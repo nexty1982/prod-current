@@ -1771,6 +1771,40 @@ server.listen(PORT, HOST, () => {
   console.log('Session housekeeping scheduled (every 6h)');
 
   // ============================================================================
+  // TASK RECONCILIATION — recover orphaned tasks + retention cleanup
+  // ============================================================================
+  const TASK_RECONCILIATION_INTERVAL = 30 * 60 * 1000; // 30 minutes
+  const { reconcileOrphanedTasks, cleanupExpiredTasks } = require('./services/taskReconciliation');
+
+  const runTaskReconciliation = async () => {
+    try {
+      const count = await reconcileOrphanedTasks();
+      if (count > 0) console.log(`[TASK-RECONCILIATION] Recovered ${count} orphaned task(s)`);
+    } catch (err: any) {
+      console.error('[TASK-RECONCILIATION] Error:', err.message);
+    }
+  };
+
+  const runTaskCleanup = async () => {
+    try {
+      const count = await cleanupExpiredTasks();
+      if (count > 0) console.log(`[TASK-CLEANUP] Cleaned up ${count} expired task(s)`);
+    } catch (err: any) {
+      console.error('[TASK-CLEANUP] Error:', err.message);
+    }
+  };
+
+  // Run both once at startup
+  runTaskReconciliation();
+  runTaskCleanup();
+
+  // Reconciliation every 30 minutes (catch tasks orphaned by mid-run crashes)
+  setInterval(runTaskReconciliation, TASK_RECONCILIATION_INTERVAL);
+  // Retention cleanup every 6 hours (alongside session cleanup)
+  setInterval(runTaskCleanup, SESSION_CLEANUP_INTERVAL);
+  console.log('Task reconciliation scheduled (every 30m), retention cleanup (every 6h)');
+
+  // ============================================================================
   // STARTUP VERIFICATION - Test critical public endpoints
   // ============================================================================
   // Verify that health and maintenance status endpoints are accessible

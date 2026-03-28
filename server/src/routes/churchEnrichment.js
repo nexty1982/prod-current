@@ -264,7 +264,21 @@ router.get('/runs', requireAuth, requireAdmin, async (req, res) => {
 router.post('/run', requireAuth, requireSuper, async (req, res) => {
   try {
     const { state, jurisdiction, limit, forceReenrich, statusFilter } = req.body;
-    const { createTask } = require('../services/taskRunner');
+    const { createTask, findActiveTaskByScope } = require('../services/taskRunner');
+
+    // Duplicate-run protection: check for active task with same scope
+    const existing = await findActiveTaskByScope(null, 'enrichment_batch', 'church-enrichment', {
+      state: state || null,
+      jurisdiction: jurisdiction || null,
+      statusFilter: statusFilter || null
+    });
+    if (existing) {
+      return res.status(409).json({
+        error: `An enrichment batch with this scope is already ${existing.status} (Task #${existing.id}: ${existing.title})`,
+        existing_task_id: existing.id,
+        existing_task_title: existing.title
+      });
+    }
 
     const userId = req.session?.user?.id || req.user?.id || null;
     const userName = req.session?.user?.username || req.user?.username || null;
@@ -297,7 +311,21 @@ router.post('/run', requireAuth, requireSuper, async (req, res) => {
 router.post('/rerun', requireAuth, requireSuper, async (req, res) => {
   try {
     const { state, jurisdiction, limit, statuses = 'no_data,low_confidence' } = req.body;
-    const { createTask } = require('../services/taskRunner');
+    const { createTask, findActiveTaskByScope } = require('../services/taskRunner');
+
+    // Duplicate-run protection: check for active task with same scope
+    const existing = await findActiveTaskByScope(null, 'enrichment_batch', 'church-enrichment', {
+      state: state || null,
+      jurisdiction: jurisdiction || null,
+      statusFilter: statuses || null
+    });
+    if (existing) {
+      return res.status(409).json({
+        error: `An enrichment batch with this scope is already ${existing.status} (Task #${existing.id}: ${existing.title})`,
+        existing_task_id: existing.id,
+        existing_task_title: existing.title
+      });
+    }
 
     const userId = req.session?.user?.id || req.user?.id || null;
     const userName = req.session?.user?.username || req.user?.username || null;
@@ -308,7 +336,7 @@ router.post('/rerun', requireAuth, requireSuper, async (req, res) => {
       title: `Enrichment re-run — ${statuses}`,
       created_by: userId,
       created_by_name: userName,
-      metadata_json: { state, jurisdiction, limit, statuses, rerun: true }
+      metadata_json: { state, jurisdiction, limit, statusFilter: statuses, rerun: true }
     });
 
     res.json({ message: `Re-run started for statuses: ${statuses}`, status: 'accepted', task_id: taskId });

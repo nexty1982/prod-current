@@ -105,4 +105,46 @@ async function isCancelled(pool, taskId) {
   return rows.length > 0 && rows[0].cancel_requested_at !== null;
 }
 
-module.exports = { createTask, updateTask, addTaskEvent, isCancelled };
+/**
+ * Find an active (queued/running) task matching the given scope.
+ * Used for duplicate-run prevention.
+ *
+ * @param {object} pool - DB pool
+ * @param {string} taskType - e.g. 'enrichment_batch'
+ * @param {string} sourceFeature - e.g. 'church-enrichment'
+ * @param {object} scopeValues - key/value pairs to match against metadata_json
+ * @returns {object|null} The matching task row, or null
+ */
+async function findActiveTaskByScope(pool, taskType, sourceFeature, scopeValues) {
+  pool = pool || getAppPool();
+
+  const [rows] = await pool.query(
+    `SELECT id, title, status, metadata_json
+     FROM omai_tasks
+     WHERE task_type = ?
+       AND source_feature = ?
+       AND status IN ('queued', 'running')
+     ORDER BY created_at DESC`,
+    [taskType, sourceFeature]
+  );
+
+  for (const row of rows) {
+    let meta = row.metadata_json;
+    if (typeof meta === 'string') {
+      try { meta = JSON.parse(meta); } catch { continue; }
+    }
+    if (!meta) continue;
+
+    // Check if all scope keys match (normalize null/undefined/empty-string to null)
+    const normalize = (v) => (v === undefined || v === null || v === '') ? null : String(v);
+    const matches = Object.entries(scopeValues).every(
+      ([key, val]) => normalize(meta[key]) === normalize(val)
+    );
+
+    if (matches) return { id: row.id, title: row.title, status: row.status };
+  }
+
+  return null;
+}
+
+module.exports = { createTask, updateTask, addTaskEvent, isCancelled, findActiveTaskByScope };

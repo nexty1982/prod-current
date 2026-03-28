@@ -33,6 +33,7 @@ const TASK_COLUMNS = `
   ${TS('t.finished_at')} AS finished_at,
   ${TS('t.last_heartbeat')} AS last_heartbeat,
   ${TS('t.cancel_requested_at')} AS cancel_requested_at,
+  t.cancelled_by, t.cancelled_by_name,
   t.total_count, t.completed_count, t.success_count, t.failure_count,
   t.metadata_json, t.result_json, t.error_json,
   TIMESTAMPDIFF(SECOND, t.started_at, COALESCE(t.finished_at, UTC_TIMESTAMP())) AS duration_seconds,
@@ -227,6 +228,9 @@ router.post('/:id/cancel', requireAuth, requireRole(ADMIN_ROLES), async (req, re
     const taskId = parseInt(req.params.id);
     if (isNaN(taskId)) return res.status(400).json({ success: false, error: 'Invalid task ID' });
 
+    const userId = req.session?.user?.id || req.user?.id || null;
+    const userName = req.session?.user?.username || req.user?.username || null;
+
     // Only allow cancellation of queued/running tasks
     const [tasks] = await pool.query('SELECT status FROM omai_tasks WHERE id = ?', [taskId]);
     if (tasks.length === 0) return res.status(404).json({ success: false, error: 'Task not found' });
@@ -239,16 +243,24 @@ router.post('/:id/cancel', requireAuth, requireRole(ADMIN_ROLES), async (req, re
     // For queued tasks, cancel immediately
     if (status === 'queued') {
       await pool.query(
-        `UPDATE omai_tasks SET status = 'cancelled', cancel_requested_at = UTC_TIMESTAMP(), finished_at = UTC_TIMESTAMP(), last_heartbeat = UTC_TIMESTAMP() WHERE id = ?`,
-        [taskId]
+        `UPDATE omai_tasks SET status = 'cancelled', cancel_requested_at = UTC_TIMESTAMP(), cancelled_by = ?, cancelled_by_name = ?, finished_at = UTC_TIMESTAMP(), last_heartbeat = UTC_TIMESTAMP() WHERE id = ?`,
+        [userId, userName, taskId]
+      );
+      await pool.query(
+        `INSERT INTO omai_task_events (task_id, level, stage, message, detail_json, created_at) VALUES (?, 'info', 'system', ?, ?, UTC_TIMESTAMP())`,
+        [taskId, `Cancelled by ${userName || 'unknown'}`, JSON.stringify({ cancelled_by: userId, cancelled_by_name: userName })]
       );
       return res.json({ success: true, immediate: true, message: 'Task cancelled' });
     }
 
     // For running tasks, set cancel_requested_at — the execution loop must check this
     await pool.query(
-      `UPDATE omai_tasks SET cancel_requested_at = UTC_TIMESTAMP(), last_heartbeat = UTC_TIMESTAMP() WHERE id = ?`,
-      [taskId]
+      `UPDATE omai_tasks SET cancel_requested_at = UTC_TIMESTAMP(), cancelled_by = ?, cancelled_by_name = ?, last_heartbeat = UTC_TIMESTAMP() WHERE id = ?`,
+      [userId, userName, taskId]
+    );
+    await pool.query(
+      `INSERT INTO omai_task_events (task_id, level, stage, message, detail_json, created_at) VALUES (?, 'info', 'system', ?, ?, UTC_TIMESTAMP())`,
+      [taskId, `Cancellation requested by ${userName || 'unknown'}`, JSON.stringify({ cancelled_by: userId, cancelled_by_name: userName })]
     );
 
     res.json({ success: true, immediate: false, message: 'Cancellation requested — task will stop at next checkpoint' });
