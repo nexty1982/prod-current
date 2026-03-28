@@ -85,7 +85,7 @@ async function getChurchDatabaseName(churchId) {
         console.log('🔍 Looking up database name for church_id:', churchId);
         
         const [churches] = await getAppPool().query(
-            'SELECT database_name FROM orthodoxmetrics_db.churches WHERE id = ? AND is_active = 1',
+            'SELECT database_name FROM orthodoxmetrics_db.churches WHERE id = ? AND database_name IS NOT NULL',
             [churchId]
         );
         
@@ -143,7 +143,7 @@ async function getChurchInfo(churchId) {
         console.log('🔍 Looking up database name for church_id:', churchId);
         
         const [churches] = await getAppPool().query(
-            'SELECT id, database_name FROM orthodoxmetrics_db.churches WHERE id = ? AND is_active = 1',
+            'SELECT id, database_name FROM orthodoxmetrics_db.churches WHERE id = ? AND database_name IS NOT NULL',
             [churchId]
         );
         
