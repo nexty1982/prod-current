@@ -8,6 +8,16 @@
  * GET  /api/admin/om-seedlings/runs/:id      — Get single run detail with full report
  * POST /api/admin/om-seedlings/purge-run/:id — Purge all records from a specific run
  *
+ * Pipeline routes:
+ * POST /api/admin/om-seedlings/pipelines           — Create a pipeline
+ * GET  /api/admin/om-seedlings/pipelines           — List pipeline history
+ * GET  /api/admin/om-seedlings/pipelines/:id       — Get pipeline detail
+ * POST /api/admin/om-seedlings/pipelines/:id/start — Start pipeline (runs dry run)
+ * POST /api/admin/om-seedlings/pipelines/:id/approve — Approve pipeline for execution
+ * POST /api/admin/om-seedlings/pipelines/:id/pause   — Pause executing pipeline
+ * POST /api/admin/om-seedlings/pipelines/:id/resume  — Resume paused pipeline
+ * POST /api/admin/om-seedlings/pipelines/:id/cancel  — Cancel pipeline
+ *
  * Mounted at /api/admin/om-seedlings in index.ts
  */
 
@@ -17,6 +27,11 @@ const { requireAuth, requireRole } = require('../../middleware/auth');
 const { dryRun, execute, purgeByRun, getRunHistory, getRunById } = require('../../services/om-seedlings/seedingEngine');
 const { SIZE_PROFILES, LIFECYCLE_PHASES } = require('../../services/om-seedlings/scopeMatrix');
 const { getChurchesForMap } = require('../../services/om-seedlings/churchSelector');
+const {
+  createPipeline, getPipelineById, getPipelineHistory,
+  startPipeline, approvePipeline, executePipeline,
+  pausePipeline, resumePipeline, cancelPipeline,
+} = require('../../services/om-seedlings/pipelineOrchestrator');
 
 const ADMIN_ROLES = ['super_admin'];
 
@@ -139,6 +154,126 @@ router.post('/purge-run/:id', requireAuth, requireRole(ADMIN_ROLES), async (req,
     res.json({ success: true, ...result });
   } catch (err) {
     console.error('[OM Seedlings] Purge error:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Pipeline Routes
+// ═══════════════════════════════════════════════════════════════════════════
+
+// ─── POST /pipelines — Create a pipeline ──────────────────────────────────
+
+router.post('/pipelines', requireAuth, requireRole(ADMIN_ROLES), async (req, res) => {
+  try {
+    const { mode, scope_label, filters, options, readiness_filter, batch_size, batch_delay_ms } = req.body;
+    const createdBy = req.user?.username || req.session?.user?.username || 'api';
+
+    const pipeline = await createPipeline({
+      mode: mode || 'manual',
+      scopeLabel: scope_label || null,
+      filters: filters || {},
+      options: options || {},
+      readinessFilter: readiness_filter || null,
+      batchSize: batch_size ? parseInt(batch_size) : 10,
+      batchDelayMs: batch_delay_ms ? parseInt(batch_delay_ms) : 1000,
+      createdBy,
+    });
+
+    res.json({ success: true, pipeline });
+  } catch (err) {
+    console.error('[OM Seedlings] Create pipeline error:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// ─── GET /pipelines — List pipelines ──────────────────────────────────────
+
+router.get('/pipelines', requireAuth, requireRole(ADMIN_ROLES), async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 20;
+    const offset = parseInt(req.query.offset) || 0;
+    const { pipelines, total } = await getPipelineHistory(limit, offset);
+    res.json({ success: true, pipelines, total, limit, offset });
+  } catch (err) {
+    console.error('[OM Seedlings] Pipeline history error:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// ─── GET /pipelines/:id — Pipeline detail ─────────────────────────────────
+
+router.get('/pipelines/:id', requireAuth, requireRole(ADMIN_ROLES), async (req, res) => {
+  try {
+    const pipeline = await getPipelineById(parseInt(req.params.id));
+    if (!pipeline) return res.status(404).json({ success: false, error: 'Pipeline not found' });
+    res.json({ success: true, pipeline });
+  } catch (err) {
+    console.error('[OM Seedlings] Pipeline detail error:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// ─── POST /pipelines/:id/start — Start pipeline (dry run) ────────────────
+
+router.post('/pipelines/:id/start', requireAuth, requireRole(ADMIN_ROLES), async (req, res) => {
+  try {
+    const pipeline = await startPipeline(parseInt(req.params.id));
+    res.json({ success: true, pipeline });
+  } catch (err) {
+    console.error('[OM Seedlings] Start pipeline error:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// ─── POST /pipelines/:id/approve — Approve for execution ─────────────────
+
+router.post('/pipelines/:id/approve', requireAuth, requireRole(ADMIN_ROLES), async (req, res) => {
+  try {
+    const approvedBy = req.user?.username || req.session?.user?.username || 'api';
+    const pipeline = await approvePipeline(parseInt(req.params.id), {
+      approvedBy,
+      notes: req.body.notes || null,
+    });
+    res.json({ success: true, pipeline });
+  } catch (err) {
+    console.error('[OM Seedlings] Approve pipeline error:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// ─── POST /pipelines/:id/pause — Pause executing pipeline ────────────────
+
+router.post('/pipelines/:id/pause', requireAuth, requireRole(ADMIN_ROLES), async (req, res) => {
+  try {
+    const pipeline = await pausePipeline(parseInt(req.params.id));
+    res.json({ success: true, pipeline });
+  } catch (err) {
+    console.error('[OM Seedlings] Pause pipeline error:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// ─── POST /pipelines/:id/resume — Resume paused pipeline ─────────────────
+
+router.post('/pipelines/:id/resume', requireAuth, requireRole(ADMIN_ROLES), async (req, res) => {
+  try {
+    const pipeline = await resumePipeline(parseInt(req.params.id));
+    res.json({ success: true, pipeline });
+  } catch (err) {
+    console.error('[OM Seedlings] Resume pipeline error:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// ─── POST /pipelines/:id/cancel — Cancel pipeline ────────────────────────
+
+router.post('/pipelines/:id/cancel', requireAuth, requireRole(ADMIN_ROLES), async (req, res) => {
+  try {
+    const pipeline = await cancelPipeline(parseInt(req.params.id));
+    res.json({ success: true, pipeline });
+  } catch (err) {
+    console.error('[OM Seedlings] Cancel pipeline error:', err);
     res.status(500).json({ success: false, error: err.message });
   }
 });

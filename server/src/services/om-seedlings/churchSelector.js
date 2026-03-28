@@ -26,7 +26,11 @@ async function fetchPhase2Churches(filters = {}) {
   const conditions = ['c.onboarding_phase = 2'];
   const params = [];
 
-  if (filters.churchId) {
+  // Support batch filtering by array of church IDs (used by pipeline orchestrator)
+  if (filters.churchIds && Array.isArray(filters.churchIds) && filters.churchIds.length > 0) {
+    conditions.push(`c.id IN (${filters.churchIds.map(() => '?').join(',')})`);
+    params.push(...filters.churchIds);
+  } else if (filters.churchId) {
     conditions.push('c.id = ?');
     params.push(filters.churchId);
   }
