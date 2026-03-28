@@ -154,7 +154,7 @@ router.get('/pipeline', requireAuth, requireRole(ADMIN_ROLES), async (req, res) 
       crmConditions.push('uc.state_code = ?');
       crmParams.push(state);
     }
-    if (stage && !['onboarding', 'active', 'setup_complete'].includes(stage)) {
+    if (stage && !['deployment', 'active_parish'].includes(stage)) {
       crmConditions.push('uc.pipeline_stage = ?');
       crmParams.push(stage);
     }
@@ -163,7 +163,7 @@ router.get('/pipeline', requireAuth, requireRole(ADMIN_ROLES), async (req, res) 
 
     // Skip CRM query if filtering for onboarding-only stages
     let crmRows = [];
-    if (!stage || !['onboarding', 'active', 'setup_complete'].includes(stage)) {
+    if (!stage || !['deployment', 'active_parish'].includes(stage)) {
       const [rows] = await pool.query(
         `SELECT
           uc.id,
@@ -250,7 +250,7 @@ router.get('/pipeline', requireAuth, requireRole(ADMIN_ROLES), async (req, res) 
 
     // Get stage metadata for onboarding stages
     const [onboardingStages] = await pool.query(
-      "SELECT * FROM omai_crm_pipeline_stages WHERE stage_key IN ('onboarding', 'active', 'setup_complete')"
+      "SELECT * FROM omai_crm_pipeline_stages WHERE stage_key IN ('deployment', 'active_parish')"
     );
     const stageMap = Object.fromEntries(onboardingStages.map(s => [s.stage_key, s]));
 
@@ -506,9 +506,9 @@ router.put('/:id/stage', requireAuth, requireRole(ADMIN_ROLES), async (req, res)
 
     if (isChurchTableId) {
       // Onboarded-only church — can only transition between onboarding stages
-      if (stage === 'setup_complete') {
+      if (stage === 'active_parish') {
         await pool.query('UPDATE churches SET setup_complete = 1 WHERE id = ?', [numericId]);
-      } else if (stage === 'active' || stage === 'onboarding') {
+      } else if (stage === 'deployment') {
         await pool.query('UPDATE churches SET setup_complete = 0 WHERE id = ?', [numericId]);
       }
       res.json({ success: true, stage, church_table_id: numericId });
@@ -521,8 +521,8 @@ router.put('/:id/stage', requireAuth, requireRole(ADMIN_ROLES), async (req, res)
 
     const church = existing[0];
 
-    // If transitioning TO "won" and not already provisioned — trigger provision
-    if (stage === 'won' && !church.provisioned_church_id) {
+    // If transitioning TO "active_parish" and not already provisioned — trigger provision
+    if (stage === 'active_parish' && !church.provisioned_church_id) {
       // Delegate to the existing CRM provision endpoint logic
       // We import and call it inline to avoid duplication
       const provisionResult = await provisionChurch(pool, numericId, req);
@@ -531,7 +531,7 @@ router.put('/:id/stage', requireAuth, requireRole(ADMIN_ROLES), async (req, res)
       }
       res.json({
         success: true,
-        stage: 'won',
+        stage: 'active_parish',
         provisioned: true,
         provisioned_church_id: provisionResult.provisioned_church_id,
         registration_url: provisionResult.registration_url,
@@ -540,8 +540,8 @@ router.put('/:id/stage', requireAuth, requireRole(ADMIN_ROLES), async (req, res)
     }
 
     // For post-provision onboarding stages, update the churches table
-    if (['onboarding', 'active', 'setup_complete'].includes(stage) && church.provisioned_church_id) {
-      if (stage === 'setup_complete') {
+    if (['deployment', 'active_parish'].includes(stage) && church.provisioned_church_id) {
+      if (stage === 'active_parish') {
         await pool.query('UPDATE churches SET setup_complete = 1 WHERE id = ?', [church.provisioned_church_id]);
       } else {
         await pool.query('UPDATE churches SET setup_complete = 0 WHERE id = ?', [church.provisioned_church_id]);
@@ -569,8 +569,8 @@ router.put('/:id/stage', requireAuth, requireRole(ADMIN_ROLES), async (req, res)
        JSON.stringify({ previous_stage: church.pipeline_stage, new_stage: stage })]
     );
 
-    // If moving to 'won', mark as client
-    if (stage === 'won') {
+    // If moving to 'active_parish', mark as client
+    if (stage === 'active_parish') {
       await pool.query('UPDATE omai_crm_leads SET is_client = 1 WHERE id = ?', [numericId]);
     }
 
@@ -642,24 +642,16 @@ async function provisionChurch(pool, crmChurchId, req) {
 
     const newChurchId = insertResult.insertId;
 
-    // 2. Create tenant database
-    let dbResult = null;
+    // 2. Create tenant database via centralized provisioning service
+    let provisionResult = null;
     try {
-      const ChurchProvisioner = require('../../services/church-provisioner');
-      const provisioner = new ChurchProvisioner();
-      dbResult = await provisioner.createChurchDatabase({
-        name: church.name,
-        email: contactEmail || `admin@church${newChurchId}.orthodoxmetrics.com`,
-        phone: church.phone || null, website: church.website || null,
-        address: church.street || null, city: church.city || null,
-        state_province: church.state_code || null, postal_code: church.zip || null,
-        country: 'United States',
-      });
-      if (dbResult?.databaseName) {
-        await pool.query('UPDATE churches SET database_name = ? WHERE id = ?', [dbResult.databaseName, newChurchId]);
+      const { provisionTenantDb } = require('../../services/tenantProvisioning');
+      provisionResult = await provisionTenantDb(newChurchId, pool, { source: 'lifecycle', initiatedBy: req.session?.user?.id || req.user?.userId });
+      if (!provisionResult.success) {
+        console.error('Tenant provisioning failed (non-fatal):', provisionResult.error);
       }
     } catch (provisionErr) {
-      console.error('ChurchProvisioner failed (non-fatal):', provisionErr.message);
+      console.error('Tenant provisioning failed (non-fatal):', provisionErr.message);
     }
 
     // 3. Generate registration token
@@ -681,7 +673,7 @@ async function provisionChurch(pool, crmChurchId, req) {
     // 4. Link back to CRM
     await pool.query(
       'UPDATE omai_crm_leads SET provisioned_church_id = ?, is_client = 1, pipeline_stage = ? WHERE id = ?',
-      [newChurchId, 'won', crmChurchId]
+      [newChurchId, 'active_parish', crmChurchId]
     );
 
     // 5. Log activity
@@ -689,13 +681,13 @@ async function provisionChurch(pool, crmChurchId, req) {
       `INSERT INTO omai_crm_activities (church_id, activity_type, subject, metadata, created_by)
        VALUES (?, 'provision', ?, ?, ?)`,
       [crmChurchId, `Church provisioned (ID: ${newChurchId})`,
-       JSON.stringify({ provisioned_church_id: newChurchId, database_name: dbResult?.databaseName || null }),
+       JSON.stringify({ provisioned_church_id: newChurchId, database_name: provisionResult?.targetDb || null }),
        req.session?.user?.id || req.user?.userId || null]
     );
 
     return {
       provisioned_church_id: newChurchId,
-      database_name: dbResult?.databaseName || null,
+      database_name: provisionResult?.targetDb || null,
       registration_url: registrationUrl,
     };
   } catch (err) {

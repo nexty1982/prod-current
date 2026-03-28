@@ -1,6 +1,9 @@
 #!/usr/bin/env node
 /**
- * church-provisioner.js
+ * ⚠️  DEPRECATED — Use scripts/provision-tenant-db.js instead.
+ * All tenant provisioning now goes through server/src/services/tenantProvisioning.js.
+ *
+ * church-provisioner.js (Legacy)
  * Location: /var/www/orthodoxmetrics/prod/scripts/
  * * Usage:
  * node church-provisioner.js test               # Run the hardcoded test church

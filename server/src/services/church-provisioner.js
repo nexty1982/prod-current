@@ -1,4 +1,9 @@
-// Church Provisioning System
+// ⚠️  DEPRECATED — DO NOT USE
+// All callers have been migrated to server/src/services/tenantProvisioning.js
+// This file is retained temporarily for reference only.
+// It always failed at runtime because templates/church-database-template.sql does not exist.
+//
+// Church Provisioning System (Legacy)
 // Creates new church databases with complete schema from template
 
 const mysql = require('mysql2/promise');

@@ -230,9 +230,11 @@ const promptPlansRouter = require('./routes/prompt-plans');
 const pageContentRouter = require('./routes/page-content');
 const snapshotsRouter = require('./routes/snapshots');
 const crmRouter = require('./routes/crm');
+const churchEnrichmentRouter = require('./routes/churchEnrichment');
 const jurisdictionsRouter = require('./routes/jurisdictions');
 const certificateTemplatesRouter = require('./routes/certificate-templates');
 const demoChurchesRouter = require('./routes/admin/demo-churches');
+const churchDecomRouter = require('./routes/admin/church-decom');
 const analyticsRouter = require('./routes/analytics'); // US Church Map analytics
 const omChartsRouter = require('./api/om-charts'); // OM Charts: graphical charts from church records
 const dashboardHomeRouter = require('./api/dashboard-home'); // Dashboard Home: summary data for church dashboard
@@ -863,6 +865,8 @@ app.use('/api/snapshots', snapshotsRouter); // Code snapshot safety system
 console.log('✅ [Server] Mounted /api/snapshots routes (Safety System)');
 app.use('/api/crm', crmRouter); // CRM pipeline & outreach
 console.log('✅ [Server] Mounted /api/crm routes (CRM & Outreach)');
+app.use('/api/church-enrichment', churchEnrichmentRouter); // Church enrichment profiles
+console.log('✅ [Server] Mounted /api/church-enrichment routes (Enrichment)');
 app.use('/api/jurisdictions', jurisdictionsRouter); // Jurisdictions reference table
 console.log('✅ [Server] Mounted /api/jurisdictions routes (Jurisdictions)');
 app.use('/api/certificate-templates', certificateTemplatesRouter); // Certificate template system
@@ -872,6 +876,8 @@ app.use('/api/i18n', i18nRouter); // UI translation strings
 console.log('✅ [Server] Mounted /api/i18n routes (UI Translations)');
 app.use('/api/admin/demo-churches', demoChurchesRouter); // Demo church management
 console.log('✅ [Server] Mounted /api/admin/demo-churches routes (Demo Churches)');
+app.use('/api/admin/church-decom', churchDecomRouter); // Church decommissioning wizard
+console.log('✅ [Server] Mounted /api/admin/church-decom routes (Church Decommissioning)');
 app.use('/api/analytics', analyticsRouter); // US Church Map analytics
 console.log('✅ [Server] Mounted /api/analytics routes (US Church Map)');
 app.use('/api/churches/:churchId/charts', omChartsRouter); // OM Charts

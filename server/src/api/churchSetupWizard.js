@@ -5,7 +5,9 @@ const bcrypt = require('bcrypt');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs').promises;
-const ChurchProvisioner = require('../church-provisioner');
+// DEPRECATED: churchSetupWizard.js is not mounted in index.ts (dead code).
+// If revived, use the centralized tenantProvisioning service instead of ChurchProvisioner.
+const { provisionTenantDb } = require('../services/tenantProvisioning');
 const TestChurchDataGenerator = require('../services/testChurchDataGenerator');
 
 const router = express.Router();

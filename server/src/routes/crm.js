@@ -74,7 +74,7 @@ router.get('/dashboard', requireAuth, async (req, res) => {
     const [activeStates] = await pool.query(
       `SELECT state_code, COUNT(*) as count
        FROM omai_crm_leads
-       WHERE pipeline_stage != 'new_lead'
+       WHERE pipeline_stage != 'prospects'
        GROUP BY state_code
        ORDER BY count DESC
        LIMIT 10`
@@ -265,8 +265,8 @@ router.put('/churches/:id', requireAuth, async (req, res) => {
         [id, `Pipeline stage changed to: ${pipeline_stage}`, JSON.stringify({ new_stage: pipeline_stage }), req.session?.user?.id || null]
       );
 
-      // If moved to 'won', mark as client
-      if (pipeline_stage === 'won') {
+      // If moved to 'active_parish', mark as client
+      if (pipeline_stage === 'active_parish') {
         await pool.query('UPDATE omai_crm_leads SET is_client = 1 WHERE id = ?', [id]);
       }
     }
@@ -624,29 +624,16 @@ router.post('/churches/:id/provision', requireAuth, requireAdmin, async (req, re
 
     const newChurchId = insertResult.insertId;
 
-    // 2. Create tenant database via ChurchProvisioner
-    let dbResult = null;
+    // 2. Create tenant database via centralized provisioning service
+    let provisionResult = null;
     try {
-      const ChurchProvisioner = require('../services/church-provisioner');
-      const provisioner = new ChurchProvisioner();
-      dbResult = await provisioner.createChurchDatabase({
-        name: church.name,
-        email: contactEmail || `admin@church${newChurchId}.orthodoxmetrics.com`,
-        phone: church.phone || null,
-        website: church.website || null,
-        address: church.street || null,
-        city: church.city || null,
-        state_province: church.state_code || null,
-        postal_code: church.zip || null,
-        country: 'United States',
-      });
-
-      // Update churches record with the database name
-      if (dbResult?.databaseName) {
-        await pool.query('UPDATE churches SET database_name = ? WHERE id = ?', [dbResult.databaseName, newChurchId]);
+      const { provisionTenantDb } = require('../services/tenantProvisioning');
+      provisionResult = await provisionTenantDb(newChurchId, pool, { source: 'crm', initiatedBy: req.session?.user?.id });
+      if (!provisionResult.success) {
+        console.error('Tenant provisioning failed (non-fatal, church record still created):', provisionResult.error);
       }
     } catch (provisionErr) {
-      console.error('ChurchProvisioner failed (non-fatal, church record still created):', provisionErr.message);
+      console.error('Tenant provisioning failed (non-fatal, church record still created):', provisionErr.message);
     }
 
     // 3. Generate registration token
@@ -668,7 +655,7 @@ router.post('/churches/:id/provision', requireAuth, requireAdmin, async (req, re
     // 4. Link back to CRM
     await pool.query(
       'UPDATE omai_crm_leads SET provisioned_church_id = ?, is_client = 1, pipeline_stage = ? WHERE id = ?',
-      [newChurchId, 'won', id]
+      [newChurchId, 'active_parish', id]
     );
 
     // 5. Log activity
@@ -678,7 +665,7 @@ router.post('/churches/:id/provision', requireAuth, requireAdmin, async (req, re
       [id, `Church provisioned as OrthodoxMetrics client (ID: ${newChurchId})`,
        JSON.stringify({
          provisioned_church_id: newChurchId,
-         database_name: dbResult?.databaseName || null,
+         database_name: provisionResult?.targetDb || null,
          calendar_type: calendarType,
          jurisdiction_id: church.jurisdiction_id || null,
          registration_token: registrationToken ? '(generated)' : null,
@@ -688,7 +675,7 @@ router.post('/churches/:id/provision', requireAuth, requireAdmin, async (req, re
     res.status(201).json({
       success: true,
       provisioned_church_id: newChurchId,
-      database_name: dbResult?.databaseName || null,
+      database_name: provisionResult?.targetDb || null,
       calendar_type: calendarType,
       registration_url: registrationUrl,
       message: `${church.name} has been provisioned as church #${newChurchId}`,
@@ -881,7 +868,7 @@ router.post('/churches/export', requireAuth, async (req, res) => {
         } else {
           op_status = 'client';
         }
-      } else if (r.pipeline_stage && r.pipeline_stage !== 'new_lead') {
+      } else if (r.pipeline_stage && r.pipeline_stage !== 'prospects') {
         op_status = 'pipeline';
       }
       return { ...r, source: 'crm', op_status, onboarded_church_id: r.provisioned_church_id || null };
@@ -904,7 +891,7 @@ router.post('/churches/export', requireAuth, async (req, res) => {
         latitude: ob.latitude,
         longitude: ob.longitude,
         jurisdiction: ob.jurisdiction,
-        pipeline_stage: op_status === 'live' ? 'active' : 'onboarding',
+        pipeline_stage: op_status === 'live' ? 'active_parish' : 'deployment',
         priority: null,
         is_client: 1,
         provisioned_church_id: null,

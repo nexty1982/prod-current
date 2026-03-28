@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 
 // All directories to scan for conversation files
-const CONVERSATION_SOURCES = [
+const DEFAULT_CONVERSATION_SOURCES = [
   { dir: '/var/www/orthodoxmetrics/prod/c0', label: 'c0' },
   { dir: '/var/www/orthodoxmetrics/prod/c1', label: 'c1' },
   { dir: '/var/www/orthodoxmetrics/prod/c2', label: 'c2' },
@@ -12,8 +12,40 @@ const CONVERSATION_SOURCES = [
   { dir: '/var/www/orthodoxmetrics/prod/ws', label: 'ws' },
 ];
 
+// Custom directory config file
+const DIRS_CONFIG_FILE = path.join('/var/www/orthodoxmetrics/prod', 'conversation-dirs.json');
+
+function loadCustomDirs() {
+  try {
+    if (fs.existsSync(DIRS_CONFIG_FILE)) {
+      const data = JSON.parse(fs.readFileSync(DIRS_CONFIG_FILE, 'utf-8'));
+      return Array.isArray(data) ? data : [];
+    }
+  } catch (err) {
+    console.error('[ConversationLog] Error loading custom dirs config:', err);
+  }
+  return [];
+}
+
+function saveCustomDirs(dirs) {
+  fs.writeFileSync(DIRS_CONFIG_FILE, JSON.stringify(dirs, null, 2), 'utf-8');
+}
+
+function getAllSources() {
+  const custom = loadCustomDirs();
+  const seenDirs = new Set();
+  const merged = [];
+  for (const s of [...DEFAULT_CONVERSATION_SOURCES, ...custom]) {
+    if (!seenDirs.has(s.dir)) {
+      seenDirs.add(s.dir);
+      merged.push(s);
+    }
+  }
+  return merged;
+}
+
 function getAvailableSources() {
-  return CONVERSATION_SOURCES.filter(s => fs.existsSync(s.dir));
+  return getAllSources().filter(s => fs.existsSync(s.dir));
 }
 
 // Collect all .md files across all source directories
@@ -176,9 +208,15 @@ function extractPreview(content, format) {
 // GET /api/conversation-log/list — list all conversations with metadata
 router.get('/list', (req, res) => {
   try {
+    const allSources = getAllSources();
     const sources = getAvailableSources();
     if (sources.length === 0) {
-      return res.status(404).json({ success: false, error: 'No conversation directories found' });
+      return res.json({
+        success: false,
+        error: 'No conversation directories found',
+        error_code: 'NO_DIRS',
+        configured: allSources.map(s => ({ dir: s.dir, label: s.label, exists: fs.existsSync(s.dir) })),
+      });
     }
 
     const allFiles = getAllConversationFiles();
@@ -1163,6 +1201,95 @@ router.get('/review/date-range', (req, res) => {
     });
   } catch (error) {
     console.error('[ConversationLog] Error in date-range review:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// ===== DIRECTORY CONFIGURATION =====
+
+// GET /api/conversation-log/config/directories — list all configured directories with existence check
+router.get('/config/directories', (req, res) => {
+  try {
+    const allSources = getAllSources();
+    const custom = loadCustomDirs();
+    const customDirSet = new Set(custom.map(c => c.dir));
+
+    const directories = allSources.map(s => ({
+      dir: s.dir,
+      label: s.label,
+      exists: fs.existsSync(s.dir),
+      isDefault: !customDirSet.has(s.dir),
+      fileCount: fs.existsSync(s.dir)
+        ? fs.readdirSync(s.dir).filter(f => f.endsWith('.md')).length
+        : 0,
+    }));
+
+    res.json({ success: true, directories });
+  } catch (error) {
+    console.error('[ConversationLog] Error listing directories:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// POST /api/conversation-log/config/directories — add a custom directory
+router.post('/config/directories', (req, res) => {
+  try {
+    const { dir, label } = req.body;
+    if (!dir || typeof dir !== 'string') {
+      return res.status(400).json({ success: false, error: 'dir (string) is required' });
+    }
+
+    const cleanDir = path.resolve(dir.trim());
+    const cleanLabel = (label || path.basename(cleanDir)).trim();
+
+    const custom = loadCustomDirs();
+    const exists = custom.some(c => c.dir === cleanDir);
+    if (exists) {
+      return res.status(409).json({ success: false, error: 'Directory already configured' });
+    }
+
+    custom.push({ dir: cleanDir, label: cleanLabel });
+    saveCustomDirs(custom);
+
+    const dirExists = fs.existsSync(cleanDir);
+    const fileCount = dirExists
+      ? fs.readdirSync(cleanDir).filter(f => f.endsWith('.md')).length
+      : 0;
+
+    console.log(`[ConversationLog] Added custom directory: ${cleanDir} (label: ${cleanLabel}, exists: ${dirExists}, files: ${fileCount})`);
+
+    res.json({
+      success: true,
+      directory: { dir: cleanDir, label: cleanLabel, exists: dirExists, isDefault: false, fileCount },
+    });
+  } catch (error) {
+    console.error('[ConversationLog] Error adding directory:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// DELETE /api/conversation-log/config/directories — remove a custom directory
+router.delete('/config/directories', (req, res) => {
+  try {
+    const { dir } = req.body;
+    if (!dir) {
+      return res.status(400).json({ success: false, error: 'dir is required' });
+    }
+
+    const cleanDir = path.resolve(dir.trim());
+    const custom = loadCustomDirs();
+    const idx = custom.findIndex(c => c.dir === cleanDir);
+    if (idx === -1) {
+      return res.status(404).json({ success: false, error: 'Directory not found in custom config (default dirs cannot be removed)' });
+    }
+
+    custom.splice(idx, 1);
+    saveCustomDirs(custom);
+
+    console.log(`[ConversationLog] Removed custom directory: ${cleanDir}`);
+    res.json({ success: true });
+  } catch (error) {
+    console.error('[ConversationLog] Error removing directory:', error);
     res.status(500).json({ success: false, error: error.message });
   }
 });

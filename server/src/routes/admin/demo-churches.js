@@ -91,19 +91,13 @@ router.post('/', requireAuth, requireAdmin, async (req, res) => {
     );
     const churchId = insertResult.insertId;
 
-    // 2. Create tenant database via ChurchProvisioner
-    let dbResult = null;
+    // 2. Create tenant database via centralized provisioning service
+    let provisionResult = null;
     try {
-      const ChurchProvisioner = require('../../services/church-provisioner');
-      const provisioner = new ChurchProvisioner();
-      dbResult = await provisioner.createChurchDatabase({
-        name: name.trim(),
-        email: `demo-${churchId}@orthodoxmetrics.com`,
-        country: 'United States',
-      });
-
-      if (dbResult?.databaseName) {
-        await pool.query('UPDATE churches SET database_name = ? WHERE id = ?', [dbResult.databaseName, churchId]);
+      const { provisionTenantDb } = require('../../services/tenantProvisioning');
+      provisionResult = await provisionTenantDb(churchId, pool, { source: 'demo', initiatedBy: req.session?.user?.id });
+      if (!provisionResult.success) {
+        throw new Error(provisionResult.error || 'Provisioning returned failure');
       }
     } catch (provisionErr) {
       console.error('Demo church provisioning failed:', provisionErr.message);
@@ -114,7 +108,7 @@ router.post('/', requireAuth, requireAdmin, async (req, res) => {
 
     // 3. Load sample data
     let sampleResults = null;
-    if (dbResult?.databaseName) {
+    if (provisionResult?.targetDb) {
       try {
         const { getTenantPool } = require('../../config/db');
         const tenantPool = getTenantPool(churchId);
@@ -131,7 +125,7 @@ router.post('/', requireAuth, requireAdmin, async (req, res) => {
       church: {
         id: churchId,
         name: name.trim(),
-        database_name: dbResult?.databaseName || null,
+        database_name: provisionResult?.targetDb || null,
         jurisdiction_name: jurisdictionName,
         calendar_type: calendarType,
         is_demo: true,

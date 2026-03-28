@@ -193,7 +193,7 @@ router.get('/us-churches-enriched', requireAuth, async (req, res) => {
         } else {
           op_status = 'client';
         }
-      } else if (r.pipeline_stage && r.pipeline_stage !== 'new_lead') {
+      } else if (r.pipeline_stage && r.pipeline_stage !== 'prospects') {
         op_status = 'pipeline';
       }
       return {
@@ -221,7 +221,7 @@ router.get('/us-churches-enriched', requireAuth, async (req, res) => {
         latitude: ob.latitude,
         longitude: ob.longitude,
         jurisdiction: ob.jurisdiction,
-        pipeline_stage: op_status === 'live' ? 'active' : 'onboarding',
+        pipeline_stage: op_status === 'live' ? 'active_parish' : 'deployment',
         priority: null,
         is_client: 1,
         provisioned_church_id: null,
@@ -309,7 +309,7 @@ router.get('/us-church-status-counts', requireAuth, async (req, res) => {
         const ob = obRows.find(o => o.id === r.provisioned_church_id);
         if (ob && (ob.setup_complete || ob.active_users > 0)) s.live++;
         else s.onboarding++;
-      } else if (r.pipeline_stage && r.pipeline_stage !== 'new_lead') {
+      } else if (r.pipeline_stage && r.pipeline_stage !== 'prospects') {
         s.pipeline++;
       } else {
         s.directory++;
@@ -453,7 +453,7 @@ router.get('/church-map/parishes', requireAuth, async (req, res) => {
         } else {
           op_status = 'client';
         }
-      } else if (r.pipeline_stage && r.pipeline_stage !== 'new_lead') {
+      } else if (r.pipeline_stage && r.pipeline_stage !== 'prospects') {
         op_status = 'pipeline';
       }
 

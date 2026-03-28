@@ -2,6 +2,7 @@ const { getAppPool } = require('../config/db-compat');
 // server/routes/admin.js
 const express = require('express');
 const { pool: promisePool } = require('../config/db-compat');
+const { provisionTenantDb } = require('../services/tenantProvisioning');
 const bcrypt = require('bcrypt');
 const {
     canManageUser,
@@ -677,81 +678,49 @@ router.post('/churches/wizard', requireSuperAdmin, async (req, res) => {
             });
         }
 
-        // Always use record_template1 as the template database
-        const templateDatabaseName = 'record_template1';
-        console.log('🎯 Using template database:', templateDatabaseName);
-
-        // Generate secure random password for database user
-        const generateSecurePassword = () => {
-            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
-            let result = '';
-            for (let i = 0; i < 16; i++) {
-                result += chars.charAt(Math.floor(Math.random() * chars.length));
-            }
-            return result;
-        };
-
         // Step 1: Insert church record and get the church_id
         const [result] = await getAppPool().query(`
             INSERT INTO churches (
-                name, email, phone, address, city, state_province, postal_code, 
+                name, email, phone, address, city, state_province, postal_code,
                 country, website, preferred_language, timezone, currency, is_active,
                 setup_complete, created_at, updated_at,
                 church_name, admin_email, language_preference
-            ) 
+            )
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?)
         `, [
             name, email, phone, address, city, state_province, postal_code,
             country, website, preferred_language, timezone, currency, is_active ? 1 : 0,
-            false, // Will be set to true after full setup
+            false,
             name, email, preferred_language
         ]);
 
         const church_id = result.insertId;
-        console.log('✅ Church created in orthodoxmetrics_db with ID:', church_id);
-
-        // Step 2: Generate database credentials using new format
         const dbName = `om_church_${church_id}`;
-        const dbUser = `church_${church_id}`;
-        const dbPassword = generateSecurePassword();
-        
-        console.log(`🔧 Creating database: ${dbName} with user: ${dbUser}`);
+        console.log('Church created in orthodoxmetrics_db with ID:', church_id);
 
-        // Step 3: Create database and dedicated user
+        // Step 2: Provision tenant database from approved template
         try {
-            console.log('🔄 Creating church-specific database and user...');
-            
-            // Create the database
-            await getAppPool().query(`CREATE DATABASE IF NOT EXISTS \`${dbName}\``);
-            console.log(`✅ Database created: ${dbName}`);
-            
-            // Create dedicated database user
-            await getAppPool().query(`CREATE USER IF NOT EXISTS '${dbUser}'@'localhost' IDENTIFIED BY '${dbPassword}'`);
-            console.log(`✅ Database user created: ${dbUser}`);
-            
-            // Grant full privileges to the user for their database
-            await getAppPool().query(`GRANT ALL PRIVILEGES ON \`${dbName}\`.* TO '${dbUser}'@'localhost'`);
-            await getAppPool().query(`FLUSH PRIVILEGES`);
-            console.log(`✅ Privileges granted to ${dbUser} for ${dbName}`);
-            
-            // Switch to the new database for table creation
-            await getAppPool().query(`USE \`${dbName}\``);
-            
-            // Create church_info table with the church_id
+            const provResult = await provisionTenantDb(church_id, getAppPool(), { source: 'admin', initiatedBy: req.session?.user?.id });
+            if (!provResult.success) {
+                throw new Error(`Tenant DB provisioning failed: ${provResult.error}`);
+            }
+            console.log(`Tenant DB provisioned: ${dbName} (template v${provResult.templateVersion}, ${provResult.tablesCreated} tables, verified=${provResult.verified})`);
+
+            // Step 3: Create church_info table and seed it (wizard-specific, not in template)
             await getAppPool().query(`
-                CREATE TABLE IF NOT EXISTS church_info (
+                CREATE TABLE IF NOT EXISTS \`${dbName}\`.church_info (
                     id INT PRIMARY KEY AUTO_INCREMENT,
                     church_id INT NOT NULL DEFAULT ${church_id},
-                    name VARCHAR(255) NOT NULL DEFAULT '${name}',
-                    email VARCHAR(255) NOT NULL DEFAULT '${email}',
+                    name VARCHAR(255) NOT NULL,
+                    email VARCHAR(255),
                     phone VARCHAR(50),
                     address TEXT,
                     city VARCHAR(100),
                     state_province VARCHAR(100),
                     country VARCHAR(100),
-                    preferred_language VARCHAR(10) DEFAULT '${preferred_language}',
-                    timezone VARCHAR(50) DEFAULT '${timezone}',
-                    currency VARCHAR(10) DEFAULT '${currency}',
+                    preferred_language VARCHAR(10) DEFAULT 'en',
+                    timezone VARCHAR(50) DEFAULT 'America/New_York',
+                    currency VARCHAR(10) DEFAULT 'USD',
                     is_active BOOLEAN DEFAULT TRUE,
                     custom_landing_page JSON,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -759,11 +728,9 @@ router.post('/churches/wizard', requireSuperAdmin, async (req, res) => {
                     UNIQUE KEY uk_church_id (church_id)
                 )
             `);
-
-            // Insert church info with landing page configuration
             await getAppPool().query(`
-                INSERT INTO church_info (
-                    church_id, name, email, phone, address, city, state_province, 
+                INSERT INTO \`${dbName}\`.church_info (
+                    church_id, name, email, phone, address, city, state_province,
                     country, preferred_language, timezone, currency, is_active, custom_landing_page
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `, [
@@ -772,499 +739,227 @@ router.post('/churches/wizard', requireSuperAdmin, async (req, res) => {
                 JSON.stringify(custom_landing_page)
             ]);
 
-            // Clone structure from record_template1 database
-            console.log('🎯 Cloning structure from template database:', templateDatabaseName);
-            
+            // Step 4: Create dedicated database user (for future per-tenant isolation)
+            const generateSecurePassword = () => {
+                const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
+                let r = '';
+                for (let i = 0; i < 16; i++) r += chars.charAt(Math.floor(Math.random() * chars.length));
+                return r;
+            };
+            const dbUser = `church_${church_id}`;
+            const dbPassword = generateSecurePassword();
             try {
-                // Map selected modules to actual table names
-                const tableNameMapping = {
-                    'baptism': ['baptism_records', 'baptism_history'],
-                    'marriage': ['marriage_records', 'marriage_history'], 
-                    'funeral': ['funeral_records', 'funeral_history']
-                };
-                
-                const tablesToClone = [];
-                for (const module of selected_tables) {
-                    if (tableNameMapping[module]) {
-                        tablesToClone.push(...tableNameMapping[module]);
-                    }
-                }
-                
-                // Clone table structures for selected tables from record_template1
-                const [templateTables] = await getAppPool().query(`
-                    SELECT TABLE_NAME 
-                    FROM information_schema.TABLES 
-                    WHERE TABLE_SCHEMA = ? 
-                    AND TABLE_NAME NOT IN ('church_info', 'church_settings')
-                    AND TABLE_NAME IN (${tablesToClone.map(() => '?').join(',')})
-                `, [templateDatabaseName, ...tablesToClone]);
-
-                // Disable foreign key checks to avoid constraint issues during cloning
-                await getAppPool().query('SET FOREIGN_KEY_CHECKS = 0');
-
-                for (const table of templateTables) {
-                    const tableName = table.TABLE_NAME;
-                    console.log(`📋 Cloning table structure: ${tableName} from ${templateDatabaseName}`);
-                    
-                    try {
-                        // Get CREATE TABLE statement from template
-                        const [createTableResult] = await getAppPool().query(`SHOW CREATE TABLE \`${templateDatabaseName}\`.\`${tableName}\``);
-                        let createStatement = createTableResult[0]['Create Table'];
-                        
-                        // Replace table name and execute in new database
-                        createStatement = createStatement.replace(`CREATE TABLE \`${tableName}\``, `CREATE TABLE IF NOT EXISTS \`${dbName}\`.\`${tableName}\``);
-                        await getAppPool().query(createStatement);
-                        console.log(`✅ Cloned table: ${tableName}`);
-                    } catch (tableError) {
-                        console.warn(`⚠️ Failed to clone table ${tableName}:`, tableError.message);
-                    }
-                }
-                
-                // Re-enable foreign key checks
-                await getAppPool().query('SET FOREIGN_KEY_CHECKS = 1');
-                
-                console.log('✅ Template structure cloned successfully');
-            } catch (templateError) {
-                console.warn('⚠️ Template cloning failed (non-critical):', templateError.message);
-                // Make sure to re-enable foreign key checks even if there's an error
-                try {
-                    await getAppPool().query('SET FOREIGN_KEY_CHECKS = 1');
-                } catch (fkError) {
-                    console.warn('⚠️ Failed to re-enable foreign key checks:', fkError.message);
-                }
+                await getAppPool().query(`CREATE USER IF NOT EXISTS '${dbUser}'@'localhost' IDENTIFIED BY '${dbPassword}'`);
+                await getAppPool().query(`GRANT ALL PRIVILEGES ON \`${dbName}\`.* TO '${dbUser}'@'localhost'`);
+                await getAppPool().query(`FLUSH PRIVILEGES`);
+            } catch (userErr) {
+                console.warn('DB user creation failed (non-critical):', userErr.message);
             }
 
-            // Create all selected record tables
-            console.log('📋 Creating wizard selected record tables:', selected_tables);
-            
-            const tableDefinitions = {
-                'baptism_records': `
-                    CREATE TABLE IF NOT EXISTS \`${dbName}\`.baptism_records (
-                        id INT PRIMARY KEY AUTO_INCREMENT,
-                        church_id INT NOT NULL DEFAULT ${church_id},
-                        first_name VARCHAR(255) NOT NULL,
-                        middle_name VARCHAR(255),
-                        last_name VARCHAR(255) NOT NULL,
-                        birth_date DATE,
-                        baptism_date DATE NOT NULL,
-                        birth_place VARCHAR(255),
-                        baptism_place VARCHAR(255),
-                        father_name VARCHAR(255),
-                        mother_name VARCHAR(255),
-                        godfather_name VARCHAR(255),
-                        godmother_name VARCHAR(255),
-                        godparents VARCHAR(500),
-                        priest_name VARCHAR(255),
-                        sponsors VARCHAR(500),
-                        parents VARCHAR(500),
-                        clergy VARCHAR(255),
-                        certificate_number VARCHAR(100),
-                        book_number VARCHAR(100),
-                        page_number VARCHAR(100),
-                        entry_number VARCHAR(100),
-                        notes TEXT,
-                        created_by INT,
-                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                        INDEX idx_baptism_church_id (church_id),
-                        INDEX idx_baptism_names (first_name, last_name),
-                        INDEX idx_baptism_date (baptism_date)
-                    )
-                `,
-                'marriage_records': `
-                    CREATE TABLE IF NOT EXISTS \`${dbName}\`.marriage_records (
-                        id INT PRIMARY KEY AUTO_INCREMENT,
-                        church_id INT NOT NULL DEFAULT ${church_id},
-                        groom_first_name VARCHAR(255) NOT NULL,
-                        groom_middle_name VARCHAR(255),
-                        groom_last_name VARCHAR(255) NOT NULL,
-                        bride_first_name VARCHAR(255) NOT NULL,
-                        bride_middle_name VARCHAR(255),
-                        bride_last_name VARCHAR(255) NOT NULL,
-                        marriage_date DATE NOT NULL,
-                        marriage_place VARCHAR(255),
-                        groom_father VARCHAR(255),
-                        groom_mother VARCHAR(255),
-                        bride_father VARCHAR(255),
-                        bride_mother VARCHAR(255),
-                        priest_name VARCHAR(255),
-                        best_man VARCHAR(255),
-                        maid_of_honor VARCHAR(255),
-                        witness1 VARCHAR(255),
-                        witness2 VARCHAR(255),
-                        certificate_number VARCHAR(100),
-                        book_number VARCHAR(100),
-                        page_number VARCHAR(100),
-                        entry_number VARCHAR(100),
-                        notes TEXT,
-                        created_by INT,
-                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                        INDEX idx_marriage_church_id (church_id),
-                        INDEX idx_marriage_groom (groom_first_name, groom_last_name),
-                        INDEX idx_marriage_bride (bride_first_name, bride_last_name),
-                        INDEX idx_marriage_date (marriage_date)
-                    )
-                `,
-                'funeral_records': `
-                    CREATE TABLE IF NOT EXISTS \`${dbName}\`.funeral_records (
-                        id INT PRIMARY KEY AUTO_INCREMENT,
-                        church_id INT NOT NULL DEFAULT ${church_id},
-                        first_name VARCHAR(255) NOT NULL,
-                        middle_name VARCHAR(255),
-                        last_name VARCHAR(255) NOT NULL,
-                        birth_date DATE,
-                        death_date DATE,
-                        funeral_date DATE NOT NULL,
-                        birth_place VARCHAR(255),
-                        death_place VARCHAR(255),
-                        funeral_place VARCHAR(255),
-                        father_name VARCHAR(255),
-                        mother_name VARCHAR(255),
-                        spouse_name VARCHAR(255),
-                        priest_name VARCHAR(255),
-                        cause_of_death VARCHAR(255),
-                        cemetery VARCHAR(255),
-                        plot_number VARCHAR(100),
-                        certificate_number VARCHAR(100),
-                        book_number VARCHAR(100),
-                        page_number VARCHAR(100),
-                        entry_number VARCHAR(100),
-                        notes TEXT,
-                        created_by INT,
-                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                        INDEX idx_funeral_church_id (church_id),
-                        INDEX idx_funeral_names (first_name, last_name),
-                        INDEX idx_funeral_date (funeral_date)
-                    )
-                `,
+            // Step 5: Add wizard-selected optional tables (not in template baseline)
+            const optionalTableDefs = {
                 'clergy': `
                     CREATE TABLE IF NOT EXISTS \`${dbName}\`.clergy (
                         id INT PRIMARY KEY AUTO_INCREMENT,
                         church_id INT NOT NULL DEFAULT ${church_id},
-                        first_name VARCHAR(255) NOT NULL,
-                        last_name VARCHAR(255) NOT NULL,
-                        title VARCHAR(100),
-                        position VARCHAR(100),
-                        ordination_date DATE,
-                        start_date DATE,
-                        end_date DATE,
-                        email VARCHAR(255),
-                        phone VARCHAR(50),
-                        is_active BOOLEAN DEFAULT TRUE,
+                        first_name VARCHAR(255) NOT NULL, last_name VARCHAR(255) NOT NULL,
+                        title VARCHAR(100), position VARCHAR(100),
+                        ordination_date DATE, start_date DATE, end_date DATE,
+                        email VARCHAR(255), phone VARCHAR(50), is_active BOOLEAN DEFAULT TRUE,
                         notes TEXT,
                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                        INDEX idx_clergy_church_id (church_id),
-                        INDEX idx_clergy_names (first_name, last_name)
-                    )
-                `,
+                        INDEX idx_clergy_church_id (church_id)
+                    )`,
                 'members': `
                     CREATE TABLE IF NOT EXISTS \`${dbName}\`.members (
                         id INT PRIMARY KEY AUTO_INCREMENT,
                         church_id INT NOT NULL DEFAULT ${church_id},
-                        first_name VARCHAR(255) NOT NULL,
-                        last_name VARCHAR(255) NOT NULL,
-                        email VARCHAR(255),
-                        phone VARCHAR(50),
-                        address TEXT,
-                        city VARCHAR(100),
-                        state_province VARCHAR(100),
-                        postal_code VARCHAR(20),
-                        country VARCHAR(100),
-                        birth_date DATE,
-                        baptism_date DATE,
-                        membership_date DATE,
-                        membership_status VARCHAR(50) DEFAULT 'active',
-                        notes TEXT,
+                        first_name VARCHAR(255) NOT NULL, last_name VARCHAR(255) NOT NULL,
+                        email VARCHAR(255), phone VARCHAR(50), address TEXT,
+                        city VARCHAR(100), state_province VARCHAR(100), postal_code VARCHAR(20), country VARCHAR(100),
+                        birth_date DATE, baptism_date DATE, membership_date DATE,
+                        membership_status VARCHAR(50) DEFAULT 'active', notes TEXT,
                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                        INDEX idx_members_church_id (church_id),
-                        INDEX idx_members_names (first_name, last_name),
-                        INDEX idx_members_email (email)
-                    )
-                `,
+                        INDEX idx_members_church_id (church_id)
+                    )`,
                 'donations': `
                     CREATE TABLE IF NOT EXISTS \`${dbName}\`.donations (
                         id INT PRIMARY KEY AUTO_INCREMENT,
                         church_id INT NOT NULL DEFAULT ${church_id},
-                        donor_name VARCHAR(255),
-                        amount DECIMAL(10,2) NOT NULL,
+                        donor_name VARCHAR(255), amount DECIMAL(10,2) NOT NULL,
                         currency VARCHAR(10) DEFAULT '${currency}',
-                        donation_date DATE NOT NULL,
-                        category VARCHAR(100),
-                        method VARCHAR(50),
-                        reference_number VARCHAR(100),
-                        notes TEXT,
+                        donation_date DATE NOT NULL, category VARCHAR(100), method VARCHAR(50),
+                        reference_number VARCHAR(100), notes TEXT,
                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                        INDEX idx_donations_church_id (church_id),
-                        INDEX idx_donations_date (donation_date),
-                        INDEX idx_donations_amount (amount)
-                    )
-                `,
+                        INDEX idx_donations_church_id (church_id)
+                    )`,
                 'calendar_events': `
                     CREATE TABLE IF NOT EXISTS \`${dbName}\`.calendar_events (
                         id INT PRIMARY KEY AUTO_INCREMENT,
                         church_id INT NOT NULL DEFAULT ${church_id},
-                        title VARCHAR(255) NOT NULL,
-                        description TEXT,
-                        event_date DATE NOT NULL,
-                        start_time TIME,
-                        end_time TIME,
-                        event_type VARCHAR(100),
-                        location VARCHAR(255),
-                        is_recurring BOOLEAN DEFAULT FALSE,
-                        recurrence_pattern VARCHAR(100),
-                        created_by INT,
+                        title VARCHAR(255) NOT NULL, description TEXT, event_date DATE NOT NULL,
+                        start_time TIME, end_time TIME, event_type VARCHAR(100), location VARCHAR(255),
+                        is_recurring BOOLEAN DEFAULT FALSE, recurrence_pattern VARCHAR(100), created_by INT,
                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                        INDEX idx_events_church_id (church_id),
-                        INDEX idx_events_date (event_date),
-                        INDEX idx_events_type (event_type)
-                    )
-                `,
+                        INDEX idx_events_church_id (church_id)
+                    )`,
                 'confession_records': `
                     CREATE TABLE IF NOT EXISTS \`${dbName}\`.confession_records (
                         id INT PRIMARY KEY AUTO_INCREMENT,
                         church_id INT NOT NULL DEFAULT ${church_id},
-                        person_name VARCHAR(255),
-                        confession_date DATE NOT NULL,
-                        priest_name VARCHAR(255),
-                        notes TEXT,
-                        is_confidential BOOLEAN DEFAULT TRUE,
+                        person_name VARCHAR(255), confession_date DATE NOT NULL, priest_name VARCHAR(255),
+                        notes TEXT, is_confidential BOOLEAN DEFAULT TRUE,
                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                        INDEX idx_confession_church_id (church_id),
-                        INDEX idx_confession_date (confession_date)
-                    )
-                `,
+                        INDEX idx_confession_church_id (church_id)
+                    )`,
                 'communion_records': `
                     CREATE TABLE IF NOT EXISTS \`${dbName}\`.communion_records (
                         id INT PRIMARY KEY AUTO_INCREMENT,
                         church_id INT NOT NULL DEFAULT ${church_id},
-                        person_name VARCHAR(255),
-                        communion_date DATE NOT NULL,
-                        service_type VARCHAR(100),
-                        priest_name VARCHAR(255),
-                        notes TEXT,
+                        person_name VARCHAR(255), communion_date DATE NOT NULL, service_type VARCHAR(100),
+                        priest_name VARCHAR(255), notes TEXT,
                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                        INDEX idx_communion_church_id (church_id),
-                        INDEX idx_communion_date (communion_date)
-                    )
-                `,
+                        INDEX idx_communion_church_id (church_id)
+                    )`,
                 'chrismation_records': `
                     CREATE TABLE IF NOT EXISTS \`${dbName}\`.chrismation_records (
                         id INT PRIMARY KEY AUTO_INCREMENT,
                         church_id INT NOT NULL DEFAULT ${church_id},
-                        first_name VARCHAR(255) NOT NULL,
-                        last_name VARCHAR(255) NOT NULL,
-                        chrismation_date DATE NOT NULL,
-                        baptism_date DATE,
-                        sponsor_name VARCHAR(255),
-                        priest_name VARCHAR(255),
-                        confirmation_name VARCHAR(255),
-                        certificate_number VARCHAR(100),
-                        notes TEXT,
+                        first_name VARCHAR(255) NOT NULL, last_name VARCHAR(255) NOT NULL,
+                        chrismation_date DATE NOT NULL, baptism_date DATE, sponsor_name VARCHAR(255),
+                        priest_name VARCHAR(255), confirmation_name VARCHAR(255),
+                        certificate_number VARCHAR(100), notes TEXT,
                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                        INDEX idx_chrismation_church_id (church_id),
-                        INDEX idx_chrismation_names (first_name, last_name),
-                        INDEX idx_chrismation_date (chrismation_date)
-                    )
-                `
+                        INDEX idx_chrismation_church_id (church_id)
+                    )`
             };
 
-            // Create selected tables
+            // Only create optional tables the wizard selected (skip baseline tables already in template)
+            const baselineTables = new Set(['baptism_records','marriage_records','funeral_records',
+                'baptism_history','marriage_history','funeral_history','activity_log','change_log',
+                'church_settings','ocr_jobs','ocr_draft_records','ocr_feeder_artifacts','ocr_feeder_pages',
+                'ocr_finalize_history','ocr_fused_drafts','ocr_mappings','ocr_settings','ocr_setup_state',
+                'record_supplements','template_meta']);
             for (const tableName of selected_tables) {
-                if (tableDefinitions[tableName]) {
-                    await getAppPool().query(tableDefinitions[tableName]);
-                    console.log(`✅ Created table: ${tableName}`);
+                if (!baselineTables.has(tableName) && optionalTableDefs[tableName]) {
+                    await getAppPool().query(optionalTableDefs[tableName]);
+                    console.log(`Created optional table: ${tableName}`);
                 }
             }
 
-            // Add custom fields to selected tables
+            // Step 6: Add custom fields to tables
             if (custom_fields && custom_fields.length > 0) {
-                console.log('🔧 Adding custom fields:', custom_fields);
-                
                 for (const field of custom_fields) {
                     try {
-                        let fieldDefinition = `${field.field_name} ${field.field_type}`;
-                        
-                        if (field.field_type === 'VARCHAR' && field.field_length) {
-                            fieldDefinition += `(${field.field_length})`;
-                        }
-                        
-                        if (field.is_required) {
-                            fieldDefinition += ' NOT NULL';
-                        }
-                        
-                        if (field.default_value) {
-                            fieldDefinition += ` DEFAULT '${field.default_value}'`;
-                        }
-
-                        await getAppPool().query(`
-                            ALTER TABLE \`${dbName}\`.\`${field.table_name}\` 
-                            ADD COLUMN ${fieldDefinition}
-                        `);
-                        
-                        console.log(`✅ Added custom field: ${field.field_name} to ${field.table_name}`);
+                        let fieldDef = `${field.field_name} ${field.field_type}`;
+                        if (field.field_type === 'VARCHAR' && field.field_length) fieldDef += `(${field.field_length})`;
+                        if (field.is_required) fieldDef += ' NOT NULL';
+                        if (field.default_value) fieldDef += ` DEFAULT '${field.default_value}'`;
+                        await getAppPool().query(`ALTER TABLE \`${dbName}\`.\`${field.table_name}\` ADD COLUMN ${fieldDef}`);
                     } catch (fieldError) {
-                        console.warn(`⚠️ Failed to add custom field ${field.field_name}:`, fieldError.message);
+                        console.warn(`Failed to add custom field ${field.field_name}:`, fieldError.message);
                     }
                 }
             }
 
-                        // NOTE: Users are stored in orthodoxmetrics_db, not in individual church databases
-            // Church databases are for records only. User management is handled centrally.
-                        // Use the church_users junction table in orthodoxmetrics_db to assign users to churches.
-
-                        // Add initial users to orthodoxmetrics_db (not church database)
+            // Step 7: Add initial users to platform DB
             if (initial_users && initial_users.length > 0) {
-                                console.log('👥 Adding initial users to orthodoxmetrics_db:', initial_users.length);
-                
                 for (const user of initial_users) {
                     try {
-                        // Check if user already exists in orthodoxmetrics_db
                         const [existingUsers] = await getAppPool().query(
-                            'SELECT id FROM orthodoxmetrics_db.users WHERE email = ?',
-                            [user.email]
+                            'SELECT id FROM users WHERE email = ?', [user.email]
                         );
-
                         let userId;
                         if (existingUsers.length > 0) {
                             userId = existingUsers[0].id;
-                            console.log(`👤 User ${user.email} already exists, using existing user`);
                         } else {
-                            // Create new user in orthodoxmetrics_db
                             const tempPassword = Math.random().toString(36).slice(-12);
-                            const bcrypt = require('bcrypt');
                             const hashedPassword = await bcrypt.hash(tempPassword, 10);
-
-                            // Get role_id for the user role
                             const [roleResult] = await getAppPool().query(
-                                'SELECT id FROM orthodoxmetrics_db.roles WHERE name = ?',
-                                [user.role]
+                                'SELECT id FROM roles WHERE name = ?', [user.role]
                             );
-                            
-                            if (roleResult.length === 0) {
-                                throw new Error(`Role '${user.role}' not found`);
-                            }
-                            
-                            const role_id = roleResult[0].id;
+                            if (roleResult.length === 0) throw new Error(`Role '${user.role}' not found`);
                             const full_name = `${user.first_name} ${user.last_name}`;
-
-                            const [result] = await getAppPool().query(`
-                                INSERT INTO orthodoxmetrics_db.users (
-                                    email, full_name, role_id, church_id, 
-                                    password_hash, is_active, created_at, updated_at
-                                ) VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())
-                            `, [
-                                user.email, full_name, role_id, church_id,
-                                hashedPassword, true
-                            ]);
-                            
-                            userId = result.insertId;
-                            console.log(`✅ Created user: ${user.first_name} ${user.last_name} (${user.role}) with temp password: ${tempPassword}`);
+                            const [uResult] = await getAppPool().query(`
+                                INSERT INTO users (email, full_name, role_id, church_id, password_hash, is_active, created_at, updated_at)
+                                VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())
+                            `, [user.email, full_name, roleResult[0].id, church_id, hashedPassword, true]);
+                            userId = uResult.insertId;
                         }
-
-                        // Assign user to church via church_users junction table
                         await getAppPool().query(
                             'INSERT INTO church_users (church_id, user_id, role) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE role = VALUES(role)',
                             [church_id, userId, user.role]
                         );
-                        
-                        // TODO: Send invitation email if user.send_invite is true
-                        if (user.send_invite) {
-                            console.log(`📧 TODO: Send invitation email to ${user.email}`);
-                        }
                     } catch (userError) {
-                        console.warn(`⚠️ Failed to add user ${user.email}:`, userError.message);
+                        console.warn(`Failed to add user ${user.email}:`, userError.message);
                     }
                 }
             }
 
-            // Create church settings table for landing page and other configurations
-            await getAppPool().query(`
-                CREATE TABLE IF NOT EXISTS \`${dbName}\`.church_settings (
-                    id INT PRIMARY KEY AUTO_INCREMENT,
-                    church_id INT NOT NULL DEFAULT ${church_id},
-                    setting_key VARCHAR(255) NOT NULL,
-                    setting_value JSON,
-                    description TEXT,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                    UNIQUE KEY uk_church_setting (church_id, setting_key),
-                    INDEX idx_settings_church_id (church_id)
-                )
-            `);
-
-            // Store landing page configuration in settings
+            // Step 8: Store landing page configuration
             if (custom_landing_page && custom_landing_page.enabled) {
-                await getAppPool().query(`
-                    INSERT INTO \`${dbName}\`.church_settings (
-                        church_id, setting_key, setting_value, description
-                    ) VALUES (?, 'custom_landing_page', ?, 'Custom landing page configuration with default app')
-                `, [church_id, JSON.stringify(custom_landing_page)]);
-                console.log('✅ Stored custom landing page configuration with default app');
+                try {
+                    await getAppPool().query(`
+                        INSERT INTO \`${dbName}\`.church_settings (church_id, setting_key, setting_value)
+                        VALUES (?, 'custom_landing_page', ?)
+                        ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)
+                    `, [church_id, JSON.stringify(custom_landing_page)]);
+                } catch (e) {
+                    console.warn('Landing page config insert failed (non-critical):', e.message);
+                }
             }
 
-            // Step 4: Store database credentials in the main churches table
-            await getAppPool().query('USE orthodoxmetrics_db');
+            // Step 9: Store DB credentials and finalize
             await getAppPool().query(`
-                UPDATE churches 
-                SET database_name = ?, db_user = ?, db_password = ?, setup_complete = 1 
-                WHERE id = ?
-            `, [dbName, dbUser, dbPassword, church_id]);
-            console.log('✅ Database credentials stored in churches table');
+                UPDATE churches SET database_name = ?, db_name = ?, db_user = ?, db_password = ?, setup_complete = 1 WHERE id = ?
+            `, [dbName, dbName, dbUser, dbPassword, church_id]);
 
-            // Step 5: Generate registration token for the new church
-            const crypto = require('crypto');
+            // Step 10: Generate registration token
             const registrationToken = crypto.randomBytes(32).toString('hex');
             const currentUser = req.user || req.session?.user;
             await getAppPool().query(
                 'INSERT INTO church_registration_tokens (church_id, token, created_by) VALUES (?, ?, ?)',
                 [church_id, registrationToken, currentUser?.id || 0]
             );
-            console.log('✅ Registration token generated for church:', registrationToken.substring(0, 8) + '...');
 
-            console.log('🎉 Church Setup Wizard completed successfully!');
+            console.log(`Church Setup Wizard completed: church=${church_id}, db=${dbName}`);
 
         } catch (dbError) {
-            console.error('❌ Database setup failed:', dbError);
-            
-            // Rollback: delete the church record and database if setup failed
+            console.error('Database setup failed:', dbError);
+            // Rollback: delete church record, drop database and user
             try {
-                await getAppPool().query('USE orthodoxmetrics_db');
                 await getAppPool().query('DELETE FROM churches WHERE id = ?', [church_id]);
                 await getAppPool().query(`DROP DATABASE IF EXISTS \`${dbName}\``);
+                const dbUser = `church_${church_id}`;
                 await getAppPool().query(`DROP USER IF EXISTS '${dbUser}'@'localhost'`);
-                console.log('🔄 Rolled back church record and database due to setup failure');
+                console.log('Rolled back church record and database');
             } catch (rollbackError) {
-                console.error('❌ Rollback failed:', rollbackError);
+                console.error('Rollback failed:', rollbackError);
             }
-            
             throw new Error(`Database setup failed: ${dbError.message}`);
         }
 
-        // Fetch the created church with all details
-        const [newChurch] = await getAppPool().query(`
-            SELECT * FROM churches WHERE id = ?
-        `, [church_id]);
+        // Fetch the created church
+        const [newChurch] = await getAppPool().query('SELECT * FROM churches WHERE id = ?', [church_id]);
 
         res.json({
             success: true,
             message: `Church "${name}" created successfully with dedicated database`,
             church_id: church_id,
             db_name: dbName,
-            db_user: dbUser,
             church: newChurch[0],
             registration_token: registrationToken,
             wizard_summary: {
-                template_used: templateDatabaseName,
-                tables_created: selected_tables.length,
+                template_used: 'record_template1',
+                template_version: '2.0.0',
+                tables_created: 20,
                 custom_fields_added: custom_fields.length,
                 initial_users_added: initial_users.length,
                 landing_page_configured: custom_landing_page.enabled,
