@@ -372,12 +372,18 @@ router.put('/profiles/:churchId/review', requireAuth, requireAdmin, async (req, 
 router.get('/filter-options', requireAuth, requireAdmin, async (req, res) => {
   try {
     const pool = getAppPool();
+    // Enriched-only filters (for profile list filtering)
     const [states] = await pool.query('SELECT DISTINCT c.state_code FROM us_churches c JOIN church_enrichment_profiles ep ON ep.church_id = c.id ORDER BY c.state_code');
     const [jurisdictions] = await pool.query('SELECT DISTINCT c.jurisdiction FROM us_churches c JOIN church_enrichment_profiles ep ON ep.church_id = c.id WHERE c.jurisdiction IS NOT NULL ORDER BY c.jurisdiction');
+    // All available states/jurisdictions (for batch run targeting)
+    const [allStates] = await pool.query('SELECT DISTINCT state_code FROM us_churches WHERE state_code IS NOT NULL ORDER BY state_code');
+    const [allJurisdictions] = await pool.query('SELECT DISTINCT jurisdiction FROM us_churches WHERE jurisdiction IS NOT NULL ORDER BY jurisdiction');
 
     res.json({
       states: states.map(r => r.state_code),
       jurisdictions: jurisdictions.map(r => r.jurisdiction),
+      allStates: allStates.map(r => r.state_code),
+      allJurisdictions: allJurisdictions.map(r => r.jurisdiction),
       statuses: ['enriched', 'low_confidence', 'no_data', 'pending', 'failed', 'review_required'],
       confidences: ['high', 'medium', 'low', 'none'],
       yearBuckets: ['pre_1900', '1900_1949', '1950_1999', '2000_present', 'unknown'],
