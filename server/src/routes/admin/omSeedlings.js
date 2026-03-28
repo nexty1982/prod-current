@@ -1,0 +1,146 @@
+/**
+ * OM Seedlings API Route
+ *
+ * POST /api/admin/om-seedlings/dry-run       — Analyze and preview seeding plan
+ * POST /api/admin/om-seedlings/execute       — Execute seeding (inserts records)
+ * GET  /api/admin/om-seedlings/scope-matrix  — Get scope matrix configuration
+ * GET  /api/admin/om-seedlings/runs          — List seed run history
+ * GET  /api/admin/om-seedlings/runs/:id      — Get single run detail with full report
+ * POST /api/admin/om-seedlings/purge-run/:id — Purge all records from a specific run
+ *
+ * Mounted at /api/admin/om-seedlings in index.ts
+ */
+
+const express = require('express');
+const router = express.Router();
+const { requireAuth, requireRole } = require('../../middleware/auth');
+const { dryRun, execute, purgeByRun, getRunHistory, getRunById } = require('../../services/om-seedlings/seedingEngine');
+const { SIZE_PROFILES, LIFECYCLE_PHASES } = require('../../services/om-seedlings/scopeMatrix');
+const { getChurchesForMap } = require('../../services/om-seedlings/churchSelector');
+
+const ADMIN_ROLES = ['super_admin'];
+
+// ─── Parse common filters/options from request body ─────────────────────────
+
+function parseRequest(body, req) {
+  const filters = {};
+  const options = {};
+
+  if (body.church_id) filters.churchId = parseInt(body.church_id);
+  if (body.jurisdiction) filters.jurisdiction = body.jurisdiction;
+  if (body.state) filters.state = body.state;
+  if (body.limit) filters.limit = parseInt(body.limit);
+
+  if (body.record_types) {
+    const valid = ['baptism', 'marriage', 'funeral'];
+    const types = Array.isArray(body.record_types) ? body.record_types : body.record_types.split(',');
+    options.recordTypes = types.filter(t => valid.includes(t.trim()));
+  }
+  if (body.from_year) options.fromYear = parseInt(body.from_year);
+  if (body.to_year) options.toYear = parseInt(body.to_year);
+  if (body.allow_fallback) options.allowFallback = true;
+  if (body.allow_seeded) options.allowSeeded = true;
+  if (body.batch_size) options.batchSize = parseInt(body.batch_size);
+  if (body.fail_fast) options.failFast = true;
+  if (body.max_churches) options.maxChurches = parseInt(body.max_churches);
+  if (body.error_threshold) options.errorThreshold = parseInt(body.error_threshold);
+  if (body.delay_ms) options.delayMs = parseInt(body.delay_ms);
+
+  // Identify who started the run
+  options.startedBy = req.user?.username || req.session?.user?.username || 'api';
+
+  return { filters, options };
+}
+
+// ─── GET /scope-matrix ──────────────────────────────────────────────────────
+
+router.get('/scope-matrix', requireAuth, requireRole(ADMIN_ROLES), (req, res) => {
+  res.json({ success: true, size_profiles: SIZE_PROFILES, lifecycle_phases: LIFECYCLE_PHASES });
+});
+
+// ─── GET /churches — Phase 2 churches with coordinates + eligibility ────────
+
+router.get('/churches', requireAuth, requireRole(ADMIN_ROLES), async (req, res) => {
+  try {
+    const filters = {};
+    if (req.query.church_id) filters.churchId = parseInt(req.query.church_id);
+    if (req.query.jurisdiction) filters.jurisdiction = req.query.jurisdiction;
+    if (req.query.state) filters.state = req.query.state;
+    const { churches, summary } = await getChurchesForMap(filters);
+    res.json({ success: true, churches, summary });
+  } catch (err) {
+    console.error('[OM Seedlings] Churches endpoint error:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// ─── POST /dry-run ──────────────────────────────────────────────────────────
+
+router.post('/dry-run', requireAuth, requireRole(ADMIN_ROLES), async (req, res) => {
+  try {
+    const { filters, options } = parseRequest(req.body, req);
+    const report = await dryRun(filters, options);
+    res.json({ success: true, ...report });
+  } catch (err) {
+    console.error('[OM Seedlings] Dry run error:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// ─── POST /execute ──────────────────────────────────────────────────────────
+
+router.post('/execute', requireAuth, requireRole(ADMIN_ROLES), async (req, res) => {
+  try {
+    const { filters, options } = parseRequest(req.body, req);
+    const report = await execute(filters, options);
+    res.json({ success: true, ...report });
+  } catch (err) {
+    console.error('[OM Seedlings] Execute error:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// ─── GET /runs — Run history ────────────────────────────────────────────────
+
+router.get('/runs', requireAuth, requireRole(ADMIN_ROLES), async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 20;
+    const offset = parseInt(req.query.offset) || 0;
+    const { runs, total } = await getRunHistory(limit, offset);
+    res.json({ success: true, runs, total, limit, offset });
+  } catch (err) {
+    console.error('[OM Seedlings] Run history error:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// ─── GET /runs/:id — Single run detail ──────────────────────────────────────
+
+router.get('/runs/:id', requireAuth, requireRole(ADMIN_ROLES), async (req, res) => {
+  try {
+    const run = await getRunById(parseInt(req.params.id));
+    if (!run) return res.status(404).json({ success: false, error: 'Run not found' });
+    // Parse report_json if stored as string
+    if (run.report_json && typeof run.report_json === 'string') {
+      try { run.report_json = JSON.parse(run.report_json); } catch { /* leave as string */ }
+    }
+    res.json({ success: true, run });
+  } catch (err) {
+    console.error('[OM Seedlings] Run detail error:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// ─── POST /purge-run/:id — Purge seeded records by run ID ──────────────────
+
+router.post('/purge-run/:id', requireAuth, requireRole(ADMIN_ROLES), async (req, res) => {
+  try {
+    const result = await purgeByRun(parseInt(req.params.id));
+    res.json({ success: true, ...result });
+  } catch (err) {
+    console.error('[OM Seedlings] Purge error:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+module.exports = router;
