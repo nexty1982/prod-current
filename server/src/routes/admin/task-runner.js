@@ -52,6 +52,16 @@ const EVENT_COLUMNS = `
   ${TS('e.created_at')} AS created_at
 `;
 
+// Parse JSON string columns into objects (mysql2 returns JSON columns as strings)
+function parseJsonFields(row) {
+  for (const key of ['metadata_json', 'result_json', 'error_json']) {
+    if (typeof row[key] === 'string') {
+      try { row[key] = JSON.parse(row[key]); } catch { /* leave as string */ }
+    }
+  }
+  return row;
+}
+
 // ─── LIST tasks (with filtering) ────────────────────────────────────────────
 router.get('/', requireAuth, requireRole(ADMIN_ROLES), async (req, res) => {
   try {
@@ -95,7 +105,7 @@ router.get('/', requireAuth, requireRole(ADMIN_ROLES), async (req, res) => {
 
     res.json({
       success: true,
-      tasks: rows,
+      tasks: rows.map(parseJsonFields),
       total: countResult[0].total,
       limit: parseInt(limit),
       offset: parseInt(offset)
@@ -126,7 +136,7 @@ router.get('/:id', requireAuth, requireRole(ADMIN_ROLES), async (req, res) => {
       [taskId]
     );
 
-    res.json({ success: true, task: tasks[0], events });
+    res.json({ success: true, task: parseJsonFields(tasks[0]), events });
   } catch (err) {
     console.error('[TaskRunner] Detail error:', err);
     res.status(500).json({ success: false, error: err.message });
