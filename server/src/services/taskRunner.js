@@ -9,7 +9,7 @@
  *   const taskId = await createTask(pool, { task_type: 'enrichment_batch', title: '...', ... });
  *   await updateTask(pool, taskId, { status: 'running', stage: 'Fetching pages', completed_count: 5 });
  *   await addTaskEvent(pool, taskId, { level: 'info', message: 'Enriched Church X' });
- *   if (await isCancelled(pool, taskId)) { /* stop work */ }
+ *   if (await isCancelled(pool, taskId)) { // stop work }
  */
 
 const { getAppPool } = require('../config/db');
