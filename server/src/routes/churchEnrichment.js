@@ -264,9 +264,24 @@ router.get('/runs', requireAuth, requireAdmin, async (req, res) => {
 router.post('/run', requireAuth, requireSuper, async (req, res) => {
   try {
     const { state, jurisdiction, limit, forceReenrich, statusFilter } = req.body;
-    res.json({ message: 'Enrichment run started', status: 'accepted' });
+    const { createTask } = require('../services/taskRunner');
 
-    runBatchEnrichment({ state, jurisdiction, limit, forceReenrich, statusFilter })
+    const userId = req.session?.user?.id || req.user?.id || null;
+    const userName = req.session?.user?.username || req.user?.username || null;
+    const filterDesc = [state, jurisdiction].filter(Boolean).join(', ') || 'all';
+
+    const taskId = await createTask(null, {
+      task_type: 'enrichment_batch',
+      source_feature: 'church-enrichment',
+      title: `Enrichment batch — ${filterDesc}${limit ? ` (limit ${limit})` : ''}`,
+      created_by: userId,
+      created_by_name: userName,
+      metadata_json: { state, jurisdiction, limit, forceReenrich, statusFilter }
+    });
+
+    res.json({ message: 'Enrichment run started', status: 'accepted', task_id: taskId });
+
+    runBatchEnrichment({ state, jurisdiction, limit, forceReenrich, statusFilter, taskId })
       .then(summary => console.log('[Enrichment API] Batch complete:', summary))
       .catch(err => console.error('[Enrichment API] Batch error:', err));
   } catch (err) {
@@ -282,9 +297,23 @@ router.post('/run', requireAuth, requireSuper, async (req, res) => {
 router.post('/rerun', requireAuth, requireSuper, async (req, res) => {
   try {
     const { state, jurisdiction, limit, statuses = 'no_data,low_confidence' } = req.body;
-    res.json({ message: `Re-run started for statuses: ${statuses}`, status: 'accepted' });
+    const { createTask } = require('../services/taskRunner');
 
-    runBatchEnrichment({ state, jurisdiction, limit, forceReenrich: true, statusFilter: statuses })
+    const userId = req.session?.user?.id || req.user?.id || null;
+    const userName = req.session?.user?.username || req.user?.username || null;
+
+    const taskId = await createTask(null, {
+      task_type: 'enrichment_batch',
+      source_feature: 'church-enrichment',
+      title: `Enrichment re-run — ${statuses}`,
+      created_by: userId,
+      created_by_name: userName,
+      metadata_json: { state, jurisdiction, limit, statuses, rerun: true }
+    });
+
+    res.json({ message: `Re-run started for statuses: ${statuses}`, status: 'accepted', task_id: taskId });
+
+    runBatchEnrichment({ state, jurisdiction, limit, forceReenrich: true, statusFilter: statuses, taskId })
       .then(summary => console.log('[Enrichment API] Re-run complete:', summary))
       .catch(err => console.error('[Enrichment API] Re-run error:', err));
   } catch (err) {

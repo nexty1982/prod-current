@@ -708,6 +708,11 @@ const opsRouter = require('./routes/admin/ops');
 app.use('/api/ops', opsRouter);
 console.log('✅ [Server] Mounted /api/ops route (includes Git Operations)');
 
+// Task Runner — generic background task/job monitoring
+const taskRunnerRouter = require('./routes/admin/task-runner');
+app.use('/api/ops/tasks', taskRunnerRouter);
+console.log('✅ [Server] Mounted /api/ops/tasks route (Task Runner)');
+
 // Health/Diagnostics endpoint for route verification (admin-only)
 const { requireAuth: requireAuthForRoutes } = require('./middleware/requireAuth');
 const requireAdminForRoutes = (req, res, next) => {
