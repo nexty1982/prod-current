@@ -80,6 +80,16 @@ async function publishPlatformEvent(evt) {
     console.error('[PlatformEvents] Rule evaluation failed:', err.message);
   });
 
+  // Fire-and-forget workflow trigger evaluation
+  try {
+    const { evaluateWorkflowTriggers } = require('./workflowEngine');
+    evaluateWorkflowTriggers(eventId, evt).catch(err => {
+      console.error('[PlatformEvents] Workflow trigger evaluation failed:', err.message);
+    });
+  } catch (err) {
+    // workflowEngine not loaded yet — safe to skip
+  }
+
   return { id: eventId };
 }
 

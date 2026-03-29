@@ -47,6 +47,7 @@ const TASK_COLUMNS = `
   t.cancelled_by, t.cancelled_by_name,
   t.total_count, t.completed_count, t.success_count, t.failure_count,
   t.metadata_json, t.result_json, t.error_json,
+  t.workflow_run_id,
   TIMESTAMPDIFF(SECOND, t.started_at, COALESCE(t.finished_at, UTC_TIMESTAMP())) AS duration_seconds,
   CASE
     WHEN t.status = 'running' AND t.last_heartbeat IS NOT NULL

@@ -675,6 +675,10 @@ const buildEventsRouter = require('./routes/internal/buildEvents');
 app.use('/api/internal', buildEventsRouter);
 console.log('✅ [Server] Mounted /api/internal/build-events route');
 
+const workflowInternalRouter = require('./routes/internal/workflows');
+app.use('/api/internal', workflowInternalRouter);
+console.log('✅ [Server] Mounted /api/internal/workflows route');
+
 // 🔧 FIXED: Specific admin routes BEFORE general admin routes
 app.use('/api/admin/church', churchAdminRouter);
 
@@ -1585,6 +1589,15 @@ cron.schedule('*/5 * * * *', async () => {
 });
 
 console.log('Email queue processor started (runs every 5 minutes)');
+
+// --- WORKFLOW SCHEDULER -----------------------------------------------
+try {
+  const { startWorkflowScheduler } = require('./services/workflowScheduler');
+  startWorkflowScheduler();
+  console.log('✅ [Server] Workflow scheduler started');
+} catch (err) {
+  console.error('⚠️ [Server] Failed to start workflow scheduler:', err.message);
+}
 
 // MIGRATED TO OMAI: om-daily cron jobs (changelog, staging review, GitHub sync)
 // These crons now run from the OMAI server
