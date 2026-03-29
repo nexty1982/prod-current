@@ -406,7 +406,7 @@ export default function TranslationManagerPage() {
       {/* ── Translation table ── */}
       <Paper>
         {loading && <LinearProgress />}
-        <TableContainer sx={{ maxHeight: 'calc(100vh - 480px)' }}>
+        <TableContainer sx={{ maxHeight: 600, overflow: 'auto' }}>
           <Table stickyHeader size="small">
             <TableHead>
               <TableRow>
