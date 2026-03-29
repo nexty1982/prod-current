@@ -881,6 +881,9 @@ console.log('✅ [Server] Mounted /api/certificate-templates routes (Certificate
 const i18nRouter = require('./routes/i18n');
 app.use('/api/i18n', i18nRouter); // UI translation strings
 console.log('✅ [Server] Mounted /api/i18n routes (UI Translations)');
+const translationsRouter = require('./routes/translations');
+app.use('/api/translations', translationsRouter); // Translation management API
+console.log('✅ [Server] Mounted /api/translations routes (Translation Management)');
 app.use('/api/admin/demo-churches', demoChurchesRouter); // Demo church management
 console.log('✅ [Server] Mounted /api/admin/demo-churches routes (Demo Churches)');
 app.use('/api/admin/church-decom', churchDecomRouter); // Church decommissioning wizard
