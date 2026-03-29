@@ -144,7 +144,7 @@ export default function TranslationManagerPage() {
   const fetchLanguages = useCallback(async () => {
     try {
       const res = await apiClient.get<{ languages: LanguageInfo[] }>('/translations/languages');
-      const nonEn = res.data.languages.filter((l: LanguageInfo) => l.code !== 'en');
+      const nonEn = res.languages.filter((l: LanguageInfo) => l.code !== 'en');
       setLanguages(nonEn);
     } catch { /* ignore */ }
   }, []);
@@ -154,7 +154,7 @@ export default function TranslationManagerPage() {
     try {
       const params = selectedNs ? `?namespace=${selectedNs}` : '';
       const res = await apiClient.get<StatsData>(`/translations/stats${params}`);
-      setStats(res.data);
+      setStats(res);
     } catch { /* ignore */ }
     setStatsLoading(false);
   }, [selectedNs]);
@@ -174,8 +174,8 @@ export default function TranslationManagerPage() {
       const res = await apiClient.get<{ rows: TranslationRow[]; total: number }>(
         `/translations/localized?${params}`
       );
-      setRows(res.data.rows);
-      setTotalRows(res.data.total);
+      setRows(res.rows);
+      setTotalRows(res.total);
     } catch {
       setRows([]);
       setTotalRows(0);
