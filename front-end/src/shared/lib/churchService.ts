@@ -19,6 +19,9 @@ export interface Church {
   setup_complete?: boolean;
   created_at?: string;
   updated_at?: string;
+  baptism_count?: number;
+  marriage_count?: number;
+  funeral_count?: number;
 }
 
 export interface FetchRecordsOptions {
@@ -41,10 +44,11 @@ const churchService = {
    * Fetch all churches the current user has access to
    * Super admins see all churches, others see only assigned churches
    */
-  fetchChurches: async (): Promise<Church[]> => {
+  fetchChurches: async (options?: { includeRecordCounts?: boolean }): Promise<Church[]> => {
     try {
+      const params = options?.includeRecordCounts ? '?include_record_counts=1' : '';
       console.log('🔍 Fetching churches from /api/my/churches...');
-      const response = await fetch('/api/my/churches', {
+      const response = await fetch(`/api/my/churches${params}`, {
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
