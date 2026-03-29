@@ -620,6 +620,16 @@ app.use('/api/auth', churchRegisterRouter); // Public church token registration
 app.use('/api/crm-public', crmPublicRouter); // Public CRM inquiry + appointment booking
 app.use('/api', churchRegisterRouter); // Admin token management endpoints
 console.log('✅ [Server] Mounted church registration token routes');
+// ─── Blanket auth guard for admin & ops route trees ──────────────────
+// Every request to /api/admin/* or /api/ops/* MUST be authenticated with
+// at least 'admin' role. Individual handlers can still enforce stricter
+// roles (e.g. super_admin). This prevents any admin endpoint from being
+// accidentally exposed without auth.
+const { adminGuard } = require('./middleware/adminGuard');
+app.use('/api/admin', ...adminGuard('admin'));
+app.use('/api/ops', ...adminGuard('admin'));
+console.log('🔒 [Server] Blanket admin guard applied to /api/admin/* and /api/ops/*');
+
 app.use('/api/admin/church-onboarding', churchOnboardingRouter);
 console.log('✅ [Server] Mounted /api/admin/church-onboarding route (Phase 2 onboarding pipeline)');
 app.use('/api/admin/onboarding-pipeline', onboardingPipelineRouter);
