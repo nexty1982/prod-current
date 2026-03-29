@@ -12,9 +12,20 @@
 const express = require('express');
 const { requireAuth, requireRole } = require('../../middleware/auth');
 const { getAppPool } = require('../../config/db');
+const { publishPlatformEvent } = require('../../services/platformEvents');
 
 const router = express.Router();
 const ADMIN_ROLES = ['super_admin', 'admin'];
+
+// Helper to extract actor info from request
+function getActor(req) {
+  const user = req.session?.user || req.user;
+  return {
+    actor_type: user ? 'user' : 'system',
+    actor_id: user?.id || null,
+    actor_name: user?.username || user?.email || null,
+  };
+}
 
 // Stale threshold: task is stale if running with no heartbeat for this many seconds
 const STALE_THRESHOLD_SECONDS = 60;
@@ -163,6 +174,16 @@ router.post('/', requireAuth, requireRole(ADMIN_ROLES), async (req, res) => {
       [task_type, source_feature || null, title, userId, userName, metadata_json ? JSON.stringify(metadata_json) : null]
     );
 
+    // Publish event (fire-and-forget)
+    const actor = getActor(req);
+    publishPlatformEvent({
+      event_type: 'task.created', category: 'task', severity: 'info',
+      source_system: 'task_runner', source_ref_id: result.insertId,
+      title: `Task created: ${title}`, message: `Type: ${task_type}`,
+      event_payload: { task_type, source_feature, title },
+      ...actor, platform: 'omai',
+    }).catch(() => {});
+
     res.json({ success: true, task_id: result.insertId });
   } catch (err) {
     console.error('[TaskRunner] Create error:', err);
@@ -214,6 +235,25 @@ router.patch('/:id', requireAuth, requireRole(ADMIN_ROLES), async (req, res) => 
     params.push(taskId);
     await pool.query(`UPDATE omai_tasks SET ${sets.join(', ')} WHERE id = ?`, params);
 
+    // Publish status transition events
+    const status = req.body.status;
+    if (status && ['running', 'succeeded', 'failed', 'cancelled'].includes(status)) {
+      const eventMap = {
+        running: { type: 'task.started', sev: 'info' },
+        succeeded: { type: 'task.completed', sev: 'success' },
+        failed: { type: 'task.failed', sev: 'warning' },
+        cancelled: { type: 'task.cancelled', sev: 'info' },
+      };
+      const { type, sev } = eventMap[status];
+      const actor = getActor(req);
+      publishPlatformEvent({
+        event_type: type, category: 'task', severity: sev,
+        source_system: 'task_runner', source_ref_id: taskId,
+        title: `Task #${taskId} ${status}`,
+        ...actor, platform: 'omai',
+      }).catch(() => {});
+    }
+
     res.json({ success: true });
   } catch (err) {
     console.error('[TaskRunner] Update error:', err);
@@ -250,6 +290,13 @@ router.post('/:id/cancel', requireAuth, requireRole(ADMIN_ROLES), async (req, re
         `INSERT INTO omai_task_events (task_id, level, stage, message, detail_json, created_at) VALUES (?, 'info', 'system', ?, ?, UTC_TIMESTAMP())`,
         [taskId, `Cancelled by ${userName || 'unknown'}`, JSON.stringify({ cancelled_by: userId, cancelled_by_name: userName })]
       );
+      const actor = getActor(req);
+      publishPlatformEvent({
+        event_type: 'task.cancelled', category: 'task', severity: 'info',
+        source_system: 'task_runner', source_ref_id: taskId,
+        title: `Task #${taskId} cancelled`, message: `Cancelled by ${userName || 'unknown'}`,
+        ...actor, platform: 'omai',
+      }).catch(() => {});
       return res.json({ success: true, immediate: true, message: 'Task cancelled' });
     }
 
@@ -262,6 +309,14 @@ router.post('/:id/cancel', requireAuth, requireRole(ADMIN_ROLES), async (req, re
       `INSERT INTO omai_task_events (task_id, level, stage, message, detail_json, created_at) VALUES (?, 'info', 'system', ?, ?, UTC_TIMESTAMP())`,
       [taskId, `Cancellation requested by ${userName || 'unknown'}`, JSON.stringify({ cancelled_by: userId, cancelled_by_name: userName })]
     );
+
+    const actor = getActor(req);
+    publishPlatformEvent({
+      event_type: 'task.cancelled', category: 'task', severity: 'info',
+      source_system: 'task_runner', source_ref_id: taskId,
+      title: `Task #${taskId} cancellation requested`,
+      ...actor, platform: 'omai',
+    }).catch(() => {});
 
     res.json({ success: true, immediate: false, message: 'Cancellation requested — task will stop at next checkpoint' });
   } catch (err) {
@@ -296,6 +351,14 @@ router.post('/:id/run', requireAuth, requireRole(ADMIN_ROLES), async (req, res) 
        VALUES (?, 'info', 'system', ?, UTC_TIMESTAMP())`,
       [taskId, `Started by ${userName}`]
     );
+
+    const actor = getActor(req);
+    publishPlatformEvent({
+      event_type: 'task.started', category: 'task', severity: 'info',
+      source_system: 'task_runner', source_ref_id: taskId,
+      title: `Task #${taskId} started`, message: `Started by ${userName}`,
+      ...actor, platform: 'omai',
+    }).catch(() => {});
 
     res.json({ success: true, message: 'Task started' });
   } catch (err) {
@@ -334,6 +397,15 @@ router.post('/:id/retry', requireAuth, requireRole(ADMIN_ROLES), async (req, res
        VALUES (?, 'info', 'system', ?, UTC_TIMESTAMP())`,
       [taskId, `Retried as task #${result.insertId} by ${userName || 'unknown'}`]
     );
+
+    const actor = getActor(req);
+    publishPlatformEvent({
+      event_type: 'task.retry_queued', category: 'task', severity: 'info',
+      source_system: 'task_runner', source_ref_id: result.insertId,
+      title: `Task #${taskId} retried as #${result.insertId}`,
+      event_payload: { original_task_id: taskId },
+      ...actor, platform: 'omai',
+    }).catch(() => {});
 
     res.json({ success: true, new_task_id: result.insertId, message: `Retried as task #${result.insertId}` });
   } catch (err) {
@@ -376,6 +448,15 @@ router.patch('/:id/assign', requireAuth, requireRole(ADMIN_ROLES), async (req, r
        VALUES (?, 'info', 'system', ?, UTC_TIMESTAMP())`,
       [taskId, `Assigned to ${assignee_name} by ${userName}`]
     );
+
+    const actor = getActor(req);
+    publishPlatformEvent({
+      event_type: 'task.assigned', category: 'task', severity: 'info',
+      source_system: 'task_runner', source_ref_id: taskId,
+      title: `Task #${taskId} assigned to ${assignee_name}`,
+      event_payload: { assignee_name },
+      ...actor, platform: 'omai',
+    }).catch(() => {});
 
     res.json({ success: true, message: `Task assigned to ${assignee_name}` });
   } catch (err) {
