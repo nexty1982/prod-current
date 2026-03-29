@@ -270,6 +270,120 @@ router.post('/:id/cancel', requireAuth, requireRole(ADMIN_ROLES), async (req, re
   }
 });
 
+// ─── RUN a task (transition queued → running) ──────────────────────────────
+router.post('/:id/run', requireAuth, requireRole(ADMIN_ROLES), async (req, res) => {
+  try {
+    const pool = getAppPool();
+    const taskId = parseInt(req.params.id);
+    if (isNaN(taskId)) return res.status(400).json({ success: false, error: 'Invalid task ID' });
+
+    const [tasks] = await pool.query('SELECT status FROM omai_tasks WHERE id = ?', [taskId]);
+    if (!tasks.length) return res.status(404).json({ success: false, error: 'Task not found' });
+
+    const { status } = tasks[0];
+    if (status !== 'queued') {
+      return res.status(400).json({ success: false, error: `Cannot run task in '${status}' status — must be queued` });
+    }
+
+    const userName = req.session?.user?.username || req.user?.username || req.user?.email || 'unknown';
+
+    await pool.query(
+      `UPDATE omai_tasks SET status = 'running', started_at = UTC_TIMESTAMP(), last_heartbeat = UTC_TIMESTAMP() WHERE id = ?`,
+      [taskId]
+    );
+    await pool.query(
+      `INSERT INTO omai_task_events (task_id, level, stage, message, created_at)
+       VALUES (?, 'info', 'system', ?, UTC_TIMESTAMP())`,
+      [taskId, `Started by ${userName}`]
+    );
+
+    res.json({ success: true, message: 'Task started' });
+  } catch (err) {
+    console.error('[TaskRunner] Run error:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// ─── RETRY a failed/cancelled task (clone as new queued task) ──────────────
+router.post('/:id/retry', requireAuth, requireRole(ADMIN_ROLES), async (req, res) => {
+  try {
+    const pool = getAppPool();
+    const taskId = parseInt(req.params.id);
+    if (isNaN(taskId)) return res.status(400).json({ success: false, error: 'Invalid task ID' });
+
+    const [tasks] = await pool.query(
+      `SELECT task_type, source_feature, title, metadata_json, total_count FROM omai_tasks WHERE id = ?`,
+      [taskId]
+    );
+    if (!tasks.length) return res.status(404).json({ success: false, error: 'Task not found' });
+
+    const orig = tasks[0];
+    const userId = req.session?.user?.id || req.user?.id || null;
+    const userName = req.session?.user?.username || req.user?.username || req.user?.email || null;
+
+    const [result] = await pool.query(
+      `INSERT INTO omai_tasks (task_type, source_feature, title, status, created_by, created_by_name, created_at, total_count, metadata_json, message)
+       VALUES (?, ?, ?, 'queued', ?, ?, UTC_TIMESTAMP(), ?, ?, ?)`,
+      [orig.task_type, orig.source_feature, orig.title, userId, userName, orig.total_count || 0,
+       orig.metadata_json, `Retry of task #${taskId}`]
+    );
+
+    // Log event on original task
+    await pool.query(
+      `INSERT INTO omai_task_events (task_id, level, stage, message, created_at)
+       VALUES (?, 'info', 'system', ?, UTC_TIMESTAMP())`,
+      [taskId, `Retried as task #${result.insertId} by ${userName || 'unknown'}`]
+    );
+
+    res.json({ success: true, new_task_id: result.insertId, message: `Retried as task #${result.insertId}` });
+  } catch (err) {
+    console.error('[TaskRunner] Retry error:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// ─── ASSIGN a task to a user/agent ────────────────────────────────────────
+router.patch('/:id/assign', requireAuth, requireRole(ADMIN_ROLES), async (req, res) => {
+  try {
+    const pool = getAppPool();
+    const taskId = parseInt(req.params.id);
+    if (isNaN(taskId)) return res.status(400).json({ success: false, error: 'Invalid task ID' });
+
+    const { assignee_name } = req.body;
+    if (!assignee_name) return res.status(400).json({ success: false, error: 'assignee_name is required' });
+
+    const [tasks] = await pool.query('SELECT id FROM omai_tasks WHERE id = ?', [taskId]);
+    if (!tasks.length) return res.status(404).json({ success: false, error: 'Task not found' });
+
+    // Store assignment in metadata_json
+    const [current] = await pool.query('SELECT metadata_json FROM omai_tasks WHERE id = ?', [taskId]);
+    let metadata = {};
+    if (current[0]?.metadata_json) {
+      metadata = typeof current[0].metadata_json === 'string'
+        ? JSON.parse(current[0].metadata_json) : current[0].metadata_json;
+    }
+    metadata.assigned_to = assignee_name;
+    metadata.assigned_at = new Date().toISOString();
+
+    const userName = req.session?.user?.username || req.user?.username || req.user?.email || 'unknown';
+
+    await pool.query(
+      `UPDATE omai_tasks SET metadata_json = ?, last_heartbeat = UTC_TIMESTAMP() WHERE id = ?`,
+      [JSON.stringify(metadata), taskId]
+    );
+    await pool.query(
+      `INSERT INTO omai_task_events (task_id, level, stage, message, created_at)
+       VALUES (?, 'info', 'system', ?, UTC_TIMESTAMP())`,
+      [taskId, `Assigned to ${assignee_name} by ${userName}`]
+    );
+
+    res.json({ success: true, message: `Task assigned to ${assignee_name}` });
+  } catch (err) {
+    console.error('[TaskRunner] Assign error:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 // ─── ADD event to task log ──────────────────────────────────────────────────
 router.post('/:id/events', requireAuth, requireRole(ADMIN_ROLES), async (req, res) => {
   try {
