@@ -834,3 +834,304 @@ describe('Pilot Validation: Dashboard State Accuracy', () => {
     expect(ids).toContain('P7'); // repeated_corrections
   });
 });
+
+// ─── 11. Decoupled Trigger Model ────────────────────────────────────────────
+//
+// Tests for Prompt 025: autonomy triggers independently of release fingerprint
+
+describe('Decoupled Trigger Model — _describeAutonomyTrigger', () => {
+  // _describeAutonomyTrigger is a pure function — no mocks needed
+  const { _describeAutonomyTrigger } = require('../autoExecutionService');
+
+  test('returns initial_run when previous is null', () => {
+    expect(_describeAutonomyTrigger(null, 'p:1:ts|w:1:ts:0|l:0:null')).toBe('initial_run');
+  });
+
+  test('detects prompt state change', () => {
+    const prev = 'p:3:2026-01-01|w:1:2026-01-01:0|l:0:null';
+    const curr = 'p:4:2026-01-02|w:1:2026-01-01:0|l:0:null';
+    expect(_describeAutonomyTrigger(prev, curr)).toBe('prompt_state_changed');
+  });
+
+  test('detects workflow state change', () => {
+    const prev = 'p:3:2026-01-01|w:1:2026-01-01:0|l:0:null';
+    const curr = 'p:3:2026-01-01|w:1:2026-01-02:0|l:0:null';
+    expect(_describeAutonomyTrigger(prev, curr)).toBe('workflow_state_changed');
+  });
+
+  test('detects learning state change', () => {
+    const prev = 'p:3:2026-01-01|w:1:2026-01-01:0|l:0:null';
+    const curr = 'p:3:2026-01-01|w:1:2026-01-01:0|l:1:2026-01-02';
+    expect(_describeAutonomyTrigger(prev, curr)).toBe('learning_state_changed');
+  });
+
+  test('detects multiple simultaneous changes', () => {
+    const prev = 'p:3:2026-01-01|w:1:2026-01-01:0|l:0:null';
+    const curr = 'p:4:2026-01-02|w:2:2026-01-02:0|l:0:null';
+    const result = _describeAutonomyTrigger(prev, curr);
+    expect(result).toContain('prompt_state_changed');
+    expect(result).toContain('workflow_state_changed');
+  });
+
+  test('detects workflow pause count change', () => {
+    const prev = 'p:3:2026-01-01|w:1:2026-01-01:0|l:0:null';
+    const curr = 'p:3:2026-01-01|w:1:2026-01-01:1|l:0:null';
+    expect(_describeAutonomyTrigger(prev, curr)).toBe('workflow_state_changed');
+  });
+
+  test('returns unknown_change when fingerprints differ but no segment matches', () => {
+    // Shouldn't happen in practice, but tests robustness
+    expect(_describeAutonomyTrigger('x:1', 'x:2')).toBe('unknown_change');
+  });
+
+  test('identical fingerprints produce no trigger (should not be called)', () => {
+    const same = 'p:3:2026-01-01|w:1:2026-01-01:0|l:0:null';
+    // When identical, runOnce() skips — this function shouldn't be called.
+    // But if it were, it should report no changes.
+    expect(_describeAutonomyTrigger(same, same)).toBe('unknown_change');
+  });
+});
+
+describe('Decoupled Trigger Model — runOnce Integration', () => {
+  let mockQuery;
+  let autoExec;
+  let mockPolicyService;
+
+  beforeEach(() => {
+    jest.resetModules();
+
+    mockQuery = jest.fn();
+    const mockPool = { query: mockQuery };
+
+    jest.mock('../../config/db', () => ({
+      getAppPool: () => mockPool,
+    }));
+
+    // Default: mode OFF
+    mockPolicyService = {
+      getStatus: jest.fn().mockResolvedValue({ enabled: true, mode: 'SAFE_ADVANCE' }),
+      recordRun: jest.fn().mockResolvedValue(undefined),
+      hasChainStepFailure: jest.fn().mockResolvedValue(false),
+      evaluateEligibility: jest.fn().mockReturnValue({ eligible: false, failures: [] }),
+      MODE: { OFF: 'OFF' },
+    };
+    jest.mock('../autoExecutionPolicyService', () => mockPolicyService);
+
+    jest.mock('../decisionEngineService', () => ({
+      getRecommendations: jest.fn().mockResolvedValue({ actions: [] }),
+    }));
+
+    jest.mock('../autonomousAdvanceService', () => ({
+      advanceWorkflows: jest.fn().mockResolvedValue({
+        skipped: false,
+        mode: 'SAFE_ADVANCE',
+        workflows_inspected: 1,
+        actions_taken: [],
+        pauses: [],
+        errors: [],
+      }),
+    }));
+
+    autoExec = require('../autoExecutionService');
+    autoExec._resetFingerprints();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  // Helper: mock fingerprint queries (release + 3 autonomy queries)
+  function mockFingerprints(release, promptState, wfState, learnState) {
+    mockQuery
+      .mockResolvedValueOnce([[release]])       // _getRegistryFingerprint
+      .mockResolvedValueOnce([[promptState]])    // autonomy: prompt state
+      .mockResolvedValueOnce([[wfState]])        // autonomy: workflow state
+      .mockResolvedValueOnce([[learnState]]);    // autonomy: learning state
+  }
+
+  test('first run always triggers both release and autonomy', async () => {
+    mockFingerprints(
+      { cnt: 0, max_updated: null },
+      { cnt: 1, max_prompt_updated: '2026-01-01' },
+      { cnt: 1, max_wf_updated: '2026-01-01', paused_count: 0 },
+      { cnt: 0, max_learn_updated: null }
+    );
+
+    const result = await autoExec.runOnce();
+    expect(result.trigger).toBeDefined();
+    expect(result.trigger.release_changed).toBe(true);
+    expect(result.trigger.autonomy_changed).toBe(true);
+  });
+
+  test('skips both when nothing changes', async () => {
+    // First run — sets fingerprints
+    mockFingerprints(
+      { cnt: 0, max_updated: null },
+      { cnt: 1, max_prompt_updated: '2026-01-01' },
+      { cnt: 1, max_wf_updated: '2026-01-01', paused_count: 0 },
+      { cnt: 0, max_learn_updated: null }
+    );
+    await autoExec.runOnce();
+
+    // Second run — identical fingerprints
+    mockFingerprints(
+      { cnt: 0, max_updated: null },
+      { cnt: 1, max_prompt_updated: '2026-01-01' },
+      { cnt: 1, max_wf_updated: '2026-01-01', paused_count: 0 },
+      { cnt: 0, max_learn_updated: null }
+    );
+    const result = await autoExec.runOnce();
+    expect(result.skipped_reason).toContain('No state changes');
+  });
+
+  test('autonomy triggers when prompt state changes but release does not', async () => {
+    // First run
+    mockFingerprints(
+      { cnt: 0, max_updated: null },
+      { cnt: 2, max_prompt_updated: '2026-01-01' },
+      { cnt: 1, max_wf_updated: '2026-01-01', paused_count: 0 },
+      { cnt: 0, max_learn_updated: null }
+    );
+    await autoExec.runOnce();
+
+    // Second run — release unchanged, but prompt updated_at changed (evaluation completed)
+    mockFingerprints(
+      { cnt: 0, max_updated: null },  // release: same
+      { cnt: 2, max_prompt_updated: '2026-01-02' },  // prompt state: changed!
+      { cnt: 1, max_wf_updated: '2026-01-01', paused_count: 0 },
+      { cnt: 0, max_learn_updated: null }
+    );
+    const result = await autoExec.runOnce();
+
+    expect(result.trigger.release_changed).toBe(false);
+    expect(result.trigger.autonomy_changed).toBe(true);
+    expect(result.autonomy).toBeDefined();
+    expect(result.autonomy.trigger_source).toBe('prompt_state_changed');
+  });
+
+  test('autonomy triggers when workflow is resumed (pause count changes)', async () => {
+    // First run — workflow paused
+    mockFingerprints(
+      { cnt: 0, max_updated: null },
+      { cnt: 1, max_prompt_updated: '2026-01-01' },
+      { cnt: 1, max_wf_updated: '2026-01-01', paused_count: 1 },
+      { cnt: 0, max_learn_updated: null }
+    );
+    await autoExec.runOnce();
+
+    // Second run — workflow resumed (paused_count → 0, updated_at changed)
+    mockFingerprints(
+      { cnt: 0, max_updated: null },
+      { cnt: 1, max_prompt_updated: '2026-01-01' },
+      { cnt: 1, max_wf_updated: '2026-01-02', paused_count: 0 },
+      { cnt: 0, max_learn_updated: null }
+    );
+    const result = await autoExec.runOnce();
+
+    expect(result.trigger.release_changed).toBe(false);
+    expect(result.trigger.autonomy_changed).toBe(true);
+    expect(result.autonomy.trigger_source).toBe('workflow_state_changed');
+  });
+
+  test('autonomy triggers when learning conflict resolves', async () => {
+    // First run — active critical violation
+    mockFingerprints(
+      { cnt: 0, max_updated: null },
+      { cnt: 1, max_prompt_updated: '2026-01-01' },
+      { cnt: 1, max_wf_updated: '2026-01-01', paused_count: 0 },
+      { cnt: 1, max_learn_updated: '2026-01-01' }
+    );
+    await autoExec.runOnce();
+
+    // Second run — violation resolved (count → 0)
+    mockFingerprints(
+      { cnt: 0, max_updated: null },
+      { cnt: 1, max_prompt_updated: '2026-01-01' },
+      { cnt: 1, max_wf_updated: '2026-01-01', paused_count: 0 },
+      { cnt: 0, max_learn_updated: null }
+    );
+    const result = await autoExec.runOnce();
+
+    expect(result.trigger.autonomy_changed).toBe(true);
+    expect(result.autonomy.trigger_source).toBe('learning_state_changed');
+  });
+
+  test('release triggers without autonomy when only release-eligible changes', async () => {
+    // First run
+    mockFingerprints(
+      { cnt: 0, max_updated: null },
+      { cnt: 1, max_prompt_updated: '2026-01-01' },
+      { cnt: 1, max_wf_updated: '2026-01-01', paused_count: 0 },
+      { cnt: 0, max_learn_updated: null }
+    );
+    await autoExec.runOnce();
+
+    // Second run — release fingerprint changed, autonomy same
+    mockFingerprints(
+      { cnt: 1, max_updated: '2026-01-02' },  // release: changed
+      { cnt: 1, max_prompt_updated: '2026-01-01' },  // autonomy: same
+      { cnt: 1, max_wf_updated: '2026-01-01', paused_count: 0 },
+      { cnt: 0, max_learn_updated: null }
+    );
+    const result = await autoExec.runOnce();
+
+    expect(result.trigger.release_changed).toBe(true);
+    expect(result.trigger.autonomy_changed).toBe(false);
+    expect(result.autonomy).toBeUndefined();
+  });
+
+  test('duplicate trigger produces no duplicate action (idempotency)', async () => {
+    const advanceModule = require('../autonomousAdvanceService');
+
+    // First run
+    mockFingerprints(
+      { cnt: 0, max_updated: null },
+      { cnt: 1, max_prompt_updated: '2026-01-01' },
+      { cnt: 1, max_wf_updated: '2026-01-01', paused_count: 0 },
+      { cnt: 0, max_learn_updated: null }
+    );
+    await autoExec.runOnce();
+
+    // Same fingerprint → skip (not even called)
+    mockFingerprints(
+      { cnt: 0, max_updated: null },
+      { cnt: 1, max_prompt_updated: '2026-01-01' },
+      { cnt: 1, max_wf_updated: '2026-01-01', paused_count: 0 },
+      { cnt: 0, max_learn_updated: null }
+    );
+    await autoExec.runOnce();
+
+    // advanceWorkflows should only be called once (first run)
+    expect(advanceModule.advanceWorkflows).toHaveBeenCalledTimes(1);
+  });
+
+  test('disabled mode skips both subsystems', async () => {
+    mockPolicyService.getStatus.mockResolvedValue({ enabled: false, mode: 'OFF' });
+
+    // Fingerprints don't even get checked when disabled
+    const result = await autoExec.runOnce();
+    expect(result.skipped_reason).toContain('disabled');
+    expect(mockQuery).not.toHaveBeenCalled();
+  });
+
+  test('deterministic: same state produces same fingerprint', async () => {
+    const fp1State = { cnt: 3, max_prompt_updated: '2026-03-30 12:00:00' };
+    const fp2State = { cnt: 1, max_wf_updated: '2026-03-30 12:00:00', paused_count: 0 };
+    const fp3State = { cnt: 0, max_learn_updated: null };
+
+    // Run 1
+    mockFingerprints(
+      { cnt: 0, max_updated: null }, fp1State, fp2State, fp3State
+    );
+    await autoExec.runOnce();
+
+    // Run 2 — identical inputs
+    mockFingerprints(
+      { cnt: 0, max_updated: null }, fp1State, fp2State, fp3State
+    );
+    const result = await autoExec.runOnce();
+
+    // Should skip because fingerprint is identical
+    expect(result.skipped_reason).toBeDefined();
+  });
+});

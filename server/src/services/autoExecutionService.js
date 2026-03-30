@@ -37,7 +37,8 @@ const autonomousAdvance = require('./autonomousAdvanceService');
 let _running = false;
 let _timer = null;
 let _intervalMs = 30000; // 30 seconds default
-let _lastFingerprint = null; // { count, maxUpdated }
+let _lastFingerprint = null; // release-eligible fingerprint
+let _lastAutonomyFingerprint = null; // autonomy-relevant fingerprint (broader)
 let _skippedCycles = 0;
 
 // ─── Core: Execute a Single Release ───────────────────────────────────────
@@ -124,16 +125,97 @@ async function _getRegistryFingerprint() {
   return `${r.cnt}:${r.max_updated || 'null'}`;
 }
 
+// ─── Autonomy Change Detection ──────────────────────────────────────────
+//
+// Autonomy needs to trigger on a BROADER set of state changes than releases:
+//   - Prompt evaluation completion (evaluator_status changes)
+//   - Prompt verification (status → verified)
+//   - Workflow resume (autonomy_paused cleared)
+//   - Workflow activation (status → active)
+//   - Learning constraint changes (critical violations added/resolved)
+//
+// This fingerprint is checked INDEPENDENTLY of the release fingerprint.
+// Either fingerprint changing triggers its respective subsystem.
+
+/**
+ * Compute a fingerprint of all autonomy-relevant state.
+ * Covers: active workflow prompts, workflow pause/resume state, learning registry.
+ * Deterministic: same DB state → same fingerprint.
+ */
+async function _getAutonomyFingerprint() {
+  const pool = getAppPool();
+
+  // 1. Prompt state across active workflows (covers evaluation, verification, status changes)
+  const [promptState] = await pool.query(
+    `SELECT COUNT(*) as cnt,
+            MAX(p.updated_at) as max_prompt_updated
+     FROM prompt_workflow_steps s
+     JOIN prompt_workflows w ON s.workflow_id = w.id
+     LEFT JOIN om_prompt_registry p ON s.prompt_id = p.id
+     WHERE w.status = 'active'`
+  );
+
+  // 2. Workflow-level state (covers pause/resume, activation, manual_only changes)
+  const [wfState] = await pool.query(
+    `SELECT COUNT(*) as cnt,
+            MAX(updated_at) as max_wf_updated,
+            SUM(autonomy_paused) as paused_count
+     FROM prompt_workflows
+     WHERE status IN ('active', 'approved')`
+  );
+
+  // 3. Critical learning conflicts (covers new violations and resolutions)
+  const [learnState] = await pool.query(
+    `SELECT COUNT(*) as cnt,
+            MAX(updated_at) as max_learn_updated
+     FROM workflow_learning_registry
+     WHERE active = 1 AND severity = 'critical'
+       AND learning_type = 'violation_pattern'`
+  );
+
+  const p = promptState[0];
+  const w = wfState[0];
+  const l = learnState[0];
+
+  return `p:${p.cnt}:${p.max_prompt_updated || 'null'}|w:${w.cnt}:${w.max_wf_updated || 'null'}:${w.paused_count || 0}|l:${l.cnt}:${l.max_learn_updated || 'null'}`;
+}
+
+/**
+ * Describe WHAT changed between two autonomy fingerprints for traceability.
+ * Parses the fingerprint format: "p:CNT:TS|w:CNT:TS:PAUSED|l:CNT:TS"
+ */
+function _describeAutonomyTrigger(prev, curr) {
+  if (!prev) return 'initial_run';
+  const sources = [];
+  const parse = (fp) => {
+    const parts = {};
+    for (const seg of (fp || '').split('|')) {
+      const [key, ...rest] = seg.split(':');
+      parts[key] = rest.join(':');
+    }
+    return parts;
+  };
+  const p = parse(prev);
+  const c = parse(curr);
+  if (p.p !== c.p) sources.push('prompt_state_changed');
+  if (p.w !== c.w) sources.push('workflow_state_changed');
+  if (p.l !== c.l) sources.push('learning_state_changed');
+  return sources.length > 0 ? sources.join(',') : 'unknown_change';
+}
+
 // ─── Core: Single Execution Run ───────────────────────────────────────────
 
 /**
  * Run a single auto-execution cycle:
  *   1. Check if enabled
- *   2. Check change fingerprint (skip if unchanged)
- *   3. Get recommendations from decision engine
- *   4. Evaluate eligibility for each
- *   5. Execute eligible actions
- *   6. Log results
+ *   2. Compute dual fingerprints (release + autonomy)
+ *   3. If release fingerprint changed → run release pipeline
+ *   4. If autonomy fingerprint changed → run autonomous advancement
+ *   5. Log results
+ *
+ * The two subsystems are DECOUPLED: autonomy triggers independently
+ * of release-eligible prompt changes, responding to evaluation completion,
+ * verification, workflow resume, dependency resolution, and learning updates.
  *
  * Returns execution summary.
  */
@@ -169,135 +251,141 @@ async function runOnce() {
       return results;
     }
 
-    // 2. Change detection — skip expensive recommendation pipeline if nothing changed
-    const fingerprint = await _getRegistryFingerprint();
-    if (fingerprint === _lastFingerprint) {
+    // 2. Dual change detection — release and autonomy are independent
+    const releaseFingerprint = await _getRegistryFingerprint();
+    const autonomyFingerprint = await _getAutonomyFingerprint();
+
+    const releaseChanged = releaseFingerprint !== _lastFingerprint;
+    const autonomyChanged = autonomyFingerprint !== _lastAutonomyFingerprint;
+
+    if (!releaseChanged && !autonomyChanged) {
       _skippedCycles++;
-      results.skipped_reason = `No registry changes (skipped ${_skippedCycles} consecutive cycles)`;
+      results.skipped_reason = `No state changes (skipped ${_skippedCycles} consecutive cycles)`;
       results.duration_ms = Date.now() - startTime;
       // Don't record run to avoid writing settings on every no-op cycle
       return results;
     }
     _skippedCycles = 0;
 
-    // 3. Get recommendations from decision engine
-    const recommendations = await decisionEngine.getRecommendations();
-    const actionable = recommendations.actions || [];
+    results.trigger = {
+      release_changed: releaseChanged,
+      autonomy_changed: autonomyChanged,
+    };
 
-    // 4. Filter to RELEASE_NOW only (other actions are never auto-executed)
-    const releaseActions = actionable.filter(a => a.action === 'RELEASE_NOW');
+    // 3. Release pipeline — only if release-eligible prompts changed
+    if (releaseChanged) {
+      const recommendations = await decisionEngine.getRecommendations();
+      const actionable = recommendations.actions || [];
+      const releaseActions = actionable.filter(a => a.action === 'RELEASE_NOW');
+      const pool = getAppPool();
 
-    // 4. Evaluate each for eligibility
-    const pool = getAppPool();
+      for (const rec of releaseActions) {
+        results.evaluated++;
 
-    for (const rec of releaseActions) {
-      results.evaluated++;
-
-      // Fetch full prompt data for eligibility check
-      const [promptRows] = await pool.query(
-        `SELECT * FROM om_prompt_registry WHERE id = ?`,
-        [rec.target.prompt_id]
-      );
-
-      if (promptRows.length === 0) {
-        results.errors.push({
-          prompt_id: rec.target.prompt_id,
-          error: 'Prompt not found during eligibility check',
-        });
-        continue;
-      }
-
-      const prompt = promptRows[0];
-
-      // Enrich with chain failure check
-      prompt._has_chain_failure = await policyService.hasChainStepFailure(prompt);
-      prompt._auto_execute_excluded = false; // Future: check per-prompt flag
-
-      // Evaluate eligibility
-      const eligibility = policyService.evaluateEligibility(rec, prompt, status.mode);
-
-      if (!eligibility.eligible) {
-        results.skipped.push({
-          prompt_id: prompt.id,
-          title: prompt.title,
-          failures: eligibility.failures,
-        });
-        continue;
-      }
-
-      results.eligible++;
-
-      // 5. Execute the release
-      try {
-        const releaseResult = await releasePrompt(
-          prompt.id,
-          `Auto-executed: ${rec.reason}`
+        const [promptRows] = await pool.query(
+          `SELECT * FROM om_prompt_registry WHERE id = ?`,
+          [rec.target.prompt_id]
         );
 
-        if (releaseResult.success) {
-          const entry = {
+        if (promptRows.length === 0) {
+          results.errors.push({
+            prompt_id: rec.target.prompt_id,
+            error: 'Prompt not found during eligibility check',
+          });
+          continue;
+        }
+
+        const prompt = promptRows[0];
+        prompt._has_chain_failure = await policyService.hasChainStepFailure(prompt);
+        prompt._auto_execute_excluded = false;
+
+        const eligibility = policyService.evaluateEligibility(rec, prompt, status.mode);
+
+        if (!eligibility.eligible) {
+          results.skipped.push({
             prompt_id: prompt.id,
             title: prompt.title,
-            component: prompt.component,
-            action: rec.action,
-            rule_id: rec.rule_id,
-            reason: rec.reason,
-            policy_mode: status.mode,
-            release_result: releaseResult,
-            eligibility_passed: eligibility.passed_count,
-            eligibility_total: eligibility.total_rules,
-          };
-          results.executed.push(entry);
+            failures: eligibility.failures,
+          });
+          continue;
+        }
 
-          // Audit log
-          await logExecution(entry, 'SUCCESS');
-        } else {
+        results.eligible++;
+
+        try {
+          const releaseResult = await releasePrompt(
+            prompt.id,
+            `Auto-executed: ${rec.reason}`
+          );
+
+          if (releaseResult.success) {
+            const entry = {
+              prompt_id: prompt.id,
+              title: prompt.title,
+              component: prompt.component,
+              action: rec.action,
+              rule_id: rec.rule_id,
+              reason: rec.reason,
+              policy_mode: status.mode,
+              release_result: releaseResult,
+              eligibility_passed: eligibility.passed_count,
+              eligibility_total: eligibility.total_rules,
+            };
+            results.executed.push(entry);
+            await logExecution(entry, 'SUCCESS');
+          } else {
+            const errorEntry = {
+              prompt_id: prompt.id,
+              title: prompt.title,
+              error: releaseResult.error,
+              action: rec.action,
+            };
+            results.errors.push(errorEntry);
+            await logExecution(errorEntry, 'FAILED');
+          }
+        } catch (execErr) {
           const errorEntry = {
             prompt_id: prompt.id,
             title: prompt.title,
-            error: releaseResult.error,
+            error: execErr.message,
             action: rec.action,
           };
           results.errors.push(errorEntry);
-          await logExecution(errorEntry, 'FAILED');
+          await logExecution(errorEntry, 'ERROR');
         }
-      } catch (execErr) {
-        const errorEntry = {
-          prompt_id: prompt.id,
-          title: prompt.title,
-          error: execErr.message,
-          action: rec.action,
-        };
-        results.errors.push(errorEntry);
-        await logExecution(errorEntry, 'ERROR');
       }
+
+      _lastFingerprint = releaseFingerprint;
     }
 
-    // 6. Autonomous advancement (if mode > RELEASE_ONLY)
-    try {
-      const advanceResult = await autonomousAdvance.advanceWorkflows();
-      if (!advanceResult.skipped) {
-        results.autonomy = {
-          mode: advanceResult.mode,
-          workflows_inspected: advanceResult.workflows_inspected,
-          actions_taken: advanceResult.actions_taken.length,
-          pauses: advanceResult.pauses.length,
-          errors: advanceResult.errors.length,
-        };
-        if (advanceResult.actions_taken.length > 0) {
-          results.autonomy.details = advanceResult.actions_taken;
+    // 4. Autonomous advancement — independent of release, triggered by broader state changes
+    if (autonomyChanged) {
+      try {
+        const advanceResult = await autonomousAdvance.advanceWorkflows();
+        if (!advanceResult.skipped) {
+          results.autonomy = {
+            mode: advanceResult.mode,
+            trigger: 'state_change',
+            trigger_source: _describeAutonomyTrigger(_lastAutonomyFingerprint, autonomyFingerprint),
+            workflows_inspected: advanceResult.workflows_inspected,
+            actions_taken: advanceResult.actions_taken.length,
+            pauses: advanceResult.pauses.length,
+            errors: advanceResult.errors.length,
+          };
+          if (advanceResult.actions_taken.length > 0) {
+            results.autonomy.details = advanceResult.actions_taken;
+          }
         }
+      } catch (advErr) {
+        results.autonomy_error = advErr.message;
+        console.error('[AutoExecution] Autonomy advance error:', advErr.message);
       }
-    } catch (advErr) {
-      results.autonomy_error = advErr.message;
-      console.error('[AutoExecution] Autonomy advance error:', advErr.message);
+
+      _lastAutonomyFingerprint = autonomyFingerprint;
     }
 
     results.duration_ms = Date.now() - startTime;
     await policyService.recordRun(results);
-
-    // Update fingerprint after successful run
-    _lastFingerprint = await _getRegistryFingerprint();
 
     return results;
 
@@ -428,4 +516,10 @@ module.exports = {
   stop,
   isLoopRunning,
   isExecuting,
+  // Exposed for testing
+  _getRegistryFingerprint,
+  _getAutonomyFingerprint,
+  _describeAutonomyTrigger,
+  // For test reset
+  _resetFingerprints: () => { _lastFingerprint = null; _lastAutonomyFingerprint = null; _skippedCycles = 0; },
 };
