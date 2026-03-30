@@ -1,4 +1,5 @@
 import { Box, Stack, Typography, Grid, Container, Divider } from '@mui/material';
+import EditableText from '@/components/frontend-pages/shared/EditableText';
 
 import Icon1 from '@/assets/images/svgs/icon-briefcase.svg';
 import FeatureApp from '@/assets/images/frontend-pages/homepage/feature-apps.png';
@@ -27,7 +28,9 @@ const Process = () => {
               fontWeight="700"
               mt={5}
             >
-              We will provide the initial record intake and provide you the secure access to maintain your churches records.
+              <EditableText contentKey="about.process.heading" multiline>
+                We will provide the initial record intake and provide you the secure access to maintain your churches records.
+              </EditableText>
             </Typography>
           </Grid>
         </Grid>
@@ -46,10 +49,14 @@ const Process = () => {
                     <img src={Icon1} alt="icon1" width={40} height={40} />
                   </Box>
                   <Typography variant="h6" fontWeight={700}>
-                    For Orthodox Christian churches, the platform is fully equipped with guidelines established by the OCA.
+                    <EditableText contentKey="about.process.card1.title" multiline>
+                      For Orthodox Christian churches, the platform is fully equipped with guidelines established by the OCA.
+                    </EditableText>
                   </Typography>
                   <Typography variant="body1">
-                    Multiple ways to update and add new records, even using your smart phone / tablet.
+                    <EditableText contentKey="about.process.card1.desc" multiline>
+                      Multiple ways to update and add new records, even using your smart phone / tablet.
+                    </EditableText>
                   </Typography>
                 </Stack>
               </Box>
@@ -71,11 +78,14 @@ const Process = () => {
               <Box px="20px" pt="26px" pb="20px">
                 <Stack direction="column" spacing={2} textAlign="center">
                   <Typography variant="h6" fontWeight={700} px={1} lineHeight={1.4}>
-                    We are dynamic, if you have an idea we will consider it 
+                    <EditableText contentKey="about.process.card2.title" multiline>
+                      We are dynamic, if you have an idea we will consider it
+                    </EditableText>
                   </Typography>
                   <Typography variant="body1">
-                    {' '}
-                    No constant back and forth, when we commit we deliver faster than Amazon
+                    <EditableText contentKey="about.process.card2.desc" multiline>
+                      No constant back and forth, when we commit we deliver faster than Amazon
+                    </EditableText>
                   </Typography>
                 </Stack>
               </Box>
@@ -98,11 +108,14 @@ const Process = () => {
                     <img src={IconBubble} alt="icon1" width={40} height={40} />
                   </Box>
                   <Typography variant="h6" fontWeight={700}>
-                    Continual updates and features
+                    <EditableText contentKey="about.process.card3.title">
+                      Continual updates and features
+                    </EditableText>
                   </Typography>
                   <Typography variant="body1">
-                    {' '}
-                    You make updates at your pace
+                    <EditableText contentKey="about.process.card3.desc">
+                      You make updates at your pace
+                    </EditableText>
                   </Typography>
                 </Stack>
               </Box>

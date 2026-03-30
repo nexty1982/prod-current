@@ -874,6 +874,9 @@ console.log('✅ [Server] Mounted records-inspector, seed-records, om-seedlings,
 // MIGRATED TO OMAI: console.log('✅ [Server] Mounted /api/om-daily routes');
 app.use('/api/prompt-plans', promptPlansRouter); // Prompt Plans (AI orchestration)
 console.log('✅ [Server] Mounted /api/prompt-plans routes (AI Prompt Plans)');
+const promptRegistryRouter = require('./api/prompts');
+app.use('/api/prompts', promptRegistryRouter); // Prompt Workflow Registry
+console.log('✅ [Server] Mounted /api/prompts routes (Prompt Workflow Registry)');
 app.use('/api/page-content', pageContentRouter); // Page Content CMS
 console.log('✅ [Server] Mounted /api/page-content routes (Page Content CMS)');
 const pageContentBuildsRouter = require('./routes/page-content-builds');
