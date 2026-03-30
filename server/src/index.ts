@@ -227,6 +227,7 @@ const systemStatusRouter = require('./api/systemStatus');
 const dailyTasksRouter = require('./api/dailyTasks');
 // MIGRATED TO OMAI: const omDailyRouter = require('./routes/om-daily');
 const promptPlansRouter = require('./routes/prompt-plans');
+const workflowLearningRouter = require('./api/workflowLearning');
 const pageContentRouter = require('./routes/page-content');
 const snapshotsRouter = require('./routes/snapshots');
 const crmRouter = require('./routes/crm');
@@ -853,6 +854,8 @@ console.log('✅ [Server] Mounted records-inspector, seed-records, record-wizard
 // MIGRATED TO OMAI: console.log('✅ [Server] Mounted /api/om-daily routes');
 app.use('/api/prompt-plans', promptPlansRouter); // Prompt Plans (AI orchestration)
 console.log('✅ [Server] Mounted /api/prompt-plans routes (AI Prompt Plans)');
+app.use('/api/learning', workflowLearningRouter); // Cross-Workflow Learning Engine
+console.log('✅ [Server] Mounted /api/learning routes (Learning Engine)');
 app.use('/api/page-content', pageContentRouter); // Page Content CMS
 console.log('✅ [Server] Mounted /api/page-content routes (Page Content CMS)');
 const pageContentBuildsRouter = require('./routes/page-content-builds');
