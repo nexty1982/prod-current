@@ -12,7 +12,7 @@ const DatabaseService = require('../../services/databaseService');
 // GET /api/admin/users - Get all users with optional filters
 router.get('/', requireRole(['super_admin', 'admin']), async (req, res) => {
   try {
-    const { search, status, limit = 100, offset = 0 } = req.query;
+    const { search, status, role, limit = 100, offset = 0 } = req.query;
     
     // Build the query
     let query = `
@@ -48,15 +48,23 @@ router.get('/', requireRole(['super_admin', 'admin']), async (req, res) => {
     
     // Apply search filter
     if (search) {
-      query += ` AND (u.email LIKE ? OR u.full_name LIKE ?)`;
-      params.push(`%${search}%`, `%${search}%`);
+      query += ` AND (u.email LIKE ? OR u.full_name LIKE ? OR CONCAT(u.first_name, ' ', u.last_name) LIKE ?)`;
+      params.push(`%${search}%`, `%${search}%`, `%${search}%`);
     }
-    
+
+    // Apply role filter
+    if (role) {
+      query += ` AND u.role = ?`;
+      params.push(role);
+    }
+
     // Apply status filter
     if (status === 'locked') {
       query += ` AND u.is_locked = 1`;
     } else if (status === 'active') {
       query += ` AND (u.is_locked = 0 OR u.is_locked IS NULL)`;
+    } else if (status === 'inactive') {
+      query += ` AND u.is_active = 0`;
     }
     
     // Order by email
@@ -79,14 +87,21 @@ router.get('/', requireRole(['super_admin', 'admin']), async (req, res) => {
     const countParams = [];
     
     if (search) {
-      countQuery += ` AND (u.email LIKE ? OR u.full_name LIKE ?)`;
-      countParams.push(`%${search}%`, `%${search}%`);
+      countQuery += ` AND (u.email LIKE ? OR u.full_name LIKE ? OR CONCAT(u.first_name, ' ', u.last_name) LIKE ?)`;
+      countParams.push(`%${search}%`, `%${search}%`, `%${search}%`);
     }
-    
+
+    if (role) {
+      countQuery += ` AND u.role = ?`;
+      countParams.push(role);
+    }
+
     if (status === 'locked') {
       countQuery += ` AND u.is_locked = 1`;
     } else if (status === 'active') {
       countQuery += ` AND (u.is_locked = 0 OR u.is_locked IS NULL)`;
+    } else if (status === 'inactive') {
+      countQuery += ` AND u.is_active = 0`;
     }
     
     const countResult = await DatabaseService.queryPlatform(countQuery, countParams);
