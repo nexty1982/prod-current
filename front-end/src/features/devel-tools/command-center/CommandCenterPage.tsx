@@ -56,6 +56,7 @@ import {
 import PageContainer from '@/shared/ui/PageContainer';
 import Breadcrumb from '@/layouts/full/shared/breadcrumb/Breadcrumb';
 import { apiClient } from '@/api/utils/axiosInstance';
+import { CLASSIFICATION, SECTION } from '@/theme/adminTokens';
 
 // ─── Types ─────────────────────────────────────────────────────────
 
@@ -163,9 +164,9 @@ const CLASSIFICATION_CONFIG: Record<Classification, { label: string; color: 'err
 };
 
 const SEVERITY_COLOR: Record<Severity, string> = {
-  critical: '#d32f2f',
-  warning: '#ed6c02',
-  info: '#757575',
+  critical: '#DC2626',
+  warning: '#D97706',
+  info: '#6B7280',
 };
 
 function formatTime(ts: string) {
@@ -187,14 +188,21 @@ function formatTime(ts: string) {
 function ClassBadge({ classification }: { classification: Classification }) {
   const cfg = CLASSIFICATION_CONFIG[classification];
   const Icon = cfg.icon;
+  const tokens = CLASSIFICATION[classification] || CLASSIFICATION.monitor;
   return (
     <Chip
       icon={<Icon size={14} />}
       label={cfg.label}
-      color={cfg.color}
       size="small"
-      variant="filled"
-      sx={{ fontWeight: 700, fontSize: '0.7rem', letterSpacing: 0.5 }}
+      sx={{
+        fontWeight: 700,
+        fontSize: '0.7rem',
+        letterSpacing: 0.5,
+        backgroundColor: tokens.chip.bg,
+        color: tokens.chip.text,
+        border: `1px solid ${tokens.border}`,
+        '& .MuiChip-icon': { color: tokens.chip.text },
+      }}
     />
   );
 }
@@ -242,11 +250,11 @@ function BlockedFrontiersPanel({
   }
 
   return (
-    <Paper sx={{ p: 0, mb: 2, overflow: 'hidden' }}>
-      <Box sx={{ px: 2, py: 1.5, bgcolor: alpha(theme.palette.error.main, 0.08) }}>
+    <Paper sx={{ p: 0, mb: 3, overflow: 'hidden', borderColor: CLASSIFICATION.action_required.border }}>
+      <Box sx={{ px: 2, py: 1.5, bgcolor: CLASSIFICATION.action_required.bg }}>
         <Stack direction="row" alignItems="center" spacing={1}>
-          <IconAlertTriangle size={18} color={theme.palette.error.main} />
-          <Typography variant="subtitle1" fontWeight={700}>
+          <IconAlertTriangle size={18} color={CLASSIFICATION.action_required.accent} />
+          <Typography variant="subtitle1" fontWeight={700} color={CLASSIFICATION.action_required.text}>
             Blocked Steps / Frontiers ({frontiers.length})
           </Typography>
         </Stack>
@@ -258,7 +266,7 @@ function BlockedFrontiersPanel({
             px: 2,
             py: 1.5,
             borderTop: i > 0 ? `1px solid ${theme.palette.divider}` : undefined,
-            '&:hover': { bgcolor: alpha(theme.palette.primary.main, 0.02) },
+            '&:hover': { bgcolor: theme.palette.grey[100] },
           }}
         >
           <Stack direction="row" spacing={1.5} alignItems="flex-start">
@@ -343,7 +351,7 @@ function WorkflowRow({
           px: 2,
           py: 1.5,
           cursor: 'pointer',
-          '&:hover': { bgcolor: alpha(theme.palette.primary.main, 0.02) },
+          '&:hover': { bgcolor: theme.palette.grey[100] },
         }}
         onClick={() => setExpanded(!expanded)}
       >
@@ -411,7 +419,7 @@ function WorkflowRow({
       </Box>
       <Collapse in={expanded}>
         <Divider />
-        <Box sx={{ px: 2, py: 1, bgcolor: alpha(theme.palette.background.default, 0.5) }}>
+        <Box sx={{ px: 2, py: 1, bgcolor: theme.palette.grey[100] }}>
           {wf.autonomy_paused && wf.autonomy_pause_reason && (
             <Typography variant="caption" color="warning.main" display="block" sx={{ mb: 1 }}>
               Why paused: {wf.autonomy_pause_reason}
@@ -465,7 +473,7 @@ function ReadyRow({ item, onRelease }: { item: ReadyItem; onRelease: (id: number
         px: 2,
         py: 1,
         borderBottom: `1px solid ${theme.palette.divider}`,
-        '&:hover': { bgcolor: alpha(theme.palette.primary.main, 0.02) },
+        '&:hover': { bgcolor: theme.palette.grey[100] },
       }}
     >
       <ClassBadge classification={item.classification} />
@@ -627,7 +635,7 @@ function ActivityStream({ events }: { events: ActivityEvent[] }) {
             px: 2,
             py: 0.75,
             borderBottom: `1px solid ${theme.palette.divider}`,
-            bgcolor: e.importance === 'high' ? alpha(theme.palette.warning.main, 0.04) : 'transparent',
+            bgcolor: e.importance === 'high' ? CLASSIFICATION.monitor.bg : 'transparent',
           }}
         >
           <Stack direction="row" spacing={1} alignItems="center">
@@ -694,11 +702,11 @@ function ProgressionPanel() {
 
   return (
     <Paper sx={{ mb: 2, overflow: 'hidden' }}>
-      <Box sx={{ px: 2, py: 1.5, bgcolor: alpha(theme.palette.info.main, 0.06) }}>
+      <Box sx={{ px: 2, py: 1.5, bgcolor: CLASSIFICATION.ready.bg }}>
         <Stack direction="row" alignItems="center" justifyContent="space-between">
           <Stack direction="row" alignItems="center" spacing={1}>
-            <IconArrowRight size={16} color={theme.palette.info.main} />
-            <Typography variant="subtitle2" fontWeight={700}>Progression Pipeline</Typography>
+            <IconArrowRight size={16} color={CLASSIFICATION.ready.accent} />
+            <Typography variant="subtitle2" fontWeight={700} color="text.primary">Progression Pipeline</Typography>
           </Stack>
           <Tooltip title="Run progression cycle">
             <span>
@@ -792,7 +800,7 @@ const CommandCenterPage: React.FC = () => {
     try {
       setLoading(true);
       const res = await apiClient.get('/workflows/dashboard');
-      setData(res.data);
+      setData(res as any);
       setError(null);
     } catch (err: any) {
       setError(err.message || 'Failed to load dashboard');
@@ -903,10 +911,16 @@ const CommandCenterPage: React.FC = () => {
 
               {/* ACTION REQUIRED workflows */}
               {actionRequired.length > 0 && (
-                <Box sx={{ mb: 2 }}>
-                  <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1 }}>
-                    <IconAlertCircle size={16} color={theme.palette.error.main} />
-                    <Typography variant="subtitle2" color="error" fontWeight={700}>
+                <Box sx={{
+                  mb: 3,
+                  borderLeft: `${SECTION.accentWidth}px solid ${CLASSIFICATION.action_required.accent}`,
+                  borderRadius: '0 12px 12px 0',
+                  bgcolor: CLASSIFICATION.action_required.bg,
+                  p: 2,
+                }}>
+                  <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1.5 }}>
+                    <IconAlertCircle size={18} color={CLASSIFICATION.action_required.accent} />
+                    <Typography variant="subtitle1" sx={{ color: CLASSIFICATION.action_required.text, fontWeight: 700 }}>
                       ACTION REQUIRED ({actionRequired.length})
                     </Typography>
                   </Stack>
@@ -918,10 +932,16 @@ const CommandCenterPage: React.FC = () => {
 
               {/* MONITOR workflows */}
               {monitored.length > 0 && (
-                <Box sx={{ mb: 2 }}>
-                  <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1 }}>
-                    <IconEye size={16} color={theme.palette.warning.main} />
-                    <Typography variant="subtitle2" color="warning.main" fontWeight={700}>
+                <Box sx={{
+                  mb: 3,
+                  borderLeft: `${SECTION.accentWidth}px solid ${CLASSIFICATION.monitor.accent}`,
+                  borderRadius: '0 12px 12px 0',
+                  bgcolor: CLASSIFICATION.monitor.bg,
+                  p: 2,
+                }}>
+                  <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1.5 }}>
+                    <IconEye size={18} color={CLASSIFICATION.monitor.accent} />
+                    <Typography variant="subtitle1" sx={{ color: CLASSIFICATION.monitor.text, fontWeight: 700 }}>
                       MONITOR ({monitored.length})
                     </Typography>
                   </Stack>
@@ -933,7 +953,13 @@ const CommandCenterPage: React.FC = () => {
 
               {/* SAFE TO IGNORE — collapsed by default */}
               {safeToIgnore.length > 0 && (
-                <Box sx={{ mb: 2 }}>
+                <Box sx={{
+                  mb: 3,
+                  borderLeft: `${SECTION.accentWidth}px solid ${CLASSIFICATION.safe_to_ignore.accent}`,
+                  borderRadius: '0 12px 12px 0',
+                  bgcolor: CLASSIFICATION.safe_to_ignore.bg,
+                  p: 2,
+                }}>
                   <Stack
                     direction="row"
                     alignItems="center"
@@ -942,8 +968,8 @@ const CommandCenterPage: React.FC = () => {
                     onClick={() => setSafeCollapsed(!safeCollapsed)}
                   >
                     {safeCollapsed ? <IconChevronRight size={16} /> : <IconChevronDown size={16} />}
-                    <IconShieldCheck size={16} color={theme.palette.success.main} />
-                    <Typography variant="subtitle2" color="success.main" fontWeight={700}>
+                    <IconShieldCheck size={18} color={CLASSIFICATION.safe_to_ignore.accent} />
+                    <Typography variant="subtitle1" sx={{ color: CLASSIFICATION.safe_to_ignore.text, fontWeight: 700 }}>
                       SAFE TO IGNORE ({safeToIgnore.length})
                     </Typography>
                   </Stack>
@@ -976,7 +1002,7 @@ const CommandCenterPage: React.FC = () => {
               {/* Exceptions */}
               {data.exceptions.length > 0 && (
                 <Paper sx={{ mb: 2, overflow: 'hidden' }}>
-                  <Box sx={{ px: 2, py: 1.5, bgcolor: alpha(theme.palette.warning.main, 0.06) }}>
+                  <Box sx={{ px: 2, py: 1.5, bgcolor: CLASSIFICATION.monitor.bg }}>
                     <Stack direction="row" alignItems="center" spacing={1}>
                       <IconAlertTriangle size={16} color={theme.palette.warning.main} />
                       <Typography variant="subtitle2" fontWeight={700}>
