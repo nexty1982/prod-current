@@ -106,6 +106,7 @@ function modePermitsAction(currentMode, actionType) {
 // │G10 │ workflow not autonomy_paused          │ operator paused autonomy on this workflow │
 // │G11 │ no unresolved learning conflicts      │ active critical violation for component   │
 // │G12 │ agent result is final/selected        │ multi-agent selection not complete        │
+// │G13 │ release_mode permits auto              │ release_mode is manual                   │
 // └────┴───────────────────────────────────────┴──────────────────────────────────────────┘
 
 const SAFETY_GATES = [
@@ -168,6 +169,11 @@ const SAFETY_GATES = [
     id: 'G12', name: 'agent_result_final',
     test: (ctx) => ctx.agentResultFinal !== false,
     reason: () => 'Multi-agent selection not yet complete',
+  },
+  {
+    id: 'G13', name: 'release_mode_permits_auto',
+    test: (ctx) => ctx.prompt.release_mode !== 'manual',
+    reason: () => 'Prompt release_mode is manual — operator must release manually',
   },
 ];
 
@@ -418,7 +424,7 @@ async function logAutonomousAction(action, details, level = 'SUCCESS') {
   const message = level === 'SUCCESS'
     ? `Autonomous ${action}: ${details.target_title || details.target_id} — mode ${details.mode}`
     : level === 'PAUSED'
-    ? `Autonomy PAUSED on ${details.target_title || details.target_id}: ${details.pause_reason}`
+    ? `Autonomy PAUSED on ${details.step_title || details.target_title || details.target_id}: ${details.reason || details.pause_reason}`
     : level === 'BLOCKED'
     ? `Autonomy BLOCKED: ${details.block_reason}`
     : `Autonomy ERROR: ${details.error}`;

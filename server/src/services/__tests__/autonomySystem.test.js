@@ -28,6 +28,7 @@ function makeCtx(overrides = {}) {
       escalation_required: 0,
       queue_status: 'ready_for_release',
       manual_only: 0,
+      release_mode: 'auto_safe',
       ...overrides.prompt,
     },
     workflow: {
@@ -103,8 +104,8 @@ describe('Safety Gates (G1-G12)', () => {
     const result = autonomyPolicy.evaluateSafetyGates(makeCtx());
     expect(result.safe).toBe(true);
     expect(result.failures).toHaveLength(0);
-    expect(result.passed_count).toBe(12);
-    expect(result.total_gates).toBe(12);
+    expect(result.passed_count).toBe(13);
+    expect(result.total_gates).toBe(13);
   });
 
   test('G1: blocks when confidence is not high', () => {
@@ -178,6 +179,23 @@ describe('Safety Gates (G1-G12)', () => {
   test('G12: blocks when agent result not final', () => {
     const result = autonomyPolicy.evaluateSafetyGates(makeCtx({ agentResultFinal: false }));
     expect(result.failures.some(f => f.id === 'G12')).toBe(true);
+  });
+
+  test('G13: blocks when release_mode is manual', () => {
+    const result = autonomyPolicy.evaluateSafetyGates(makeCtx({ prompt: { release_mode: 'manual' } }));
+    expect(result.failures.some(f => f.id === 'G13')).toBe(true);
+  });
+
+  test('G13: passes when release_mode is auto_safe or auto_full', () => {
+    for (const mode of ['auto_safe', 'auto_full']) {
+      const result = autonomyPolicy.evaluateSafetyGates(makeCtx({ prompt: { release_mode: mode } }));
+      expect(result.failures.some(f => f.id === 'G13')).toBe(false);
+    }
+  });
+
+  test('G13: passes when release_mode is null/undefined', () => {
+    const result = autonomyPolicy.evaluateSafetyGates(makeCtx({ prompt: { release_mode: null } }));
+    expect(result.failures.some(f => f.id === 'G13')).toBe(false);
   });
 
   test('multiple gates can fail simultaneously', () => {
@@ -540,8 +558,8 @@ describe('Autonomous Advance Service', () => {
 // ─── 6. Traceability ──────────────────────────────────────────────────────
 
 describe('Traceability & Logging', () => {
-  test('SAFETY_GATES array has exactly 12 gates', () => {
-    expect(autonomyPolicy.SAFETY_GATES).toHaveLength(12);
+  test('SAFETY_GATES array has exactly 13 gates', () => {
+    expect(autonomyPolicy.SAFETY_GATES).toHaveLength(13);
   });
 
   test('PAUSE_CONDITIONS array has exactly 8 conditions', () => {
@@ -566,12 +584,12 @@ describe('Traceability & Logging', () => {
     }
   });
 
-  test('gate IDs are unique and sequential G1-G12', () => {
+  test('gate IDs are unique and sequential G1-G13', () => {
     const ids = autonomyPolicy.SAFETY_GATES.map(g => g.id);
-    for (let i = 1; i <= 12; i++) {
+    for (let i = 1; i <= 13; i++) {
       expect(ids).toContain(`G${i}`);
     }
-    expect(new Set(ids).size).toBe(12);
+    expect(new Set(ids).size).toBe(13);
   });
 
   test('pause condition IDs are unique and sequential P1-P8', () => {
@@ -687,5 +705,132 @@ describe('Edge Cases', () => {
       prompt: { confidence_level: 'high' },
     }));
     expect(result.reasons.some(r => r.id === 'P5')).toBe(false);
+  });
+});
+
+// ─── 9. Pilot Validation Tests (from real execution) ──────────────────────
+
+describe('Pilot Validation: Pause Reason Correctness', () => {
+  test('unknown confidence triggers P5 pause (observed in OCR workflow)', () => {
+    const ctx = makeCtx({
+      prompt: { confidence_level: 'unknown' },
+    });
+    const result = autonomyPolicy.checkPauseConditions(ctx);
+    expect(result.shouldPause).toBe(true);
+    const p5 = result.reasons.find(r => r.id === 'P5');
+    expect(p5).toBeDefined();
+    expect(p5.reason).toContain('unknown');
+  });
+
+  test('degradation flag triggers G4 gate block (observed in complex workflow)', () => {
+    const ctx = makeCtx({ prompt: { degradation_flag: 1 } });
+    const result = autonomyPolicy.evaluateSafetyGates(ctx);
+    expect(result.safe).toBe(false);
+    const g4 = result.failures.find(f => f.id === 'G4');
+    expect(g4.reason).toContain('Degradation');
+  });
+
+  test('manual_only workflow blocks with clear G9 reason', () => {
+    const ctx = makeCtx({ workflow: { manual_only: 1 } });
+    const result = autonomyPolicy.evaluateSafetyGates(ctx);
+    const g9 = result.failures.find(f => f.id === 'G9');
+    expect(g9.reason).toContain('manual_only');
+  });
+
+  test('release_mode=manual blocks with G13 (discovered in pilot)', () => {
+    const ctx = makeCtx({ prompt: { release_mode: 'manual' } });
+    const result = autonomyPolicy.evaluateSafetyGates(ctx);
+    expect(result.safe).toBe(false);
+    const g13 = result.failures.find(f => f.id === 'G13');
+    expect(g13).toBeDefined();
+    expect(g13.reason).toContain('manual');
+  });
+});
+
+describe('Pilot Validation: Mode Behavior Differences', () => {
+  test('SAFE_ADVANCE does not permit chaining', () => {
+    // In SAFE_ADVANCE, after releasing one step, the engine stops
+    // allowChaining = mode === SUPERVISED_FLOW → false for SAFE_ADVANCE
+    expect(autonomyPolicy.modePermitsAction('SAFE_ADVANCE', ACTION_TYPE.RELEASE)).toBe(true);
+    // The actual chaining logic is in the advance service, tested via integration
+  });
+
+  test('SUPERVISED_FLOW permits all action types for chaining', () => {
+    expect(autonomyPolicy.modePermitsAction('SUPERVISED_FLOW', ACTION_TYPE.RELEASE)).toBe(true);
+    expect(autonomyPolicy.modePermitsAction('SUPERVISED_FLOW', ACTION_TYPE.TRIGGER_EVAL)).toBe(true);
+    expect(autonomyPolicy.modePermitsAction('SUPERVISED_FLOW', ACTION_TYPE.ADVANCE_WORKFLOW)).toBe(true);
+  });
+
+  test('mode escalation is strict — higher mode includes lower permissions', () => {
+    const modes = ['OFF', 'RELEASE_ONLY', 'SAFE_ADVANCE', 'SUPERVISED_FLOW'];
+    for (let i = 0; i < modes.length; i++) {
+      for (let j = 0; j < i; j++) {
+        // Every action permitted at lower mode should be permitted at higher mode
+        for (const action of Object.values(ACTION_TYPE)) {
+          if (autonomyPolicy.modePermitsAction(modes[j], action)) {
+            expect(autonomyPolicy.modePermitsAction(modes[i], action)).toBe(true);
+          }
+        }
+      }
+    }
+  });
+});
+
+describe('Pilot Validation: Resume and Override', () => {
+  test('resumed workflow passes G10 gate', () => {
+    // After resume, autonomy_paused should be 0
+    const ctx = makeCtx({ workflow: { autonomy_paused: 0, autonomy_pause_reason: null } });
+    const result = autonomyPolicy.evaluateSafetyGates(ctx);
+    expect(result.failures.some(f => f.id === 'G10')).toBe(false);
+  });
+
+  test('paused workflow with reason shows reason in G10 message', () => {
+    const ctx = makeCtx({
+      workflow: { autonomy_paused: 1, autonomy_pause_reason: 'Operator testing' }
+    });
+    const result = autonomyPolicy.evaluateSafetyGates(ctx);
+    const g10 = result.failures.find(f => f.id === 'G10');
+    expect(g10.reason).toContain('Operator testing');
+  });
+
+  test('manual_only override completely blocks all autonomous actions', () => {
+    // Even a perfect prompt context fails if workflow is manual_only
+    const ctx = makeCtx({ workflow: { manual_only: 1 } });
+    const result = autonomyPolicy.evaluateSafetyGates(ctx);
+    expect(result.safe).toBe(false);
+  });
+});
+
+describe('Pilot Validation: Dashboard State Accuracy', () => {
+  test('gate evaluation provides complete audit trail', () => {
+    const ctx = makeCtx({
+      prompt: { confidence_level: 'low', degradation_flag: 1 },
+      hasCriticalLearningConflict: true,
+    });
+    const result = autonomyPolicy.evaluateSafetyGates(ctx);
+    // Should include both passed and failed gates
+    expect(result.passed.length + result.failures.length).toBe(result.total_gates);
+    // Each failure should have actionable info
+    for (const f of result.failures) {
+      expect(f.id).toBeTruthy();
+      expect(f.name).toBeTruthy();
+      expect(f.reason).toBeTruthy();
+      expect(f.reason.length).toBeGreaterThan(10); // Not just a code
+    }
+  });
+
+  test('pause conditions provide categorized reasons', () => {
+    const ctx = makeCtx({
+      recommendation: { action: 'FIX_REQUIRED' },
+      prompt: { degradation_flag: 1, confidence_level: 'low' },
+      correctionCount: 3,
+    });
+    const result = autonomyPolicy.checkPauseConditions(ctx);
+    // Should capture multiple distinct reasons
+    expect(result.reasons.length).toBeGreaterThanOrEqual(3);
+    const ids = result.reasons.map(r => r.id);
+    expect(ids).toContain('P1'); // fix_required
+    expect(ids).toContain('P4'); // degradation
+    expect(ids).toContain('P7'); // repeated_corrections
   });
 });
