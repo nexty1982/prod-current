@@ -846,6 +846,9 @@ app.use('/api/admin/api-tests', apiExplorerTestsRouter); // API Explorer test ca
 console.log('✅ [Server] Mounted /api/system/routes and /api/admin/api-tests (API Explorer)');
 app.use('/api/admin/tasks', dailyTasksRouter); // Daily tasks management
 app.use('/api/admin/records-inspector', recordsInspectorRouter); // Dynamic Records Inspector
+const schemaDriftRouter = require('./routes/admin/schema-drift');
+app.use('/api/admin/schema-drift', schemaDriftRouter); // Schema Drift Detector (super_admin)
+console.log('✅ [Server] Mounted /api/admin/schema-drift routes (Schema Drift Detector)');
 app.use('/api/admin', seedRecordsRouter); // Seed Records (POST /api/admin/seed-records)
 app.use('/api/admin/record-wizard', recordCreationWizardRouter); // Record Creation Wizard
 app.use('/api/admin/ai', aiAdminRouter); // AI Admin Panel (commands + training)

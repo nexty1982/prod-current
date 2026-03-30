@@ -36,6 +36,15 @@ router.get('/dashboard/exceptions', guardAdmin, controller.dashboardExceptions);
 router.get('/dashboard/ready',      guardAdmin, controller.dashboardReady);
 router.get('/dashboard/recommendations', guardAdmin, controller.dashboardRecommendations);
 
+// ─── Auto-Execution routes (BEFORE :id to avoid param capture) ────────────
+
+router.post('/auto-execution/enable',  guardAdmin, controller.autoExecEnable);
+router.post('/auto-execution/disable', guardAdmin, controller.autoExecDisable);
+router.post('/auto-execution/mode',    guardAdmin, controller.autoExecSetMode);
+router.get('/auto-execution/status',   guardAdmin, controller.autoExecStatus);
+router.get('/auto-execution/logs',     guardAdmin, controller.autoExecLogs);
+router.post('/auto-execution/run',     guardAdmin, controller.autoExecRunOnce);
+
 // ─── Per-workflow routes ────────────────────────────────────────────────────
 
 router.get('/:id',                  guardAdmin, controller.getById);
