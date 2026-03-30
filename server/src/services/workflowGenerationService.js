@@ -165,10 +165,22 @@ async function previewGeneration(workflowId) {
 async function generatePrompts(workflowId, actor) {
   const pool = getAppPool();
 
-  // Load workflow
-  const [wfRows] = await pool.query('SELECT * FROM prompt_workflows WHERE id = ?', [workflowId]);
+  // Load workflow (include template release_mode for propagation chain)
+  const [wfRows] = await pool.query(
+    `SELECT pw.*, wt.release_mode AS template_release_mode
+     FROM prompt_workflows pw
+     LEFT JOIN workflow_templates wt ON wt.id COLLATE utf8mb4_general_ci = pw.template_id COLLATE utf8mb4_general_ci
+     WHERE pw.id = ?`,
+    [workflowId]
+  );
   if (wfRows.length === 0) throw new Error(`Workflow not found: ${workflowId}`);
   const workflow = wfRows[0];
+
+  // Resolve release_mode: workflow override > template default > system default (auto_safe)
+  const resolvedReleaseMode = workflow.release_mode
+    || workflow.template_release_mode
+    || 'auto_safe';
+  workflow._resolved_release_mode = resolvedReleaseMode;
 
   // Must be approved
   if (workflow.status !== 'approved') {
@@ -235,9 +247,9 @@ async function generatePrompts(workflowId, actor) {
             sequence_order, status, prompt_text, guardrails_applied, audit_status,
             auto_generated, generated_from_evaluation, released_for_execution,
             workflow_id, workflow_step_number, dependency_type, depends_on_prompt_id,
-            priority, queue_status)
+            priority, queue_status, release_mode)
          VALUES (?, ?, ?, ?, ?, NULL, ?, 'draft', ?, 1, 'pending', 1, 0, 0,
-                 ?, ?, ?, ?, 'normal', 'pending')`,
+                 ?, ?, ?, ?, 'normal', 'pending', ?)`,
         [
           promptId,
           actor,
@@ -250,6 +262,7 @@ async function generatePrompts(workflowId, actor) {
           step.step_number,
           depType,
           dependsOnPromptId,
+          workflow._resolved_release_mode,
         ]
       );
 
@@ -266,6 +279,7 @@ async function generatePrompts(workflowId, actor) {
         status: 'draft',
         dependency_type: depType,
         depends_on_prompt_id: dependsOnPromptId,
+        release_mode: workflow._resolved_release_mode,
       });
     }
 
@@ -281,6 +295,8 @@ async function generatePrompts(workflowId, actor) {
     await logAction(pool, workflowId, 'PROMPTS_GENERATED', actor, {
       prompt_count: generatedPrompts.length,
       prompt_ids: generatedPrompts.map(p => p.id),
+      release_mode: resolvedReleaseMode,
+      release_mode_source: workflow.release_mode ? 'workflow' : (workflow.template_release_mode ? 'template' : 'system_default'),
     });
 
     return { prompts: generatedPrompts, already_existed: false };

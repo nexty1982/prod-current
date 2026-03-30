@@ -14,6 +14,7 @@ const autoExecutionService = require('../services/autoExecutionService');
 const costService = require('../services/workflowCostService');
 const autonomyPolicy = require('../services/autonomyPolicyService');
 const autonomousAdvance = require('../services/autonomousAdvanceService');
+const promptProgression = require('../services/promptProgressionService');
 
 function getActor(req) {
   return req.user?.email || req.user?.username || 'unknown';
@@ -23,9 +24,9 @@ function getActor(req) {
 
 async function create(req, res) {
   try {
-    const { name, description, component, steps } = req.body;
+    const { name, description, component, steps, release_mode } = req.body;
     const workflow = await workflowService.createWorkflow(
-      { name, description, component, steps },
+      { name, description, component, steps, release_mode },
       getActor(req)
     );
     res.status(201).json({ success: true, workflow });
@@ -56,9 +57,9 @@ async function getById(req, res) {
 
 async function update(req, res) {
   try {
-    const { name, description, component } = req.body;
+    const { name, description, component, release_mode } = req.body;
     const workflow = await workflowService.updateWorkflow(
-      req.params.id, { name, description, component }, getActor(req)
+      req.params.id, { name, description, component, release_mode }, getActor(req)
     );
     res.json({ success: true, workflow });
   } catch (err) {
@@ -410,6 +411,26 @@ async function autonomyDashboard(req, res) {
   }
 }
 
+// ─── Progression ────────────────────────────────────────────────────────────
+
+async function progressionRun(req, res) {
+  try {
+    const results = await promptProgression.advanceAll();
+    res.json({ success: true, ...results });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+}
+
+async function progressionPipeline(req, res) {
+  try {
+    const summary = await promptProgression.getPipelineSummary();
+    res.json({ success: true, ...summary });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+}
+
 module.exports = {
   create, list, getById, update,
   setSteps,
@@ -420,4 +441,5 @@ module.exports = {
   autoExecEnable, autoExecDisable, autoExecSetMode, autoExecStatus, autoExecLogs, autoExecRunOnce,
   costReport, workflowCost,
   autonomySetMode, autonomyStatus, autonomyLogs, autonomyPause, autonomyResume, setManualOnly, autonomyDashboard,
+  progressionRun, progressionPipeline,
 };

@@ -133,10 +133,16 @@ async function createTemplate(data, actor) {
   const templateId = uuidv4();
   const params = data.parameters ? JSON.stringify(data.parameters) : null;
 
+  // Validate release_mode if provided
+  const validModes = ['manual', 'auto_safe', 'auto_full'];
+  if (data.release_mode && !validModes.includes(data.release_mode)) {
+    throw new Error(`Invalid release_mode "${data.release_mode}". Must be one of: ${validModes.join(', ')}`);
+  }
+
   await pool.query(
-    `INSERT INTO workflow_templates (id, name, description, category, parameters, version, is_active, created_by)
-     VALUES (?, ?, ?, ?, ?, 1, 1, ?)`,
-    [templateId, data.name.trim(), data.description || null, data.category, params, actor]
+    `INSERT INTO workflow_templates (id, name, description, category, parameters, version, is_active, created_by, release_mode)
+     VALUES (?, ?, ?, ?, ?, 1, 1, ?, ?)`,
+    [templateId, data.name.trim(), data.description || null, data.category, params, actor, data.release_mode || null]
   );
 
   // Insert steps
@@ -181,11 +187,18 @@ async function updateTemplate(templateId, data, actor) {
     throw new Error(`Template validation failed: ${validation.errors.join('; ')}`);
   }
 
+  // Validate release_mode if provided
+  const validModes = ['manual', 'auto_safe', 'auto_full'];
+  if (data.release_mode !== undefined && data.release_mode !== null && !validModes.includes(data.release_mode)) {
+    throw new Error(`Invalid release_mode "${data.release_mode}". Must be one of: ${validModes.join(', ')}`);
+  }
+
   const params = merged.parameters ? JSON.stringify(merged.parameters) : null;
+  const releaseMode = data.release_mode !== undefined ? data.release_mode : existing.release_mode;
   await pool.query(
-    `UPDATE workflow_templates SET name = ?, description = ?, category = ?, parameters = ?, updated_at = NOW()
+    `UPDATE workflow_templates SET name = ?, description = ?, category = ?, parameters = ?, release_mode = ?, updated_at = NOW()
      WHERE id = ?`,
-    [merged.name.trim(), merged.description, merged.category, params, templateId]
+    [merged.name.trim(), merged.description, merged.category, params, releaseMode || null, templateId]
   );
 
   // Replace steps if provided
@@ -283,6 +296,7 @@ async function createVersionSnapshot(templateId, version, actor) {
     name: template.name,
     description: template.description,
     category: template.category,
+    release_mode: template.release_mode || null,
     parameters: template.parameters,
     steps: template.steps.map(s => ({
       step_number: s.step_number,

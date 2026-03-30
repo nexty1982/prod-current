@@ -160,6 +160,7 @@ async function previewInstantiation(templateId, params, version = null) {
       version: template.version || version,
       category: template.category,
     },
+    template_release_mode: template.release_mode || null,
     unresolved_warnings: unresolvedWarnings,
   };
 }
@@ -179,11 +180,13 @@ async function instantiate(templateId, params, actor, version = null) {
   }
 
   // Create workflow via existing service (preserves all guardrails)
+  // Propagate template's release_mode to the workflow
   const workflow = await workflowService.createWorkflow(
     {
       name: preview.workflow.name,
       description: preview.workflow.description,
       component: preview.workflow.component,
+      release_mode: preview.template_release_mode || null,
       steps: preview.steps.map(s => ({
         step_number: s.step_number,
         title: s.title,

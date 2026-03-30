@@ -65,18 +65,24 @@ async function logAction(pool, workflowId, action, actor, details = null) {
 /**
  * Create a new workflow in draft status.
  */
-async function createWorkflow({ name, description, component, steps }, actor) {
+async function createWorkflow({ name, description, component, steps, release_mode }, actor) {
   if (!name || !component) {
     throw new Error('Workflow name and component are required.');
+  }
+
+  // Validate release_mode if provided
+  const validModes = ['manual', 'auto_safe', 'auto_full'];
+  if (release_mode && !validModes.includes(release_mode)) {
+    throw new Error(`Invalid release_mode "${release_mode}". Must be one of: ${validModes.join(', ')}`);
   }
 
   const pool = getAppPool();
   const id = uuidv4();
 
   await pool.query(
-    `INSERT INTO prompt_workflows (id, name, description, component, status, created_by, step_count)
-     VALUES (?, ?, ?, ?, 'draft', ?, ?)`,
-    [id, name, description || null, component, actor, steps ? steps.length : 0]
+    `INSERT INTO prompt_workflows (id, name, description, component, status, created_by, step_count, release_mode)
+     VALUES (?, ?, ?, ?, 'draft', ?, ?, ?)`,
+    [id, name, description || null, component, actor, steps ? steps.length : 0, release_mode || null]
   );
 
   // Insert steps if provided
@@ -151,7 +157,7 @@ async function listWorkflows({ status, component, created_by } = {}) {
 /**
  * Update workflow metadata (only in draft status).
  */
-async function updateWorkflow(id, { name, description, component }, actor) {
+async function updateWorkflow(id, { name, description, component, release_mode }, actor) {
   const pool = getAppPool();
   const workflow = await getWorkflowById(id);
 
@@ -159,11 +165,18 @@ async function updateWorkflow(id, { name, description, component }, actor) {
     throw new Error(`Cannot edit workflow in "${workflow.status}" status. Only draft workflows can be edited.`);
   }
 
+  // Validate release_mode if provided
+  const validModes = ['manual', 'auto_safe', 'auto_full'];
+  if (release_mode !== undefined && release_mode !== null && !validModes.includes(release_mode)) {
+    throw new Error(`Invalid release_mode "${release_mode}". Must be one of: ${validModes.join(', ')}`);
+  }
+
   const updates = [];
   const params = [];
   if (name !== undefined) { updates.push('name = ?'); params.push(name); }
   if (description !== undefined) { updates.push('description = ?'); params.push(description); }
   if (component !== undefined) { updates.push('component = ?'); params.push(component); }
+  if (release_mode !== undefined) { updates.push('release_mode = ?'); params.push(release_mode); }
 
   if (updates.length === 0) throw new Error('No valid fields to update.');
 

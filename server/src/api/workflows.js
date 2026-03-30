@@ -62,6 +62,11 @@ router.get('/auto-execution/status',   guardAdmin, controller.autoExecStatus);
 router.get('/auto-execution/logs',     guardAdmin, controller.autoExecLogs);
 router.post('/auto-execution/run',     guardAdmin, controller.autoExecRunOnce);
 
+// ─── Progression routes (BEFORE :id to avoid param capture) ─────────────
+
+router.post('/progression/run',     guardAdmin, controller.progressionRun);
+router.get('/progression/pipeline', guardAdmin, controller.progressionPipeline);
+
 // ─── Autonomy routes (BEFORE :id to avoid param capture) ─────────────────
 
 router.post('/autonomy/mode',       guardAdmin, controller.autonomySetMode);

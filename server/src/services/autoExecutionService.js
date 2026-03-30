@@ -25,6 +25,7 @@ const { getAppPool } = require('../config/db');
 const policyService = require('./autoExecutionPolicyService');
 const decisionEngine = require('./decisionEngineService');
 const autonomousAdvance = require('./autonomousAdvanceService');
+const promptProgression = require('./promptProgressionService');
 
 // ─── Mutex & Change Detection ────────────────────────────────────────────
 //
@@ -271,6 +272,20 @@ async function runOnce() {
       release_changed: releaseChanged,
       autonomy_changed: autonomyChanged,
     };
+
+    // 2.5 State progression — advance draft→audited→ready→approved→released
+    try {
+      const progression = await promptProgression.advanceAll();
+      if (progression.advanced > 0) {
+        results.progression = {
+          advanced: progression.advanced,
+          transitions: progression.transitions,
+        };
+      }
+    } catch (progErr) {
+      results.progression_error = progErr.message;
+      console.error('[AutoExecution] Progression error:', progErr.message);
+    }
 
     // 3. Release pipeline — only if release-eligible prompts changed
     if (releaseChanged) {
