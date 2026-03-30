@@ -260,19 +260,43 @@ async function isEligibleForRelease(promptId) {
   } else {
     conditions.push(`Eligible: ${state.explanation}`);
 
+    // Scoring-based release constraints (Prompt 007)
+    const hasEscalation = !!prompt.escalation_required;
+    const hasDegradation = !!prompt.degradation_flag;
+    const confidence = prompt.confidence_level || 'unknown';
+
     if (prompt.release_mode === 'auto_full') {
-      canAutoRelease = true;
-      conditions.push('auto_full mode → auto-release allowed');
-    } else if (prompt.release_mode === 'auto_safe') {
-      const priorClean = await isPriorStepClean(pool, prompt);
-      if (priorClean.clean) {
-        canAutoRelease = true;
-        conditions.push('auto_safe mode: prior step clean → auto-release allowed');
+      if (hasEscalation) {
+        // auto_full blocked by escalation
+        conditions.push('auto_full mode: BLOCKED — escalation required');
       } else {
-        conditions.push(`auto_safe mode: ${priorClean.reason} → manual release required`);
+        canAutoRelease = true;
+        conditions.push('auto_full mode → auto-release allowed');
+      }
+    } else if (prompt.release_mode === 'auto_safe') {
+      if (hasEscalation) {
+        conditions.push('auto_safe mode: BLOCKED — escalation required');
+      } else if (hasDegradation) {
+        conditions.push('auto_safe mode: BLOCKED — degradation detected');
+      } else if (confidence !== 'high' && confidence !== 'unknown') {
+        conditions.push(`auto_safe mode: BLOCKED — confidence is "${confidence}", must be "high"`);
+      } else {
+        const priorClean = await isPriorStepClean(pool, prompt);
+        if (priorClean.clean) {
+          canAutoRelease = true;
+          conditions.push('auto_safe mode: prior step clean → auto-release allowed');
+        } else {
+          conditions.push(`auto_safe mode: ${priorClean.reason} → manual release required`);
+        }
       }
     } else {
       conditions.push('manual mode → explicit release action required');
+      if (hasEscalation) {
+        conditions.push('WARNING: escalation required — review before release');
+      }
+      if (hasDegradation) {
+        conditions.push('WARNING: degradation detected in chain');
+      }
     }
   }
 
@@ -297,6 +321,12 @@ async function isEligibleForRelease(promptId) {
     overdue_since: state.overdue_since,
     explanation: state.explanation,
     conditions,
+    // Scoring context (Prompt 007)
+    quality_score: prompt.quality_score,
+    confidence_level: prompt.confidence_level || 'unknown',
+    degradation_flag: !!prompt.degradation_flag,
+    escalation_required: !!prompt.escalation_required,
+    escalation_reason: prompt.escalation_reason,
   };
 }
 
@@ -357,7 +387,8 @@ async function getQueue(filters = {}) {
     params.push(filters.priority);
   }
 
-  sql += ` ORDER BY FIELD(priority, 'critical','high','normal','low'), sequence_order ASC`;
+  // Priority: escalated first, then overdue, then by priority enum, then by quality score (worst first for attention)
+  sql += ` ORDER BY escalation_required DESC, overdue DESC, FIELD(priority, 'critical','high','normal','low'), sequence_order ASC`;
   const [rows] = await pool.query(sql, params);
   return rows;
 }
@@ -369,7 +400,10 @@ async function getNextReady(limit = 5) {
   const [rows] = await pool.query(
     `SELECT * FROM om_prompt_registry
      WHERE queue_status IN ('ready_for_release', 'overdue')
-     ORDER BY FIELD(priority, 'critical','high','normal','low'), sequence_order ASC
+     ORDER BY escalation_required DESC, overdue DESC,
+              FIELD(priority, 'critical','high','normal','low'),
+              FIELD(confidence_level, 'low','unknown','medium','high'),
+              sequence_order ASC
      LIMIT ?`,
     [limit]
   );

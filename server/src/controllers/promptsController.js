@@ -11,6 +11,7 @@ const promptEvaluationService = require('../services/promptEvaluationService');
 const promptGenerationService = require('../services/promptGenerationService');
 const promptQueueService = require('../services/promptQueueService');
 const promptReleaseService = require('../services/promptReleaseService');
+const promptScoringService = require('../services/promptScoringService');
 
 class PromptsController {
 
@@ -431,6 +432,60 @@ class PromptsController {
     } catch (error) {
       const status = error.message.includes('not found') ? 404 : 500;
       res.status(status).json({ success: false, error: error.message });
+    }
+  }
+
+  // ─── Scoring Endpoints ─────────────────────────────────────────────────
+
+  // GET /api/prompts/:id/score
+  async getPromptScore(req, res) {
+    try {
+      const result = await promptScoringService.getScore(req.params.id);
+      res.json({ success: true, data: result });
+    } catch (error) {
+      const status = error.message.includes('not found') ? 404 : 500;
+      res.status(status).json({ success: false, error: error.message });
+    }
+  }
+
+  // POST /api/prompts/:id/score — force recalculate
+  async scorePrompt(req, res) {
+    try {
+      const result = await promptScoringService.scorePrompt(req.params.id);
+      res.json({ success: true, data: result });
+    } catch (error) {
+      const status = error.message.includes('not found') ? 404 : 500;
+      res.status(status).json({ success: false, error: error.message });
+    }
+  }
+
+  // GET /api/prompts/low-confidence
+  async getLowConfidence(req, res) {
+    try {
+      const prompts = await promptScoringService.getLowConfidence();
+      res.json({ success: true, data: prompts, count: prompts.length });
+    } catch (error) {
+      res.status(500).json({ success: false, error: error.message });
+    }
+  }
+
+  // GET /api/prompts/degraded
+  async getDegradedPrompts(req, res) {
+    try {
+      const prompts = await promptScoringService.getDegraded();
+      res.json({ success: true, data: prompts, count: prompts.length });
+    } catch (error) {
+      res.status(500).json({ success: false, error: error.message });
+    }
+  }
+
+  // GET /api/prompts/escalated
+  async getEscalatedPrompts(req, res) {
+    try {
+      const prompts = await promptScoringService.getEscalated();
+      res.json({ success: true, data: prompts, count: prompts.length });
+    } catch (error) {
+      res.status(500).json({ success: false, error: error.message });
     }
   }
 

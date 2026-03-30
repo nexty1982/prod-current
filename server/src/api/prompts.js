@@ -11,6 +11,9 @@
  * GET    /api/prompts/due               — Prompts due now
  * GET    /api/prompts/overdue           — Prompts past release window
  * GET    /api/prompts/workplan/today    — Today's workplan
+ * GET    /api/prompts/low-confidence    — Low confidence prompts
+ * GET    /api/prompts/degraded          — Degraded chain prompts
+ * GET    /api/prompts/escalated         — Prompts requiring escalation
  *
  * Per-prompt routes
  * GET    /api/prompts/:id               — Get single prompt
@@ -34,6 +37,8 @@
  * POST   /api/prompts/:id/release-auto-check — Check release eligibility (read-only)
  * GET    /api/prompts/:id/queue-status  — Full queue context (recalculated)
  * GET    /api/prompts/:id/dependencies  — Get dependency chain
+ * GET    /api/prompts/:id/score         — Quality score details
+ * POST   /api/prompts/:id/score         — Force recalculate score
  */
 
 const express = require('express');
@@ -56,6 +61,9 @@ router.get('/blocked',        guardAdmin, controller.getBlockedPrompts);
 router.get('/due',            guardAdmin, controller.getDuePrompts);
 router.get('/overdue',        guardAdmin, controller.getOverduePrompts);
 router.get('/workplan/today', guardAdmin, controller.getWorkplan);
+router.get('/low-confidence', guardAdmin, controller.getLowConfidence);
+router.get('/degraded',       guardAdmin, controller.getDegradedPrompts);
+router.get('/escalated',      guardAdmin, controller.getEscalatedPrompts);
 
 // ─── Per-prompt routes ────────────────────────────────────────────────────
 
@@ -84,5 +92,7 @@ router.post('/:id/release',            guardAdmin, controller.releaseForExecutio
 router.post('/:id/release-auto-check', guardAdmin, controller.releaseAutoCheck);
 router.get('/:id/queue-status',        guardAdmin, controller.getQueueStatus);
 router.get('/:id/dependencies',        guardAdmin, controller.getDependencies);
+router.get('/:id/score',              guardAdmin, controller.getPromptScore);
+router.post('/:id/score',             guardAdmin, controller.scorePrompt);
 
 module.exports = router;
