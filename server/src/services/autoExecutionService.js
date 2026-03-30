@@ -25,11 +25,19 @@ const { getAppPool } = require('../config/db');
 const policyService = require('./autoExecutionPolicyService');
 const decisionEngine = require('./decisionEngineService');
 
-// ─── Mutex ────────────────────────────────────────────────────────────────
+// ─── Mutex & Change Detection ────────────────────────────────────────────
+//
+// The auto-execution loop runs every 30s. Most cycles find nothing changed.
+// Change detection tracks a lightweight fingerprint of om_prompt_registry
+// state (count + max updated_at for release-eligible prompts). If the
+// fingerprint hasn't changed, the expensive getRecommendations() call and
+// per-prompt eligibility checks are skipped entirely.
 
 let _running = false;
 let _timer = null;
 let _intervalMs = 30000; // 30 seconds default
+let _lastFingerprint = null; // { count, maxUpdated }
+let _skippedCycles = 0;
 
 // ─── Core: Execute a Single Release ───────────────────────────────────────
 
@@ -95,15 +103,36 @@ async function releasePrompt(promptId, reason) {
   };
 }
 
+// ─── Change Detection ────────────────────────────────────────────────────
+
+/**
+ * Compute a lightweight fingerprint of release-eligible prompt state.
+ * If the fingerprint hasn't changed, no prompts have been added, removed,
+ * or had their status/queue_status updated — so running the full
+ * recommendation + eligibility pipeline is provably unnecessary.
+ */
+async function _getRegistryFingerprint() {
+  const pool = getAppPool();
+  const [rows] = await pool.query(
+    `SELECT COUNT(*) as cnt,
+            MAX(updated_at) as max_updated
+     FROM om_prompt_registry
+     WHERE queue_status IN ('ready_for_release', 'overdue')`
+  );
+  const r = rows[0];
+  return `${r.cnt}:${r.max_updated || 'null'}`;
+}
+
 // ─── Core: Single Execution Run ───────────────────────────────────────────
 
 /**
  * Run a single auto-execution cycle:
  *   1. Check if enabled
- *   2. Get recommendations from decision engine
- *   3. Evaluate eligibility for each
- *   4. Execute eligible actions
- *   5. Log results
+ *   2. Check change fingerprint (skip if unchanged)
+ *   3. Get recommendations from decision engine
+ *   4. Evaluate eligibility for each
+ *   5. Execute eligible actions
+ *   6. Log results
  *
  * Returns execution summary.
  */
@@ -139,11 +168,22 @@ async function runOnce() {
       return results;
     }
 
-    // 2. Get recommendations from decision engine
+    // 2. Change detection — skip expensive recommendation pipeline if nothing changed
+    const fingerprint = await _getRegistryFingerprint();
+    if (fingerprint === _lastFingerprint) {
+      _skippedCycles++;
+      results.skipped_reason = `No registry changes (skipped ${_skippedCycles} consecutive cycles)`;
+      results.duration_ms = Date.now() - startTime;
+      // Don't record run to avoid writing settings on every no-op cycle
+      return results;
+    }
+    _skippedCycles = 0;
+
+    // 3. Get recommendations from decision engine
     const recommendations = await decisionEngine.getRecommendations();
     const actionable = recommendations.actions || [];
 
-    // 3. Filter to RELEASE_NOW only (other actions are never auto-executed)
+    // 4. Filter to RELEASE_NOW only (other actions are never auto-executed)
     const releaseActions = actionable.filter(a => a.action === 'RELEASE_NOW');
 
     // 4. Evaluate each for eligibility
@@ -234,6 +274,10 @@ async function runOnce() {
 
     results.duration_ms = Date.now() - startTime;
     await policyService.recordRun(results);
+
+    // Update fingerprint after successful run
+    _lastFingerprint = await _getRegistryFingerprint();
+
     return results;
 
   } catch (err) {

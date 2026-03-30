@@ -81,6 +81,10 @@ async function getExecutiveSummary() {
 
 /**
  * Returns active workflows with per-step prompt status for progress tracking.
+ *
+ * OPTIMIZATION: Uses a single batch query for all workflow steps instead of
+ * N+1 per-workflow queries. With 6 active workflows × 4 steps each, this
+ * reduces 7 queries to 2.
  */
 async function getActiveWorkflows() {
   const pool = getAppPool();
@@ -89,19 +93,34 @@ async function getActiveWorkflows() {
     `SELECT * FROM prompt_workflows WHERE status IN ('active', 'approved') ORDER BY activated_at DESC, approved_at DESC`
   );
 
+  if (workflows.length === 0) return [];
+
+  // Batch: load all steps for all active workflows in one query
+  const wfIds = workflows.map(w => w.id);
+  const placeholders = wfIds.map(() => '?').join(',');
+  const [allSteps] = await pool.query(
+    `SELECT s.workflow_id, s.step_number, s.title, s.prompt_id,
+            p.status as prompt_status, p.quality_score, p.confidence_level,
+            p.escalation_required, p.degradation_flag, p.queue_status
+     FROM prompt_workflow_steps s
+     LEFT JOIN om_prompt_registry p ON s.prompt_id = p.id
+     WHERE s.workflow_id IN (${placeholders})
+     ORDER BY s.workflow_id, s.step_number`,
+    wfIds
+  );
+
+  // Group steps by workflow_id
+  const stepsByWorkflow = new Map();
+  for (const step of allSteps) {
+    if (!stepsByWorkflow.has(step.workflow_id)) {
+      stepsByWorkflow.set(step.workflow_id, []);
+    }
+    stepsByWorkflow.get(step.workflow_id).push(step);
+  }
+
   const result = [];
   for (const wf of workflows) {
-    const [steps] = await pool.query(
-      `SELECT s.step_number, s.title, s.prompt_id,
-              p.status as prompt_status, p.quality_score, p.confidence_level,
-              p.escalation_required, p.degradation_flag, p.queue_status
-       FROM prompt_workflow_steps s
-       LEFT JOIN om_prompt_registry p ON s.prompt_id = p.id
-       WHERE s.workflow_id = ?
-       ORDER BY s.step_number`,
-      [wf.id]
-    );
-
+    const steps = stepsByWorkflow.get(wf.id) || [];
     const total = steps.length;
     const verified = steps.filter(s => s.prompt_status === 'verified').length;
     const executing = steps.filter(s => s.prompt_status === 'executing').length;

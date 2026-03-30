@@ -11,6 +11,7 @@ const dashboardService = require('../services/workflowDashboardService');
 const decisionEngine = require('../services/decisionEngineService');
 const autoExecutionPolicy = require('../services/autoExecutionPolicyService');
 const autoExecutionService = require('../services/autoExecutionService');
+const costService = require('../services/workflowCostService');
 
 function getActor(req) {
   return req.user?.email || req.user?.username || 'unknown';
@@ -306,6 +307,27 @@ async function autoExecRunOnce(req, res) {
   }
 }
 
+// ─── Cost Reporting ──────────────────────────────────────────────────────
+
+async function costReport(req, res) {
+  try {
+    const report = await costService.getCostReport();
+    res.json({ success: true, ...report });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+}
+
+async function workflowCost(req, res) {
+  try {
+    const cost = await costService.getWorkflowCost(req.params.id);
+    res.json({ success: true, ...cost });
+  } catch (err) {
+    const status = err.message.includes('not found') ? 404 : 500;
+    res.status(status).json({ success: false, error: err.message });
+  }
+}
+
 module.exports = {
   create, list, getById, update,
   setSteps,
@@ -314,4 +336,5 @@ module.exports = {
   getStatus, validate,
   dashboard, dashboardExceptions, dashboardReady, dashboardRecommendations,
   autoExecEnable, autoExecDisable, autoExecSetMode, autoExecStatus, autoExecLogs, autoExecRunOnce,
+  costReport, workflowCost,
 };

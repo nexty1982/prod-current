@@ -511,7 +511,12 @@ describe('resultSelectionService evaluateResult', () => {
   });
 
   test('records evaluation correctly', async () => {
-    setupQueryResults([{ affectedRows: 1 }, null]);
+    // First query: duplicate check (returns pending = not yet evaluated)
+    // Second query: UPDATE
+    setupQueryResults(
+      [[{ evaluator_status: 'pending', completion_status: null, confidence: null }]],
+      [{ affectedRows: 1 }, null]
+    );
 
     const result = await selectionService.evaluateResult('r1', {
       completion_status: 'success',
@@ -524,7 +529,8 @@ describe('resultSelectionService evaluateResult', () => {
     expect(result.violation_count).toBe(1);
     expect(result.confidence).toBe(0.85);
 
-    const updateSql = queryCalls[0][0];
+    // queryCalls[0] is the duplicate check SELECT, queryCalls[1] is the UPDATE
+    const updateSql = queryCalls[1][0];
     expect(updateSql).toMatch(/evaluator_status = 'evaluated'/);
     expect(updateSql).toMatch(/violation_count = \?/);
   });

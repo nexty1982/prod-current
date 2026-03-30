@@ -51,6 +51,7 @@ router.get('/dashboard',            guardAdmin, controller.dashboard);
 router.get('/dashboard/exceptions', guardAdmin, controller.dashboardExceptions);
 router.get('/dashboard/ready',      guardAdmin, controller.dashboardReady);
 router.get('/dashboard/recommendations', guardAdmin, controller.dashboardRecommendations);
+router.get('/dashboard/cost-report',     guardAdmin, controller.costReport);
 
 // ─── Auto-Execution routes (BEFORE :id to avoid param capture) ────────────
 
@@ -75,5 +76,6 @@ router.post('/:id/reopen',         guardAdmin, controller.reopen);
 router.get('/:id/preview',         guardAdmin, controller.preview);
 router.post('/:id/generate-prompts', guardAdmin, controller.generatePrompts);
 router.get('/:id/status',          guardAdmin, controller.getStatus);
+router.get('/:id/cost',            guardAdmin, controller.workflowCost);
 
 module.exports = router;
