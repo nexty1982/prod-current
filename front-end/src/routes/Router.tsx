@@ -131,6 +131,7 @@ const InteractiveReportJobsPage = Loadable(lazy(() => import('../features/devel-
 const BuildInfoPage = Loadable(lazy(() => import('../features/devel-tools/build-info/BuildInfoPage')));
 const RepoOpsPage = Loadable(lazy(() => import('../features/devel-tools/repo-ops/RepoOpsPage')));
 const PlatformStatusPage = Loadable(lazy(() => import('../features/devel-tools/platform-status/PlatformStatusPage')));
+const CommandCenterPage = Loadable(lazy(() => import('../features/devel-tools/command-center/CommandCenterPage')));
 const OrthodMetricsAdmin = Loadable(lazy(() => import('../features/admin/admin/OrthodoxMetricsAdmin')));
 const AIAdminPanel = Loadable(lazy(() => import('../features/admin/ai/AIAdminPanel')));
 const OMAIUltimateLogger = Loadable(lazy(() => import('../features/devel-tools/om-ultimatelogger/LoggerDashboard')));
@@ -169,6 +170,7 @@ const SiteMapPage = Loadable(lazy(() => import('../features/admin/SiteMapPage'))
 const CertificateTemplatesPage = Loadable(lazy(() => import('../features/admin/control-panel/CertificateTemplatesPage')));
 const CRMPage = Loadable(lazy(() => import('../features/devel-tools/crm/CRMPage')));
 const USChurchMapPage = Loadable(lazy(() => import('../features/devel-tools/us-church-map/USChurchMapPage')));
+const AuditDashboardPage = Loadable(lazy(() => import('../features/devel-tools/audit-dashboard/AuditDashboardPage')));
 const LogSearch = Loadable(lazy(() => import('../features/admin/dashboard/LogSearch')));
 const OmOcrStudioPage = Loadable(lazy(() => import('../features/devel-tools/om-ocr/pages/OmOcrStudioPage')));
 const UploadRecordsPage = Loadable(lazy(() => import('../features/records-centralized/apps/upload-records/UploadRecordsPage')));
@@ -1284,6 +1286,16 @@ const Router = [
         )
       },
       {
+        path: '/devel-tools/audit-dashboard',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin']}>
+            <AdminErrorBoundary>
+              <AuditDashboardPage />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
         path: '/devel-tools/git-operations',
         element: <Navigate to="/devel-tools/repo-ops" replace />,
       },
@@ -1380,6 +1392,14 @@ const Router = [
         element: (
           <ProtectedRoute requiredRole={['super_admin']}>
             <PlatformStatusPage />
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/devel-tools/command-center',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin']}>
+            <CommandCenterPage />
           </ProtectedRoute>
         )
       },

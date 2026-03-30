@@ -437,13 +437,74 @@ async function _buildGateContext(step, workflow, pool) {
  * Get autonomy dashboard data for the command center.
  */
 async function getAutonomyDashboard() {
+  const pool = getAppPool();
   const status = await autonomyPolicy.getStatus();
   const paused = await autonomyPolicy.getPausedWorkflows();
   const logs = await autonomyPolicy.getLogs(20);
 
+  // Per-workflow frontier gate results for active workflows
+  const [workflows] = await pool.query(
+    `SELECT * FROM prompt_workflows WHERE status = 'active' ORDER BY activated_at ASC`
+  );
+
+  const workflowDetails = [];
+  for (const wf of workflows) {
+    // Find frontier step
+    const [steps] = await pool.query(
+      `SELECT s.*, p.status as prompt_status, p.queue_status, p.confidence_level,
+              p.evaluator_status, p.completion_status, p.degradation_flag,
+              p.escalation_required, p.manual_only as prompt_manual_only,
+              p.release_mode, p.quality_score
+       FROM prompt_workflow_steps s
+       LEFT JOIN om_prompt_registry p ON s.prompt_id = p.id
+       WHERE s.workflow_id = ?
+       ORDER BY s.step_number ASC`,
+      [wf.id]
+    );
+
+    const frontier = steps.find(s => s.prompt_status && s.prompt_status !== 'verified');
+    let gateResult = null;
+
+    if (frontier && frontier.prompt_id) {
+      const ctx = await _buildGateContext(frontier, wf, pool);
+      gateResult = autonomyPolicy.evaluateSafetyGates(ctx);
+    }
+
+    workflowDetails.push({
+      id: wf.id,
+      name: wf.name,
+      component: wf.component,
+      autonomy_paused: !!wf.autonomy_paused,
+      autonomy_pause_reason: wf.autonomy_pause_reason,
+      manual_only: !!wf.manual_only,
+      frontier_step: frontier ? {
+        step_number: frontier.step_number,
+        title: frontier.title,
+        prompt_status: frontier.prompt_status,
+        queue_status: frontier.queue_status,
+      } : null,
+      gate_results: gateResult ? {
+        safe: gateResult.safe,
+        passed: gateResult.passed,
+        failures: gateResult.failures,
+        passed_count: gateResult.passed_count,
+        total_gates: gateResult.total_gates,
+      } : null,
+      why_paused: wf.autonomy_paused
+        ? wf.autonomy_pause_reason || 'Paused by operator'
+        : (gateResult && !gateResult.safe)
+          ? gateResult.failures[0]?.reason
+          : null,
+      why_advancing: (!wf.autonomy_paused && !wf.manual_only && gateResult?.safe)
+        ? `All ${gateResult.total_gates} safety gates passed`
+        : null,
+    });
+  }
+
   return {
     status,
     paused_workflows: paused,
+    workflow_details: workflowDetails,
     recent_activity: logs,
   };
 }
