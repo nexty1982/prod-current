@@ -9,6 +9,8 @@ const promptWorkflowService = require('../services/promptWorkflowService');
 const promptAuditService = require('../services/promptAuditService');
 const promptEvaluationService = require('../services/promptEvaluationService');
 const promptGenerationService = require('../services/promptGenerationService');
+const promptQueueService = require('../services/promptQueueService');
+const promptReleaseService = require('../services/promptReleaseService');
 
 class PromptsController {
 
@@ -308,6 +310,126 @@ class PromptsController {
     } catch (error) {
       const status = error.message.includes('not found') ? 404 : 500;
       res.status(status).json({ success: false, error: error.message });
+    }
+  }
+
+  // ─── Queue & Scheduling Endpoints ─────────────────────────────────────
+
+  // GET /api/prompts/queue
+  async getQueue(req, res) {
+    try {
+      const { queue_status, component, priority } = req.query;
+      const prompts = await promptQueueService.getQueue({ queue_status, component, priority });
+      res.json({ success: true, data: prompts, count: prompts.length });
+    } catch (error) {
+      res.status(500).json({ success: false, error: error.message });
+    }
+  }
+
+  // GET /api/prompts/next-ready
+  async getNextReady(req, res) {
+    try {
+      const limit = parseInt(req.query.limit, 10) || 5;
+      const prompts = await promptQueueService.getNextReady(limit);
+      res.json({ success: true, data: prompts, count: prompts.length });
+    } catch (error) {
+      res.status(500).json({ success: false, error: error.message });
+    }
+  }
+
+  // GET /api/prompts/blocked
+  async getBlockedPrompts(req, res) {
+    try {
+      const prompts = await promptQueueService.getBlocked();
+      res.json({ success: true, data: prompts, count: prompts.length });
+    } catch (error) {
+      res.status(500).json({ success: false, error: error.message });
+    }
+  }
+
+  // GET /api/prompts/due
+  async getDuePrompts(req, res) {
+    try {
+      const prompts = await promptQueueService.getDue();
+      res.json({ success: true, data: prompts, count: prompts.length });
+    } catch (error) {
+      res.status(500).json({ success: false, error: error.message });
+    }
+  }
+
+  // GET /api/prompts/overdue
+  async getOverduePrompts(req, res) {
+    try {
+      const prompts = await promptQueueService.getOverdue();
+      res.json({ success: true, data: prompts, count: prompts.length });
+    } catch (error) {
+      res.status(500).json({ success: false, error: error.message });
+    }
+  }
+
+  // POST /api/prompts/:id/schedule
+  async schedulePrompt(req, res) {
+    try {
+      const actor = req.user?.email || req.user?.username || 'unknown';
+      const result = await promptQueueService.schedulePrompt(req.params.id, req.body, actor);
+      res.json({ success: true, data: result, message: 'Prompt scheduled' });
+    } catch (error) {
+      const status = error.message.includes('not found') ? 404
+        : error.message.includes('Cannot schedule') ? 409
+        : error.message.includes('rejected') ? 409
+        : error.message.includes('Circular') ? 422
+        : error.message.includes('Invalid') ? 400
+        : error.message.includes('No scheduling') ? 400
+        : 500;
+      res.status(status).json({ success: false, error: error.message });
+    }
+  }
+
+  // POST /api/prompts/:id/release
+  async releaseForExecution(req, res) {
+    try {
+      const actor = req.user?.email || req.user?.username || 'unknown';
+      const result = await promptReleaseService.releasePrompt(req.params.id, actor);
+      res.json({ success: true, data: result, message: 'Prompt released for execution' });
+    } catch (error) {
+      const status = error.message.includes('not found') ? 404
+        : error.message.includes('Cannot release') ? 409
+        : error.message.includes('not eligible') ? 409
+        : error.message.includes('Release failed') ? 409
+        : 500;
+      res.status(status).json({ success: false, error: error.message });
+    }
+  }
+
+  // POST /api/prompts/:id/release-auto-check
+  async releaseAutoCheck(req, res) {
+    try {
+      const result = await promptReleaseService.checkReleaseEligibility(req.params.id);
+      res.json({ success: true, data: result });
+    } catch (error) {
+      const status = error.message.includes('not found') ? 404 : 500;
+      res.status(status).json({ success: false, error: error.message });
+    }
+  }
+
+  // GET /api/prompts/:id/dependencies
+  async getDependencies(req, res) {
+    try {
+      const result = await promptQueueService.getDependencyChain(req.params.id);
+      res.json({ success: true, data: result });
+    } catch (error) {
+      const status = error.message.includes('not found') ? 404 : 500;
+      res.status(status).json({ success: false, error: error.message });
+    }
+  }
+
+  // GET /api/prompts/workplan/today
+  async getWorkplan(req, res) {
+    try {
+      const workplan = await promptReleaseService.generateWorkplan();
+      res.json({ success: true, data: workplan });
+    } catch (error) {
+      res.status(500).json({ success: false, error: error.message });
     }
   }
 }
