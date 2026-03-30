@@ -853,6 +853,9 @@ console.log('✅ [Server] Mounted records-inspector, seed-records, record-wizard
 // MIGRATED TO OMAI: console.log('✅ [Server] Mounted /api/om-daily routes');
 app.use('/api/prompt-plans', promptPlansRouter); // Prompt Plans (AI orchestration)
 console.log('✅ [Server] Mounted /api/prompt-plans routes (AI Prompt Plans)');
+const agentRouter = require('./api/agentRoutes');
+app.use('/api/agents', agentRouter); // Multi-Agent Routing & Selection
+console.log('✅ [Server] Mounted /api/agents routes (Multi-Agent System)');
 app.use('/api/page-content', pageContentRouter); // Page Content CMS
 console.log('✅ [Server] Mounted /api/page-content routes (Page Content CMS)');
 const pageContentBuildsRouter = require('./routes/page-content-builds');
