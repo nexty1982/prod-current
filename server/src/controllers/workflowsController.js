@@ -8,6 +8,7 @@
 const workflowService = require('../services/workflowService');
 const workflowGenerationService = require('../services/workflowGenerationService');
 const dashboardService = require('../services/workflowDashboardService');
+const decisionEngine = require('../services/decisionEngineService');
 
 function getActor(req) {
   return req.user?.email || req.user?.username || 'unknown';
@@ -223,11 +224,20 @@ async function dashboardReady(req, res) {
   }
 }
 
+async function dashboardRecommendations(req, res) {
+  try {
+    const recommendations = await decisionEngine.getRecommendations();
+    res.json({ success: true, ...recommendations });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+}
+
 module.exports = {
   create, list, getById, update,
   setSteps,
   approve, activate, complete, cancel, reopen,
   preview, generatePrompts,
   getStatus, validate,
-  dashboard, dashboardExceptions, dashboardReady,
+  dashboard, dashboardExceptions, dashboardReady, dashboardRecommendations,
 };
