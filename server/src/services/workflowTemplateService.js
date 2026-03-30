@@ -250,7 +250,7 @@ async function listTemplates(filters = {}) {
   }
 
   const [rows] = await pool.query(
-    `SELECT id, name, description, category, version, is_active, usage_count, created_by, created_at, updated_at,
+    `SELECT id, name, description, category, parameters, version, is_active, usage_count, created_by, created_at, updated_at,
             (SELECT COUNT(*) FROM workflow_template_steps WHERE template_id = workflow_templates.id) as step_count
      FROM workflow_templates ${where}
      ORDER BY updated_at DESC`,

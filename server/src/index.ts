@@ -863,11 +863,12 @@ app.use('/api/workflows', workflowsRouter); // Prompt Workflows + Dashboard + De
 console.log('✅ [Server] Mounted /api/workflows routes (Prompt Workflows)');
 app.use('/api/workflow-templates', workflowTemplatesRouter); // Workflow Template Library
 console.log('✅ [Server] Mounted /api/workflow-templates routes (Template Library)');
+const workflowLearningRouter = require('./api/workflowLearning');
+app.use('/api/learning', workflowLearningRouter); // Workflow Learning Engine
+console.log('✅ [Server] Mounted /api/learning routes (Workflow Learning Engine)');
 const agentRouter = require('./api/agentRoutes');
 app.use('/api/agents', agentRouter); // Multi-Agent Routing & Selection
 console.log('✅ [Server] Mounted /api/agents routes (Multi-Agent System)');
-app.use('/api/learning', workflowLearningRouter); // Cross-Workflow Learning Engine
-console.log('✅ [Server] Mounted /api/learning routes (Learning Engine)');
 app.use('/api/page-content', pageContentRouter); // Page Content CMS
 console.log('✅ [Server] Mounted /api/page-content routes (Page Content CMS)');
 const pageContentBuildsRouter = require('./routes/page-content-builds');

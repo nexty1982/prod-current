@@ -31,8 +31,12 @@ const { getAppPool } = require('../config/db');
  */
 function injectParams(text, params) {
   if (!text || typeof text !== 'string') return text;
+  if (!params || typeof params !== 'object') return text;
+  // Use a replacer function (not a string) so $ in values is treated literally.
+  // String.replace's string replacement interprets $& $1 $$ etc. but function
+  // return values are always literal.
   return text.replace(/\{\{(\w+)\}\}/g, (match, paramName) => {
-    if (params.hasOwnProperty(paramName)) {
+    if (Object.prototype.hasOwnProperty.call(params, paramName)) {
       return String(params[paramName]);
     }
     return match; // Leave unresolved placeholders as-is (caught in validation)
