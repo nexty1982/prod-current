@@ -24,6 +24,7 @@
 const { getAppPool } = require('../config/db');
 const policyService = require('./autoExecutionPolicyService');
 const decisionEngine = require('./decisionEngineService');
+const autonomousAdvance = require('./autonomousAdvanceService');
 
 // ─── Mutex & Change Detection ────────────────────────────────────────────
 //
@@ -270,6 +271,26 @@ async function runOnce() {
         results.errors.push(errorEntry);
         await logExecution(errorEntry, 'ERROR');
       }
+    }
+
+    // 6. Autonomous advancement (if mode > RELEASE_ONLY)
+    try {
+      const advanceResult = await autonomousAdvance.advanceWorkflows();
+      if (!advanceResult.skipped) {
+        results.autonomy = {
+          mode: advanceResult.mode,
+          workflows_inspected: advanceResult.workflows_inspected,
+          actions_taken: advanceResult.actions_taken.length,
+          pauses: advanceResult.pauses.length,
+          errors: advanceResult.errors.length,
+        };
+        if (advanceResult.actions_taken.length > 0) {
+          results.autonomy.details = advanceResult.actions_taken;
+        }
+      }
+    } catch (advErr) {
+      results.autonomy_error = advErr.message;
+      console.error('[AutoExecution] Autonomy advance error:', advErr.message);
     }
 
     results.duration_ms = Date.now() - startTime;

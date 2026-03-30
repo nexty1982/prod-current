@@ -12,6 +12,8 @@ const decisionEngine = require('../services/decisionEngineService');
 const autoExecutionPolicy = require('../services/autoExecutionPolicyService');
 const autoExecutionService = require('../services/autoExecutionService');
 const costService = require('../services/workflowCostService');
+const autonomyPolicy = require('../services/autonomyPolicyService');
+const autonomousAdvance = require('../services/autonomousAdvanceService');
 
 function getActor(req) {
   return req.user?.email || req.user?.username || 'unknown';
@@ -328,6 +330,86 @@ async function workflowCost(req, res) {
   }
 }
 
+// ─── Autonomy ──────────────────────────────────────────────────────────────
+
+async function autonomySetMode(req, res) {
+  try {
+    const { mode } = req.body;
+    if (!mode) {
+      return res.status(400).json({ success: false, error: 'mode is required (OFF, RELEASE_ONLY, SAFE_ADVANCE, SUPERVISED_FLOW)' });
+    }
+    const status = await autonomyPolicy.setMode(mode.toUpperCase());
+    res.json({ success: true, ...status });
+  } catch (err) {
+    res.status(400).json({ success: false, error: err.message });
+  }
+}
+
+async function autonomyStatus(req, res) {
+  try {
+    const status = await autonomyPolicy.getStatus();
+    res.json({ success: true, ...status });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+}
+
+async function autonomyLogs(req, res) {
+  try {
+    const limit = req.query.limit ? parseInt(req.query.limit) : 50;
+    const logs = await autonomyPolicy.getLogs(limit);
+    res.json({ success: true, logs });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+}
+
+async function autonomyPause(req, res) {
+  try {
+    const { reason } = req.body;
+    await autonomyPolicy.pauseWorkflow(req.params.id, reason || 'Paused by operator');
+    res.json({ success: true, message: `Workflow ${req.params.id} autonomy paused` });
+  } catch (err) {
+    const status = err.message.includes('not found') ? 404 : 400;
+    res.status(status).json({ success: false, error: err.message });
+  }
+}
+
+async function autonomyResume(req, res) {
+  try {
+    await autonomyPolicy.resumeWorkflow(req.params.id);
+    res.json({ success: true, message: `Workflow ${req.params.id} autonomy resumed` });
+  } catch (err) {
+    const status = err.message.includes('not found') ? 404 : 400;
+    res.status(status).json({ success: false, error: err.message });
+  }
+}
+
+async function setManualOnly(req, res) {
+  try {
+    const { target_type, manual_only } = req.body;
+    const type = target_type || 'workflow';
+    if (manual_only === undefined) {
+      return res.status(400).json({ success: false, error: 'manual_only (boolean) is required' });
+    }
+    await autonomyPolicy.setManualOnly(type, req.params.id, !!manual_only);
+    res.json({ success: true, message: `${type} ${req.params.id} manual_only set to ${!!manual_only}` });
+  } catch (err) {
+    const status = err.message.includes('not found') ? 404 :
+                   err.message.includes('Invalid') ? 400 : 500;
+    res.status(status).json({ success: false, error: err.message });
+  }
+}
+
+async function autonomyDashboard(req, res) {
+  try {
+    const data = await autonomousAdvance.getAutonomyDashboard();
+    res.json({ success: true, ...data });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+}
+
 module.exports = {
   create, list, getById, update,
   setSteps,
@@ -337,4 +419,5 @@ module.exports = {
   dashboard, dashboardExceptions, dashboardReady, dashboardRecommendations,
   autoExecEnable, autoExecDisable, autoExecSetMode, autoExecStatus, autoExecLogs, autoExecRunOnce,
   costReport, workflowCost,
+  autonomySetMode, autonomyStatus, autonomyLogs, autonomyPause, autonomyResume, setManualOnly, autonomyDashboard,
 };

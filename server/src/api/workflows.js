@@ -62,6 +62,13 @@ router.get('/auto-execution/status',   guardAdmin, controller.autoExecStatus);
 router.get('/auto-execution/logs',     guardAdmin, controller.autoExecLogs);
 router.post('/auto-execution/run',     guardAdmin, controller.autoExecRunOnce);
 
+// ─── Autonomy routes (BEFORE :id to avoid param capture) ─────────────────
+
+router.post('/autonomy/mode',       guardAdmin, controller.autonomySetMode);
+router.get('/autonomy/status',      guardAdmin, controller.autonomyStatus);
+router.get('/autonomy/logs',        guardAdmin, controller.autonomyLogs);
+router.get('/autonomy/dashboard',   guardAdmin, controller.autonomyDashboard);
+
 // ─── Per-workflow routes ────────────────────────────────────────────────────
 
 router.get('/:id',                  guardAdmin, controller.getById);
@@ -77,5 +84,8 @@ router.get('/:id/preview',         guardAdmin, controller.preview);
 router.post('/:id/generate-prompts', guardAdmin, controller.generatePrompts);
 router.get('/:id/status',          guardAdmin, controller.getStatus);
 router.get('/:id/cost',            guardAdmin, controller.workflowCost);
+router.post('/:id/autonomy/pause',  guardAdmin, controller.autonomyPause);
+router.post('/:id/autonomy/resume', guardAdmin, controller.autonomyResume);
+router.post('/:id/manual-only',     guardAdmin, controller.setManualOnly);
 
 module.exports = router;
