@@ -412,6 +412,17 @@ class PromptsController {
     }
   }
 
+  // GET /api/prompts/:id/queue-status
+  async getQueueStatus(req, res) {
+    try {
+      const result = await promptQueueService.getFullQueueStatus(req.params.id);
+      res.json({ success: true, data: result });
+    } catch (error) {
+      const status = error.message.includes('not found') ? 404 : 500;
+      res.status(status).json({ success: false, error: error.message });
+    }
+  }
+
   // GET /api/prompts/:id/dependencies
   async getDependencies(req, res) {
     try {

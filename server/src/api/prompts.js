@@ -32,6 +32,7 @@
  * POST   /api/prompts/:id/schedule      — Schedule prompt
  * POST   /api/prompts/:id/release       — Release prompt for execution
  * POST   /api/prompts/:id/release-auto-check — Check release eligibility (read-only)
+ * GET    /api/prompts/:id/queue-status  — Full queue context (recalculated)
  * GET    /api/prompts/:id/dependencies  — Get dependency chain
  */
 
@@ -81,6 +82,7 @@ router.get('/:id/next',           guardAdmin, controller.getNextPrompt);
 router.post('/:id/schedule',           guardAdmin, controller.schedulePrompt);
 router.post('/:id/release',            guardAdmin, controller.releaseForExecution);
 router.post('/:id/release-auto-check', guardAdmin, controller.releaseAutoCheck);
+router.get('/:id/queue-status',        guardAdmin, controller.getQueueStatus);
 router.get('/:id/dependencies',        guardAdmin, controller.getDependencies);
 
 module.exports = router;
