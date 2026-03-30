@@ -97,8 +97,16 @@ async function resolveAgent(component, promptType) {
     throw new Error('No active agents configured. Cannot route prompt.');
   }
 
+  // Parse the raw DB row — getAgent() normally handles this, but the fallback
+  // uses a direct query so we must parse JSON fields ourselves.
+  const fallbackAgent = {
+    ...defaults[0],
+    capabilities: _parseJSON(defaults[0].capabilities, []),
+    config: _parseJSON(defaults[0].config, null),
+  };
+
   return {
-    primary_agent: agentRegistry._parseAgent ? defaults[0] : defaults[0],
+    primary_agent: fallbackAgent,
     comparison_agents: [],
     rule: null,
     is_multi_agent: false,

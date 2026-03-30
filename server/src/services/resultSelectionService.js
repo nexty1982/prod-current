@@ -144,31 +144,26 @@ async function selectBestResult(executionGroupId) {
     );
   }
 
-  // Score each result
+  // Score each result with a single stable sort that applies all tie-breakers.
+  // Order: total_score DESC → agent_priority ASC → execution_duration_ms ASC.
+  // This handles 3+ agents correctly — every pair is compared the same way.
   const scored = results.map(r => _scoreResult(r));
-  scored.sort((a, b) => b.total_score - a.total_score);
+  scored.sort((a, b) => {
+    if (b.total_score !== a.total_score) return b.total_score - a.total_score;
+    if (a.agent_priority !== b.agent_priority) return a.agent_priority - b.agent_priority;
+    return (a.execution_duration_ms || Infinity) - (b.execution_duration_ms || Infinity);
+  });
 
-  const winner = scored[0];
   let tieBreakerUsed = false;
   let tieBreakerMethod = null;
 
-  // Check for ties
+  // Detect which tie-breaker resolved the winner (for traceability)
   if (scored.length > 1 && scored[0].total_score === scored[1].total_score) {
     tieBreakerUsed = true;
-    // Tie-breaker 1: agent_priority (lower = better)
     if (scored[0].agent_priority !== scored[1].agent_priority) {
       tieBreakerMethod = 'agent_priority';
-      scored.sort((a, b) => {
-        if (b.total_score !== a.total_score) return b.total_score - a.total_score;
-        return a.agent_priority - b.agent_priority;
-      });
     } else {
-      // Tie-breaker 2: execution speed
       tieBreakerMethod = 'execution_speed';
-      scored.sort((a, b) => {
-        if (b.total_score !== a.total_score) return b.total_score - a.total_score;
-        return (a.execution_duration_ms || Infinity) - (b.execution_duration_ms || Infinity);
-      });
     }
   }
 

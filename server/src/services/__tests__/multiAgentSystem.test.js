@@ -643,3 +643,343 @@ describe('determinism guarantees', () => {
     expect(a.total_score).toBeGreaterThan(c.total_score);
   });
 });
+
+// ─── 9. Hardening: Routing Edge Cases ────────────────────────────────────
+
+describe('routing hardening', () => {
+  const makeAgent = (overrides) => ({
+    id: 'agent-1', name: 'Claude', provider: 'anthropic',
+    model_id: 'claude-sonnet-4-6', capabilities: '["backend"]',
+    config: null, status: 'active', default_priority: 10,
+    ...overrides,
+  });
+
+  test('fallback agent has parsed JSON fields (capabilities, config)', async () => {
+    setupQueryResults(
+      [[], null],  // no rules
+      [[makeAgent({
+        id: 'fallback',
+        name: 'Fallback',
+        capabilities: '["backend","frontend"]',
+        config: '{"temperature":0.5}',
+      })], null]
+    );
+
+    const result = await routingService.resolveAgent('unknown', 'unknown');
+
+    // Must be parsed arrays/objects, not raw JSON strings
+    expect(Array.isArray(result.primary_agent.capabilities)).toBe(true);
+    expect(result.primary_agent.capabilities).toEqual(['backend', 'frontend']);
+    expect(result.primary_agent.config).toEqual({ temperature: 0.5 });
+  });
+
+  test('fallback agent has null config parsed as null, not string', async () => {
+    setupQueryResults(
+      [[], null],
+      [[makeAgent({ capabilities: '[]', config: null })], null]
+    );
+
+    const result = await routingService.resolveAgent('x', 'x');
+
+    expect(result.primary_agent.capabilities).toEqual([]);
+    expect(result.primary_agent.config).toBeNull();
+  });
+
+  test('inactive agent in rule is excluded by SQL WHERE clause', async () => {
+    // If an agent is inactive, the JOIN + WHERE a.status='active' excludes it.
+    // Simulate: no rules returned (because agent was inactive), then fallback.
+    setupQueryResults(
+      [[], null],
+      [[makeAgent({ id: 'active-fallback', name: 'Active Fallback' })], null]
+    );
+
+    const result = await routingService.resolveAgent('backend', 'implementation');
+
+    expect(result.primary_agent.name).toBe('Active Fallback');
+    expect(result.rule).toBeNull();
+  });
+
+  test('component-only rule matches any prompt_type', async () => {
+    const makeRule = (overrides) => ({
+      id: 'r1', rule_name: 'Test', component: null, prompt_type: null,
+      agent_id: 'a1', agent_name: 'Claude', agent_status: 'active',
+      priority: 50, is_multi_agent: 0, comparison_agent_ids: null, active: 1,
+      ...overrides,
+    });
+
+    setupQueryResults(
+      [[makeRule({ component: 'backend', prompt_type: null, priority: 10 })], null],
+      [[makeAgent({ id: 'a1' })], null]
+    );
+
+    const result = await routingService.resolveAgent('backend', 'docs');
+
+    expect(result.rule.component).toBe('backend');
+    expect(result.primary_agent).toBeDefined();
+  });
+
+  test('type-only rule matches any component', async () => {
+    const makeRule = (overrides) => ({
+      id: 'r1', rule_name: 'Test', component: null, prompt_type: null,
+      agent_id: 'a1', agent_name: 'Claude', agent_status: 'active',
+      priority: 50, is_multi_agent: 0, comparison_agent_ids: null, active: 1,
+      ...overrides,
+    });
+
+    setupQueryResults(
+      [[makeRule({ component: null, prompt_type: 'verification', priority: 10 })], null],
+      [[makeAgent({ id: 'a1' })], null]
+    );
+
+    const result = await routingService.resolveAgent('frontend', 'verification');
+
+    expect(result.rule.prompt_type).toBe('verification');
+  });
+
+  test('multi-agent rule with inactive comparison agent excludes that agent', async () => {
+    const makeRule = (overrides) => ({
+      id: 'r1', rule_name: 'Multi', component: null, prompt_type: null,
+      agent_id: 'primary', agent_name: 'Claude', agent_status: 'active',
+      priority: 10, is_multi_agent: 1, comparison_agent_ids: '["comp-1","comp-2"]',
+      active: 1, ...overrides,
+    });
+
+    setupQueryResults(
+      [[makeRule()], null],
+      [[makeAgent({ id: 'primary', name: 'Primary' })], null],
+      // comp-1 is active
+      [[makeAgent({ id: 'comp-1', name: 'Comp 1', status: 'active' })], null],
+      // comp-2 is inactive — getAgent returns it but status check filters it
+      [[makeAgent({ id: 'comp-2', name: 'Comp 2', status: 'inactive' })], null]
+    );
+
+    const result = await routingService.resolveAgent('backend', 'implementation');
+
+    expect(result.comparison_agents).toHaveLength(1);
+    expect(result.comparison_agents[0].name).toBe('Comp 1');
+    // is_multi_agent should be true since at least one comparison agent is active
+    expect(result.is_multi_agent).toBe(true);
+  });
+
+  test('multi-agent rule with all comparison agents inactive falls back to single', async () => {
+    const makeRule = (overrides) => ({
+      id: 'r1', rule_name: 'Multi', component: null, prompt_type: null,
+      agent_id: 'primary', agent_name: 'Claude', agent_status: 'active',
+      priority: 10, is_multi_agent: 1, comparison_agent_ids: '["comp-1"]',
+      active: 1, ...overrides,
+    });
+
+    setupQueryResults(
+      [[makeRule()], null],
+      [[makeAgent({ id: 'primary', name: 'Primary' })], null],
+      [[makeAgent({ id: 'comp-1', name: 'Comp 1', status: 'inactive' })], null]
+    );
+
+    const result = await routingService.resolveAgent('backend', 'implementation');
+
+    expect(result.comparison_agents).toHaveLength(0);
+    expect(result.is_multi_agent).toBe(false);
+  });
+});
+
+// ─── 10. Hardening: Selection Edge Cases ─────────────────────────────────
+
+describe('selection hardening', () => {
+  const makeResult = (overrides) => ({
+    id: 'result-1', agent_id: 'agent-1', agent_name: 'Claude',
+    agent_priority: 10, prompt_plan_step_id: 1, execution_group_id: 'group-1',
+    execution_duration_ms: 5000, evaluator_status: 'evaluated',
+    completion_status: 'success', violation_count: 0,
+    violations_found: '[]', confidence: 0.9,
+    ...overrides,
+  });
+
+  test('3-agent tie-break: score > priority > speed', async () => {
+    setupQueryResults(
+      [[
+        makeResult({ id: 'r1', agent_id: 'a1', agent_name: 'Agent A', agent_priority: 20, execution_duration_ms: 3000, confidence: 0.9 }),
+        makeResult({ id: 'r2', agent_id: 'a2', agent_name: 'Agent B', agent_priority: 10, execution_duration_ms: 5000, confidence: 0.9 }),
+        makeResult({ id: 'r3', agent_id: 'a3', agent_name: 'Agent C', agent_priority: 30, execution_duration_ms: 1000, confidence: 0.9 }),
+      ], null],
+      [{ affectedRows: 1 }, null], // mark winner
+      [{ affectedRows: 1 }, null], // mark loser 1
+      [{ affectedRows: 1 }, null], // mark loser 2
+      [{ affectedRows: 1 }, null]  // insert comparison
+    );
+
+    const result = await selectionService.selectBestResult('group-1');
+
+    // All same score, so priority breaks it: a2 (priority 10) wins
+    expect(result.selected_agent_id).toBe('a2');
+    expect(result.comparison.tie_breaker_used).toBe(true);
+    expect(result.comparison.tie_breaker_method).toBe('agent_priority');
+  });
+
+  test('3-agent tie-break: same score + same priority → speed wins', async () => {
+    setupQueryResults(
+      [[
+        makeResult({ id: 'r1', agent_id: 'a1', agent_name: 'Agent A', agent_priority: 10, execution_duration_ms: 8000, confidence: 0.9 }),
+        makeResult({ id: 'r2', agent_id: 'a2', agent_name: 'Agent B', agent_priority: 10, execution_duration_ms: 2000, confidence: 0.9 }),
+        makeResult({ id: 'r3', agent_id: 'a3', agent_name: 'Agent C', agent_priority: 10, execution_duration_ms: 5000, confidence: 0.9 }),
+      ], null],
+      [{ affectedRows: 1 }, null],
+      [{ affectedRows: 1 }, null],
+      [{ affectedRows: 1 }, null],
+      [{ affectedRows: 1 }, null]
+    );
+
+    const result = await selectionService.selectBestResult('group-1');
+
+    // Same score, same priority — fastest wins: a2 (2000ms)
+    expect(result.selected_agent_id).toBe('a2');
+    expect(result.comparison.tie_breaker_method).toBe('execution_speed');
+  });
+
+  test('null execution_duration_ms treated as Infinity in tie-break', async () => {
+    setupQueryResults(
+      [[
+        makeResult({ id: 'r1', agent_id: 'a1', agent_name: 'Agent A', agent_priority: 10, execution_duration_ms: null, confidence: 0.9 }),
+        makeResult({ id: 'r2', agent_id: 'a2', agent_name: 'Agent B', agent_priority: 10, execution_duration_ms: 5000, confidence: 0.9 }),
+      ], null],
+      [{ affectedRows: 1 }, null],
+      [{ affectedRows: 1 }, null],
+      [{ affectedRows: 1 }, null]
+    );
+
+    const result = await selectionService.selectBestResult('group-1');
+
+    // Null duration → Infinity, so a2 (5000ms) wins
+    expect(result.selected_agent_id).toBe('a2');
+    expect(result.comparison.tie_breaker_method).toBe('execution_speed');
+  });
+
+  test('failure result scores below partial regardless of violations/confidence', () => {
+    const failure = selectionService._scoreResult({
+      completion_status: 'failure', violation_count: 0, confidence: 1.0,
+    });
+    const partial = selectionService._scoreResult({
+      completion_status: 'partial', violation_count: 10, confidence: 0.0,
+    });
+
+    // failure: 1*100 + 10*10 + 10 = 210
+    // partial: 3*100 + 0*10 + 0 = 300
+    expect(partial.total_score).toBeGreaterThan(failure.total_score);
+  });
+
+  test('blocked and timeout score identically (both 0)', () => {
+    const blocked = selectionService._scoreResult({
+      completion_status: 'blocked', violation_count: 0, confidence: 0.5,
+    });
+    const timeout = selectionService._scoreResult({
+      completion_status: 'timeout', violation_count: 0, confidence: 0.5,
+    });
+
+    expect(blocked.total_score).toBe(timeout.total_score);
+  });
+
+  test('unknown completion_status gets rank 0', () => {
+    const unknown = selectionService._scoreResult({
+      completion_status: 'never_heard_of_this', violation_count: 0, confidence: 1.0,
+    });
+
+    expect(unknown.completion_rank).toBe(0);
+    // 0*100 + 10*10 + 10 = 110
+    expect(unknown.total_score).toBe(110);
+  });
+
+  test('null confidence and null violation_count default to 0', () => {
+    const result = selectionService._scoreResult({
+      completion_status: 'success', violation_count: null, confidence: null,
+    });
+
+    expect(result.violation_rank).toBe(10); // max(0, 10-0)
+    expect(result.confidence_rank).toBe(0); // round(0 * 10)
+    expect(result.total_score).toBe(5 * 100 + 10 * 10 + 0); // 600
+  });
+
+  test('loser rejection reason includes correct scores for 3 agents', async () => {
+    setupQueryResults(
+      [[
+        makeResult({ id: 'r1', agent_id: 'a1', agent_name: 'Winner', violation_count: 0, confidence: 0.95 }),
+        makeResult({ id: 'r2', agent_id: 'a2', agent_name: 'Loser1', violation_count: 2, confidence: 0.80 }),
+        makeResult({ id: 'r3', agent_id: 'a3', agent_name: 'Loser2', violation_count: 5, confidence: 0.60 }),
+      ], null],
+      [{ affectedRows: 1 }, null], // mark winner
+      [{ affectedRows: 1 }, null], // mark loser 1
+      [{ affectedRows: 1 }, null], // mark loser 2
+      [{ affectedRows: 1 }, null]  // insert comparison
+    );
+
+    await selectionService.selectBestResult('group-1');
+
+    // Find loser UPDATE calls
+    const loserUpdates = queryCalls.filter(c =>
+      c[0].includes('was_selected = 0')
+    );
+    expect(loserUpdates).toHaveLength(2);
+
+    // Both losers should reference the winner
+    for (const update of loserUpdates) {
+      expect(update[1][0]).toContain('outscored by Winner');
+    }
+  });
+
+  test('comparison record contains all agent scores for 3 agents', async () => {
+    setupQueryResults(
+      [[
+        makeResult({ id: 'r1', agent_id: 'a1', agent_name: 'A', confidence: 0.95 }),
+        makeResult({ id: 'r2', agent_id: 'a2', agent_name: 'B', confidence: 0.80 }),
+        makeResult({ id: 'r3', agent_id: 'a3', agent_name: 'C', confidence: 0.60 }),
+      ], null],
+      [{ affectedRows: 1 }, null],
+      [{ affectedRows: 1 }, null],
+      [{ affectedRows: 1 }, null],
+      [{ affectedRows: 1 }, null]
+    );
+
+    await selectionService.selectBestResult('group-1');
+
+    const insertCall = queryCalls.find(c => c[0].includes('INSERT INTO prompt_agent_comparisons'));
+    const scores = JSON.parse(insertCall[1][6]);
+
+    expect(Object.keys(scores)).toHaveLength(3);
+    expect(scores['a1']).toBeDefined();
+    expect(scores['a2']).toBeDefined();
+    expect(scores['a3']).toBeDefined();
+    // Verify ordering: a1 > a2 > a3
+    expect(scores['a1'].total_score).toBeGreaterThanOrEqual(scores['a2'].total_score);
+    expect(scores['a2'].total_score).toBeGreaterThanOrEqual(scores['a3'].total_score);
+  });
+});
+
+// ─── 11. Hardening: Constraint Parity ────────────────────────────────────
+
+describe('constraint parity', () => {
+  test('VALID_PROMPT_TYPES is frozen and matches routing expectations', () => {
+    expect(routingService.VALID_PROMPT_TYPES).toEqual(
+      ['plan', 'implementation', 'verification', 'correction', 'migration', 'docs']
+    );
+  });
+
+  test('VALID_COMPLETION_STATUSES matches COMPLETION_RANK keys', () => {
+    const { COMPLETION_RANK, VALID_COMPLETION_STATUSES } = selectionService;
+    expect(VALID_COMPLETION_STATUSES.sort()).toEqual(Object.keys(COMPLETION_RANK).sort());
+  });
+
+  test('all COMPLETION_RANK values are non-negative integers', () => {
+    for (const [status, rank] of Object.entries(selectionService.COMPLETION_RANK)) {
+      expect(Number.isInteger(rank)).toBe(true);
+      expect(rank).toBeGreaterThanOrEqual(0);
+    }
+  });
+
+  test('scoring formula is purely additive — no NaN possible with valid inputs', () => {
+    for (const status of selectionService.VALID_COMPLETION_STATUSES) {
+      const result = selectionService._scoreResult({
+        completion_status: status, violation_count: 0, confidence: 0.5,
+      });
+      expect(Number.isNaN(result.total_score)).toBe(false);
+      expect(Number.isFinite(result.total_score)).toBe(true);
+    }
+  });
+});

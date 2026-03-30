@@ -114,17 +114,23 @@ async function executePrompt({
   // Execute all agents
   const results = [];
   if (mode === 'multi') {
-    // Parallel execution
+    // Parallel execution — map agents alongside promises for traceability
     const timeout = parseInt(await getConfig('comparison_timeout_ms') || '120000', 10);
     const execPromises = agents.map(agent =>
       _executeWithAgent(agent, promptText, stepId, workItemId, executionGroupId, timeout)
     );
     const settled = await Promise.allSettled(execPromises);
-    for (const s of settled) {
+    for (let i = 0; i < settled.length; i++) {
+      const s = settled[i];
       if (s.status === 'fulfilled') {
         results.push(s.value);
       } else {
-        results.push({ error: s.reason.message, agent_id: 'unknown' });
+        // Preserve agent identity from the original agents array
+        results.push({
+          error: s.reason.message,
+          agent_id: agents[i].id,
+          agent_name: agents[i].name,
+        });
       }
     }
   } else {
@@ -135,11 +141,13 @@ async function executePrompt({
     results.push(result);
   }
 
-  // Auto-evaluate if configured
+  // Auto-evaluate if configured — evaluate ALL recorded results, including
+  // those with errors. Failed results that were recorded to DB need evaluation
+  // so selection can compare all candidates deterministically.
   const autoEval = await getConfig('auto_evaluate');
   if (autoEval === 'true') {
     for (const result of results) {
-      if (result.result_id && !result.error) {
+      if (result.result_id) {
         await _autoEvaluate(result.result_id, result);
       }
     }
@@ -149,7 +157,7 @@ async function executePrompt({
   let selected = null;
   let comparison = null;
 
-  if (mode === 'multi' && results.filter(r => !r.error).length > 1) {
+  if (mode === 'multi' && results.filter(r => r.result_id).length > 1) {
     try {
       const selection = await resultSelection.selectBestResult(executionGroupId);
       selected = {
@@ -347,13 +355,13 @@ async function _autoEvaluate(resultId, resultData) {
   if (rows.length === 0) return;
   const result = rows[0];
 
-  // If execution failed, mark as failure
-  if (!result.result_text) {
+  // If execution failed (either no output or pre-marked as failure), evaluate as failure
+  if (!result.result_text || result.completion_status === 'failure') {
     await resultSelection.evaluateResult(resultId, {
       completion_status: 'failure',
-      violations: [{ type: 'execution_error', description: 'No output produced', severity: 'critical' }],
+      violations: [{ type: 'execution_error', description: result.result_text ? 'Execution error' : 'No output produced', severity: 'critical' }],
       confidence: 0,
-      notes: 'Auto-evaluated: execution produced no output',
+      notes: `Auto-evaluated: ${result.result_text ? 'execution failed with error' : 'execution produced no output'}`,
     });
     return;
   }
