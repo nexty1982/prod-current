@@ -51,7 +51,7 @@ const PortalNavigations: React.FC = () => {
             to={link.to}
             className={`font-['Inter'] text-[15px] transition-colors no-underline relative pb-1 ${
               isActive
-                ? 'text-[#2d1b4e] dark:text-white font-medium after:content-[""] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[2px] after:bg-[#2d1b4e] after:dark:bg-[#d4af37] after:rounded-sm'
+                ? 'text-[#2d1b4e] dark:text-white font-medium after:content-[""] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[2px] after:bg-[#2d1b4e] dark:after:bg-[#d4af37] after:rounded-sm'
                 : 'text-[#4a5565] dark:text-gray-400 hover:text-[#2d1b4e] dark:hover:text-white'
             }`}
           >

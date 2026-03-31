@@ -926,6 +926,10 @@ app.use('/api/user/profile', userProfileRouter);
 const userSessionsRouter = require('./routes/user-sessions');
 app.use('/api/user/sessions', userSessionsRouter);
 
+// Work session tracking (cross-app work timer + weekly reports)
+const workSessionsRouter = require('./routes/work-sessions');
+app.use('/api/work-sessions', workSessionsRouter);
+
 // Profile image upload routes (avatar + banner)
 const profileUploadRouter = require('./routes/upload');
 app.use('/api/upload', profileUploadRouter);
@@ -1586,6 +1590,29 @@ cron.schedule('*/5 * * * *', async () => {
 });
 
 console.log('Email queue processor started (runs every 5 minutes)');
+
+// --- WORK SESSION CRONS ---------------------------------------------
+// Weekly report generation — every Monday at 12:00 UTC (8 AM ET)
+cron.schedule('0 12 * * 1', async () => {
+  try {
+    const { processWeeklyReports } = require('./services/weeklyReportService');
+    await processWeeklyReports();
+  } catch (error) {
+    console.error('Error processing weekly reports:', error);
+  }
+});
+
+// Auto-end stale work sessions — every hour
+cron.schedule('0 * * * *', async () => {
+  try {
+    const { autoEndStaleSessions } = require('./services/weeklyReportService');
+    await autoEndStaleSessions();
+  } catch (error) {
+    console.error('Error auto-ending stale sessions:', error);
+  }
+});
+
+console.log('Work session crons started (weekly reports Mon 8AM ET, stale session cleanup hourly)');
 
 // MIGRATED TO OMAI: om-daily cron jobs (changelog, staging review, GitHub sync)
 // These crons now run from the OMAI server
