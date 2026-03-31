@@ -229,6 +229,7 @@ const dailyTasksRouter = require('./api/dailyTasks');
 const promptPlansRouter = require('./routes/prompt-plans');
 const workflowsRouter = require('./api/workflows');
 const workflowTemplatesRouter = require('./api/workflowTemplates');
+const workflowLearningRouter = require('./api/workflowLearning');
 const pageContentRouter = require('./routes/page-content');
 const snapshotsRouter = require('./routes/snapshots');
 const crmRouter = require('./routes/crm');
@@ -865,6 +866,8 @@ app.use('/api/workflows', workflowsRouter); // Prompt Workflows + Dashboard + De
 console.log('✅ [Server] Mounted /api/workflows routes (Prompt Workflows)');
 app.use('/api/workflow-templates', workflowTemplatesRouter); // Workflow Template Library
 console.log('✅ [Server] Mounted /api/workflow-templates routes (Template Library)');
+app.use('/api/learning', workflowLearningRouter); // Cross-Workflow Learning Engine
+console.log('✅ [Server] Mounted /api/learning routes (Learning Engine)');
 app.use('/api/page-content', pageContentRouter); // Page Content CMS
 console.log('✅ [Server] Mounted /api/page-content routes (Page Content CMS)');
 const pageContentBuildsRouter = require('./routes/page-content-builds');

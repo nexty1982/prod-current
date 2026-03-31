@@ -12,10 +12,12 @@
  *   - Generated prompts start in "draft" status (must pass audit before execution)
  *   - Dependency chain is set via parent_prompt_id + depends_on_prompt_id
  *   - Each prompt gets workflow_id + workflow_step_number for traceability
+ *   - Learned constraints are injected based on cross-workflow analysis
  */
 
 const { v4: uuidv4 } = require('uuid');
 const { getAppPool } = require('../config/db');
+const injectionEngine = require('./constraintInjectionEngine');
 
 // ─── Prompt Type Labels ─────────────────────────────────────────────────────
 
@@ -33,10 +35,21 @@ const TYPE_LABELS = {
 /**
  * Build a structurally complete prompt from a workflow step definition.
  * All 8 required sections are populated.
+ *
+ * @param {object} step
+ * @param {object} workflow
+ * @param {number} stepIndex
+ * @param {number} totalSteps
+ * @param {string} [constraintBlock] - injected constraint text (from learning engine)
  */
-function buildPromptFromStep(step, workflow, stepIndex, totalSteps) {
+function buildPromptFromStep(step, workflow, stepIndex, totalSteps, constraintBlock) {
   const now = new Date().toISOString().split('T')[0];
   const typeLabel = TYPE_LABELS[step.prompt_type] || step.prompt_type;
+
+  // Build the constraint injection section
+  const constraintSection = constraintBlock
+    ? `\n---\n\n${constraintBlock}\n`
+    : '';
 
   return `[METADATA]
 ID: ${String(stepIndex + 1).padStart(3, '0')}
@@ -88,7 +101,7 @@ ${step.depends_on_step ? `\nDepends on: Step ${step.depends_on_step} (must be co
 REQUIREMENTS:
 
 ${step.requirements_summary || `1. Complete all objectives described in the task section\n2. Ensure output meets the expected outcome criteria\n3. Follow existing codebase patterns and conventions`}
-
+${constraintSection}
 ---
 
 OUTPUT REQUIREMENTS:
@@ -126,6 +139,7 @@ Every output must be verifiable. Do not claim completion without evidence. Every
 /**
  * Preview what prompts would be generated for a workflow.
  * Returns the full prompt text for each step without creating anything.
+ * Now includes constraint preview.
  */
 async function previewGeneration(workflowId) {
   const pool = getAppPool();
@@ -141,14 +155,28 @@ async function previewGeneration(workflowId) {
 
   if (steps.length === 0) throw new Error('Workflow has no steps.');
 
-  return steps.map((step, i) => ({
-    step_number: step.step_number,
-    title: step.title,
-    component: step.component || workflow.component,
-    prompt_type: step.prompt_type,
-    depends_on_step: step.depends_on_step,
-    prompt_text: buildPromptFromStep(step, workflow, i, steps.length),
-  }));
+  // Build constraint blocks for each step
+  const previews = [];
+  for (let i = 0; i < steps.length; i++) {
+    const step = steps[i];
+    const { text: constraintBlock, constraints } = await injectionEngine.buildConstraintBlock(step, workflow);
+
+    previews.push({
+      step_number: step.step_number,
+      title: step.title,
+      component: step.component || workflow.component,
+      prompt_type: step.prompt_type,
+      depends_on_step: step.depends_on_step,
+      prompt_text: buildPromptFromStep(step, workflow, i, steps.length, constraintBlock),
+      injected_constraints: constraints.map(c => ({
+        title: c.title,
+        severity: c.severity,
+        reason: c.injection_reason,
+      })),
+    });
+  }
+
+  return previews;
 }
 
 // ─── Batch Generation ───────────────────────────────────────────────────────
@@ -158,9 +186,11 @@ async function previewGeneration(workflowId) {
  * Atomic: uses a transaction — all prompts created or none.
  * Idempotent: if prompts_generated is already true, returns existing.
  *
+ * Now integrates constraint injection from the learning engine.
+ *
  * @param {string} workflowId - UUID
  * @param {string} actor - who triggered generation
- * @returns {{ prompts: object[], already_existed: boolean }}
+ * @returns {{ prompts: object[], already_existed: boolean, injections_count: number }}
  */
 async function generatePrompts(workflowId, actor) {
   const pool = getAppPool();
@@ -185,7 +215,7 @@ async function generatePrompts(workflowId, actor) {
        WHERE p.workflow_id = ? ORDER BY s.step_number`,
       [workflowId]
     );
-    return { prompts: existing, already_existed: true };
+    return { prompts: existing, already_existed: true, injections_count: 0 };
   }
 
   // Load steps
@@ -198,16 +228,20 @@ async function generatePrompts(workflowId, actor) {
     throw new Error('Cannot generate: workflow has no steps.');
   }
 
+  // Pre-compute constraint blocks for each step (before transaction)
+  const constraintBlocks = [];
+  for (const step of steps) {
+    const block = await injectionEngine.buildConstraintBlock(step, workflow);
+    constraintBlocks.push(block);
+  }
+
   // Generate all prompts in a transaction
   const conn = await pool.getConnection();
+  let totalInjections = 0;
+
   try {
     await conn.beginTransaction();
 
-    // Create a parent prompt ID for the workflow scope (used for sequence ordering)
-    // We use the workflow's first prompt as the parent scope anchor
-    const parentScopeId = null; // Workflow prompts use workflow_id instead of parent_prompt_id
-
-    // Map step_number → prompt_id for dependency resolution
     const stepPromptMap = {};
     const generatedPrompts = [];
 
@@ -216,9 +250,10 @@ async function generatePrompts(workflowId, actor) {
       const promptId = uuidv4();
       stepPromptMap[step.step_number] = promptId;
 
-      const promptText = buildPromptFromStep(step, workflow, i, steps.length);
+      const { text: constraintBlock, constraints } = constraintBlocks[i];
+      const promptText = buildPromptFromStep(step, workflow, i, steps.length, constraintBlock);
 
-      // Determine dependency: explicit step dep → that step's prompt, otherwise previous step's prompt
+      // Determine dependency
       let dependsOnPromptId = null;
       if (step.depends_on_step && stepPromptMap[step.depends_on_step]) {
         dependsOnPromptId = stepPromptMap[step.depends_on_step];
@@ -226,7 +261,6 @@ async function generatePrompts(workflowId, actor) {
         dependsOnPromptId = stepPromptMap[steps[i - 1].step_number];
       }
 
-      // Determine dependency type
       const depType = step.depends_on_step ? 'explicit' : (i > 0 ? 'sequence' : 'none');
 
       await conn.query(
@@ -244,7 +278,7 @@ async function generatePrompts(workflowId, actor) {
           step.title,
           step.purpose,
           step.component || workflow.component,
-          step.step_number, // sequence_order = step_number
+          step.step_number,
           promptText,
           workflowId,
           step.step_number,
@@ -266,7 +300,10 @@ async function generatePrompts(workflowId, actor) {
         status: 'draft',
         dependency_type: depType,
         depends_on_prompt_id: dependsOnPromptId,
+        constraints_injected: constraints.length,
       });
+
+      totalInjections += constraints.length;
     }
 
     // Mark workflow as prompts_generated
@@ -277,13 +314,25 @@ async function generatePrompts(workflowId, actor) {
 
     await conn.commit();
 
+    // Record injections outside transaction (non-critical)
+    for (let i = 0; i < steps.length; i++) {
+      const { recordAll } = constraintBlocks[i];
+      const promptId = stepPromptMap[steps[i].step_number];
+      try {
+        await recordAll(promptId);
+      } catch (err) {
+        console.error(`[workflow_gen] Failed to record injection for prompt ${promptId}:`, err.message);
+      }
+    }
+
     // Log outside transaction
     await logAction(pool, workflowId, 'PROMPTS_GENERATED', actor, {
       prompt_count: generatedPrompts.length,
       prompt_ids: generatedPrompts.map(p => p.id),
+      constraints_injected: totalInjections,
     });
 
-    return { prompts: generatedPrompts, already_existed: false };
+    return { prompts: generatedPrompts, already_existed: false, injections_count: totalInjections };
 
   } catch (err) {
     await conn.rollback();
