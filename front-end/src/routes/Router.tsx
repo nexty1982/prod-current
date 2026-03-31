@@ -1709,9 +1709,7 @@ const Router = [
 
       // Removed: Dynamic addon routes (misc-legacy)
 
-      // =====================================================
       // BIG BOOK CUSTOM COMPONENT ROUTES
-      // =====================================================
 
       // Big Book custom component routes
       {
