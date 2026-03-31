@@ -5,6 +5,7 @@ import { useContext } from 'react';
 
 // Components
 import OrthodoxThemeToggle from '@/shared/ui/OrthodoxThemeToggle';
+import WorkSessionControl from '../../../../components/layout/WorkSessionControl';
 import ChurchHeader from '../../../../components/layout/ChurchHeader';
 import Language from './Language';
 import LastLoggedIn from './LastLoggedIn';
@@ -90,6 +91,9 @@ const Header = () => {
 
         {/* Right Side Actions */}
         <Stack spacing={1.5} direction="row" alignItems="center" sx={{ ml: 'auto' }}>
+
+          {/* Work Session Timer */}
+          {authenticated && <WorkSessionControl />}
 
           {/* User Tools */}
           <LastLoggedIn />

@@ -192,6 +192,7 @@ const LayoutTemplateEditorPage = Loadable(lazy(() => import('../features/devel-t
 const OcrActivityMonitor = Loadable(lazy(() => import('../features/admin/OcrActivityMonitor')));
 const OcrOperationsDashboard = Loadable(lazy(() => import('../features/devel-tools/ocr-operations/OcrOperationsDashboard')));
 const OcrBatchManager = Loadable(lazy(() => import('../features/devel-tools/ocr-operations/OcrBatchManager')));
+const WorkSessionAdmin = Loadable(lazy(() => import('../features/devel-tools/work-sessions/WorkSessionAdminPage')));
 // OMTasksPage, DailyTasks — retired, now managed via OMAI OM Daily
 const ApiExplorerPage = Loadable(lazy(() => import('../features/devel-tools/api-explorer/ApiExplorerPage')));
 const LiveTableBuilderPage = Loadable(lazy(() => import('../features/devel-tools/live-table-builder/LiveTableBuilderPage')));
@@ -1314,6 +1315,16 @@ const Router = [
         )
       },
       // OM Tasks, Daily Tasks — retired from OM, now managed via OMAI OM Daily
+      {
+        path: '/devel-tools/work-session-admin',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin']}>
+            <AdminErrorBoundary>
+              <WorkSessionAdmin />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
       {
         path: '/devel-tools/api-explorer',
         element: (

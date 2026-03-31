@@ -21,6 +21,7 @@ import { getPageTitle } from '../../config/pageTitles';
 // import GlobalOMAI from '../../components/global/GlobalOMAI';
 // import ErrorNotificationToast from '../../components/global/ErrorNotificationToast';
 import { OmAssistant } from '../../components/OmAssistant';
+import WorkSessionPrompt from '../../components/layout/WorkSessionPrompt';
 import ChurchContext from '@/context/ChurchContext';
 
 const MainWrapper = styled('div')(({ theme }) => ({
@@ -82,6 +83,8 @@ const FullLayout: FC = () => {
           {/* Header */}
           {/* ------------------------------------------- */}
           {activeLayout === 'horizontal' ? <HorizontalHeader /> : <Header />}
+          {/* Work Session Start Prompt (shows once after login if no active session) */}
+          <WorkSessionPrompt />
           {/* PageContent */}
           {activeLayout === 'horizontal' ? <Navigation /> : ''}
           <Container
