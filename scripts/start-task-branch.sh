@@ -4,24 +4,27 @@ set -Eeuo pipefail
 # start-task-branch.sh — Create a task-scoped branch from current main
 # ============================================================================
 #
+# Authoritative Branch Naming Standard:
+#   <type>/<work-item-id>/<yyyy-mm-dd>/<slug>
+#
 # Usage:
 #   ./scripts/start-task-branch.sh <type> <description> [options]
 #
 # Arguments:
-#   type          Branch type: feature|enhancement|bugfix|refactor|migration|chore|spike|docs
+#   type          Branch type: feature | fix | chore
 #   description   Short description (will be slugified)
 #
 # Options:
 #   --owner <name>    Owner identifier (default: git user or whoami)
-#   --item <id>       OM Daily item ID (used as owner)
+#   --item <id>       OM Daily item ID (used as owner, e.g. omd-412)
 #   --repo <target>   Which repo: orthodoxmetrics (default) or omai
 #   --no-push         Don't push to origin (local-only branch)
 #
 # Examples:
-#   ./scripts/start-task-branch.sh feature work-session-tracking
-#   ./scripts/start-task-branch.sh bugfix session-cookie-issue --item 693
-#   ./scripts/start-task-branch.sh enhancement improve-ocr --owner claude-cli
-#   ./scripts/start-task-branch.sh chore update-deps --repo omai
+#   ./scripts/start-task-branch.sh feature work-session-tracking --item omd-412
+#   ./scripts/start-task-branch.sh fix session-cookie-issue --item omd-413
+#   ./scripts/start-task-branch.sh chore update-deps --owner claude-cli
+#   ./scripts/start-task-branch.sh feature improve-ocr --repo omai --item omd-500
 #
 # ============================================================================
 
@@ -39,16 +42,13 @@ declare -A REPO_PATHS=(
   [omai]="/var/www/omai"
 )
 
-# ── Type → prefix mapping (matches OM Daily BRANCH_TYPE_PREFIXES) ──────────
+# ── Authoritative type mapping ──────────────────────────────────────────────
+# Only three branch types are supported for new branches.
+# Long-form names are used directly as the branch prefix.
 declare -A TYPE_TO_PREFIX=(
-  [feature]=feat
-  [enhancement]=enh
-  [bugfix]=fix
-  [refactor]=ref
-  [migration]=mig
+  [feature]=feature
+  [fix]=fix
   [chore]=chore
-  [spike]=spike
-  [docs]=docs
 )
 
 # ── Parse arguments ────────────────────────────────────────────────────────
@@ -60,19 +60,24 @@ usage() {
   echo "  ./scripts/start-task-branch.sh <type> <description> [options]"
   echo ""
   echo -e "${BOLD}Types:${NC}"
-  echo "  feature | enhancement | bugfix | refactor | migration | chore | spike | docs"
+  echo "  feature    New functionality or capability"
+  echo "  fix        Bug fix or correction"
+  echo "  chore      Maintenance, refactoring, docs, migrations, tooling"
   echo ""
   echo -e "${BOLD}Options:${NC}"
   echo "  --owner <name>    Owner identifier (default: git user or whoami)"
-  echo "  --item <id>       OM Daily item ID (used as owner instead of username)"
+  echo "  --item <id>       OM Daily item ID (e.g. omd-412, used as owner)"
   echo "  --repo <target>   Target repo: orthodoxmetrics (default) or omai"
   echo "  --no-push         Don't push branch to origin"
   echo "  -h, --help        Show this help"
   echo ""
+  echo -e "${BOLD}Branch format:${NC}"
+  echo "  <type>/<work-item-id>/<yyyy-mm-dd>/<slug>"
+  echo ""
   echo -e "${BOLD}Examples:${NC}"
-  echo "  ./scripts/start-task-branch.sh feature work-session-tracking"
-  echo "  ./scripts/start-task-branch.sh bugfix session-fix --item 693"
-  echo "  ./scripts/start-task-branch.sh chore update-deps --repo omai"
+  echo "  ./scripts/start-task-branch.sh feature work-session-tracking --item omd-412"
+  echo "  ./scripts/start-task-branch.sh fix session-cookie-issue --item omd-413"
+  echo "  ./scripts/start-task-branch.sh chore update-deps --owner claude-cli"
   exit 0
 }
 
@@ -115,7 +120,7 @@ if [[ -z "$BRANCH_TYPE" || -z "$DESCRIPTION" ]]; then
   echo -e "${RED}✗ Both <type> and <description> are required.${NC}" >&2
   echo "" >&2
   echo "  Usage: ./scripts/start-task-branch.sh <type> <description>" >&2
-  echo "  Types: feature | enhancement | bugfix | refactor | migration | chore | spike | docs" >&2
+  echo "  Types: feature | fix | chore" >&2
   exit 1
 fi
 
@@ -142,7 +147,12 @@ fi
 
 if [[ -n "$ITEM_ID" ]]; then
   # Item ID takes precedence as the owner segment
-  OWNER="$ITEM_ID"
+  # Normalize: plain numbers become omd-NNN, omd-NNN passes through
+  if [[ "$ITEM_ID" =~ ^[0-9]+$ ]]; then
+    OWNER="omd-${ITEM_ID}"
+  else
+    OWNER=$(echo "$ITEM_ID" | tr '[:upper:]' '[:lower:]')
+  fi
 elif [[ -z "$OWNER" ]]; then
   # Default: git user.name slugified, or whoami
   OWNER=$(cd "$REPO_DIR" && git config user.name 2>/dev/null \

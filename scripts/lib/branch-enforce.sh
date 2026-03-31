@@ -3,6 +3,26 @@
 # branch-enforce.sh — Shared branch discipline enforcement library
 # ============================================================================
 #
+# Authoritative Branch Naming Standard:
+#
+#   <type>/<work-item-id>/<yyyy-mm-dd>/<slug>
+#
+#   Accepted types:  feature, fix, chore
+#   Work item ID:    omd-NNN, username slug, or agent tool name
+#   Date:            ISO date of branch creation
+#   Slug:            kebab-case description
+#
+#   Examples:
+#     feature/omd-412/2026-03-31/work-session-foundation
+#     fix/omd-413/2026-03-31/header-timer-layout
+#     chore/omd-502/2026-03-31/branch-discipline-standardization
+#
+# Legacy compatibility:
+#   Branches using older naming conventions (feat/, enh/, ref/, mig/, spike/,
+#   docs/, feature/<user>/<date>/<slug>) are recognized and allowed with a
+#   deprecation warning during a migration period. New branches must use the
+#   authoritative standard above.
+#
 # Source this file from deploy scripts to enforce task-scoped branch usage.
 # All functions are prefixed with be_ to avoid collisions.
 #
@@ -16,15 +36,29 @@
 #   BE_ALLOW_MAIN=true       — permit deploy from main
 #   BE_SKIP_SCOPE_CHECK=true — suppress stale/diverse commit warnings
 #   BE_SKIP_DIRTY_CHECK=true — skip clean-tree check (caller handles commit prompt)
+#   BE_ALLOW_LEGACY=true     — suppress legacy branch warnings (auto-set when detected)
 # ============================================================================
 
 # ── Configuration ───────────────────────────────────────────────────────────
 
-# Allowed branch prefixes (matches OM Daily BRANCH_TYPE_PREFIXES)
-BE_ALLOWED_PREFIXES="feat|enh|fix|ref|mig|chore|spike|docs"
+# Authoritative branch prefixes — the ONLY types for new branches
+BE_STANDARD_PREFIXES="feature|fix|chore"
 
-# Full branch pattern: <prefix>/<owner-or-id>/<yyyy-mm-dd>/<slug>
-BE_BRANCH_PATTERN="^(${BE_ALLOWED_PREFIXES})/[a-z0-9][a-z0-9-]*/[0-9]{4}-[0-9]{2}-[0-9]{2}/[a-z0-9][a-z0-9-]*$"
+# Full authoritative pattern: <type>/<work-item-id>/<yyyy-mm-dd>/<slug>
+BE_BRANCH_PATTERN="^(${BE_STANDARD_PREFIXES})/[a-z0-9][a-z0-9-]*/[0-9]{4}-[0-9]{2}-[0-9]{2}/[a-z0-9][a-z0-9-]*$"
+
+# Legacy patterns — recognized with deprecation warning during migration
+# Short-form prefixes from P-001 era (feat/enh/ref/mig/spike/docs)
+BE_LEGACY_SHORT_PATTERN="^(feat|enh|ref|mig|spike|docs)/[a-z0-9][a-z0-9-]*/[0-9]{4}-[0-9]{2}-[0-9]{2}/[a-z0-9][a-z0-9-]*$"
+
+# OM Daily legacy format: <prefix>/<id>-<slug> (no date segment)
+BE_LEGACY_OMDAILY_PATTERN="^(feat|enh|fix|ref|mig|chore|spike|docs)/[0-9]+-[a-z0-9][a-z0-9-]*$"
+
+# Pre-P-001 human format: feature/<username>/<date>/<slug> (valid, already long-form)
+# This is actually compatible with the standard — no special handling needed
+
+# Ancient agent formats: EF_claude-cli_2026-03-24, NF_windsurf_2026-03-24, etc.
+BE_LEGACY_AGENT_PATTERN="^(EF|NF|BF|PA)_[a-z0-9-]+_[0-9]{4}-[0-9]{2}-[0-9]{2}"
 
 # Staleness threshold in days
 BE_STALE_DAYS=7
@@ -39,6 +73,7 @@ _BE_COMMIT_FULL=""
 _BE_MERGE_BASE=""
 _BE_AHEAD_COUNT=0
 _BE_INITIALIZED=false
+_BE_BRANCH_CLASS=""  # "standard", "legacy", or "invalid"
 
 # ── Color codes ─────────────────────────────────────────────────────────────
 
@@ -90,6 +125,7 @@ be_init() {
   _BE_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "HEAD")
   _BE_COMMIT=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
   _BE_COMMIT_FULL=$(git rev-parse HEAD 2>/dev/null || echo "unknown")
+  _BE_BRANCH_CLASS=""
 
   # Fetch origin to ensure merge-base is accurate
   git fetch origin main --quiet 2>/dev/null || true
@@ -107,13 +143,14 @@ be_init() {
 
 # ── Accessor functions ──────────────────────────────────────────────────────
 
-be_branch()      { echo "$_BE_BRANCH"; }
-be_commit()      { echo "$_BE_COMMIT"; }
-be_commit_full() { echo "$_BE_COMMIT_FULL"; }
-be_merge_base()  { echo "$_BE_MERGE_BASE"; }
-be_ahead_count() { echo "$_BE_AHEAD_COUNT"; }
-be_repo_name()   { echo "$_BE_REPO_NAME"; }
-be_repo_dir()    { echo "$_BE_REPO_DIR"; }
+be_branch()       { echo "$_BE_BRANCH"; }
+be_commit()       { echo "$_BE_COMMIT"; }
+be_commit_full()  { echo "$_BE_COMMIT_FULL"; }
+be_merge_base()   { echo "$_BE_MERGE_BASE"; }
+be_ahead_count()  { echo "$_BE_AHEAD_COUNT"; }
+be_repo_name()    { echo "$_BE_REPO_NAME"; }
+be_repo_dir()     { echo "$_BE_REPO_DIR"; }
+be_branch_class() { echo "$_BE_BRANCH_CLASS"; }
 
 # ── Validation functions ───────────────────────────────────────────────────
 
@@ -147,26 +184,58 @@ be_check_not_main() {
 }
 
 # be_validate_branch_pattern
-#   Fails if branch name doesn't match the unified naming convention.
+#   Checks branch name against authoritative standard and legacy patterns.
+#   Standard branches pass cleanly.
+#   Legacy branches pass with a deprecation warning.
+#   Invalid branches fail with remediation instructions.
 be_validate_branch_pattern() {
   if [[ "${BE_ALLOW_MAIN:-false}" == "true" && "$_BE_BRANCH" == "main" ]]; then
     return 0  # skip pattern check when main is explicitly allowed
   fi
 
+  # ── Check authoritative standard first ──
   if [[ "$_BE_BRANCH" =~ $BE_BRANCH_PATTERN ]]; then
-    _be_ok "Branch name matches naming convention"
+    _BE_BRANCH_CLASS="standard"
+    _be_ok "Branch name matches authoritative standard"
     return 0
   fi
 
+  # ── Check legacy patterns ──
+  local legacy_reason=""
+
+  if [[ "$_BE_BRANCH" =~ $BE_LEGACY_SHORT_PATTERN ]]; then
+    legacy_reason="uses short-form prefix '${BASH_REMATCH[1]}' instead of long-form"
+  elif [[ "$_BE_BRANCH" =~ $BE_LEGACY_OMDAILY_PATTERN ]]; then
+    legacy_reason="uses OM Daily legacy format (missing date segment)"
+  elif [[ "$_BE_BRANCH" =~ $BE_LEGACY_AGENT_PATTERN ]]; then
+    legacy_reason="uses pre-standardization agent format"
+  fi
+
+  if [[ -n "$legacy_reason" ]]; then
+    _BE_BRANCH_CLASS="legacy"
+    _be_warn "Legacy branch format detected: $_BE_BRANCH"
+    echo -e "  ${_BE_YELLOW}↳${_BE_NC} This branch $legacy_reason." >&2
+    echo -e "  ${_BE_YELLOW}↳${_BE_NC} Allowed temporarily — new branches must use the standard format:" >&2
+    echo -e "  ${_BE_CYAN}  feature/<work-item-id>/<date>/<slug>${_BE_NC}" >&2
+    echo -e "  ${_BE_CYAN}  fix/<work-item-id>/<date>/<slug>${_BE_NC}" >&2
+    echo -e "  ${_BE_CYAN}  chore/<work-item-id>/<date>/<slug>${_BE_NC}" >&2
+    echo "" >&2
+    return 0
+  fi
+
+  # ── No match — invalid branch ──
+  _BE_BRANCH_CLASS="invalid"
   _be_fail \
-    "Branch '$_BE_BRANCH' does not match required naming convention." \
-    "Required format: <prefix>/<owner>/<yyyy-mm-dd>/<slug>"
+    "Branch '$_BE_BRANCH' does not match any accepted naming convention." \
+    "Required format: <type>/<work-item-id>/<yyyy-mm-dd>/<slug>"
   echo "" >&2
-  echo -e "  ${_BE_BOLD}Allowed prefixes:${_BE_NC} feat, enh, fix, ref, mig, chore, spike, docs" >&2
+  echo -e "  ${_BE_BOLD}Accepted types:${_BE_NC} feature, fix, chore" >&2
+  echo -e "  ${_BE_BOLD}Work item ID:${_BE_NC}   omd-NNN, username, or agent tool name" >&2
+  echo "" >&2
   echo -e "  ${_BE_BOLD}Examples:${_BE_NC}" >&2
-  echo -e "    feat/nectarios-parsells/$(date +%Y-%m-%d)/work-session-tracking" >&2
-  echo -e "    fix/693/$(date +%Y-%m-%d)/session-cookie-issue" >&2
-  echo -e "    enh/claude-cli/$(date +%Y-%m-%d)/improve-ocr-accuracy" >&2
+  echo -e "    feature/omd-412/$(date +%Y-%m-%d)/work-session-foundation" >&2
+  echo -e "    fix/omd-413/$(date +%Y-%m-%d)/header-timer-layout" >&2
+  echo -e "    chore/omd-502/$(date +%Y-%m-%d)/branch-discipline-standardization" >&2
   echo "" >&2
   echo -e "  ${_BE_CYAN}→${_BE_NC} Create one: ./scripts/start-task-branch.sh <type> <description>" >&2
   return 1
@@ -343,6 +412,7 @@ be_generate_deploy_metadata() {
   "deploy_id": "$deploy_id",
   "repo": "$_BE_REPO_NAME",
   "branch": "$_BE_BRANCH",
+  "branch_class": "$_BE_BRANCH_CLASS",
   "branch_type": "$branch_type",
   "branch_owner": "$branch_owner",
   "branch_date": "$branch_date",
@@ -374,6 +444,9 @@ be_print_change_summary() {
   echo -e "\n${_BE_BOLD}${_BE_CYAN}▶ Change Summary${_BE_NC}" >&2
   echo -e "${_BE_CYAN}───────────────────────────────────────────────────────────────${_BE_NC}" >&2
   echo -e "  Branch:     ${_BE_BOLD}$_BE_BRANCH${_BE_NC}" >&2
+  if [[ "$_BE_BRANCH_CLASS" == "legacy" ]]; then
+    echo -e "  Format:     ${_BE_YELLOW}legacy (migration required for new work)${_BE_NC}" >&2
+  fi
   echo -e "  Merge base: ${_BE_MERGE_BASE:0:12}" >&2
   echo -e "  Commits:    $_BE_AHEAD_COUNT" >&2
   echo "" >&2

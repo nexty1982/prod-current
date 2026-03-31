@@ -193,18 +193,28 @@ curl -X POST http://127.0.0.1:3001/api/om-daily/items/:id/complete-work \
 
 `feature` | `enhancement` | `bugfix` | `refactor` | `migration` | `chore` | `spike` | `docs`
 
-### Branch Types & Naming
+### Branch Naming Standard
 
-| branch_type | Prefix | Example |
-|-------------|--------|---------|
-| `feature` | `feat` | `feat/42-add-parish-wizard` |
-| `enhancement` | `enh` | `enh/43-improve-ocr-accuracy` |
-| `bugfix` | `fix` | `fix/44-session-cookie-issue` |
-| `refactor` | `ref` | `ref/45-extract-db-helpers` |
-| `migration` | `mig` | `mig/46-move-crm-to-omai` |
-| `chore` | `chore` | `chore/47-update-deps` |
-| `spike` | `spike` | `spike/48-evaluate-ocr-engine` |
-| `docs` | `docs` | `docs/49-api-reference` |
+All branches use the authoritative format: `<type>/<work-item-id>/<yyyy-mm-dd>/<slug>`
+
+| branch_type | Branch prefix | Example |
+|-------------|---------------|---------|
+| `feature` | `feature` | `feature/omd-412/2026-03-31/work-session-foundation` |
+| `enhancement` | `feature` | `feature/omd-413/2026-03-31/improve-ocr-accuracy` |
+| `bugfix` | `fix` | `fix/omd-414/2026-03-31/session-cookie-issue` |
+| `refactor` | `chore` | `chore/omd-415/2026-03-31/extract-db-helpers` |
+| `migration` | `chore` | `chore/omd-416/2026-03-31/move-crm-to-omai` |
+| `chore` | `chore` | `chore/omd-417/2026-03-31/update-deps` |
+| `spike` | `feature` | `feature/omd-418/2026-03-31/evaluate-ocr-engine` |
+| `docs` | `chore` | `chore/omd-419/2026-03-31/api-reference` |
+
+**Three branch types**: `feature`, `fix`, `chore`. All task types map to one of these.
+
+**Work item ID**: `omd-NNN` for OM Daily items, username for human work, agent tool name for agent work.
+
+**Create with**: `./scripts/start-task-branch.sh <type> <description> --item <id>`
+
+**Legacy branches** (feat/, enh/, ref/, etc.) are allowed temporarily with a deprecation warning. All new work must use the standard format.
 
 ### Categories
 
