@@ -144,8 +144,6 @@ type OpStatus = 'directory' | 'pipeline' | 'onboarding' | 'live' | 'client';
 type ViewMode = 'all' | 'pipeline' | 'onboarding' | 'live';
 type MapMode = 'national' | 'parish';
 
-const PARISH_ENABLED_STATES = new Set(['NY', 'NJ']);
-
 // ═══════════════════════════════════════════════════════════════════
 //  Constants
 // ═══════════════════════════════════════════════════════════════════
@@ -604,21 +602,11 @@ const USChurchMapPage: React.FC = () => {
 
   // ─── State click ──────────────────────────────────────
   const handleStateClick = useCallback((code: string) => {
-    // Parish-enabled states get the Mapbox detail map
-    if (PARISH_ENABLED_STATES.has(code)) {
-      setSelectedState(code);
-      setSelectedChurch(null);
-      setMapMode('parish');
-      fetchParishGeoData(code);
-      fetchStateChurches(code);
-      return;
-    }
-    setSelectedState(prev => {
-      const next = prev === code ? null : code;
-      if (!next) { setStateChurches(null); setJurisdictionFilter(null); }
-      setSelectedChurch(null);
-      return next;
-    });
+    setSelectedState(code);
+    setSelectedChurch(null);
+    setMapMode('parish');
+    fetchParishGeoData(code);
+    fetchStateChurches(code);
   }, [fetchParishGeoData, fetchStateChurches]);
 
   // ─── Church actions ───────────────────────────────────

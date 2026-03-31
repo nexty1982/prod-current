@@ -105,8 +105,57 @@ interface ParishDetailMapProps {
 // ─── State center coordinates ───────────────────────────────────
 
 const STATE_CENTERS: Record<string, { lat: number; lng: number; zoom: number }> = {
-  NY: { lat: 41.5, lng: -75.5, zoom: 6.5 },
+  AL: { lat: 32.8, lng: -86.8, zoom: 6.5 },
+  AK: { lat: 64.2, lng: -152.5, zoom: 3.5 },
+  AZ: { lat: 34.3, lng: -111.7, zoom: 6 },
+  AR: { lat: 34.8, lng: -92.2, zoom: 6.5 },
+  CA: { lat: 37.2, lng: -119.4, zoom: 5.5 },
+  CO: { lat: 39.0, lng: -105.5, zoom: 6 },
+  CT: { lat: 41.6, lng: -72.7, zoom: 8.5 },
+  DE: { lat: 39.0, lng: -75.5, zoom: 8.5 },
+  DC: { lat: 38.9, lng: -77.0, zoom: 11 },
+  FL: { lat: 28.6, lng: -82.4, zoom: 5.8 },
+  GA: { lat: 32.7, lng: -83.5, zoom: 6.3 },
+  HI: { lat: 20.5, lng: -157.5, zoom: 6 },
+  ID: { lat: 44.4, lng: -114.7, zoom: 5.8 },
+  IL: { lat: 40.0, lng: -89.2, zoom: 6 },
+  IN: { lat: 39.8, lng: -86.2, zoom: 6.5 },
+  IA: { lat: 42.0, lng: -93.5, zoom: 6.3 },
+  KS: { lat: 38.5, lng: -98.3, zoom: 6 },
+  KY: { lat: 37.8, lng: -85.7, zoom: 6.5 },
+  LA: { lat: 31.0, lng: -92.0, zoom: 6.3 },
+  ME: { lat: 45.4, lng: -69.2, zoom: 6.3 },
+  MD: { lat: 39.0, lng: -76.7, zoom: 7.5 },
+  MA: { lat: 42.2, lng: -71.8, zoom: 7.8 },
+  MI: { lat: 44.3, lng: -84.5, zoom: 5.8 },
+  MN: { lat: 46.3, lng: -94.3, zoom: 5.8 },
+  MS: { lat: 32.7, lng: -89.7, zoom: 6.3 },
+  MO: { lat: 38.4, lng: -92.5, zoom: 6 },
+  MT: { lat: 47.0, lng: -109.6, zoom: 5.8 },
+  NE: { lat: 41.5, lng: -99.8, zoom: 6 },
+  NV: { lat: 39.3, lng: -116.6, zoom: 5.8 },
+  NH: { lat: 43.7, lng: -71.6, zoom: 7.3 },
   NJ: { lat: 40.2, lng: -74.65, zoom: 7.8 },
+  NM: { lat: 34.4, lng: -106.1, zoom: 6 },
+  NY: { lat: 41.5, lng: -75.5, zoom: 6.5 },
+  NC: { lat: 35.6, lng: -79.8, zoom: 6.3 },
+  ND: { lat: 47.4, lng: -100.5, zoom: 6 },
+  OH: { lat: 40.4, lng: -82.7, zoom: 6.5 },
+  OK: { lat: 35.6, lng: -97.5, zoom: 6.3 },
+  OR: { lat: 44.0, lng: -120.5, zoom: 6 },
+  PA: { lat: 41.0, lng: -77.6, zoom: 6.5 },
+  RI: { lat: 41.7, lng: -71.5, zoom: 9.5 },
+  SC: { lat: 33.9, lng: -80.9, zoom: 6.8 },
+  SD: { lat: 44.4, lng: -100.2, zoom: 6 },
+  TN: { lat: 35.9, lng: -86.4, zoom: 6.3 },
+  TX: { lat: 31.5, lng: -99.3, zoom: 5.3 },
+  UT: { lat: 39.3, lng: -111.7, zoom: 6 },
+  VT: { lat: 44.1, lng: -72.6, zoom: 7.5 },
+  VA: { lat: 37.5, lng: -78.8, zoom: 6.5 },
+  WA: { lat: 47.4, lng: -120.5, zoom: 6.3 },
+  WV: { lat: 38.6, lng: -80.6, zoom: 6.8 },
+  WI: { lat: 44.6, lng: -89.8, zoom: 6 },
+  WY: { lat: 43.0, lng: -107.6, zoom: 6 },
 };
 
 const MAPBOX_TOKEN = import.meta.env.VITE_APP_MAPBOX_ACCESS_TOKEN;
@@ -162,7 +211,7 @@ export default function ParishDetailMap({
     return { type: 'FeatureCollection' as const, features: filtered };
   }, [geoData, affiliationFilter, statusFilter]);
 
-  const center = STATE_CENTERS[stateCode] || STATE_CENTERS.NY;
+  const center = STATE_CENTERS[stateCode] || { lat: 39.8, lng: -98.6, zoom: 4.5 };
 
   // Click handler for map features
   const handleMapClick = useCallback(
