@@ -753,7 +753,7 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
       setLoading(true);
       console.log('🔍 Fetching churches...');
       
-      const churchData = await churchService.fetchChurches();
+      const churchData = await churchService.fetchChurches({ includeRecordCounts: true });
       
       // Add "All Churches" option at the beginning
       const allChurchesOption: Church = {
@@ -1721,11 +1721,16 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
                         onChange={(e) => setSelectedChurch(e.target.value)}
                         disabled={loading}
                       >
-                        {churches.map((church) => (
-                          <MenuItem key={church.id} value={church.id}>
-                            {church.church_name}
-                          </MenuItem>
-                        ))}
+                        {churches.map((church) => {
+                          const countKey = `${selectedRecordType}_count` as keyof Church;
+                          const count = church.id !== 0 ? church[countKey] : undefined;
+                          return (
+                            <MenuItem key={church.id} value={church.id}>
+                              {church.church_name}
+                              {count !== undefined && ` (${count})`}
+                            </MenuItem>
+                          );
+                        })}
                       </Select>
                     </FormControl>
                   )}

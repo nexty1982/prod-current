@@ -7,10 +7,6 @@
 
 const workflowService = require('../services/workflowService');
 const workflowGenerationService = require('../services/workflowGenerationService');
-const dashboardService = require('../services/workflowDashboardService');
-const decisionEngine = require('../services/decisionEngineService');
-const autoExecutionPolicy = require('../services/autoExecutionPolicyService');
-const autoExecutionService = require('../services/autoExecutionService');
 
 function getActor(req) {
   return req.user?.email || req.user?.username || 'unknown';
@@ -192,126 +188,10 @@ async function validate(req, res) {
   }
 }
 
-// ─── Dashboard ─────────────────────────────────────────────────────────────
-
-async function dashboard(req, res) {
-  try {
-    const { type, component, workflow_id, activity_limit } = req.query;
-    const data = await dashboardService.getDashboard({
-      type, component, workflow_id,
-      activity_limit: activity_limit ? parseInt(activity_limit) : undefined,
-    });
-    res.json({ success: true, ...data });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-}
-
-async function dashboardExceptions(req, res) {
-  try {
-    const { type, component, workflow_id } = req.query;
-    const exceptions = await dashboardService.getExceptionFeed({ type, component, workflow_id });
-    res.json({ success: true, exceptions });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-}
-
-async function dashboardReady(req, res) {
-  try {
-    const ready = await dashboardService.getReadyToRelease();
-    res.json({ success: true, ready });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-}
-
-async function dashboardRecommendations(req, res) {
-  try {
-    const recommendations = await decisionEngine.getRecommendations();
-    res.json({ success: true, ...recommendations });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-}
-
-// ─── Auto-Execution ───────────────────────────────────────────────────────
-
-async function autoExecEnable(req, res) {
-  try {
-    const status = await autoExecutionPolicy.enable();
-    autoExecutionService.start(); // start loop when enabled
-    res.json({ success: true, ...status });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-}
-
-async function autoExecDisable(req, res) {
-  try {
-    const status = await autoExecutionPolicy.disable();
-    autoExecutionService.stop(); // stop loop when disabled
-    res.json({ success: true, ...status });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-}
-
-async function autoExecSetMode(req, res) {
-  try {
-    const { mode } = req.body;
-    if (!mode) {
-      return res.status(400).json({ success: false, error: 'mode is required (OFF, SAFE, FULL)' });
-    }
-    const status = await autoExecutionPolicy.setMode(mode.toUpperCase());
-    if (mode.toUpperCase() === 'OFF') {
-      autoExecutionService.stop();
-    }
-    res.json({ success: true, ...status });
-  } catch (err) {
-    res.status(400).json({ success: false, error: err.message });
-  }
-}
-
-async function autoExecStatus(req, res) {
-  try {
-    const status = await autoExecutionPolicy.getStatus();
-    res.json({
-      success: true,
-      ...status,
-      loop_running: autoExecutionService.isLoopRunning(),
-      executing_now: autoExecutionService.isExecuting(),
-    });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-}
-
-async function autoExecLogs(req, res) {
-  try {
-    const limit = req.query.limit ? parseInt(req.query.limit) : 50;
-    const logs = await autoExecutionService.getLogs(limit);
-    res.json({ success: true, logs });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-}
-
-async function autoExecRunOnce(req, res) {
-  try {
-    const result = await autoExecutionService.runOnce();
-    res.json({ success: true, ...result });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-}
-
 module.exports = {
   create, list, getById, update,
   setSteps,
   approve, activate, complete, cancel, reopen,
   preview, generatePrompts,
   getStatus, validate,
-  dashboard, dashboardExceptions, dashboardReady, dashboardRecommendations,
-  autoExecEnable, autoExecDisable, autoExecSetMode, autoExecStatus, autoExecLogs, autoExecRunOnce,
 };

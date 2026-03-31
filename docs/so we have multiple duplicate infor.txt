@@ -1,0 +1,30 @@
+so we have multiple duplicate information across orthodoxmetrics_db and omai_db ??
+
+● Yes — the CRM tables (omai_crm_leads, omai_crm_pipeline_stages, etc.) exist in both databases as duplicates. The OM
+  backend reads from orthodoxmetrics_db and the OMAI backend reads from omai_db, but they contain the same data that has
+   to be kept in sync manually. That's exactly what just bit us — I migrated one and forgot the other.
+
+  Let me get the full picture of what's duplicated.
+
+● Bash(node -e "
+      const mysql = require('mysql2/promise');…)
+  ⎿  === DUPLICATED (in both DBs) ===
+       bigbook_config
+       bigbook_tags
+     … +58 lines (ctrl+o to expand)
+
+● 26 tables are duplicated across both databases. That's a real problem — every migration has to be run twice, and data
+  can drift.
+
+  This is something that needs a proper plan to consolidate. The options are:
+
+  1. Make OMAI query orthodoxmetrics_db directly for the shared tables (CRM, om_daily, tutorials, etc.) using
+  cross-database queries or just using the getOmAuthPool() which already points to orthodoxmetrics_db
+  2. Move canonical ownership — pick one DB as the source of truth for each table group and have the other reference it
+  3. Drop the duplicates from omai_db and point all OMAI queries at orthodoxmetrics_db for those tables
+
+  Option 3 is the cleanest for the CRM and om_daily tables since orthodoxmetrics_db is the primary platform DB. The
+  omai_db would only keep its own unique tables (bigbook, etc.).
+
+  This is a bigger refactor that would touch all the OMAI api-ops files that use getOmaiPool() for CRM/om_daily queries
+  — they'd switch to getOmAuthPool(). Want me to plan this out and tackle it, or is there something more pressing first?

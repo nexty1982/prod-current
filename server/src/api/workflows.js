@@ -20,7 +20,6 @@
 const express = require('express');
 const router = express.Router();
 const controller = require('../controllers/workflowsController');
-const instantiationService = require('../services/templateInstantiationService');
 const { requireRole } = require('../middleware/auth');
 
 const guardAdmin = requireRole(['super_admin']);
@@ -28,38 +27,7 @@ const guardAdmin = requireRole(['super_admin']);
 // ─── Collection routes ──────────────────────────────────────────────────────
 
 router.post('/',  guardAdmin, controller.create);
-
-// ─── Template instantiation (on /api/workflows, not /api/workflow-templates) ─
-router.post('/from-template', guardAdmin, async (req, res) => {
-  try {
-    const { template_id, parameters, version } = req.body;
-    if (!template_id) return res.status(400).json({ success: false, error: 'template_id is required' });
-    const actor = req.user?.email || req.user?.username || 'unknown';
-    const result = await instantiationService.instantiate(template_id, parameters || {}, actor, version || null);
-    res.status(201).json({ success: true, ...result });
-  } catch (err) {
-    const status = err.message.includes('not found') ? 404 :
-                   err.message.includes('validation') || err.message.includes('Unresolved') ? 400 : 500;
-    res.status(status).json({ success: false, error: err.message });
-  }
-});
 router.get('/',   guardAdmin, controller.list);
-
-// ─── Dashboard routes (BEFORE :id to avoid param capture) ──────────────────
-
-router.get('/dashboard',            guardAdmin, controller.dashboard);
-router.get('/dashboard/exceptions', guardAdmin, controller.dashboardExceptions);
-router.get('/dashboard/ready',      guardAdmin, controller.dashboardReady);
-router.get('/dashboard/recommendations', guardAdmin, controller.dashboardRecommendations);
-
-// ─── Auto-Execution routes (BEFORE :id to avoid param capture) ────────────
-
-router.post('/auto-execution/enable',  guardAdmin, controller.autoExecEnable);
-router.post('/auto-execution/disable', guardAdmin, controller.autoExecDisable);
-router.post('/auto-execution/mode',    guardAdmin, controller.autoExecSetMode);
-router.get('/auto-execution/status',   guardAdmin, controller.autoExecStatus);
-router.get('/auto-execution/logs',     guardAdmin, controller.autoExecLogs);
-router.post('/auto-execution/run',     guardAdmin, controller.autoExecRunOnce);
 
 // ─── Per-workflow routes ────────────────────────────────────────────────────
 

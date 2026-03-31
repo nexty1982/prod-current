@@ -194,6 +194,7 @@ const OcrBatchManager = Loadable(lazy(() => import('../features/devel-tools/ocr-
 // OMTasksPage, DailyTasks — retired, now managed via OMAI OM Daily
 const ApiExplorerPage = Loadable(lazy(() => import('../features/devel-tools/api-explorer/ApiExplorerPage')));
 const LiveTableBuilderPage = Loadable(lazy(() => import('../features/devel-tools/live-table-builder/LiveTableBuilderPage')));
+const TranslationManagerPage = Loadable(lazy(() => import('../features/devel-tools/translation-manager/TranslationManagerPage')));
 const GitOperations = Loadable(lazy(() => import('../features/devel-tools/git-operations/GitOperations')));
 // ConversationLogPage — retired, now on OMAI Operations Hub
 // ChangeSetsDashboard, ChangeSetDetailPage, ReleaseHistoryPage, SDLCWizardPage, PromptPlans — retired, now on OMAI
@@ -1344,6 +1345,16 @@ const Router = [
             <AdminErrorBoundary>
               <LiveTableBuilderPage />
             </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/devel-tools/translation-manager',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin']}>
+            <EnvironmentAwarePage featureId="translation-manager" priority={2} featureName="Translation Manager">
+              <TranslationManagerPage />
+            </EnvironmentAwarePage>
           </ProtectedRoute>
         )
       },

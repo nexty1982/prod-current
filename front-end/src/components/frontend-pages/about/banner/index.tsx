@@ -1,6 +1,7 @@
 import { Box, Stack, Typography, Container, Grid, Button } from '@mui/material';
 import { Link } from 'react-router-dom';
 import IlluminationFlow from './IlluminationFlow';
+import EditableText from '@/components/frontend-pages/shared/EditableText';
 
 const Banner = () => {
   return (
@@ -40,7 +41,9 @@ const Banner = () => {
                 },
               }}
             >
-              Orthodox Metrics is Live and on-boarding parishes in the United States and Canada. 
+              <EditableText contentKey="about.banner.title" multiline>
+                Orthodox Metrics is Live and on-boarding parishes in the United States and Canada.
+              </EditableText>
             </Typography>
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
               <Button variant="contained" size="large" component={Link} to="/auth/register">
@@ -59,7 +62,9 @@ const Banner = () => {
               lg: 5
             }}>
             <Typography lineHeight={1.9}>
-             Orthodox Metrics offers an Orthodox-themed records system designed specifically for baptism, marriage, and funeral documentation. With an intuitive interface, flexible certificate generation, and support for Greek, Russian, Romanian, Georgian, and English, it brings the sacred work of recordkeeping into a peaceful and organized space. Created with the needs of Orthodox parishes in mind, it honors tradition while simplifying the tools needed to serve your community.
+              <EditableText contentKey="about.banner.body" multiline>
+                Orthodox Metrics offers an Orthodox-themed records system designed specifically for baptism, marriage, and funeral documentation. With an intuitive interface, flexible certificate generation, and support for Greek, Russian, Romanian, Georgian, and English, it brings the sacred work of recordkeeping into a peaceful and organized space. Created with the needs of Orthodox parishes in mind, it honors tradition while simplifying the tools needed to serve your community.
+              </EditableText>
             </Typography>
           </Grid>
         </Grid>

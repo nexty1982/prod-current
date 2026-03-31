@@ -786,8 +786,13 @@ async function upsertEnrichmentProfile(pool, runId, result) {
 
 // ─── Batch Runner ─────────────────────────────────────────────────────────────
 
-async function runBatchEnrichment({ state = null, jurisdiction = null, limit = null, forceReenrich = false, statusFilter = null } = {}) {
+async function runBatchEnrichment({ state = null, jurisdiction = null, limit = null, forceReenrich = false, statusFilter = null, taskId = null } = {}) {
   const pool = getAppPool();
+  const { updateTask, addTaskEvent } = require('./taskRunner');
+
+  // Helper: update task if one exists
+  const taskUpdate = taskId ? (u) => updateTask(pool, taskId, u).catch(e => console.error('[TaskRunner] update error:', e)) : () => {};
+  const taskEvent = taskId ? (opts) => addTaskEvent(pool, taskId, opts).catch(e => console.error('[TaskRunner] event error:', e)) : () => {};
 
   let where = ['1=1'];
   const params = [];
@@ -823,16 +828,33 @@ async function runBatchEnrichment({ state = null, jurisdiction = null, limit = n
     options: { limit, forceReenrich, statusFilter }
   });
 
+  // Mark task as running with total count
+  await taskUpdate({ status: 'running', stage: 'Processing churches', total_count: churches.length, message: `Processing ${churches.length} churches` });
+
   let enrichedCount = 0, failedCount = 0, skippedCount = 0;
 
   for (let i = 0; i < churches.length; i++) {
+    // Check for cancellation request before each church
+    if (taskId) {
+      const { isCancelled } = require('./taskRunner');
+      if (await isCancelled(pool, taskId)) {
+        console.log(`[Enrichment] Cancellation requested — stopping after ${i} of ${churches.length} churches`);
+        await taskUpdate({ status: 'cancelled', message: `Cancelled after processing ${i} of ${churches.length} churches` });
+        await taskEvent({ level: 'warn', stage: 'cancelled', message: `Batch cancelled by user after ${i} churches` });
+        return { enriched: enrichedCount, failed: failedCount, skipped: skippedCount, cancelled: true };
+      }
+    }
+
     const church = churches[i];
-    console.log(`[Enrichment] [${i + 1}/${churches.length}] Processing: ${church.name} (${church.city}, ${church.state_code})`);
+    const progress = `[${i + 1}/${churches.length}]`;
+    console.log(`[Enrichment] ${progress} Processing: ${church.name} (${church.city}, ${church.state_code})`);
 
     try {
       if (!church.website) {
         console.log(`  → Skipped: no website`);
         skippedCount++;
+        await taskEvent({ level: 'warn', stage: 'skip', message: `${church.name} — no website` });
+        await taskUpdate({ completed_count: i + 1, success_count: enrichedCount, failure_count: failedCount, message: `${progress} Skipped ${church.name} (no website)` });
         continue;
       }
 
@@ -844,29 +866,54 @@ async function runBatchEnrichment({ state = null, jurisdiction = null, limit = n
         const estStr = result.established ? `est. ${result.established.year} (${result.established.confidence})` : 'no est. date';
         const sizeStr = result.size ? `${result.size.category} (${result.size.confidence})` : 'no size';
         console.log(`  → ${result.status}: ${estStr}, ${sizeStr}`);
+        await taskEvent({ level: 'info', stage: 'enrich', message: `${church.name} — ${result.status}: ${estStr}, ${sizeStr}` });
       } else {
         const reasons = result.noDataReasons.length > 0 ? ` [${result.noDataReasons.join(', ')}]` : '';
         console.log(`  → ${result.status}: ${result.notes.join('; ')}${reasons}`);
         if (result.status === 'no_data') skippedCount++;
+        await taskEvent({ level: result.status === 'failed' ? 'error' : 'warn', stage: result.status, message: `${church.name} — ${result.status}${reasons}` });
       }
 
     } catch (err) {
       console.error(`  → ERROR: ${err.message}`);
       failedCount++;
+      await taskEvent({ level: 'error', stage: 'error', message: `${church.name} — ${err.message}` });
     }
+
+    // Update task progress
+    await taskUpdate({
+      completed_count: i + 1,
+      success_count: enrichedCount,
+      failure_count: failedCount,
+      message: `${progress} ${church.name}`
+    });
 
     if (i < churches.length - 1) {
       await new Promise(r => setTimeout(r, 1500));
     }
   }
 
+  const finalStatus = failedCount === churches.length ? 'failed' : 'completed';
+
   await updateRunStatus(pool, runId, {
-    status: failedCount === churches.length ? 'failed' : 'completed',
+    status: finalStatus,
     enrichedCount, failedCount, skippedCount
   });
 
   const summary = { runId, total: churches.length, enriched: enrichedCount, failed: failedCount, skipped: skippedCount };
   console.log(`[Enrichment] Run #${runId} complete:`, summary);
+
+  // Finalize task
+  await taskUpdate({
+    status: finalStatus === 'failed' ? 'failed' : 'succeeded',
+    stage: 'Complete',
+    completed_count: churches.length,
+    success_count: enrichedCount,
+    failure_count: failedCount,
+    message: `Done: ${enrichedCount} enriched, ${failedCount} failed, ${skippedCount} skipped`,
+    result_json: summary
+  });
+
   return summary;
 }
 

@@ -160,6 +160,33 @@ router.get('/my/churches', requireAuth, async (req, res) => {
 
     console.log(`✅ [GET /api/my/churches] Found ${churches.length} churches for user ${user.email} (role: ${user.role})`);
 
+    // Fetch record counts per church (baptism, marriage, funeral)
+    const includeRecordCounts = req.query.include_record_counts === '1';
+    if (includeRecordCounts && churches.length > 0) {
+      const pool = getAppPool();
+      const countPromises = churches.map(async (church) => {
+        if (!church.database_name) return;
+        const db = pool.escapeId(church.database_name);
+        try {
+          const [[counts]] = await pool.query(
+            `SELECT
+               (SELECT COUNT(*) FROM ${db}.baptism_records) AS baptism_count,
+               (SELECT COUNT(*) FROM ${db}.marriage_records) AS marriage_count,
+               (SELECT COUNT(*) FROM ${db}.funeral_records) AS funeral_count`
+          );
+          church.baptism_count = counts.baptism_count || 0;
+          church.marriage_count = counts.marriage_count || 0;
+          church.funeral_count = counts.funeral_count || 0;
+        } catch (err) {
+          console.warn(`⚠️ Could not fetch record counts for ${church.database_name}:`, err.message);
+          church.baptism_count = 0;
+          church.marriage_count = 0;
+          church.funeral_count = 0;
+        }
+      });
+      await Promise.all(countPromises);
+    }
+
     // Clean records
     const cleanedChurches = cleanRecords(churches);
 
@@ -398,6 +425,33 @@ router.get('/churches', requireAuth, async (req, res) => {
 
     console.log(`✅ [GET /churches] Found ${churches.length} churches for user ${user.email}`);
 
+    // Fetch record counts per church if requested
+    const includeRecordCounts = req.query.include_record_counts === '1';
+    if (includeRecordCounts && churches.length > 0) {
+      const pool = getAppPool();
+      const countPromises = churches.map(async (church) => {
+        if (!church.database_name) return;
+        const db = pool.escapeId(church.database_name);
+        try {
+          const [[counts]] = await pool.query(
+            `SELECT
+               (SELECT COUNT(*) FROM ${db}.baptism_records) AS baptism_count,
+               (SELECT COUNT(*) FROM ${db}.marriage_records) AS marriage_count,
+               (SELECT COUNT(*) FROM ${db}.funeral_records) AS funeral_count`
+          );
+          church.baptism_count = counts.baptism_count || 0;
+          church.marriage_count = counts.marriage_count || 0;
+          church.funeral_count = counts.funeral_count || 0;
+        } catch (err) {
+          console.warn(`⚠️ Could not fetch record counts for ${church.database_name}:`, err.message);
+          church.baptism_count = 0;
+          church.marriage_count = 0;
+          church.funeral_count = 0;
+        }
+      });
+      await Promise.all(countPromises);
+    }
+
     // Map to consistent format
     const formattedChurches = churches.map(church => ({
       id: church.id,
@@ -405,7 +459,12 @@ router.get('/churches', requireAuth, async (req, res) => {
       name: church.name || church.church_name,
       email: church.email,
       database_name: church.database_name,
-      is_active: church.is_active
+      is_active: church.is_active,
+      ...(includeRecordCounts && {
+        baptism_count: church.baptism_count || 0,
+        marriage_count: church.marriage_count || 0,
+        funeral_count: church.funeral_count || 0,
+      }),
     }));
 
     res.json(ApiResponse(true, { churches: formattedChurches }, {

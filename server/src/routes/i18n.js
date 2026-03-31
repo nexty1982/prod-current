@@ -799,6 +799,8 @@ function filterByNamespace(obj, namespaces) {
 }
 
 // GET /api/i18n/:lang[?ns=common,explorer]
+// Now reads from translations_source + translations_localized (new tables),
+// with ENGLISH_DEFAULTS as in-memory fallback for resilience.
 router.get('/:lang', async (req, res) => {
   try {
     const { lang } = req.params;
@@ -807,48 +809,78 @@ router.get('/:lang', async (req, res) => {
     // Build cache key
     const cacheKey = namespaces ? `${lang}:${namespaces.join(',')}` : lang;
 
-    // English — return defaults directly, no DB hit
-    if (lang === 'en') {
-      return res.json(filterByNamespace(ENGLISH_DEFAULTS, namespaces));
-    }
-
-    // Unsupported language — return English defaults
-    if (!SUPPORTED_LANGS.has(lang)) {
-      return res.json(filterByNamespace(ENGLISH_DEFAULTS, namespaces));
-    }
-
     // Check cache
     const cached = cache[cacheKey];
     if (cached && (Date.now() - cached.cachedAt) < CACHE_TTL_MS) {
       return res.json(cached.translations);
     }
 
-    // Query DB — with optional namespace filter
     const pool = getAppPool();
-    let rows;
-    if (namespaces) {
-      const placeholders = namespaces.map(() => '?').join(',');
-      [rows] = await pool.query(
-        `SELECT translation_key, translation_text FROM ui_translations WHERE lang_code = ? AND namespace IN (${placeholders})`,
-        [lang, ...namespaces]
-      );
-    } else {
-      [rows] = await pool.query(
-        'SELECT translation_key, translation_text FROM ui_translations WHERE lang_code = ?',
-        [lang]
-      );
+
+    // Build English base from translations_source (DB) with ENGLISH_DEFAULTS fallback
+    let englishBase;
+    try {
+      let srcQuery = 'SELECT translation_key, english_text FROM translations_source WHERE is_active = 1';
+      const srcParams = [];
+      if (namespaces) {
+        srcQuery += ` AND namespace IN (${namespaces.map(() => '?').join(',')})`;
+        srcParams.push(...namespaces);
+      }
+      const [srcRows] = await pool.query(srcQuery, srcParams);
+      englishBase = {};
+      for (const row of srcRows) {
+        englishBase[row.translation_key] = row.english_text;
+      }
+    } catch (dbErr) {
+      console.warn('[i18n] translations_source query failed, using ENGLISH_DEFAULTS:', dbErr.message);
+      englishBase = filterByNamespace(ENGLISH_DEFAULTS, namespaces);
     }
 
-    // Merge over English defaults (missing keys fall back to English)
-    const englishBase = filterByNamespace(ENGLISH_DEFAULTS, namespaces);
+    // English or unsupported language — return English base
+    if (lang === 'en' || !SUPPORTED_LANGS.has(lang)) {
+      cache[cacheKey] = { translations: englishBase, cachedAt: Date.now() };
+      return res.json(englishBase);
+    }
+
+    // Non-English: overlay with localized translations from new table
     const translations = { ...englishBase };
-    for (const row of rows) {
-      translations[row.translation_key] = row.translation_text;
+    try {
+      let locQuery = `SELECT tl.translation_key, tl.translated_text
+                       FROM translations_localized tl
+                       INNER JOIN translations_source ts ON ts.translation_key = tl.translation_key AND ts.is_active = 1
+                       WHERE tl.language_code = ? AND tl.status IN ('current', 'review', 'outdated', 'draft')`;
+      const locParams = [lang];
+      if (namespaces) {
+        locQuery += ` AND ts.namespace IN (${namespaces.map(() => '?').join(',')})`;
+        locParams.push(...namespaces);
+      }
+      const [locRows] = await pool.query(locQuery, locParams);
+      for (const row of locRows) {
+        translations[row.translation_key] = row.translated_text;
+      }
+    } catch (dbErr) {
+      // Fall back to old ui_translations table
+      console.warn('[i18n] translations_localized query failed, trying ui_translations:', dbErr.message);
+      let rows;
+      if (namespaces) {
+        const placeholders = namespaces.map(() => '?').join(',');
+        [rows] = await pool.query(
+          `SELECT translation_key, translation_text FROM ui_translations WHERE lang_code = ? AND namespace IN (${placeholders})`,
+          [lang, ...namespaces]
+        );
+      } else {
+        [rows] = await pool.query(
+          'SELECT translation_key, translation_text FROM ui_translations WHERE lang_code = ?',
+          [lang]
+        );
+      }
+      for (const row of rows) {
+        translations[row.translation_key] = row.translation_text;
+      }
     }
 
     // Update cache
     cache[cacheKey] = { translations, cachedAt: Date.now() };
-
     return res.json(translations);
   } catch (err) {
     console.error('[i18n] Error fetching translations:', err.message);
