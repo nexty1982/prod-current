@@ -233,6 +233,7 @@ const workflowTemplatesRouter = require('./api/workflowTemplates');
 const workflowLearningRouter = require('./api/workflowLearning');
 const pageContentRouter = require('./routes/page-content');
 const snapshotsRouter = require('./routes/snapshots');
+const pageSnapshotsRouter = require('./routes/page-snapshots');
 const crmRouter = require('./routes/crm');
 const churchEnrichmentRouter = require('./routes/churchEnrichment');
 const jurisdictionsRouter = require('./routes/jurisdictions');
@@ -881,6 +882,8 @@ app.use('/api/page-content-live', pageContentLiveRouter); // Live content overri
 console.log('✅ [Server] Mounted /api/page-content-live routes (Inline Page Editor)');
 app.use('/api/snapshots', snapshotsRouter); // Code snapshot safety system
 console.log('✅ [Server] Mounted /api/snapshots routes (Safety System)');
+app.use('/api/page-snapshots', pageSnapshotsRouter); // Page-aware Git history browser
+console.log('✅ [Server] Mounted /api/page-snapshots routes (Page Snapshot Manager)');
 app.use('/api/crm', crmRouter); // CRM pipeline & outreach
 console.log('✅ [Server] Mounted /api/crm routes (CRM & Outreach)');
 app.use('/api/church-enrichment', churchEnrichmentRouter); // Church enrichment profiles
