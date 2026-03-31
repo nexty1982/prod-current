@@ -478,6 +478,12 @@ const Menuitems: MenuitemsType[] = [
         icon: IconDatabase,
         href: '/devel-tools/platform-status',
       },
+      {
+        id: uniqueId(),
+        title: 'Badge State Manager',
+        icon: IconBell,
+        href: '/devel-tools/badge-state-manager',
+      },
       // Record Creation Wizard — retired, now on OMAI /omai/tools/om-seedlings
       {
         id: uniqueId(),

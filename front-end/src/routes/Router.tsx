@@ -131,6 +131,7 @@ const InteractiveReportJobsPage = Loadable(lazy(() => import('../features/devel-
 const BuildInfoPage = Loadable(lazy(() => import('../features/devel-tools/build-info/BuildInfoPage')));
 const RepoOpsPage = Loadable(lazy(() => import('../features/devel-tools/repo-ops/RepoOpsPage')));
 const PlatformStatusPage = Loadable(lazy(() => import('../features/devel-tools/platform-status/PlatformStatusPage')));
+const BadgeStateManagerPage = Loadable(lazy(() => import('../features/devel-tools/badge-state-manager/BadgeStateManagerPage')));
 const OrthodMetricsAdmin = Loadable(lazy(() => import('../features/admin/admin/OrthodoxMetricsAdmin')));
 const AIAdminPanel = Loadable(lazy(() => import('../features/admin/ai/AIAdminPanel')));
 const OMAIUltimateLogger = Loadable(lazy(() => import('../features/devel-tools/om-ultimatelogger/LoggerDashboard')));
@@ -1380,6 +1381,16 @@ const Router = [
         element: (
           <ProtectedRoute requiredRole={['super_admin']}>
             <PlatformStatusPage />
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/devel-tools/badge-state-manager',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin']}>
+            <EnvironmentAwarePage featureId="badge-state-manager">
+              <BadgeStateManagerPage />
+            </EnvironmentAwarePage>
           </ProtectedRoute>
         )
       },
