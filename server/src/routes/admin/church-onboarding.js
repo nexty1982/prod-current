@@ -500,23 +500,36 @@ router.get('/phase1/candidates', requireRole(ADMIN_ROLES), async (req, res) => {
 });
 
 // POST /api/admin/church-onboarding/phase1/batch-stage — Batch create Phase 1 church rows
+// Body: { lead_ids?: number[], state?: string, jurisdiction?: string }
 router.post('/phase1/batch-stage', requireRole(ADMIN_ROLES), async (req, res) => {
   try {
     const pool = getAppPool();
-    const { lead_ids } = req.body; // optional: array of specific CRM lead IDs to stage
+    const { lead_ids, state, jurisdiction } = req.body;
 
-    // Get eligible leads (OCA, NY/NJ, not already provisioned)
+    // Build scope-aware eligibility query
+    const jur = jurisdiction || 'OCA';
+    const conditions = ['cl.jurisdiction = ?'];
+    const params = [jur];
+
+    // State scope: accept comma-separated or default to all states
+    if (state) {
+      const states = String(state).split(',').map(s => s.trim().toUpperCase()).filter(Boolean);
+      if (states.length > 0) {
+        conditions.push(`cl.state_code IN (${states.map(() => '?').join(',')})`);
+        params.push(...states);
+      }
+    }
+
+    conditions.push('cl.provisioned_church_id IS NULL');
+    conditions.push('cl.id NOT IN (SELECT crm_lead_id FROM churches WHERE crm_lead_id IS NOT NULL)');
+
     let query = `
       SELECT cl.id, cl.name, cl.street, cl.city, cl.state_code, cl.zip,
              cl.phone, cl.website, cl.latitude, cl.longitude,
              cl.jurisdiction, cl.jurisdiction_id
       FROM omai_crm_leads cl
-      WHERE cl.jurisdiction = 'OCA'
-        AND cl.state_code IN ('NY', 'NJ')
-        AND cl.provisioned_church_id IS NULL
-        AND cl.id NOT IN (SELECT crm_lead_id FROM churches WHERE crm_lead_id IS NOT NULL)
+      WHERE ${conditions.join(' AND ')}
     `;
-    const params = [];
 
     if (Array.isArray(lead_ids) && lead_ids.length > 0) {
       query += ` AND cl.id IN (${lead_ids.map(() => '?').join(',')})`;
@@ -599,6 +612,85 @@ router.get('/phase1/staged', requireRole(ADMIN_ROLES), async (req, res) => {
   } catch (err) {
     console.error('Phase1 staged list error:', err);
     res.status(500).json({ success: false, error: 'Failed to load staged churches' });
+  }
+});
+
+// GET /api/admin/church-onboarding/bulk-eligibility — Generic bulk action eligibility check
+// Query params: action (required), state, jurisdiction
+// Returns { actionAllowed, totalInScope, eligibleCount, ineligibleCount, reason }
+router.get('/bulk-eligibility', requireRole(ADMIN_ROLES), async (req, res) => {
+  try {
+    const { action, state, jurisdiction } = req.query;
+    if (!action) {
+      return res.status(400).json({ success: false, error: 'Missing required param: action' });
+    }
+
+    const pool = getAppPool();
+
+    // ── Action: phase1_stage ──────────────────────────────────
+    // Eligible: CRM leads matching scope that have NOT been provisioned yet
+    if (action === 'phase1_stage') {
+      const jur = jurisdiction || 'OCA';
+
+      // Build WHERE clause dynamically based on scope
+      const conditions = ['cl.jurisdiction = ?'];
+      const params = [jur];
+
+      if (state) {
+        const states = String(state).split(',').map(s => s.trim().toUpperCase()).filter(Boolean);
+        if (states.length > 0) {
+          conditions.push(`cl.state_code IN (${states.map(() => '?').join(',')})`);
+          params.push(...states);
+        }
+      }
+
+      const whereClause = conditions.join(' AND ');
+
+      // Total in scope (all CRM leads matching jurisdiction + state filter)
+      const [totalRows] = await pool.query(
+        `SELECT COUNT(*) AS cnt FROM omai_crm_leads cl WHERE ${whereClause}`,
+        params
+      );
+      const totalInScope = totalRows[0].cnt;
+
+      // Eligible: not yet provisioned and not already linked to a church
+      const [eligibleRows] = await pool.query(
+        `SELECT COUNT(*) AS cnt FROM omai_crm_leads cl
+         WHERE ${whereClause}
+           AND cl.provisioned_church_id IS NULL
+           AND cl.id NOT IN (SELECT crm_lead_id FROM churches WHERE crm_lead_id IS NOT NULL)`,
+        params
+      );
+      const eligibleCount = eligibleRows[0].cnt;
+      const ineligibleCount = totalInScope - eligibleCount;
+
+      const actionAllowed = eligibleCount > 0;
+      let reason = '';
+      if (!actionAllowed) {
+        if (totalInScope === 0) {
+          reason = `No ${jur} churches found in the selected scope.`;
+        } else {
+          reason = `All ${jur} churches in this scope have already been staged or advanced beyond Phase 1.`;
+        }
+      }
+
+      return res.json({
+        success: true,
+        action,
+        scope: { jurisdiction: jur, state: state || null },
+        totalInScope,
+        eligibleCount,
+        ineligibleCount,
+        actionAllowed,
+        reason,
+      });
+    }
+
+    // Unknown action
+    return res.status(400).json({ success: false, error: `Unknown action: ${action}` });
+  } catch (err) {
+    console.error('Bulk eligibility check error:', err);
+    res.status(500).json({ success: false, error: 'Failed to check eligibility' });
   }
 });
 
