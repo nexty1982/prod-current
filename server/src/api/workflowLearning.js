@@ -144,8 +144,8 @@ router.post('/:id/severity', guardAdmin, async (req, res) => {
   try {
     const { severity } = req.body;
     if (!severity) return res.status(400).json({ success: false, error: 'severity is required' });
-    await learningService.setSeverity(req.params.id, severity);
-    res.json({ success: true, message: `Severity set to ${severity}` });
+    const result = await learningService.setSeverity(req.params.id, severity, getActor(req));
+    res.json({ success: true, message: `Severity set to ${severity}`, ...result });
   } catch (err) {
     const status = err.message.includes('not found') ? 404 : 400;
     res.status(status).json({ success: false, error: err.message });

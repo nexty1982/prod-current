@@ -264,11 +264,17 @@ async function _recordPattern({
     try { pIds = JSON.parse(record.source_prompt_ids || '[]'); } catch (e) { /* ignore */ }
     if (prompt_id && !pIds.includes(prompt_id)) pIds.push(prompt_id);
 
-    // Check severity escalation
+    // Severity escalation — NEVER override manual overrides.
+    // If an operator manually set the severity, automatic escalation must not touch it.
     let newSeverity = record.severity;
-    const escalation = SEVERITY_ESCALATION[record.severity];
-    if (escalation && newOccurrences >= escalation.threshold) {
-      newSeverity = escalation.escalate_to;
+    let newSeveritySource = record.severity_source || 'category_default';
+
+    if (newSeveritySource !== 'manual_override') {
+      const escalation = SEVERITY_ESCALATION[record.severity];
+      if (escalation && newOccurrences >= escalation.threshold) {
+        newSeverity = escalation.escalate_to;
+        newSeveritySource = 'threshold_escalated';
+      }
     }
 
     // Check global threshold
@@ -276,11 +282,11 @@ async function _recordPattern({
 
     await pool.query(
       `UPDATE workflow_learning_registry
-       SET occurrences = ?, severity = ?, global_candidate = ?,
+       SET occurrences = ?, severity = ?, severity_source = ?, global_candidate = ?,
            affected_components = ?, source_workflow_ids = ?, source_prompt_ids = ?,
            last_seen_at = NOW()
        WHERE id = ?`,
-      [newOccurrences, newSeverity, isGlobal,
+      [newOccurrences, newSeverity, newSeveritySource, isGlobal,
        JSON.stringify(components), JSON.stringify(wfIds), JSON.stringify(pIds),
        record.id]
     );
@@ -290,6 +296,8 @@ async function _recordPattern({
       is_new: false,
       occurrences: newOccurrences,
       severity: newSeverity,
+      severity_source: newSeveritySource,
+      base_severity: record.base_severity || default_severity,
       global_candidate: isGlobal === 1,
     };
   }
@@ -303,11 +311,12 @@ async function _recordPattern({
   await pool.query(
     `INSERT INTO workflow_learning_registry
      (id, learning_type, pattern_signature, title, description, constraint_text,
-      occurrences, severity, affected_components, source_workflow_ids, source_prompt_ids,
+      occurrences, severity, base_severity, severity_source,
+      affected_components, source_workflow_ids, source_prompt_ids,
       active, global_candidate)
-     VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?, 1, 0)`,
+     VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?, 'category_default', ?, ?, ?, 1, 0)`,
     [id, learning_type, signature, title, description, constraint_text,
-     default_severity, components, wfIds, pIds]
+     default_severity, default_severity, components, wfIds, pIds]
   );
 
   return {
@@ -315,6 +324,8 @@ async function _recordPattern({
     is_new: true,
     occurrences: 1,
     severity: default_severity,
+    severity_source: 'category_default',
+    base_severity: default_severity,
     global_candidate: false,
   };
 }
@@ -341,13 +352,14 @@ async function aggregatePatterns() {
   );
   promoted = promoResult.affectedRows || 0;
 
-  // Escalate severities
+  // Escalate severities — skip manual overrides
   for (const [severity, rule] of Object.entries(SEVERITY_ESCALATION)) {
     if (!rule) continue;
     const [escResult] = await pool.query(
       `UPDATE workflow_learning_registry
-       SET severity = ?
-       WHERE active = 1 AND severity = ? AND occurrences >= ?`,
+       SET severity = ?, severity_source = 'threshold_escalated'
+       WHERE active = 1 AND severity = ? AND occurrences >= ?
+         AND severity_source != 'manual_override'`,
       [rule.escalate_to, severity, rule.threshold]
     );
     escalated += escResult.affectedRows || 0;
@@ -378,8 +390,8 @@ async function getConstraints(component, options = {}) {
 
   const [rows] = await pool.query(
     `SELECT id, learning_type, pattern_signature, title, description,
-            constraint_text, occurrences, severity, affected_components,
-            global_candidate
+            constraint_text, occurrences, severity, base_severity,
+            severity_source, affected_components, global_candidate
      FROM workflow_learning_registry
      WHERE active = 1 AND constraint_text IS NOT NULL AND constraint_text != ''
      ORDER BY
@@ -399,26 +411,28 @@ async function getConstraints(component, options = {}) {
     let include = false;
     let reason = '';
 
+    const srcLabel = _severitySourceLabel(row.severity_source || 'category_default');
+
     if (includeAll) {
       include = true;
-      reason = `Active pattern (${row.occurrences} occurrences)`;
+      reason = `Active pattern, ${srcLabel} (${row.occurrences} occurrences)`;
     } else if (row.severity === 'critical' || row.severity === 'high') {
       // Always inject high/critical
       include = true;
-      reason = `${row.severity} severity pattern (${row.occurrences} occurrences)`;
+      reason = `${row.severity} severity [${srcLabel}] (${row.occurrences} occurrences)`;
     } else if (row.severity === 'medium') {
       // Inject if component matches or global
       if (componentMatch || isGlobal) {
         include = true;
         reason = componentMatch
-          ? `Medium severity, component match (${row.occurrences} occurrences)`
-          : `Medium severity, global candidate (${row.occurrences} occurrences)`;
+          ? `medium severity [${srcLabel}], component match (${row.occurrences} occurrences)`
+          : `medium severity [${srcLabel}], global candidate (${row.occurrences} occurrences)`;
       }
     } else if (row.severity === 'low') {
       // Only inject if component matches directly
       if (componentMatch) {
         include = true;
-        reason = `Low severity, direct component match (${row.occurrences} occurrences)`;
+        reason = `low severity [${srcLabel}], direct component match (${row.occurrences} occurrences)`;
       }
     }
 
@@ -427,10 +441,13 @@ async function getConstraints(component, options = {}) {
         learning_id: row.id,
         title: row.title,
         severity: row.severity,
+        base_severity: row.base_severity,
+        severity_source: row.severity_source || 'category_default',
         constraint_text: row.constraint_text,
         occurrences: row.occurrences,
         injection_reason: reason,
         pattern_signature: row.pattern_signature,
+        global_candidate: isGlobal,
       });
     }
   }
@@ -573,19 +590,38 @@ async function enableLearning(id) {
 }
 
 /**
- * Adjust severity of a learning pattern.
+ * Manual severity override with full audit trail.
+ * Sets severity_source to 'manual_override' and records who, when, and what it was before.
+ * Manual overrides are never overwritten by automatic escalation.
  */
-async function setSeverity(id, severity) {
+async function setSeverity(id, severity, actor) {
   if (!VALID_SEVERITIES.includes(severity)) {
     throw new Error(`Invalid severity: ${severity}. Valid: ${VALID_SEVERITIES.join(', ')}`);
   }
   const pool = getAppPool();
+
+  // Get current severity for audit trail
+  const [rows] = await pool.query('SELECT severity FROM workflow_learning_registry WHERE id = ?', [id]);
+  if (rows.length === 0) throw new Error('Learning not found');
+
+  const previousSeverity = rows[0].severity;
+
   const [result] = await pool.query(
-    'UPDATE workflow_learning_registry SET severity = ? WHERE id = ?',
-    [severity, id]
+    `UPDATE workflow_learning_registry
+     SET severity = ?, severity_source = 'manual_override',
+         override_by = ?, override_at = NOW(), override_previous_severity = ?
+     WHERE id = ?`,
+    [severity, actor || 'unknown', previousSeverity, id]
   );
   if (result.affectedRows === 0) throw new Error('Learning not found');
-  return { success: true };
+
+  return {
+    success: true,
+    previous_severity: previousSeverity,
+    new_severity: severity,
+    severity_source: 'manual_override',
+    override_by: actor || 'unknown',
+  };
 }
 
 /**
@@ -622,21 +658,24 @@ async function getStats() {
   );
 
   const [topViolations] = await pool.query(
-    `SELECT id, title, pattern_signature, occurrences, severity, affected_components, last_seen_at
+    `SELECT id, title, pattern_signature, occurrences, severity, base_severity, severity_source,
+            global_candidate, affected_components, last_seen_at
      FROM workflow_learning_registry
      WHERE active = 1 AND learning_type = 'violation_pattern'
      ORDER BY occurrences DESC LIMIT 10`
   );
 
   const [topSuccesses] = await pool.query(
-    `SELECT id, title, pattern_signature, occurrences, severity, affected_components, last_seen_at
+    `SELECT id, title, pattern_signature, occurrences, severity, base_severity, severity_source,
+            global_candidate, affected_components, last_seen_at
      FROM workflow_learning_registry
      WHERE active = 1 AND learning_type = 'success_pattern'
      ORDER BY occurrences DESC LIMIT 10`
   );
 
   const [globalCandidates] = await pool.query(
-    `SELECT id, title, pattern_signature, occurrences, severity, learning_type
+    `SELECT id, title, pattern_signature, occurrences, severity, base_severity, severity_source,
+            learning_type, affected_components
      FROM workflow_learning_registry
      WHERE active = 1 AND global_candidate = 1
      ORDER BY occurrences DESC`
@@ -678,12 +717,24 @@ async function getStats() {
       ...r,
       affected_components: _parseJSON(r.affected_components, []),
     })),
-    global_candidates: globalCandidates,
+    global_candidates: globalCandidates.map(r => ({
+      ...r,
+      affected_components: _parseJSON(r.affected_components, []),
+    })),
     recent_injections: recentInjections,
   };
 }
 
 // ─── Helpers ───────────────────────────────────────────────────────────────
+
+function _severitySourceLabel(source) {
+  const labels = {
+    category_default: 'category default',
+    threshold_escalated: 'threshold escalated',
+    manual_override: 'manual override',
+  };
+  return labels[source] || source;
+}
 
 function _parseJSON(str, fallback) {
   try { return JSON.parse(str || 'null') || fallback; } catch { return fallback; }

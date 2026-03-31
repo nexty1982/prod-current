@@ -120,9 +120,10 @@ describe('recordViolation', () => {
     expect(params[4]).toBe('Used fetch instead of omApi'); // description
     expect(params[5]).toBe('Must use omApi (the project API client), not fetch, axios, or custom HTTP clients.'); // constraint_text
     expect(params[6]).toBe('high'); // severity
-    expect(JSON.parse(params[7])).toEqual(['backend']); // affected_components
-    expect(JSON.parse(params[8])).toEqual(['wf-1']); // source_workflow_ids
-    expect(JSON.parse(params[9])).toEqual(['p-1']); // source_prompt_ids
+    expect(params[7]).toBe('high'); // base_severity
+    expect(JSON.parse(params[8])).toEqual(['backend']); // affected_components
+    expect(JSON.parse(params[9])).toEqual(['wf-1']); // source_workflow_ids
+    expect(JSON.parse(params[10])).toEqual(['p-1']); // source_prompt_ids
   });
 
   test('increments occurrences when same violation recorded twice', async () => {
@@ -159,8 +160,8 @@ describe('recordViolation', () => {
     expect(updateCall[0]).toMatch(/UPDATE workflow_learning_registry/);
     const params = updateCall[1];
     expect(params[0]).toBe(2); // new occurrences
-    // Merged workflow IDs
-    const wfIds = JSON.parse(params[4]);
+    // Merged workflow IDs (index 5 after severity_source and global_candidate added)
+    const wfIds = JSON.parse(params[5]);
     expect(wfIds).toContain('wf-1');
     expect(wfIds).toContain('wf-2');
   });
@@ -354,7 +355,7 @@ describe('global threshold promotion', () => {
 
     // Verify the UPDATE query set global_candidate = 1
     const updateParams = queryCalls[1][1];
-    expect(updateParams[2]).toBe(1); // global_candidate param
+    expect(updateParams[3]).toBe(1); // global_candidate param (index 3 after severity_source)
   });
 
   test('global_candidate stays 0 when below threshold', async () => {
@@ -753,27 +754,42 @@ describe('CRUD operations', () => {
     expect(queryCalls[0][0]).toMatch(/SET active = 1/);
   });
 
-  test('setSeverity validates enum and updates', async () => {
-    setupQueryResults([{ affectedRows: 1 }, null]);
+  test('setSeverity validates enum, records override trail, and updates', async () => {
+    // First query: SELECT current severity
+    // Second query: UPDATE
+    setupQueryResults(
+      [[{ severity: 'medium' }], null],
+      [{ affectedRows: 1 }, null]
+    );
 
-    const result = await learningService.setSeverity('learn-1', 'high');
+    const result = await learningService.setSeverity('learn-1', 'high', 'admin@test.com');
 
     expect(result.success).toBe(true);
-    expect(queryCalls[0][0]).toMatch(/SET severity = \?/);
-    expect(queryCalls[0][1]).toEqual(['high', 'learn-1']);
+    expect(result.previous_severity).toBe('medium');
+    expect(result.new_severity).toBe('high');
+    expect(result.severity_source).toBe('manual_override');
+    expect(result.override_by).toBe('admin@test.com');
+
+    // Verify UPDATE query sets severity_source to manual_override
+    const updateCall = queryCalls[1];
+    expect(updateCall[0]).toMatch(/severity_source = 'manual_override'/);
+    expect(updateCall[0]).toMatch(/override_by = \?/);
+    expect(updateCall[0]).toMatch(/override_previous_severity = \?/);
   });
 
   test('setSeverity throws for invalid severity', async () => {
     await expect(
-      learningService.setSeverity('learn-1', 'extreme')
+      learningService.setSeverity('learn-1', 'extreme', 'admin')
     ).rejects.toThrow('Invalid severity: extreme');
   });
 
   test('setSeverity throws when learning not found', async () => {
-    setupQueryResults([{ affectedRows: 0 }, null]);
+    setupQueryResults(
+      [[], null]  // SELECT returns empty
+    );
 
     await expect(
-      learningService.setSeverity('nonexistent', 'high')
+      learningService.setSeverity('nonexistent', 'high', 'admin')
     ).rejects.toThrow('Learning not found');
   });
 
@@ -869,5 +885,230 @@ describe('deterministic behavior', () => {
     expect(vSig).not.toBe(sSig);
     expect(vSig).not.toBe(stSig);
     expect(sSig).not.toBe(stSig);
+  });
+});
+
+// ─── 11. Severity Integrity (Prompt 018) ─────────────────────────────────
+
+describe('severity integrity — traceability and truthfulness', () => {
+  test('new pattern records base_severity = category default severity', async () => {
+    setupQueryResults(
+      [[], null],              // SELECT: no existing
+      [{ affectedRows: 1 }, null]  // INSERT
+    );
+
+    const result = await learningService.recordViolation({
+      category: 'wrong_api_client',
+      component: 'backend',
+    });
+
+    expect(result.severity).toBe('high');
+    expect(result.base_severity).toBe('high');
+    expect(result.severity_source).toBe('category_default');
+
+    // Verify INSERT includes base_severity
+    const insertCall = queryCalls[1];
+    expect(insertCall[0]).toMatch(/base_severity/);
+    expect(insertCall[0]).toMatch(/severity_source/);
+  });
+
+  test('auto-escalation sets severity_source to threshold_escalated', async () => {
+    const existingRecord = {
+      id: 'int-1',
+      occurrences: 4,
+      severity: 'low',
+      severity_source: 'category_default',
+      base_severity: 'low',
+      affected_components: '[]',
+      source_workflow_ids: '[]',
+      source_prompt_ids: '[]',
+      global_candidate: 1,
+    };
+
+    setupQueryResults(
+      [[existingRecord], null],
+      [{ affectedRows: 1 }, null]
+    );
+
+    const result = await learningService.recordViolation({
+      category: 'inconsistent_naming',
+    });
+
+    expect(result.severity).toBe('medium');
+    expect(result.severity_source).toBe('threshold_escalated');
+    expect(result.base_severity).toBe('low');
+  });
+
+  test('manual override prevents automatic escalation in _recordPattern', async () => {
+    // Pattern was manually overridden to 'medium' — at 8 occurrences, auto-escalation
+    // would normally escalate medium→high, but it must NOT because it's a manual override
+    const existingRecord = {
+      id: 'int-2',
+      occurrences: 7,
+      severity: 'medium',
+      severity_source: 'manual_override',
+      base_severity: 'high',
+      affected_components: '[]',
+      source_workflow_ids: '[]',
+      source_prompt_ids: '[]',
+      global_candidate: 1,
+    };
+
+    setupQueryResults(
+      [[existingRecord], null],
+      [{ affectedRows: 1 }, null]
+    );
+
+    const result = await learningService.recordViolation({
+      category: 'wrong_api_client',
+    });
+
+    // Occurrences 8 meets medium→high threshold, but manual_override must be preserved
+    expect(result.occurrences).toBe(8);
+    expect(result.severity).toBe('medium');
+    expect(result.severity_source).toBe('manual_override');
+  });
+
+  test('aggregatePatterns skips manual overrides in escalation', async () => {
+    setupQueryResults(
+      [{ affectedRows: 2 }, null],   // promote
+      [{ affectedRows: 1 }, null],   // low→medium
+      [{ affectedRows: 0 }, null],   // medium→high
+      [{ affectedRows: 0 }, null]    // high→critical
+    );
+
+    await learningService.aggregatePatterns();
+
+    // Each escalation query must include the manual_override exclusion
+    for (let i = 1; i <= 3; i++) {
+      expect(queryCalls[i][0]).toMatch(/severity_source != 'manual_override'/);
+    }
+  });
+
+  test('setSeverity creates full override audit trail', async () => {
+    setupQueryResults(
+      [[{ severity: 'low' }], null],     // SELECT current
+      [{ affectedRows: 1 }, null]        // UPDATE
+    );
+
+    const result = await learningService.setSeverity('int-3', 'critical', 'admin@example.com');
+
+    expect(result.previous_severity).toBe('low');
+    expect(result.new_severity).toBe('critical');
+    expect(result.severity_source).toBe('manual_override');
+    expect(result.override_by).toBe('admin@example.com');
+
+    // Verify UPDATE stores the full trail
+    const updateSql = queryCalls[1][0];
+    expect(updateSql).toMatch(/override_by/);
+    expect(updateSql).toMatch(/override_at/);
+    expect(updateSql).toMatch(/override_previous_severity/);
+    expect(queryCalls[1][1][2]).toBe('low'); // override_previous_severity
+  });
+
+  test('setSeverity defaults actor to unknown when not provided', async () => {
+    setupQueryResults(
+      [[{ severity: 'medium' }], null],
+      [{ affectedRows: 1 }, null]
+    );
+
+    const result = await learningService.setSeverity('int-4', 'high');
+
+    expect(result.override_by).toBe('unknown');
+  });
+
+  test('getConstraints returns severity_source and base_severity in each constraint', async () => {
+    const row = {
+      id: 'int-5',
+      learning_type: 'violation_pattern',
+      pattern_signature: 'violation:test',
+      title: 'Test',
+      description: 'Test',
+      constraint_text: 'Do something.',
+      occurrences: 10,
+      severity: 'critical',
+      base_severity: 'high',
+      severity_source: 'threshold_escalated',
+      affected_components: JSON.stringify(['backend']),
+      global_candidate: 1,
+    };
+
+    setupQueryResults([[row], null]);
+
+    const constraints = await learningService.getConstraints('backend');
+
+    expect(constraints).toHaveLength(1);
+    expect(constraints[0].severity_source).toBe('threshold_escalated');
+    expect(constraints[0].base_severity).toBe('high');
+    expect(constraints[0].global_candidate).toBe(true);
+    expect(constraints[0].injection_reason).toContain('threshold escalated');
+  });
+
+  test('injection reason includes severity source label', async () => {
+    const manualRow = {
+      id: 'int-6',
+      learning_type: 'violation_pattern',
+      pattern_signature: 'violation:manual',
+      title: 'Manual Override Test',
+      description: 'Test',
+      constraint_text: 'Must do X.',
+      occurrences: 2,
+      severity: 'critical',
+      base_severity: 'medium',
+      severity_source: 'manual_override',
+      affected_components: '[]',
+      global_candidate: 0,
+    };
+
+    setupQueryResults([[manualRow], null]);
+
+    const constraints = await learningService.getConstraints('backend');
+
+    expect(constraints).toHaveLength(1);
+    expect(constraints[0].injection_reason).toContain('manual override');
+  });
+
+  test('global candidate flag is independent of severity', async () => {
+    // A low severity pattern at 3+ occurrences should be global_candidate but
+    // still NOT injected for non-matching component (low only injects on direct match)
+    const row = {
+      id: 'int-7',
+      learning_type: 'violation_pattern',
+      pattern_signature: 'violation:naming',
+      title: 'Naming Issue',
+      description: 'Test',
+      constraint_text: 'Use correct naming.',
+      occurrences: 5,
+      severity: 'low',
+      base_severity: 'low',
+      severity_source: 'category_default',
+      affected_components: JSON.stringify(['backend']),
+      global_candidate: 1,
+    };
+
+    setupQueryResults([[row], null]);
+
+    // Query for 'frontend' — not a direct component match
+    const constraints = await learningService.getConstraints('frontend');
+
+    // Low severity + global candidate but NO component match → excluded
+    // (global candidate only helps medium severity, not low)
+    expect(constraints).toHaveLength(0);
+  });
+
+  test('every violation category has a defined default severity', () => {
+    for (const [key, def] of Object.entries(learningService.VIOLATION_CATEGORIES)) {
+      expect(learningService.VALID_SEVERITIES).toContain(def.severity);
+    }
+  });
+
+  test('every escalation rule maps to a valid severity', () => {
+    for (const [severity, rule] of Object.entries(learningService.SEVERITY_ESCALATION)) {
+      if (rule) {
+        expect(learningService.VALID_SEVERITIES).toContain(rule.escalate_to);
+        expect(typeof rule.threshold).toBe('number');
+        expect(rule.threshold).toBeGreaterThan(0);
+      }
+    }
   });
 });
