@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wght@400;500;600;700&display=swap');
 
 /* Enable class-based dark mode (Tailwind v4) */
 @custom-variant dark (&:where(.dark, .dark *));
@@ -68,9 +69,6 @@
 .MuiButton-root .MuiButton-endIcon {
   color: inherit !important;
 }
-
-/* Georgian font — Google Fonts loaded for ქართული rendering */
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wght@400;500;600;700&display=swap');
 
 :root {
   font-family: Inter, 'Noto Sans Georgian', system-ui, Avenir, Helvetica, Arial, sans-serif;

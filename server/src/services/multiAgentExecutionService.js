@@ -25,22 +25,41 @@ const { getAppPool } = require('../config/db');
 const agentRouter = require('./agentRoutingService');
 const resultSelection = require('./resultSelectionService');
 
-// ─── Configuration ──────────────────────────────────────────────────────────
+// ─── Configuration (with in-memory cache) ───────────────────────────────────
+//
+// agent_config values change rarely (operator-driven). Caching them avoids
+// 3 DB round-trips per executePrompt call. Cache is invalidated on write
+// and expires after CONFIG_CACHE_TTL_MS regardless.
+
+const CONFIG_CACHE_TTL_MS = 30_000; // 30 seconds
+let _configCache = null;        // { data: Map<string,string>, loadedAt: number }
 
 /**
- * Read a config value from agent_config table.
+ * Load all config into cache (single query).
  */
-async function getConfig(key) {
+async function _loadConfigCache() {
+  const now = Date.now();
+  if (_configCache && (now - _configCache.loadedAt) < CONFIG_CACHE_TTL_MS) {
+    return _configCache.data;
+  }
   const pool = getAppPool();
-  const [rows] = await pool.query(
-    'SELECT config_value FROM agent_config WHERE config_key = ?',
-    [key]
-  );
-  return rows.length > 0 ? rows[0].config_value : null;
+  const [rows] = await pool.query('SELECT config_key, config_value FROM agent_config');
+  const data = new Map();
+  for (const row of rows) data.set(row.config_key, row.config_value);
+  _configCache = { data, loadedAt: now };
+  return data;
 }
 
 /**
- * Set a config value.
+ * Read a config value from agent_config table (cached).
+ */
+async function getConfig(key) {
+  const cache = await _loadConfigCache();
+  return cache.get(key) ?? null;
+}
+
+/**
+ * Set a config value. Invalidates cache so next read reflects the write.
  */
 async function setConfig(key, value) {
   const pool = getAppPool();
@@ -49,6 +68,7 @@ async function setConfig(key, value) {
      ON DUPLICATE KEY UPDATE config_value = ?`,
     [key, value, value]
   );
+  _configCache = null; // invalidate
   return { success: true };
 }
 
@@ -56,13 +76,17 @@ async function setConfig(key, value) {
  * Get all config as a map.
  */
 async function getAllConfig() {
-  const pool = getAppPool();
-  const [rows] = await pool.query('SELECT * FROM agent_config ORDER BY config_key');
+  const cache = await _loadConfigCache();
   const config = {};
-  for (const row of rows) {
-    config[row.config_key] = row.config_value;
-  }
+  for (const [k, v] of cache) config[k] = v;
   return config;
+}
+
+/**
+ * Invalidate config cache (for testing or manual refresh).
+ */
+function invalidateConfigCache() {
+  _configCache = null;
 }
 
 // ─── Execution ──────────────────────────────────────────────────────────────
@@ -111,26 +135,56 @@ async function executePrompt({
     agents.push(...routing.comparison_agents);
   }
 
+  // Read all config values in a single cached call (avoids N separate queries)
+  const configMap = await _loadConfigCache();
+  const timeout = parseInt(configMap.get('comparison_timeout_ms') || '120000', 10);
+  const autoEval = configMap.get('auto_evaluate') === 'true';
+  const confidenceThreshold = parseFloat(configMap.get('confidence_threshold') || '0.7');
+
   // Execute all agents
   const results = [];
   if (mode === 'multi') {
-    // Parallel execution — map agents alongside promises for traceability
-    const timeout = parseInt(await getConfig('comparison_timeout_ms') || '120000', 10);
-    const execPromises = agents.map(agent =>
-      _executeWithAgent(agent, promptText, stepId, workItemId, executionGroupId, timeout)
+    // Execute primary agent first for smart-skip evaluation
+    const primaryResult = await _executeWithAgent(
+      routing.primary_agent, promptText, stepId, workItemId, executionGroupId, timeout
     );
-    const settled = await Promise.allSettled(execPromises);
-    for (let i = 0; i < settled.length; i++) {
-      const s = settled[i];
-      if (s.status === 'fulfilled') {
-        results.push(s.value);
-      } else {
-        // Preserve agent identity from the original agents array
-        results.push({
-          error: s.reason.message,
-          agent_id: agents[i].id,
-          agent_name: agents[i].name,
-        });
+    results.push(primaryResult);
+
+    // Smart multi-agent skip: if primary result is high quality, skip comparison
+    // agents to save cost. Only applies when the primary result:
+    //   1. Produced output (no error)
+    //   2. Passes auto-evaluation with confidence >= threshold
+    // This is deterministic: same primary quality → same skip decision.
+    let skipComparison = false;
+    if (primaryResult.has_result && !primaryResult.error && autoEval) {
+      await _autoEvaluate(primaryResult.result_id, primaryResult);
+      const evalResult = await _getEvaluation(primaryResult.result_id);
+      if (evalResult &&
+          evalResult.completion_status === 'success' &&
+          (evalResult.confidence || 0) >= confidenceThreshold &&
+          (evalResult.violation_count || 0) === 0) {
+        skipComparison = true;
+      }
+    }
+
+    if (!skipComparison) {
+      // Run comparison agents in parallel
+      const comparisonAgents = agents.slice(1);
+      const execPromises = comparisonAgents.map(agent =>
+        _executeWithAgent(agent, promptText, stepId, workItemId, executionGroupId, timeout)
+      );
+      const settled = await Promise.allSettled(execPromises);
+      for (let i = 0; i < settled.length; i++) {
+        const s = settled[i];
+        if (s.status === 'fulfilled') {
+          results.push(s.value);
+        } else {
+          results.push({
+            error: s.reason.message,
+            agent_id: comparisonAgents[i].id,
+            agent_name: comparisonAgents[i].name,
+          });
+        }
       }
     }
   } else {
@@ -141,14 +195,15 @@ async function executePrompt({
     results.push(result);
   }
 
-  // Auto-evaluate if configured — evaluate ALL recorded results, including
-  // those with errors. Failed results that were recorded to DB need evaluation
-  // so selection can compare all candidates deterministically.
-  const autoEval = await getConfig('auto_evaluate');
-  if (autoEval === 'true') {
+  // Auto-evaluate if configured — evaluate ALL recorded results that haven't
+  // been evaluated yet (primary may already be evaluated from smart-skip check).
+  if (autoEval) {
     for (const result of results) {
       if (result.result_id) {
-        await _autoEvaluate(result.result_id, result);
+        const existing = await _getEvaluation(result.result_id);
+        if (!existing || existing.evaluator_status !== 'evaluated') {
+          await _autoEvaluate(result.result_id, result);
+        }
       }
     }
   }
@@ -401,12 +456,25 @@ function _parseJSON(str, fallback) {
   try { return JSON.parse(str || 'null') || fallback; } catch { return fallback; }
 }
 
+/**
+ * Read evaluation state for a result (used by smart-skip and duplicate prevention).
+ */
+async function _getEvaluation(resultId) {
+  const pool = getAppPool();
+  const [rows] = await pool.query(
+    'SELECT evaluator_status, completion_status, confidence, violation_count FROM prompt_execution_results WHERE id = ?',
+    [resultId]
+  );
+  return rows.length > 0 ? rows[0] : null;
+}
+
 // ─── Exports ────────────────────────────────────────────────────────────────
 
 module.exports = {
   getConfig,
   setConfig,
   getAllConfig,
+  invalidateConfigCache,
   executePrompt,
   getExecutionGroup,
 };

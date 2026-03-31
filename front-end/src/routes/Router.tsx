@@ -131,6 +131,7 @@ const InteractiveReportJobsPage = Loadable(lazy(() => import('../features/devel-
 const BuildInfoPage = Loadable(lazy(() => import('../features/devel-tools/build-info/BuildInfoPage')));
 const RepoOpsPage = Loadable(lazy(() => import('../features/devel-tools/repo-ops/RepoOpsPage')));
 const PlatformStatusPage = Loadable(lazy(() => import('../features/devel-tools/platform-status/PlatformStatusPage')));
+const CommandCenterPage = Loadable(lazy(() => import('../features/devel-tools/command-center/CommandCenterPage')));
 const OrthodMetricsAdmin = Loadable(lazy(() => import('../features/admin/admin/OrthodoxMetricsAdmin')));
 const AIAdminPanel = Loadable(lazy(() => import('../features/admin/ai/AIAdminPanel')));
 const OMAIUltimateLogger = Loadable(lazy(() => import('../features/devel-tools/om-ultimatelogger/LoggerDashboard')));
@@ -191,6 +192,7 @@ const LayoutTemplateEditorPage = Loadable(lazy(() => import('../features/devel-t
 const OcrActivityMonitor = Loadable(lazy(() => import('../features/admin/OcrActivityMonitor')));
 const OcrOperationsDashboard = Loadable(lazy(() => import('../features/devel-tools/ocr-operations/OcrOperationsDashboard')));
 const OcrBatchManager = Loadable(lazy(() => import('../features/devel-tools/ocr-operations/OcrBatchManager')));
+const WorkSessionAdmin = Loadable(lazy(() => import('../features/devel-tools/work-sessions/WorkSessionAdminPage')));
 // OMTasksPage, DailyTasks — retired, now managed via OMAI OM Daily
 const ApiExplorerPage = Loadable(lazy(() => import('../features/devel-tools/api-explorer/ApiExplorerPage')));
 const LiveTableBuilderPage = Loadable(lazy(() => import('../features/devel-tools/live-table-builder/LiveTableBuilderPage')));
@@ -1315,6 +1317,16 @@ const Router = [
       },
       // OM Tasks, Daily Tasks — retired from OM, now managed via OMAI OM Daily
       {
+        path: '/devel-tools/work-session-admin',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin']}>
+            <AdminErrorBoundary>
+              <WorkSessionAdmin />
+            </AdminErrorBoundary>
+          </ProtectedRoute>
+        )
+      },
+      {
         path: '/devel-tools/api-explorer',
         element: (
           <ProtectedRoute requiredRole={['super_admin']}>
@@ -1391,6 +1403,14 @@ const Router = [
         element: (
           <ProtectedRoute requiredRole={['super_admin']}>
             <PlatformStatusPage />
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/devel-tools/command-center',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin']}>
+            <CommandCenterPage />
           </ProtectedRoute>
         )
       },

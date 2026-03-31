@@ -227,11 +227,13 @@ const systemStatusRouter = require('./api/systemStatus');
 const dailyTasksRouter = require('./api/dailyTasks');
 // MIGRATED TO OMAI: const omDailyRouter = require('./routes/om-daily');
 const promptPlansRouter = require('./routes/prompt-plans');
+const promptsRouter = require('./routes/prompts');
 const workflowsRouter = require('./api/workflows');
 const workflowTemplatesRouter = require('./api/workflowTemplates');
 const workflowLearningRouter = require('./api/workflowLearning');
 const pageContentRouter = require('./routes/page-content');
 const snapshotsRouter = require('./routes/snapshots');
+const pageSnapshotsRouter = require('./routes/page-snapshots');
 const crmRouter = require('./routes/crm');
 const churchEnrichmentRouter = require('./routes/churchEnrichment');
 const jurisdictionsRouter = require('./routes/jurisdictions');
@@ -856,6 +858,8 @@ console.log('✅ [Server] Mounted records-inspector, seed-records, record-wizard
 // MIGRATED TO OMAI: console.log('✅ [Server] Mounted /api/om-daily routes');
 app.use('/api/prompt-plans', promptPlansRouter); // Prompt Plans (AI orchestration)
 console.log('✅ [Server] Mounted /api/prompt-plans routes (AI Prompt Plans)');
+app.use('/api/prompts', promptsRouter); // Prompt Registry (CRUD + state machine)
+console.log('✅ [Server] Mounted /api/prompts routes (Prompt Registry)');
 const agentRouter = require('./api/agentRoutes');
 app.use('/api/agents', agentRouter); // Multi-Agent Routing & Selection
 console.log('✅ [Server] Mounted /api/agents routes (Multi-Agent System)');
@@ -875,6 +879,8 @@ app.use('/api/page-content-live', pageContentLiveRouter); // Live content overri
 console.log('✅ [Server] Mounted /api/page-content-live routes (Inline Page Editor)');
 app.use('/api/snapshots', snapshotsRouter); // Code snapshot safety system
 console.log('✅ [Server] Mounted /api/snapshots routes (Safety System)');
+app.use('/api/page-snapshots', pageSnapshotsRouter); // Page-aware Git history browser
+console.log('✅ [Server] Mounted /api/page-snapshots routes (Page Snapshot Manager)');
 app.use('/api/crm', crmRouter); // CRM pipeline & outreach
 console.log('✅ [Server] Mounted /api/crm routes (CRM & Outreach)');
 app.use('/api/church-enrichment', churchEnrichmentRouter); // Church enrichment profiles
@@ -916,6 +922,10 @@ app.use('/api/user/profile', userProfileRouter);
 // User session management (self-service)
 const userSessionsRouter = require('./routes/user-sessions');
 app.use('/api/user/sessions', userSessionsRouter);
+
+// Work session tracking (cross-app work timer + weekly reports)
+const workSessionsRouter = require('./routes/work-sessions');
+app.use('/api/work-sessions', workSessionsRouter);
 
 // Profile image upload routes (avatar + banner)
 const profileUploadRouter = require('./routes/upload');
@@ -1577,6 +1587,29 @@ cron.schedule('*/5 * * * *', async () => {
 });
 
 console.log('Email queue processor started (runs every 5 minutes)');
+
+// --- WORK SESSION CRONS ---------------------------------------------
+// Weekly report generation — every Monday at 12:00 UTC (8 AM ET)
+cron.schedule('0 12 * * 1', async () => {
+  try {
+    const { processWeeklyReports } = require('./services/weeklyReportService');
+    await processWeeklyReports();
+  } catch (error) {
+    console.error('Error processing weekly reports:', error);
+  }
+});
+
+// Auto-end stale work sessions — every hour
+cron.schedule('0 * * * *', async () => {
+  try {
+    const { autoEndStaleSessions } = require('./services/weeklyReportService');
+    await autoEndStaleSessions();
+  } catch (error) {
+    console.error('Error auto-ending stale sessions:', error);
+  }
+});
+
+console.log('Work session crons started (weekly reports Mon 8AM ET, stale session cleanup hourly)');
 
 // MIGRATED TO OMAI: om-daily cron jobs (changelog, staging review, GitHub sync)
 // These crons now run from the OMAI server

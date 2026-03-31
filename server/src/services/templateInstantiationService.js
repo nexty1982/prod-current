@@ -31,8 +31,12 @@ const { getAppPool } = require('../config/db');
  */
 function injectParams(text, params) {
   if (!text || typeof text !== 'string') return text;
+  if (!params || typeof params !== 'object') return text;
+  // Use a replacer function (not a string) so $ in values is treated literally.
+  // String.replace's string replacement interprets $& $1 $$ etc. but function
+  // return values are always literal.
   return text.replace(/\{\{(\w+)\}\}/g, (match, paramName) => {
-    if (params.hasOwnProperty(paramName)) {
+    if (Object.prototype.hasOwnProperty.call(params, paramName)) {
       return String(params[paramName]);
     }
     return match; // Leave unresolved placeholders as-is (caught in validation)
@@ -156,6 +160,7 @@ async function previewInstantiation(templateId, params, version = null) {
       version: template.version || version,
       category: template.category,
     },
+    template_release_mode: template.release_mode || null,
     unresolved_warnings: unresolvedWarnings,
   };
 }
@@ -175,11 +180,13 @@ async function instantiate(templateId, params, actor, version = null) {
   }
 
   // Create workflow via existing service (preserves all guardrails)
+  // Propagate template's release_mode to the workflow
   const workflow = await workflowService.createWorkflow(
     {
       name: preview.workflow.name,
       description: preview.workflow.description,
       component: preview.workflow.component,
+      release_mode: preview.template_release_mode || null,
       steps: preview.steps.map(s => ({
         step_number: s.step_number,
         title: s.title,

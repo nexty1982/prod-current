@@ -108,10 +108,18 @@ function slugify(str, maxLen = 50) {
     .replace(/-$/, '');
 }
 
-// Extract OM Daily item ID from a branch name like feat/636-some-description
-const BRANCH_TASK_ID_REGEX = /^(?:feat|fix|patch|chore)\/([0-9]+)(?:-|$)/;
+// Extract OM Daily item ID from branch name.
+// Authoritative format: feature/omd-412/2026-03-31/slug  →  412
+// Legacy format:        feat/636-some-description        →  636
+// Also handles:         fix/omd-413/2026-03-31/slug      →  413
+const BRANCH_TASK_ID_REGEX_STANDARD = /^(?:feature|fix|chore)\/omd-([0-9]+)\//;
+const BRANCH_TASK_ID_REGEX_LEGACY = /^(?:feat|enh|fix|ref|mig|chore|spike|docs)\/([0-9]+)(?:-|$)/;
 function extractTaskIdFromBranch(branchName) {
-  const m = branchName.match(BRANCH_TASK_ID_REGEX);
+  // Try authoritative format first
+  let m = branchName.match(BRANCH_TASK_ID_REGEX_STANDARD);
+  if (m) return parseInt(m[1], 10);
+  // Fall back to legacy format
+  m = branchName.match(BRANCH_TASK_ID_REGEX_LEGACY);
   return m ? parseInt(m[1], 10) : null;
 }
 
@@ -1210,7 +1218,9 @@ const HORIZON_LABELS_GH = { '1': 'H:24hr', '2': 'H:48hr', '7': 'H:7day', '14': '
 const SOURCE_LABELS = { agent: 'source:agent', human: 'source:human' };
 const STATUS_LABELS_GH = { in_progress: 'status:in_progress', self_review: 'status:self_review', review: 'status:review', staging: 'status:staging', backlog: 'status:backlog', done: 'status:done', blocked: 'status:blocked' };
 const BRANCH_TYPE_LABELS = { feature: 'type:feature', enhancement: 'type:enhancement', bugfix: 'type:bugfix', refactor: 'type:refactor', migration: 'type:migration', chore: 'type:chore', spike: 'type:spike', docs: 'type:docs' };
-const BRANCH_TYPE_PREFIXES = { feature: 'feat', enhancement: 'enh', bugfix: 'fix', refactor: 'ref', migration: 'mig', chore: 'chore', spike: 'spike', docs: 'docs' };
+// Authoritative branch prefix mapping — long-form only.
+// All branch_type values map to one of three standard prefixes.
+const BRANCH_TYPE_PREFIXES = { feature: 'feature', enhancement: 'feature', bugfix: 'fix', refactor: 'chore', migration: 'chore', chore: 'chore', spike: 'feature', docs: 'chore' };
 const AGENT_TOOL_SHORT = { windsurf: 'windsurf', claude_cli: 'claude-cli', cursor: 'cursor', github_copilot: 'gh-copilot' };
 
 // Cache of labels known to exist in the repo (populated lazily)
@@ -1341,8 +1351,9 @@ function ensureMonthlyBranch(date) {
 }
 
 /**
- * Create a task branch from main using SDLC naming convention.
- * Naming: type/taskID-short-description  e.g. feat/636-migration-logic
+ * Create a task branch from main using authoritative naming convention.
+ * Format: <type>/omd-<id>/<yyyy-mm-dd>/<slug>
+ * Example: feature/omd-636/2026-03-31/migration-logic
  * Returns the branch name or null on failure.
  */
 async function createTaskBranch(item) {
@@ -1353,7 +1364,8 @@ async function createTaskBranch(item) {
   if (!prefix) return null;
 
   const slug = slugify(item.title);
-  const taskBranch = `${prefix}/${item.id}-${slug}`;
+  const today = new Date().toISOString().slice(0, 10);
+  const taskBranch = `${prefix}/omd-${item.id}/${today}/${slug}`;
 
   try {
     // Check if task branch already exists on remote
@@ -1941,13 +1953,14 @@ router.post('/items/:id/start-work', requireAuth, async (req, res) => {
       }
     }
 
-    // 3. Build branch name: type/taskID-short-description
+    // 3. Build branch name: type/omd-<id>/<date>/<slug>
     const prefix = BRANCH_TYPE_PREFIXES[branchType];
     if (!prefix) {
       return res.status(400).json({ error: `Invalid branch_type: ${branchType}` });
     }
     const slug = slugify(item.title);
-    let branchName = `${prefix}/${item.id}-${slug}`;
+    const today = new Date().toISOString().slice(0, 10);
+    let branchName = `${prefix}/omd-${item.id}/${today}/${slug}`;
 
     // 4. Fetch latest main and create branch
     execSync('git fetch origin main', { cwd: REPO_DIR, encoding: 'utf-8', stdio: 'pipe' });

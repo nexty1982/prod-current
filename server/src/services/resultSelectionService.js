@@ -45,14 +45,21 @@ const VALID_COMPLETION_STATUSES = Object.keys(COMPLETION_RANK);
  * Called after an agent produces output and it has been evaluated
  * (either automatically or by the learning system).
  *
+ * OPTIMIZATION: Skips re-evaluation if the result has already been evaluated
+ * and the result_text hasn't changed. This prevents redundant DB writes when
+ * the same result is evaluated multiple times (e.g., auto-eval + manual eval
+ * on unchanged output).
+ *
  * @param {string} resultId - prompt_execution_results.id
  * @param {object} evaluation
  * @param {string} evaluation.completion_status - success|partial|failure|blocked|timeout
  * @param {Array} evaluation.violations - [{type, description, severity}]
  * @param {number} evaluation.confidence - 0.0 to 1.0
  * @param {string} [evaluation.notes]
+ * @param {object} [options]
+ * @param {boolean} [options.force] - Force re-evaluation even if already evaluated
  */
-async function evaluateResult(resultId, evaluation) {
+async function evaluateResult(resultId, evaluation, options = {}) {
   const { completion_status, violations, confidence, notes } = evaluation;
 
   if (!VALID_COMPLETION_STATUSES.includes(completion_status)) {
@@ -63,6 +70,27 @@ async function evaluateResult(resultId, evaluation) {
   }
 
   const pool = getAppPool();
+
+  // Duplicate evaluation prevention: skip if already evaluated with same status
+  if (!options.force) {
+    const [existing] = await pool.query(
+      'SELECT evaluator_status, completion_status, confidence FROM prompt_execution_results WHERE id = ?',
+      [resultId]
+    );
+    if (existing.length > 0 && existing[0].evaluator_status === 'evaluated') {
+      // Already evaluated — return existing without re-writing
+      return {
+        result_id: resultId,
+        evaluator_status: 'evaluated',
+        completion_status: existing[0].completion_status,
+        violation_count: null, // not re-counted
+        confidence: existing[0].confidence,
+        skipped: true,
+        reason: 'Already evaluated',
+      };
+    }
+  }
+
   const violationArray = violations || [];
 
   const [result] = await pool.query(

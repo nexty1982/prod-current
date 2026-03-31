@@ -29,6 +29,34 @@ const guardAdmin = requireRole(['super_admin']);
 router.post('/',  guardAdmin, controller.create);
 router.get('/',   guardAdmin, controller.list);
 
+// ─── Dashboard routes (BEFORE :id to avoid param capture) ──────────────────
+
+router.get('/dashboard',            guardAdmin, controller.dashboard);
+router.get('/dashboard/exceptions', guardAdmin, controller.dashboardExceptions);
+router.get('/dashboard/ready',      guardAdmin, controller.dashboardReady);
+router.get('/dashboard/recommendations', guardAdmin, controller.dashboardRecommendations);
+router.get('/dashboard/cost-report',     guardAdmin, controller.costReport);
+
+// ─── Auto-Execution routes (BEFORE :id to avoid param capture) ────────────
+
+router.post('/auto-execution/enable',  guardAdmin, controller.autoExecEnable);
+router.post('/auto-execution/disable', guardAdmin, controller.autoExecDisable);
+router.post('/auto-execution/mode',    guardAdmin, controller.autoExecSetMode);
+router.get('/auto-execution/status',   guardAdmin, controller.autoExecStatus);
+router.get('/auto-execution/logs',     guardAdmin, controller.autoExecLogs);
+router.post('/auto-execution/run',     guardAdmin, controller.autoExecRunOnce);
+
+// ─── Progression routes (BEFORE :id to avoid param capture) ─────────────
+
+router.post('/progression/run',     guardAdmin, controller.progressionRun);
+router.get('/progression/pipeline', guardAdmin, controller.progressionPipeline);
+
+// ─── Autonomy routes (BEFORE :id to avoid param capture) ─────────────────
+
+router.post('/autonomy/mode',       guardAdmin, controller.autonomySetMode);
+router.get('/autonomy/status',      guardAdmin, controller.autonomyStatus);
+router.get('/autonomy/logs',        guardAdmin, controller.autonomyLogs);
+router.get('/autonomy/dashboard',   guardAdmin, controller.autonomyDashboard);
 // ─── Per-workflow routes ────────────────────────────────────────────────────
 
 router.get('/:id',                  guardAdmin, controller.getById);
@@ -43,5 +71,9 @@ router.post('/:id/reopen',         guardAdmin, controller.reopen);
 router.get('/:id/preview',         guardAdmin, controller.preview);
 router.post('/:id/generate-prompts', guardAdmin, controller.generatePrompts);
 router.get('/:id/status',          guardAdmin, controller.getStatus);
+router.get('/:id/cost',            guardAdmin, controller.workflowCost);
+router.post('/:id/autonomy/pause',  guardAdmin, controller.autonomyPause);
+router.post('/:id/autonomy/resume', guardAdmin, controller.autonomyResume);
+router.post('/:id/manual-only',     guardAdmin, controller.setManualOnly);
 
 module.exports = router;

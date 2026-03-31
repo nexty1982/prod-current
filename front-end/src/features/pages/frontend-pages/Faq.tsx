@@ -6,12 +6,6 @@ import FAQ from '@/components/frontend-pages/homepage/faq';
 
 import C2a from '@/components/frontend-pages/shared/c2a';
 
-import Footer from '@/components/frontend-pages/shared/footer';
-
-import HeaderAlert from '@/components/frontend-pages/shared/header/HeaderAlert';
-
-import HpHeader from '@/components/frontend-pages/shared/header/HpHeader';
-
 import ScrollToTop from '@/components/frontend-pages/shared/scroll-to-top';
 
 import PageContainer from '@/shared/ui/PageContainer';
@@ -25,10 +19,6 @@ const Faq = () => {
   return (
 
     <PageContainer title="Faq" description="this is Faq page">
-
-      <HeaderAlert />
-
-      <HpHeader />
 
 
 
@@ -61,8 +51,6 @@ const Faq = () => {
 
 
       <C2a />
-
-      <Footer />
 
       <ScrollToTop />
 

@@ -158,8 +158,9 @@ const components: any = (theme: Theme) => {
     MuiPaper: {
       styleOverrides: {
         root: {
-          // border: `1px solid ${theme.palette.divider}`,
           backgroundImage: 'none',
+          border: `1px solid ${theme.palette.divider}`,
+          borderRadius: 12,
         },
       },
     },
@@ -363,15 +364,18 @@ const components: any = (theme: Theme) => {
       styleOverrides: {
         root: {
           width: '100%',
-          padding: '15px',
+          padding: 0,
           backgroundImage: 'none',
+          border: `1px solid ${theme.palette.divider}`,
+          borderRadius: 12,
+          backgroundColor: theme.palette.background.paper,
         },
       },
     },
     MuiCardContent: {
       styleOverrides: {
         root: {
-          padding: '24px',
+          padding: '20px',
         },
       },
     },
@@ -379,6 +383,14 @@ const components: any = (theme: Theme) => {
       styleOverrides: {
         root: {
           borderBottom: `1px solid ${theme.palette.divider}`,
+          padding: '12px 16px',
+          fontSize: '0.875rem',
+          color: theme.palette.text.secondary,
+        },
+        head: {
+          fontWeight: 600,
+          color: theme.palette.text.primary,
+          backgroundColor: theme.palette.grey[100],
         },
       },
     },
@@ -387,6 +399,11 @@ const components: any = (theme: Theme) => {
         root: {
           '&:last-child td': {
             borderBottom: 0,
+          },
+          '&:hover': {
+            backgroundColor: theme.palette.mode === 'dark'
+              ? 'rgba(255, 255, 255, 0.04)'
+              : theme.palette.grey[100],
           },
         },
       },
@@ -427,6 +444,27 @@ const components: any = (theme: Theme) => {
         root: {
           fontWeight: 600,
           fontSize: '0.75rem',
+          borderRadius: 6,
+        },
+        colorSuccess: {
+          backgroundColor: theme.palette.success.light,
+          color: theme.palette.success.dark,
+          border: `1px solid ${theme.palette.success.main}33`,
+        },
+        colorError: {
+          backgroundColor: theme.palette.error.light,
+          color: theme.palette.error.dark,
+          border: `1px solid ${theme.palette.error.main}33`,
+        },
+        colorWarning: {
+          backgroundColor: theme.palette.warning.light,
+          color: theme.palette.warning.dark,
+          border: `1px solid ${theme.palette.warning.main}33`,
+        },
+        colorInfo: {
+          backgroundColor: theme.palette.info.light,
+          color: theme.palette.info.dark,
+          border: `1px solid ${theme.palette.info.main}33`,
         },
       },
     },
