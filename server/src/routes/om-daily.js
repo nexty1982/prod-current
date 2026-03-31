@@ -1,9 +1,11 @@
 /**
- * OM Daily API Routes
- * Work pipeline management with 7/14/30/60/90 day horizons
- * Also serves as the unified backend for the Daily Tasks page
+ * OM Daily API Routes — LEGACY / NOT MOUNTED
  *
- * Mounted at /api/om-daily
+ * This file is NOT mounted in the OM backend (see index.ts line ~852).
+ * The canonical OM Daily routes live in OMAI: /var/www/omai/_runtime/server/src/api-ops/om-daily.js
+ * All om_daily_items data lives in omai_db (NOT orthodoxmetrics_db).
+ *
+ * DO NOT re-mount this file. If OM-side OM Daily access is needed, use getOmaiPool().
  */
 
 const express = require('express');

@@ -1,5 +1,5 @@
 const { getAppPool } = require('../config/db-compat');
-const { getTenantPool } = require('../config/db');
+const { getTenantPool, getOmaiPool } = require('../config/db');
 const express = require('express');
 const router = express.Router();
 const fs = require('fs').promises;
@@ -115,7 +115,7 @@ function generateWorkItemTitle(prompt) {
  * Returns the created item row, or throws on failure.
  */
 async function createPromptWorkItem(prompt, context, userId) {
-  const pool = getAppPool();
+  const pool = getOmaiPool(); // canonical om_daily_items in omai_db
   const title = generateWorkItemTitle(prompt);
   const metadata = {
     prompt_text: prompt,
@@ -149,7 +149,7 @@ async function createPromptWorkItem(prompt, context, userId) {
  * @param {object} updates - partial metadata fields to merge
  */
 async function updateWorkItemExecutionMeta(itemId, updates) {
-  const pool = getAppPool();
+  const pool = getOmaiPool(); // canonical om_daily_items in omai_db
   try {
     const [rows] = await pool.query('SELECT metadata FROM om_daily_items WHERE id = ?', [itemId]);
     if (!rows.length) return;
