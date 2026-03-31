@@ -726,7 +726,8 @@ function isBugFix(text) {
 router.post('/tasks/export-completed-to-pipeline', async (req, res) => {
   try {
     const { agent_tool, horizon = '7', auto_branch = true, dry_run = false } = req.body;
-    const { promisePool } = require('../config/db');
+    const { getOmaiPool } = require('../config/db');
+    const promisePool = getOmaiPool(); // canonical om_daily_items in omai_db
 
     // Load completed tasks
     const allTasks = loadTasks();
@@ -1033,11 +1034,12 @@ router.post('/export-to-pipeline', async (req, res) => {
       return res.status(400).json({ success: false, error: 'items array required' });
     }
 
-    const { promisePool } = require('../config/db');
+    const { getOmaiPool } = require('../config/db');
+    const omaiPool = getOmaiPool(); // canonical om_daily_items in omai_db
     const created = [];
 
     for (const item of items.slice(0, 50)) {
-      const [result] = await promisePool.query(
+      const [result] = await omaiPool.query(
         `INSERT INTO om_daily_items (title, task_type, description, horizon, status, priority, category, source, agent_tool, conversation_ref, metadata, created_by)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
@@ -1055,7 +1057,7 @@ router.post('/export-to-pipeline', async (req, res) => {
           req.session?.user?.id || null,
         ]
       );
-      const [row] = await promisePool.query('SELECT * FROM om_daily_items WHERE id = ?', [result.insertId]);
+      const [row] = await omaiPool.query('SELECT * FROM om_daily_items WHERE id = ?', [result.insertId]);
       if (row.length) created.push(row[0]);
     }
 

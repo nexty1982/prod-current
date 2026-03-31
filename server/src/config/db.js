@@ -310,9 +310,32 @@ async function normalizeTenantOcrSchema(churchId) {
   return { schema, status: 'ok', added };
 }
 
+// ── OMAI pool (omai_db) ────────────────────────────────────────────────────
+// Lazily created pool targeting omai_db — the canonical home for om_daily_*
+// tables. Used by routes that need to read/write OM Daily items when the
+// request originates from the OM backend (port 3001) rather than OMAI (7060).
+
+let _omaiPool;
+function getOmaiPool() {
+  if (!_omaiPool) {
+    const baseConfig = getDbConfig('app');
+    _omaiPool = mysql.createPool({
+      ...baseConfig,
+      database: 'omai_db',
+      connectTimeout: 60000,
+      waitForConnections: true,
+      connectionLimit: 5,
+      queueLimit: 0,
+      charset: 'utf8mb4',
+    });
+  }
+  return _omaiPool;
+}
+
 module.exports = {
   getAppPool,
   getAuthPool,
+  getOmaiPool,
   testConnection,
   // Tenant helpers
   tenantSchema,
