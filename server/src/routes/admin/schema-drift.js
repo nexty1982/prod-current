@@ -889,6 +889,92 @@ async function ensurePersistenceTables() {
       INDEX idx_evt_status (event_type, status, attempted_at)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
   `);
+
+  // ── Phase 6A: Distributed scan lock ──────────────────────────────────────
+  //
+  // Design: DB row-level lock with PRIMARY KEY on lock_key.
+  //   Acquire = DELETE stale (expires_at < NOW()) then INSERT IGNORE.
+  //   These two operations are sequential but:
+  //     - DELETE only removes *expired* rows, not any active lock
+  //     - INSERT IGNORE silently fails if the key already exists
+  //   Result: only one caller wins the INSERT; the rest get rows_affected=0.
+  //
+  //   Why this over MySQL GET_LOCK():
+  //     + Survives connection pool churn (GET_LOCK is connection-scoped)
+  //     + Observable in the UI (SELECT the table)
+  //     + Records owner, run_id, timestamps for auditability
+  //     + Compatible with multi-instance deployments
+  //   Why not SELECT FOR UPDATE:
+  //     - Requires explicit transaction; INSERT IGNORE is cleaner here.
+  //
+  //   Stale lock recovery: locks have an expires_at. On every acquire attempt,
+  //   expired locks are cleared first. A crashed scan can never block future
+  //   scans beyond the TTL (default 30 minutes, stored in retention config).
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS schema_drift_scan_lock (
+      lock_key   VARCHAR(60)   NOT NULL,
+      locked_by  VARCHAR(255)  NOT NULL,
+      run_id     INT UNSIGNED  DEFAULT NULL,
+      locked_at  DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      expires_at DATETIME      NOT NULL,
+      PRIMARY KEY (lock_key)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  `);
+
+  // ── Phase 6B: Retention policy configuration ─────────────────────────────
+  //
+  // Single-row config (id=1). auto_cleanup_enabled triggers cleanup
+  // automatically after each scheduled scan.
+  //
+  // Retention windows:
+  //   retention_scan_runs_days    — delete scan run rows beyond this age
+  //   retention_snapshot_days     — NULL-out findings_snapshot beyond this age
+  //                                  (preserves the run row for history, just
+  //                                   drops the large LONGTEXT payload)
+  //   retention_delivery_log_days — delete delivery log rows beyond this age
+  //   retention_notif_days        — delete notification rows beyond this age
+  //   min_runs_to_keep            — safety: never delete the most recent N runs
+  //                                  regardless of age
+  //   scan_lock_ttl_minutes       — how long before an acquired lock expires
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS schema_drift_retention_config (
+      id                          TINYINT UNSIGNED NOT NULL DEFAULT 1,
+      retention_scan_runs_days    INT UNSIGNED NOT NULL DEFAULT 90,
+      retention_snapshot_days     INT UNSIGNED NOT NULL DEFAULT 30,
+      retention_delivery_log_days INT UNSIGNED NOT NULL DEFAULT 60,
+      retention_notif_days        INT UNSIGNED NOT NULL DEFAULT 180,
+      min_runs_to_keep            INT UNSIGNED NOT NULL DEFAULT 10,
+      scan_lock_ttl_minutes       INT UNSIGNED NOT NULL DEFAULT 30,
+      auto_cleanup_enabled        TINYINT(1)   NOT NULL DEFAULT 0,
+      updated_by                  VARCHAR(255) DEFAULT NULL,
+      updated_at                  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      PRIMARY KEY (id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  `);
+
+  await pool.query(`
+    INSERT IGNORE INTO schema_drift_retention_config (id) VALUES (1)
+  `);
+
+  // ── Phase 6C: Retention cleanup history ──────────────────────────────────
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS schema_drift_retention_log (
+      id                   INT UNSIGNED NOT NULL AUTO_INCREMENT,
+      triggered_by         VARCHAR(255) NOT NULL,
+      dry_run              TINYINT(1)   NOT NULL DEFAULT 0,
+      runs_deleted         INT UNSIGNED NOT NULL DEFAULT 0,
+      snapshots_nulled     INT UNSIGNED NOT NULL DEFAULT 0,
+      delivery_log_deleted INT UNSIGNED NOT NULL DEFAULT 0,
+      notifs_deleted       INT UNSIGNED NOT NULL DEFAULT 0,
+      error_message        TEXT         DEFAULT NULL,
+      executed_at          DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      PRIMARY KEY (id),
+      INDEX idx_executed_at (executed_at)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  `);
 }
 
 ensurePersistenceTables().catch(err => {
@@ -1044,6 +1130,231 @@ async function updateScanRun(pool, runId, { status, completedAt, summary,
       runId,
     ]
   );
+}
+
+// ─── Phase 6: Distributed Scan Lock ───────────────────────────────────────────
+//
+// LOCK_KEY is a single global key. Future: per-scope keys e.g. 'scan:all',
+// 'scan:platform_only'. For now one key prevents any overlapping scans.
+//
+// Acquire protocol:
+//   1. DELETE FROM schema_drift_scan_lock WHERE lock_key=? AND expires_at < NOW()
+//      → clears any expired/stale lock (stale lock recovery)
+//   2. INSERT IGNORE INTO schema_drift_scan_lock (lock_key, locked_by, run_id, expires_at)
+//      → atomic: succeeds only if no row exists for this key
+//   3. If rows_affected=1: acquired. If 0: another instance holds the lock.
+//
+// Release protocol: DELETE WHERE lock_key=?
+//   Must be called in a finally block; scan failure must not skip release.
+//
+// TTL: loaded from schema_drift_retention_config.scan_lock_ttl_minutes (default 30).
+//   A crashed scan (process restart, unhandled exception) leaves a stale lock
+//   that auto-expires after TTL. This ensures no single scan failure can
+//   permanently block future scans.
+
+const SCAN_LOCK_KEY = 'schema_drift:scan';
+
+async function loadRetentionConfig(pool) {
+  const [rows] = await pool.query(
+    'SELECT * FROM schema_drift_retention_config WHERE id = 1 LIMIT 1'
+  );
+  return rows[0] || {
+    retention_scan_runs_days:    90,
+    retention_snapshot_days:     30,
+    retention_delivery_log_days: 60,
+    retention_notif_days:        180,
+    min_runs_to_keep:            10,
+    scan_lock_ttl_minutes:       30,
+    auto_cleanup_enabled:        0,
+  };
+}
+
+async function acquireScanLock(pool, lockedBy, runId = null) {
+  const cfg = await loadRetentionConfig(pool);
+  const ttl = Math.max(5, cfg.scan_lock_ttl_minutes || 30);
+
+  // Step 1: clear any stale/expired lock for this key
+  await pool.query(
+    'DELETE FROM schema_drift_scan_lock WHERE lock_key = ? AND expires_at < NOW()',
+    [SCAN_LOCK_KEY]
+  );
+
+  // Step 2: attempt atomic acquire
+  const [result] = await pool.query(
+    `INSERT IGNORE INTO schema_drift_scan_lock (lock_key, locked_by, run_id, expires_at)
+     VALUES (?, ?, ?, DATE_ADD(NOW(), INTERVAL ? MINUTE))`,
+    [SCAN_LOCK_KEY, lockedBy, runId, ttl]
+  );
+
+  if (result.affectedRows === 1) {
+    return { acquired: true, existingLock: null };
+  }
+
+  // Lock already held — fetch current holder for informational logging
+  const [rows] = await pool.query(
+    'SELECT * FROM schema_drift_scan_lock WHERE lock_key = ? LIMIT 1',
+    [SCAN_LOCK_KEY]
+  );
+  return { acquired: false, existingLock: rows[0] || null };
+}
+
+async function updateLockRunId(pool, runId) {
+  await pool.query(
+    'UPDATE schema_drift_scan_lock SET run_id = ? WHERE lock_key = ?',
+    [runId, SCAN_LOCK_KEY]
+  ).catch(() => {});
+}
+
+async function releaseScanLock(pool) {
+  await pool.query(
+    'DELETE FROM schema_drift_scan_lock WHERE lock_key = ?',
+    [SCAN_LOCK_KEY]
+  );
+}
+
+// ─── Phase 6: Retention Engine ─────────────────────────────────────────────────
+//
+// runRetentionCleanup(pool, triggeredBy, dryRun):
+//   dryRun=true  → COUNT only, no deletions, returns preview
+//   dryRun=false → executes deletions, returns actual counts
+//
+// Safety rules enforced:
+//   1. Never delete the most recent min_runs_to_keep scan runs (ORDER BY id DESC)
+//   2. NULL-out findings_snapshot for old runs rather than deleting the row
+//      (preserves run metadata/history without the large LONGTEXT payload)
+//   3. Only delete delivery log and notification rows older than their windows
+//
+// The cleanup function always logs to schema_drift_retention_log (even dry-run).
+
+async function runRetentionCleanup(pool, triggeredBy, dryRun = false) {
+  const cfg = await loadRetentionConfig(pool);
+
+  const scanRunsDays    = Math.max(1, cfg.retention_scan_runs_days    || 90);
+  const snapshotDays    = Math.max(1, cfg.retention_snapshot_days     || 30);
+  const deliveryDays    = Math.max(1, cfg.retention_delivery_log_days || 60);
+  const notifDays       = Math.max(1, cfg.retention_notif_days        || 180);
+  const minKeep         = Math.max(1, cfg.min_runs_to_keep            || 10);
+
+  let runsDeleted         = 0;
+  let snapshotsNulled     = 0;
+  let deliveryLogDeleted  = 0;
+  let notifsDeleted       = 0;
+  let errorMessage        = null;
+
+  try {
+    // --- Find the min id of the most-recent N runs (safety anchor) ----------
+    const [anchorRows] = await pool.query(
+      `SELECT id FROM schema_drift_scan_runs ORDER BY id DESC LIMIT ?`,
+      [minKeep]
+    );
+    const anchorIds    = anchorRows.map(r => r.id);
+    const safeAnchorId = anchorIds.length > 0 ? Math.min(...anchorIds) : 0;
+
+    // 1. NULL-out findings_snapshot for runs older than retention_snapshot_days
+    //    (but never for the most recent min_runs_to_keep runs)
+    if (dryRun) {
+      const [cnt] = await pool.query(
+        `SELECT COUNT(*) AS n FROM schema_drift_scan_runs
+         WHERE findings_snapshot IS NOT NULL
+           AND started_at < DATE_SUB(NOW(), INTERVAL ? DAY)
+           AND id < ?`,
+        [snapshotDays, safeAnchorId]
+      );
+      snapshotsNulled = cnt[0].n;
+    } else {
+      const [res] = await pool.query(
+        `UPDATE schema_drift_scan_runs
+         SET findings_snapshot = NULL
+         WHERE findings_snapshot IS NOT NULL
+           AND started_at < DATE_SUB(NOW(), INTERVAL ? DAY)
+           AND id < ?`,
+        [snapshotDays, safeAnchorId]
+      );
+      snapshotsNulled = res.affectedRows;
+    }
+
+    // 2. DELETE scan run rows older than retention_scan_runs_days
+    //    (never delete the most recent min_runs_to_keep runs)
+    if (dryRun) {
+      const [cnt] = await pool.query(
+        `SELECT COUNT(*) AS n FROM schema_drift_scan_runs
+         WHERE started_at < DATE_SUB(NOW(), INTERVAL ? DAY)
+           AND id < ?`,
+        [scanRunsDays, safeAnchorId]
+      );
+      runsDeleted = cnt[0].n;
+    } else {
+      const [res] = await pool.query(
+        `DELETE FROM schema_drift_scan_runs
+         WHERE started_at < DATE_SUB(NOW(), INTERVAL ? DAY)
+           AND id < ?`,
+        [scanRunsDays, safeAnchorId]
+      );
+      runsDeleted = res.affectedRows;
+    }
+
+    // 3. DELETE delivery log rows older than retention_delivery_log_days
+    if (dryRun) {
+      const [cnt] = await pool.query(
+        `SELECT COUNT(*) AS n FROM schema_drift_notif_delivery_log
+         WHERE attempted_at < DATE_SUB(NOW(), INTERVAL ? DAY)`,
+        [deliveryDays]
+      );
+      deliveryLogDeleted = cnt[0].n;
+    } else {
+      const [res] = await pool.query(
+        `DELETE FROM schema_drift_notif_delivery_log
+         WHERE attempted_at < DATE_SUB(NOW(), INTERVAL ? DAY)`,
+        [deliveryDays]
+      );
+      deliveryLogDeleted = res.affectedRows;
+    }
+
+    // 4. DELETE notification rows older than retention_notif_days
+    if (dryRun) {
+      const [cnt] = await pool.query(
+        `SELECT COUNT(*) AS n FROM schema_drift_notifications
+         WHERE created_at < DATE_SUB(NOW(), INTERVAL ? DAY)`,
+        [notifDays]
+      );
+      notifsDeleted = cnt[0].n;
+    } else {
+      const [res] = await pool.query(
+        `DELETE FROM schema_drift_notifications
+         WHERE created_at < DATE_SUB(NOW(), INTERVAL ? DAY)`,
+        [notifDays]
+      );
+      notifsDeleted = res.affectedRows;
+    }
+
+  } catch (err) {
+    errorMessage = err.message;
+    console.error('[schema-drift] runRetentionCleanup error:', err.message);
+  }
+
+  // Always log the cleanup run (even dry-runs, even partial failures)
+  await pool.query(
+    `INSERT INTO schema_drift_retention_log
+       (triggered_by, dry_run, runs_deleted, snapshots_nulled,
+        delivery_log_deleted, notifs_deleted, error_message)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    [triggeredBy, dryRun ? 1 : 0,
+     runsDeleted, snapshotsNulled, deliveryLogDeleted, notifsDeleted,
+     errorMessage]
+  ).catch(logErr => console.error('[schema-drift] Failed to log cleanup run:', logErr.message));
+
+  return {
+    dryRun,
+    runsDeleted,
+    snapshotsNulled,
+    deliveryLogDeleted,
+    notifsDeleted,
+    errorMessage,
+    executedAt: new Date().toISOString(),
+    config: {
+      scanRunsDays, snapshotDays, deliveryDays, notifDays, minKeep,
+    },
+  };
 }
 
 // ─── Phase 5: Notification Delivery Engine ────────────────────────────────────
@@ -1361,9 +1672,52 @@ async function deliverNotifications(pool, runId, notifs, delta, scopeType, newCr
 // Stable matching key: scope|table|column|driftType
 // All fields are defined on every finding — no fuzzy matching.
 // Prior run must share the same scope_type for a meaningful diff.
+//
+// Two variants:
+//   computeDeltaReadOnly() — pure read: computes delta, returns result, NO DB writes.
+//                            Used by GET /scans/:runId/delta to prevent duplicate
+//                            notification rows from repeated read requests.
+//   computeAndStoreDelta() — full: computes delta, inserts notification rows,
+//                            triggers email/webhook delivery.
+//                            Used after scan completion (scheduler + POST /scans/run).
 
 function findingFingerprint(f) {
   return `${f.scope}|${f.table}|${f.column ?? ''}|${f.driftType}`;
+}
+
+async function computeDeltaReadOnly(pool, runId, currentFindings, scopeType, suppressionRules) {
+  const [priorRows] = await pool.query(
+    `SELECT id, findings_snapshot FROM schema_drift_scan_runs
+     WHERE status = 'complete' AND scope_type = ? AND id != ?
+     ORDER BY id DESC LIMIT 1`,
+    [scopeType, runId]
+  );
+
+  if (!priorRows.length || !priorRows[0].findings_snapshot) return null;
+
+  let priorFindings;
+  try { priorFindings = JSON.parse(priorRows[0].findings_snapshot); }
+  catch (_) { return null; }
+
+  const priorKeys = new Set(priorFindings.map(findingFingerprint));
+  const currKeys  = new Set(currentFindings.map(findingFingerprint));
+
+  const newFindings      = currentFindings.filter(f => !priorKeys.has(findingFingerprint(f)));
+  const resolvedFindings = priorFindings.filter(f => !currKeys.has(findingFingerprint(f)));
+
+  const annotatedNew            = annotateSuppression(newFindings, suppressionRules);
+  const newUnsuppressedCritical = annotatedNew.filter(f => !f.suppressed && f.severity === 'critical');
+  const newUnsuppressedHigh     = annotatedNew.filter(f => !f.suppressed && f.severity === 'high');
+
+  return {
+    priorRunId:       priorRows[0].id,
+    newCount:         newFindings.length,
+    resolvedCount:    resolvedFindings.length,
+    newCriticalCount: newUnsuppressedCritical.length,
+    newHighCount:     newUnsuppressedHigh.length,
+    newFindings:      newFindings.slice(0, 100),
+    resolvedFindings: resolvedFindings.slice(0, 100),
+  };
 }
 
 async function computeAndStoreDelta(pool, runId, currentFindings, scopeType, suppressionRules) {
@@ -1498,14 +1852,16 @@ async function runScheduledScan() {
   if (config.frequency === 'daily'  && _schedulerState.lastRunDate === todayDate) return;
   if (config.frequency === 'weekly' && _schedulerState.lastRunWeek === todayWeek)  return;
 
-  // Cluster guard: skip if another instance started a run in the last 10 min
-  const [recentRows] = await pool.query(
-    `SELECT id FROM schema_drift_scan_runs
-     WHERE status = 'running' AND started_at > DATE_SUB(NOW(), INTERVAL 10 MINUTE)
-     LIMIT 1`
-  );
-  if (recentRows.length) {
-    console.log('[schema-drift] Scheduler: skipping — concurrent scan detected');
+  // Phase 6: acquire distributed scan lock before proceeding.
+  // acquireScanLock() already clears expired/stale locks (stale lock recovery).
+  const lockResult = await acquireScanLock(pool, 'scheduler', null);
+  if (!lockResult.acquired) {
+    const holder = lockResult.existingLock;
+    console.log(
+      `[schema-drift] Scheduler: skipping — lock held by "${holder?.locked_by || 'unknown'}"` +
+      (holder?.run_id ? ` (run #${holder.run_id})` : '') +
+      `, expires ${holder?.expires_at || 'unknown'}`
+    );
     return;
   }
 
@@ -1521,6 +1877,9 @@ async function runScheduledScan() {
     [config.scope_type, startedAt]
   );
   const runId = ins.insertId;
+
+  // Update lock row with actual runId now that we have it
+  await updateLockRunId(pool, runId);
 
   const params = { scope: config.scope_type, includePlatform: true };
   const jobId  = createJob(params);
@@ -1562,6 +1921,14 @@ async function runScheduledScan() {
 
       await computeAndStoreDelta(pool, runId, allFindings, config.scope_type, suppressionRules);
       console.log(`[schema-drift] Scheduled scan run ${runId} complete: ${allFindings.length} findings`);
+
+      // Phase 6: auto-cleanup if enabled
+      const retCfg = await loadRetentionConfig(pool);
+      if (retCfg.auto_cleanup_enabled) {
+        runRetentionCleanup(pool, 'scheduler-auto', false).catch(err =>
+          console.error('[schema-drift] Auto-cleanup error:', err.message)
+        );
+      }
     })
     .catch(async err => {
       console.error('[schema-drift] Scheduled scan error:', err.message);
@@ -1569,6 +1936,12 @@ async function runScheduledScan() {
         `UPDATE schema_drift_scan_runs SET status='error', completed_at=NOW(),
          error_message=? WHERE id=?`,
         [err.message, runId]
+      );
+    })
+    .finally(async () => {
+      // Phase 6: always release lock, regardless of success/failure
+      await releaseScanLock(pool).catch(err =>
+        console.error('[schema-drift] Failed to release scan lock:', err.message)
       );
     });
 }
@@ -2122,8 +2495,9 @@ router.get('/scans/:runId', requireAuth, requireSuperAdmin, async (req, res) => 
 });
 
 // GET /api/admin/schema-drift/scans/:runId/delta
-// Computes delta on-the-fly between runId and the most recent prior completed
-// run of the same scope_type, using the stored findings_snapshot.
+// Returns a read-only delta between runId and the prior completed run of the same
+// scope_type. Uses computeDeltaReadOnly — no DB writes, safe to call repeatedly.
+// (Previously called computeAndStoreDelta which created duplicate notifications.)
 router.get('/scans/:runId/delta', requireAuth, requireSuperAdmin, async (req, res) => {
   const runId = parseInt(req.params.runId, 10);
   if (!runId || runId < 1) return res.status(400).json({ error: 'Invalid runId' });
@@ -2148,7 +2522,7 @@ router.get('/scans/:runId/delta', requireAuth, requireSuperAdmin, async (req, re
     catch (_) { return res.status(500).json({ error: 'Could not parse findings snapshot' }); }
 
     const rules = await loadSuppressionRules(pool, true);
-    const delta = await computeAndStoreDelta(pool, runId, currentFindings, run.scope_type, rules);
+    const delta = await computeDeltaReadOnly(pool, runId, currentFindings, run.scope_type, rules);
 
     if (!delta) {
       return res.json({ delta: null, message: 'No prior run found for comparison' });
@@ -2168,19 +2542,43 @@ router.post('/scans/run', requireAuth, requireSuperAdmin, async (req, res) => {
   const triggeredBy = req.user?.email || req.user?.username || 'manual';
   const pool        = getAppPool();
 
-  const startedAt = new Date().toISOString().slice(0, 19).replace('T', ' ');
-  const [ins] = await pool.query(
-    `INSERT INTO schema_drift_scan_runs
-       (triggered_by, scope_type, scope_payload, status, started_at)
-     VALUES (?, ?, ?, 'running', ?)`,
-    [
-      triggeredBy,
-      scope,
-      churchIds?.length ? JSON.stringify({ churchIds }) : null,
-      startedAt,
-    ]
-  );
-  const runId  = ins.insertId;
+  // Phase 6: acquire distributed lock before starting
+  const lockResult = await acquireScanLock(pool, triggeredBy, null);
+  if (!lockResult.acquired) {
+    const holder = lockResult.existingLock;
+    return res.status(409).json({
+      error:    'A scan is already in progress. Please wait for it to complete.',
+      lockedBy: holder?.locked_by || 'unknown',
+      runId:    holder?.run_id    || null,
+      lockedAt: holder?.locked_at || null,
+      expiresAt:holder?.expires_at|| null,
+    });
+  }
+
+  let runId;
+  try {
+    const startedAt = new Date().toISOString().slice(0, 19).replace('T', ' ');
+    const [ins] = await pool.query(
+      `INSERT INTO schema_drift_scan_runs
+         (triggered_by, scope_type, scope_payload, status, started_at)
+       VALUES (?, ?, ?, 'running', ?)`,
+      [
+        triggeredBy,
+        scope,
+        churchIds?.length ? JSON.stringify({ churchIds }) : null,
+        startedAt,
+      ]
+    );
+    runId = ins.insertId;
+
+    // Update lock with actual runId
+    await updateLockRunId(pool, runId);
+
+  } catch (initErr) {
+    await releaseScanLock(pool).catch(() => {});
+    return res.status(500).json({ error: initErr.message });
+  }
+
   const params = { scope, churchIds, includePlatform };
   const jobId  = createJob(params);
 
@@ -2228,6 +2626,12 @@ router.post('/scans/run', requireAuth, requireSuperAdmin, async (req, res) => {
         `UPDATE schema_drift_scan_runs SET status='error', completed_at=NOW(),
          error_message=? WHERE id=?`,
         [err.message, runId]
+      );
+    })
+    .finally(async () => {
+      // Phase 6: always release lock on completion or failure
+      await releaseScanLock(pool).catch(err =>
+        console.error('[schema-drift] Failed to release scan lock after manual scan:', err.message)
       );
     });
 });
@@ -2528,6 +2932,156 @@ router.post('/notif-config/test', requireAuth, requireSuperAdmin, async (req, re
     res.json({ results });
   } catch (err) {
     console.error('[schema-drift] POST /notif-config/test error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ─── Phase 6: Maintenance Routes ─────────────────────────────────────────────
+//
+// All routes require super_admin.
+// Write routes (PUT, POST) mutate operational config or trigger cleanup.
+
+// GET /api/admin/schema-drift/maintenance/lock-status
+// Returns current scan lock row, or null if no lock is held.
+// Also indicates whether the lock appears stale (expires_at in the past).
+router.get('/maintenance/lock-status', requireAuth, requireSuperAdmin, async (_req, res) => {
+  try {
+    const [rows] = await getAppPool().query(
+      'SELECT * FROM schema_drift_scan_lock WHERE lock_key = ? LIMIT 1',
+      [SCAN_LOCK_KEY]
+    );
+    const lock = rows[0] || null;
+    res.json({
+      lock,
+      isLocked:  !!lock,
+      isStale:   lock ? new Date(lock.expires_at) < new Date() : false,
+      lockKey:   SCAN_LOCK_KEY,
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// DELETE /api/admin/schema-drift/maintenance/lock
+// Force-releases the current scan lock. Use only when a scan is confirmed dead.
+// Protected: super_admin only.
+router.delete('/maintenance/lock', requireAuth, requireSuperAdmin, async (req, res) => {
+  try {
+    const pool = getAppPool();
+    const [before] = await pool.query(
+      'SELECT * FROM schema_drift_scan_lock WHERE lock_key = ? LIMIT 1',
+      [SCAN_LOCK_KEY]
+    );
+    const hadLock = before.length > 0;
+    await pool.query(
+      'DELETE FROM schema_drift_scan_lock WHERE lock_key = ?',
+      [SCAN_LOCK_KEY]
+    );
+    const releasedBy = req.user?.email || req.user?.username || 'admin';
+    console.log(`[schema-drift] Lock force-released by ${releasedBy}`);
+    res.json({
+      ok:         true,
+      hadLock,
+      releasedBy,
+      releasedAt: new Date().toISOString(),
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /api/admin/schema-drift/maintenance/retention-config
+router.get('/maintenance/retention-config', requireAuth, requireSuperAdmin, async (_req, res) => {
+  try {
+    const cfg = await loadRetentionConfig(getAppPool());
+    res.json({ config: cfg });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// PUT /api/admin/schema-drift/maintenance/retention-config
+// Body: any subset of the configurable fields.
+router.put('/maintenance/retention-config', requireAuth, requireSuperAdmin, async (req, res) => {
+  const ALLOWED = [
+    'retention_scan_runs_days',
+    'retention_snapshot_days',
+    'retention_delivery_log_days',
+    'retention_notif_days',
+    'min_runs_to_keep',
+    'scan_lock_ttl_minutes',
+    'auto_cleanup_enabled',
+  ];
+  const body    = req.body || {};
+  const updates = {};
+  for (const key of ALLOWED) {
+    if (key in body) updates[key] = body[key];
+  }
+  if (!Object.keys(updates).length) {
+    return res.status(400).json({ error: 'No valid fields provided' });
+  }
+
+  // Validate numeric fields
+  const numericFields = [
+    'retention_scan_runs_days', 'retention_snapshot_days',
+    'retention_delivery_log_days', 'retention_notif_days',
+    'min_runs_to_keep', 'scan_lock_ttl_minutes',
+  ];
+  for (const f of numericFields) {
+    if (f in updates) {
+      const v = parseInt(updates[f], 10);
+      if (isNaN(v) || v < 1) {
+        return res.status(400).json({ error: `${f} must be a positive integer` });
+      }
+      updates[f] = v;
+    }
+  }
+  if ('auto_cleanup_enabled' in updates) {
+    updates.auto_cleanup_enabled = updates.auto_cleanup_enabled ? 1 : 0;
+  }
+
+  updates.updated_by = req.user?.email || req.user?.username || 'unknown';
+
+  const pool = getAppPool();
+  try {
+    const setClauses = Object.keys(updates).map(k => `\`${k}\` = ?`).join(', ');
+    await pool.query(
+      `UPDATE schema_drift_retention_config SET ${setClauses} WHERE id = 1`,
+      Object.values(updates)
+    );
+    const cfg = await loadRetentionConfig(pool);
+    res.json({ config: cfg });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/admin/schema-drift/maintenance/cleanup
+// Triggers retention cleanup. Supports dry-run (body: { dryRun: true }).
+// Returns cleanup summary and what was (or would be) deleted.
+router.post('/maintenance/cleanup', requireAuth, requireSuperAdmin, async (req, res) => {
+  const dryRun     = req.body?.dryRun === true || req.body?.dry_run === true;
+  const triggeredBy = req.user?.email || req.user?.username || 'admin';
+  const pool        = getAppPool();
+  try {
+    const result = await runRetentionCleanup(pool, triggeredBy, dryRun);
+    res.json({ result });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /api/admin/schema-drift/maintenance/cleanup-history?limit=20
+// Returns recent cleanup run log entries (newest first).
+router.get('/maintenance/cleanup-history', requireAuth, requireSuperAdmin, async (req, res) => {
+  const limit = Math.min(parseInt(req.query.limit || '20', 10), 100);
+  try {
+    const [rows] = await getAppPool().query(
+      `SELECT * FROM schema_drift_retention_log ORDER BY id DESC LIMIT ?`,
+      [limit]
+    );
+    res.json({ history: rows });
+  } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });

@@ -223,6 +223,56 @@ interface NotifDelivery {
   attempted_at:    string;
 }
 
+interface ScanLock {
+  lock_key:   string;
+  locked_by:  string;
+  run_id:     number | null;
+  locked_at:  string;
+  expires_at: string;
+}
+
+interface RetentionConfig {
+  id:                          number;
+  retention_scan_runs_days:    number;
+  retention_snapshot_days:     number;
+  retention_delivery_log_days: number;
+  retention_notif_days:        number;
+  min_runs_to_keep:            number;
+  scan_lock_ttl_minutes:       number;
+  auto_cleanup_enabled:        number;
+  updated_by:                  string | null;
+  updated_at:                  string;
+}
+
+interface CleanupResult {
+  dryRun:              boolean;
+  runsDeleted:         number;
+  snapshotsNulled:     number;
+  deliveryLogDeleted:  number;
+  notifsDeleted:       number;
+  errorMessage:        string | null;
+  executedAt:          string;
+  config: {
+    scanRunsDays:   number;
+    snapshotDays:   number;
+    deliveryDays:   number;
+    notifDays:      number;
+    minKeep:        number;
+  };
+}
+
+interface CleanupHistoryEntry {
+  id:                   number;
+  triggered_by:         string;
+  dry_run:              number;
+  runs_deleted:         number;
+  snapshots_nulled:     number;
+  delivery_log_deleted: number;
+  notifs_deleted:       number;
+  error_message:        string | null;
+  executed_at:          string;
+}
+
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const SEVERITY_ORDER: Severity[] = ['critical', 'high', 'medium', 'low', 'informational'];
@@ -472,6 +522,16 @@ export default function SchemaDriftPage() {
   const [deliveries, setDeliveries]           = useState<NotifDelivery[]>([]);
   const [deliveriesLoading, setDeliveriesLoading] = useState(false);
 
+  // Phase 6: Maintenance panel
+  const [maintenanceOpen, setMaintenanceOpen]         = useState(false);
+  const [lockStatus, setLockStatus]                   = useState<{ lock: ScanLock | null; isLocked: boolean; isStale: boolean } | null>(null);
+  const [retentionConfig, setRetentionConfig]         = useState<RetentionConfig | null>(null);
+  const [retentionDraft, setRetentionDraft]           = useState<Partial<RetentionConfig>>({});
+  const [cleanupResult, setCleanupResult]             = useState<CleanupResult | null>(null);
+  const [cleanupHistory, setCleanupHistory]           = useState<CleanupHistoryEntry[]>([]);
+  const [cleanupRunning, setCleanupRunning]           = useState(false);
+  const [maintenanceTab, setMaintenanceTab]           = useState(0);
+
   // SQL dialog
   const [sqlOpen, setSqlOpen]       = useState(false);
   const [sqlContent, setSqlContent] = useState('');
@@ -511,6 +571,30 @@ export default function SchemaDriftPage() {
       .finally(() => setDeliveriesLoading(false));
   }, []);
 
+  const loadMaintenance = useCallback(() => {
+    axios.get('/api/admin/schema-drift/maintenance/lock-status')
+      .then(r => setLockStatus(r.data))
+      .catch(() => {});
+    axios.get('/api/admin/schema-drift/maintenance/retention-config')
+      .then(r => {
+        const cfg = r.data.config || null;
+        setRetentionConfig(cfg);
+        if (cfg) setRetentionDraft({
+          retention_scan_runs_days:    cfg.retention_scan_runs_days,
+          retention_snapshot_days:     cfg.retention_snapshot_days,
+          retention_delivery_log_days: cfg.retention_delivery_log_days,
+          retention_notif_days:        cfg.retention_notif_days,
+          min_runs_to_keep:            cfg.min_runs_to_keep,
+          scan_lock_ttl_minutes:       cfg.scan_lock_ttl_minutes,
+          auto_cleanup_enabled:        cfg.auto_cleanup_enabled,
+        });
+      })
+      .catch(() => {});
+    axios.get('/api/admin/schema-drift/maintenance/cleanup-history?limit=10')
+      .then(r => setCleanupHistory(r.data.history || []))
+      .catch(() => {});
+  }, []);
+
   // Load church list, suppression rules, history, schedule, notifications on mount
   useEffect(() => {
     axios.get('/api/admin/schema-drift/churches')
@@ -523,6 +607,7 @@ export default function SchemaDriftPage() {
     loadScheduleConfig();
     loadNotifications();
     loadNotifConfig();
+    loadMaintenance();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const reloadSuppressionRules = useCallback(() => {
@@ -768,6 +853,18 @@ export default function SchemaDriftPage() {
               sx={{ bgcolor: notifConfig?.is_enabled ? alpha(theme.palette.info.main, 0.1) : undefined }}
             >
               <IconMail size={17} color={notifConfig?.is_enabled ? theme.palette.info.main : undefined} />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title={lockStatus?.isLocked ? 'Maintenance (scan lock active)' : 'Operational settings & maintenance'}>
+            <IconButton
+              size="small"
+              onClick={() => { setMaintenanceOpen(true); loadMaintenance(); }}
+              sx={{ bgcolor: lockStatus?.isLocked ? alpha(theme.palette.warning.main, 0.15) : undefined }}
+            >
+              {lockStatus?.isLocked
+                ? <IconLock size={17} color={theme.palette.warning.main} />
+                : <IconTool size={17} />
+              }
             </IconButton>
           </Tooltip>
         </Stack>
@@ -1276,6 +1373,42 @@ export default function SchemaDriftPage() {
         onClose={() => setNotifConfigOpen(false)}
         onSaved={(cfg) => { setNotifConfig(cfg); }}
         onRefreshDeliveries={loadDeliveries}
+      />
+
+      {/* ── Phase 6: Maintenance Panel ──────────────────────────── */}
+      <MaintenancePanel
+        open={maintenanceOpen}
+        lockStatus={lockStatus}
+        retentionConfig={retentionConfig}
+        retentionDraft={retentionDraft}
+        cleanupResult={cleanupResult}
+        cleanupHistory={cleanupHistory}
+        cleanupRunning={cleanupRunning}
+        maintenanceTab={maintenanceTab}
+        onTabChange={setMaintenanceTab}
+        onClose={() => setMaintenanceOpen(false)}
+        onRetentionDraftChange={(patch) => setRetentionDraft(prev => ({ ...prev, ...patch }))}
+        onSaveRetention={() => {
+          axios.put('/api/admin/schema-drift/maintenance/retention-config', retentionDraft)
+            .then(r => { setRetentionConfig(r.data.config); })
+            .catch(() => {});
+        }}
+        onRefreshLock={loadMaintenance}
+        onForceReleaseLock={() => {
+          axios.delete('/api/admin/schema-drift/maintenance/lock')
+            .then(() => loadMaintenance())
+            .catch(() => {});
+        }}
+        onRunCleanup={(dryRun) => {
+          setCleanupRunning(true);
+          axios.post('/api/admin/schema-drift/maintenance/cleanup', { dryRun })
+            .then(r => {
+              setCleanupResult(r.data.result);
+              loadMaintenance();
+            })
+            .catch(() => {})
+            .finally(() => setCleanupRunning(false));
+        }}
       />
 
       {/* ── Scheduler Panel ─────────────────────────────────────── */}
@@ -2534,6 +2667,265 @@ function NotificationsDialog({
         )}
       </DialogContent>
       <DialogActions>
+        <Button onClick={onClose}>Close</Button>
+      </DialogActions>
+    </Dialog>
+  );
+}
+
+// ─── Phase 6: Maintenance Panel ───────────────────────────────────────────────
+
+function MaintenancePanel({
+  open, lockStatus, retentionConfig, retentionDraft, cleanupResult,
+  cleanupHistory, cleanupRunning, maintenanceTab,
+  onTabChange, onClose, onRetentionDraftChange, onSaveRetention,
+  onRefreshLock, onForceReleaseLock, onRunCleanup,
+}: {
+  open:                  boolean;
+  lockStatus:            { lock: ScanLock | null; isLocked: boolean; isStale: boolean } | null;
+  retentionConfig:       RetentionConfig | null;
+  retentionDraft:        Partial<RetentionConfig>;
+  cleanupResult:         CleanupResult | null;
+  cleanupHistory:        CleanupHistoryEntry[];
+  cleanupRunning:        boolean;
+  maintenanceTab:        number;
+  onTabChange:           (t: number) => void;
+  onClose:               () => void;
+  onRetentionDraftChange:(patch: Partial<RetentionConfig>) => void;
+  onSaveRetention:       () => void;
+  onRefreshLock:         () => void;
+  onForceReleaseLock:    () => void;
+  onRunCleanup:          (dryRun: boolean) => void;
+}) {
+  const theme = useTheme();
+  const lock    = lockStatus?.lock   || null;
+  const isLocked = lockStatus?.isLocked || false;
+  const isStale  = lockStatus?.isStale  || false;
+
+  const numField = (label: string, key: keyof RetentionConfig, helperText: string) => (
+    <TextField
+      label={label}
+      type="number"
+      size="small"
+      value={retentionDraft[key] ?? ''}
+      onChange={e => onRetentionDraftChange({ [key]: parseInt(e.target.value, 10) || 1 })}
+      helperText={helperText}
+      inputProps={{ min: 1 }}
+      sx={{ width: 190 }}
+    />
+  );
+
+  return (
+    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
+      <DialogTitle sx={{ pb: 0 }}>
+        <Stack direction="row" alignItems="center" justifyContent="space-between">
+          <Stack direction="row" spacing={1} alignItems="center">
+            <IconTool size={18} />
+            <Typography fontWeight={700}>Operational Settings &amp; Maintenance</Typography>
+          </Stack>
+          <IconButton size="small" onClick={onClose}><IconX size={16} /></IconButton>
+        </Stack>
+        {isLocked && (
+          <Alert severity={isStale ? 'warning' : 'info'}
+            icon={isStale ? <IconAlertTriangle size={16} /> : <IconLock size={16} />}
+            sx={{ mt: 1.5, mb: 0.5, py: 0.5 }}>
+            {isStale
+              ? `Stale lock detected — scan by "${lock?.locked_by}" appears expired (${new Date(lock!.expires_at).toLocaleString()}). Safe to force-release.`
+              : `Scan in progress by "${lock?.locked_by}"${lock?.run_id ? ` (run #${lock.run_id})` : ''} · expires ${new Date(lock!.expires_at).toLocaleString()}`}
+          </Alert>
+        )}
+        <Tabs value={maintenanceTab} onChange={(_, v) => onTabChange(v)} sx={{ mt: 1 }}>
+          <Tab label="Lock Status"  icon={<IconLock size={14} />}          iconPosition="start" sx={{ minHeight: 36, textTransform: 'none', fontSize: '0.82rem' }} />
+          <Tab label="Retention"    icon={<IconSettings size={14} />}       iconPosition="start" sx={{ minHeight: 36, textTransform: 'none', fontSize: '0.82rem' }} />
+          <Tab label="Cleanup"      icon={<IconTrash size={14} />}          iconPosition="start" sx={{ minHeight: 36, textTransform: 'none', fontSize: '0.82rem' }} />
+          <Tab label="History"      icon={<IconClipboardList size={14} />}  iconPosition="start" sx={{ minHeight: 36, textTransform: 'none', fontSize: '0.82rem' }} />
+        </Tabs>
+      </DialogTitle>
+
+      <DialogContent dividers sx={{ minHeight: 320 }}>
+
+        {/* Tab 0: Lock Status */}
+        {maintenanceTab === 0 && (
+          <Box>
+            <Stack direction="row" spacing={1} alignItems="center" mb={2}>
+              <Typography variant="subtitle2" fontWeight={700}>Distributed Scan Lock</Typography>
+              <Tooltip title="Refresh"><IconButton size="small" onClick={onRefreshLock}><IconRefresh size={14} /></IconButton></Tooltip>
+            </Stack>
+            {!isLocked ? (
+              <Stack spacing={1}>
+                <Stack direction="row" spacing={1} alignItems="center">
+                  <IconLockOpen size={18} color={theme.palette.success.main} />
+                  <Typography variant="body2" color="success.main" fontWeight={600}>No active lock — scans can proceed</Typography>
+                </Stack>
+                <Typography variant="caption" color="text.secondary">
+                  Lock is acquired atomically before each scan and released in a finally block on completion or failure.
+                  Expired locks (beyond TTL) are cleared automatically on the next acquire attempt.
+                </Typography>
+              </Stack>
+            ) : (
+              <Stack spacing={2}>
+                <Paper variant="outlined" sx={{ p: 2, borderColor: isStale ? 'warning.main' : 'primary.main' }}>
+                  <Stack spacing={0.75}>
+                    <Stack direction="row" spacing={1} alignItems="center">
+                      <IconLock size={16} color={isStale ? theme.palette.warning.main : theme.palette.primary.main} />
+                      <Typography variant="body2" fontWeight={700}>{isStale ? 'Stale Lock (expired)' : 'Active Lock'}</Typography>
+                      {isStale && <Chip label="STALE" size="small" color="warning" />}
+                    </Stack>
+                    <Typography variant="caption"><b>Held by:</b> {lock?.locked_by}</Typography>
+                    <Typography variant="caption"><b>Run ID:</b> {lock?.run_id ?? 'not yet assigned'}</Typography>
+                    <Typography variant="caption"><b>Acquired:</b> {lock ? new Date(lock.locked_at).toLocaleString() : '—'}</Typography>
+                    <Typography variant="caption"><b>Expires:</b>  {lock ? new Date(lock.expires_at).toLocaleString() : '—'}</Typography>
+                    <Typography variant="caption"><b>Key:</b> <code>{lock?.lock_key}</code></Typography>
+                  </Stack>
+                </Paper>
+                <Alert severity="warning" sx={{ py: 0.5 }}>
+                  Only force-release if you are certain the scan that holds this lock has stopped running.
+                </Alert>
+                <Button variant="outlined" color="warning" size="small" startIcon={<IconLockOpen size={14} />}
+                  onClick={onForceReleaseLock} sx={{ alignSelf: 'flex-start' }}>
+                  Force-Release Lock
+                </Button>
+              </Stack>
+            )}
+            <Divider sx={{ my: 2 }} />
+            <Typography variant="caption" color="text.secondary">
+              <b>Lock TTL:</b> {retentionConfig?.scan_lock_ttl_minutes ?? 30} minutes (configurable in Retention tab).
+              A scan that crashes without releasing the lock will auto-expire after this window.
+            </Typography>
+          </Box>
+        )}
+
+        {/* Tab 1: Retention Settings */}
+        {maintenanceTab === 1 && (
+          <Box>
+            <Typography variant="subtitle2" fontWeight={700} mb={2}>Retention Policy</Typography>
+            <Typography variant="caption" color="text.secondary" display="block" mb={2}>
+              Snapshots are NULL-ed (not deleted) to preserve run metadata while reducing storage.
+              The <b>min_runs_to_keep</b> guard ensures recent history is never deleted regardless of age.
+            </Typography>
+            <Stack spacing={2.5}>
+              <Stack direction="row" spacing={2} flexWrap="wrap" useFlexGap>
+                {numField('Scan runs (days)',    'retention_scan_runs_days',    'Delete run rows older than N days')}
+                {numField('Snapshots (days)',     'retention_snapshot_days',     'NULL-out snapshot payloads older than N days')}
+              </Stack>
+              <Stack direction="row" spacing={2} flexWrap="wrap" useFlexGap>
+                {numField('Delivery log (days)', 'retention_delivery_log_days', 'Delete delivery log rows older than N days')}
+                {numField('Notifications (days)','retention_notif_days',        'Delete notification rows older than N days')}
+              </Stack>
+              <Stack direction="row" spacing={2} flexWrap="wrap" useFlexGap>
+                {numField('Min runs to keep',    'min_runs_to_keep',            'Never delete the most recent N scan runs')}
+                {numField('Lock TTL (min)',       'scan_lock_ttl_minutes',       'Minutes before a scan lock auto-expires')}
+              </Stack>
+              <FormControlLabel
+                control={
+                  <Switch size="small"
+                    checked={!!(retentionDraft.auto_cleanup_enabled)}
+                    onChange={e => onRetentionDraftChange({ auto_cleanup_enabled: e.target.checked ? 1 : 0 })} />
+                }
+                label={<Typography variant="body2">Run cleanup automatically after each scheduled scan</Typography>}
+              />
+            </Stack>
+            {retentionConfig && (
+              <Typography variant="caption" color="text.secondary" display="block" mt={2}>
+                Last updated: {retentionConfig.updated_at ? new Date(retentionConfig.updated_at).toLocaleString() : 'never'}
+                {retentionConfig.updated_by ? ` by ${retentionConfig.updated_by}` : ''}
+              </Typography>
+            )}
+          </Box>
+        )}
+
+        {/* Tab 2: Cleanup */}
+        {maintenanceTab === 2 && (
+          <Box>
+            <Typography variant="subtitle2" fontWeight={700} mb={1}>Manual Cleanup</Typography>
+            <Typography variant="caption" color="text.secondary" display="block" mb={2}>
+              Dry-run previews what would be deleted without making changes.
+              The most recent <b>{retentionConfig?.min_runs_to_keep ?? 10} runs</b> are always preserved.
+            </Typography>
+            <Stack direction="row" spacing={1.5} mb={3}>
+              <Button variant="outlined" size="small" startIcon={<IconRefresh size={14} />}
+                onClick={() => onRunCleanup(true)} disabled={cleanupRunning}>
+                {cleanupRunning ? 'Running…' : 'Dry-Run Preview'}
+              </Button>
+              <Button variant="contained" color="error" size="small" startIcon={<IconTrash size={14} />}
+                onClick={() => onRunCleanup(false)} disabled={cleanupRunning}>
+                {cleanupRunning ? 'Cleaning…' : 'Run Cleanup'}
+              </Button>
+            </Stack>
+            {cleanupResult && (
+              <Paper variant="outlined" sx={{ p: 2 }}>
+                <Stack direction="row" spacing={1} alignItems="center" mb={1.5}>
+                  <Typography variant="subtitle2" fontWeight={700}>
+                    {cleanupResult.dryRun ? 'Dry-Run Preview' : 'Cleanup Result'}
+                  </Typography>
+                  {cleanupResult.dryRun && <Chip label="DRY RUN" size="small" color="info" />}
+                  {cleanupResult.errorMessage && <Chip label="ERROR" size="small" color="error" />}
+                </Stack>
+                {cleanupResult.errorMessage && (
+                  <Alert severity="error" sx={{ mb: 1.5, py: 0.5 }}>{cleanupResult.errorMessage}</Alert>
+                )}
+                <Stack spacing={0.5}>
+                  <Typography variant="caption"><b>Scan runs {cleanupResult.dryRun ? 'to delete' : 'deleted'}:</b> {cleanupResult.runsDeleted}</Typography>
+                  <Typography variant="caption"><b>Snapshots {cleanupResult.dryRun ? 'to null' : 'nulled'}:</b> {cleanupResult.snapshotsNulled}</Typography>
+                  <Typography variant="caption"><b>Delivery log rows {cleanupResult.dryRun ? 'to delete' : 'deleted'}:</b> {cleanupResult.deliveryLogDeleted}</Typography>
+                  <Typography variant="caption"><b>Notifications {cleanupResult.dryRun ? 'to delete' : 'deleted'}:</b> {cleanupResult.notifsDeleted}</Typography>
+                  <Typography variant="caption" color="text.secondary" mt={0.5}>Executed: {new Date(cleanupResult.executedAt).toLocaleString()}</Typography>
+                </Stack>
+              </Paper>
+            )}
+          </Box>
+        )}
+
+        {/* Tab 3: Cleanup History */}
+        {maintenanceTab === 3 && (
+          <Box>
+            <Typography variant="subtitle2" fontWeight={700} mb={1.5}>Cleanup History</Typography>
+            {cleanupHistory.length === 0 ? (
+              <Typography variant="body2" color="text.secondary">No cleanup runs recorded yet.</Typography>
+            ) : (
+              <TableContainer component={Paper} variant="outlined">
+                <Table size="small">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell sx={{ fontWeight: 700, fontSize: '0.75rem' }}>Date</TableCell>
+                      <TableCell sx={{ fontWeight: 700, fontSize: '0.75rem' }}>By</TableCell>
+                      <TableCell sx={{ fontWeight: 700, fontSize: '0.75rem' }}>Mode</TableCell>
+                      <TableCell sx={{ fontWeight: 700, fontSize: '0.75rem' }} align="right">Runs</TableCell>
+                      <TableCell sx={{ fontWeight: 700, fontSize: '0.75rem' }} align="right">Snapshots</TableCell>
+                      <TableCell sx={{ fontWeight: 700, fontSize: '0.75rem' }} align="right">Deliveries</TableCell>
+                      <TableCell sx={{ fontWeight: 700, fontSize: '0.75rem' }} align="right">Notifs</TableCell>
+                      <TableCell sx={{ fontWeight: 700, fontSize: '0.75rem' }}>Status</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {cleanupHistory.map(row => (
+                      <TableRow key={row.id} hover>
+                        <TableCell sx={{ fontSize: '0.75rem' }}>{new Date(row.executed_at).toLocaleString()}</TableCell>
+                        <TableCell sx={{ fontSize: '0.75rem' }}>{row.triggered_by}</TableCell>
+                        <TableCell sx={{ fontSize: '0.75rem' }}>{row.dry_run ? <Chip label="DRY RUN" size="small" color="info" /> : 'Real'}</TableCell>
+                        <TableCell sx={{ fontSize: '0.75rem' }} align="right">{row.runs_deleted}</TableCell>
+                        <TableCell sx={{ fontSize: '0.75rem' }} align="right">{row.snapshots_nulled}</TableCell>
+                        <TableCell sx={{ fontSize: '0.75rem' }} align="right">{row.delivery_log_deleted}</TableCell>
+                        <TableCell sx={{ fontSize: '0.75rem' }} align="right">{row.notifs_deleted}</TableCell>
+                        <TableCell sx={{ fontSize: '0.75rem' }}>
+                          {row.error_message ? <Chip label="Error" size="small" color="error" /> : <Chip label="OK" size="small" color="success" />}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            )}
+          </Box>
+        )}
+
+      </DialogContent>
+      <DialogActions>
+        {maintenanceTab === 1 && (
+          <Button variant="contained" size="small" onClick={onSaveRetention} sx={{ mr: 'auto' }}>
+            Save Retention Settings
+          </Button>
+        )}
         <Button onClick={onClose}>Close</Button>
       </DialogActions>
     </Dialog>

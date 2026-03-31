@@ -170,7 +170,6 @@ const SiteMapPage = Loadable(lazy(() => import('../features/admin/SiteMapPage'))
 const CertificateTemplatesPage = Loadable(lazy(() => import('../features/admin/control-panel/CertificateTemplatesPage')));
 const CRMPage = Loadable(lazy(() => import('../features/devel-tools/crm/CRMPage')));
 const USChurchMapPage = Loadable(lazy(() => import('../features/devel-tools/us-church-map/USChurchMapPage')));
-const AuditDashboardPage = Loadable(lazy(() => import('../features/devel-tools/audit-dashboard/AuditDashboardPage')));
 const LogSearch = Loadable(lazy(() => import('../features/admin/dashboard/LogSearch')));
 const OmOcrStudioPage = Loadable(lazy(() => import('../features/devel-tools/om-ocr/pages/OmOcrStudioPage')));
 const UploadRecordsPage = Loadable(lazy(() => import('../features/records-centralized/apps/upload-records/UploadRecordsPage')));
@@ -1282,16 +1281,6 @@ const Router = [
             <EnvironmentAwarePage featureId="repo-ops">
               <RepoOpsPage />
             </EnvironmentAwarePage>
-          </ProtectedRoute>
-        )
-      },
-      {
-        path: '/devel-tools/audit-dashboard',
-        element: (
-          <ProtectedRoute requiredRole={['super_admin']}>
-            <AdminErrorBoundary>
-              <AuditDashboardPage />
-            </AdminErrorBoundary>
           </ProtectedRoute>
         )
       },
