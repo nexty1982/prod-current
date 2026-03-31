@@ -45,6 +45,8 @@ interface MenuitemsType {
   chipColor?: string;
   variant?: string;
   external?: boolean;
+  /** Key for metadata-driven badge state (NEW / UPDATED). Matches badge_states.item_key. */
+  badgeKey?: string;
 }
 
 const Menuitems: MenuitemsType[] = [
@@ -119,6 +121,7 @@ const Menuitems: MenuitemsType[] = [
     title: 'Image AI',
     icon: IconPalette,
     href: '/apps/image-ai',
+    badgeKey: 'image-ai',
   },
   {
     id: uniqueId(),
@@ -171,8 +174,7 @@ const Menuitems: MenuitemsType[] = [
     title: 'OM Charts',
     icon: IconChartBar,
     href: '/apps/om-charts',
-    chip: 'NEW',
-    chipColor: 'primary',
+    badgeKey: 'om-charts',
   },
   {
     id: uniqueId(),
@@ -237,6 +239,7 @@ const Menuitems: MenuitemsType[] = [
     title: 'US Church Map',
     icon: IconPoint,
     href: '/devel-tools/us-church-map',
+    badgeKey: 'us-church-map',
   },
 
   // ========================================================================
@@ -479,6 +482,12 @@ const Menuitems: MenuitemsType[] = [
         icon: IconDatabase,
         href: '/devel-tools/platform-status',
       },
+      {
+        id: uniqueId(),
+        title: 'Badge State Manager',
+        icon: IconBell,
+        href: '/devel-tools/badge-state-manager',
+      },
       // Record Creation Wizard — retired, now on OMAI /omai/tools/om-seedlings
       {
         id: uniqueId(),
@@ -583,8 +592,7 @@ export const getMenuItems = (user: any) => {
             title: 'Records',
             icon: IconRocket,
             href: '/apps/records/baptism',
-            chip: 'NEW',
-            chipColor: 'primary',
+            badgeKey: 'baptism-records-v2',
           },
           {
             id: uniqueId(),
@@ -599,6 +607,7 @@ export const getMenuItems = (user: any) => {
         title: 'OM Charts',
         icon: IconChartBar,
         href: '/apps/om-charts',
+        badgeKey: 'om-charts',
       },
       {
         navlabel: true,
@@ -664,8 +673,7 @@ export const getMenuItems = (user: any) => {
           title: 'Records',
           icon: IconRocket,
           href: '/apps/records/baptism',
-          chip: 'NEW',
-          chipColor: 'primary',
+          badgeKey: 'baptism-records-v2',
         },
         {
           id: uniqueId(),

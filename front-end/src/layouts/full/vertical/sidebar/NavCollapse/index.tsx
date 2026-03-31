@@ -40,6 +40,7 @@ interface NavCollapseProps {
   pathDirect: any;
   hideMenu: any;
   onClick: (event: React.MouseEvent<HTMLElement>) => void;
+  badgeMap?: Map<string, any>;
 }
 
 // FC Component For Dropdown Menu
@@ -49,7 +50,8 @@ const NavCollapse = ({
   pathWithoutLastPart,
   pathDirect,
   hideMenu,
-  onClick
+  onClick,
+  badgeMap,
 }: NavCollapseProps) => {
   const { isBorderRadius } = useContext(CustomizerContext);
 
@@ -108,6 +110,7 @@ const NavCollapse = ({
           pathDirect={pathDirect}
           hideMenu={hideMenu}
           onClick={onClick}
+          badgeMap={badgeMap}
         />
       );
     } else {
@@ -119,6 +122,7 @@ const NavCollapse = ({
           pathDirect={pathDirect}
           hideMenu={hideMenu}
           onClick={onClick}
+          badgeMap={badgeMap}
         />
       );
     }

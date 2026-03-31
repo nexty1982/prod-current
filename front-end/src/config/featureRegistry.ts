@@ -106,6 +106,7 @@ export const FEATURE_REGISTRY: FeatureEntry[] = [
   { id: 'record-creation-wizard', name: 'Record Creation Wizard', stage: 2, route: '/devel-tools/record-creation-wizard', description: 'Wizard-based batch record creation with configurable fields, date distribution, validation, and presets', since: '2026-03-27' },
   { id: 'parish-onboarding-wizard', name: 'Parish Onboarding Wizard', stage: 2, route: '/portal/onboarding', description: 'Guided parish setup wizard for configuring record field labels, order, and visibility', since: '2026-03-24' },
   { id: 'translation-manager', name: 'Translation Manager', stage: 2, route: '/devel-tools/translation-manager', description: 'Professional translation management with source versioning, hash-based staleness, and per-language workflow', since: '2026-03-28' },
+  { id: 'badge-state-manager', name: 'Badge State Manager', stage: 2, route: '/devel-tools/badge-state-manager', description: 'Manage menu item badge lifecycle (NEW/UPDATED) from the control panel', since: '2026-03-31' },
   { id: 'live-table-builder', name: 'Live Table Builder', stage: 1, route: '/devel-tools/live-table-builder', since: '2026-01-20' },
   { id: 'liturgical-calendar', name: 'Liturgical Calendar', stage: 5, route: '/apps/liturgical-calendar', description: 'Eastern Orthodox liturgical calendar with auto-theme', since: '2026-02-27' },
 ];
