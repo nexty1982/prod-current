@@ -8,6 +8,7 @@ import NavCollapse from './NavCollapse';
 import NavGroup from './NavGroup/NavGroup';
 import { useFilteredMenuItems } from '@/shared/lib/useFilteredMenuItems';
 import { useAuth } from '@/context/AuthContext';
+import { useBadgeStates } from '@/shared/lib/useBadgeStates';
 
 import { CustomizerContext } from '@/context/CustomizerContext';
 
@@ -18,22 +19,17 @@ const SidebarItems = () => {
   const { isSidebarHover, isCollapse, isMobileSidebar, setIsMobileSidebar } = useContext(CustomizerContext);
   const { user } = useAuth();
   const menuItems = useFilteredMenuItems();
+  const { badgeMap } = useBadgeStates();
 
   const lgUp = useMediaQuery((theme: any) => theme.breakpoints.up('lg'));
   const hideMenu: any = lgUp ? isCollapse == "mini-sidebar" && !isSidebarHover : '';
-
-
 
   return (
     <Box sx={{ px: 3 }}>
       <List sx={{ pt: 0 }} className="sidebarNav">
         {menuItems.map((item: any) => {
-          // {/********SubHeader**********/}
           if (item.subheader) {
             return <NavGroup item={item} hideMenu={hideMenu} key={item.subheader} />;
-
-            // {/********If Sub Menu**********/}
-            /* eslint no-else-return: "off" */
           } else if (item.children) {
             return (
               <NavCollapse
@@ -44,15 +40,13 @@ const SidebarItems = () => {
                 level={1}
                 key={item.id}
                 onClick={() => setIsMobileSidebar(!isMobileSidebar)}
-
+                badgeMap={badgeMap}
               />
             );
-
-            // {/********If Sub No Menu**********/}
           } else {
             return (
               <NavItem item={item} key={item.id} pathDirect={pathDirect} hideMenu={hideMenu}
-                onClick={() => setIsMobileSidebar(!isMobileSidebar)} />
+                onClick={() => setIsMobileSidebar(!isMobileSidebar)} badgeMap={badgeMap} />
             );
           }
         })}

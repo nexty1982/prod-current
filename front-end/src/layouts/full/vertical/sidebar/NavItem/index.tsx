@@ -17,6 +17,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { CustomizerContext } from '@/context/CustomizerContext';
 import { HelpOutline } from '@mui/icons-material';
+import StateBadge from '@/shared/ui/StateBadge';
 
 type NavGroup = {
   [x: string]: any;
@@ -41,9 +42,10 @@ interface ItemType {
   onClick: (event: React.MouseEvent<HTMLElement>) => void;
   level?: number | any;
   pathDirect: string;
+  badgeMap?: Map<string, any>;
 }
 
-const NavItem = ({ item, level, pathDirect, hideMenu, onClick }: ItemType) => {
+const NavItem = ({ item, level, pathDirect, hideMenu, onClick, badgeMap }: ItemType) => {
   const { isBorderRadius } = useContext(CustomizerContext);
 
   const Icon = item?.icon || HelpOutline; // fallback to prevent crashes
@@ -128,7 +130,9 @@ const NavItem = ({ item, level, pathDirect, hideMenu, onClick }: ItemType) => {
           )}
         </ListItemText>
 
-        {!item?.chip || hideMenu ? null : (
+        {hideMenu ? null : item?.badgeKey && badgeMap ? (
+          <StateBadge badgeData={badgeMap.get(item.badgeKey)} />
+        ) : item?.chip ? (
           <Chip
             color={item?.chipColor}
             variant="outlined"
@@ -142,7 +146,7 @@ const NavItem = ({ item, level, pathDirect, hideMenu, onClick }: ItemType) => {
               borderRadius: '4px',
             }}
           />
-        )}
+        ) : null}
       </ListItemStyled>
     </List>
   );
