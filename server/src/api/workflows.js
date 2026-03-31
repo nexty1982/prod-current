@@ -34,6 +34,7 @@ router.get('/',   guardAdmin, controller.list);
 router.get('/dashboard',            guardAdmin, controller.dashboard);
 router.get('/dashboard/exceptions', guardAdmin, controller.dashboardExceptions);
 router.get('/dashboard/ready',      guardAdmin, controller.dashboardReady);
+router.get('/dashboard/recommendations', guardAdmin, controller.dashboardRecommendations);
 
 // ─── Per-workflow routes ────────────────────────────────────────────────────
 
