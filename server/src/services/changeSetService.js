@@ -5,6 +5,7 @@
  */
 
 const { getAppPool } = require('../config/db-compat');
+const { fetchByIds: fetchOmDailyItems, hydrateRows: hydrateOmDailyItems } = require('./omDailyItemHydrator');
 const { execSync } = require('child_process');
 const path = require('path');
 
@@ -388,9 +389,9 @@ class ChangeSetService {
       throw Object.assign(new Error(`Cannot add items when status is '${cs.status}'`), { status: 400 });
     }
 
-    // Verify the om_daily_item exists
-    const [itemRows] = await pool.query('SELECT id, title, status FROM om_daily_items WHERE id = ?', [omDailyItemId]);
-    if (!itemRows.length) {
+    // Verify the om_daily_item exists (canonical source: omai_db)
+    const itemMap = await fetchOmDailyItems([omDailyItemId], ['id', 'title', 'status']);
+    if (!itemMap.has(omDailyItemId)) {
       throw Object.assign(new Error(`OM Daily item ${omDailyItemId} not found`), { status: 404 });
     }
 
@@ -423,9 +424,10 @@ class ChangeSetService {
       throw err;
     }
 
+    const addedItem = itemMap.get(omDailyItemId);
     await this._logEvent(changeSetId, 'item_added', null, null, userId,
-      `Added item: ${itemRows[0].title}`,
-      { om_daily_item_id: omDailyItemId, item_title: itemRows[0].title }
+      `Added item: ${addedItem.title}`,
+      { om_daily_item_id: omDailyItemId, item_title: addedItem.title }
     );
 
     return this.getItems(changeSetId);
@@ -439,9 +441,9 @@ class ChangeSetService {
       throw Object.assign(new Error(`Cannot remove items when status is '${cs.status}'`), { status: 400 });
     }
 
-    // Get item title for logging
-    const [itemRows] = await pool.query('SELECT title FROM om_daily_items WHERE id = ?', [omDailyItemId]);
-    const itemTitle = itemRows.length ? itemRows[0].title : `#${omDailyItemId}`;
+    // Get item title for logging (canonical source: omai_db)
+    const itemMap = await fetchOmDailyItems([omDailyItemId], ['id', 'title']);
+    const itemTitle = itemMap.has(omDailyItemId) ? itemMap.get(omDailyItemId).title : `#${omDailyItemId}`;
 
     const [result] = await pool.query(
       'DELETE FROM change_set_items WHERE change_set_id = ? AND om_daily_item_id = ?',
@@ -462,17 +464,15 @@ class ChangeSetService {
 
   async getItems(changeSetId) {
     const pool = getAppPool();
+    // Step 1: get change_set_items from orthodoxmetrics_db
     const [rows] = await pool.query(`
-      SELECT csi.*, odi.title AS item_title, odi.status AS item_status,
-             odi.priority AS item_priority, odi.category AS item_category,
-             odi.github_issue_number, odi.github_branch AS item_branch,
-             odi.branch_type
+      SELECT csi.*
       FROM change_set_items csi
-      JOIN om_daily_items odi ON odi.id = csi.om_daily_item_id
       WHERE csi.change_set_id = ?
       ORDER BY csi.sort_order ASC, csi.added_at ASC
     `, [changeSetId]);
-    return rows;
+    // Step 2: hydrate om_daily_items fields from omai_db
+    return hydrateOmDailyItems(rows);
   }
 
   // ── EVENTS ──────────────────────────────────────────────────────────────
@@ -732,12 +732,16 @@ class ChangeSetService {
 
   async _validateItemsReady(changeSetId) {
     const pool = getAppPool();
-    const [items] = await pool.query(`
-      SELECT csi.om_daily_item_id, odi.title, odi.status AS item_status, csi.is_required
+    // Step 1: get change_set_items from orthodoxmetrics_db
+    const [csiRows] = await pool.query(`
+      SELECT csi.om_daily_item_id, csi.is_required
       FROM change_set_items csi
-      JOIN om_daily_items odi ON odi.id = csi.om_daily_item_id
       WHERE csi.change_set_id = ?
     `, [changeSetId]);
+    // Step 2: hydrate title + status from omai_db
+    const items = await hydrateOmDailyItems(csiRows, {
+      fieldMap: { title: 'title', status: 'item_status' },
+    });
 
     if (!items.length) {
       throw Object.assign(new Error('Cannot stage an empty change_set — add at least one OM Daily item'), { status: 400 });

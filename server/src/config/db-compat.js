@@ -1,7 +1,7 @@
-const { getAppPool, getAuthPool } = require('./db');
+const { getAppPool, getAuthPool, getOmaiPool } = require('./db');
 const { getChurchDbConnection } = require('../utils/dbSwitcher');
 const pool = {
   query:   (...args) => getAppPool().query(...args),
   execute: (...args) => getAppPool().query(...args),
 };
-module.exports = { getAppPool, getAuthPool, pool, getChurchDbConnection };
+module.exports = { getAppPool, getAuthPool, getOmaiPool, pool, getChurchDbConnection };

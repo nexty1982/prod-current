@@ -32,6 +32,7 @@ function getOmaiHelpers() {
     // These functions are defined in omai.js — we extract them by requiring the module's
     // pool access pattern directly. Since omai.js doesn't export them, we replicate the
     // lean versions here that call the same DB.
+    const { getOmaiPool } = require('../config/db');
     const { getAppPool } = require('../config/db-compat');
 
     function generateWorkItemTitle(prompt) {
@@ -67,7 +68,7 @@ function getOmaiHelpers() {
     }
 
     async function createWorkItemForStep(step, userId, agentTool) {
-      const pool = getAppPool();
+      const pool = getOmaiPool(); // canonical om_daily_items in omai_db
       const title = step.title || generateWorkItemTitle(step.prompt_text);
       const metadata = {
         prompt_text: step.prompt_text || null,
@@ -89,7 +90,7 @@ function getOmaiHelpers() {
     }
 
     async function updateWorkItemMeta(itemId, updates) {
-      const pool = getAppPool();
+      const pool = getOmaiPool(); // canonical om_daily_items in omai_db
       try {
         const [rows] = await pool.query('SELECT metadata FROM om_daily_items WHERE id = ?', [itemId]);
         if (!rows.length) return;
@@ -228,14 +229,25 @@ router.get('/:id', async (req, res) => {
     if (!plans.length) return res.status(404).json({ error: 'Plan not found' });
 
     const [steps] = await pool.query(
-      `SELECT pps.*, odi.title AS work_item_title, odi.status AS work_item_status
+      `SELECT pps.*
        FROM prompt_plan_steps pps
-       LEFT JOIN om_daily_items odi ON pps.generated_work_item_id = odi.id
        WHERE pps.prompt_plan_id = ?
        ORDER BY pps.execution_order ASC`, [req.params.id]
     );
 
-    res.json({ plan: plans[0], steps });
+    // Hydrate work_item_title/status from omai_db
+    const { fetchByIds: fetchOmDailyItems } = require('../services/omDailyItemHydrator');
+    const workItemIds = steps.map(s => s.generated_work_item_id).filter(Boolean);
+    const itemMap = await fetchOmDailyItems(workItemIds, ['id', 'title', 'status']);
+    const hydratedSteps = steps.map(s => ({
+      ...s,
+      work_item_title: s.generated_work_item_id && itemMap.has(s.generated_work_item_id)
+        ? itemMap.get(s.generated_work_item_id).title : null,
+      work_item_status: s.generated_work_item_id && itemMap.has(s.generated_work_item_id)
+        ? itemMap.get(s.generated_work_item_id).status : null,
+    }));
+
+    res.json({ plan: plans[0], steps: hydratedSteps });
   } catch (err) {
     console.error('[PromptPlans] Get error:', err);
     res.status(500).json({ error: 'Failed to get prompt plan' });
@@ -624,9 +636,10 @@ router.post('/:id/steps/:stepId/launch', async (req, res) => {
         return res.status(500).json({ error: 'Failed to create work item for step. Launch aborted.' });
       }
     } else {
-      // Work item already exists from a previous attempt
-      const [existing] = await pool.query('SELECT * FROM om_daily_items WHERE id = ?', [step.generated_work_item_id]);
-      workItem = existing[0] || null;
+      // Work item already exists from a previous attempt — read from omai_db
+      const { fetchByIds: fetchOmDailyItems } = require('../services/omDailyItemHydrator');
+      const itemMap = await fetchOmDailyItems([step.generated_work_item_id]);
+      workItem = itemMap.get(step.generated_work_item_id) || null;
     }
 
     // Mark step as running
