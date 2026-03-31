@@ -8,6 +8,8 @@ import C2a from '@/components/frontend-pages/shared/c2a';
 
 import Footer from '@/components/frontend-pages/shared/footer';
 
+import HeaderAlert from '@/components/frontend-pages/shared/header/HeaderAlert';
+
 import HpHeader from '@/components/frontend-pages/shared/header/HpHeader';
 
 import Leadership from '@/components/frontend-pages/shared/leadership';
