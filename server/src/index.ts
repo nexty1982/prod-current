@@ -227,6 +227,8 @@ const systemStatusRouter = require('./api/systemStatus');
 const dailyTasksRouter = require('./api/dailyTasks');
 // MIGRATED TO OMAI: const omDailyRouter = require('./routes/om-daily');
 const promptPlansRouter = require('./routes/prompt-plans');
+const workflowsRouter = require('./api/workflows');
+const workflowTemplatesRouter = require('./api/workflowTemplates');
 const workflowLearningRouter = require('./api/workflowLearning');
 const pageContentRouter = require('./routes/page-content');
 const snapshotsRouter = require('./routes/snapshots');
@@ -854,6 +856,13 @@ console.log('✅ [Server] Mounted records-inspector, seed-records, record-wizard
 // MIGRATED TO OMAI: console.log('✅ [Server] Mounted /api/om-daily routes');
 app.use('/api/prompt-plans', promptPlansRouter); // Prompt Plans (AI orchestration)
 console.log('✅ [Server] Mounted /api/prompt-plans routes (AI Prompt Plans)');
+const agentRouter = require('./api/agentRoutes');
+app.use('/api/agents', agentRouter); // Multi-Agent Routing & Selection
+console.log('✅ [Server] Mounted /api/agents routes (Multi-Agent System)');
+app.use('/api/workflows', workflowsRouter); // Prompt Workflows + Dashboard + Decision Engine
+console.log('✅ [Server] Mounted /api/workflows routes (Prompt Workflows)');
+app.use('/api/workflow-templates', workflowTemplatesRouter); // Workflow Template Library
+console.log('✅ [Server] Mounted /api/workflow-templates routes (Template Library)');
 app.use('/api/learning', workflowLearningRouter); // Cross-Workflow Learning Engine
 console.log('✅ [Server] Mounted /api/learning routes (Learning Engine)');
 app.use('/api/page-content', pageContentRouter); // Page Content CMS
