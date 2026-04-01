@@ -1,0 +1,4 @@
+# Reconciliation run artifacts are ephemeral — generated per-run
+*.json
+*.csv
+!.gitignore
