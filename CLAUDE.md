@@ -149,19 +149,19 @@ To register a new feature, add it to `FEATURE_REGISTRY` in `featureRegistry.ts` 
 
 ## AI Agent Work Tracking (REQUIRED)
 
-**Every change you make MUST be tracked as an OM Daily item with branch lifecycle management.** This is mandatory, not optional.
+**Every change you make MUST be tracked as an OMAI Daily item with branch lifecycle management.** This is mandatory, not optional.
 
 ### Quick Reference — Branch Lifecycle
 
 ```bash
 # 1. Create item (BEFORE starting work)
-curl -X POST http://127.0.0.1:3001/api/om-daily/items \
+curl -X POST http://127.0.0.1:7060/api/omai-daily/items \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN" \
   -d '{"title":"...","task_type":"chore","status":"todo","source":"agent","agent_tool":"claude_cli","priority":"medium","horizon":"7","category":"om-frontend","description":"..."}'
 
 # 2. Start work — creates branch from main, checks it out locally
-curl -X POST http://127.0.0.1:3001/api/om-daily/items/:id/start-work \
+curl -X POST http://127.0.0.1:7060/api/omai-daily/items/:id/start-work \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN" \
   -d '{"branch_type":"enhancement","agent_tool":"claude_cli"}'
@@ -169,24 +169,24 @@ curl -X POST http://127.0.0.1:3001/api/om-daily/items/:id/start-work \
 # 3. Do your work, commit changes to the branch
 
 # 4. Signal work complete — moves item to Self Review
-curl -X POST http://127.0.0.1:3001/api/om-daily/items/:id/agent-complete \
+curl -X POST http://127.0.0.1:7060/api/omai-daily/items/:id/agent-complete \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN" \
   -d '{"agent_tool":"claude_cli","summary":"Brief description of what was done"}'
 
 # 5. (Optional) Full merge — ff-only merge to main, delete branch
-curl -X POST http://127.0.0.1:3001/api/om-daily/items/:id/complete-work \
+curl -X POST http://127.0.0.1:7060/api/omai-daily/items/:id/complete-work \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN"
 ```
 
 ### Workflow
 
-1. **Create item** → `POST /api/om-daily/items` with `status: "todo"`, `source: "agent"`, `agent_tool: "claude_cli"`
-2. **Start work** → `POST /api/om-daily/items/:id/start-work` with `branch_type` — creates and checks out a branch from `main`
+1. **Create item** → `POST /api/omai-daily/items` with `status: "todo"`, `source: "agent"`, `agent_tool: "claude_cli"`
+2. **Start work** → `POST /api/omai-daily/items/:id/start-work` with `branch_type` — creates and checks out a branch from `main`
 3. **During work** → Commit changes to the branch. Update `progress` (0-100) if the task is large
-4. **Signal complete** → `POST /api/om-daily/items/:id/agent-complete` — moves item from In Progress → Self Review. **ALWAYS call this when you finish work on a task.** Idempotent and safe to call multiple times.
-5. **Full merge** (optional) → `POST /api/om-daily/items/:id/complete-work` — fast-forward merges branch to `main`, deletes branch, closes item
+4. **Signal complete** → `POST /api/omai-daily/items/:id/agent-complete` — moves item from In Progress → Self Review. **ALWAYS call this when you finish work on a task.** Idempotent and safe to call multiple times.
+5. **Full merge** (optional) → `POST /api/omai-daily/items/:id/complete-work` — fast-forward merges branch to `main`, deletes branch, closes item
 6. **If abandoned** → Set `status: "cancelled"` with reason in description
 
 ### Task Types
@@ -210,7 +210,7 @@ All branches use the authoritative format: `<type>/<work-item-id>/<yyyy-mm-dd>/<
 
 **Three branch types**: `feature`, `fix`, `chore`. All task types map to one of these.
 
-**Work item ID**: `omd-NNN` for OM Daily items, username for human work, agent tool name for agent work.
+**Work item ID**: `omd-NNN` for OMAI Daily items, username for human work, agent tool name for agent work.
 
 **Create with**: `./scripts/start-task-branch.sh <type> <description> --item <id>`
 
@@ -252,7 +252,7 @@ Each status has a defined owner and required exit action. The backend enforces t
 - **Fast-forward only** — `complete-work` uses `git merge --ff-only`. If main has diverged, rebase first.
 - **Clean tree required** — All changes must be committed before calling `complete-work`.
 - **Explicit actions** — Branches are NOT auto-merged on status change. You must call the endpoints.
-- **One branch per item** — Each OM Daily item gets its own isolated branch.
+- **One branch per item** — Each OMAI Daily item gets its own isolated branch.
 
 ### Priorities: `critical`, `high`, `medium` (default), `low`
 ### Categories: `om-frontend`, `om-backend`, `om-database`, `om-ocr`, `om-records`, `om-admin`, `om-portal`, `om-auth`, `om-devops`, `omai-frontend`, `omai-backend`, `omai-sdlc`, `omai-ai`, `docs`

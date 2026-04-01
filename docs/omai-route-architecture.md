@@ -59,8 +59,8 @@
 | `/admin/sessions` | `/ops/sessions` | SessionManagement | **PLACEHOLDER** (rewrite needed) |
 | `/devel-tools/repo-ops` | `/devops/repo` | RepoOpsPage (1544 lines) | **SAFE COPY** — self-contained git UI |
 | `/admin/build` | `/devops/build` | BuildConsole / BuildInfo | **BUILT** (build-info exists; full console is planned) |
-| `/admin/control-panel/om-daily/change-sets` | `/devops/change-sets` | ChangeSetsDashboard | **PLACEHOLDER** (safe copy later) |
-| `/admin/control-panel/om-daily/change-sets/releases` | `/devops/releases` | ReleaseHistoryPage | **PLACEHOLDER** (safe copy later) |
+| `/admin/control-panel/omai-daily/change-sets` | `/devops/change-sets` | ChangeSetsDashboard | **PLACEHOLDER** (safe copy later) |
+| `/admin/control-panel/omai-daily/change-sets/releases` | `/devops/releases` | ReleaseHistoryPage | **PLACEHOLDER** (safe copy later) |
 | `/admin/control-panel/system-server/platform-config` | `/system/config` | PlatformConfigPage (89 lines) | **SAFE COPY** — nav hub only |
 | `/admin/control-panel/system-server/users-security` | `/system/security` | UsersSecurityPage | **PLACEHOLDER** (rewrite needed) |
 | `/admin/control-panel/system-server/code-safety` | `/system/code-safety` | CodeSafetyPage (397 lines) | **SAFE COPY** — snapshot UI |
@@ -82,7 +82,7 @@
 | `/public/*`, `/about`, `/blog`, `/contact`, `/tour` | Product — public pages |
 | `/apps/email`, `/social/*`, `/apps/chat` | Product — social/CRM |
 | `/admin/control-panel` (hub) | **REWRITE** — bloated; decomposed into focused OMAI pages |
-| `/admin/control-panel/om-daily` | **DEFER** — 1900 lines, entangled; extract later |
+| `/admin/control-panel/omai-daily` | **DEFER** — 1900 lines, entangled; extract later |
 | `/admin/control-panel/church-*` | Product — church lifecycle is product admin |
 | `/admin/control-panel/crm-outreach` | Product — CRM |
 | `/devel/ocr-*` | Product — OCR admin |

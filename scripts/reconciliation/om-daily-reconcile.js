@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /**
- * om-daily-reconcile.js — OM Daily Work Item Git Reconciliation Engine
+ * om-daily-reconcile.js — OMAI Daily Work Item Git Reconciliation Engine
  *
- * Matches historical OM Daily work items to Git branches and commits
+ * Matches historical OMAI Daily work items to Git branches and commits
  * across both OrthodoxMetrics and OMAI repositories, then optionally
  * backfills trusted metadata into the database.
  *
@@ -86,7 +86,7 @@ function parseArgs() {
       case '--help':
       case '-h':
         console.log(`
-OM Daily Git Reconciliation Engine
+OMAI Daily Git Reconciliation Engine
 
 Usage:
   node om-daily-reconcile.js [options]
@@ -268,7 +268,7 @@ function buildBranchIndex(branches) {
     match = name.match(/\/(\d+)\//);
     if (match) {
       const id = parseInt(match[1], 10);
-      if (id > 0 && id < 10000) { // reasonable range for OM Daily IDs
+      if (id > 0 && id < 10000) { // reasonable range for OMAI Daily IDs
         if (!index[id]) index[id] = [];
         index[id].push({ branch, matchType: 'embedded_numeric_segment', confidence: 70 });
       }
@@ -344,7 +344,7 @@ function slugSimilarity(a, b) {
 }
 
 /**
- * Match a single OM Daily item against Git evidence from one repo.
+ * Match a single OMAI Daily item against Git evidence from one repo.
  * Returns a match candidate or null.
  */
 function matchItemToRepo(item, repoEvidence) {
@@ -947,7 +947,7 @@ async function main() {
   const pool = await getPool();
 
   console.log('================================================');
-  console.log('  OM Daily Git Reconciliation Engine');
+  console.log('  OMAI Daily Git Reconciliation Engine');
   console.log('================================================');
   console.log(`  Mode:     ${opts.mode}`);
   console.log(`  Item:     ${opts.itemId || 'all'}`);
@@ -963,7 +963,7 @@ async function main() {
 
     // Fetch items
     const items = await fetchItems(pool, opts);
-    console.log(`[2/5] Fetched ${items.length} OM Daily items`);
+    console.log(`[2/5] Fetched ${items.length} OMAI Daily items`);
 
     if (items.length === 0) {
       console.log('\nNo items to reconcile.');

@@ -1,8 +1,8 @@
-# AI Agent Workflow — OM Daily Integration
+# AI Agent Workflow — OMAI Daily Integration
 
 ## Purpose
 
-Every change made by an AI agent (Claude CLI, Cursor, Windsurf, etc.) must be tracked as an OM Daily item. This creates an auditable trail of all AI-assisted work, enables progress tracking, and integrates with the changelog and GitHub sync systems.
+Every change made by an AI agent (Claude CLI, Cursor, Windsurf, etc.) must be tracked as an OMAI Daily item. This creates an auditable trail of all AI-assisted work, enables progress tracking, and integrates with the changelog and GitHub sync systems.
 
 ## Core Principle
 
@@ -12,12 +12,12 @@ Every change made by an AI agent (Claude CLI, Cursor, Windsurf, etc.) must be tr
 
 ## Workflow
 
-### 1. Create OM Daily Item
+### 1. Create OMAI Daily Item
 
-When the user asks you to make changes, **before starting work**, create an OM Daily item:
+When the user asks you to make changes, **before starting work**, create an OMAI Daily item:
 
 ```
-POST /api/om-daily/items
+POST /api/omai-daily/items
 {
   "title": "<concise description of the work>",
   "description": "<detailed scope — what files, what changes, why>",
@@ -41,7 +41,7 @@ Record the returned `id` — you will need it for the branch lifecycle calls.
 **Call the `start-work` endpoint** to create an isolated branch and check it out locally:
 
 ```
-POST /api/om-daily/items/:id/start-work
+POST /api/omai-daily/items/:id/start-work
 {
   "branch_type": "existing_feature",
   "agent_tool": "claude_cli"
@@ -73,7 +73,7 @@ If the item already has a branch, the endpoint will check it out locally instead
 Make your changes, commit them to the branch. If the scope changes significantly, update the item:
 
 ```
-PUT /api/om-daily/items/:id
+PUT /api/omai-daily/items/:id
 {
   "description": "<updated scope>",
   "progress": <0-100>
@@ -85,7 +85,7 @@ PUT /api/om-daily/items/:id
 When the work is done and verified (builds pass, tests pass, deployed), **call the `complete-work` endpoint**:
 
 ```
-POST /api/om-daily/items/:id/complete-work
+POST /api/omai-daily/items/:id/complete-work
 ```
 
 This will:
@@ -113,7 +113,7 @@ git rebase main
 If the work is abandoned or blocked:
 
 ```
-PUT /api/om-daily/items/:id
+PUT /api/omai-daily/items/:id
 {
   "status": "cancelled",
   "description": "<original description>\n\n**Cancelled:** <reason>"
@@ -329,7 +329,7 @@ Response:
 
 1. Read the `next_step.prompt_text` — this is your instruction for this stage
 2. Execute the work as described in the prompt
-3. Track the work as an OM Daily item (per normal workflow above)
+3. Track the work as an OMAI Daily item (per normal workflow above)
 4. When complete, the work item is automatically linked to the plan's Change Set
 
 ### Agent Identifiers
@@ -349,6 +349,6 @@ When a plan is activated, a Change Set is **automatically created** and linked. 
 
 ## Error Handling
 
-- If the OM Daily API is unreachable, **do not block the user's work**. Note the item details in the conversation and create it when the API is available.
+- If the OMAI Daily API is unreachable, **do not block the user's work**. Note the item details in the conversation and create it when the API is available.
 - If item creation fails, log the error and continue with the work. Create the item retroactively.
 - Always attempt to close items even if the work had issues — use appropriate status (`done`, `cancelled`, or leave as `in_progress` with a description update).

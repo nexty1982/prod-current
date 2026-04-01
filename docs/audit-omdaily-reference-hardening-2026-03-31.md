@@ -1,4 +1,4 @@
-# OM Daily Reference Audit & Hardening Report
+# OMAI Daily Reference Audit & Hardening Report
 
 **Date**: 2026-03-31
 **Prompt**: PROMPT-030
@@ -119,8 +119,8 @@ Column and index on `change_set_items.om_daily_item_id` preserved. Referential i
 |------|----------|--------|
 | Change set hydration | `GET /api/admin/change-sets/50/items` | 5/5 items hydrated from omai_db |
 | Prompt plan hydration | `GET /api/prompt-plans/3` | 3/3 work items hydrated from omai_db |
-| Dashboard stats | `GET /api/om-daily/dashboard` (OMAI) | Returns data from omai_db |
-| Agent-complete transition | `POST /api/om-daily/items/702/agent-complete` | in_progress → self_review (omai_db) |
+| Dashboard stats | `GET /api/omai-daily/dashboard` (OMAI) | Returns data from omai_db |
+| Agent-complete transition | `POST /api/omai-daily/items/702/agent-complete` | in_progress → self_review (omai_db) |
 | Start Work flow | Traced end-to-end in code | All reads/writes use `getOmaiPool()` → omai_db |
 
 ---

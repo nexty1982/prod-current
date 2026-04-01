@@ -225,7 +225,7 @@ const globalOmaiRouter = require('./routes/globalOmai');
 const versionRouter = require('./routes/version');
 const systemStatusRouter = require('./api/systemStatus');
 const dailyTasksRouter = require('./api/dailyTasks');
-// MIGRATED TO OMAI: const omDailyRouter = require('./routes/om-daily');
+// MIGRATED TO OMAI: const omaiDailyRouter = require('./routes/omai-daily');
 const promptPlansRouter = require('./routes/prompt-plans');
 const promptsRouter = require('./routes/prompts');
 const workflowsRouter = require('./api/workflows');
@@ -858,8 +858,8 @@ app.use('/api/admin', seedRecordsRouter); // Seed Records (POST /api/admin/seed-
 app.use('/api/admin/record-wizard', recordCreationWizardRouter); // Record Creation Wizard
 app.use('/api/admin/ai', aiAdminRouter); // AI Admin Panel (commands + training)
 console.log('✅ [Server] Mounted records-inspector, seed-records, record-wizard, and ai-admin routes');
-// MIGRATED TO OMAI: app.use('/api/om-daily', omDailyRouter);
-// MIGRATED TO OMAI: console.log('✅ [Server] Mounted /api/om-daily routes');
+// MIGRATED TO OMAI: app.use('/api/omai-daily', omaiDailyRouter);
+// MIGRATED TO OMAI: console.log('✅ [Server] Mounted /api/omai-daily routes');
 app.use('/api/prompt-plans', promptPlansRouter); // Prompt Plans (AI orchestration)
 console.log('✅ [Server] Mounted /api/prompt-plans routes (AI Prompt Plans)');
 app.use('/api/prompts', promptsRouter); // Prompt Registry (CRUD + state machine)
