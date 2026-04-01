@@ -115,7 +115,7 @@ be_init() {
   _BE_REPO_DIR="$1"
   _BE_REPO_NAME="${2:-$(basename "$1")}"
 
-  if [[ ! -d "$_BE_REPO_DIR/.git" ]]; then
+  if [[ ! -d "$_BE_REPO_DIR/.git" && ! -f "$_BE_REPO_DIR/.git" ]]; then
     _be_fail "Not a git repository: $_BE_REPO_DIR"
     exit 1
   fi
@@ -304,7 +304,7 @@ be_check_branch_scope() {
 
   # --- Staleness check: extract date from branch name ---
   local branch_date
-  branch_date=$(echo "$_BE_BRANCH" | grep -oP '\d{4}-\d{2}-\d{2}' | head -1)
+  branch_date=$(echo "$_BE_BRANCH" | grep -oP '\d{4}-\d{2}-\d{2}' | head -1 || true)
   if [[ -n "$branch_date" ]]; then
     local branch_epoch today_epoch age_days
     branch_epoch=$(date -d "$branch_date" +%s 2>/dev/null || echo "0")

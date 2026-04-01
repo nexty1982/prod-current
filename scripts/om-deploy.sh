@@ -10,7 +10,28 @@ set -Eeuo pipefail
 #   om-deploy.sh fe     — Build frontend only
 # ============================================================================
 
-ROOT="/var/www/orthodoxmetrics/prod"
+# ── Worktree Detection ──────────────────────────────────────────────────────
+# If invoked from a linked worktree, git-common-dir ≠ git-dir.
+# In the main worktree, they're identical.
+PROD_ROOT="/var/www/orthodoxmetrics/prod"
+
+_GIT_COMMON_DIR="$(git rev-parse --git-common-dir 2>/dev/null || echo "")"
+_GIT_DIR="$(git rev-parse --git-dir 2>/dev/null || echo "")"
+
+IS_WORKTREE=false
+WORKTREE_ROOT=""
+AGENT_NAME=""
+AGENT_BRANCH=""
+
+if [[ -n "$_GIT_COMMON_DIR" && -n "$_GIT_DIR" && "$_GIT_COMMON_DIR" != "$_GIT_DIR" ]]; then
+  IS_WORKTREE=true
+  WORKTREE_ROOT="$(git rev-parse --show-toplevel 2>/dev/null)"
+  AGENT_NAME="$(basename "$WORKTREE_ROOT")"
+  AGENT_BRANCH="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "HEAD")"
+fi
+
+# Build and deploy always happen from the production worktree
+ROOT="$PROD_ROOT"
 SERVER="$ROOT/server"
 FRONT="$ROOT/front-end"
 
@@ -48,17 +69,30 @@ BOLD='\033[1m'
 BUILD_EVENT_URL="http://127.0.0.1:3001/api/internal/build-events"
 BUILD_TOKEN=$(grep '^OM_BUILD_EVENT_TOKEN=' "$SERVER/.env" 2>/dev/null | cut -d'=' -f2- | tr -d "\"'" || echo "")
 RUN_ID=$(cat /proc/sys/kernel/random/uuid 2>/dev/null || uuidgen 2>/dev/null || echo "$(date +%s)-$$")
-GIT_BRANCH=$(cd "$ROOT" && git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")
-GIT_COMMIT=$(cd "$ROOT" && git rev-parse --short HEAD 2>/dev/null || echo "unknown")
+if $IS_WORKTREE; then
+  GIT_BRANCH="$AGENT_BRANCH"
+  GIT_COMMIT=$(cd "$WORKTREE_ROOT" && git rev-parse --short HEAD 2>/dev/null || echo "unknown")
+else
+  GIT_BRANCH=$(cd "$ROOT" && git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")
+  GIT_COMMIT=$(cd "$ROOT" && git rev-parse --short HEAD 2>/dev/null || echo "unknown")
+fi
 DEPLOY_HOST=$(hostname)
 DEPLOY_PID=$$
 HEARTBEAT_PID=""
 CURRENT_STAGE=""
 BUILD_SUCCESS=false
 
-# Parse target
-TARGET="${1:-all}"
-CS_ARG="${2:-}"  # Change set code or ID for stage/promote/hotfix
+# Parse arguments — separate flags from positional args
+_POSITIONAL=()
+for _arg in "$@"; do
+  case "$_arg" in
+    --allow-main)       BE_ALLOW_MAIN=true ;;
+    --skip-scope-check) BE_SKIP_SCOPE_CHECK=true ;;
+    *)                  _POSITIONAL+=("$_arg") ;;
+  esac
+done
+TARGET="${_POSITIONAL[0]:-all}"
+CS_ARG="${_POSITIONAL[1]:-}"  # Change set code or ID for stage/promote/hotfix
 
 # ── Change set helper: call backend API ────────────────────────────────────
 cs_api_call() {
@@ -247,26 +281,31 @@ log_info() {
 # ============================================================================
 # Branch Enforcement — shared library for task-scoped branch discipline
 # ============================================================================
-cd "$ROOT"
+if $IS_WORKTREE; then
+  cd "$WORKTREE_ROOT"
+else
+  cd "$ROOT"
+fi
 
 # Source shared enforcement library
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/lib/branch-enforce.sh"
 
-# Parse override flags from deploy arguments
-# --allow-main and --skip-scope-check can be passed after the target
-for _arg in "$@"; do
-  case "$_arg" in
-    --allow-main)       BE_ALLOW_MAIN=true ;;
-    --skip-scope-check) BE_SKIP_SCOPE_CHECK=true ;;
-  esac
-done
 
-# Initialize enforcement (fetches origin/main, computes merge-base)
-be_init "$ROOT" "orthodoxmetrics"
+# Initialize enforcement against the invoker's directory (worktree or production)
+if $IS_WORKTREE; then
+  be_init "$WORKTREE_ROOT" "orthodoxmetrics"
+else
+  be_init "$ROOT" "orthodoxmetrics"
+fi
 
 # Skip dirty check here — we handle it with an interactive commit prompt below
 BE_SKIP_DIRTY_CHECK=true
+
+# Allow deploying from main — branch enforcement is for task branches only
+if [[ "$(be_branch)" == "main" ]]; then
+  BE_ALLOW_MAIN=true
+fi
 
 # Run enforcement checks (exits on hard failure)
 be_check_not_main      || exit 1
@@ -280,6 +319,9 @@ if [[ -n "$(git status --porcelain 2>/dev/null)" ]]; then
   echo -e "${YELLOW}  Uncommitted Changes Detected${NC}"
   echo -e "${YELLOW}═══════════════════════════════════════════════════════════════${NC}"
   echo ""
+  if $IS_WORKTREE; then
+    echo -e "Agent:  ${BOLD}${AGENT_NAME}${NC}"
+  fi
   echo -e "Branch: ${BOLD}${GIT_BRANCH}${NC}"
   echo ""
 
@@ -328,6 +370,42 @@ fi
 be_print_change_summary
 
 log_info "Git branch: ${BOLD}$GIT_BRANCH${NC} (${GIT_COMMIT})"
+
+# ============================================================================
+# Worktree Merge — ff-merge agent's branch into main on the production worktree
+# ============================================================================
+if $IS_WORKTREE; then
+  log_section "Worktree Merge: ${AGENT_NAME} → main"
+  log_step "Agent branch: ${BOLD}${AGENT_BRANCH}${NC}"
+
+  cd "$PROD_ROOT"
+
+  PROD_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")
+  if [[ "$PROD_BRANCH" != "main" ]]; then
+    log_error "Production worktree ($PROD_ROOT) is on '${PROD_BRANCH}', expected 'main'."
+    echo -e "  ${CYAN}→${NC} Fix: cd $PROD_ROOT && git checkout main" >&2
+    exit 1
+  fi
+
+  PROD_DIRTY=$(git status --porcelain 2>/dev/null || true)
+  if [[ -n "$PROD_DIRTY" ]]; then
+    log_error "Production worktree has uncommitted changes — cannot merge."
+    echo -e "  ${CYAN}→${NC} Fix: cd $PROD_ROOT && git stash (or commit/discard)" >&2
+    exit 1
+  fi
+
+  log_step "Merging ${AGENT_BRANCH} into main (ff-only)..."
+  if git merge --ff-only "$AGENT_BRANCH" 2>&1; then
+    GIT_COMMIT=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
+    log_success "Merged to main: ${BOLD}${GIT_COMMIT}${NC}"
+  else
+    log_error "Fast-forward merge failed — ${AGENT_BRANCH} has diverged from main."
+    echo -e "  ${CYAN}→${NC} Rebase first: cd $WORKTREE_ROOT && git rebase main" >&2
+    exit 1
+  fi
+
+  GIT_BRANCH="main (merged from ${AGENT_BRANCH} via ${AGENT_NAME})"
+fi
 
 # ============================================================================
 # Change Set Validation (stage/promote/hotfix modes)
@@ -743,9 +821,14 @@ log_info "Build number: $APP_VERSION.$NEW_BUILD"
 # ============================================================================
 # Deploy Metadata — task-scoped change tracking
 # ============================================================================
-# Re-init enforcement state (commit may have changed during build)
-be_init "$ROOT" "orthodoxmetrics"
-be_save_deploy_metadata "$TARGET" "$DEPLOY_MODE"
+# Re-init against production root (we deployed from main after merge)
+cd "$PROD_ROOT"
+be_init "$PROD_ROOT" "orthodoxmetrics"
+if $IS_WORKTREE; then
+  be_save_deploy_metadata "$TARGET" "worktree:${AGENT_NAME}"
+else
+  be_save_deploy_metadata "$TARGET" "$DEPLOY_MODE"
+fi
 
 # ============================================================================
 # Change Set Post-Deploy Finalization
@@ -840,6 +923,9 @@ fi
 # ============================================================================
 log_header "Deployment Complete"
 log_success "Target: ${BOLD}$LABEL${NC}"
+if $IS_WORKTREE; then
+  log_success "Agent:  ${BOLD}$AGENT_NAME${NC} (branch: $AGENT_BRANCH → main)"
+fi
 log_success "Completed: $(date '+%Y-%m-%d %H:%M:%S %Z')"
 
 if $BUILD_FE; then
