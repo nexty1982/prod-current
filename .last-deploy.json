@@ -1,0 +1,22 @@
+{
+  "deploy_id": "f6907a4c-1c46-477c-9bca-176734bca3a7",
+  "repo": "orthodoxmetrics",
+  "branch": "main",
+  "branch_class": "",
+  "branch_type": "",
+  "branch_owner": "",
+  "branch_date": "",
+  "branch_slug": "",
+  "merge_base": "null",
+  "head_commit": "afc961b6505a2f6ed5ba732abb6d8023c13c7010",
+  "head_commit_short": "afc961b6",
+  "commit_count": 0,
+  "commits": [],
+  "changed_files": [],
+  "diff_stat": "",
+  "deployed_at": "2026-04-01T03:10:56Z",
+  "deployed_by": "next",
+  "deploy_target": "all",
+  "deploy_mode": "legacy",
+  "overrides": {"allow_main":true,"skip_dirty_check":true}
+}
