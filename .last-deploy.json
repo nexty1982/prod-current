@@ -1,5 +1,5 @@
 {
-  "deploy_id": "adbc1a43-c9d0-4062-8758-1734ecd4c10a",
+  "deploy_id": "b89444b1-09ff-4ef1-a2f1-be960326d0c1",
   "repo": "orthodoxmetrics",
   "branch": "main",
   "branch_class": "",
@@ -8,15 +8,15 @@
   "branch_date": "",
   "branch_slug": "",
   "merge_base": "null",
-  "head_commit": "4c84305e2f8a7bfe7ccff8ecca5c3c6012f64d2b",
-  "head_commit_short": "4c84305e",
+  "head_commit": "a4bf57889b2717cd5111f460e31c89a6ab4d4ba6",
+  "head_commit_short": "a4bf5788",
   "commit_count": 0,
   "commits": [],
   "changed_files": [],
   "diff_stat": "",
-  "deployed_at": "2026-04-01T03:44:29Z",
+  "deployed_at": "2026-04-01T16:03:55Z",
   "deployed_by": "next",
-  "deploy_target": "all",
+  "deploy_target": "fe",
   "deploy_mode": "legacy",
   "overrides": {"allow_main":true,"skip_dirty_check":true}
 }

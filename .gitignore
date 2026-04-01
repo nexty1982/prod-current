@@ -163,3 +163,11 @@ front-end/server/
 server/scripts/
 .snapshots/
 .branch-notes.json
+
+# Added via Repo Operations
+orthodoxmetrics.com
+inner-orthodoxmetrics.com
+
+# Added via Repo Operations
+scripts/om-deploy.sh
+scripts/lib/branch-enforce.sh

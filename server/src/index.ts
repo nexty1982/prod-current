@@ -338,6 +338,7 @@ const feederRouter = require('./routes/feeder');
 // Import service management router for system monitoring and control
 const servicesRouter = require('./routes/admin/services');
 const sslCertificatesRouter = require('./routes/admin/ssl-certificates');
+const nginxRouter = require('./routes/admin/nginx');
 // Import components management router for system component control
 const componentsRouter = require('./routes/admin/components');
 const deprecationRegistryRouter = require('./routes/admin/deprecation-registry');
@@ -776,6 +777,7 @@ app.use('/api/headlines', headlinesRouter);
 app.use('/api/headlines/config', headlinesConfigRouter);
 app.use('/api/admin/services', servicesRouter);
 app.use('/api/admin/ssl-certificates', sslCertificatesRouter);
+app.use('/api/admin/nginx', nginxRouter);
 app.use('/api/admin/components', componentsRouter);
 app.use('/api/admin/deprecation-registry', deprecationRegistryRouter);
 app.use('/api/admin/feature-registry', featureRegistryRouter);

@@ -629,14 +629,24 @@ router.get('/git/branch-analysis', requireAuth, requireAdmin, async (req, res) =
       headSha = shaOut.trim();
     } catch { /* ignore */ }
 
-    // Working tree clean/dirty
+    // Working tree clean/dirty + categorized dirty files
     let isClean = true;
+    const dirtyFiles = { modified: [], added: [], deleted: [], untracked: [], renamed: [] };
     try {
       const { stdout: statusOut } = await execFileAsync(
         'git', ['status', '--porcelain'],
         { cwd: repoRoot, timeout: 5000 }
       );
-      isClean = !statusOut.trim();
+      const lines = statusOut.trim().split('\n').filter(Boolean);
+      isClean = lines.length === 0;
+      for (const line of lines) {
+        const idx = line[0], wt = line[1], fp = line.substring(3);
+        if (idx === '?' && wt === '?') dirtyFiles.untracked.push(fp);
+        else if (idx === 'A' || wt === 'A') dirtyFiles.added.push(fp);
+        else if (idx === 'D' || wt === 'D') dirtyFiles.deleted.push(fp);
+        else if (idx === 'R') dirtyFiles.renamed.push(fp);
+        else dirtyFiles.modified.push(fp);
+      }
     } catch { /* assume dirty on error */ isClean = false; }
 
     // Current branch tracking info
@@ -752,6 +762,7 @@ router.get('/git/branch-analysis', requireAuth, requireAdmin, async (req, res) =
 
         // Check for operator note/override
         const branchNote = branchNotes[branchName] || null;
+        const classificationOverride = branchNote?.classificationOverride || null;
 
         if (isMerged && ahead === 0) {
           classification = 'Already Merged';
@@ -819,6 +830,18 @@ router.get('/git/branch-analysis', requireAuth, requireAdmin, async (req, res) =
           confidence = 'low';
         }
 
+        // Apply classification override (if operator set one)
+        const VALID_CLASSIFICATIONS = ['Already Merged', 'Safe To Delete', 'Fast-Forward Safe', 'Needs Rebase', 'Parked Work', 'Stale / Diverged', 'Manual Review'];
+        let isOverridden = false;
+        if (classificationOverride && VALID_CLASSIFICATIONS.includes(classificationOverride)) {
+          classification = classificationOverride;
+          confidence = 'high';
+          isOverridden = true;
+          // Update recommended action to match override
+          const ACTION_MAP = { 'Already Merged': 'Delete', 'Safe To Delete': 'Delete', 'Fast-Forward Safe': 'Merge', 'Needs Rebase': 'Rebase', 'Parked Work': 'Review', 'Stale / Diverged': 'Delete', 'Manual Review': 'Review' };
+          recommendedAction = ACTION_MAP[classificationOverride] || 'Review';
+        }
+
         // Local tracking info
         const hasLocal = localBranchSet.has(branchName);
         const isCurrentBranch = branchName === currentBranch;
@@ -835,6 +858,8 @@ router.get('/git/branch-analysis', requireAuth, requireAdmin, async (req, res) =
           classification,
           recommendedAction,
           confidence,
+          isOverridden,
+          classificationOverride: classificationOverride || null,
           commitAgeDays: Math.round(commitAgeDays),
           mergeBase,
           isMerged,
@@ -951,6 +976,7 @@ router.get('/git/branch-analysis', requireAuth, requireAdmin, async (req, res) =
         headSha,
         isClean,
         trackingRemote: currentTrackingRemote,
+        dirtyFiles: isClean ? null : dirtyFiles,
       },
       remoteBranches: remoteBranchData,
       localOnlyBranches,
@@ -971,9 +997,9 @@ router.get('/git/branch-analysis', requireAuth, requireAdmin, async (req, res) =
 // Safely delete a remote (and optionally local) branch.
 // Only allowed for branches classified as "Already Merged" or "Safe To Delete".
 // ────────────────────────────────────────────────────────────────
-router.delete('/git/branch/:branchName', requireAuth, requireRole('super_admin'), async (req, res) => {
+router.delete('/git/branch/*', requireAuth, requireRole('super_admin'), async (req, res) => {
   const { repoKey, repoRoot } = resolveRepo(req);
-  const { branchName } = req.params;
+  const branchName = req.query.branch || req.params[0];
 
   // ── Safety: validate branch name ──────────────────────────
   if (!branchName || branchName === 'main' || branchName === 'master') {
@@ -1054,7 +1080,14 @@ router.delete('/git/branch/:branchName', requireAuth, requireRole('super_admin')
       classification = 'other';
     }
 
-    // ── Step 2: Gate — only allow deletable classifications ──
+    // ── Step 2: Apply operator classification override if set ──
+    const branchNotes = await loadBranchNotes();
+    const note = branchNotes[branchName];
+    if (note?.classificationOverride) {
+      classification = note.classificationOverride;
+    }
+
+    // ── Step 3: Gate — only allow deletable classifications ──
     const SAFE_CLASSIFICATIONS = ['Already Merged', 'Safe To Delete', 'Stale / Diverged'];
     if (!SAFE_CLASSIFICATIONS.includes(classification)) {
       return res.status(403).json({
@@ -1063,19 +1096,19 @@ router.delete('/git/branch/:branchName', requireAuth, requireRole('super_admin')
         classification,
         ahead,
         behind,
-        message: `This branch is classified as "${classification}" and cannot be deleted through this endpoint.`,
+        message: `This branch is classified as "${classification}" and cannot be deleted through this endpoint. Use a classification override to reclassify it.`,
       });
     }
 
-    // ── Step 3: Delete remote branch ─────────────────────────
-    console.log(`[Git Ops] Deleting remote branch: ${branchName} (classification: ${classification})`);
+    // ── Step 4: Delete remote branch ─────────────────────────
+    console.log(`[Git Ops] Deleting remote branch: ${branchName} (classification: ${classification}${note?.classificationOverride ? ', overridden' : ''})`);
     await execFileAsync(
       'git', ['push', 'origin', '--delete', branchName],
       { cwd: repoRoot, timeout: 15000 }
     );
     console.log(`[Git Ops] Remote branch deleted: ${branchName}`);
 
-    // ── Step 4: Delete local branch if it exists (safe -d) ──
+    // ── Step 5: Delete local branch if it exists (safe -d) ──
     let localDeleted = false;
     try {
       // Check if local branch exists
@@ -1098,7 +1131,7 @@ router.delete('/git/branch/:branchName', requireAuth, requireRole('super_admin')
       // Local branch doesn't exist or couldn't be deleted — that's fine
     }
 
-    // ── Step 5: Fetch + prune to sync refs ───────────────────
+    // ── Step 6: Fetch + prune to sync refs ───────────────────
     try {
       await execFileAsync('git', ['fetch', '--prune'], { cwd: repoRoot, timeout: 15000 });
     } catch (err) {
@@ -1128,9 +1161,9 @@ router.delete('/git/branch/:branchName', requireAuth, requireRole('super_admin')
 // Fast-forward merge a branch into main, push, and delete the branch.
 // Only allowed for branches classified as "Fast-Forward Safe" (ahead > 0, behind === 0).
 // ────────────────────────────────────────────────────────────────
-router.post('/git/branch/:branchName/merge', requireAuth, requireRole('super_admin'), async (req, res) => {
+router.post('/git/merge-branch', requireAuth, requireRole('super_admin'), async (req, res) => {
   const { repoKey, repoRoot } = resolveRepo(req);
-  const { branchName } = req.params;
+  const branchName = req.query.branch || req.body.branch;
 
   // ── Safety: validate branch name ──────────────────────────
   if (!branchName || branchName === 'main' || branchName === 'master') {
@@ -1208,6 +1241,7 @@ router.post('/git/branches/bulk-delete', requireAuth, requireRole('super_admin')
   }
 
   const SAFE_CLASSIFICATIONS = ['Already Merged', 'Safe To Delete', 'Stale / Diverged'];
+  const branchNotes = await loadBranchNotes();
   const results = [];
 
   // Get current branch once
@@ -1291,6 +1325,12 @@ router.post('/git/branches/bulk-delete', requireAuth, requireRole('super_admin')
         classification = 'other';
       }
 
+      // Apply operator override
+      const note = branchNotes[branchName];
+      if (note?.classificationOverride) {
+        classification = note.classificationOverride;
+      }
+
       if (!SAFE_CLASSIFICATIONS.includes(classification)) {
         results.push({ branch: branchName, success: false, error: 'Not eligible for deletion', classification, ahead });
         continue;
@@ -1339,27 +1379,44 @@ router.post('/git/branches/bulk-delete', requireAuth, requireRole('super_admin')
 
 // ────────────────────────────────────────────────────────────────
 // PUT /api/ops/git/branch-notes/:branchName
+// Also accepts branch name via ?branch= query param (nginx decodes %2F in path params)
 // Set an operator note for a branch (persists to .branch-notes.json)
 // ────────────────────────────────────────────────────────────────
-router.put('/git/branch-notes/:branchName', requireAuth, requireRole('super_admin'), async (req, res) => {
-  const { branchName } = req.params;
-  const { note } = req.body;
+router.put('/git/branch-notes/*', requireAuth, requireRole('super_admin'), async (req, res) => {
+  const branchName = req.query.branch || req.params[0];
+  const { note, classificationOverride } = req.body;
 
   if (!branchName || !/^[a-zA-Z0-9._\-\/]+$/.test(branchName)) {
     return res.status(400).json({ success: false, error: 'Invalid branch name' });
   }
 
+  const VALID_CLASSIFICATIONS = ['Already Merged', 'Safe To Delete', 'Fast-Forward Safe', 'Needs Rebase', 'Parked Work', 'Stale / Diverged', 'Manual Review'];
+  if (classificationOverride && !VALID_CLASSIFICATIONS.includes(classificationOverride)) {
+    return res.status(400).json({ success: false, error: 'Invalid classification override' });
+  }
+
   try {
     const notes = await loadBranchNotes();
+    const existing = notes[branchName] || {};
 
-    if (!note || note.trim() === '') {
-      // Remove note
+    const hasNote = note && note.trim() !== '';
+    const hasOverride = classificationOverride && classificationOverride.trim() !== '';
+
+    if (!hasNote && !hasOverride) {
+      // Remove entry entirely
       delete notes[branchName];
     } else {
       notes[branchName] = {
-        note: note.trim().substring(0, 500), // cap at 500 chars
+        ...existing,
+        note: hasNote ? note.trim().substring(0, 500) : (existing.note || ''),
         updated: new Date().toISOString(),
       };
+      if (hasOverride) {
+        notes[branchName].classificationOverride = classificationOverride;
+      } else if (classificationOverride === '') {
+        // Explicitly clear override
+        delete notes[branchName].classificationOverride;
+      }
     }
 
     await saveBranchNotes(notes);
@@ -1866,6 +1923,76 @@ router.post('/git/gitignore/untrack', requireAuth, requireRole('super_admin'), a
   } catch (error) {
     console.error('[Git Ops] untrack error:', error);
     res.status(500).json({ success: false, error: 'Untrack failed', message: error.message });
+  }
+});
+
+// ────────────────────────────────────────────────────────────────
+// POST /api/ops/git/gitignore/add?repo=...
+// Add file paths/patterns to .gitignore and untrack any that are currently tracked.
+// Body: { files: string[] }
+// ────────────────────────────────────────────────────────────────
+router.post('/git/gitignore/add', requireAuth, requireRole('super_admin'), async (req, res) => {
+  try {
+    const { repoKey, repoRoot } = resolveRepo(req);
+    const { files } = req.body;
+    const opts = { cwd: repoRoot, timeout: 15000 };
+
+    if (!Array.isArray(files) || files.length === 0) {
+      return res.status(400).json({ success: false, error: 'files array required' });
+    }
+
+    // Validate paths — no traversal, no absolute
+    for (const f of files) {
+      if (f.includes('..') || f.startsWith('/')) {
+        return res.status(400).json({ success: false, error: `Invalid path: ${f}` });
+      }
+    }
+
+    // 1. Read current .gitignore
+    const gitignorePath = path.join(repoRoot, '.gitignore');
+    let content = '';
+    try {
+      content = await fs.readFile(gitignorePath, 'utf8');
+    } catch { /* file may not exist */ }
+
+    const existingLines = new Set(content.split('\n').map(l => l.trim()));
+
+    // 2. Determine which patterns to add (skip duplicates)
+    const toAdd = files.filter(f => !existingLines.has(f) && !existingLines.has('/' + f));
+
+    // 3. Append new patterns
+    if (toAdd.length > 0) {
+      const block = '\n# Added via Repo Operations\n' + toAdd.join('\n') + '\n';
+      const newContent = content.endsWith('\n') ? content + block : content + '\n' + block;
+      await fs.writeFile(gitignorePath, newContent, 'utf8');
+    }
+
+    // 4. Untrack any files that are currently tracked by git
+    const untracked = [];
+    for (const f of files) {
+      try {
+        // Check if file is tracked
+        await execFileAsync('git', ['ls-files', '--error-unmatch', f], opts);
+        // It IS tracked — remove from index
+        await execFileAsync('git', ['rm', '--cached', '-r', '--', f], opts);
+        untracked.push(f);
+      } catch {
+        // Not tracked — nothing to untrack
+      }
+    }
+
+    res.json({
+      success: true,
+      repo: repoKey,
+      added: toAdd.length,
+      alreadyIgnored: files.length - toAdd.length,
+      untracked: untracked.length,
+      untrackedFiles: untracked,
+      message: `Added ${toAdd.length} pattern(s) to .gitignore${untracked.length > 0 ? `, untracked ${untracked.length} file(s)` : ''}`,
+    });
+  } catch (error) {
+    console.error('[Git Ops] gitignore add error:', error);
+    res.status(500).json({ success: false, error: 'Failed to add to .gitignore', message: error.message });
   }
 });
 
