@@ -125,7 +125,7 @@ const OMDailyItemsPage: React.FC = () => {
       if (selectedHorizon) params.set('horizon', selectedHorizon);
 
       const qs = params.toString();
-      const res = await fetch(`/api/om-daily/items${qs ? `?${qs}` : ''}`, {
+      const res = await fetch(`/api/omai-daily/items${qs ? `?${qs}` : ''}`, {
         credentials: 'include',
       });
       if (!res.ok) throw new Error('Failed to fetch items');
@@ -141,7 +141,7 @@ const OMDailyItemsPage: React.FC = () => {
   // Fetch categories
   const fetchCategories = useCallback(async () => {
     try {
-      const res = await fetch('/api/om-daily/categories', { credentials: 'include' });
+      const res = await fetch('/api/omai-daily/categories', { credentials: 'include' });
       if (res.ok) {
         const data = await res.json();
         setCategories(Array.isArray(data) ? data : data.categories || []);
@@ -154,7 +154,7 @@ const OMDailyItemsPage: React.FC = () => {
   // Auto-sync commits on first load
   useEffect(() => {
     if (!synced) {
-      fetch('/api/om-daily/sync-commits', {
+      fetch('/api/omai-daily/sync-commits', {
         method: 'POST',
         credentials: 'include',
       }).catch(() => {});
@@ -177,8 +177,8 @@ const OMDailyItemsPage: React.FC = () => {
       const isNew = !editingItem;
       const method = isNew ? 'POST' : 'PUT';
       const url = isNew
-        ? '/api/om-daily/items'
-        : `/api/om-daily/items/${editingItem.id}`;
+        ? '/api/omai-daily/items'
+        : `/api/omai-daily/items/${editingItem.id}`;
       const res = await fetch(url, {
         method,
         credentials: 'include',
@@ -192,7 +192,7 @@ const OMDailyItemsPage: React.FC = () => {
       // Auto-create branch if agent_tool + branch_type are set on new items
       if (isNew && (form as any).agent_tool && (form as any).branch_type && itemId) {
         try {
-          const workRes = await fetch(`/api/om-daily/items/${itemId}/start-work`, {
+          const workRes = await fetch(`/api/omai-daily/items/${itemId}/start-work`, {
             method: 'POST', credentials: 'include',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ branch_type: (form as any).branch_type, agent_tool: (form as any).agent_tool }),
@@ -219,7 +219,7 @@ const OMDailyItemsPage: React.FC = () => {
   // Delete item
   const deleteItem = async (id: number) => {
     try {
-      const res = await fetch(`/api/om-daily/items/${id}`, {
+      const res = await fetch(`/api/omai-daily/items/${id}`, {
         method: 'DELETE',
         credentials: 'include',
       });
@@ -234,7 +234,7 @@ const OMDailyItemsPage: React.FC = () => {
   // Quick status change (uses SDLC-enforced PATCH endpoint)
   const updateStatus = async (item: DailyItem, status: string) => {
     try {
-      const res = await fetch(`/api/om-daily/items/${item.id}/status`, {
+      const res = await fetch(`/api/omai-daily/items/${item.id}/status`, {
         method: 'PATCH',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },

@@ -108,7 +108,7 @@ const SDLCWizardPage: React.FC = () => {
       const ids = urlItems.split(',').map(Number).filter(n => !isNaN(n));
       setSelectedItemIds(ids);
       // Fetch titles for preselected items
-      apiClient.get('/om-daily/items').then(res => {
+      apiClient.get('/omai-daily/items').then(res => {
         const titleMap: Record<number, string> = {};
         for (const item of (res.data.items || [])) {
           if (ids.includes(item.id)) titleMap[item.id] = item.title;
@@ -130,7 +130,7 @@ const SDLCWizardPage: React.FC = () => {
   // Fetch item titles when selection changes (for new-work mode)
   useEffect(() => {
     if (mode !== 'new-work' || selectedItemIds.length === 0) return;
-    apiClient.get('/om-daily/items').then(res => {
+    apiClient.get('/omai-daily/items').then(res => {
       const titleMap: Record<number, string> = {};
       for (const item of (res.data.items || [])) {
         if (selectedItemIds.includes(item.id)) titleMap[item.id] = item.title;

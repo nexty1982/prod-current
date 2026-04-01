@@ -45,7 +45,7 @@ const AdvanceStep2: React.FC<Props> = ({ csStatus, csHasDbChanges, formData, onC
   const nextStatus = NEXT_STATUS[csStatus];
 
   useEffect(() => {
-    apiClient.get('/om-daily/build-info').then(res => {
+    apiClient.get('/omai-daily/build-info').then(res => {
       setBuildInfo(res.data);
       // Auto-fill SHAs
       const sha = res.data?.commit_sha || res.data?.git_sha || '';

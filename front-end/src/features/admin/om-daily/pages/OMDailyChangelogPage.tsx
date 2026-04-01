@@ -48,7 +48,7 @@ const OMDailyChangelogPage: React.FC = () => {
 
   const fetchChangelog = useCallback(async () => {
     try {
-      const data = await apiFetch('/api/om-daily/changelog?limit=30');
+      const data = await apiFetch('/api/omai-daily/changelog?limit=30');
       setChangelogEntries(Array.isArray(data) ? data : data.entries ?? []);
     } catch {
       /* silent */
@@ -58,7 +58,7 @@ const OMDailyChangelogPage: React.FC = () => {
   const fetchChangelogDetail = useCallback(async (date: string) => {
     setChangelogLoading(true);
     try {
-      const data = await apiFetch(`/api/om-daily/changelog/${date}`);
+      const data = await apiFetch(`/api/omai-daily/changelog/${date}`);
       setChangelogDetail(data);
     } catch {
       setChangelogDetail(null);
@@ -69,7 +69,7 @@ const OMDailyChangelogPage: React.FC = () => {
 
   const fetchBuildInfo = useCallback(async () => {
     try {
-      const data = await apiFetch('/api/om-daily/build-info');
+      const data = await apiFetch('/api/omai-daily/build-info');
       setBuildInfo(data);
     } catch {
       /* silent */
@@ -87,7 +87,7 @@ const OMDailyChangelogPage: React.FC = () => {
   const handleGenerate = async () => {
     setChangelogLoading(true);
     try {
-      await apiFetch('/api/om-daily/changelog/generate', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+      await apiFetch('/api/omai-daily/changelog/generate', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
       showToast('Changelog generated', 'success');
       await fetchChangelog();
       await fetchChangelogDetail(selectedChangelogDate);
@@ -100,7 +100,7 @@ const OMDailyChangelogPage: React.FC = () => {
 
   const handleSendEmail = async () => {
     try {
-      await apiFetch(`/api/om-daily/changelog/email/${selectedChangelogDate}`, { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+      await apiFetch(`/api/omai-daily/changelog/email/${selectedChangelogDate}`, { method: 'POST', headers: { 'Content-Type': 'application/json' } });
       showToast('Email sent', 'success');
       await fetchChangelogDetail(selectedChangelogDate);
     } catch (err: any) {
@@ -111,7 +111,7 @@ const OMDailyChangelogPage: React.FC = () => {
   const handlePush = async () => {
     setPushing(true);
     try {
-      await apiFetch('/api/om-daily/push-to-origin', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+      await apiFetch('/api/omai-daily/push-to-origin', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
       showToast('Pushed to origin', 'success');
     } catch (err: any) {
       showToast(err.message || 'Push failed', 'error');

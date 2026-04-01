@@ -72,28 +72,28 @@ const OMDailyDashboardPage: React.FC = () => {
   // ── Fetchers ──
   const fetchDashboard = useCallback(async () => {
     try {
-      const resp = await fetch('/api/om-daily/dashboard', { credentials: 'include' });
+      const resp = await fetch('/api/omai-daily/dashboard', { credentials: 'include' });
       if (resp.ok) setDashboard(await resp.json());
     } catch {}
   }, []);
 
   const fetchExtended = useCallback(async () => {
     try {
-      const resp = await fetch('/api/om-daily/dashboard/extended', { credentials: 'include' });
+      const resp = await fetch('/api/omai-daily/dashboard/extended', { credentials: 'include' });
       if (resp.ok) setExtended(await resp.json());
     } catch {}
   }, []);
 
   const fetchGhStatus = useCallback(async () => {
     try {
-      const resp = await fetch('/api/om-daily/github/status', { credentials: 'include' });
+      const resp = await fetch('/api/omai-daily/github/status', { credentials: 'include' });
       if (resp.ok) setGhStatus(await resp.json());
     } catch {}
   }, []);
 
   const fetchBuildInfo = useCallback(async () => {
     try {
-      const resp = await fetch('/api/om-daily/build-info', { credentials: 'include' });
+      const resp = await fetch('/api/omai-daily/build-info', { credentials: 'include' });
       if (resp.ok) setBuildInfo(await resp.json());
     } catch {}
   }, []);
@@ -119,11 +119,11 @@ const OMDailyDashboardPage: React.FC = () => {
   const triggerGhSync = async () => {
     setGhSyncing(true);
     try {
-      await fetch('/api/om-daily/github/sync', { method: 'POST', credentials: 'include' });
+      await fetch('/api/omai-daily/github/sync', { method: 'POST', credentials: 'include' });
       showToast('GitHub sync started');
       pollRef.current = setInterval(async () => {
         try {
-          const resp = await fetch('/api/om-daily/github/sync/progress', { credentials: 'include' });
+          const resp = await fetch('/api/omai-daily/github/sync/progress', { credentials: 'include' });
           if (resp.ok) {
             const data = await resp.json();
             setGhSyncProgress(data);
@@ -147,7 +147,7 @@ const OMDailyDashboardPage: React.FC = () => {
   const pushToOrigin = async () => {
     setPushing(true);
     try {
-      await fetch('/api/om-daily/push-to-origin', { method: 'POST', credentials: 'include' });
+      await fetch('/api/omai-daily/push-to-origin', { method: 'POST', credentials: 'include' });
       showToast('Pushed to origin');
     } catch {
       showToast('Push failed', 'error');
@@ -160,7 +160,7 @@ const OMDailyDashboardPage: React.FC = () => {
   const handleSave = async () => {
     if (!form.title.trim()) return;
     try {
-      const resp = await fetch(editingItem ? `/api/om-daily/items/${editingItem.id}` : '/api/om-daily/items', {
+      const resp = await fetch(editingItem ? `/api/omai-daily/items/${editingItem.id}` : '/api/omai-daily/items', {
         method: editingItem ? 'PUT' : 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },

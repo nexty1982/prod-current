@@ -35,7 +35,7 @@ const FastForwardStep2: React.FC<Props> = ({ csId, csCode, csStatus, csBranch, o
   const [result, setResult] = useState<any>(null);
 
   useEffect(() => {
-    apiClient.get('/om-daily/build-info').then(res => {
+    apiClient.get('/omai-daily/build-info').then(res => {
       const sha = res.data?.commit_sha || res.data?.git_sha || '';
       const buildId = res.data?.build_number?.toString() || '';
       setStagingBuildRunId(buildId);

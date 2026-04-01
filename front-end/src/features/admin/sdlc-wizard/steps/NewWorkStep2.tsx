@@ -35,7 +35,7 @@ const NewWorkStep2: React.FC<Props> = ({ formData, onChange }) => {
   const [buildBranch, setBuildBranch] = useState('');
 
   useEffect(() => {
-    apiClient.get('/om-daily/build-info').then(res => {
+    apiClient.get('/omai-daily/build-info').then(res => {
       const branch = res.data?.branch || res.data?.git_branch || '';
       setBuildBranch(branch);
       if (!formData.git_branch && branch) {

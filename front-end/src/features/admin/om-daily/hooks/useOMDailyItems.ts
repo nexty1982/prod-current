@@ -35,7 +35,7 @@ export function useOMDailyItems(_opts?: UseOMDailyItemsOptions) {
       if (params?.search) qs.set('search', params.search);
       qs.set('sort', params?.sort || 'priority');
 
-      const resp = await fetch(`/api/om-daily/items?${qs}`, { credentials: 'include' });
+      const resp = await fetch(`/api/omai-daily/items?${qs}`, { credentials: 'include' });
       if (resp.ok) {
         const data = await resp.json();
         setItems(data.items || []);
@@ -47,7 +47,7 @@ export function useOMDailyItems(_opts?: UseOMDailyItemsOptions) {
 
   const fetchCategories = useCallback(async () => {
     try {
-      const resp = await fetch('/api/om-daily/categories', { credentials: 'include' });
+      const resp = await fetch('/api/omai-daily/categories', { credentials: 'include' });
       if (resp.ok) {
         const data = await resp.json();
         setCategories(data.categories || []);
@@ -56,7 +56,7 @@ export function useOMDailyItems(_opts?: UseOMDailyItemsOptions) {
   }, []);
 
   const saveItem = useCallback(async (form: Record<string, any>, editId?: number) => {
-    const url = editId ? `/api/om-daily/items/${editId}` : '/api/om-daily/items';
+    const url = editId ? `/api/omai-daily/items/${editId}` : '/api/omai-daily/items';
     const method = editId ? 'PUT' : 'POST';
     const resp = await fetch(url, {
       method, credentials: 'include',
@@ -68,12 +68,12 @@ export function useOMDailyItems(_opts?: UseOMDailyItemsOptions) {
   }, []);
 
   const deleteItem = useCallback(async (id: number) => {
-    const resp = await fetch(`/api/om-daily/items/${id}`, { method: 'DELETE', credentials: 'include' });
+    const resp = await fetch(`/api/omai-daily/items/${id}`, { method: 'DELETE', credentials: 'include' });
     if (!resp.ok) throw new Error('Failed to delete');
   }, []);
 
   const updateStatus = useCallback(async (id: number, newStatus: string, extra?: Record<string, any>) => {
-    const resp = await fetch(`/api/om-daily/items/${id}/status`, {
+    const resp = await fetch(`/api/omai-daily/items/${id}/status`, {
       method: 'PATCH', credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status: newStatus, ...extra }),
@@ -88,7 +88,7 @@ export function useOMDailyItems(_opts?: UseOMDailyItemsOptions) {
   }, []);
 
   const startWork = useCallback(async (id: number, branchType: string, agentTool: string) => {
-    const resp = await fetch(`/api/om-daily/items/${id}/start-work`, {
+    const resp = await fetch(`/api/omai-daily/items/${id}/start-work`, {
       method: 'POST', credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ branch_type: branchType, agent_tool: agentTool }),

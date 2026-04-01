@@ -61,7 +61,7 @@ const NewWorkStep1: React.FC<Props> = ({ selectedItemIds, onItemsChange }) => {
   const fetchItems = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await apiClient.get('/om-daily/items');
+      const res = await apiClient.get('/omai-daily/items');
       setItems(res.data.items || []);
     } catch (err) {
       console.error('Failed to fetch items:', err);
@@ -84,7 +84,7 @@ const NewWorkStep1: React.FC<Props> = ({ selectedItemIds, onItemsChange }) => {
     if (!newTitle.trim()) return;
     setCreating(true);
     try {
-      const res = await apiClient.post('/om-daily/items', {
+      const res = await apiClient.post('/omai-daily/items', {
         title: newTitle.trim(),
         priority: newPriority,
         category: newCategory || undefined,
