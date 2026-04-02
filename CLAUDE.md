@@ -151,14 +151,29 @@ To register a new feature, add it to `FEATURE_REGISTRY` in `featureRegistry.ts` 
 
 **Every change you make MUST be tracked as an OMAI Daily item with branch lifecycle management.** This is mandatory, not optional.
 
+**Full workflow documentation:** [docs/ai-agent-workflow.md](docs/ai-agent-workflow.md)
+
+### Workspace Rule
+
+**Always work from your assigned worktree.** Never work from `/var/www/omai/` directly — it is deploy-only.
+
+| Agent | Workspace |
+|-------|-----------|
+| Claude CLI | `/var/www/omai-workspaces/agent-claude` |
+| Cursor | `/var/www/omai-workspaces/agent-cursor` |
+| Windsurf | `/var/www/omai-workspaces/agent-windsurf` |
+
 ### Quick Reference — Branch Lifecycle
 
 ```bash
-# 1. Create item (BEFORE starting work)
+# 0. Enter your workspace
+cd /var/www/omai-workspaces/agent-claude
+
+# 1. Create item (BEFORE starting work) — status MUST be "backlog"
 curl -X POST http://127.0.0.1:7060/api/omai-daily/items \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN" \
-  -d '{"title":"...","task_type":"chore","status":"todo","source":"agent","agent_tool":"claude_cli","priority":"medium","horizon":"7","category":"om-frontend","description":"..."}'
+  -d '{"title":"...","task_type":"chore","status":"backlog","source":"agent","agent_tool":"claude_cli","priority":"medium","category":"om-frontend","description":"..."}'
 
 # 2. Start work — creates branch from main, checks it out locally
 curl -X POST http://127.0.0.1:7060/api/omai-daily/items/:id/start-work \
@@ -166,27 +181,33 @@ curl -X POST http://127.0.0.1:7060/api/omai-daily/items/:id/start-work \
   -H "Authorization: Bearer $TOKEN" \
   -d '{"branch_type":"enhancement","agent_tool":"claude_cli"}'
 
-# 3. Do your work, commit changes to the branch
+# 3. Verify branch
+git branch --show-current
 
-# 4. Signal work complete — moves item to Self Review
+# 4. Do your work, commit changes to the branch, push regularly
+git push -u origin HEAD
+
+# 5. Signal work complete — moves item to Self Review
 curl -X POST http://127.0.0.1:7060/api/omai-daily/items/:id/agent-complete \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN" \
   -d '{"agent_tool":"claude_cli","summary":"Brief description of what was done"}'
 
-# 5. (Optional) Full merge — ff-only merge to main, delete branch
-curl -X POST http://127.0.0.1:7060/api/omai-daily/items/:id/complete-work \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $TOKEN"
+# 6. Create Pull Request
+gh pr create --base main --head "$(git branch --show-current)" \
+  --title "OMD-<id>: Short description" --body "..." --label "agent-pr"
+
+# 7. Admin reviews and merges — agents never self-merge
 ```
 
 ### Workflow
 
-1. **Create item** → `POST /api/omai-daily/items` with `status: "todo"`, `source: "agent"`, `agent_tool: "claude_cli"`
+0. **Enter workspace** → `cd /var/www/omai-workspaces/agent-claude`
+1. **Create item** → `POST /api/omai-daily/items` with `status: "backlog"`, `source: "agent"`, `agent_tool: "claude_cli"`
 2. **Start work** → `POST /api/omai-daily/items/:id/start-work` with `branch_type` — creates and checks out a branch from `main`
-3. **During work** → Commit changes to the branch. Update `progress` (0-100) if the task is large
+3. **During work** → Commit changes to the branch. Push regularly with `git push -u origin HEAD`. Update `progress` (0-100) if the task is large
 4. **Signal complete** → `POST /api/omai-daily/items/:id/agent-complete` — moves item from In Progress → Self Review. **ALWAYS call this when you finish work on a task.** Idempotent and safe to call multiple times.
-5. **Full merge** (optional) → `POST /api/omai-daily/items/:id/complete-work` — fast-forward merges branch to `main`, deletes branch, closes item
+5. **Create PR** → `gh pr create` against `main` with OMD item ID in the title. Never self-merge.
 6. **If abandoned** → Set `status: "cancelled"` with reason in description
 
 ### Task Types
@@ -247,12 +268,14 @@ Each status has a defined owner and required exit action. The backend enforces t
 
 ### Key Rules
 
+- **ALWAYS work from your workspace** — Never `cd` into `/var/www/omai/` to make changes. Pre-commit hooks will block you.
 - **ALWAYS signal completion** — Call `POST /items/:id/agent-complete` when you finish work. This moves the item to Self Review so the board reflects your progress. Without this call, items stay stuck in In Progress.
+- **ALWAYS create a PR** — After agent-complete, open a PR with `gh pr create`. Never self-merge.
 - **Agent transitions use actor_type** — When calling PATCH /status directly, include `"actor_type": "agent"` in the body. The `agent-complete` and `start-work` endpoints handle this automatically.
 - **Fast-forward only** — `complete-work` uses `git merge --ff-only`. If main has diverged, rebase first.
 - **Clean tree required** — All changes must be committed before calling `complete-work`.
 - **Explicit actions** — Branches are NOT auto-merged on status change. You must call the endpoints.
-- **One branch per item** — Each OMAI Daily item gets its own isolated branch.
+- **One branch per item, one PR per branch** — Each OMAI Daily item gets its own isolated branch and PR.
 
 ### Priorities: `critical`, `high`, `medium` (default), `low`
 ### Categories: `om-frontend`, `om-backend`, `om-database`, `om-ocr`, `om-records`, `om-admin`, `om-portal`, `om-auth`, `om-devops`, `omai-frontend`, `omai-backend`, `omai-sdlc`, `omai-ai`, `docs`
@@ -264,8 +287,6 @@ Check for assigned plans at conversation start:
 curl -H "Authorization: Bearer $TOKEN" http://127.0.0.1:3001/api/prompt-plans/agent/claude_cli
 ```
 If an active plan is returned, read the `next_step.prompt_text` and execute that stage. Work items are auto-linked to the plan's Change Set. See [docs/ai-agent-workflow.md](docs/ai-agent-workflow.md) for full details.
-
-**Full workflow documentation:** [docs/ai-agent-workflow.md](docs/ai-agent-workflow.md)
 
 ## Documentation
 
