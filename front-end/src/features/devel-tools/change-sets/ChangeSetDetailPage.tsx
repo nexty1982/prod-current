@@ -455,11 +455,11 @@ const ChangeSetDetailPage: React.FC = () => {
         {/* ── CLI action hints for deploy-driven transitions ────────────── */}
         {cs.status === 'ready_for_staging' && (
           <Alert severity="info" variant="outlined" action={
-            <Button size="small" startIcon={<CopyIcon />} onClick={() => copyCmd(`./scripts/om-deploy.sh stage ${cs.code}`)}>
+            <Button size="small" startIcon={<CopyIcon />} onClick={() => copyCmd(`/var/omai-ops/scripts/orthodoxmetrics/om-deploy.sh stage ${cs.code}`)}>
               Copy
             </Button>
           }>
-            <strong>Next step:</strong> Run <code>./scripts/om-deploy.sh stage {cs.code}</code> from the server to build and stage this change set for review.
+            <strong>Next step:</strong> Run <code>/var/omai-ops/scripts/orthodoxmetrics/om-deploy.sh stage {cs.code}</code> from the server to build and stage this change set for review.
             {cs.git_branch && (
               <Box sx={{ mt: 0.5 }}>
                 <Typography variant="caption" color="text.secondary">Ensure you are on branch <code>{cs.git_branch}</code></Typography>
@@ -469,20 +469,20 @@ const ChangeSetDetailPage: React.FC = () => {
         )}
         {cs.status === 'approved' && cs.deployment_strategy !== 'hotfix_direct' && (
           <Alert severity="success" variant="outlined" action={
-            <Button size="small" startIcon={<CopyIcon />} onClick={() => copyCmd(`./scripts/om-deploy.sh promote ${cs.code}`)}>
+            <Button size="small" startIcon={<CopyIcon />} onClick={() => copyCmd(`/var/omai-ops/scripts/orthodoxmetrics/om-deploy.sh promote ${cs.code}`)}>
               Copy
             </Button>
           }>
-            <strong>Ready for production.</strong> Run <code>./scripts/om-deploy.sh promote {cs.code}</code> to deploy.
+            <strong>Ready for production.</strong> Run <code>/var/omai-ops/scripts/orthodoxmetrics/om-deploy.sh promote {cs.code}</code> to deploy.
           </Alert>
         )}
         {cs.deployment_strategy === 'hotfix_direct' && ['draft', 'active', 'ready_for_staging', 'approved'].includes(cs.status) && (
           <Alert severity="warning" variant="outlined" action={
-            <Button size="small" startIcon={<CopyIcon />} onClick={() => copyCmd(`./scripts/om-deploy.sh hotfix ${cs.code}`)}>
+            <Button size="small" startIcon={<CopyIcon />} onClick={() => copyCmd(`/var/omai-ops/scripts/orthodoxmetrics/om-deploy.sh hotfix ${cs.code}`)}>
               Copy
             </Button>
           }>
-            <strong>Hotfix Direct.</strong> Run <code>./scripts/om-deploy.sh hotfix {cs.code}</code> to fast-track build and deploy to production.
+            <strong>Hotfix Direct.</strong> Run <code>/var/omai-ops/scripts/orthodoxmetrics/om-deploy.sh hotfix {cs.code}</code> to fast-track build and deploy to production.
           </Alert>
         )}
 

@@ -525,7 +525,7 @@ router.get('/watch-all', async (req, res) => {
         if (cmd.includes('omai') || (meta.repo && meta.repo.includes('omai'))) {
           target = cmd.includes('server') || cmd.includes('be') ? 'omai-server' : 'omai-frontend';
         }
-        if (cmd === 'all' || cmd === './scripts/om-deploy.sh') target = 'om-frontend';
+        if (cmd === 'all' || cmd === '/var/omai-ops/scripts/orthodoxmetrics/om-deploy.sh') target = 'om-frontend';
 
         if (!seenTargets.has(target)) {
           seenTargets.add(target);

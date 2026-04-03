@@ -168,6 +168,5 @@ server/scripts/
 orthodoxmetrics.com
 inner-orthodoxmetrics.com
 
-# Added via Repo Operations
-scripts/om-deploy.sh
-scripts/lib/branch-enforce.sh
+# Scripts live in /var/omai-ops/scripts/orthodoxmetrics/ (outside repo)
+scripts/

@@ -10,9 +10,9 @@ Multi-tenant Orthodox church management platform. Sacramental records (baptism, 
 
 ```bash
 # Deploy
-./scripts/om-deploy.sh          # Full (backend + frontend)
-./scripts/om-deploy.sh be       # Backend only
-./scripts/om-deploy.sh fe       # Frontend only
+/var/omai-ops/scripts/orthodoxmetrics/om-deploy.sh          # Full (backend + frontend)
+/var/omai-ops/scripts/orthodoxmetrics/om-deploy.sh be       # Backend only
+/var/omai-ops/scripts/orthodoxmetrics/om-deploy.sh fe       # Frontend only
 
 # Service management
 sudo systemctl restart orthodox-backend
@@ -233,7 +233,7 @@ All branches use the authoritative format: `<type>/<work-item-id>/<yyyy-mm-dd>/<
 
 **Work item ID**: `omd-NNN` for OMAI Daily items, username for human work, agent tool name for agent work.
 
-**Create with**: `./scripts/start-task-branch.sh <type> <description> --item <id>`
+**Create with**: `/var/omai-ops/scripts/orthodoxmetrics/start-task-branch.sh <type> <description> --item <id>`
 
 **Legacy branches** (feat/, enh/, ref/, etc.) are allowed temporarily with a deprecation warning. All new work must use the standard format.
 
