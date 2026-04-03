@@ -171,5 +171,14 @@ inner-orthodoxmetrics.com
 # Scripts live in /var/omai-ops/scripts/orthodoxmetrics/ (outside repo)
 scripts/
 
+# Docs live in /var/omai-ops/docs/orthodoxmetrics/ (outside repo)
+docs/
+
+# Berry frontend lives in /var/www/omai/berry/ (canonical copy)
+berry/
+
+# Analysis artifacts
+.analysis/
+
 # Deploy artifact (auto-generated)
 .last-deploy.json
