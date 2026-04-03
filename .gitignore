@@ -170,3 +170,6 @@ inner-orthodoxmetrics.com
 
 # Scripts live in /var/omai-ops/scripts/orthodoxmetrics/ (outside repo)
 scripts/
+
+# Deploy artifact (auto-generated)
+.last-deploy.json
