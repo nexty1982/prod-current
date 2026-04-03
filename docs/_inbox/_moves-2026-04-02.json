@@ -1,0 +1,45 @@
+{
+  "date": "2026-04-02",
+  "timestamp": "2026-04-02T06:40:58.005Z",
+  "rootPath": "/var/www/orthodoxmetrics/prod",
+  "moves": [
+    {
+      "from": "/var/www/orthodoxmetrics/prod/CLAUDE.md",
+      "to": "/var/www/orthodoxmetrics/prod/docs/_inbox/2026-04-02/CLAUDE.md",
+      "fromRelative": "CLAUDE.md",
+      "toRelative": "docs/_inbox/2026-04-02/CLAUDE.md",
+      "size": 15377,
+      "mtime": "2026-04-01T21:25:25.388Z",
+      "sha256": "70c8e198220e9169045107f8238caab165e7d1a94c2382358b63cfdbee9dc925",
+      "shouldMove": true,
+      "reason": "categorized as inbox",
+      "category": "inbox"
+    },
+    {
+      "from": "/var/www/orthodoxmetrics/prod/OCR-PIPELINE.docx",
+      "to": "/var/www/orthodoxmetrics/prod/docs/_inbox/2026-04-02/OCR-PIPELINE.docx",
+      "fromRelative": "OCR-PIPELINE.docx",
+      "toRelative": "docs/_inbox/2026-04-02/OCR-PIPELINE.docx",
+      "size": 53777,
+      "mtime": "2026-03-24T02:46:26.543Z",
+      "sha256": "46f94455546d00d91b56fe1fc06ed8f78d03330534c08c56f2f993d42a4d1f0f",
+      "shouldMove": true,
+      "reason": "categorized as inbox",
+      "category": "inbox"
+    },
+    {
+      "from": "/var/www/orthodoxmetrics/prod/WS-tasks.md",
+      "to": "/var/www/orthodoxmetrics/prod/docs/_inbox/2026-04-02/WS-tasks.md",
+      "fromRelative": "WS-tasks.md",
+      "toRelative": "docs/_inbox/2026-04-02/WS-tasks.md",
+      "size": 195646,
+      "mtime": "2026-02-16T08:26:53.811Z",
+      "sha256": "5a0221b59bb6b421004948fe1bf1c47bf323113ed55391a3dfd71c5c304e2cd4",
+      "shouldMove": true,
+      "reason": "categorized as inbox",
+      "category": "inbox"
+    }
+  ],
+  "totalMoved": 3,
+  "failed": []
+}
