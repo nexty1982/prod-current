@@ -4,8 +4,8 @@
  * Validates whether a status transition is allowed and checks prerequisites.
  * Returns structured errors with human-readable messages for the UI.
  *
- * Canonical statuses (8):
- *   backlog → in_progress → self_review → review → staging → done
+ * Canonical statuses (9 = 8 lifecycle + draft intake):
+ *   draft → backlog → in_progress → self_review → review → staging → done
  *   blocked (from any active status)
  *   cancelled (from any status)
  *
@@ -26,7 +26,7 @@ const repoService = require('./repoService');
 
 // ── Canonical Status Order ──────────────────────────────────────
 const STATUSES = [
-  'backlog', 'in_progress', 'self_review',
+  'draft', 'backlog', 'in_progress', 'self_review',
   'review', 'staging', 'done',
   'blocked', 'cancelled',
 ];
@@ -34,6 +34,7 @@ const STATUSES = [
 // ── Allowed Transitions Matrix ──────────────────────────────────
 // Key = from_status, Value = array of allowed to_statuses
 const ALLOWED_TRANSITIONS = {
+  draft:        ['backlog', 'cancelled'],
   backlog:      ['in_progress', 'blocked', 'cancelled'],
   in_progress:  ['self_review', 'backlog', 'blocked', 'cancelled'],
   self_review:  ['review', 'in_progress', 'blocked', 'cancelled'],
@@ -46,6 +47,7 @@ const ALLOWED_TRANSITIONS = {
 
 // ── Status display labels ───────────────────────────────────────
 const STATUS_LABELS = {
+  draft: 'Draft',
   backlog: 'Backlog',
   in_progress: 'In Progress',
   self_review: 'Self Review',

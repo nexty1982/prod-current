@@ -246,14 +246,15 @@ All branches use the authoritative format: `<type>/<work-item-id>/<yyyy-mm-dd>/<
 ### SDLC Status Ownership (Canonical 8-Status Model)
 
 ```
-backlog → in_progress → self_review → review → staging → done
+draft → backlog → in_progress → self_review → review → staging → done
 blocked (from any active status)
 cancelled (from any status)
 ```
 
 | Status | DB Value | Owner | Trigger |
 |--------|----------|-------|---------|
-| Backlog | `backlog` | Admin | Item created / triaged |
+| Draft | `draft` | Creator | Structured intake (pre-backlog shaping) |
+| Backlog | `backlog` | Admin | Intake promotion / item created |
 | In Progress | `in_progress` | **Agent** | POST /start-work |
 | Self Review | `self_review` | **Agent** | POST /agent-complete |
 | Review | `review` | Admin | PR opened (GitHub webhook) |
