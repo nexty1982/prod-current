@@ -243,28 +243,31 @@ All branches use the authoritative format: `<type>/<work-item-id>/<yyyy-mm-dd>/<
 **OMAI:** `omai-frontend` | `omai-backend` | `omai-sdlc` | `omai-ai`
 **Shared:** `docs`
 
-### SDLC Status Ownership
+### SDLC Status Ownership (Canonical 8-Status Model)
 
-Each status has a defined owner and required exit action. The backend enforces this — agents cannot approve their own work, and admins cannot skip agent-owned steps.
+```
+backlog → in_progress → self_review → review → staging → done
+blocked (from any active status)
+cancelled (from any status)
+```
 
-| Status | Owner | Exit Action | Exit By |
-|--------|-------|-------------|---------|
-| Backlog | Admin | Triage: review priority, assign category | Admin |
-| Triaged | Admin | Plan: define approach, set repo_target | Admin |
-| Planned | Admin | Schedule: set dates, assign to agent | Admin |
-| Scheduled | Admin | Start work: agent creates branch | **Agent** |
-| In Progress | **Agent** | Complete implementation, commit all | **Agent** |
-| Self Review | **Agent** | Self-check: build, lint, push to remote | **Agent** |
-| Testing | **Agent** | Verify tests pass, mark ready for review | **Agent** |
-| Review Ready | Admin | Review changes, approve or reject | Admin |
-| Approved | Admin | Deploy, merge to main, close item | Admin |
-| Done | — | Reopen if needed | Admin |
+| Status | DB Value | Owner | Trigger |
+|--------|----------|-------|---------|
+| Backlog | `backlog` | Admin | Item created / triaged |
+| In Progress | `in_progress` | **Agent** | POST /start-work |
+| Self Review | `self_review` | **Agent** | POST /agent-complete |
+| Review | `review` | Admin | PR opened (GitHub webhook) |
+| Staging | `staging` | Admin | PR approved (GitHub webhook) |
+| Done | `done` | — | PR merged (GitHub webhook) |
+| Blocked | `blocked` | Admin | Manual or webhook |
+| Cancelled | `cancelled` | — | Manual |
 
 **Key enforcement:**
 - Agents pass `actor_type: "agent"` in PATCH /status calls to identify themselves
-- Agents CANNOT exit admin-owned statuses (e.g., cannot self-approve)
-- Admins CANNOT exit agent-owned statuses (e.g., cannot skip testing)
+- Agents own `in_progress` and `self_review` — admins cannot skip these steps
+- Admins own `backlog`, `review`, `staging` — agents cannot self-approve
 - `blocked` and `cancelled` transitions are always allowed by any actor
+- Backend PATCH /status enforces the transition matrix — invalid transitions are rejected
 
 ### Key Rules
 
