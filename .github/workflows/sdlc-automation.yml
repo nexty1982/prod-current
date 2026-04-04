@@ -9,8 +9,9 @@
 #   4. Staging      → PR approved
 #   5. Done         → PR merged into main
 #
-# Branch naming convention: type/taskID-short-description
-#   Examples: feat/636-migration-logic, fix/637-login-redirect
+# Branch naming convention: type/omd-taskID/date/slug
+#   Examples: feature/omd-636/2026-04-01/migration-logic, fix/omd-637/2026-04-01/login-redirect
+#   Legacy format also supported: feat/636-migration-logic
 #
 # The webhook at /api/om-daily/webhooks/github handles the DB updates.
 # This workflow provides additional GitHub-side automation (labels, comments).
@@ -27,7 +28,7 @@ on:
     types: [cross-repo-sync, promote-to-production]
 
 env:
-  TASK_ID_REGEX: '^(feat|fix|patch|chore)/([0-9]+)-'
+  TASK_ID_REGEX: '^(feature|fix|chore)/omd-([0-9]+)/'
 
 jobs:
   # ──────────────────────────────────────────────────────────────
@@ -47,11 +48,18 @@ jobs:
           BRANCH="${{ github.event.pull_request.head.ref }}"
           echo "Branch: $BRANCH"
 
-          if [[ "$BRANCH" =~ ^(feat|fix|patch|chore)/([0-9]+)- ]]; then
+          # Canonical format: feature/omd-636/2026-04-01/slug
+          if [[ "$BRANCH" =~ ^(feature|fix|chore)/omd-([0-9]+)/ ]]; then
             echo "task_id=${BASH_REMATCH[2]}" >> "$GITHUB_OUTPUT"
             echo "branch_type=${BASH_REMATCH[1]}" >> "$GITHUB_OUTPUT"
             echo "has_task=true" >> "$GITHUB_OUTPUT"
             echo "✅ Task ID: ${BASH_REMATCH[2]}, Type: ${BASH_REMATCH[1]}"
+          # Legacy format: feat/636-description
+          elif [[ "$BRANCH" =~ ^(feat|fix|patch|chore)/([0-9]+)- ]]; then
+            echo "task_id=${BASH_REMATCH[2]}" >> "$GITHUB_OUTPUT"
+            echo "branch_type=${BASH_REMATCH[1]}" >> "$GITHUB_OUTPUT"
+            echo "has_task=true" >> "$GITHUB_OUTPUT"
+            echo "✅ (legacy) Task ID: ${BASH_REMATCH[2]}, Type: ${BASH_REMATCH[1]}"
           else
             echo "has_task=false" >> "$GITHUB_OUTPUT"
             echo "⚠️ No task ID found in branch name"
