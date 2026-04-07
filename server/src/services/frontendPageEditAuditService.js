@@ -79,6 +79,54 @@ const PAGE_KEY_PREFIX_EXEMPT = {
 };
 
 /**
+ * Routes in BlankLayout that are NOT public content pages.
+ * These are excluded from candidate detection because they are auth flows,
+ * redirects, utility viewers, data-driven apps, or token-gated pages.
+ *
+ * The BlankLayout block contains nested children (e.g., auth route group)
+ * whose paths are extracted alongside direct children. Every non-content
+ * route must be listed here to keep the candidate set clean.
+ */
+const CANDIDATE_EXCLUDED_ROUTES = {
+  // ── Auth route group and all its children ────────────────────
+  'auth':                                'auth route group',
+  '404':                                 'auth error page',
+  'coming-soon':                         'auth placeholder page',
+  'unauthorized':                        'auth error page',
+  'login':                               'auth login page',
+  'login2':                              'auth login page',
+  'register':                            'auth registration page',
+  'register-token':                      'auth token registration',
+  'register2':                           'auth registration page',
+  'forgot-password':                     'auth password reset',
+  'forgot-password2':                    'auth password reset',
+  'two-steps':                           'auth 2FA page',
+  'two-steps2':                          'auth 2FA page',
+  'maintenance':                         'auth maintenance page',
+  'accept-invite/:token':               'auth invite acceptance',
+  'verify-email':                        'auth email verification',
+  // ── Redirects ────────────────────────────────────────────────
+  '/login':                              'redirect to auth',
+  '/landingpage':                        'redirect to admin',
+  '/pages/pricing':                      'redirect to admin',
+  // ── Utility demo viewers ─────────────────────────────────────
+  '/greek_baptism_table_demo.html':      'utility HTML viewer',
+  '/russian_wedding_table_demo.html':    'utility HTML viewer',
+  '/romanian_funeral_table_demo.html':   'utility HTML viewer',
+  // ── Data-driven / CMS-driven pages ───────────────────────────
+  '/tasks':                              'data-driven task list',
+  '/tasks/:id':                          'data-driven task detail',
+  '/blog/:slug':                         'CMS-driven blog post renderer',
+  '/frontend-pages/blog/detail/:id':     'CMS-driven blog post renderer',
+  '/frontend-pages/gallery':             'devel-tools gallery, not a public content page',
+  // ── Token-gated functional pages ─────────────────────────────
+  '/r/interactive/:token':               'token-gated form submission',
+  '/c/:token':                           'token-gated collaboration page',
+  // ── Catch-all ────────────────────────────────────────────────
+  '*':                                   'catch-all error page',
+};
+
+/**
  * Unregistered page files on disk that are intentionally not in PAGE_REGISTRY.
  * These are either sub-components, utility pages, or legacy files that should
  * not be audited as standalone editable pages.
@@ -102,12 +150,13 @@ const UNREGISTERED_KNOWN = {
 /**
  * Parse Router.tsx once and extract:
  *   - publicLayoutPaths: routes nested inside the <PublicLayout /> block
+ *   - blankLayoutPaths: all routes inside BlankLayout (the public/unauthenticated tree)
  *   - allRoutePaths: every path="..." in the file
  *   - componentImports: map of component name → import path
  */
 function parseRouterFile() {
   const source = readFileSafe(ROUTER_FILE);
-  if (!source) return { publicLayoutPaths: [], allRoutePaths: [], componentImports: {} };
+  if (!source) return { publicLayoutPaths: [], blankLayoutPaths: [], allRoutePaths: [], componentImports: {} };
 
   // Extract all path="..." values
   const allRoutePaths = [];
@@ -131,6 +180,21 @@ function parseRouterFile() {
     }
   }
 
+  // Find the BlankLayout children block and extract ALL paths inside it.
+  // This captures the full public/unauthenticated route tree, including
+  // PublicLayout children, legacy public pages, auth routes, etc.
+  const blankLayoutPaths = [];
+  const blBlockRe = /element:\s*<BlankLayout\s*\/?>[\s\S]*?children:\s*\[([\s\S]*?)(?:\n\s*\],\s*\n\s*\})/;
+  const blMatch = blBlockRe.exec(source);
+  if (blMatch) {
+    const childBlock = blMatch[1];
+    const childPathRe = /path:\s*['"]([^'"]+)['"]/g;
+    let cm;
+    while ((cm = childPathRe.exec(childBlock)) !== null) {
+      blankLayoutPaths.push(cm[1]);
+    }
+  }
+
   // Extract component imports: const Name = Loadable(lazy(() => import('...')))
   const componentImports = {};
   const importRe = /const\s+(\w+)\s*=\s*Loadable\(lazy\(\(\)\s*=>\s*import\(['"]([^'"]+)['"]\)\)\)/g;
@@ -138,7 +202,7 @@ function parseRouterFile() {
     componentImports[m[1]] = m[2];
   }
 
-  return { publicLayoutPaths, allRoutePaths, componentImports };
+  return { publicLayoutPaths, blankLayoutPaths, allRoutePaths, componentImports };
 }
 
 // ── File scanning ───────────────────────────────────────────────────────
@@ -1018,21 +1082,49 @@ function isDataDriven(sources) {
 }
 
 /**
+ * Check if a route path is excluded from candidate detection.
+ */
+function isExcludedRoute(routePath) {
+  return CANDIDATE_EXCLUDED_ROUTES.hasOwnProperty(routePath);
+}
+
+/**
+ * Resolve a Router.tsx import path to an absolute filesystem path.
+ * Handles relative paths (../), @/ alias, and bare paths.
+ */
+function resolveRouterImport(importPath) {
+  let absoluteImportPath;
+  if (importPath.startsWith('.')) {
+    absoluteImportPath = path.resolve(path.dirname(ROUTER_FILE), importPath);
+  } else if (importPath.startsWith('@/')) {
+    absoluteImportPath = path.join(FRONTEND_SRC, importPath.slice(2));
+  } else {
+    absoluteImportPath = path.resolve(path.dirname(ROUTER_FILE), importPath);
+  }
+  return resolveFilePath(absoluteImportPath);
+}
+
+/**
  * Detect public-facing pages that are candidates for Edit Mode conversion.
  *
- * Scans all routes under PublicLayout in Router.tsx, resolves each to its
- * source file, and classifies based on deterministic signals:
- *   S1: Under PublicLayout (required — only these get EditModeProvider)
+ * Scans ALL routes inside BlankLayout (the public/unauthenticated tree) in
+ * Router.tsx, filtering out non-content routes via CANDIDATE_EXCLUDED_ROUTES.
+ * This covers both PublicLayout children and legacy public pages outside it.
+ *
+ * Each page is classified based on deterministic signals:
+ *   S1: Public-facing route in BlankLayout (required)
  *   S2: Not already edit-mode compliant (no EditableText or wired shared sections)
- *   S3: Has substantial static text (≥5 translatable strings)
- *   S4: Uses i18n (useTranslation)
- *   S5: Not data-driven (no primary API fetch pattern)
+ *   S3: Has substantial static text (≥5 translatable strings) → +3
+ *   S4: Uses i18n (useTranslation or useLanguage) → +2
+ *   S5: Not data-driven (no primary API fetch pattern) → +1
+ *   Bonus: Under PublicLayout (EditModeProvider already available) → +1
  *
  * Classifications:
  *   - conversion-candidate: S1+S2 and score ≥ 4
  *   - low-priority-candidate: S1+S2 and score 1-3
  *   - already-compliant: Has EditableText or wired shared sections
- *   - non-candidate: In NON_EDITABLE_BY_DESIGN or not under PublicLayout
+ *   - non-candidate: In NON_EDITABLE_BY_DESIGN
+ *   - excluded: Route in CANDIDATE_EXCLUDED_ROUTES (not a content page)
  *   - needs-investigation: File not found or parse error
  *
  * @returns {{ summary, candidates }}
@@ -1044,13 +1136,31 @@ function detectCandidates() {
   }
 
   const routerData = parseRouterFile();
+  const publicLayoutSet = new Set(routerData.publicLayoutPaths);
   const candidates = [];
 
-  for (const routePath of routerData.publicLayoutPaths) {
+  // Deduplicate routes (e.g., /samples and /frontend-pages/samples → same component)
+  const seenComponents = new Set();
+
+  for (const routePath of routerData.blankLayoutPaths) {
     const pageKey = derivePageKey(routePath);
 
+    // Skip excluded routes (auth, redirects, utility viewers, etc.)
+    if (isExcludedRoute(routePath)) {
+      candidates.push({
+        route: routePath,
+        pageKey,
+        component: null,
+        classification: 'excluded',
+        score: 0,
+        signals: {},
+        rationale: `Excluded: ${CANDIDATE_EXCLUDED_ROUTES[routePath]}`,
+        inPublicLayout: false,
+      });
+      continue;
+    }
+
     // Find the component name for this route
-    // Parse: { path: 'routePath', element: <ComponentName /> }
     const routeEscaped = routePath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const elementRe = new RegExp(`path:\\s*['"]${routeEscaped}['"][^}]*element:\\s*<(\\w+)`);
     const elementMatch = elementRe.exec(routerSource);
@@ -1063,11 +1173,49 @@ function detectCandidates() {
         score: 0,
         signals: {},
         rationale: 'Could not determine component for this route',
+        inPublicLayout: publicLayoutSet.has(routePath),
       });
       continue;
     }
 
     const componentName = elementMatch[1];
+
+    // Skip Navigate (redirect) components
+    if (componentName === 'Navigate') {
+      candidates.push({
+        route: routePath,
+        pageKey,
+        component: 'Navigate',
+        classification: 'excluded',
+        score: 0,
+        signals: {},
+        rationale: 'Redirect route (Navigate)',
+        inPublicLayout: false,
+      });
+      continue;
+    }
+
+    // Deduplicate: if we've already analyzed this component, add a reference entry
+    if (seenComponents.has(componentName)) {
+      const original = candidates.find(c => c.component === componentName && c.classification !== 'excluded');
+      if (original) {
+        candidates.push({
+          route: routePath,
+          pageKey,
+          component: componentName,
+          file: original.file,
+          registryId: original.registryId,
+          classification: original.classification,
+          score: original.score,
+          signals: original.signals,
+          rationale: `Duplicate route for ${componentName} (see ${original.route})`,
+          inPublicLayout: publicLayoutSet.has(routePath),
+          duplicateOf: original.route,
+        });
+      }
+      continue;
+    }
+    seenComponents.add(componentName);
 
     // Resolve component to file path
     const importPath = routerData.componentImports[componentName];
@@ -1080,20 +1228,12 @@ function detectCandidates() {
         score: 0,
         signals: {},
         rationale: `Could not resolve import path for ${componentName}`,
+        inPublicLayout: publicLayoutSet.has(routePath),
       });
       continue;
     }
 
-    // Resolve to absolute file path — imports are relative to Router.tsx dir
-    let absoluteImportPath;
-    if (importPath.startsWith('.')) {
-      absoluteImportPath = path.resolve(path.dirname(ROUTER_FILE), importPath);
-    } else if (importPath.startsWith('@/')) {
-      absoluteImportPath = path.join(FRONTEND_SRC, importPath.slice(2));
-    } else {
-      absoluteImportPath = path.resolve(path.dirname(ROUTER_FILE), importPath);
-    }
-    const resolvedFile = resolveFilePath(absoluteImportPath);
+    const resolvedFile = resolveRouterImport(importPath);
     if (!resolvedFile || !fs.existsSync(resolvedFile)) {
       candidates.push({
         route: routePath,
@@ -1103,11 +1243,13 @@ function detectCandidates() {
         score: 0,
         signals: {},
         rationale: `Source file not found for ${componentName}`,
+        inPublicLayout: publicLayoutSet.has(routePath),
       });
       continue;
     }
 
     const relFile = path.relative(FRONTEND_SRC, resolvedFile);
+    const inPublicLayout = publicLayoutSet.has(routePath);
 
     // Check if in NON_EDITABLE_BY_DESIGN (by matching PAGE_REGISTRY id)
     const registryEntry = PAGE_REGISTRY.find(p => p.file === relFile);
@@ -1122,6 +1264,7 @@ function detectCandidates() {
         score: 0,
         signals: {},
         rationale: `Non-editable by design: ${NON_EDITABLE_BY_DESIGN[registryEntry.id]}`,
+        inPublicLayout,
       });
       continue;
     }
@@ -1129,7 +1272,7 @@ function detectCandidates() {
     // Collect source files
     const sources = collectPageSources(resolvedFile);
 
-    // S2: Check if already edit-mode compliant
+    // Check if already edit-mode compliant
     const editableText = scanEditableText(sources);
     const sharedSections = scanSharedSections(sources);
     const wiredSections = sharedSections.filter(s => s.hasEditKeyPrefix);
@@ -1149,11 +1292,12 @@ function detectCandidates() {
           wiredSharedSections: wiredSections.length,
         },
         rationale: `Already has ${editableText.count} EditableText usage(s) and ${wiredSections.length} wired shared section(s)`,
+        inPublicLayout,
       });
       continue;
     }
 
-    // S3+S4+S5: Score the candidate
+    // Score the candidate
     const textAnalysis = countStaticText(sources);
     const dataDriven = isDataDriven(sources);
 
@@ -1166,11 +1310,13 @@ function detectCandidates() {
       usesI18n: textAnalysis.usesI18n,
       isDataDriven: dataDriven,
       unwiredSharedSections: sharedSections.length - wiredSections.length,
+      inPublicLayout,
     };
 
-    if (textAnalysis.totalTranslatable >= 5) score += 3; // S3
-    if (textAnalysis.usesI18n) score += 2;               // S4
-    if (!dataDriven) score += 1;                          // S5
+    if (textAnalysis.totalTranslatable >= 5) score += 3; // S3: substantial text
+    if (textAnalysis.usesI18n) score += 2;               // S4: uses i18n
+    if (!dataDriven) score += 1;                          // S5: not data-driven
+    if (inPublicLayout) score += 1;                       // Bonus: EditModeProvider already available
 
     const classification = score >= 4 ? 'conversion-candidate' : 'low-priority-candidate';
 
@@ -1183,6 +1329,7 @@ function detectCandidates() {
     }
     if (textAnalysis.usesI18n) reasons.push('uses i18n');
     if (dataDriven) reasons.push('data-driven (lower priority)');
+    if (!inPublicLayout) reasons.push('NOT under PublicLayout (would need EditModeProvider)');
     if (sharedSections.length > 0) reasons.push(`${sharedSections.length} shared section(s) without editKeyPrefix`);
 
     candidates.push({
@@ -1195,20 +1342,26 @@ function detectCandidates() {
       score,
       signals,
       rationale: reasons.join('; '),
+      inPublicLayout,
       recommended_action: classification === 'conversion-candidate'
-        ? 'Add editKeyPrefix props to shared sections and/or wrap static text with EditableText'
+        ? inPublicLayout
+          ? 'Add editKeyPrefix props to shared sections and/or wrap static text with EditableText'
+          : 'Move route under PublicLayout first, then add EditableText/shared section wiring'
         : 'Low priority — review if content grows or page becomes more prominent',
     });
   }
 
-  // Summary
+  // Summary (exclude 'excluded' from totals — they aren't public content pages)
+  const contentCandidates = candidates.filter(c => c.classification !== 'excluded');
   const summary = {
-    total_public_routes: routerData.publicLayoutPaths.length,
-    already_compliant: candidates.filter(c => c.classification === 'already-compliant').length,
-    conversion_candidates: candidates.filter(c => c.classification === 'conversion-candidate').length,
-    low_priority_candidates: candidates.filter(c => c.classification === 'low-priority-candidate').length,
-    non_candidates: candidates.filter(c => c.classification === 'non-candidate').length,
-    needs_investigation: candidates.filter(c => c.classification === 'needs-investigation').length,
+    total_public_routes: routerData.blankLayoutPaths.length,
+    excluded_non_content: candidates.filter(c => c.classification === 'excluded').length,
+    evaluated_content_pages: contentCandidates.length,
+    already_compliant: contentCandidates.filter(c => c.classification === 'already-compliant').length,
+    conversion_candidates: contentCandidates.filter(c => c.classification === 'conversion-candidate').length,
+    low_priority_candidates: contentCandidates.filter(c => c.classification === 'low-priority-candidate').length,
+    non_candidates: contentCandidates.filter(c => c.classification === 'non-candidate').length,
+    needs_investigation: contentCandidates.filter(c => c.classification === 'needs-investigation').length,
   };
 
   return { summary, candidates };
@@ -1224,6 +1377,7 @@ module.exports = {
   derivePageKey,
   APPROVED_SHARED_SECTIONS,
   NON_EDITABLE_BY_DESIGN,
+  CANDIDATE_EXCLUDED_ROUTES,
   PAGE_KEY_PREFIX_EXEMPT,
   UNREGISTERED_KNOWN,
 };
