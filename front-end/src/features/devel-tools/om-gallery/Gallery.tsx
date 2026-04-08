@@ -39,30 +39,28 @@ import {
   extractDirectoryFromPath,
   IMAGES_BASE_PATH
 } from '../system-documentation/gallery.config';
-import type { GalleryImage, SuggestionStatus, UploadStatus } from './Gallery/types';
+import type { GalleryImage } from './Gallery/types';
 import { GalleryContainer, ThumbnailGrid, ImageCard, ImageThumbnail, CarouselContainer, CarouselButton, CarouselImageContainer } from './Gallery/styledComponents';
 import { createColumns } from './Gallery/columns';
 import UploadDialog from './Gallery/UploadDialog';
 import ImageDetailDialog from './Gallery/ImageDetailDialog';
 import SuggestionsDialog from './Gallery/SuggestionsDialog';
+import { sortImages } from './Gallery/galleryUtils';
+import type { SortBy, SortOrder, UsageFilter } from './Gallery/galleryUtils';
+import { useGalleryUpload } from './Gallery/useGalleryUpload';
+import { useGallerySuggestions } from './Gallery/useGallerySuggestions';
 
 const Gallery: React.FC = () => {
   const theme = useTheme();
   const [images, setImages] = useState<GalleryImage[]>([]);
-  const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   const [imageDialogOpen, setImageDialogOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState<GalleryImage | null>(null);
-  const [uploading, setUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [uploadError, setUploadError] = useState<string | null>(null);
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-  const [uploadStatus, setUploadStatus] = useState<Record<string, UploadStatus>>({});
   const [deleting, setDeleting] = useState(false);
   const [selectedRows, setSelectedRows] = useState<GridRowSelectionModel>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [sortBy, setSortBy] = useState<'date' | 'name' | 'size' | 'type' | 'location'>('date');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
-  const [usageFilter, setUsageFilter] = useState<'all' | 'used' | 'unused' | 'not_checked'>('all');
+  const [sortBy, setSortBy] = useState<SortBy>('date');
+  const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
+  const [usageFilter, setUsageFilter] = useState<UsageFilter>('all');
   const [checkingUsage, setCheckingUsage] = useState(false);
   const [exportingUsedImages, setExportingUsedImages] = useState(false);
   const [selectedDirectory, setSelectedDirectory] = useState<string>(''); // Default to root (empty = all images)
@@ -73,51 +71,19 @@ const Gallery: React.FC = () => {
   const [itemToMove, setItemToMove] = useState<GalleryImage | null>(null);
   const [newName, setNewName] = useState('');
   const [targetDir, setTargetDir] = useState('review-required');
-  const [suggestions, setSuggestions] = useState<any[]>([]);
-  const [suggestionsDialogOpen, setSuggestionsDialogOpen] = useState(false);
-  const [suggestionStatuses, setSuggestionStatuses] = useState<Record<number, SuggestionStatus>>({});
-  const [showFullSummary, setShowFullSummary] = useState(false);
-  const [summaryExpanded, setSummaryExpanded] = useState(false);
-  const [validating, setValidating] = useState(false);
-  const [applying, setApplying] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Upload hook
+  const {
+    uploadDialogOpen, uploading, uploadProgress, uploadError,
+    selectedFiles, uploadStatus, fileInputRef,
+    handleFileSelect, handleUpload, handleOpenUploadDialog,
+    handleCloseUploadDialog, handleRemoveFile,
+  } = useGalleryUpload();
+
   const hasAutoCheckedUsage = useRef(false); // Track if auto-check has been triggered
   const lastCheckedDirectory = useRef<string>(''); // Track which directory we last checked
   const lastImageCount = useRef<number>(0); // Track image count when we last checked
 
-  // Sort images function
-  const sortImages = (imagesToSort: GalleryImage[]): GalleryImage[] => {
-    const sorted = [...imagesToSort].sort((a, b) => {
-      let comparison = 0;
-      
-      switch (sortBy) {
-        case 'date':
-          // Use modified date (or created if modified not available)
-          const dateA = new Date(a.modified || a.created || 0).getTime();
-          const dateB = new Date(b.modified || b.created || 0).getTime();
-          comparison = dateA - dateB;
-          break;
-        case 'name':
-          comparison = a.name.localeCompare(b.name);
-          break;
-        case 'size':
-          comparison = (a.size || 0) - (b.size || 0);
-          break;
-        case 'type':
-          comparison = (a.type || '').localeCompare(b.type || '');
-          break;
-        case 'location':
-          comparison = (a.path || '').localeCompare(b.path || '');
-          break;
-        default:
-          comparison = 0;
-      }
-      
-      return sortOrder === 'asc' ? comparison : -comparison;
-    });
-    
-    return sorted;
-  };
 
   // Single source of truth: activeImages combines directory selection, usage filter, and sorting
   // This ensures grid, table, and carousel all use the same filtered and sorted list
@@ -136,7 +102,7 @@ const Gallery: React.FC = () => {
     // 'all' case: filtered = images (already set)
     
     // Apply sorting
-    return sortImages(filtered);
+    return sortImages(filtered, sortBy, sortOrder);
   }, [images, usageFilter, sortBy, sortOrder]);
 
   // Reset carousel index when active images change
@@ -516,6 +482,17 @@ const Gallery: React.FC = () => {
     }
   };
 
+  // Suggestions hook (needs loadImages/loadDirectoryTree)
+  const {
+    suggestions, suggestionsDialogOpen, setSuggestionsDialogOpen,
+    suggestionStatuses, setSuggestionStatuses,
+    showFullSummary, setShowFullSummary,
+    summaryExpanded, setSummaryExpanded,
+    validating, applying,
+    handleGetSuggestions, handleDryRun, handleApplySingle,
+    handleApplyAll, handleCopySummary,
+  } = useGallerySuggestions({ images, loadImages, loadDirectoryTree });
+
   const handleImageClick = (image: GalleryImage) => {
     setSelectedImage(image);
     setImageDialogOpen(true);
@@ -793,478 +770,18 @@ const Gallery: React.FC = () => {
     }
   };
 
-  const handleGetSuggestions = async () => {
-    try {
-      const response = await fetch('/api/gallery/suggest-destination', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ images: images.map(img => ({ path: img.path, name: img.name })) })
-      });
 
-      if (response.ok) {
-        const data = await response.json();
-        setSuggestions(data.suggestions || []);
-        setSuggestionStatuses({}); // Reset statuses
-        setSuggestionsDialogOpen(true);
-      } else {
-        const data = await response.json();
-        alert(data.error || 'Failed to get catalog suggestions');
-      }
-    } catch (error) {
-      console.error('Error getting suggestions:', error);
-      alert('Failed to get catalog suggestions');
-    }
-  };
 
-  const normalizePath = (pathStr: string): string => {
-    return pathStr.replace(/^\/images\//, '').replace(/^\/+/, '');
-  };
 
-  const handleDryRun = async () => {
-    if (suggestions.length === 0) return;
-    
-    setValidating(true);
-    try {
-      // Convert suggestions to actions
-      const actions = suggestions.map((suggestion) => {
-        const relativePath = normalizePath(suggestion.path);
-        const targetPath = suggestion.suggestedDir 
-          ? `${suggestion.suggestedDir}/${suggestion.suggestedName}`
-          : suggestion.suggestedName;
-        
-        return {
-          type: 'move',
-          from: relativePath,
-          to: targetPath
-        };
-      });
 
-      const response = await fetch('/api/gallery/validate-actions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ actions })
-      });
 
-      if (response.ok) {
-        const data = await response.json();
-        const newStatuses: Record<number, any> = {};
-        
-        data.results.forEach((result: any, idx: number) => {
-          newStatuses[idx] = {
-            status: result.ok ? 'valid' : 'invalid',
-            message: result.message,
-            code: result.code
-          };
-        });
-        
-        setSuggestionStatuses(newStatuses);
-        setSummaryExpanded(true);
-      } else {
-        const data = await response.json();
-        alert(data.error || 'Failed to validate actions');
-      }
-    } catch (error) {
-      console.error('Error validating actions:', error);
-      alert('Failed to validate actions');
-    } finally {
-      setValidating(false);
-    }
-  };
 
-  const handleApplySingle = async (idx: number) => {
-    const suggestion = suggestions[idx];
-    if (!suggestion) return;
 
-    setApplying(true);
-    try {
-      const relativePath = normalizePath(suggestion.path);
-      const targetPath = suggestion.suggestedDir 
-        ? `${suggestion.suggestedDir}/${suggestion.suggestedName}`
-        : suggestion.suggestedName;
 
-      const actions = [{
-        type: 'move',
-        from: relativePath,
-        to: targetPath
-      }];
 
-      const response = await fetch('/api/gallery/apply-actions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ actions, continueOnError: false })
-      });
 
-      if (response.ok) {
-        const data = await response.json();
-        const result = data.results[0];
-        
-        setSuggestionStatuses(prev => ({
-          ...prev,
-          [idx]: {
-            status: result.ok ? 'applied' : 'failed',
-            message: result.message,
-            code: result.code
-          }
-        }));
 
-        if (result.ok) {
-          // Reload images and directory tree
-          await loadImages();
-          await loadDirectoryTree();
-        }
-      } else {
-        const data = await response.json();
-        setSuggestionStatuses(prev => ({
-          ...prev,
-          [idx]: {
-            status: 'failed',
-            message: data.error || 'Failed to apply action',
-            code: 'APPLY_ERROR'
-          }
-        }));
-      }
-    } catch (error) {
-      console.error('Error applying action:', error);
-      setSuggestionStatuses(prev => ({
-        ...prev,
-        [idx]: {
-          status: 'failed',
-          message: 'Failed to apply action',
-          code: 'APPLY_ERROR'
-        }
-      }));
-    } finally {
-      setApplying(false);
-    }
-  };
 
-  const handleApplyAll = async () => {
-    if (suggestions.length === 0) return;
-
-    // Check if any are invalid
-    const invalidCount = Object.values(suggestionStatuses).filter(
-      s => s.status === 'invalid'
-    ).length;
-    
-    if (invalidCount > 0) {
-      const proceed = confirm(
-        `${invalidCount} suggestion(s) are invalid. Do you want to continue anyway? ` +
-        'Only valid suggestions will be applied.'
-      );
-      if (!proceed) return;
-    }
-
-    setApplying(true);
-    try {
-      const actions = suggestions.map((suggestion) => {
-        const relativePath = normalizePath(suggestion.path);
-        const targetPath = suggestion.suggestedDir 
-          ? `${suggestion.suggestedDir}/${suggestion.suggestedName}`
-          : suggestion.suggestedName;
-        
-        return {
-          type: 'move',
-          from: relativePath,
-          to: targetPath
-        };
-      });
-
-      const response = await fetch('/api/gallery/apply-actions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ actions, continueOnError: true })
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        const newStatuses: Record<number, any> = {};
-        
-        data.results.forEach((result: any, idx: number) => {
-          newStatuses[idx] = {
-            status: result.ok ? 'applied' : 'failed',
-            message: result.message,
-            code: result.code
-          };
-        });
-        
-        setSuggestionStatuses(newStatuses);
-        setSummaryExpanded(true);
-
-        // Reload if any succeeded
-        if (data.summary.ok > 0) {
-          await loadImages();
-          await loadDirectoryTree();
-        }
-      } else {
-        const data = await response.json();
-        alert(data.error || 'Failed to apply actions');
-      }
-    } catch (error) {
-      console.error('Error applying actions:', error);
-      alert('Failed to apply actions');
-    } finally {
-      setApplying(false);
-    }
-  };
-
-  const handleCopySummary = () => {
-    const summary = {
-      total: suggestions.length,
-      statuses: Object.entries(suggestionStatuses).map(([idx, status]) => ({
-        index: parseInt(idx),
-        suggestion: suggestions[parseInt(idx)],
-        status: status.status,
-        message: status.message,
-        code: status.code
-      })),
-      summary: {
-        total: suggestions.length,
-        valid: Object.values(suggestionStatuses).filter(s => s.status === 'valid').length,
-        invalid: Object.values(suggestionStatuses).filter(s => s.status === 'invalid').length,
-        applied: Object.values(suggestionStatuses).filter(s => s.status === 'applied').length,
-        failed: Object.values(suggestionStatuses).filter(s => s.status === 'failed').length,
-        pending: Object.values(suggestionStatuses).filter(s => s.status === 'pending' || !s).length
-      }
-    };
-
-    const text = JSON.stringify(summary, null, 2);
-    navigator.clipboard.writeText(text).then(() => {
-      alert('Summary copied to clipboard');
-    }).catch(err => {
-      console.error('Failed to copy:', err);
-      alert('Failed to copy summary');
-    });
-  };
-
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(event.target.files || []);
-    if (files.length === 0) return;
-
-    const validFiles: File[] = [];
-    const errors: string[] = [];
-
-    files.forEach((file) => {
-      // Allowed image file extensions
-      const allowedExtensions = ['.jpg', '.jpeg', '.tiff', '.gif', '.png'];
-      const fileExtension = '.' + file.name.split('.').pop()?.toLowerCase();
-      
-      if (!allowedExtensions.includes(fileExtension)) {
-        errors.push(`${file.name}: Invalid file type. Allowed types: ${allowedExtensions.join(', ')}`);
-        return;
-      }
-      if (file.size > 10 * 1024 * 1024) {
-        errors.push(`${file.name}: File size must be less than 10MB`);
-        return;
-      }
-      validFiles.push(file);
-    });
-
-    if (errors.length > 0) {
-      setUploadError(errors.join('\n'));
-    } else {
-      setUploadError(null);
-    }
-
-    if (validFiles.length > 0) {
-      setSelectedFiles(prev => [...prev, ...validFiles]);
-    }
-  };
-
-  const uploadSingleFile = (file: File, targetDirectory: string = 'review-required'): Promise<void> => {
-    return new Promise((resolve, reject) => {
-      const formData = new FormData();
-      formData.append('image', file);
-      formData.append('targetDir', targetDirectory);
-      
-      const xhr = new XMLHttpRequest();
-      const fileKey = `${file.name}-${file.size}`;
-
-      // Initialize upload status
-      setUploadStatus(prev => ({
-        ...prev,
-        [fileKey]: { progress: 0, status: 'uploading' }
-      }));
-
-      xhr.upload.addEventListener('progress', (e) => {
-        if (e.lengthComputable) {
-          const percentComplete = (e.loaded / e.total) * 100;
-          setUploadStatus(prev => {
-            const updated = {
-              ...prev,
-              [fileKey]: { ...prev[fileKey], progress: percentComplete, status: 'uploading' as const }
-            };
-            // Calculate overall progress
-            const allStatuses = Object.values(updated);
-            const totalProgress = allStatuses.length > 0 
-              ? allStatuses.reduce((sum, s) => sum + s.progress, 0) / allStatuses.length 
-              : 0;
-            setUploadProgress(totalProgress);
-            return updated;
-          });
-        }
-      });
-
-      xhr.addEventListener('load', () => {
-        if (xhr.status === 200) {
-          try {
-            const response = JSON.parse(xhr.responseText);
-            if (response.success) {
-              setUploadStatus(prev => ({
-                ...prev,
-                [fileKey]: { progress: 100, status: 'success' }
-              }));
-              resolve();
-            } else {
-              const errorMsg = response.error || response.message || 'Upload failed';
-              setUploadStatus(prev => ({
-                ...prev,
-                [fileKey]: { progress: 0, status: 'error', error: errorMsg }
-              }));
-              reject(new Error(errorMsg));
-            }
-          } catch (e) {
-            setUploadStatus(prev => ({
-              ...prev,
-              [fileKey]: { progress: 100, status: 'success' }
-            }));
-            resolve();
-          }
-        } else {
-          let errorMessage = 'Upload failed';
-          try {
-            const errorResponse = JSON.parse(xhr.responseText);
-            errorMessage = errorResponse.error || errorResponse.message || errorMessage;
-          } catch (e) {
-            if (xhr.status === 500) {
-              errorMessage = 'Internal server error. Please check server logs.';
-            } else if (xhr.status === 404) {
-              errorMessage = 'Upload endpoint not found. Backend needs to implement POST /api/gallery/upload';
-            } else {
-              errorMessage = `Upload failed with status ${xhr.status}`;
-            }
-          }
-          setUploadStatus(prev => ({
-            ...prev,
-            [fileKey]: { progress: 0, status: 'error', error: errorMessage }
-          }));
-          reject(new Error(errorMessage));
-        }
-      });
-
-      xhr.addEventListener('error', () => {
-        const errorMsg = 'Upload failed. Backend endpoint /api/gallery/upload may not be available.';
-        setUploadStatus(prev => ({
-          ...prev,
-          [fileKey]: { progress: 0, status: 'error', error: errorMsg }
-        }));
-        reject(new Error(errorMsg));
-      });
-
-      xhr.open('POST', '/api/gallery/upload');
-      xhr.withCredentials = true;
-      xhr.send(formData);
-    });
-  };
-
-  const handleUpload = async () => {
-    if (selectedFiles.length === 0) {
-      setUploadError('Please select at least one file');
-      return;
-    }
-
-    setUploading(true);
-    setUploadError(null);
-    setUploadProgress(0);
-    
-    // Initialize upload status for all files
-    const initialStatus: Record<string, UploadStatus> = {};
-    selectedFiles.forEach(file => {
-      const fileKey = `${file.name}-${file.size}`;
-      initialStatus[fileKey] = { progress: 0, status: 'pending' };
-    });
-    setUploadStatus(initialStatus);
-
-    try {
-      // Upload files sequentially to avoid overwhelming the server
-      const errors: string[] = [];
-      for (const file of selectedFiles) {
-        try {
-          // Always upload to review-required directory
-          await uploadSingleFile(file, 'review-required');
-        } catch (error: any) {
-          errors.push(`${file.name}: ${error.message || 'Upload failed'}`);
-        }
-      }
-
-      if (errors.length > 0) {
-        setUploadError(`Some files failed to upload:\n${errors.join('\n')}`);
-      } else {
-        // All files uploaded successfully
-        setUploadDialogOpen(false);
-        setSelectedFiles([]);
-        setUploadStatus({});
-        setUploadProgress(0);
-        if (fileInputRef.current) {
-          fileInputRef.current.value = '';
-        }
-        // Reload the page to show newly uploaded images
-        window.location.href = '/apps/gallery';
-      }
-    } catch (error: any) {
-      setUploadError(error.message || 'An error occurred during upload');
-    } finally {
-      setUploading(false);
-    }
-  };
-
-  const handleOpenUploadDialog = () => {
-    setUploadDialogOpen(true);
-    setSelectedFiles([]);
-    setUploadError(null);
-    setUploadProgress(0);
-    setUploadStatus({});
-  };
-
-  const handleCloseUploadDialog = () => {
-    if (!uploading) {
-      setUploadDialogOpen(false);
-      setSelectedFiles([]);
-      setUploadError(null);
-      setUploadProgress(0);
-      setUploadStatus({});
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
-    }
-  };
-
-  const handleRemoveFile = (index: number) => {
-    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
-  };
-
-  // Filter images based on usage filter (tri-state: used, not_used, not_checked)
-  // Note: This function is kept for backward compatibility but activeImages should be used instead
-  const getFilteredImages = (): GalleryImage[] => {
-    if (!images || images.length === 0) return [];
-    if (usageFilter === 'all') return images;
-    if (usageFilter === 'used') {
-      // Only show images that are explicitly marked as used (true)
-      return images.filter(img => img && img.isUsed === true);
-    }
-    if (usageFilter === 'unused') {
-      // Only show images that are explicitly marked as not used (false)
-      return images.filter(img => img && img.isUsed === false);
-    }
-    if (usageFilter === 'not_checked') {
-      // Only show images that haven't been checked yet (undefined)
-      return images.filter(img => img && img.isUsed === undefined);
-    }
-    return images;
-  };
 
   // MUI DataGrid column definitions (extracted to Gallery/columns.tsx)
   const columns = createColumns({
@@ -1509,9 +1026,6 @@ const Gallery: React.FC = () => {
   const DEFAULT_DIRECTORIES = CANONICAL_IMAGE_DIRECTORIES;
 
   // Check if directory is a canonical directory
-  const isDefaultDirectory = (dirName: string): boolean => {
-    return isCanonicalDirectory(dirName);
-  };
 
   // Clean up empty directories
   const cleanupEmptyDirectories = async () => {
