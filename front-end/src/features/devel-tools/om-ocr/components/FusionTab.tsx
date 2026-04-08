@@ -73,6 +73,8 @@ import { getEntryColor } from './FusionTab/fusionConstants';
 import { useFusionDrafts } from './FusionTab/useFusionDrafts';
 import AnchorLabelsStep from './FusionTab/AnchorLabelsStep';
 import MapFieldsStep from './FusionTab/MapFieldsStep';
+import DetectEntriesStepContent from './FusionTab/DetectEntriesStepContent';
+import FusionProgressHeader from './FusionTab/FusionProgressHeader';
 
 // ============================================================================
 // Component
@@ -1546,93 +1548,19 @@ const FusionTab: React.FC<FusionTabProps> = ({
 
       {/* Progress Header */}
       {entries.length > 0 && activeStep >= 1 && (
-        <Paper 
-          variant="outlined" 
-          sx={{ 
-            p: 1.5, 
-            mb: 2, 
-            bgcolor: allEntriesComplete ? alpha(theme.palette.success.main, 0.1) : 'background.paper',
-            borderColor: allEntriesComplete ? 'success.main' : 'divider',
-          }}
-        >
-          <Stack direction="row" justifyContent="space-between" alignItems="center">
-            <Stack direction="row" spacing={2} alignItems="center">
-              <Typography variant="subtitle1" fontWeight={600}>
-                Record {(selectedEntryIndex ?? 0) + 1} of {entries.length}
-              </Typography>
-              <Chip 
-                size="small" 
-                label={`${inProgressEntries.size - completionState.size} in progress`}
-                color="info"
-                sx={{ display: inProgressEntries.size > completionState.size ? 'flex' : 'none' }}
-              />
-              <Chip 
-                size="small" 
-                label={`${completionState.size} saved`}
-                color={allEntriesComplete ? 'success' : 'warning'}
-                icon={allEntriesComplete ? <IconCheck size={14} /> : undefined}
-              />
-              {manualEditMode.has(selectedEntryIndex ?? -1) && (
-                <Chip size="small" label="Manual Edit" color="secondary" />
-              )}
-            </Stack>
-            <Stack direction="row" spacing={1}>
-              <Button
-                size="small"
-                variant="outlined"
-                onClick={() => {
-                  const prevIdx = (selectedEntryIndex ?? 0) - 1;
-                  if (prevIdx >= 0) setSelectedEntryIndex(prevIdx);
-                }}
-                disabled={selectedEntryIndex === 0 || selectedEntryIndex === null}
-                startIcon={<IconChevronLeft size={16} />}
-              >
-                Previous
-              </Button>
-              <Button
-                size="small"
-                variant="outlined"
-                onClick={() => {
-                  const nextIdx = (selectedEntryIndex ?? 0) + 1;
-                  if (nextIdx < entries.length) setSelectedEntryIndex(nextIdx);
-                }}
-                disabled={selectedEntryIndex === entries.length - 1 || selectedEntryIndex === null}
-                endIcon={<IconChevronRight size={16} />}
-              >
-                Next
-              </Button>
-              <FormControlLabel
-                control={
-                  <Switch
-                    size="small"
-                    checked={hideCompleted}
-                    onChange={(e) => setHideCompleted(e.target.checked)}
-                  />
-                }
-                label="Hide completed"
-                sx={{ ml: 1 }}
-              />
-            </Stack>
-          </Stack>
-          {allEntriesComplete && (
-            <Stack spacing={1.5} sx={{ mt: 1.5 }}>
-              <Alert severity="success" icon={<IconCheck size={18} />}>
-                All {entries.length} records complete! Click "Send to Review & Finalize" to proceed.
-              </Alert>
-              <Button
-                variant="contained"
-                color="info"
-                onClick={handleSendToReview}
-                disabled={isProcessing || entries.length === 0}
-                startIcon={isProcessing ? <CircularProgress size={16} color="inherit" /> : <IconChevronRight size={18} />}
-                fullWidth
-                size="large"
-              >
-                {isProcessing ? 'Sending...' : 'Send to Review & Finalize'}
-              </Button>
-            </Stack>
-          )}
-        </Paper>
+        <FusionProgressHeader
+          entries={entries}
+          selectedEntryIndex={selectedEntryIndex}
+          completionState={completionState}
+          inProgressEntries={inProgressEntries}
+          allEntriesComplete={allEntriesComplete}
+          manualEditMode={manualEditMode}
+          hideCompleted={hideCompleted}
+          isProcessing={isProcessing}
+          onSetSelectedEntryIndex={setSelectedEntryIndex}
+          onSetHideCompleted={setHideCompleted}
+          onSendToReview={handleSendToReview}
+        />
       )}
 
       {/* Stepper */}
@@ -1665,94 +1593,35 @@ const FusionTab: React.FC<FusionTabProps> = ({
             </Typography>
           </StepLabel>
           <StepContent>
-            <Typography variant="body2" color="text.secondary" mb={2}>
-              Detect individual record cards from the scanned image. Works best with Google Vision JSON data.
-            </Typography>
-
-            <Stack direction="row" spacing={2} alignItems="center" mb={2}>
-              <Button
-                variant="contained"
-                onClick={handleDetectEntries}
-                disabled={isProcessing}
-                startIcon={isProcessing ? <CircularProgress size={18} color="inherit" /> : <IconWand size={18} />}
-              >
-                {isProcessing ? 'Detecting...' : 'Auto-Detect Entries'}
-              </Button>
-              <Typography variant="body2" color="text.secondary">or</Typography>
-              <TextField
-                type="number"
-                size="small"
-                label="Manual Count"
-                value={manualEntryCount}
-                onChange={(e) => setManualEntryCount(parseInt(e.target.value) || 1)}
-                inputProps={{ min: 1, max: 10 }}
-                sx={{ width: 100 }}
-              />
-              <Button
-                variant="outlined"
-                onClick={handleManualEntryCount}
-                disabled={isProcessing || manualEntryCount < 1}
-              >
-                Set {manualEntryCount} Entries
-              </Button>
-            </Stack>
-
-            {entries.length > 0 && (
-              <Box mt={2}>
-                <Stack direction="row" spacing={2} alignItems="center" mb={2}>
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        size="small"
-                        checked={bboxEditMode}
-                        onChange={(e) => setBboxEditMode(e.target.checked)}
-                      />
-                    }
-                    label="Edit Entry Areas"
-                  />
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        size="small"
-                        checked={showFieldBoxes}
-                        onChange={(e) => setShowFieldBoxes(e.target.checked)}
-                      />
-                    }
-                    label="Show Field Boxes"
-                  />
-                  {bboxEditMode && (
-                    <Typography variant="caption" color="text.secondary">
-                      Drag or resize bounding boxes on the image to adjust entry areas
-                    </Typography>
-                  )}
-                </Stack>
-
-                <EntryListPanel
-                  entries={entries}
-                  entryAreas={entryAreas}
-                  drafts={drafts}
-                  selectedEntryIndex={selectedEntryIndex}
-                  completionState={completionState}
-                  inProgressEntries={inProgressEntries}
-                  dirtyEntries={dirtyEntries}
-                  hideCompleted={hideCompleted}
-                  bboxEditMode={bboxEditMode}
-                  getEntryColor={getEntryColor}
-                  onEntrySelect={handleEntrySelect}
-                  onAddEntry={handleAddEntry}
-                  onDeleteEntry={handleDeleteEntry}
-                  onSaveBbox={handleSaveBbox}
-                  onResetBbox={handleResetBbox}
-                  onEditEntry={(idx) => {
-                    setEditingEntryIndex(idx);
-                    setEntryEditorOpen(true);
-                  }}
-                />
-                <Button size="small" onClick={handleNext} endIcon={<IconChevronRight size={16} />} sx={{ mt: 1 }}>
-                  Continue
-                </Button>
-              </Box>
-            )}
+            <DetectEntriesStepContent
+              entries={entries}
+              entryAreas={entryAreas}
+              drafts={drafts}
+              selectedEntryIndex={selectedEntryIndex}
+              completionState={completionState}
+              inProgressEntries={inProgressEntries}
+              dirtyEntries={dirtyEntries}
+              hideCompleted={hideCompleted}
+              bboxEditMode={bboxEditMode}
+              showFieldBoxes={showFieldBoxes}
+              isProcessing={isProcessing}
+              manualEntryCount={manualEntryCount}
+              onDetectEntries={handleDetectEntries}
+              onManualEntryCount={handleManualEntryCount}
+              onSetManualEntryCount={setManualEntryCount}
+              onSetBboxEditMode={setBboxEditMode}
+              onSetShowFieldBoxes={setShowFieldBoxes}
+              onEntrySelect={handleEntrySelect}
+              onAddEntry={handleAddEntry}
+              onDeleteEntry={handleDeleteEntry}
+              onSaveBbox={handleSaveBbox}
+              onResetBbox={handleResetBbox}
+              onEditEntry={(idx) => {
+                setEditingEntryIndex(idx);
+                setEntryEditorOpen(true);
+              }}
+              onNext={handleNext}
+            />
           </StepContent>
         </Step>
 
