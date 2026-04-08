@@ -11,13 +11,9 @@ import {
   Typography,
   Box,
   List,
-  ListItem,
-  ListItemText,
-  ListItemIcon,
   Chip,
   Alert,
   CircularProgress,
-  Divider,
   Button,
   Dialog,
   DialogTitle,
@@ -29,37 +25,27 @@ import {
   IconButton,
   Tooltip,
   Paper,
-  Grid,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  TablePagination,
   FormControl,
   InputLabel,
   Select,
   MenuItem,
-  TextField as MuiTextField,
   Stack,
   Accordion,
   AccordionSummary,
   AccordionDetails,
   Switch,
-  FormControlLabel,
   Badge,
   Avatar,
-  CardHeader,
-  CardActions
 } from '@mui/material';
 import {
   Assignment as AssignmentIcon,
-  Email as EmailIcon,
   CheckCircle as CheckCircleIcon,
-  Schedule as ScheduleIcon,
-  Send as SendIcon,
-  Visibility as VisibilityIcon,
   Refresh as RefreshIcon,
   Add as AddIcon,
   History as HistoryIcon,
@@ -69,63 +55,26 @@ import {
   Download as DownloadIcon,
   RemoveRedEye as ViewIcon,
   ExpandMore as ExpandMoreIcon,
-  FilterList as FilterIcon,
-  Search as SearchIcon,
   Computer as ComputerIcon,
-  AccessTime as TimeIcon,
-  Person as PersonIcon,
-  Warning as WarningIcon,
-  Info as InfoIcon,
   Task as TaskIcon,
   Link as LinkIcon,
-  Archive as ArchiveIcon,
-  RestoreFromTrash as RestoreIcon
 } from '@mui/icons-material';
 import { omaiAPI } from '@/api/omai.api';
 import { useAuth } from '@/context/AuthContext';
 import EmailSettingsForm from './EmailSettingsForm';
 import CreateTaskDialog from './CreateTaskDialog';
-
-interface TaskLink {
-  id: number;
-  email: string;
-  token: string;
-  created_at: string;
-  expires_at?: string;
-  is_used: boolean;
-  used_at?: string;
-  notes?: string;
-  status?: string;
-  ip_address?: string;
-}
-
-interface TaskSubmission {
-  id: number;
-  email: string;
-  tasks_json: string;
-  submitted_at: string;
-  status: string;
-  notes?: string;
-  ip_address?: string;
-  user_agent?: string;
-  submission_type?: string;
-  sent_to_nick?: boolean;
-  sent_at?: string;
-}
-
-interface TaskLog {
-  timestamp: string;
-  action: string;
-  email: string;
-  token?: string;
-  data: any;
-}
-
-interface TaskAssignmentData {
-  recent_links: TaskLink[];
-  recent_submissions: TaskSubmission[];
-  recent_logs: TaskLog[];
-}
+import type { TaskAssignmentData, TaskSubmission } from './OMAITaskAssignmentWidget/types';
+import {
+  formatDate,
+  getStatusColor,
+  getStatusIcon,
+  getActionIcon,
+  getActionLabel,
+  parseTasksJson,
+  generateSubmissionReport,
+} from './OMAITaskAssignmentWidget/helpers';
+import ViewSubmissionDialog from './OMAITaskAssignmentWidget/ViewSubmissionDialog';
+import HistoryDialog from './OMAITaskAssignmentWidget/HistoryDialog';
 
 const OMAITaskAssignmentWidget: React.FC = () => {
   const { hasRole, isSuperAdmin } = useAuth();
@@ -373,111 +322,6 @@ const OMAITaskAssignmentWidget: React.FC = () => {
     }
   };
 
-  const generateSubmissionReport = (submission: TaskSubmission, tasks: any[]) => {
-    const date = new Date(submission.submitted_at).toLocaleString();
-    
-    let report = `OMAI Task Submission Report\n`;
-    report += `=====================================\n\n`;
-    report += `Submission ID: ${submission.id}\n`;
-    report += `From Email: ${submission.email}\n`;
-    report += `Submitted: ${date}\n`;
-    report += `IP Address: ${submission.ip_address}\n`;
-    report += `User Agent: ${submission.user_agent || 'Not provided'}\n`;
-    report += `Submission Type: ${submission.submission_type}\n`;
-    report += `Total Tasks: ${tasks.length}\n`;
-    report += `Status: ${submission.status}\n`;
-    report += `Sent to Nick: ${submission.sent_to_nick ? 'Yes' : 'No'}\n`;
-    if (submission.sent_at) {
-      report += `Email Sent: ${new Date(submission.sent_at).toLocaleString()}\n`;
-    }
-    report += `\n`;
-    
-    report += `TASK DETAILS\n`;
-    report += `=====================================\n\n`;
-    
-    tasks.forEach((task, index) => {
-      report += `Task ${index + 1}:\n`;
-      report += `  Title: ${task.title}\n`;
-      report += `  Priority: ${task.priority}\n`;
-      if (task.description) {
-        report += `  Description:\n    ${task.description.replace(/\n/g, '\n    ')}\n`;
-      }
-      report += `\n`;
-    });
-    
-    report += `\nReport generated: ${new Date().toLocaleString()}\n`;
-    report += `© Orthodox Metrics AI System\n`;
-    
-    return report;
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'active': return 'success';
-      case 'used': return 'info';
-      case 'expired': return 'warning';
-      case 'deleted': return 'error';
-      case 'pending': return 'warning';
-      case 'processed': return 'info';
-      case 'completed': return 'success';
-      case 'failed': return 'error';
-      default: return 'default';
-    }
-  };
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'active': return <LinkIcon />;
-      case 'used': return <CheckCircleIcon />;
-      case 'expired': return <ScheduleIcon />;
-      case 'deleted': return <DeleteIcon />;
-      case 'pending': return <ScheduleIcon />;
-      case 'processed': return <InfoIcon />;
-      case 'completed': return <CheckCircleIcon />;
-      case 'failed': return <WarningIcon />;
-      default: return <InfoIcon />;
-    }
-  };
-
-  const getActionIcon = (action: string) => {
-    const iconMap: { [key: string]: JSX.Element } = {
-      'TASK_LINK_GENERATED': <EmailIcon color="primary" />,
-      'TASKS_SUBMITTED': <CheckCircleIcon color="success" />,
-      'TOKEN_VALIDATED': <VisibilityIcon color="info" />,
-      'TASK_LINK_ERROR': <AssignmentIcon color="error" />,
-      'TASK_SUBMISSION_ERROR': <AssignmentIcon color="error" />
-    };
-    return iconMap[action] || <HistoryIcon />;
-  };
-
-  const getActionLabel = (action: string) => {
-    const labelMap: { [key: string]: string } = {
-      'TASK_LINK_GENERATED': 'Link Generated',
-      'TASKS_SUBMITTED': 'Tasks Submitted',
-      'TOKEN_VALIDATED': 'Token Validated',
-      'TASK_LINK_ERROR': 'Link Error',
-      'TASK_SUBMISSION_ERROR': 'Submission Error'
-    };
-    return labelMap[action] || action;
-  };
-
-  const parseTasksJson = (tasksJson: string) => {
-    try {
-      const tasks = JSON.parse(tasksJson);
-      return Array.isArray(tasks) ? tasks : [];
-    } catch {
-      return [];
-    }
-  };
 
   const handleHistoryPageChange = (event: unknown, newPage: number) => {
     setHistoryPage(newPage);
@@ -1058,318 +902,27 @@ const OMAITaskAssignmentWidget: React.FC = () => {
       </Dialog>
 
       {/* View Submission Dialog */}
-      <Dialog 
-        open={viewSubmissionOpen} 
-        onClose={() => setViewSubmissionOpen(false)} 
-        maxWidth="md" 
-        fullWidth
-      >
-        <DialogTitle>
-          Task Submission Details
-          {selectedSubmission && (
-            <Typography variant="subtitle2" color="text.secondary">
-              Submission #{selectedSubmission.id} from {selectedSubmission.email}
-            </Typography>
-          )}
-        </DialogTitle>
-        <DialogContent>
-          {selectedSubmission && (
-            <Box>
-              {/* Submission Info */}
-              <Paper sx={{ p: 3, mb: 3, bgcolor: '#f9f9f9' }}>
-                <Grid container spacing={3}>
-                  <Grid item xs={12} sm={6}>
-                    <Typography variant="body2">
-                      <strong>Submitted:</strong> {formatDate(selectedSubmission.submitted_at)}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <Typography variant="body2">
-                      <strong>Status:</strong> 
-                      <Chip 
-                        label={selectedSubmission.status}
-                        color={getStatusColor(selectedSubmission.status) as any}
-                        size="small"
-                        sx={{ ml: 1 }}
-                      />
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <Typography variant="body2">
-                      <strong>IP Address:</strong> 
-                      <Box display="flex" alignItems="center" sx={{ ml: 1 }}>
-                        <ComputerIcon sx={{ fontSize: 16, mr: 0.5, color: 'text.secondary' }} />
-                        <Typography variant="body2" fontFamily="monospace">
-                          {selectedSubmission.ip_address}
-                        </Typography>
-                      </Box>
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <Typography variant="body2">
-                      <strong>Type:</strong> 
-                      <Chip 
-                        label={selectedSubmission.submission_type}
-                        size="small"
-                        variant="outlined"
-                        sx={{ ml: 1 }}
-                      />
-                    </Typography>
-                  </Grid>
-                  {selectedSubmission.sent_to_nick && selectedSubmission.sent_at && (
-                    <Grid item xs={12}>
-                      <Typography variant="body2">
-                        <strong>Email Sent:</strong> {formatDate(selectedSubmission.sent_at)}
-                      </Typography>
-                    </Grid>
-                  )}
-                </Grid>
-              </Paper>
-
-              {/* Task List */}
-              <Typography variant="h6" gutterBottom>
-                Submitted Tasks
-              </Typography>
-              
-              {(() => {
-                try {
-                  const tasks = JSON.parse(selectedSubmission.tasks_json);
-                  return (
-                    <List>
-                      {tasks.map((task: any, index: number) => (
-                        <Paper key={index} sx={{ mb: 2, p: 3 }} variant="outlined">
-                          <Box display="flex" alignItems="center" mb={2}>
-                            <Typography variant="h6" component="span">
-                              Task {index + 1}
-                            </Typography>
-                            <Chip 
-                              label={task.priority} 
-                              color={
-                                task.priority === 'high' ? 'error' :
-                                task.priority === 'medium' ? 'warning' : 'default'
-                              }
-                              size="small"
-                              sx={{ ml: 2 }}
-                            />
-                          </Box>
-                          
-                          <Typography variant="body1" fontWeight="medium" gutterBottom>
-                            {task.title}
-                          </Typography>
-                          
-                          {task.description && (
-                            <Typography variant="body2" color="text.secondary" sx={{ whiteSpace: 'pre-wrap' }}>
-                              {task.description}
-                            </Typography>
-                          )}
-                        </Paper>
-                      ))}
-                    </List>
-                  );
-                } catch (error) {
-                  return (
-                    <Alert severity="error">
-                      Failed to parse task data: {selectedSubmission.tasks_json}
-                    </Alert>
-                  );
-                }
-              })()}
-            </Box>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setViewSubmissionOpen(false)}>
-            Close
-          </Button>
-          {selectedSubmission && (
-            <Button
-              onClick={() => handleDownloadSubmission(selectedSubmission)}
-              variant="contained"
-              startIcon={<DownloadIcon />}
-              sx={{ bgcolor: '#8c249d' }}
-            >
-              Download Report
-            </Button>
-          )}
-        </DialogActions>
-      </Dialog>
+      <ViewSubmissionDialog
+        open={viewSubmissionOpen}
+        onClose={() => setViewSubmissionOpen(false)}
+        submission={selectedSubmission}
+        onDownload={handleDownloadSubmission}
+      />
 
       {/* History Dialog */}
-      <Dialog 
-        open={historyDialogOpen} 
-        onClose={() => setHistoryDialogOpen(false)} 
-        maxWidth="xl" 
-        fullWidth
-      >
-        <DialogTitle>
-          <Box display="flex" alignItems="center" justifyContent="space-between">
-            <Typography variant="h6">Task Assignment History</Typography>
-            <Button
-              variant="outlined"
-              startIcon={<RefreshIcon />}
-              onClick={() => fetchHistory()}
-              disabled={historyLoading}
-            >
-              Refresh
-            </Button>
-          </Box>
-        </DialogTitle>
-        <DialogContent>
-          {/* Filters */}
-          <Paper sx={{ p: 2, mb: 3 }} variant="outlined">
-            <Grid container spacing={2} alignItems="center">
-              <Grid item xs={12} sm={3}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  label="Email"
-                  value={historyFilters.email}
-                  onChange={(e) => handleHistoryFilterChange('email', e.target.value)}
-                  placeholder="Filter by email..."
-                />
-              </Grid>
-              <Grid item xs={12} sm={2}>
-                <FormControl fullWidth size="small">
-                  <InputLabel>Status</InputLabel>
-                  <Select
-                    value={historyFilters.status}
-                    onChange={(e) => handleHistoryFilterChange('status', e.target.value)}
-                    label="Status"
-                  >
-                    <MenuItem value="">All</MenuItem>
-                    <MenuItem value="pending">Pending</MenuItem>
-                    <MenuItem value="processed">Processed</MenuItem>
-                    <MenuItem value="completed">Completed</MenuItem>
-                    <MenuItem value="failed">Failed</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid item xs={12} sm={2}>
-                <FormControl fullWidth size="small">
-                  <InputLabel>Type</InputLabel>
-                  <Select
-                    value={historyFilters.type}
-                    onChange={(e) => handleHistoryFilterChange('type', e.target.value)}
-                    label="Type"
-                  >
-                    <MenuItem value="">All</MenuItem>
-                    <MenuItem value="email_link">Email Link</MenuItem>
-                    <MenuItem value="public_token">Public Token</MenuItem>
-                    <MenuItem value="internal">Internal</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid item xs={12} sm={2}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  type="date"
-                  label="From Date"
-                  value={historyFilters.dateFrom}
-                  onChange={(e) => handleHistoryFilterChange('dateFrom', e.target.value)}
-                  InputLabelProps={{ shrink: true }}
-                />
-              </Grid>
-              <Grid item xs={12} sm={2}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  type="date"
-                  label="To Date"
-                  value={historyFilters.dateTo}
-                  onChange={(e) => handleHistoryFilterChange('dateTo', e.target.value)}
-                  InputLabelProps={{ shrink: true }}
-                />
-              </Grid>
-            </Grid>
-          </Paper>
-
-          {/* History Table */}
-          {historyLoading ? (
-            <Box display="flex" justifyContent="center" p={4}>
-              <CircularProgress />
-            </Box>
-          ) : (
-            <TableContainer component={Paper} variant="outlined">
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Email</TableCell>
-                    <TableCell>Tasks</TableCell>
-                    <TableCell>Submitted</TableCell>
-                    <TableCell>IP Address</TableCell>
-                    <TableCell>Status</TableCell>
-                    <TableCell>Type</TableCell>
-                    <TableCell>Actions</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {historyData.map((submission) => {
-                    const tasks = parseTasksJson(submission.tasks_json);
-                    return (
-                      <TableRow key={submission.id}>
-                        <TableCell>{submission.email}</TableCell>
-                        <TableCell>{tasks.length} tasks</TableCell>
-                        <TableCell>{formatDate(submission.submitted_at)}</TableCell>
-                        <TableCell>
-                          <Box display="flex" alignItems="center">
-                            <ComputerIcon sx={{ fontSize: 16, mr: 1, color: 'text.secondary' }} />
-                            <Typography variant="body2" fontFamily="monospace">
-                              {submission.ip_address}
-                            </Typography>
-                          </Box>
-                        </TableCell>
-                        <TableCell>
-                          <Chip
-                            label={submission.status}
-                            color={getStatusColor(submission.status) as any}
-                            size="small"
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Chip
-                            label={submission.submission_type}
-                            size="small"
-                            variant="outlined"
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Box display="flex" gap={1}>
-                            <Tooltip title="View Details">
-                              <IconButton size="small">
-                                <ViewIcon fontSize="small" />
-                              </IconButton>
-                            </Tooltip>
-                            <Tooltip title="Download">
-                              <IconButton size="small">
-                                <DownloadIcon fontSize="small" />
-                              </IconButton>
-                            </Tooltip>
-                          </Box>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-              <TablePagination
-                rowsPerPageOptions={[10, 25, 50, 100]}
-                component="div"
-                count={-1} // We don't have total count from API
-                rowsPerPage={historyRowsPerPage}
-                page={historyPage}
-                onPageChange={handleHistoryPageChange}
-                onRowsPerPageChange={handleHistoryRowsPerPageChange}
-              />
-            </TableContainer>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setHistoryDialogOpen(false)}>
-            Close
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <HistoryDialog
+        open={historyDialogOpen}
+        onClose={() => setHistoryDialogOpen(false)}
+        historyData={historyData}
+        historyLoading={historyLoading}
+        historyPage={historyPage}
+        historyRowsPerPage={historyRowsPerPage}
+        historyFilters={historyFilters}
+        onRefresh={() => fetchHistory()}
+        onPageChange={handleHistoryPageChange}
+        onRowsPerPageChange={handleHistoryRowsPerPageChange}
+        onFilterChange={handleHistoryFilterChange}
+      />
 
       {/* Settings Dialog */}
       <Dialog 
