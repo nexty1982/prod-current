@@ -4,7 +4,6 @@ import {
     Button,
     Chip,
     CircularProgress,
-    Collapse,
     IconButton,
     Paper,
     TextField,
@@ -14,10 +13,8 @@ import { alpha, useTheme } from '@mui/material/styles';
 import {
     AlertCircle,
     Archive,
-    Check,
     Eye,
     FileSearch,
-    FolderOpen,
     History,
     RefreshCw,
     Settings
@@ -42,6 +39,8 @@ import Toolbar from './components/Toolbar';
 import Tree from './components/Tree';
 import { useRefactorScan } from './hooks/useRefactorScan';
 import { useWhitelist } from './hooks/useWhitelist';
+import DetailsModal from './RefactorConsole/DetailsModal';
+import PathConfigPanel from './RefactorConsole/PathConfigPanel';
 
 const RefactorConsole: React.FC = () => {
   // Get theme context for dark mode
@@ -656,185 +655,6 @@ const RefactorConsole: React.FC = () => {
     setPendingRestorePath(null);
   };
 
-  // Modal component for showing details
-  const Modal = ({ onClose }: { onClose: () => void }) => {
-    if (!showModal || showModal.type === 'requirementPreview') return null;
-
-    const { type, data } = showModal;
-
-    return (
-      <Box
-        sx={{
-          position: 'fixed',
-          inset: 0,
-          bgcolor: 'rgba(0, 0, 0, 0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1300
-        }}
-      >
-        <Paper
-          elevation={8}
-          sx={{
-            bgcolor: 'background.paper',
-            borderRadius: 1,
-            maxWidth: '42rem',
-            width: '100%',
-            mx: 2,
-            maxHeight: '80vh',
-            overflow: 'auto'
-          }}
-        >
-          <Box sx={{ p: 3 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-              <h2 style={{ fontSize: '1.25rem', fontWeight: 600, color: theme.palette.text.primary }}>
-                {type === 'reasons' ? 'Classification Details' : 'Duplicate Analysis'}
-              </h2>
-              <button
-                onClick={onClose}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: theme.palette.text.secondary,
-                  cursor: 'pointer',
-                  fontSize: '1.5rem',
-                  lineHeight: 1,
-                  padding: 0,
-                  width: 24,
-                  height: 24
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.color = theme.palette.text.primary;
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.color = theme.palette.text.secondary;
-                }}
-              >
-                ×
-              </button>
-            </Box>
-
-            {type === 'reasons' && (
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <div>
-                  <h3 style={{ fontWeight: 500, color: theme.palette.text.primary, marginBottom: '0.5rem' }}>File Information</h3>
-                  <Box sx={{ bgcolor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.05)' : theme.palette.grey[50], p: 1.5, borderRadius: 1 }}>
-                    <p style={{ fontSize: '0.875rem', fontFamily: 'monospace', color: theme.palette.text.primary }}>{data.node.relPath}</p>
-                    <p style={{ fontSize: '0.875rem', color: theme.palette.text.secondary, marginTop: '0.25rem' }}>
-                      Classification: <span style={{ fontWeight: 500 }}>{data.classification}</span>
-                    </p>
-                  </Box>
-                </div>
-
-                <div>
-                  <h3 style={{ fontWeight: 500, color: theme.palette.text.primary, marginBottom: '0.5rem' }}>Usage Statistics</h3>
-                  <div className="grid grid-cols-2 gap-4">
-                    <Box sx={{ bgcolor: alpha(theme.palette.info.main, 0.1), p: 1.5, borderRadius: 1 }}>
-                      <p style={{ fontSize: '0.875rem', color: theme.palette.info.main }}>Import References</p>
-                      <p style={{ fontSize: '1.125rem', fontWeight: 600, color: theme.palette.info.main }}>{data.usage.importRefs}</p>
-                    </Box>
-                    <Box sx={{ bgcolor: alpha(theme.palette.success.main, 0.1), p: 1.5, borderRadius: 1 }}>
-                      <p style={{ fontSize: '0.875rem', color: theme.palette.success.main }}>Server References</p>
-                      <p style={{ fontSize: '1.125rem', fontWeight: 600, color: theme.palette.success.main }}>{data.usage.serverRefs}</p>
-                    </Box>
-                    <Box sx={{ bgcolor: alpha(theme.palette.secondary.main, 0.1), p: 1.5, borderRadius: 1 }}>
-                      <p style={{ fontSize: '0.875rem', color: theme.palette.secondary.main }}>Route References</p>
-                      <p style={{ fontSize: '1.125rem', fontWeight: 600, color: theme.palette.secondary.main }}>{data.usage.routeRefs}</p>
-                    </Box>
-                    <Box sx={{ bgcolor: alpha(theme.palette.warning.main, 0.1), p: 1.5, borderRadius: 1 }}>
-                      <p style={{ fontSize: '0.875rem', color: theme.palette.warning.main }}>Usage Score</p>
-                      <p style={{ fontSize: '1.125rem', fontWeight: 600, color: theme.palette.warning.main }}>{data.usage.score}</p>
-                    </Box>
-                  </div>
-                </div>
-
-                <div>
-                  <h3 style={{ fontWeight: 500, color: theme.palette.text.primary, marginBottom: '0.5rem' }}>Classification Reasons</h3>
-                  <ul className="space-y-1">
-                    {data.reasons.map((reason: string, index: number) => (
-                      <li key={index} className="flex items-start gap-2 text-sm" style={{ color: theme.palette.text.primary }}>
-                        <span style={{ color: theme.palette.info.main, marginTop: '0.125rem' }}>•</span>
-                        <span>{reason}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </Box>
-            )}
-
-            {type === 'duplicates' && (
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <div>
-                  <h3 style={{ fontWeight: 500, color: theme.palette.text.primary, marginBottom: '0.5rem' }}>Duplicate Analysis</h3>
-                  <Box sx={{ bgcolor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.05)' : theme.palette.grey[50], p: 1.5, borderRadius: 1 }}>
-                    <p style={{ fontSize: '0.875rem', fontFamily: 'monospace', color: theme.palette.text.primary }}>{data.node.relPath}</p>
-                  </Box>
-                </div>
-
-                {data.duplicates.length > 0 && (
-                  <div>
-                    <h3 style={{ fontWeight: 500, color: theme.palette.text.primary, marginBottom: '0.5rem' }}>Exact Duplicates</h3>
-                    <ul className="space-y-1">
-                      {data.duplicates.map((duplicate: string, index: number) => (
-                        <li key={index} className="flex items-start gap-2 text-sm" style={{ color: theme.palette.text.primary }}>
-                          <span style={{ color: theme.palette.error.main, marginTop: '0.125rem' }}>•</span>
-                          <span className="font-mono">{duplicate}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
-                {data.nearMatches.length > 0 && (
-                  <div>
-                    <h3 style={{ fontWeight: 500, color: theme.palette.text.primary, marginBottom: '0.5rem' }}>Near Matches</h3>
-                    <ul className="space-y-2">
-                      {data.nearMatches.map((match: any, index: number) => (
-                        <li key={index}>
-                          <Box sx={{ 
-                            bgcolor: theme.palette.mode === 'dark' ? theme.palette.warning.dark + '20' : theme.palette.warning.light,
-                            p: 1.5,
-                            borderRadius: 1,
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'flex-start'
-                          }}>
-                            <span className="font-mono text-sm" style={{ color: theme.palette.text.primary }}>{match.target}</span>
-                            <Box sx={{
-                              fontSize: '0.75rem',
-                              bgcolor: theme.palette.mode === 'dark' ? theme.palette.warning.dark + '40' : theme.palette.warning.main,
-                              color: theme.palette.mode === 'dark' ? theme.palette.warning.light : theme.palette.warning.contrastText,
-                              px: 1,
-                              py: 0.5,
-                              borderRadius: 0.5
-                            }}>
-                              {Math.round(match.similarity * 100)}% similar
-                            </Box>
-                          </Box>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </Box>
-            )}
-          </Box>
-
-          <Box sx={{ px: 3, py: 2, borderTop: 1, borderColor: 'divider', bgcolor: 'action.hover' }}>
-            <Button
-              variant="outlined"
-              onClick={onClose}
-              sx={{ textTransform: 'none' }}
-            >
-              Close
-            </Button>
-          </Box>
-        </Paper>
-      </Box>
-    );
-  };
-
   return (
     <Box 
       sx={{ 
@@ -1029,219 +849,23 @@ const RefactorConsole: React.FC = () => {
       </Box>
 
       {/* Path Configuration Panel */}
-      <Collapse in={showPathConfig}>
-        <Paper 
-          elevation={0}
-          sx={{ 
-            mx: 3, 
-            mt: 2,
-            p: 2, 
-            bgcolor: alpha(theme.palette.primary.main, 0.05),
-            border: 1,
-            borderColor: alpha(theme.palette.primary.main, 0.2),
-            borderRadius: 1
-          }}
-        >
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <FolderOpen className="w-5 h-5" style={{ color: theme.palette.primary.main }} />
-              <h3 style={{ fontWeight: 600, color: theme.palette.text.primary, margin: 0 }}>
-                Path Configuration
-              </h3>
-              <Chip 
-                label="Persisted in localStorage" 
-                size="small" 
-                sx={{ fontSize: '0.7rem', height: 20 }}
-              />
-            </Box>
-            <Box sx={{ display: 'flex', gap: 1 }}>
-              <Button
-                variant="outlined"
-                size="small"
-                onClick={handleResetPaths}
-                sx={{ textTransform: 'none' }}
-              >
-                Reset to Defaults
-              </Button>
-              <Button
-                variant="contained"
-                size="small"
-                onClick={handleSavePaths}
-                disabled={isValidatingPaths}
-                startIcon={isValidatingPaths ? <CircularProgress size={14} /> : <Check className="w-4 h-4" />}
-                sx={{ textTransform: 'none' }}
-              >
-                {isValidatingPaths ? 'Validating...' : 'Save & Validate'}
-              </Button>
-            </Box>
-          </Box>
-          
-          {/* Source Type & Snapshot Selection */}
-          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)' }, gap: 2, mb: 2 }}>
-            {/* Source Type Toggle */}
-            <Box>
-              <label style={{ 
-                display: 'block', 
-                fontSize: '0.875rem', 
-                fontWeight: 500, 
-                color: theme.palette.text.primary, 
-                marginBottom: '0.5rem' 
-              }}>
-                Source Type
-              </label>
-              <Box sx={{ display: 'flex', gap: 1 }}>
-                <Button
-                  variant={sourceType === 'local' ? 'contained' : 'outlined'}
-                  size="small"
-                  onClick={() => setSourceType('local')}
-                  sx={{ flex: 1, textTransform: 'none' }}
-                >
-                  Local File System
-                </Button>
-                <Button
-                  variant={sourceType === 'remote' ? 'contained' : 'outlined'}
-                  size="small"
-                  onClick={() => setSourceType('remote')}
-                  sx={{ flex: 1, textTransform: 'none' }}
-                  color="secondary"
-                >
-                  Remote Samba
-                </Button>
-              </Box>
-              <Box sx={{ fontSize: '0.75rem', color: theme.palette.mode === 'dark' ? theme.palette.grey[400] : 'text.secondary', mt: 0.5 }}>
-                {sourceType === 'local' ? 'Using local production files' : 'Using remote Samba mount (192.168.1.221)'}
-              </Box>
-            </Box>
-            
-            {/* Snapshot Selection */}
-            <Box>
-              <label style={{ 
-                display: 'block', 
-                fontSize: '0.875rem', 
-                fontWeight: 500, 
-                color: theme.palette.text.primary, 
-                marginBottom: '0.5rem' 
-              }}>
-                Snapshot (MM-YYYY)
-              </label>
-              <TextField
-                select
-                fullWidth
-                size="small"
-                value={selectedSnapshot || ''}
-                onChange={(e) => setSelectedSnapshot(e.target.value || null)}
-                disabled={isLoadingSnapshots || availableSnapshots.length === 0}
-                helperText={
-                  isLoadingSnapshots ? 'Loading snapshots...' :
-                  snapshotError ? `Error: ${snapshotError}` :
-                  availableSnapshots.length === 0 ? 'No snapshots available' :
-                  selectedSnapshot ? `Selected: ${availableSnapshots.find(s => s.id === selectedSnapshot)?.label || selectedSnapshot}` :
-                  'Select a snapshot to scan'
-                }
-                error={!!snapshotError}
-                SelectProps={{
-                  displayEmpty: true
-                }}
-              >
-                <option value="">Current / Latest</option>
-                {availableSnapshots.map((snapshot) => (
-                  <option key={snapshot.id} value={snapshot.id}>
-                    {snapshot.label} ({snapshot.id})
-                  </option>
-                ))}
-              </TextField>
-            </Box>
-          </Box>
-          
-          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' }, gap: 2 }}>
-            {/* Source Path */}
-            <Box>
-              <TextField
-                fullWidth
-                size="small"
-                label="Source Directory"
-                placeholder="/var/www/orthodoxmetrics/prod/refactor-src/"
-                value={pathConfig.sourcePath}
-                onChange={(e) => setPathConfig(prev => ({ ...prev, sourcePath: e.target.value }))}
-                helperText={
-                  pathValidation.sourcePath?.error || 
-                  (pathValidation.sourcePath?.isValid 
-                    ? (pathValidation.sourcePath.exists ? '✓ Valid & exists' : '⚠ Valid but does not exist')
-                    : 'Directory containing files to restore from')
-                }
-                error={pathValidation.sourcePath?.isValid === false}
-                InputProps={{
-                  sx: { fontFamily: 'monospace', fontSize: '0.85rem' },
-                  endAdornment: pathValidation.sourcePath?.isValid && (
-                    <Check className="w-4 h-4" style={{ color: theme.palette.success.main }} />
-                  )
-                }}
-              />
-            </Box>
-            
-            {/* Destination Path */}
-            <Box>
-              <TextField
-                fullWidth
-                size="small"
-                label="Destination Directory"
-                placeholder="/var/www/orthodoxmetrics/prod/front-end/src/"
-                value={pathConfig.destinationPath}
-                onChange={(e) => setPathConfig(prev => ({ ...prev, destinationPath: e.target.value }))}
-                helperText={
-                  pathValidation.destinationPath?.error || 
-                  (pathValidation.destinationPath?.isValid 
-                    ? (pathValidation.destinationPath.exists ? '✓ Valid & exists' : '⚠ Valid but does not exist')
-                    : 'Directory where files will be restored to')
-                }
-                error={pathValidation.destinationPath?.isValid === false}
-                InputProps={{
-                  sx: { fontFamily: 'monospace', fontSize: '0.85rem' },
-                  endAdornment: pathValidation.destinationPath?.isValid && (
-                    <Check className="w-4 h-4" style={{ color: theme.palette.success.main }} />
-                  )
-                }}
-              />
-            </Box>
-            
-            {/* Backup Path */}
-            <Box>
-              <TextField
-                fullWidth
-                size="small"
-                label="Backup Directory (for Gap Analysis)"
-                placeholder="/var/www/orthodoxmetrics/backup"
-                value={pathConfig.backupPath || ''}
-                onChange={(e) => setPathConfig(prev => ({ ...prev, backupPath: e.target.value }))}
-                helperText={
-                  pathValidation.backupPath?.error || 
-                  (pathValidation.backupPath?.isValid 
-                    ? (pathValidation.backupPath.exists ? '✓ Valid & exists' : '⚠ Valid but does not exist')
-                    : 'September 2025 backup location for recovery')
-                }
-                error={pathValidation.backupPath?.isValid === false}
-                InputProps={{
-                  sx: { fontFamily: 'monospace', fontSize: '0.85rem' },
-                  endAdornment: pathValidation.backupPath?.isValid && (
-                    <Check className="w-4 h-4" style={{ color: theme.palette.success.main }} />
-                  )
-                }}
-              />
-            </Box>
-          </Box>
-          
-          <Box sx={{ mt: 2, p: 1.5, bgcolor: 'background.paper', borderRadius: 1, border: 1, borderColor: 'divider' }}>
-            <p style={{ fontSize: '0.75rem', color: theme.palette.mode === 'dark' ? theme.palette.grey[400] : theme.palette.text.secondary, margin: 0 }}>
-              <strong>Security:</strong> All paths must be within <code style={{ 
-                backgroundColor: alpha(theme.palette.primary.main, 0.1), 
-                padding: '0 4px', 
-                borderRadius: 2 
-              }}>/var/www/orthodoxmetrics/</code>. 
-              Path traversal and shell injection are blocked.
-            </p>
-          </Box>
-        </Paper>
-      </Collapse>
+      <PathConfigPanel
+        open={showPathConfig}
+        theme={theme}
+        pathConfig={pathConfig}
+        onPathConfigChange={setPathConfig}
+        pathValidation={pathValidation}
+        isValidatingPaths={isValidatingPaths}
+        onSavePaths={handleSavePaths}
+        onResetPaths={handleResetPaths}
+        sourceType={sourceType}
+        onSourceTypeChange={setSourceType}
+        selectedSnapshot={selectedSnapshot}
+        onSnapshotChange={setSelectedSnapshot}
+        isLoadingSnapshots={isLoadingSnapshots}
+        availableSnapshots={availableSnapshots}
+        snapshotError={snapshotError}
+      />
 
       {/* Main Content */}
       <Box sx={{ px: 3, py: 3 }}>
@@ -1595,8 +1219,8 @@ const RefactorConsole: React.FC = () => {
         )}
       </Box>
 
-      {/* Modal */}
-      <Modal onClose={() => setShowModal(null)} />
+      {/* Details Modal */}
+      <DetailsModal showModal={showModal} onClose={() => setShowModal(null)} theme={theme} />
       
       {/* Requirement Preview Modal */}
       {showModal?.type === 'requirementPreview' && (
