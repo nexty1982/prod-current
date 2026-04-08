@@ -13,6 +13,7 @@ import {
 import { FC, useContext, useState } from 'react';
 
 import Box, { BoxProps } from '@mui/material/Box';
+import { useDraggableFab } from '@/hooks/useDraggableFab';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import Scrollbar from '@/components/custom-scroll/Scrollbar';
@@ -71,6 +72,12 @@ const Customizer: FC = () => {
     headerBackground,
     setHeaderBackground
   } = useContext(CustomizerContext);
+
+  const { dragProps, positionSx, wrapClick } = useDraggableFab({
+    fabId: 'settings',
+    defaultRight: 24,
+    defaultBottom: 24,
+  });
 
 
   const StyledBox = styled(Box)<BoxProps>(({ theme }) => ({
@@ -137,14 +144,20 @@ const Customizer: FC = () => {
       {/* --Floating Button to open customizer ------ */}
       {/* ------------------------------------------- */}
       <Tooltip title="Settings">
-        <Fab
-          color="primary"
-          aria-label="settings"
-          sx={{ position: "fixed", right: "24px", bottom: "24px", zIndex: 1300 }}
-          onClick={() => setShowDrawer(true)}
+        <Box
+          ref={dragProps.ref}
+          onMouseDown={dragProps.onMouseDown}
+          onTouchStart={dragProps.onTouchStart}
+          sx={{ ...positionSx, zIndex: 1300, display: 'inline-flex' }}
         >
-          <ThreeBarCross />
-        </Fab>
+          <Fab
+            color="primary"
+            aria-label="settings"
+            onClick={wrapClick(() => setShowDrawer(true))}
+          >
+            <ThreeBarCross />
+          </Fab>
+        </Box>
       </Tooltip>
       <Drawer
         anchor="right"
