@@ -21,7 +21,6 @@ import {
   ListItem,
   ListItemButton,
   ListItemText,
-  ListItemIcon,
   TextField,
   Select,
   MenuItem,
@@ -30,8 +29,6 @@ import {
   InputLabel,
   IconButton,
   Tooltip,
-  Divider,
-  Badge,
   alpha,
   useTheme,
   LinearProgress,
@@ -49,7 +46,6 @@ import {
   IconDeviceFloppy,
   IconCheck,
   IconAlertCircle,
-  IconRefresh,
   IconChevronRight,
   IconChevronLeft,
   IconFocusCentered,
@@ -57,9 +53,7 @@ import {
   IconTrash,
   IconEdit,
   IconCopy,
-  IconShieldCheck,
   IconAlertTriangle,
-  IconPlus,
 } from '@tabler/icons-react';
 
 import {
@@ -91,26 +85,9 @@ import { useOcrSelection } from '../context/OcrSelectionContext';
 
 // EntryEditorDialog - import directly (no lazy needed, it's a simple dialog with no cycles)
 import EntryEditorDialog from './EntryEditorDialog';
-
-// ============================================================================
-// Props
-// ============================================================================
-
-interface FusionTabProps {
-  jobId: number;
-  churchId: number;
-  ocrText: string | null;
-  ocrResult: VisionResponse | null;
-  recordType: 'baptism' | 'marriage' | 'funeral';
-  imageUrl: string | null;
-  onHighlightBbox?: (bbox: BBox | null, color?: string) => void;
-  onHighlightMultiple?: (bboxes: { bbox: BBox; color: string; label?: string; completed?: boolean; selected?: boolean; entryIndex?: number }[]) => void;
-  onSendToReview?: () => void; // Callback when user clicks "Send to Review & Finalize"
-  onBboxEditModeChange?: (enabled: boolean) => void; // Notify parent when edit mode changes
-  onTokenClick?: (tokenId: string, bbox: BBox, text: string) => void; // OCR token click handler
-  onTokenDoubleClick?: (tokenId: string, bbox: BBox, text: string) => void; // OCR token double-click handler
-  stickyDefaults?: Record<'baptism' | 'marriage' | 'funeral', boolean>; // Sticky defaults from EnhancedOCRUploader
-}
+import type { FusionTabProps } from './FusionTab/types';
+import EntryListPanel from './FusionTab/EntryListPanel';
+import SaveCommitStep from './FusionTab/SaveCommitStep';
 
 // ============================================================================
 // Component
@@ -2107,183 +2084,27 @@ const FusionTab: React.FC<FusionTabProps> = ({
                   )}
                 </Stack>
 
-                <Stack direction="row" spacing={2} alignItems="center" justifyContent="space-between" mb={1}>
-                  <Typography variant="subtitle2">
-                    Detected Entries ({entries.length}):
-                  </Typography>
-                  <Stack direction="row" spacing={1}>
-                    <Tooltip title="Add Entry">
-                      <IconButton
-                        size="small"
-                        onClick={handleAddEntry}
-                        color="primary"
-                      >
-                        <IconPlus size={18} />
-                      </IconButton>
-                    </Tooltip>
-                  </Stack>
-                </Stack>
-                {/* Empty state check - show message if no entryAreas */}
-                {entryAreas.length === 0 && entries.length === 0 && (
-                  <Alert severity="info" sx={{ mb: 2 }}>
-                    <Typography variant="body2">
-                      No entry areas detected yet. Click "Auto-Detect Entries" to detect record cards from the image.
-                    </Typography>
-                    {drafts.length > 0 && drafts.some(d => d.bbox_json?.entryBbox) && (
-                      <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
-                        Note: Legacy entryBbox found in drafts. Run "Auto-Detect Entries" to migrate to entryAreas format.
-                      </Typography>
-                    )}
-                  </Alert>
-                )}
-
-                <Stack spacing={1.5}>
-                  {entries.map((entry, idx) => {
-                    const isCompleted = completionState.has(idx);
-                    const isInProgress = inProgressEntries.has(idx) && !isCompleted;
-                    const isSelected = selectedEntryIndex === idx;
-                    const isDirty = dirtyEntries.has(idx);
-                    const entryColor = getEntryColor(idx);
-                    
-                    // Hide completed entries if toggle is on
-                    if (hideCompleted && isCompleted) return null;
-                    
-                    return (
-                      <Paper
-                        key={entry.id}
-                        variant="outlined"
-                        sx={{
-                          p: 1.5,
-                          borderLeft: `4px solid ${entryColor}`,
-                          bgcolor: isSelected ? alpha(entryColor, 0.1) : 'background.paper',
-                          borderColor: isSelected ? entryColor : 'divider',
-                          cursor: 'pointer',
-                          '&:hover': {
-                            bgcolor: alpha(entryColor, 0.05),
-                          },
-                        }}
-                        onClick={() => handleEntrySelect(idx)}
-                        onDoubleClick={(e) => {
-                          e.stopPropagation();
-                          setEditingEntryIndex(idx);
-                          setEntryEditorOpen(true);
-                        }}
-                      >
-                        <Stack direction="row" spacing={1.5} alignItems="center" justifyContent="space-between">
-                          <Stack direction="row" spacing={1.5} alignItems="center" flex={1}>
-                            {/* Color indicator */}
-                            <Box
-                              sx={{
-                                width: 16,
-                                height: 16,
-                                borderRadius: '50%',
-                                bgcolor: entryColor,
-                                border: `2px solid ${isSelected ? entryColor : 'transparent'}`,
-                                boxShadow: isSelected ? `0 0 8px ${alpha(entryColor, 0.5)}` : 'none',
-                              }}
-                            />
-                            {/* Entry info */}
-                            <Stack spacing={0.5} flex={1}>
-                              <Stack direction="row" spacing={1} alignItems="center">
-                                <Typography 
-                                  variant="body2" 
-                                  fontWeight={isSelected ? 600 : 500}
-                                  onDoubleClick={(e) => {
-                                    e.stopPropagation();
-                                    setEditingEntryIndex(idx);
-                                    setEntryEditorOpen(true);
-                                  }}
-                                  sx={{ cursor: 'pointer' }}
-                                >
-                                  {entry.displayName || `Entry ${idx + 1}`}
-                                  {entry.recordNumber && ` (Record #${entry.recordNumber})`}
-                                </Typography>
-                                {isCompleted && (
-                                  <Chip
-                                    size="small"
-                                    label="Saved"
-                                    color="success"
-                                    icon={<IconCheck size={12} />}
-                                    sx={{ height: 20 }}
-                                  />
-                                )}
-                                {isInProgress && (
-                                  <Chip
-                                    size="small"
-                                    label="In Progress"
-                                    color="info"
-                                    sx={{ height: 20 }}
-                                  />
-                                )}
-                                {isDirty && (
-                                  <Chip
-                                    size="small"
-                                    label="Unsaved"
-                                    color="warning"
-                                    sx={{ height: 20 }}
-                                  />
-                                )}
-                              </Stack>
-                              <Typography variant="caption" color="text.secondary">
-                                BBox: ({Math.round(entry.bbox.x)}, {Math.round(entry.bbox.y)}) 
-                                {Math.round(entry.bbox.w)}×{Math.round(entry.bbox.h)}px
-                                {entry.lines.length > 0 && ` • ${entry.lines.length} lines`}
-                              </Typography>
-                            </Stack>
-                          </Stack>
-                          {/* Actions */}
-                          <Stack direction="row" spacing={0.5}>
-                            {bboxEditMode && isSelected && (
-                              <>
-                                {isDirty && (
-                                  <Tooltip title="Save bbox changes">
-                                    <IconButton
-                                      size="small"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleSaveBbox(idx);
-                                      }}
-                                      color="primary"
-                                    >
-                                      <IconDeviceFloppy size={16} />
-                                    </IconButton>
-                                  </Tooltip>
-                                )}
-                                <Tooltip title="Reset to detected bbox">
-                                  <IconButton
-                                    size="small"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleResetBbox(idx);
-                                    }}
-                                    color="default"
-                                  >
-                                    <IconRefresh size={16} />
-                                  </IconButton>
-                                </Tooltip>
-                              </>
-                            )}
-                            <Tooltip title="Delete Entry">
-                              <IconButton
-                                size="small"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  if (window.confirm(`Delete Entry ${idx + 1}?`)) {
-                                    handleDeleteEntry(idx);
-                                  }
-                                }}
-                                color="error"
-                                disabled={entries.length <= 1}
-                              >
-                                <IconTrash size={16} />
-                              </IconButton>
-                            </Tooltip>
-                          </Stack>
-                        </Stack>
-                      </Paper>
-                    );
-                  })}
-                </Stack>
+                <EntryListPanel
+                  entries={entries}
+                  entryAreas={entryAreas}
+                  drafts={drafts}
+                  selectedEntryIndex={selectedEntryIndex}
+                  completionState={completionState}
+                  inProgressEntries={inProgressEntries}
+                  dirtyEntries={dirtyEntries}
+                  hideCompleted={hideCompleted}
+                  bboxEditMode={bboxEditMode}
+                  getEntryColor={getEntryColor}
+                  onEntrySelect={handleEntrySelect}
+                  onAddEntry={handleAddEntry}
+                  onDeleteEntry={handleDeleteEntry}
+                  onSaveBbox={handleSaveBbox}
+                  onResetBbox={handleResetBbox}
+                  onEditEntry={(idx) => {
+                    setEditingEntryIndex(idx);
+                    setEntryEditorOpen(true);
+                  }}
+                />
                 <Button size="small" onClick={handleNext} endIcon={<IconChevronRight size={16} />} sx={{ mt: 1 }}>
                   Continue
                 </Button>
@@ -2546,183 +2367,23 @@ const FusionTab: React.FC<FusionTabProps> = ({
             </Typography>
           </StepLabel>
           <StepContent>
-            {/* Success Banner */}
-            {commitSuccess && (
-              <Alert 
-                severity="success" 
-                sx={{ mb: 2 }}
-                onClose={() => setCommitSuccess(false)}
-                icon={<IconCheck size={20} />}
-              >
-                <Typography fontWeight={600}>Records committed successfully!</Typography>
-                <Typography variant="body2">
-                  Your records have been saved to the database.
-                </Typography>
-              </Alert>
-            )}
-
-            {/* Review Reminder Banner */}
-            {drafts.length > 0 && drafts.some(d => d.status === 'draft') && !commitSuccess && (
-              <Alert 
-                severity="info" 
-                sx={{ mb: 2 }}
-                icon={<IconAlertCircle size={20} />}
-              >
-                <Typography fontWeight={600}>Drafts saved. Review entries before committing to database.</Typography>
-                <Typography variant="body2">
-                  Validate your drafts to check for missing fields, then commit when ready.
-                </Typography>
-              </Alert>
-            )}
-
-            <Typography variant="body2" color="text.secondary" mb={2}>
-              Save drafts for review, validate for errors, then commit to the database.
-            </Typography>
-
-            {/* Save Buttons */}
-            <Stack direction="row" spacing={1} mb={2}>
-              <Button
-                variant="outlined"
-                onClick={handleSaveDraft}
-                disabled={isProcessing || selectedEntryIndex === null}
-                startIcon={isProcessing && !isSaving ? <CircularProgress size={16} /> : <IconDeviceFloppy size={18} />}
-              >
-                Save Current Draft
-              </Button>
-              <Button
-                variant="outlined"
-                onClick={handleSaveAllDrafts}
-                disabled={isProcessing || entries.length === 0}
-                startIcon={<IconDeviceFloppy size={18} />}
-              >
-                Save All Drafts
-              </Button>
-              <Button
-                variant="contained"
-                color="info"
-                onClick={handleSendToReview}
-                disabled={isProcessing || entries.length === 0}
-                startIcon={<IconChevronRight size={18} />}
-              >
-                Send to Review & Finalize
-              </Button>
-            </Stack>
-
-            {/* Drafts List */}
-            {drafts.length > 0 && (
-              <Paper variant="outlined" sx={{ p: 1, mb: 2, maxHeight: 150, overflow: 'auto' }}>
-                <List dense disablePadding>
-                  {drafts.map((draft) => (
-                    <ListItem key={draft.id} disablePadding>
-                      <ListItemText
-                        primary={`Entry ${draft.entry_index + 1} - ${draft.record_type}`}
-                        secondary={draft.status === 'committed' 
-                          ? `Committed → Record #${draft.committed_record_id}` 
-                          : 'Draft (pending review)'
-                        }
-                      />
-                      <Chip
-                        size="small"
-                        label={draft.status}
-                        color={draft.status === 'committed' ? 'success' : 'warning'}
-                      />
-                    </ListItem>
-                  ))}
-                </List>
-              </Paper>
-            )}
-
-            <Divider sx={{ my: 2 }} />
-
-            {/* Validation Section */}
-            <Typography variant="subtitle2" gutterBottom>
-              Step 1: Validate Drafts
-            </Typography>
-            <Button
-              variant="outlined"
-              color="primary"
-              onClick={handleValidateDrafts}
-              disabled={isProcessing || drafts.filter(d => d.status === 'draft').length === 0}
-              startIcon={isProcessing ? <CircularProgress size={16} /> : <IconShieldCheck size={18} />}
-              sx={{ mb: 2 }}
-            >
-              Validate Drafts
-            </Button>
-
-            {/* Validation Results */}
-            {validationResult && (
-              <Paper 
-                variant="outlined" 
-                sx={{ 
-                  p: 2, 
-                  mb: 2, 
-                  bgcolor: validationResult.valid ? alpha(theme.palette.success.main, 0.05) : alpha(theme.palette.error.main, 0.05),
-                  borderColor: validationResult.valid ? 'success.main' : 'error.main',
-                }}
-              >
-                <Stack direction="row" spacing={1} alignItems="center" mb={1}>
-                  {validationResult.valid ? (
-                    <IconCheck size={20} color={theme.palette.success.main} />
-                  ) : (
-                    <IconAlertTriangle size={20} color={theme.palette.error.main} />
-                  )}
-                  <Typography fontWeight={600} color={validationResult.valid ? 'success.main' : 'error.main'}>
-                    {validationResult.valid ? 'All drafts are valid!' : 'Validation failed'}
-                  </Typography>
-                </Stack>
-                
-                <Typography variant="body2" color="text.secondary" mb={1}>
-                  {validationResult.summary?.total} drafts: {validationResult.summary?.valid} valid, {validationResult.summary?.invalid} invalid, {validationResult.summary?.warnings} warnings
-                </Typography>
-
-                {validationResult.drafts.some(d => d.missing_fields.length > 0 || d.warnings.length > 0) && (
-                  <List dense disablePadding>
-                    {validationResult.drafts.map(draft => (
-                      (draft.missing_fields.length > 0 || draft.warnings.length > 0) && (
-                        <ListItem key={draft.id} disablePadding sx={{ flexDirection: 'column', alignItems: 'flex-start' }}>
-                          <Typography variant="caption" fontWeight={600}>
-                            Entry {draft.entry_index + 1} ({draft.record_type}):
-                          </Typography>
-                          {draft.missing_fields.map(f => (
-                            <Typography key={f} variant="caption" color="error.main" sx={{ pl: 2 }}>
-                              • Missing: {f}
-                            </Typography>
-                          ))}
-                          {draft.warnings.map((w, i) => (
-                            <Typography key={i} variant="caption" color="warning.main" sx={{ pl: 2 }}>
-                              ⚠ {w}
-                            </Typography>
-                          ))}
-                        </ListItem>
-                      )
-                    ))}
-                  </List>
-                )}
-              </Paper>
-            )}
-
-            <Divider sx={{ my: 2 }} />
-
-            {/* Commit Section */}
-            <Typography variant="subtitle2" gutterBottom>
-              Step 2: Commit to Database
-            </Typography>
-            <Button
-              variant="contained"
-              color="success"
-              onClick={handleOpenCommitDialog}
-              disabled={isProcessing || !validationResult?.valid || drafts.filter(d => d.status === 'draft').length === 0}
-              startIcon={isProcessing ? <CircularProgress size={18} color="inherit" /> : <IconCheck size={18} />}
-              fullWidth
-            >
-              {!validationResult ? 'Validate First' : 
-               !validationResult.valid ? 'Fix Validation Errors' :
-               `Commit ${drafts.filter(d => d.status === 'draft').length} Drafts to Database`}
-            </Button>
-
-            <Button size="small" onClick={handleBack} startIcon={<IconChevronLeft size={16} />} sx={{ mt: 1 }}>
-              Back
-            </Button>
+            <SaveCommitStep
+              entries={entries}
+              drafts={drafts}
+              recordType={recordType}
+              selectedEntryIndex={selectedEntryIndex}
+              isProcessing={isProcessing}
+              isSaving={isSaving}
+              commitSuccess={commitSuccess}
+              setCommitSuccess={setCommitSuccess}
+              validationResult={validationResult}
+              onSaveDraft={handleSaveDraft}
+              onSaveAllDrafts={handleSaveAllDrafts}
+              onSendToReview={handleSendToReview}
+              onValidateDrafts={handleValidateDrafts}
+              onOpenCommitDialog={handleOpenCommitDialog}
+              onBack={handleBack}
+            />
           </StepContent>
         </Step>
       </Stepper>
