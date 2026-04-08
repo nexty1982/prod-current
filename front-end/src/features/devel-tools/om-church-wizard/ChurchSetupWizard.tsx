@@ -5,7 +5,6 @@ import {
   Step,
   StepLabel,
   StepContent,
-  StepConnector,
   Button,
   Typography,
   Card,
@@ -26,41 +25,29 @@ import {
   ListItem,
   ListItemText,
   ListItemSecondaryAction,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
   CircularProgress,
   Paper,
   Stack,
-  Autocomplete,
-  FormGroup,
   Checkbox,
   Tabs,
   Tab,
   Tooltip,
   Snackbar,
 } from '@mui/material';
-import { alpha, styled } from '@mui/material/styles';
+import { alpha } from '@mui/material/styles';
 import {
   Add as AddIcon,
   Delete as DeleteIcon,
   Edit as EditIcon,
   Save as SaveIcon,
-  Cancel as CancelIcon,
   CheckCircle as CheckIcon,
-  Info as InfoIcon,
-  Warning as WarningIcon,
   Church as ChurchIcon,
   People as PeopleIcon,
-  Settings as SettingsIcon,
   Web as WebIcon,
   Storage as StorageIcon,
-  Person as PersonIcon,
   ContentCopy as CopyIcon,
   VpnKey as TokenIcon,
   TableChart as TableIcon,
-  Dashboard as DashboardIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
@@ -68,153 +55,17 @@ import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { LiveTableBuilder } from '@/features/devel-tools/live-table-builder/components/LiveTableBuilder';
 import type { TableData } from '@/features/devel-tools/live-table-builder/types';
-
-// Types
-interface ChurchWizardData {
-  // Basic Info
-  name: string;
-  email: string;
-  phone: string;
-  address: string;
-  city: string;
-  state_province: string;
-  postal_code: string;
-  country: string;
-  website: string;
-  preferred_language: string;
-  timezone: string;
-  currency: string;
-  is_active: boolean;
-
-  // Template Selection
-  template_church_id: number | null;
-  selected_tables: string[];
-
-  // Custom Fields
-  custom_fields: CustomField[];
-
-  // User Management
-  initial_users: ChurchUser[];
-
-  // Landing Page
-  custom_landing_page: {
-    enabled: boolean;
-    title: string;
-    welcome_message: string;
-    primary_color: string;
-    logo_url: string;
-    default_app: 'liturgical_calendar' | 'church_records' | 'notes_app';
-  };
-
-  // Custom Table Builder data
-  custom_table_builder?: {
-    table_name: string;
-    data: TableData;
-  } | null;
-}
-
-interface CustomField {
-  id: string;
-  table_name: string;
-  field_name: string;
-  field_type: 'VARCHAR' | 'TEXT' | 'INT' | 'DATE' | 'BOOLEAN';
-  field_length?: number;
-  is_required: boolean;
-  default_value?: string;
-  description: string;
-}
-
-interface ChurchUser {
-  id: string;
-  email: string;
-  first_name: string;
-  last_name: string;
-  role: 'admin' | 'manager' | 'user' | 'viewer';
-  permissions: string[];
-  send_invite: boolean;
-}
-
-interface TemplateChurch {
-  id: number;
-  name: string;
-  city: string;
-  country: string;
-  available_tables: string[];
-}
-
-// Step configuration with icons and descriptions
-const STEP_CONFIG = [
-  { label: 'Church Information', icon: <ChurchIcon />, description: 'Basic details about your church' },
-  { label: 'Template Selection', icon: <DashboardIcon />, description: 'Clone from an existing church or start fresh' },
-  { label: 'Record Tables', icon: <TableIcon />, description: 'Configure database tables and custom fields' },
-  { label: 'User Management', icon: <PeopleIcon />, description: 'Add initial users and set permissions' },
-  { label: 'Landing Page', icon: <WebIcon />, description: 'Customize the church landing page' },
-  { label: 'Review & Create', icon: <CheckIcon />, description: 'Review all settings before creating' },
-  { label: 'Registration Token', icon: <TokenIcon />, description: 'Share this token so members can register' },
-];
-
-const steps = STEP_CONFIG.map(s => s.label);
-
-const AVAILABLE_RECORD_TABLES = [
-  { key: 'baptism_records', label: 'Baptism Records', description: 'Track baptism ceremonies and certificates' },
-  { key: 'marriage_records', label: 'Marriage Records', description: 'Manage wedding ceremonies and certificates' },
-  { key: 'funeral_records', label: 'Funeral Records', description: 'Record funeral services and memorials' },
-  { key: 'clergy', label: 'Clergy Management', description: 'Manage priests, deacons, and church staff' },
-  { key: 'members', label: 'Church Members', description: 'Comprehensive membership database' },
-  { key: 'donations', label: 'Donations & Offerings', description: 'Track financial contributions' },
-  { key: 'calendar_events', label: 'Calendar Events', description: 'Liturgical and parish events' },
-  { key: 'confession_records', label: 'Confession Records', description: 'Private confession tracking (encrypted)' },
-  { key: 'communion_records', label: 'Communion Records', description: 'Holy Communion participation' },
-  { key: 'chrismation_records', label: 'Chrismation Records', description: 'Confirmation ceremonies' }
-];
-
-const FIELD_TYPES = [
-  { value: 'VARCHAR', label: 'Text (Short)', maxLength: 255 },
-  { value: 'TEXT', label: 'Text (Long)', maxLength: null },
-  { value: 'INT', label: 'Number', maxLength: null },
-  { value: 'DATE', label: 'Date', maxLength: null },
-  { value: 'BOOLEAN', label: 'Yes/No', maxLength: null }
-];
-
-const USER_ROLES = [
-  { value: 'church_admin', label: 'Church Administrator', description: 'Full access to all church functions' },
-  { value: 'priest', label: 'Priest', description: 'Full clergy privileges and record lifecycle authority' },
-  { value: 'deacon', label: 'Deacon', description: 'Partial clergy privileges' },
-  { value: 'editor', label: 'Editor', description: 'Add and edit records' },
-  { value: 'viewer', label: 'Viewer', description: 'View-only access' }
-];
-
-const AVAILABLE_PERMISSIONS = [
-  'view_records', 'create_records', 'edit_records', 'delete_records',
-  'view_reports', 'export_data', 'manage_users', 'view_analytics'
-];
-
-const DEFAULT_APP_OPTIONS = [
-  {
-    value: 'liturgical_calendar',
-    label: 'Liturgical Calendar',
-    description: 'Orthodox liturgical calendar with feast days and fasting periods'
-  },
-  {
-    value: 'church_records',
-    label: 'Church Records',
-    description: 'Manage baptism, marriage, and funeral records'
-  },
-  {
-    value: 'notes_app',
-    label: 'Notes App',
-    description: 'Personal notes and task management'
-  }
-];
-
-// Styled step connector for professional look
-const StyledStepConnector = styled(StepConnector)(({ theme }) => ({
-  '& .MuiStepConnector-line': {
-    borderColor: theme.palette.divider,
-    borderLeftWidth: 2,
-    minHeight: 20,
-  },
-}));
+import type { ChurchWizardData, CustomField, ChurchUser, TemplateChurch } from './ChurchSetupWizard/types';
+import {
+  STEP_CONFIG,
+  steps,
+  AVAILABLE_RECORD_TABLES,
+  FIELD_TYPES,
+  DEFAULT_APP_OPTIONS,
+  StyledStepConnector,
+} from './ChurchSetupWizard/constants';
+import CustomFieldDialog from './ChurchSetupWizard/CustomFieldDialog';
+import UserDialog from './ChurchSetupWizard/UserDialog';
 
 const ChurchSetupWizard: React.FC = () => {
   const navigate = useNavigate();
@@ -1436,293 +1287,5 @@ const RegistrationTokenStep: React.FC<{
     </Paper>
   </Box>
 );
-
-// ============================================================================
-// Dialog Components
-// ============================================================================
-
-const CustomFieldDialog: React.FC<{
-  open: boolean;
-  onClose: () => void;
-  onSave: (field: CustomField) => void;
-  editingField: CustomField | null;
-  existingTables: string[];
-}> = ({ open, onClose, onSave, editingField, existingTables }) => {
-  const [fieldData, setFieldData] = useState<Partial<CustomField>>({
-    table_name: '',
-    field_name: '',
-    field_type: 'VARCHAR',
-    is_required: false,
-    description: ''
-  });
-
-  useEffect(() => {
-    if (editingField) {
-      setFieldData(editingField);
-    } else {
-      setFieldData({
-        table_name: '',
-        field_name: '',
-        field_type: 'VARCHAR',
-        is_required: false,
-        description: ''
-      });
-    }
-  }, [editingField, open]);
-
-  const handleSave = () => {
-    if (fieldData.table_name && fieldData.field_name && fieldData.field_type) {
-      onSave({
-        ...fieldData,
-        id: editingField?.id || Date.now().toString()
-      } as CustomField);
-    }
-  };
-
-  return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-      <DialogTitle>
-        {editingField ? 'Edit Custom Field' : 'Add Custom Field'}
-      </DialogTitle>
-      <DialogContent>
-        <Grid container spacing={2} sx={{ mt: 1 }}>
-          <Grid item xs={12} md={6}>
-            <FormControl fullWidth>
-              <InputLabel>Table</InputLabel>
-              <Select
-                label="Table"
-                value={fieldData.table_name || ''}
-                onChange={(e) => setFieldData({ ...fieldData, table_name: e.target.value })}
-              >
-                {existingTables.map((table) => (
-                  <MenuItem key={table} value={table}>
-                    {AVAILABLE_RECORD_TABLES.find(t => t.key === table)?.label || table}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <TextField
-              fullWidth
-              label="Field Name"
-              value={fieldData.field_name || ''}
-              onChange={(e) => setFieldData({ ...fieldData, field_name: e.target.value })}
-              placeholder="e.g., sponsor_name"
-            />
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <FormControl fullWidth>
-              <InputLabel>Field Type</InputLabel>
-              <Select
-                label="Field Type"
-                value={fieldData.field_type || 'VARCHAR'}
-                onChange={(e) => setFieldData({ ...fieldData, field_type: e.target.value as any })}
-              >
-                {FIELD_TYPES.map((type) => (
-                  <MenuItem key={type.value} value={type.value}>
-                    {type.label}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid item xs={12} md={6}>
-            {fieldData.field_type === 'VARCHAR' && (
-              <TextField
-                fullWidth
-                type="number"
-                label="Max Length"
-                value={fieldData.field_length || 255}
-                onChange={(e) => setFieldData({ ...fieldData, field_length: parseInt(e.target.value) })}
-              />
-            )}
-          </Grid>
-          <Grid item xs={12}>
-            <TextField
-              fullWidth
-              multiline
-              rows={2}
-              label="Description"
-              value={fieldData.description || ''}
-              onChange={(e) => setFieldData({ ...fieldData, description: e.target.value })}
-              placeholder="Describe what this field is for..."
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={fieldData.is_required || false}
-                  onChange={(e) => setFieldData({ ...fieldData, is_required: e.target.checked })}
-                />
-              }
-              label="Required Field"
-            />
-          </Grid>
-        </Grid>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
-        <Button
-          onClick={handleSave}
-          variant="contained"
-          disabled={!fieldData.table_name || !fieldData.field_name || !fieldData.field_type}
-        >
-          {editingField ? 'Update' : 'Add'} Field
-        </Button>
-      </DialogActions>
-    </Dialog>
-  );
-};
-
-const UserDialog: React.FC<{
-  open: boolean;
-  onClose: () => void;
-  onSave: (user: ChurchUser) => void;
-  editingUser: ChurchUser | null;
-}> = ({ open, onClose, onSave, editingUser }) => {
-  const [userData, setUserData] = useState<Partial<ChurchUser>>({
-    email: '',
-    first_name: '',
-    last_name: '',
-    role: 'user',
-    permissions: [],
-    send_invite: true
-  });
-
-  useEffect(() => {
-    if (editingUser) {
-      setUserData(editingUser);
-    } else {
-      setUserData({
-        email: '',
-        first_name: '',
-        last_name: '',
-        role: 'user',
-        permissions: [],
-        send_invite: true
-      });
-    }
-  }, [editingUser, open]);
-
-  const handleSave = () => {
-    if (userData.email && userData.first_name && userData.last_name) {
-      onSave({
-        ...userData,
-        id: editingUser?.id || Date.now().toString()
-      } as ChurchUser);
-    }
-  };
-
-  return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-      <DialogTitle>
-        {editingUser ? 'Edit User' : 'Add User'}
-      </DialogTitle>
-      <DialogContent>
-        <Grid container spacing={2} sx={{ mt: 1 }}>
-          <Grid item xs={12} md={6}>
-            <TextField
-              fullWidth
-              label="First Name"
-              value={userData.first_name || ''}
-              onChange={(e) => setUserData({ ...userData, first_name: e.target.value })}
-              required
-            />
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <TextField
-              fullWidth
-              label="Last Name"
-              value={userData.last_name || ''}
-              onChange={(e) => setUserData({ ...userData, last_name: e.target.value })}
-              required
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <TextField
-              fullWidth
-              type="email"
-              label="Email Address"
-              value={userData.email || ''}
-              onChange={(e) => setUserData({ ...userData, email: e.target.value })}
-              required
-            />
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <FormControl fullWidth>
-              <InputLabel>Role</InputLabel>
-              <Select
-                label="Role"
-                value={userData.role || 'user'}
-                onChange={(e) => setUserData({ ...userData, role: e.target.value as any })}
-              >
-                {USER_ROLES.map((role) => (
-                  <MenuItem key={role.value} value={role.value}>
-                    {role.label}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={userData.send_invite || false}
-                  onChange={(e) => setUserData({ ...userData, send_invite: e.target.checked })}
-                />
-              }
-              label="Send Email Invitation"
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <Typography variant="subtitle2" gutterBottom>
-              Permissions
-            </Typography>
-            <FormGroup row>
-              {AVAILABLE_PERMISSIONS.map((permission) => (
-                <FormControlLabel
-                  key={permission}
-                  control={
-                    <Checkbox
-                      checked={userData.permissions?.includes(permission) || false}
-                      onChange={(e) => {
-                        const currentPermissions = userData.permissions || [];
-                        if (e.target.checked) {
-                          setUserData({
-                            ...userData,
-                            permissions: [...currentPermissions, permission]
-                          });
-                        } else {
-                          setUserData({
-                            ...userData,
-                            permissions: currentPermissions.filter(p => p !== permission)
-                          });
-                        }
-                      }}
-                    />
-                  }
-                  label={permission.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                />
-              ))}
-            </FormGroup>
-          </Grid>
-        </Grid>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
-        <Button
-          onClick={handleSave}
-          variant="contained"
-          disabled={!userData.email || !userData.first_name || !userData.last_name}
-        >
-          {editingUser ? 'Update' : 'Add'} User
-        </Button>
-      </DialogActions>
-    </Dialog>
-  );
-};
 
 export default ChurchSetupWizard;
