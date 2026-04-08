@@ -3,17 +3,13 @@ import {
   Card,
   CardContent,
   Typography,
-  Grid,
   Button,
   TextField,
-  FormControl,
-  FormLabel,
   Tabs,
   Tab,
   Box,
   Chip,
   Paper,
-  Divider,
   Stack,
   IconButton,
   Tooltip,
@@ -23,11 +19,6 @@ import {
   ListItem,
   ListItemText,
   ListItemIcon,
-  CircularProgress,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions
 } from '@mui/material';
 import BigBookConsolePage from './BigBookConsolePage';
 import { BigBookConsoleSettings, defaultSettings } from './BigBookSettings';
@@ -69,6 +60,8 @@ import KnowledgeAnalyticsPanel from './OMBigBook/KnowledgeAnalyticsPanel';
 import EthicsReasoningPanel from './OMBigBook/EthicsReasoningPanel';
 import CustomComponentsPanel from './OMBigBook/CustomComponentsPanel';
 import RegistryManagementPanel from './OMBigBook/RegistryManagementPanel';
+import TrainingDialog from './OMBigBook/TrainingDialog';
+import FoundationDetailsDialog from './OMBigBook/FoundationDetailsDialog';
 
 const OMBigBook: React.FC = () => {
   const [activeTab, setActiveTab] = useState(0);
@@ -1515,169 +1508,21 @@ const OMBigBook: React.FC = () => {
       />
 
       {/* Start Training Dialog */}
-      <Dialog 
-        open={trainingDialogOpen} 
+      <TrainingDialog
+        open={trainingDialogOpen}
         onClose={() => setTrainingDialogOpen(false)}
-        maxWidth="sm"
-        fullWidth
-      >
-        <DialogTitle>
-          <LearningIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
-          Start OMAI Training Session
-        </DialogTitle>
-        <DialogContent>
-          <Typography variant="body1" paragraph>
-            Select a training phase to begin OMAI's learning session. Each phase builds upon previous knowledge.
-          </Typography>
-          
-          <FormControl fullWidth>
-            <FormLabel>Training Phase</FormLabel>
-            <Box mt={1}>
-              {[
-                { id: 'foundation', name: 'Foundation Knowledge', icon: '🏗️' },
-                { id: 'functional', name: 'Functional Understanding', icon: '⚙️' },
-                { id: 'operational', name: 'Operational Intelligence', icon: '🔧' },
-                { id: 'resolution', name: 'Issue Resolution', icon: '🛠️' },
-                { id: 'predictive', name: 'Predictive Capabilities', icon: '🔮' }
-              ].map((phase) => (
-                <Paper 
-                  key={phase.id}
-                  sx={{ 
-                    p: 2, 
-                    mb: 1, 
-                    cursor: 'pointer',
-                    border: selectedTrainingPhase === phase.id ? 2 : 1,
-                    borderColor: selectedTrainingPhase === phase.id ? 'primary.main' : 'divider'
-                  }}
-                  onClick={() => setSelectedTrainingPhase(phase.id)}
-                >
-                  <Typography variant="subtitle1">
-                    {phase.icon} {phase.name}
-                  </Typography>
-                </Paper>
-              ))}
-            </Box>
-          </FormControl>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setTrainingDialogOpen(false)}>Cancel</Button>
-          <Button 
-            onClick={() => startTrainingSession(selectedTrainingPhase)}
-            variant="contained"
-            disabled={learningLoading}
-            startIcon={learningLoading ? <CircularProgress size={16} /> : <PlayIcon />}
-          >
-            {learningLoading ? 'Starting...' : 'Start Training'}
-          </Button>
-        </DialogActions>
-      </Dialog>
+        selectedPhase={selectedTrainingPhase}
+        onPhaseSelect={setSelectedTrainingPhase}
+        onStart={startTrainingSession}
+        loading={learningLoading}
+      />
 
       {/* Ethical Foundation Details Dialog */}
-      <Dialog 
-        open={foundationDialogOpen} 
+      <FoundationDetailsDialog
+        open={foundationDialogOpen}
         onClose={() => setFoundationDialogOpen(false)}
-        maxWidth="md"
-        fullWidth
-      >
-        <DialogTitle>
-          {selectedFoundation && (
-            <>
-              <PsychologyIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
-              Ethical Foundation Details
-              <Chip 
-                label={selectedFoundation.gradeGroup}
-                size="small"
-                sx={{ ml: 2 }}
-              />
-            </>
-          )}
-        </DialogTitle>
-        <DialogContent>
-          {selectedFoundation && (
-            <Box>
-              <Typography variant="h6" gutterBottom color="primary">
-                Question
-              </Typography>
-              <Typography variant="body1" paragraph>
-                {selectedFoundation.question}
-              </Typography>
-              
-              <Typography variant="h6" gutterBottom color="primary">
-                Your Response
-              </Typography>
-              <Typography variant="body1" paragraph>
-                {selectedFoundation.userResponse}
-              </Typography>
-              
-              <Typography variant="h6" gutterBottom color="primary">
-                Reasoning
-              </Typography>
-              <Typography variant="body1" paragraph>
-                {selectedFoundation.reasoning}
-              </Typography>
-              
-              <Divider sx={{ my: 2 }} />
-              
-              <Grid container spacing={2}>
-                <Grid item xs={6}>
-                  <Typography variant="subtitle2" color="primary">Category</Typography>
-                  <Typography variant="body2">
-                    {selectedFoundation.category.replace('_', ' ')}
-                  </Typography>
-                </Grid>
-                <Grid item xs={6}>
-                  <Typography variant="subtitle2" color="primary">Weight</Typography>
-                  <Typography variant="body2">{selectedFoundation.weight}</Typography>
-                </Grid>
-                <Grid item xs={6}>
-                  <Typography variant="subtitle2" color="primary">Confidence</Typography>
-                  <Typography variant="body2">{selectedFoundation.confidence}%</Typography>
-                </Grid>
-                <Grid item xs={6}>
-                  <Typography variant="subtitle2" color="primary">Created</Typography>
-                  <Typography variant="body2">
-                    {new Date(selectedFoundation.createdAt).toLocaleString()}
-                  </Typography>
-                </Grid>
-              </Grid>
-              
-              {selectedFoundation.appliedContexts.length > 0 && (
-                <>
-                  <Divider sx={{ my: 2 }} />
-                  <Typography variant="subtitle2" color="primary" gutterBottom>
-                    Applied Contexts
-                  </Typography>
-                  <Box display="flex" flexWrap="wrap" gap={1}>
-                    {selectedFoundation.appliedContexts.map((context, index) => (
-                      <Chip
-                        key={index}
-                        label={context}
-                        size="small"
-                        variant="outlined"
-                      />
-                    ))}
-                  </Box>
-                </>
-              )}
-              
-              {selectedFoundation.lastReferenced && (
-                <>
-                  <Divider sx={{ my: 2 }} />
-                  <Typography variant="subtitle2" color="primary">
-                    Last Referenced
-                  </Typography>
-                  <Typography variant="body2">
-                    {new Date(selectedFoundation.lastReferenced).toLocaleString()}
-                  </Typography>
-                </>
-              )}
-            </Box>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setFoundationDialogOpen(false)}>Close</Button>
-        </DialogActions>
-      </Dialog>
+        foundation={selectedFoundation}
+      />
     </Box>
   );
 
