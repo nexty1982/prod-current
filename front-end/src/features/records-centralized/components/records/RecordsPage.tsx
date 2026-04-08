@@ -29,6 +29,7 @@ import { BaptismRecord, SortConfig, RecordsPageProps } from './RecordsPage/types
 import { useRecordsAutocomplete } from './RecordsPage/useRecordsAutocomplete';
 import RecordEditForm from './RecordsPage/RecordEditForm';
 import { parseJsonField, displayJsonField, highlightMatch, getCellValue, getColumnDefinitions, getSortFields, RECORD_TYPE_CONFIGS, DEFAULT_DATE_SORT_FIELD } from './RecordsPage/utils';
+import RecordsControlsBar from './RecordsPage/RecordsControlsBar';
 import {
     Alert,
     Box,

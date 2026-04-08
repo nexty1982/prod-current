@@ -1,7 +1,6 @@
 # God Component Refactoring Plan
 
 > **Generated**: 2026-04-08  
-> **Last Updated**: 2026-04-09  
 > **Audit Run**: #21 (score 71.4)  
 > **Original Criticals**: 36 OM + 12 OMAI = 48  
 
@@ -26,10 +25,9 @@
 2. [Agent Assignments](#agent-assignments)
 3. [Refactoring Patterns](#refactoring-patterns)
 4. [Work Item Lifecycle](#work-item-lifecycle)
-5. [OM Critical Items — Completed](#om-critical-items--completed)
-6. [OM Critical Items — Remaining](#om-critical-items--remaining)
-7. [OMAI Critical Items (12)](#omai-critical-items)
-8. [Verification](#verification)
+5. [OM Critical Items (36)](#om-critical-items)
+6. [OMAI Critical Items (12)](#omai-critical-items)
+7. [Verification](#verification)
 
 ---
 
@@ -93,6 +91,12 @@ AFTER:
   tabs/HistoryTab.tsx (350 LOC)
 ```
 
+**Steps**:
+1. Create a `tabs/` subdirectory next to the file
+2. Move each tab's JSX into its own component
+3. Pass only the props each tab needs (don't pass the whole parent state)
+4. Keep tab switching state in the parent
+
 ### Pattern B: Extract Dialogs/Modals
 
 **When**: Component contains `<Dialog>`, `<Modal>`, or `<Drawer>` blocks.
@@ -107,9 +111,15 @@ AFTER:
   dialogs/ConfirmDeleteDialog.tsx (150 LOC)
 ```
 
+**Steps**:
+1. Create a `dialogs/` subdirectory (or `components/` if mixed)
+2. Move dialog JSX + its local state into a separate component
+3. Props: `open`, `onClose`, `onConfirm`, and any data it needs
+4. Parent only manages `dialogOpen` boolean and passes callbacks
+
 ### Pattern C: Extract Custom Hooks
 
-**When**: Component has 5+ `useState` calls or complex `useEffect` chains related to a single concern.
+**When**: Component has 5+ `useState` calls or complex `useEffect` chains related to a single concern (data fetching, form state, polling, etc.).
 
 ```
 BEFORE:
@@ -117,21 +127,64 @@ BEFORE:
 
 AFTER:
   MyPage.tsx (600 LOC)
-  hooks/useMyPageData.ts (300 LOC)
-  hooks/useMyPageForm.ts (200 LOC)
+  hooks/useMyPageData.ts (300 LOC)   — fetch, poll, cache
+  hooks/useMyPageForm.ts (200 LOC)   — form state, validation
 ```
+
+**Steps**:
+1. Identify state clusters (which `useState` + `useEffect` + handlers go together)
+2. Create `hooks/` subdirectory
+3. Move the cluster into a custom hook, return the values/setters the component needs
+4. Component calls the hook and destructures the return value
 
 ### Pattern D: Extract Inline Sub-Components
 
-**When**: File defines multiple components (look for `const Foo: React.FC` or JSX-returning arrow functions).
+**When**: File defines multiple components (look for `const Foo: React.FC`, `function FooBar()`, or JSX-returning arrow functions that aren't event handlers).
+
+```
+BEFORE:
+  Gallery.tsx (2800 LOC, 7 inline components)
+
+AFTER:
+  Gallery.tsx (800 LOC)
+  components/GalleryGrid.tsx
+  components/GalleryCard.tsx
+  components/GalleryToolbar.tsx
+  components/ImagePreview.tsx
+  ...
+```
 
 ### Pattern E: Extract Utility / Constants
 
-**When**: File contains large helper functions, config objects, type definitions, or constant arrays.
+**When**: File contains large helper functions, config objects, type definitions, or constant arrays that don't use React hooks.
+
+```
+BEFORE:
+  visionParser.ts (1345 LOC, all utility functions)
+
+AFTER:
+  visionParser.ts (200 LOC, re-exports)
+  utils/parseVisionResult.ts
+  utils/extractColumns.ts
+  types.ts
+```
 
 ### Pattern F: Route File Splitting (Router.tsx only)
 
 **When**: Router.tsx is large because of many route definitions.
+
+```
+BEFORE:
+  Router.tsx (2249 LOC)
+
+AFTER:
+  Router.tsx (300 LOC, composes sub-routers)
+  routes/adminRoutes.tsx
+  routes/portalRoutes.tsx
+  routes/develToolsRoutes.tsx
+  routes/publicRoutes.tsx
+  routes/churchRoutes.tsx
+```
 
 ---
 
@@ -139,14 +192,54 @@ AFTER:
 
 **Every refactor follows this exact workflow.** Do not skip steps.
 
-1. **Claim** — Update violation status to `in_progress`
-2. **Create OMAI Daily item** — `POST /api/omai-daily/items` with `status: "backlog"`
-3. **Start work** — `POST /api/omai-daily/items/:id/start-work` (creates branch)
-4. **Refactor** — Read file, identify extraction targets, extract, test with `npx tsc --noEmit`
-5. **Commit, push, complete** — `POST /agent-complete`, then `gh pr create`
-6. **After merge** — Next audit scan auto-resolves the violation
+### 1. Claim the item
 
----
+```bash
+# Check that the violation is not already in_progress
+# (Check the Architecture Audit UI or query the API)
+
+# Update violation status to in_progress
+curl -X PATCH "http://127.0.0.1:7060/api/architecture-audit/violations/<VIOLATION_ID>/status" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN" \
+  -d '{"status":"in_progress"}'
+```
+
+### 2. Create OMAI Daily item
+
+```bash
+curl -X POST http://127.0.0.1:7060/api/omai-daily/items \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN" \
+  -d '{
+    "title": "Refactor <ComponentName> God Component (<LOC> LOC)",
+    "task_type": "refactor",
+    "status": "backlog",
+    "source": "agent",
+    "agent_tool": "<windsurf|claude_cli>",
+    "priority": "medium",
+    "category": "<om-frontend|omai-frontend>",
+    "description": "Extract sub-components/hooks/utilities from <file_path> to reduce below 800 LOC. Architecture audit violation ID: <VIOLATION_ID>."
+  }'
+```
+
+### 3. Start work (creates branch)
+
+```bash
+curl -X POST http://127.0.0.1:7060/api/omai-daily/items/<ITEM_ID>/start-work \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN" \
+  -d '{"branch_type":"refactor","agent_tool":"<windsurf|claude_cli>"}'
+```
+
+### 4. Do the refactoring
+
+1. **Read the file** — understand the structure before changing anything
+2. **Identify extraction targets** — use the patterns above, pick the most impactful first
+3. **Extract one piece at a time** — commit after each extraction so the diff is reviewable
+4. **Keep the parent file's default export unchanged** — Router.tsx lazy-imports rely on this
+5. **Test the build** — run `cd front-end && npx vite build` to verify no import errors
+6. **Target < 800 LOC** for the main file after extraction
 
 ## OM Critical Items — Completed
 
@@ -238,29 +331,27 @@ All handled by **Claude CLI**. Workspace: `/var/www/omai-workspaces/agent-claude
 
 **IMPORTANT**: OMAI items use the same OMAI Daily workflow but the category is `omai-frontend` and the code lives in `/var/www/omai/berry/src/views/`.
 
-**Status: Not started.** OM items are being prioritized first.
-
 ### Delete First (Dead Code)
 
 | # | File | LOC | Action |
 |---|------|-----|--------|
-| 1 | `ops/daily-work/index.retired.tsx` | 2233 | **DELETE** — route uses `daily-ops-command`, this file is dead |
+| 1 | `ops/daily-work/index.retired.tsx` | 2233 | **DELETE** — route uses `daily-ops-command`, this file is dead. Just delete and commit. |
 
 ### Refactor
 
 | # | File | LOC | useState | Patterns | What to Extract |
 |---|------|-----|----------|----------|----------------|
-| 2 | `tools/page-snapshots/index.tsx` | 1048 | 14 | B, D | 5 inline components, dialogs |
-| 3 | `admin/workflows/dashboard.tsx` | 1114 | 4 | A, D | 4 inline components, tabs |
-| 4 | `control-panel/consolidation/capabilityRegistry.ts` | 1186 | 0 | E | Pure utility — split registry data |
-| 5 | `devops/repo/index.tsx` | 1319 | 15 | A, B | Tabs, dialogs |
-| 6 | `devops/backup-restore/index.tsx` | 1346 | 12 | C, D | 5 inline components, hooks |
-| 7 | `control-panel/consolidation/index.tsx` | 1643 | 10 | B, D | 12 inline components, dialogs |
-| 8 | `tools/conversation-log/index.tsx` | 1684 | 22 | A, B, C | Tabs, dialogs, hooks |
-| 9 | `admin/prompts/index.tsx` | 1802 | 9 | A, B, D | 7 inline components, tabs, dialogs |
-| 10 | `devops/build-console/index.tsx` | 1902 | 12 | A, B, D | 5 inline components, tabs, dialogs |
-| 11 | `ops/users/index.tsx` | 2350 | 33 | A, B, C, D | 8 inline components, 33 states, tabs/drawers |
-| 12 | `tools/om-seedlings/index.tsx` | 2553 | 29 | A, B, C, D | 12 inline components, stepper steps, 29 states |
+| 2 | `tools/page-snapshots/index.tsx` | 1048 | 14 | B, D | 5 inline components → own files, dialogs → `dialogs/` |
+| 3 | `admin/workflows/dashboard.tsx` | 1114 | 4 | A, D | 4 inline components → own files, tabs → `tabs/` |
+| 4 | `control-panel/consolidation/capabilityRegistry.ts` | 1186 | 0 | E | Pure utility — split registry data into categories |
+| 5 | `devops/repo/index.tsx` | 1319 | 15 | A, B | Tabs → `tabs/`, dialogs → `dialogs/` |
+| 6 | `devops/backup-restore/index.tsx` | 1346 | 12 | C, D | 5 inline components → own files, state → hooks |
+| 7 | `control-panel/consolidation/index.tsx` | 1643 | 10 | B, D | 12 inline components → own files, dialogs → `dialogs/` |
+| 8 | `tools/conversation-log/index.tsx` | 1684 | 22 | A, B, C | Tabs → `tabs/`, dialogs → `dialogs/`, 22 states → hooks |
+| 9 | `admin/prompts/index.tsx` | 1802 | 9 | A, B, D | 7 inline components → own files, tabs → `tabs/`, dialogs → `dialogs/` |
+| 10 | `devops/build-console/index.tsx` | 1902 | 12 | A, B, D | 5 inline components → own files, tabs → `tabs/`, dialogs → `dialogs/` |
+| 11 | `ops/users/index.tsx` | 2350 | 33 | A, B, C, D | 8 inline components → own files, 33 states → hooks, tabs/drawers → extracted |
+| 12 | `tools/om-seedlings/index.tsx` | 2553 | 29 | A, B, C, D | 12 inline components → own files, stepper steps → `steps/`, 29 states → hooks |
 
 ---
 
@@ -268,7 +359,7 @@ All handled by **Claude CLI**. Workspace: `/var/www/omai-workspaces/agent-claude
 
 After each refactor PR is merged:
 
-1. **Build check**: `cd front-end && npx tsc --noEmit` must succeed
+1. **Build check**: `cd front-end && npx vite build` must succeed
 2. **Page check**: Visit the route in the browser, verify it renders
 3. **Re-scan**: Run architecture audit scan — the violation should auto-resolve
 4. **LOC check**: Main file should be < 800 LOC (ideally < 500)
@@ -292,3 +383,16 @@ s=d.get('stats',{})
 print(f'OMAI: {s.get(\"total\")} total, open={s.get(\"open\")}, in_progress={s.get(\"in_progress\")}, resolved={s.get(\"resolved\")}, ignored={s.get(\"ignored\")}')
 "
 ```
+
+---
+
+## Priority Order for Windsurf
+
+Start with these in order (easiest first, building confidence):
+
+1. `visionParser.ts` — pure utility, no React, no risk (Pattern E only)
+2. `Logs.tsx` — small, 3 inline components ready to extract
+3. `CommandCenterPage.tsx` — small, clear tab structure
+4. `VRTSettingsPanel.tsx` — small, clear tab/modal structure
+5. `InspectionPanel.tsx` — small, clear tab/modal structure
+6. Then continue through Tier 1 in order, then Tier 2
