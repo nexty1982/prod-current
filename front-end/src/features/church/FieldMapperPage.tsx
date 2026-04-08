@@ -3,7 +3,6 @@ import { useAuth } from '@/context/AuthContext';
 import { fetchWithChurchContext } from '@/shared/lib/fetchWithChurchContext';
 import { enhancedTableStore, THEME_MAP, type LiturgicalThemeKey, type ThemeTokens } from '@/store/enhancedTableStore';
 import {
-    Download as DownloadIcon,
     Palette as PaletteIcon,
     Settings as SettingsIcon,
     Storage as StorageIcon,
@@ -13,13 +12,6 @@ import {
     Alert,
     Box,
     Button,
-    Checkbox,
-    CircularProgress,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogTitle,
-    FormControlLabel,
     IconButton,
     Stack,
     Tab,
@@ -30,10 +22,11 @@ import {
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import DatabaseMappingTab from './FieldMapperPage/DatabaseMappingTab';
+import ExportTemplateDialog from './FieldMapperPage/ExportTemplateDialog';
 import RecordSettingsTab from './FieldMapperPage/RecordSettingsTab';
 import ThemeStudioTab from './FieldMapperPage/ThemeStudioTab';
 import UIThemeTab from './FieldMapperPage/UIThemeTab';
-import { DEFAULT_RECORD_SETTINGS } from './FieldMapperPage/constants';
+import { useRecordSettings } from './FieldMapperPage/useRecordSettings';
 import type { ApiResponse, Column, DynamicConfig, EditingTheme, ThemeStudioState } from './FieldMapperPage/types';
 
 const FieldMapperPage: React.FC = () => {
@@ -89,86 +82,14 @@ const FieldMapperPage: React.FC = () => {
   const [exporting, setExporting] = useState<boolean>(false);
   const [exportOverwrite, setExportOverwrite] = useState<boolean>(false);
 
-  // Record Settings State
-  const [recordSettings, setRecordSettings] = useState({
-    logo: {
-      enabled: true,
-      column: 3,
-      file: null as File | null,
-      width: 200,
-      height: 200,
-      objectFit: 'contain' as 'contain' | 'cover' | 'fill' | 'none' | 'scale-down',
-      opacity: 100,
-      quadrant: 'middle' as 'top' | 'middle' | 'bottom',
-      horizontalPosition: 'center' as 'left' | 'center' | 'right',
-    },
-    calendar: {
-      enabled: true,
-      column: 2,
-      quadrant: 'middle' as 'top' | 'middle' | 'bottom',
-      horizontalPosition: 'center' as 'left' | 'center' | 'right',
-    },
-    omLogo: {
-      enabled: true,
-      column: 4,
-      width: 68,
-      height: 68,
-      quadrant: 'middle' as 'top' | 'middle' | 'bottom',
-      horizontalPosition: 'center' as 'left' | 'center' | 'right',
-    },
-    headerText: {
-      fontFamily: 'Arial, sans-serif',
-      fontSize: 16,
-      fontWeight: 700,
-      color: '#4C1D95',
-      column: 1,
-      position: 'above', // 'above' or 'below' recordImage
-      quadrant: 'middle', // 'top', 'middle', or 'bottom'
-      horizontalPosition: 'center' as 'left' | 'center' | 'right',
-    },
-    recordImages: {
-      column: 1,
-      quadrant: 'middle', // 'top', 'middle', or 'bottom'
-      horizontalPosition: 'center' as 'left' | 'center' | 'right',
-      width: 160, // Width in pixels (default 160x160)
-      height: 160, // Height in pixels (default 160x160)
-    },
-    backgroundImage: {
-      enabled: true,
-      column: 0, // 0 means span all columns
-      images: [] as string[], // Array of image paths
-      currentIndex: 0,
-      quadrant: 'middle' as 'top' | 'middle' | 'bottom',
-    },
-    g1Image: {
-      enabled: true,
-      column: 0, // 0 means span all columns
-      images: [] as string[], // Array of image paths
-      currentIndex: 0,
-      quadrant: 'middle' as 'top' | 'middle' | 'bottom',
-    },
-    // Support for multiple images per type
-    imageLibrary: {
-      logo: [] as string[],
-      omLogo: [] as string[],
-      baptism: [] as string[],
-      marriage: [] as string[],
-      funeral: [] as string[],
-      bg: [] as string[],
-      g1: [] as string[],
-      recordImage: [] as string[], // General record images library
-    },
-    currentImageIndex: {
-      logo: 0,
-      omLogo: 0,
-      baptism: 0,
-      marriage: 0,
-      funeral: 0,
-      bg: 0,
-      g1: 0,
-      recordImage: 0,
-    },
-  });
+  // Record Settings (custom hook)
+  const {
+    recordSettings,
+    setRecordSettings,
+    handleImageUpload,
+    handleResetDefaults,
+    handleSaveRecordSettings,
+  } = useRecordSettings(churchId, setError, setSuccess, setSaving);
 
   // Dynamic Records Config State
   const [dynamicConfig, setDynamicConfig] = useState<DynamicConfig>({
@@ -673,28 +594,6 @@ const FieldMapperPage: React.FC = () => {
 
   const handleCancel = () => window.close();
 
-  // Reset header settings to defaults
-  const handleResetDefaults = () => {
-    if (!window.confirm('Are you sure you want to reset the header display to default settings? This will clear all customizations.')) {
-      return;
-    }
-
-    setRecordSettings({
-      ...DEFAULT_RECORD_SETTINGS,
-      logo: { ...DEFAULT_RECORD_SETTINGS.logo },
-      calendar: { ...DEFAULT_RECORD_SETTINGS.calendar },
-      omLogo: { ...DEFAULT_RECORD_SETTINGS.omLogo },
-      headerText: { ...DEFAULT_RECORD_SETTINGS.headerText },
-      recordImages: { ...DEFAULT_RECORD_SETTINGS.recordImages },
-      backgroundImage: { ...DEFAULT_RECORD_SETTINGS.backgroundImage, images: [], currentIndex: 0 },
-      g1Image: { ...DEFAULT_RECORD_SETTINGS.g1Image, images: [], currentIndex: 0 },
-      imageLibrary: { ...DEFAULT_RECORD_SETTINGS.imageLibrary },
-      currentImageIndex: { ...DEFAULT_RECORD_SETTINGS.currentImageIndex },
-    });
-
-    setSuccess('Header display reset to default settings. Click "Save Record Settings" to apply changes.');
-    setError(null);
-  };
 
   const updateNewName = (columnName: string, newName: string) => {
     setRows((prev) =>
@@ -748,439 +647,6 @@ const FieldMapperPage: React.FC = () => {
     );
   }
 
-  // Handle logo file upload
-  const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      // Validate it's an image
-      if (!file.type.startsWith('image/')) {
-        setError('Please upload an image file');
-        return;
-      }
-      setRecordSettings(prev => ({
-        ...prev,
-        logo: { ...prev.logo, file }
-      }));
-    }
-  };
-
-  // Handle image upload from preview component
-  const handleImageUpload = async (type: string, file: File) => {
-    if (!churchId) {
-      throw new Error('Invalid church ID. Cannot upload image.');
-    }
-
-    if (!file.type.startsWith('image/')) {
-      throw new Error('Please upload an image file');
-    }
-
-    const formData = new FormData();
-    formData.append('image', file);
-    formData.append('type', type);
-
-    const response = await fetch(`/api/admin/churches/${churchId}/record-images`, {
-        method: 'POST',
-        credentials: 'include',
-        body: formData,
-      });
-
-      if (!response.ok) {
-        let errorMessage = 'Failed to upload image';
-      let errorDetails: any = null;
-
-      // Try to get the response as text first (in case it's not JSON)
-      const responseText = await response.text();
-
-      // Check if it's an HTML error page (nginx/apache)
-      if (responseText.trim().startsWith('<html') || responseText.trim().startsWith('<!DOCTYPE')) {
-        // Extract title from HTML if possible
-        const titleMatch = responseText.match(/<title>(.*?)<\/title>/i);
-        const title = titleMatch ? titleMatch[1] : 'Internal Server Error';
-
-        errorMessage = `Server error (${response.status}): ${title}. The server is experiencing issues. Please check the server logs or contact support.`;
-
-        console.error('Received HTML error page instead of JSON:', {
-          status: response.status,
-          statusText: response.statusText,
-          htmlTitle: title,
-          responsePreview: responseText.substring(0, 300),
-        });
-      } else {
-        try {
-          // Try to parse as JSON
-          errorDetails = JSON.parse(responseText);
-          errorMessage = errorDetails.message || errorDetails.error || errorDetails.error?.message || errorMessage;
-        } catch (parseError) {
-          // If not JSON and not HTML, use the text response (but limit length)
-          if (responseText && responseText.trim() && responseText.length < 500) {
-            errorMessage = responseText.trim();
-          } else {
-          errorMessage = `Server error: ${response.status} ${response.statusText}`;
-        }
-        }
-      }
-
-      // Log full error details for debugging (but don't include full HTML in message)
-      console.error('Upload error details:', {
-        status: response.status,
-        statusText: response.statusText,
-        errorDetails,
-        responsePreview: responseText.substring(0, 500),
-        isHtml: responseText.trim().startsWith('<html') || responseText.trim().startsWith('<!DOCTYPE'),
-      });
-
-        throw new Error(errorMessage);
-      }
-
-      const result = await response.json();
-      const imageUrl = result.url || result.path || `/images/records/${churchId}-${type === 'logo' ? 'logo' : type === 'bg' ? 'bg' : type}.png`;
-
-      // Add the new image to the image library
-      setRecordSettings(prev => {
-        const imageLibrary = prev.imageLibrary || {
-          logo: [],
-          omLogo: [],
-          baptism: [],
-          marriage: [],
-          funeral: [],
-          bg: [],
-          g1: [],
-          recordImage: [],
-        };
-
-        const currentImages = imageLibrary[type as keyof typeof imageLibrary] || [];
-        const updatedImages = [...currentImages, imageUrl];
-
-        // Update current index to the newly uploaded image
-        const currentImageIndex = prev.currentImageIndex || {
-          logo: 0,
-          omLogo: 0,
-          baptism: 0,
-          marriage: 0,
-          funeral: 0,
-          bg: 0,
-          g1: 0,
-          recordImage: 0,
-        };
-
-        return {
-          ...prev,
-          imageLibrary: {
-            ...imageLibrary,
-            [type]: updatedImages,
-          },
-          currentImageIndex: {
-            ...currentImageIndex,
-            [type]: updatedImages.length - 1,
-          },
-          // Also update the file reference for logo
-          ...(type === 'logo' ? {
-            logo: { ...prev.logo, file }
-          } : {}),
-        };
-      });
-
-    return imageUrl;
-  };
-
-  // Save record settings
-  const handleSaveRecordSettings = async () => {
-    if (!churchId) {
-      setError('Invalid church ID. Please check the URL and ensure you have access to this church.');
-      return;
-    }
-
-    try {
-      setSaving(true);
-      setError(null);
-      setSuccess(null);
-
-      const formData = new FormData();
-      formData.append('settings', JSON.stringify({
-        logo: {
-          enabled: recordSettings.logo.enabled,
-          column: recordSettings.logo.column,
-          width: recordSettings.logo.width,
-          height: recordSettings.logo.height,
-          objectFit: recordSettings.logo.objectFit,
-          opacity: recordSettings.logo.opacity,
-          order: recordSettings.logo?.order ?? 0,
-          quadrant: recordSettings.logo?.quadrant || 'middle',
-          horizontalPosition: recordSettings.logo?.horizontalPosition || 'center',
-        },
-        calendar: {
-          ...recordSettings.calendar,
-          order: recordSettings.calendar?.order ?? 0,
-          quadrant: recordSettings.calendar?.quadrant || 'middle',
-          horizontalPosition: recordSettings.calendar?.horizontalPosition || 'center',
-        },
-        omLogo: {
-          ...recordSettings.omLogo,
-          order: recordSettings.omLogo?.order ?? 0,
-          quadrant: recordSettings.omLogo?.quadrant || 'middle',
-          horizontalPosition: recordSettings.omLogo?.horizontalPosition || 'center',
-          width: recordSettings.omLogo.width,
-          height: recordSettings.omLogo.height,
-        },
-        headerText: {
-          fontFamily: recordSettings.headerText?.fontFamily || 'Arial, sans-serif',
-          fontSize: recordSettings.headerText?.fontSize || 16,
-          fontWeight: recordSettings.headerText?.fontWeight || 700,
-          color: recordSettings.headerText?.color || '#4C1D95',
-          column: recordSettings.headerText?.column || 1,
-          order: recordSettings.headerText?.order ?? 0,
-          position: recordSettings.headerText?.position || 'above',
-          quadrant: recordSettings.headerText?.quadrant || 'middle',
-          horizontalPosition: recordSettings.headerText?.horizontalPosition || 'center',
-        },
-        recordImages: {
-          column: recordSettings.recordImages?.column || 1,
-          order: recordSettings.recordImages?.order ?? 0,
-          quadrant: recordSettings.recordImages?.quadrant || 'middle',
-          horizontalPosition: recordSettings.recordImages?.horizontalPosition || 'center',
-          width: recordSettings.recordImages?.width || 60,
-          height: recordSettings.recordImages?.height || 60,
-        },
-        backgroundImage: {
-          enabled: recordSettings.backgroundImage?.enabled ?? true,
-          column: recordSettings.backgroundImage?.column ?? 0,
-          order: recordSettings.backgroundImage?.order ?? 0,
-          quadrant: recordSettings.backgroundImage?.quadrant || 'middle',
-        },
-        g1Image: {
-          enabled: recordSettings.g1Image?.enabled ?? true,
-          column: recordSettings.g1Image?.column ?? 0,
-          order: recordSettings.g1Image?.order ?? 0,
-          quadrant: recordSettings.g1Image?.quadrant || 'middle',
-        },
-        imageLibrary: recordSettings.imageLibrary || {},
-        currentImageIndex: recordSettings.currentImageIndex || {},
-      }));
-
-      if (recordSettings.logo.file) {
-        formData.append('logo', recordSettings.logo.file);
-      }
-
-      const response = await fetchWithChurchContext(`/api/admin/churches/${churchId}/record-settings`, {
-        churchId,
-        method: 'POST',
-        credentials: 'include',
-        body: formData,
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        const errorMessage = errorData.message || errorData.error || `HTTP ${response.status}: ${response.statusText}`;
-        throw new Error(errorMessage);
-      }
-
-      const result = await response.json();
-      setSuccess('Record settings saved successfully!');
-
-      // Reload settings to ensure preview is updated
-      if (churchId) {
-        const loadRecordSettings = async () => {
-          try {
-            const response = await fetch(`/api/admin/churches/${churchId}/record-settings`, {
-              credentials: 'include',
-              cache: 'no-cache',
-            });
-            if (response.ok) {
-              const data = await response.json();
-              if (data.settings) {
-                const safeObj = (val: any) => (val && typeof val === 'object' && !Array.isArray(val)) ? val : {};
-                setRecordSettings(prev => ({
-                  ...prev,
-                  ...safeObj(data.settings),
-                  logo: {
-                    ...prev.logo,
-                    ...safeObj(data.settings.logo),
-                  },
-                  calendar: {
-                    ...prev.calendar,
-                    ...safeObj(data.settings.calendar),
-                  },
-                  omLogo: {
-                    ...prev.omLogo,
-                    ...safeObj(data.settings.omLogo),
-                  },
-                  headerText: {
-                    fontFamily: 'Arial, sans-serif',
-                    fontSize: 16,
-                    fontWeight: 700,
-                    color: '#4C1D95',
-                    ...safeObj(data.settings.headerText),
-                    column: data.settings.headerText?.column ?? 1,
-                  },
-                  recordImages: {
-                    column: data.settings.recordImages?.column ?? 1,
-                    quadrant: data.settings.recordImages?.quadrant || 'middle',
-                    horizontalPosition: data.settings.recordImages?.horizontalPosition || 'center',
-                    width: data.settings.recordImages?.width ?? 160,
-                    height: data.settings.recordImages?.height ?? 160,
-                  },
-                  backgroundImage: {
-                    enabled: data.settings.backgroundImage?.enabled ?? true,
-                    column: data.settings.backgroundImage?.column ?? 0,
-                    images: data.settings.backgroundImage?.images || [],
-                    currentIndex: data.settings.backgroundImage?.currentIndex ?? 0,
-                    quadrant: data.settings.backgroundImage?.quadrant || 'middle',
-                  },
-                  g1Image: {
-                    enabled: data.settings.g1Image?.enabled ?? true,
-                    column: data.settings.g1Image?.column ?? 0,
-                    images: data.settings.g1Image?.images || [],
-                    currentIndex: data.settings.g1Image?.currentIndex ?? 0,
-                    quadrant: data.settings.g1Image?.quadrant || 'middle',
-                  },
-                  imageLibrary: {
-                    logo: data.settings.imageLibrary?.logo || [],
-                    omLogo: data.settings.imageLibrary?.omLogo || [],
-                    baptism: data.settings.imageLibrary?.baptism || [],
-                    marriage: data.settings.imageLibrary?.marriage || [],
-                    funeral: data.settings.imageLibrary?.funeral || [],
-                    bg: data.settings.imageLibrary?.bg || [],
-                    g1: data.settings.imageLibrary?.g1 || [],
-                    recordImage: data.settings.imageLibrary?.recordImage || [],
-                  },
-                  currentImageIndex: {
-                    logo: data.settings.currentImageIndex?.logo ?? 0,
-                    omLogo: data.settings.currentImageIndex?.omLogo ?? 0,
-                    baptism: data.settings.currentImageIndex?.baptism ?? 0,
-                    marriage: data.settings.currentImageIndex?.marriage ?? 0,
-                    funeral: data.settings.currentImageIndex?.funeral ?? 0,
-                    bg: data.settings.currentImageIndex?.bg ?? 0,
-                    g1: data.settings.currentImageIndex?.g1 ?? 0,
-                    recordImage: data.settings.currentImageIndex?.recordImage ?? 0,
-                  },
-                }));
-              }
-            }
-          } catch (err) {
-            console.error('Error reloading record settings:', err);
-          }
-        };
-        loadRecordSettings();
-      }
-
-      // Dispatch custom event to notify other pages that settings have been updated
-      window.dispatchEvent(new CustomEvent('recordSettingsUpdated', {
-        detail: { churchId, timestamp: Date.now() }
-      }));
-
-      // Clear the file from state after successful save
-      if (recordSettings.logo.file) {
-        setRecordSettings(prev => ({
-          ...prev,
-          logo: { ...prev.logo, file: null }
-        }));
-      }
-    } catch (err: any) {
-      console.error('Error saving record settings:', err);
-      setError(err?.message || 'Failed to save record settings');
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  // Load record settings
-  useEffect(() => {
-    if (!churchId) {
-      setError('Invalid church ID. Please check the URL and ensure you have access to this church.');
-      return;
-    }
-
-    const loadRecordSettings = async () => {
-      try {
-        const response = await fetchWithChurchContext(`/api/admin/churches/${churchId}/record-settings`, {
-          churchId,
-          credentials: 'include',
-        });
-        if (response.ok) {
-          const data = await response.json();
-          if (data.settings) {
-            // Helper: only spread objects, not strings (guards against legacy corrupt data)
-            const safeObj = (val: any) => (val && typeof val === 'object' && !Array.isArray(val)) ? val : {};
-
-            // Merge loaded settings with defaults to ensure all properties exist
-            setRecordSettings(prev => ({
-              ...prev,
-              ...safeObj(data.settings),
-              logo: {
-                ...prev.logo,
-                ...safeObj(data.settings.logo),
-              },
-              calendar: {
-                ...prev.calendar,
-                ...safeObj(data.settings.calendar),
-              },
-              omLogo: {
-                ...prev.omLogo,
-                ...safeObj(data.settings.omLogo),
-              },
-              headerText: {
-                fontFamily: 'Arial, sans-serif',
-                fontSize: 16,
-                fontWeight: 700,
-                color: '#4C1D95',
-                x: 0,
-                y: 0,
-                ...safeObj(data.settings.headerText),
-                column: data.settings.headerText?.column ?? 1,
-              },
-              recordImages: {
-                column: data.settings.recordImages?.column ?? 1,
-                // Handle both old format (baptism/marriage/funeral) and new format (x, y)
-                x: data.settings.recordImages?.x ?? data.settings.recordImages?.baptism?.x ?? 0,
-                y: data.settings.recordImages?.y ?? data.settings.recordImages?.baptism?.y ?? 0,
-                width: data.settings.recordImages?.width ?? 60,
-                height: data.settings.recordImages?.height ?? 60,
-              },
-              backgroundImage: {
-                enabled: true,
-                column: 0,
-                images: [],
-                currentIndex: 0,
-                ...safeObj(data.settings.backgroundImage),
-              },
-              g1Image: {
-                enabled: true,
-                column: 0,
-                images: [],
-                currentIndex: 0,
-                ...safeObj(data.settings.g1Image),
-              },
-              imageLibrary: {
-                logo: [],
-                omLogo: [],
-                baptism: [],
-                marriage: [],
-                funeral: [],
-                bg: [],
-                g1: [],
-                ...safeObj(data.settings.imageLibrary),
-              },
-              currentImageIndex: {
-                logo: 0,
-                omLogo: 0,
-                baptism: 0,
-                marriage: 0,
-                funeral: 0,
-                bg: 0,
-                g1: 0,
-                ...safeObj(data.settings.currentImageIndex),
-              },
-            }));
-          }
-        }
-      } catch (err) {
-        console.error('Error loading record settings:', err);
-      }
-    };
-    if (churchId) {
-      loadRecordSettings();
-    }
-  }, [churchId]);
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: theme.palette.background.default }}>
@@ -1335,70 +801,17 @@ const FieldMapperPage: React.FC = () => {
         )}
       </Box>
 
-      {/* Export to Template Dialog */}
-      <Dialog open={exportDialogOpen} onClose={() => !exporting && setExportDialogOpen(false)} maxWidth="sm" fullWidth>
-          <DialogTitle>Export to Template</DialogTitle>
-          <DialogContent>
-            <Box sx={{ pt: 2 }}>
-              <Typography variant="body2" color="text.secondary" gutterBottom>
-                This will create or update a global template from the current table schema and field mapper configuration.
-              </Typography>
-
-              <Box sx={{ mt: 3, mb: 2 }}>
-                <Typography variant="subtitle2" gutterBottom>Template Details:</Typography>
-                <Typography variant="body2">
-                  <strong>Table:</strong> {tableName}
-                </Typography>
-                <Typography variant="body2">
-                  <strong>Language:</strong> {exportLanguage}
-                </Typography>
-                <Typography variant="body2">
-                  <strong>Template Slug:</strong> {exportLanguage}_{tableName}
-                </Typography>
-                <Typography variant="body2">
-                  <strong>Template Name:</strong> {
-                    exportLanguage === 'en' ? 'English' :
-                    exportLanguage === 'gr' ? 'Greek' :
-                    exportLanguage === 'ru' ? 'Russian' :
-                    exportLanguage === 'ro' ? 'Romanian' :
-                    exportLanguage === 'ka' ? 'Georgian' : exportLanguage.toUpperCase()
-                  } {getRecordType(tableName).charAt(0).toUpperCase() + getRecordType(tableName).slice(1)} Records
-                </Typography>
-              </Box>
-
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={exportOverwrite}
-                    onChange={(e) => setExportOverwrite(e.target.checked)}
-                    disabled={exporting}
-                  />
-                }
-                label="Overwrite existing template if it exists"
-              />
-
-              <Alert severity="warning" sx={{ mt: 2 }}>
-                <Typography variant="body2">
-                  <strong>Warning:</strong> This will create a global template available to all churches.
-                  Only export standardized, production-ready configurations. Church-specific customizations should not be exported.
-                </Typography>
-              </Alert>
-            </Box>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setExportDialogOpen(false)} disabled={exporting}>
-              Cancel
-            </Button>
-            <Button
-              onClick={handleExportToTemplate}
-              variant="contained"
-              disabled={exporting}
-              startIcon={exporting ? <CircularProgress size={16} /> : <DownloadIcon />}
-            >
-              {exporting ? 'Exporting...' : 'Export Template'}
-            </Button>
-          </DialogActions>
-        </Dialog>
+      <ExportTemplateDialog
+        open={exportDialogOpen}
+        onClose={() => setExportDialogOpen(false)}
+        onExport={handleExportToTemplate}
+        exporting={exporting}
+        tableName={tableName}
+        exportLanguage={exportLanguage}
+        exportOverwrite={exportOverwrite}
+        setExportOverwrite={setExportOverwrite}
+        getRecordType={getRecordType}
+      />
     </Box>
   );
 };
