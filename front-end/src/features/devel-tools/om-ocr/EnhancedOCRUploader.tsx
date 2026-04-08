@@ -16,377 +16,44 @@ import {
   Box,
   Typography,
   Button,
-  Card,
-  CardContent,
   Alert,
-  CircularProgress,
   FormControl,
-  InputLabel,
   Select,
   MenuItem,
   Chip,
-  IconButton,
-  LinearProgress,
   Paper,
   Stack,
   Tooltip,
   Switch,
   FormControlLabel,
-  Collapse,
-  Divider,
   alpha,
   useTheme,
   Snackbar,
-  Radio,
-  RadioGroup,
-  FormLabel,
 } from '@mui/material';
 import {
   IconUpload,
-  IconX,
-  IconRefresh,
-  IconCheck,
-  IconAlertCircle,
   IconPlayerPlay,
   IconPlayerPause,
   IconTrash,
-  IconChevronDown,
-  IconChevronUp,
   IconSettings,
   IconDatabase,
   IconAlertTriangle,
   IconPhoto,
-  IconClock,
-  IconRotateClockwise
 } from '@tabler/icons-react';
 import { useAuth } from '@/context/AuthContext';
 import { apiClient } from '@/shared/lib/axiosInstance';
-// @deprecated - Replaced by Workbench
-// import InspectionPanel from './components/InspectionPanel';
-// import MappingTab from './components/MappingTab';
-// import ProcessedImagesTable from './components/ProcessedImagesTable';
-import RecordSchemaInfoPopover from './components/RecordSchemaInfoPopover';
 import { useOcrJobs } from './hooks/useOcrJobs';
 import { WorkbenchProvider } from './context/WorkbenchContext';
 import OcrWorkbench from './components/workbench/OcrWorkbench';
 import type { OCRJobRow } from './types/ocrJob';
 import type { JobDetail } from './types/inspection';
-import { getDefaultColumns } from './config/defaultRecordColumns';
 import { OcrSelectionProvider } from './context/OcrSelectionContext';
 import OcrSetupGate from './components/OcrSetupGate';
+import type { UploadFile, Church, OCRSettings, DocumentProcessingSettings, ExtractionAction } from './EnhancedOCRUploader/types';
+import { formatFileSize, generateId, FileCard, BatchProgress } from './EnhancedOCRUploader/components';
+import SettingsPanel from './EnhancedOCRUploader/SettingsPanel';
+import AdvancedOptionsPanel from './EnhancedOCRUploader/AdvancedOptionsPanel';
 
-// Types
-interface UploadFile {
-  id: string;
-  file: File;
-  name: string;
-  size: number;
-  recordType: 'baptism' | 'marriage' | 'funeral';
-  status: 'queued' | 'uploading' | 'processing' | 'complete' | 'error';
-  progress: number;
-  error?: string;
-  thumbnail?: string;
-  jobId?: string; // Backend job ID after upload
-  isSimulation?: boolean; // Flag for simulation mode results
-}
-
-interface Church {
-  id: number;
-  name: string;
-  database_name: string;
-}
-
-interface OCRSettings {
-  engine: string;
-  dpi: number;
-  confidenceThreshold: number;
-  autoDetectLanguage: boolean;
-  forceGrayscale: boolean;
-  deskewImages: boolean;
-  language: string;
-}
-
-interface DocumentProcessingSettings {
-  transcriptionMode: 'exact' | 'fix-spelling';
-  textExtractionScope: 'all' | 'handwritten-only';
-  formattingMode: 'improve-formatting' | 'preserve-original';
-}
-
-type ExtractionAction = 'full-text' | 'tables' | 'custom-data';
-
-// Utility functions
-const formatFileSize = (bytes: number): string => {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
-};
-
-const generateId = (): string => Math.random().toString(36).substring(2, 11);
-
-// Status Badge Component
-const StatusBadge: React.FC<{ status: UploadFile['status'] }> = ({ status }) => {
-  const theme = useTheme();
-  
-  const config = {
-    queued: { label: 'Queued', color: theme.palette.grey[500], icon: <IconClock size={14} /> },
-    uploading: { label: 'Uploading', color: theme.palette.info.main, icon: <CircularProgress size={14} sx={{ color: 'inherit' }} /> },
-    processing: { label: 'Processing', color: theme.palette.warning.main, icon: <CircularProgress size={14} sx={{ color: 'inherit' }} /> },
-    complete: { label: 'Complete', color: theme.palette.success.main, icon: <IconCheck size={14} /> },
-    error: { label: 'Error', color: theme.palette.error.main, icon: <IconAlertCircle size={14} /> }
-  };
-
-  const { label, color, icon } = config[status];
-
-  return (
-    <Chip
-      size="small"
-      label={label}
-      icon={<Box sx={{ display: 'flex', color: 'inherit' }}>{icon}</Box>}
-      sx={{
-        bgcolor: alpha(color, 0.1),
-        color: color,
-        borderColor: alpha(color, 0.3),
-        border: '1px solid',
-        fontWeight: 500,
-        fontSize: '0.75rem',
-        '& .MuiChip-icon': { color: 'inherit' }
-      }}
-    />
-  );
-};
-
-// Record Type Badge Component
-const RecordTypeBadge: React.FC<{ type: 'baptism' | 'marriage' | 'funeral' }> = ({ type }) => {
-  const theme = useTheme();
-  
-  const colors = {
-    baptism: theme.palette.primary.main,
-    marriage: '#9c27b0',
-    funeral: theme.palette.grey[700]
-  };
-
-  return (
-    <Chip
-      size="small"
-      label={type.charAt(0).toUpperCase() + type.slice(1)}
-      sx={{
-        bgcolor: alpha(colors[type], 0.1),
-        color: colors[type],
-        fontWeight: 600,
-        fontSize: '0.7rem',
-        textTransform: 'capitalize'
-      }}
-    />
-  );
-};
-
-// File Card Component
-const FileCard: React.FC<{
-  file: UploadFile;
-  isSelected?: boolean;
-  onRecordTypeChange: (id: string, type: 'baptism' | 'marriage' | 'funeral') => void;
-  onRemove: (id: string) => void;
-  onRetry: (id: string) => void;
-  onSelect?: (id: string) => void;
-}> = ({ file, isSelected, onRecordTypeChange, onRemove, onRetry, onSelect }) => {
-  const theme = useTheme();
-  const isClickable = file.status === 'complete' && onSelect;
-
-  return (
-    <Paper
-      elevation={0}
-      onClick={() => isClickable && onSelect(file.id)}
-      sx={{
-        p: 2,
-        mb: 1.5,
-        border: '2px solid',
-        borderColor: isSelected ? 'primary.main' : file.status === 'error' ? 'error.light' : 'divider',
-        borderRadius: 2,
-        bgcolor: isSelected 
-          ? alpha(theme.palette.primary.main, 0.05) 
-          : file.status === 'error' 
-            ? alpha(theme.palette.error.main, 0.02) 
-            : 'background.paper',
-        transition: 'all 0.2s ease',
-        cursor: isClickable ? 'pointer' : 'default',
-        '&:hover': {
-          boxShadow: theme.shadows[2],
-          borderColor: isSelected ? 'primary.dark' : file.status === 'error' ? 'error.main' : 'primary.light'
-        }
-      }}
-    >
-      <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
-        {/* Thumbnail */}
-        <Box
-          sx={{
-            width: 64,
-            height: 64,
-            borderRadius: 1.5,
-            bgcolor: 'action.hover',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            overflow: 'hidden',
-            flexShrink: 0,
-            border: '1px solid',
-            borderColor: 'divider'
-          }}
-        >
-          {file.thumbnail ? (
-            <img src={file.thumbnail} alt={file.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          ) : (
-            <IconPhoto size={24} color={theme.palette.grey[400]} />
-          )}
-        </Box>
-
-        {/* File Info */}
-        <Box sx={{ flex: 1, minWidth: 0 }}>
-          <Typography variant="body2" fontWeight={600} noWrap title={file.name}>
-            {file.name}
-          </Typography>
-          <Typography variant="caption" color="text.secondary">
-            {formatFileSize(file.size)}
-          </Typography>
-          
-          <Stack direction="row" spacing={1} sx={{ mt: 1 }} alignItems="center" flexWrap="wrap">
-            <RecordTypeBadge type={file.recordType} />
-            {file.isSimulation && (
-              <Chip
-                label="SIMULATION"
-                size="small"
-                color="info"
-                sx={{ fontSize: '0.7rem', height: 20, fontWeight: 600 }}
-              />
-            )}
-            <FormControl size="small" sx={{ minWidth: 100 }}>
-              <Select
-                value={file.recordType}
-                onChange={(e) => onRecordTypeChange(file.id, e.target.value as any)}
-                disabled={file.status !== 'queued'}
-                sx={{ 
-                  height: 28, 
-                  fontSize: '0.75rem',
-                  '& .MuiSelect-select': { py: 0.5 }
-                }}
-              >
-                <MenuItem value="baptism">Baptism</MenuItem>
-                <MenuItem value="marriage">Marriage</MenuItem>
-                <MenuItem value="funeral">Funeral</MenuItem>
-              </Select>
-            </FormControl>
-          </Stack>
-
-          {/* Progress Bar */}
-          {(file.status === 'uploading' || file.status === 'processing') && (
-            <Box sx={{ mt: 1.5 }}>
-              <LinearProgress 
-                variant="determinate" 
-                value={file.progress} 
-                sx={{ 
-                  height: 6, 
-                  borderRadius: 3,
-                  bgcolor: alpha(theme.palette.primary.main, 0.1),
-                  '& .MuiLinearProgress-bar': {
-                    borderRadius: 3,
-                    transition: 'transform 0.3s ease'
-                  }
-                }}
-              />
-              <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
-                {file.progress}%
-              </Typography>
-            </Box>
-          )}
-
-          {/* Error Message */}
-          {file.status === 'error' && file.error && (
-            <Alert 
-              severity="error" 
-              sx={{ mt: 1, py: 0, '& .MuiAlert-message': { fontSize: '0.75rem' } }}
-              action={
-                <Button size="small" onClick={() => onRetry(file.id)} startIcon={<IconRotateClockwise size={14} />}>
-                  Retry
-                </Button>
-              }
-            >
-              {file.error}
-            </Alert>
-          )}
-        </Box>
-
-        {/* Actions */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-          <StatusBadge status={file.status} />
-          <IconButton 
-            size="small" 
-            onClick={() => onRemove(file.id)}
-            disabled={file.status === 'uploading' || file.status === 'processing'}
-            sx={{ color: 'text.secondary' }}
-          >
-            <IconX size={18} />
-          </IconButton>
-        </Box>
-      </Box>
-    </Paper>
-  );
-};
-
-// Batch Progress Component
-const BatchProgress: React.FC<{
-  total: number;
-  completed: number;
-  processing: boolean;
-}> = ({ total, completed, processing }) => {
-  const theme = useTheme();
-  const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
-
-  return (
-    <Paper
-      elevation={3}
-      sx={{
-        p: 2,
-        bgcolor: 'background.paper',
-        borderRadius: 2,
-        border: '1px solid',
-        borderColor: 'divider'
-      }}
-    >
-      <Stack direction="row" alignItems="center" spacing={2}>
-        {processing && (
-          <CircularProgress size={20} sx={{ color: 'primary.main' }} />
-        )}
-        <Typography variant="subtitle2" fontWeight={600}>
-          Batch Progress
-        </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ ml: 'auto' }}>
-          {completed} of {total}
-        </Typography>
-      </Stack>
-      <LinearProgress
-        variant="determinate"
-        value={percentage}
-        sx={{
-          mt: 1.5,
-          height: 10,
-          borderRadius: 5,
-          bgcolor: alpha(theme.palette.primary.main, 0.1),
-          '& .MuiLinearProgress-bar': {
-            borderRadius: 5,
-            background: `linear-gradient(90deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`
-          }
-        }}
-      />
-      <Stack direction="row" justifyContent="space-between" sx={{ mt: 1 }}>
-        <Typography variant="caption" color="text.secondary">
-          {completed} images processed
-        </Typography>
-        <Typography variant="caption" color="primary.main" fontWeight={600}>
-          {percentage}%
-        </Typography>
-      </Stack>
-    </Paper>
-  );
-};
 
 // Main Component
 const EnhancedOCRUploader: React.FC = () => {
@@ -1036,157 +703,15 @@ const EnhancedOCRUploader: React.FC = () => {
 
       <Box sx={{ maxWidth: 1200, mx: 'auto', px: 3 }}>
         {/* Settings Section */}
-        <Paper
-          elevation={0}
-          sx={{
-            mb: 3,
-            borderRadius: 2,
-            border: '1px solid',
-            borderColor: 'divider',
-            overflow: 'hidden',
-          }}
-        >
-          <Box
-            sx={{
-              p: 2,
-              display: 'flex',
-              alignItems: 'center',
-              cursor: 'pointer',
-              '&:hover': { bgcolor: 'action.hover' }
-            }}
-            onClick={() => setShowAdvanced(!showAdvanced)}
-          >
-            <IconSettings size={20} style={{ marginRight: 12 }} />
-            <Typography variant="subtitle1" fontWeight={600}>
-              Settings
-            </Typography>
-            <Box sx={{ ml: 'auto' }}>
-              {showAdvanced ? <IconChevronUp size={20} /> : <IconChevronDown size={20} />}
-            </Box>
-          </Box>
-          
-          <Collapse in={showAdvanced}>
-            <Divider />
-            <Box sx={{ p: 3 }}>
-              {/* Document Processing Settings */}
-              <Box sx={{ mb: 3 }}>
-                <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 2 }}>
-                  <Typography variant="subtitle2" fontWeight={600}>
-                    Document processing
-                  </Typography>
-                  <Chip label="Customize AI" size="small" color="primary" variant="outlined" />
-                  <Chip label="Experimental" size="small" color="warning" variant="outlined" />
-                </Stack>
-                
-                <Stack spacing={2.5}>
-                  <FormControl fullWidth>
-                    <FormLabel sx={{ mb: 1, fontWeight: 500 }}>Transcription mode</FormLabel>
-                    <Select
-                      value={docSettings.transcriptionMode}
-                      onChange={(e) => {
-                        setDocSettings(s => ({ ...s, transcriptionMode: e.target.value as any }));
-                        showToast('Settings saved', 'success');
-                      }}
-                      size="small"
-                    >
-                      <MenuItem value="exact">Transcribe exactly as written</MenuItem>
-                      <MenuItem value="fix-spelling">Fix spelling mistakes</MenuItem>
-                    </Select>
-                  </FormControl>
-
-                  <FormControl fullWidth>
-                    <FormLabel sx={{ mb: 1, fontWeight: 500 }}>Text extraction scope</FormLabel>
-                    <Select
-                      value={docSettings.textExtractionScope}
-                      onChange={(e) => {
-                        setDocSettings(s => ({ ...s, textExtractionScope: e.target.value as any }));
-                        if (e.target.value === 'handwritten-only') {
-                          showToast('Handwritten-only not supported for this engine yet.', 'warning');
-                        } else {
-                          showToast('Settings saved', 'success');
-                        }
-                      }}
-                      size="small"
-                    >
-                      <MenuItem value="all">Extract all text</MenuItem>
-                      <MenuItem value="handwritten-only">Extract handwritten text only</MenuItem>
-                    </Select>
-                  </FormControl>
-
-                  <FormControl fullWidth>
-                    <FormLabel sx={{ mb: 1, fontWeight: 500 }}>Formatting mode</FormLabel>
-                    <Select
-                      value={docSettings.formattingMode}
-                      onChange={(e) => {
-                        setDocSettings(s => ({ ...s, formattingMode: e.target.value as any }));
-                        showToast('Settings saved', 'success');
-                      }}
-                      size="small"
-                    >
-                      <MenuItem value="improve-formatting">Improving formatting for better readability</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Stack>
-              </Box>
-
-              <Divider sx={{ my: 3 }} />
-
-              {/* Action Selector */}
-              <Box>
-                <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 2 }}>
-                  Choose an action
-                </Typography>
-                <RadioGroup
-                  value={extractionAction}
-                  onChange={(e) => setExtractionAction(e.target.value as ExtractionAction)}
-                >
-                  <FormControlLabel
-                    value="full-text"
-                    control={<Radio />}
-                    label={
-                      <Box>
-                        <Typography variant="body2" fontWeight={500}>
-                          Extract Full Text
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          Extract all text from the document
-                        </Typography>
-                      </Box>
-                    }
-                  />
-                  <FormControlLabel
-                    value="tables"
-                    control={<Radio disabled />}
-                    label={
-                      <Box>
-                        <Typography variant="body2" fontWeight={500} color="text.disabled">
-                          Extract Tables
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          Coming soon
-                        </Typography>
-                      </Box>
-                    }
-                  />
-                  <FormControlLabel
-                    value="custom-data"
-                    control={<Radio disabled />}
-                    label={
-                      <Box>
-                        <Typography variant="body2" fontWeight={500} color="text.disabled">
-                          Extract Custom Data
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          Coming soon
-                        </Typography>
-                      </Box>
-                    }
-                  />
-                </RadioGroup>
-              </Box>
-            </Box>
-          </Collapse>
-        </Paper>
+        <SettingsPanel
+          showAdvanced={showAdvanced}
+          setShowAdvanced={setShowAdvanced}
+          docSettings={docSettings}
+          setDocSettings={setDocSettings}
+          showToast={showToast}
+          extractionAction={extractionAction}
+          setExtractionAction={setExtractionAction}
+        />
 
         {/* SuperAdmin Church Selector */}
         {isSuperAdmin() && (
@@ -1355,203 +880,15 @@ const EnhancedOCRUploader: React.FC = () => {
         </Paper>
 
         {/* Advanced Options */}
-        <Paper elevation={0} sx={{ mb: 3, borderRadius: 2, border: '1px solid', borderColor: 'divider' }}>
-          <Box
-            sx={{ 
-              p: 2, 
-              display: 'flex', 
-              alignItems: 'center', 
-              cursor: 'pointer',
-              '&:hover': { bgcolor: 'action.hover' }
-            }}
-            onClick={() => setShowAdvanced(!showAdvanced)}
-          >
-            <IconSettings size={20} style={{ marginRight: 12 }} />
-            <Typography variant="subtitle1" fontWeight={600}>
-              Advanced Options
-            </Typography>
-            <Box sx={{ ml: 'auto' }}>
-              {showAdvanced ? <IconChevronUp size={20} /> : <IconChevronDown size={20} />}
-            </Box>
-          </Box>
-          
-          <Collapse in={showAdvanced}>
-            <Divider />
-            <Box sx={{ p: 3 }}>
-              <Stack spacing={3}>
-                <FormControlLabel
-                  control={
-                    <Switch 
-                      checked={settings.autoDetectLanguage}
-                      onChange={(e) => setSettings(s => ({ ...s, autoDetectLanguage: e.target.checked }))}
-                    />
-                  }
-                  label={
-                    <Box>
-                      <Typography variant="body2" fontWeight={500}>Auto-detect Language</Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        Automatically detect the language in record images
-                      </Typography>
-                    </Box>
-                  }
-                />
-                
-                <FormControlLabel
-                  control={
-                    <Switch 
-                      checked={settings.forceGrayscale}
-                      onChange={(e) => setSettings(s => ({ ...s, forceGrayscale: e.target.checked }))}
-                    />
-                  }
-                  label={
-                    <Box>
-                      <Typography variant="body2" fontWeight={500}>Force Grayscale Preprocessing</Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        Convert images to grayscale before OCR processing
-                      </Typography>
-                    </Box>
-                  }
-                />
-                
-                <FormControlLabel
-                  control={
-                    <Switch 
-                      checked={settings.deskewImages}
-                      onChange={(e) => setSettings(s => ({ ...s, deskewImages: e.target.checked }))}
-                    />
-                  }
-                  label={
-                    <Box>
-                      <Typography variant="body2" fontWeight={500}>Deskew Images Before OCR</Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        Automatically correct skewed or rotated images
-                      </Typography>
-                    </Box>
-                  }
-                />
-                
-                <Box>
-                  <Typography variant="body2" fontWeight={500} sx={{ mb: 1 }}>OCR Language</Typography>
-                  <FormControl sx={{ minWidth: 200 }}>
-                    <Select
-                      value={settings.language}
-                      onChange={(e) => setSettings(s => ({ ...s, language: e.target.value }))}
-                      size="small"
-                    >
-                      <MenuItem value="en">English</MenuItem>
-                      <MenuItem value="el">Greek</MenuItem>
-                      <MenuItem value="ru">Russian</MenuItem>
-                      <MenuItem value="ro">Romanian</MenuItem>
-                      <MenuItem value="sr">Serbian</MenuItem>
-                      <MenuItem value="bg">Bulgarian</MenuItem>
-                    </Select>
-                  </FormControl>
-                  <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
-                    Default language from church settings
-                  </Typography>
-                </Box>
-                
-                <Box>
-                  <Typography variant="body2" fontWeight={500} sx={{ mb: 1 }}>Upload Directory</Typography>
-                  <Paper 
-                    variant="outlined" 
-                    sx={{ 
-                      p: 1.5, 
-                      bgcolor: 'background.paper', 
-                      fontFamily: 'monospace',
-                      fontSize: '0.875rem'
-                    }}
-                  >
-                    {uploadPath}
-                  </Paper>
-                  <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
-                    Server path where images will be stored
-                  </Typography>
-                </Box>
-
-                <Divider sx={{ my: 2 }} />
-
-                {/* Sticky Defaults Section */}
-                <Box>
-                  <Typography variant="body2" fontWeight={600} sx={{ mb: 2 }}>
-                    Sticky Default Fields
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary" sx={{ mb: 2, display: 'block' }}>
-                    Restrict field mapping to default database columns for each record type
-                  </Typography>
-                  
-                  <Stack spacing={2}>
-                    {/* Baptism Records */}
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                      <RecordSchemaInfoPopover
-                        title="baptism_records"
-                        imageSrc="/images/schema-previews/baptism_records.png"
-                      />
-                      <Typography variant="body2" sx={{ flex: 1 }}>
-                        baptism_records
-                      </Typography>
-                      <FormControlLabel
-                        control={
-                          <Switch
-                            checked={stickyDefaults.baptism}
-                            onChange={(e) => setStickyDefaults(prev => ({ ...prev, baptism: e.target.checked }))}
-                            size="small"
-                          />
-                        }
-                        label="Sticky Defaults"
-                        labelPlacement="end"
-                      />
-                    </Box>
-
-                    {/* Marriage Records */}
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                      <RecordSchemaInfoPopover
-                        title="marriage_records"
-                        imageSrc="/images/schema-previews/marriage_records.png"
-                      />
-                      <Typography variant="body2" sx={{ flex: 1 }}>
-                        marriage_records
-                      </Typography>
-                      <FormControlLabel
-                        control={
-                          <Switch
-                            checked={stickyDefaults.marriage}
-                            onChange={(e) => setStickyDefaults(prev => ({ ...prev, marriage: e.target.checked }))}
-                            size="small"
-                          />
-                        }
-                        label="Sticky Defaults"
-                        labelPlacement="end"
-                      />
-                    </Box>
-
-                    {/* Funeral Records */}
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                      <RecordSchemaInfoPopover
-                        title="funeral_records"
-                        imageSrc="/images/schema-previews/funeral_records.png"
-                      />
-                      <Typography variant="body2" sx={{ flex: 1 }}>
-                        funeral_records
-                      </Typography>
-                      <FormControlLabel
-                        control={
-                          <Switch
-                            checked={stickyDefaults.funeral}
-                            onChange={(e) => setStickyDefaults(prev => ({ ...prev, funeral: e.target.checked }))}
-                            size="small"
-                          />
-                        }
-                        label="Sticky Defaults"
-                        labelPlacement="end"
-                      />
-                    </Box>
-                  </Stack>
-                </Box>
-              </Stack>
-            </Box>
-          </Collapse>
-        </Paper>
+        <AdvancedOptionsPanel
+          showAdvanced={showAdvanced}
+          setShowAdvanced={setShowAdvanced}
+          settings={settings}
+          setSettings={setSettings}
+          uploadPath={uploadPath}
+          stickyDefaults={stickyDefaults}
+          setStickyDefaults={setStickyDefaults}
+        />
 
         {/* Upload Controls */}
         {files.length > 0 && (
