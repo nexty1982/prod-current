@@ -12,75 +12,32 @@ import { apiClient } from '@/api/utils/axiosInstance';
 import Breadcrumb from '@/layouts/full/shared/breadcrumb/Breadcrumb';
 import PageContainer from '@/shared/ui/PageContainer';
 import {
-  Add as AddIcon,
   ArrowBack as BackIcon,
-  Call as CallIcon,
-  Cancel as RejectIcon,
-  CheckCircle as ApproveIcon,
-  CheckCircle as CheckIcon,
-  CheckCircleOutline as CheckOutlineIcon,
   Close as CloseIcon,
-  ContentCopy as CopyIcon,
-  Delete as DeleteIcon,
-  Description as TemplateIcon,
-  Edit as EditIcon,
-  Email as EmailIcon,
-  Event as FollowUpIcon,
-  ExpandMore as ExpandIcon,
-  Groups as MeetingIcon,
-  LinkOff as DeactivateIcon,
-  ListAlt as ChecklistIcon,
-  NoteAlt as NoteIcon,
-  Person as PersonIcon,
   Refresh as RefreshIcon,
-  Save as SaveIcon,
   Send as SendIcon,
-  Star as StarIcon,
-  SwapHoriz as StageChangeIcon,
-  Task as TaskIcon,
-  Timeline as TimelineIcon,
-  VpnKey as TokenIcon,
 } from '@mui/icons-material';
 import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
   Alert,
   alpha,
-  Avatar,
   Box,
   Button,
-  Card,
-  CardContent,
-  CardHeader,
   Chip,
   CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
-  Divider,
   FormControl,
   FormControlLabel,
-  Grid,
   IconButton,
   InputLabel,
   MenuItem,
   Paper,
   Select,
   Snackbar,
-  Stack,
-  Step,
-  StepLabel,
-  Stepper,
   Switch,
   Tab,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   Tabs,
   TextField,
   Tooltip,
@@ -89,236 +46,34 @@ import {
 } from '@mui/material';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { COLOR, EMAIL_TYPES, RECORD_TYPES } from './ChurchLifecycleDetailPage/constants';
+import type {
+  CRMChurch,
+  CRMContact,
+  CRMActivity,
+  CRMFollowUp,
+  ChurchMember,
+  ChurchToken,
+  OnboardedChurch,
+  OnboardingChecklist,
+  OnboardingEmail,
+  PipelineActivity,
+  PipelineStage,
+  ProvisioningChecklist,
+  RecordRequirement,
+  SampleTemplate,
+  SnackState,
+} from './ChurchLifecycleDetailPage/types';
+import OverviewPanel from './ChurchLifecycleDetailPage/OverviewPanel';
+import ContactsPanel from './ChurchLifecycleDetailPage/ContactsPanel';
+import ActivityPanel from './ChurchLifecycleDetailPage/ActivityPanel';
+import FollowUpsPanel from './ChurchLifecycleDetailPage/FollowUpsPanel';
+import RequirementsPanel from './ChurchLifecycleDetailPage/RequirementsPanel';
+import EmailWorkflowPanel from './ChurchLifecycleDetailPage/EmailWorkflowPanel';
+import OnboardingPanel from './ChurchLifecycleDetailPage/OnboardingPanel';
+import TimelinePanel from './ChurchLifecycleDetailPage/TimelinePanel';
 
-/* ------------------------------------------------------------------ */
-/*  Types                                                              */
-/* ------------------------------------------------------------------ */
 
-interface CRMChurch {
-  id: number;
-  name: string;
-  city: string | null;
-  state_code: string | null;
-  phone: string | null;
-  website: string | null;
-  pipeline_stage: string;
-  priority: string | null;
-  is_client: number;
-  provisioned_church_id: number | null;
-  last_contacted_at: string | null;
-  next_follow_up: string | null;
-  crm_notes: string | null;
-  jurisdiction: string | null;
-  created_at: string;
-  stage_label?: string;
-  stage_color?: string;
-  street?: string;
-  zip?: string;
-  // Extended pipeline fields
-  current_records_situation?: string | null;
-  estimated_volume?: string | null;
-  historical_import_needed?: number;
-  ocr_assistance_needed?: number;
-  public_records_needed?: number;
-  desired_launch_timeline?: string | null;
-  custom_structure_required?: number;
-  provisioning_ready?: number;
-  provisioning_completed?: number;
-  activation_date?: string | null;
-  assigned_to_user_id?: number | null;
-  discovery_notes?: string | null;
-  blockers?: string | null;
-}
-
-interface OnboardedChurch {
-  id: number;
-  name: string;
-  email: string | null;
-  phone: string | null;
-  address: string | null;
-  city: string | null;
-  state_province: string | null;
-  country: string | null;
-  jurisdiction: string | null;
-  is_active: number;
-  setup_complete: number;
-  created_at: string;
-  website: string | null;
-  db_name: string | null;
-  notes: string | null;
-}
-
-interface CRMContact {
-  id: number;
-  church_id: number;
-  first_name: string;
-  last_name: string | null;
-  role: string | null;
-  email: string | null;
-  phone: string | null;
-  is_primary: number;
-  notes: string | null;
-}
-
-interface CRMActivity {
-  id: number;
-  church_id: number;
-  activity_type: string;
-  subject: string;
-  body: string | null;
-  metadata: any;
-  created_by: number | null;
-  created_at: string;
-}
-
-interface CRMFollowUp {
-  id: number;
-  church_id: number;
-  due_date: string;
-  subject: string;
-  description: string | null;
-  status: string;
-  completed_at: string | null;
-}
-
-interface ChurchMember {
-  id: number;
-  email: string;
-  first_name: string;
-  last_name: string;
-  full_name: string;
-  role: string;
-  is_locked: number;
-  lockout_reason: string | null;
-  created_at: string;
-}
-
-interface ChurchToken {
-  id: number;
-  token: string;
-  is_active: number;
-  created_at: string;
-  created_by: string | null;
-}
-
-interface OnboardingChecklist {
-  church_created: boolean;
-  token_issued: boolean;
-  members_registered: boolean;
-  members_active: boolean;
-  setup_complete: boolean;
-}
-
-interface SampleTemplate {
-  id: number;
-  code: string;
-  name: string;
-  description: string;
-  record_type: string;
-  fields: { name: string; type: string; required: boolean; label: string }[];
-}
-
-interface PipelineStage {
-  id: number;
-  stage_key: string;
-  label: string;
-  color: string;
-  sort_order: number;
-  is_terminal: number;
-}
-
-interface RecordRequirement {
-  id: number;
-  record_type: string;
-  uses_sample: number;
-  sample_template_id: number | null;
-  custom_required: number;
-  custom_notes: string | null;
-  template_name?: string;
-}
-
-interface OnboardingEmail {
-  id: number;
-  email_type: string;
-  subject: string;
-  recipients: string;
-  status: string;
-  sent_at: string | null;
-  replied_at: string | null;
-  created_at: string;
-}
-
-interface PipelineActivity {
-  id: number;
-  activity_type: string;
-  summary: string;
-  details_json: any;
-  actor_user_id: number | null;
-  created_at: string;
-}
-
-interface ProvisioningChecklist {
-  contact_complete: boolean;
-  record_requirements_set: boolean;
-  templates_or_custom: boolean;
-  internal_review_done: boolean;
-  provisioning_email_sent: boolean;
-  response_received: boolean;
-  account_created: boolean;
-  invite_sent: boolean;
-  activated: boolean | null;
-}
-
-interface TimelineEntry {
-  id: string;
-  type: 'activity' | 'crm_activity' | 'email' | 'stage_change' | 'member' | 'token' | 'pipeline';
-  icon: React.ReactNode;
-  color: string;
-  title: string;
-  detail?: string;
-  date: string;
-}
-
-type SnackState = { open: boolean; message: string; severity: 'success' | 'error' | 'info' };
-
-/* ------------------------------------------------------------------ */
-/*  Constants                                                          */
-/* ------------------------------------------------------------------ */
-
-const COLOR = '#1565c0';
-
-const STEPPER_STEPS = ['Church Created', 'Token Issued', 'Members Registered', 'Members Active', 'Setup Complete'];
-
-const RECORD_TYPES = ['baptism', 'marriage', 'funeral', 'chrismation', 'other'] as const;
-
-const EMAIL_TYPES = [
-  { key: 'welcome', label: 'Welcome / Discovery Follow-up' },
-  { key: 'info_request', label: 'Request Missing Info' },
-  { key: 'template_confirm', label: 'Template Confirmation' },
-  { key: 'custom_review', label: 'Custom Review Needed' },
-  { key: 'provisioned', label: 'Account Provisioned' },
-  { key: 'reminder', label: 'Reminder / Follow-up' },
-];
-
-const ACTIVITY_ICONS: Record<string, React.ReactNode> = {
-  note: <NoteIcon fontSize="small" />,
-  call: <CallIcon fontSize="small" />,
-  email: <EmailIcon fontSize="small" />,
-  meeting: <MeetingIcon fontSize="small" />,
-  task: <TaskIcon fontSize="small" />,
-  stage_change: <StageChangeIcon fontSize="small" />,
-  provision: <TokenIcon fontSize="small" />,
-};
-
-const ACTIVITY_COLORS: Record<string, string> = {
-  note: '#9e9e9e',
-  call: '#4caf50',
-  email: '#2196f3',
-  meeting: '#ff9800',
-  task: '#9c27b0',
-  stage_change: '#e91e63',
-  provision: '#00bcd4',
-};
 
 /* ------------------------------------------------------------------ */
 /*  Component                                                          */
@@ -845,10 +600,6 @@ const ChurchLifecycleDetailPage: React.FC = () => {
   ];
   const visibleTabs = tabDefs.filter(t => t.show);
 
-  /* ------------------------------------------------------------------ */
-  /*  Render helpers                                                     */
-  /* ------------------------------------------------------------------ */
-
   const sectionPaper = (children: React.ReactNode) => (
     <Paper
       elevation={0}
@@ -862,989 +613,10 @@ const ChurchLifecycleDetailPage: React.FC = () => {
     </Paper>
   );
 
-  /* --- Overview Tab ------------------------------------------------- */
-  const renderOverview = () => (
-    <>
-      {/* Onboarding Stepper (if onboarded) */}
-      {hasOnboarding && checklist && sectionPaper(
-        <>
-          <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 2.5 }}>Onboarding Progress</Typography>
-          <Stepper activeStep={getActiveStep()} alternativeLabel>
-            {STEPPER_STEPS.map(label => (
-              <Step key={label}>
-                <StepLabel StepIconProps={{ sx: { '&.Mui-active': { color: COLOR }, '&.Mui-completed': { color: COLOR } } }}>
-                  {label}
-                </StepLabel>
-              </Step>
-            ))}
-          </Stepper>
-        </>
-      )}
 
-      {/* Church Information */}
-      {sectionPaper(
-        <>
-          <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 2 }}>Church Information</Typography>
-          <Grid container spacing={2.5}>
-            <Grid item xs={12} sm={6} md={3}>
-              <Typography variant="caption" color="text.secondary" fontWeight={600}>Name</Typography>
-              <Typography variant="body2">{churchName}</Typography>
-            </Grid>
-            <Grid item xs={12} sm={6} md={3}>
-              <Typography variant="caption" color="text.secondary" fontWeight={600}>Location</Typography>
-              <Typography variant="body2">
-                {[crm?.city || onboarded?.city, crm?.state_code || onboarded?.state_province].filter(Boolean).join(', ') || '—'}
-              </Typography>
-            </Grid>
-            <Grid item xs={12} sm={6} md={3}>
-              <Typography variant="caption" color="text.secondary" fontWeight={600}>Phone</Typography>
-              <Typography variant="body2">{crm?.phone || onboarded?.phone || '—'}</Typography>
-            </Grid>
-            <Grid item xs={12} sm={6} md={3}>
-              <Typography variant="caption" color="text.secondary" fontWeight={600}>Website</Typography>
-              <Typography variant="body2">{crm?.website || onboarded?.website || '—'}</Typography>
-            </Grid>
 
-            {crm && (
-              <>
-                <Grid item xs={12} sm={6} md={3}>
-                  <Typography variant="caption" color="text.secondary" fontWeight={600}>Priority</Typography>
-                  <Typography variant="body2">{crm.priority || '—'}</Typography>
-                </Grid>
-                <Grid item xs={12} sm={6} md={3}>
-                  <Typography variant="caption" color="text.secondary" fontWeight={600}>Last Contacted</Typography>
-                  <Typography variant="body2">{formatDate(crm.last_contacted_at)}</Typography>
-                </Grid>
-                <Grid item xs={12} sm={6} md={3}>
-                  <Typography variant="caption" color="text.secondary" fontWeight={600}>Next Follow-up</Typography>
-                  <Typography variant="body2">{formatDate(crm.next_follow_up)}</Typography>
-                </Grid>
-                <Grid item xs={12} sm={6} md={3}>
-                  <Typography variant="caption" color="text.secondary" fontWeight={600}>Jurisdiction</Typography>
-                  <Typography variant="body2">{crm.jurisdiction || '—'}</Typography>
-                </Grid>
-              </>
-            )}
 
-            {onboarded && (
-              <>
-                <Grid item xs={12} sm={6} md={3}>
-                  <Typography variant="caption" color="text.secondary" fontWeight={600}>Email</Typography>
-                  <Typography variant="body2">{onboarded.email || '—'}</Typography>
-                </Grid>
-                <Grid item xs={12} sm={6} md={3}>
-                  <Typography variant="caption" color="text.secondary" fontWeight={600}>Database</Typography>
-                  <Typography variant="body2" sx={{ fontFamily: 'monospace', fontSize: '0.82rem' }}>
-                    {onboarded.db_name || '—'}
-                  </Typography>
-                </Grid>
-                <Grid item xs={12} sm={6} md={3}>
-                  <Typography variant="caption" color="text.secondary" fontWeight={600}>Status</Typography>
-                  <Box>
-                    <Chip
-                      label={onboarded.is_active ? 'Active' : 'Inactive'}
-                      size="small"
-                      color={onboarded.is_active ? 'success' : 'default'}
-                      variant={onboarded.is_active ? 'filled' : 'outlined'}
-                    />
-                  </Box>
-                </Grid>
-                <Grid item xs={12} sm={6} md={3}>
-                  <Typography variant="caption" color="text.secondary" fontWeight={600}>Setup Complete</Typography>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Chip
-                      label={onboarded.setup_complete ? 'Complete' : 'Incomplete'}
-                      size="small"
-                      color={onboarded.setup_complete ? 'success' : 'warning'}
-                      variant={onboarded.setup_complete ? 'filled' : 'outlined'}
-                    />
-                    <Tooltip title={onboarded.setup_complete ? 'Mark as incomplete' : 'Mark as complete'}>
-                      <Switch
-                        size="small"
-                        checked={!!onboarded.setup_complete}
-                        disabled={togglingSetup}
-                        onChange={handleToggleSetup}
-                        sx={{
-                          '& .MuiSwitch-switchBase.Mui-checked': { color: COLOR },
-                          '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { bgcolor: COLOR },
-                        }}
-                      />
-                    </Tooltip>
-                  </Box>
-                </Grid>
-              </>
-            )}
 
-            {/* Notes */}
-            <Grid item xs={12}>
-              <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ mb: 0.5, display: 'block' }}>
-                Notes
-              </Typography>
-              <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
-                <TextField
-                  fullWidth multiline minRows={2} maxRows={5} size="small"
-                  value={notes}
-                  onChange={e => setNotes(e.target.value)}
-                  placeholder="Add notes..."
-                  InputProps={{ startAdornment: <EditIcon sx={{ mr: 1, color: 'text.disabled', fontSize: 18, mt: 0.5 }} /> }}
-                />
-                <Button
-                  variant="contained" size="small"
-                  startIcon={notesSaving ? <CircularProgress size={14} color="inherit" /> : <SaveIcon />}
-                  disabled={notesSaving || notes === notesOriginal}
-                  onClick={handleSaveNotes}
-                  sx={{ textTransform: 'none', bgcolor: COLOR, '&:hover': { bgcolor: alpha(COLOR, 0.85) }, minWidth: 80, mt: 0.5 }}
-                >
-                  Save
-                </Button>
-              </Box>
-            </Grid>
-          </Grid>
-        </>
-      )}
-
-      {/* Quick stats for follow-ups (if CRM) */}
-      {hasCrm && followUps.length > 0 && sectionPaper(
-        <>
-          <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 1.5 }}>Upcoming Follow-ups</Typography>
-          {followUps.filter(f => f.status === 'pending').slice(0, 5).map(f => {
-            const isOverdue = new Date(f.due_date) < new Date(new Date().toDateString());
-            return (
-              <Box key={f.id} sx={{ display: 'flex', alignItems: 'center', gap: 1.5, py: 0.75 }}>
-                <IconButton size="small" onClick={() => handleCompleteFollowUp(f.id)} sx={{ color: '#4caf50' }}>
-                  <CheckIcon fontSize="small" />
-                </IconButton>
-                <Box sx={{ flex: 1 }}>
-                  <Typography variant="body2" fontWeight={600}>{f.subject}</Typography>
-                  <Typography variant="caption" color={isOverdue ? 'error.main' : 'text.secondary'}>
-                    {formatDate(f.due_date)}{isOverdue ? ' (overdue)' : ''}
-                  </Typography>
-                </Box>
-              </Box>
-            );
-          })}
-        </>
-      )}
-
-      {/* Discovery & Qualification (CRM extended fields) */}
-      {hasCrm && crm && sectionPaper(
-        <>
-          <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 2 }}>Discovery & Qualification</Typography>
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={6} md={3}>
-              <Typography variant="caption" color="text.secondary" fontWeight={600}>Current Records</Typography>
-              <Typography variant="body2">{crm.current_records_situation || '—'}</Typography>
-            </Grid>
-            <Grid item xs={12} sm={6} md={3}>
-              <Typography variant="caption" color="text.secondary" fontWeight={600}>Estimated Volume</Typography>
-              <Typography variant="body2">{crm.estimated_volume || '—'}</Typography>
-            </Grid>
-            <Grid item xs={12} sm={6} md={3}>
-              <Typography variant="caption" color="text.secondary" fontWeight={600}>Launch Timeline</Typography>
-              <Typography variant="body2">{crm.desired_launch_timeline || '—'}</Typography>
-            </Grid>
-            <Grid item xs={12} sm={6} md={3}>
-              <Typography variant="caption" color="text.secondary" fontWeight={600}>Needs</Typography>
-              <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mt: 0.5 }}>
-                {crm.historical_import_needed ? <Chip label="Historical Import" size="small" variant="outlined" /> : null}
-                {crm.ocr_assistance_needed ? <Chip label="OCR Assistance" size="small" variant="outlined" /> : null}
-                {crm.public_records_needed ? <Chip label="Public Records" size="small" variant="outlined" /> : null}
-                {crm.custom_structure_required ? <Chip label="Custom Structure" size="small" color="warning" variant="outlined" /> : null}
-                {!crm.historical_import_needed && !crm.ocr_assistance_needed && !crm.public_records_needed && !crm.custom_structure_required && (
-                  <Typography variant="body2" color="text.secondary">None specified</Typography>
-                )}
-              </Box>
-            </Grid>
-            <Grid item xs={12}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Typography variant="caption" color="text.secondary" fontWeight={600}>Discovery Notes</Typography>
-                {!editingDiscovery && (
-                  <IconButton size="small" onClick={() => { setDiscoveryDraft(crm.discovery_notes || ''); setEditingDiscovery(true); }}>
-                    <EditIcon fontSize="inherit" />
-                  </IconButton>
-                )}
-              </Box>
-              {editingDiscovery ? (
-                <Box sx={{ mt: 0.5 }}>
-                  <TextField fullWidth multiline minRows={2} maxRows={6} size="small" value={discoveryDraft} onChange={e => setDiscoveryDraft(e.target.value)} />
-                  <Box sx={{ mt: 0.5, display: 'flex', gap: 1 }}>
-                    <Button size="small" variant="contained" disabled={pipelineSaving} onClick={() => handleSaveInlineField('discovery_notes', discoveryDraft)} sx={{ bgcolor: COLOR }}>Save</Button>
-                    <Button size="small" onClick={() => setEditingDiscovery(false)}>Cancel</Button>
-                  </Box>
-                </Box>
-              ) : (
-                <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', mt: 0.5 }}>{crm.discovery_notes || <em>None yet — click edit to add</em>}</Typography>
-              )}
-            </Grid>
-            <Grid item xs={12}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Typography variant="caption" color="text.secondary" fontWeight={600}>Blockers</Typography>
-                {!editingBlockers && (
-                  <IconButton size="small" onClick={() => { setBlockersDraft(crm.blockers || ''); setEditingBlockers(true); }}>
-                    <EditIcon fontSize="inherit" />
-                  </IconButton>
-                )}
-              </Box>
-              {editingBlockers ? (
-                <Box sx={{ mt: 0.5 }}>
-                  <TextField fullWidth multiline minRows={2} maxRows={4} size="small" value={blockersDraft} onChange={e => setBlockersDraft(e.target.value)} />
-                  <Box sx={{ mt: 0.5, display: 'flex', gap: 1 }}>
-                    <Button size="small" variant="contained" disabled={pipelineSaving} onClick={() => handleSaveInlineField('blockers', blockersDraft)} sx={{ bgcolor: COLOR }}>Save</Button>
-                    <Button size="small" onClick={() => setEditingBlockers(false)}>Cancel</Button>
-                  </Box>
-                </Box>
-              ) : crm.blockers ? (
-                <Alert severity="warning" sx={{ mt: 0.5 }}>{crm.blockers}</Alert>
-              ) : (
-                <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}><em>None</em></Typography>
-              )}
-            </Grid>
-          </Grid>
-        </>
-      )}
-
-      {/* Provisioning Checklist (from pipeline) */}
-      {hasCrm && provisionChecklist && sectionPaper(
-        <>
-          <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 2 }}>Provisioning Checklist</Typography>
-          <Grid container spacing={1}>
-            {[
-              { key: 'contact_complete', label: 'Contact info complete', manual: false },
-              { key: 'record_requirements_set', label: 'Record requirements defined', manual: false },
-              { key: 'templates_or_custom', label: 'Templates or custom structure confirmed', manual: false },
-              { key: 'internal_review_done', label: 'Internal review done', manual: true },
-              { key: 'provisioning_email_sent', label: 'Provisioning email sent', manual: false },
-              { key: 'response_received', label: 'Response received', manual: true },
-              { key: 'account_created', label: 'Account created', manual: false },
-              { key: 'invite_sent', label: 'Invite sent', manual: false },
-              { key: 'activated', label: 'Activated', manual: false },
-            ].map(item => {
-              const done = !!(provisionChecklist as Record<string, any>)[item.key];
-              return (
-                <Grid item xs={12} sm={6} md={4} key={item.key}>
-                  <Box
-                    sx={{
-                      display: 'flex', alignItems: 'center', gap: 1,
-                      ...(item.manual ? { cursor: 'pointer', '&:hover': { opacity: 0.7 } } : {}),
-                    }}
-                    onClick={item.manual ? () => {
-                      if (item.key === 'internal_review_done') {
-                        handleMarkProvisioning('provisioning_ready', done ? 0 : 1);
-                      }
-                    } : undefined}
-                  >
-                    <CheckIcon sx={{ fontSize: 18, color: done ? '#4caf50' : alpha('#9e9e9e', 0.4) }} />
-                    <Typography variant="body2" sx={{ color: done ? 'text.primary' : 'text.disabled' }}>
-                      {item.label}{item.manual ? ' ✎' : ''}
-                    </Typography>
-                  </Box>
-                </Grid>
-              );
-            })}
-          </Grid>
-          <Divider sx={{ my: 2 }} />
-          <Typography variant="caption" color="text.secondary" sx={{ mb: 1.5, display: 'block' }}>
-            {Object.values(provisionChecklist).filter(Boolean).length} / {Object.keys(provisionChecklist).length} complete
-          </Typography>
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            {!crm?.provisioning_ready && (
-              <Button
-                size="small" variant="outlined" color="info"
-                onClick={() => handleMarkProvisioning('provisioning_ready', 1)}
-                disabled={pipelineSaving}
-              >
-                Mark Ready for Provisioning
-              </Button>
-            )}
-            {crm?.provisioning_ready && !crm?.provisioning_completed && (
-              <Button
-                size="small" variant="contained" color="success"
-                onClick={() => handleMarkProvisioning('provisioning_completed', 1)}
-                disabled={pipelineSaving}
-              >
-                Mark Active / Provisioned
-              </Button>
-            )}
-          </Box>
-        </>
-      )}
-
-      {/* Record Requirements (from pipeline) */}
-      {pipelineRequirements.length > 0 && sectionPaper(
-        <>
-          <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 1.5 }}>Record Requirements</Typography>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-            {pipelineRequirements.map(r => (
-              <Paper key={r.id} variant="outlined" sx={{ p: 1.5, borderRadius: 1.5 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <Typography variant="body2" fontWeight={600} sx={{ textTransform: 'capitalize' }}>{r.record_type}</Typography>
-                  <Box sx={{ display: 'flex', gap: 0.5 }}>
-                    {r.uses_sample ? <Chip label={r.template_name || 'Sample Template'} size="small" color="info" variant="outlined" /> : null}
-                    {r.custom_required ? <Chip label="Custom Required" size="small" color="warning" variant="outlined" /> : null}
-                  </Box>
-                </Box>
-                {r.custom_notes && <Typography variant="caption" color="text.secondary">{r.custom_notes}</Typography>}
-              </Paper>
-            ))}
-          </Box>
-        </>
-      )}
-    </>
-  );
-
-  /* --- Contacts Tab ------------------------------------------------- */
-  const renderContacts = () => (
-    <>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <Typography variant="subtitle1" fontWeight={700}>Contacts ({contacts.length})</Typography>
-        <Button
-          variant="contained" size="small" startIcon={<AddIcon />}
-          onClick={() => {
-            setEditingContact(null);
-            setContactForm({ first_name: '', last_name: '', role: '', email: '', phone: '', is_primary: false, notes: '' });
-            setContactDialogOpen(true);
-          }}
-          sx={{ textTransform: 'none', bgcolor: COLOR, '&:hover': { bgcolor: alpha(COLOR, 0.85) } }}
-        >
-          Add Contact
-        </Button>
-      </Box>
-
-      {contacts.length === 0 ? (
-        <Typography color="text.secondary" sx={{ py: 4, textAlign: 'center' }}>No contacts yet</Typography>
-      ) : (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-          {contacts.map(c => (
-            <Paper key={c.id} variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                <Avatar sx={{ width: 36, height: 36, bgcolor: c.is_primary ? COLOR : alpha(COLOR, 0.3), fontSize: '0.85rem' }}>
-                  {(c.first_name?.[0] || '?').toUpperCase()}
-                </Avatar>
-                <Box sx={{ flex: 1 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                    <Typography variant="body2" fontWeight={600}>
-                      {c.first_name} {c.last_name || ''}
-                    </Typography>
-                    {c.is_primary === 1 && <StarIcon sx={{ fontSize: 16, color: '#ff9800' }} />}
-                  </Box>
-                  {c.role && <Typography variant="caption" color="text.secondary">{c.role}</Typography>}
-                  <Box sx={{ display: 'flex', gap: 2, mt: 0.25 }}>
-                    {c.email && <Typography variant="caption" color="text.secondary">{c.email}</Typography>}
-                    {c.phone && <Typography variant="caption" color="text.secondary">{c.phone}</Typography>}
-                  </Box>
-                </Box>
-                <Box sx={{ display: 'flex', gap: 0.5 }}>
-                  <Tooltip title="Edit">
-                    <IconButton size="small" onClick={() => {
-                      setEditingContact(c);
-                      setContactForm({
-                        first_name: c.first_name,
-                        last_name: c.last_name || '',
-                        role: c.role || '',
-                        email: c.email || '',
-                        phone: c.phone || '',
-                        is_primary: c.is_primary === 1,
-                        notes: c.notes || '',
-                      });
-                      setContactDialogOpen(true);
-                    }}>
-                      <EditIcon fontSize="small" />
-                    </IconButton>
-                  </Tooltip>
-                  <Tooltip title="Delete">
-                    <IconButton size="small" color="error" onClick={() => handleDeleteContact(c.id)}>
-                      <DeleteIcon fontSize="small" />
-                    </IconButton>
-                  </Tooltip>
-                </Box>
-              </Box>
-            </Paper>
-          ))}
-        </Box>
-      )}
-    </>
-  );
-
-  /* --- Activity Tab ------------------------------------------------- */
-  const renderActivity = () => (
-    <>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <Typography variant="subtitle1" fontWeight={700}>Activity Log ({activities.length})</Typography>
-        <Button
-          variant="contained" size="small" startIcon={<AddIcon />}
-          onClick={() => {
-            setActivityForm({ activity_type: 'note', subject: '', body: '' });
-            setActivityDialogOpen(true);
-          }}
-          sx={{ textTransform: 'none', bgcolor: COLOR, '&:hover': { bgcolor: alpha(COLOR, 0.85) } }}
-        >
-          Log Activity
-        </Button>
-      </Box>
-
-      {activities.length === 0 ? (
-        <Typography color="text.secondary" sx={{ py: 4, textAlign: 'center' }}>No activity yet</Typography>
-      ) : (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-          {activities.map(a => {
-            const aColor = ACTIVITY_COLORS[a.activity_type] || '#9e9e9e';
-            return (
-              <Box key={a.id} sx={{ display: 'flex', gap: 1.5, py: 1 }}>
-                <Avatar sx={{ width: 32, height: 32, bgcolor: alpha(aColor, isDark ? 0.25 : 0.12), color: aColor }}>
-                  {ACTIVITY_ICONS[a.activity_type] || <NoteIcon fontSize="small" />}
-                </Avatar>
-                <Box sx={{ flex: 1 }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                    <Typography variant="body2" fontWeight={600}>{a.subject}</Typography>
-                    <Typography variant="caption" color="text.secondary">{timeAgo(a.created_at)}</Typography>
-                  </Box>
-                  {a.body && <Typography variant="caption" color="text.secondary">{a.body}</Typography>}
-                  <Chip label={a.activity_type} size="small" sx={{ fontSize: '0.68rem', height: 20, mt: 0.5, bgcolor: alpha(aColor, 0.1), color: aColor }} />
-                </Box>
-              </Box>
-            );
-          })}
-        </Box>
-      )}
-    </>
-  );
-
-  /* --- Follow-ups Tab ----------------------------------------------- */
-  const renderFollowUps = () => {
-    const pending = followUps.filter(f => f.status === 'pending');
-    const completed = followUps.filter(f => f.status === 'completed');
-    return (
-      <>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-          <Typography variant="subtitle1" fontWeight={700}>
-            Follow-ups ({pending.length} pending)
-          </Typography>
-          <Button
-            variant="contained" size="small" startIcon={<AddIcon />}
-            onClick={() => {
-              setFollowUpForm({ due_date: '', subject: '', description: '' });
-              setFollowUpDialogOpen(true);
-            }}
-            sx={{ textTransform: 'none', bgcolor: COLOR, '&:hover': { bgcolor: alpha(COLOR, 0.85) } }}
-          >
-            Schedule Follow-up
-          </Button>
-        </Box>
-
-        {pending.length > 0 && (
-          <Box sx={{ mb: 2 }}>
-            {pending.map(f => {
-              const isOverdue = new Date(f.due_date) < new Date(new Date().toDateString());
-              return (
-                <Box key={f.id} sx={{ display: 'flex', alignItems: 'center', gap: 1.5, py: 1, borderBottom: '1px solid', borderColor: 'divider' }}>
-                  <IconButton size="small" onClick={() => handleCompleteFollowUp(f.id)} sx={{ color: '#4caf50' }}>
-                    <CheckIcon fontSize="small" />
-                  </IconButton>
-                  <Box sx={{ flex: 1 }}>
-                    <Typography variant="body2" fontWeight={600}>{f.subject}</Typography>
-                    {f.description && <Typography variant="caption" color="text.secondary">{f.description}</Typography>}
-                  </Box>
-                  <Chip
-                    label={formatDate(f.due_date)}
-                    size="small"
-                    color={isOverdue ? 'error' : 'default'}
-                    variant={isOverdue ? 'filled' : 'outlined'}
-                    sx={{ fontWeight: 600 }}
-                  />
-                </Box>
-              );
-            })}
-          </Box>
-        )}
-
-        {completed.length > 0 && (
-          <>
-            <Typography variant="caption" color="text.secondary" sx={{ mt: 2, mb: 1, display: 'block' }}>
-              Completed ({completed.length})
-            </Typography>
-            {completed.map(f => (
-              <Box key={f.id} sx={{ py: 0.75, opacity: 0.6 }}>
-                <Typography variant="body2" sx={{ textDecoration: 'line-through' }}>{f.subject}</Typography>
-                <Typography variant="caption" color="text.secondary">{formatDate(f.completed_at)}</Typography>
-              </Box>
-            ))}
-          </>
-        )}
-
-        {followUps.length === 0 && (
-          <Typography color="text.secondary" sx={{ py: 4, textAlign: 'center' }}>No follow-ups scheduled</Typography>
-        )}
-      </>
-    );
-  };
-
-  /* --- Record Requirements Tab --------------------------------------- */
-  const renderRequirements = () => (
-    <>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <Typography variant="subtitle1" fontWeight={700}>Record Structure Requirements ({pipelineRequirements.length})</Typography>
-        <Button
-          variant="contained" size="small" startIcon={<AddIcon />}
-          onClick={() => {
-            setReqForm({ record_type: 'baptism', uses_sample: false, sample_template_id: null, custom_required: false, custom_notes: '', review_required: false });
-            setReqDialogOpen(true);
-          }}
-          sx={{ textTransform: 'none', bgcolor: COLOR, '&:hover': { bgcolor: alpha(COLOR, 0.85) } }}
-        >
-          Add Requirement
-        </Button>
-      </Box>
-
-      {pipelineRequirements.length === 0 ? (
-        <Alert severity="info" sx={{ mb: 3 }}>No record requirements set yet. Add requirements to specify which record types this church needs.</Alert>
-      ) : (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, mb: 3 }}>
-          {pipelineRequirements.map(req => (
-            <Paper key={req.id} variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <Box>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
-                    <Typography fontWeight={600} sx={{ textTransform: 'capitalize' }}>{req.record_type}</Typography>
-                    {req.uses_sample ? (
-                      <Chip label={`Template: ${req.template_name || 'Standard'}`} size="small" color="success" variant="outlined" />
-                    ) : req.custom_required ? (
-                      <Chip label="Custom Structure" size="small" color="warning" variant="outlined" />
-                    ) : null}
-                  </Box>
-                  {req.custom_notes && (
-                    <Typography variant="body2" color="text.secondary" sx={{ mt: 1, whiteSpace: 'pre-wrap' }}>{req.custom_notes}</Typography>
-                  )}
-                </Box>
-                <Tooltip title="Remove">
-                  <IconButton size="small" color="error" onClick={() => handleDeleteRequirement(req.id)}>
-                    <DeleteIcon fontSize="small" />
-                  </IconButton>
-                </Tooltip>
-              </Box>
-            </Paper>
-          ))}
-        </Box>
-      )}
-
-      {/* Available Templates Preview */}
-      {sampleTemplates.length > 0 && (
-        <>
-          <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 1.5 }}>Available Sample Templates</Typography>
-          <Grid container spacing={2}>
-            {sampleTemplates.map(tmpl => (
-              <Grid item xs={12} sm={6} key={tmpl.id}>
-                <Accordion>
-                  <AccordionSummary expandIcon={<ExpandIcon />}>
-                    <Box>
-                      <Typography fontWeight={600}>{tmpl.name}</Typography>
-                      <Typography variant="caption" color="text.secondary">{tmpl.record_type} · {tmpl.fields.length} fields</Typography>
-                    </Box>
-                  </AccordionSummary>
-                  <AccordionDetails>
-                    <Typography variant="body2" sx={{ mb: 1 }}>{tmpl.description}</Typography>
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-                      {tmpl.fields.map(f => (
-                        <Typography key={f.name} variant="caption">
-                          {f.required ? '●' : '○'} {f.label} ({f.type})
-                        </Typography>
-                      ))}
-                    </Box>
-                  </AccordionDetails>
-                </Accordion>
-              </Grid>
-            ))}
-          </Grid>
-        </>
-      )}
-    </>
-  );
-
-  /* --- Email Workflow Tab ------------------------------------------- */
-  const renderEmailWorkflow = () => (
-    <>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2, flexWrap: 'wrap', gap: 1 }}>
-        <Box>
-          <Typography variant="subtitle1" fontWeight={700}>Email Correspondence ({pipelineEmails.length})</Typography>
-          <Typography variant="caption" color="text.secondary">Track emails sent outside this system — drafts and status updates are for logging only</Typography>
-        </Box>
-        <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
-          {EMAIL_TYPES.map(et => (
-            <Button key={et.key} size="small" variant="outlined" onClick={() => openEmailComposer(et.key)}
-              sx={{ textTransform: 'none', fontSize: '0.75rem' }}
-            >
-              {et.label}
-            </Button>
-          ))}
-        </Box>
-      </Box>
-
-      {pipelineEmails.length === 0 ? (
-        <Alert severity="info">No emails yet. Use the buttons above to draft a formal email.</Alert>
-      ) : (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-          {pipelineEmails.map(email => (
-            <Paper key={email.id} variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <Box sx={{ flex: 1 }}>
-                  <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mb: 0.5, flexWrap: 'wrap' }}>
-                    <Chip label={email.email_type.replace(/_/g, ' ')} size="small" sx={{ textTransform: 'capitalize' }} />
-                    <Chip
-                      label={email.status.replace(/_/g, ' ')}
-                      size="small"
-                      color={
-                        email.status === 'completed' ? 'success' :
-                        email.status === 'sent' ? 'info' :
-                        email.status === 'replied' ? 'primary' :
-                        email.status === 'awaiting_response' ? 'warning' : 'default'
-                      }
-                    />
-                    <Typography variant="caption" color="text.secondary">
-                      {formatDateTime(email.sent_at || email.created_at)}
-                    </Typography>
-                  </Box>
-                  <Typography variant="body2" fontWeight={600}>{email.subject}</Typography>
-                  <Typography variant="caption" color="text.secondary">To: {email.recipients}</Typography>
-                </Box>
-                <Box sx={{ display: 'flex', gap: 0.5, ml: 2 }}>
-                  {email.status === 'draft' && (
-                    <Tooltip title="Log as Sent">
-                      <IconButton size="small" color="primary" onClick={() => handleUpdateEmailStatus(email.id, 'sent')}>
-                        <SendIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
-                  )}
-                  {email.status === 'sent' && (
-                    <Tooltip title="Log Reply Received">
-                      <IconButton size="small" color="success" onClick={() => handleUpdateEmailStatus(email.id, 'replied')}>
-                        <CheckIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
-                  )}
-                  {(email.status === 'sent' || email.status === 'awaiting_response') && (
-                    <Tooltip title="Log as Awaiting Response">
-                      <IconButton size="small" color="warning" onClick={() => handleUpdateEmailStatus(email.id, 'awaiting_response')}>
-                        <TimelineIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
-                  )}
-                  {email.status !== 'completed' && (
-                    <Tooltip title="Log as Completed">
-                      <IconButton size="small" onClick={() => handleUpdateEmailStatus(email.id, 'completed')}>
-                        <CheckOutlineIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
-                  )}
-                </Box>
-              </Box>
-            </Paper>
-          ))}
-        </Box>
-      )}
-    </>
-  );
-
-  /* --- Onboarding Tab ----------------------------------------------- */
-  const renderOnboarding = () => (
-    <>
-      {/* Members */}
-      <Paper
-        elevation={0}
-        sx={{ mb: 2.5, overflow: 'hidden', border: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'}`, borderRadius: 2 }}
-      >
-        <Box sx={{ px: 2.5, py: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Typography variant="subtitle1" fontWeight={700}>Members</Typography>
-          <Box sx={{ display: 'flex', gap: 1.5 }}>
-            <Chip label={`${totalMembers} total`} size="small" variant="outlined" sx={{ fontWeight: 600 }} />
-            <Chip label={`${activeMembers} active`} size="small"
-              sx={{ fontWeight: 600, bgcolor: alpha('#4caf50', isDark ? 0.2 : 0.1), color: '#4caf50', border: `1px solid ${alpha('#4caf50', 0.3)}` }}
-            />
-            {pendingMembers > 0 && (
-              <Chip label={`${pendingMembers} pending`} size="small"
-                sx={{ fontWeight: 600, bgcolor: alpha('#ff9800', isDark ? 0.2 : 0.1), color: '#ff9800', border: `1px solid ${alpha('#ff9800', 0.3)}` }}
-              />
-            )}
-          </Box>
-        </Box>
-        <TableContainer>
-          <Table size="small">
-            <TableHead>
-              <TableRow sx={{ bgcolor: alpha(COLOR, isDark ? 0.08 : 0.04) }}>
-                <TableCell sx={{ fontWeight: 700 }}>Name</TableCell>
-                <TableCell sx={{ fontWeight: 700 }}>Email</TableCell>
-                <TableCell sx={{ fontWeight: 700 }}>Role</TableCell>
-                <TableCell sx={{ fontWeight: 700 }}>Status</TableCell>
-                <TableCell sx={{ fontWeight: 700 }}>Registered</TableCell>
-                <TableCell sx={{ fontWeight: 700 }} align="right">Actions</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {members.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={6} align="center" sx={{ py: 4 }}>
-                    <Typography color="text.secondary">No members found</Typography>
-                  </TableCell>
-                </TableRow>
-              ) : members.map(m => {
-                const isPending = m.is_locked && m.lockout_reason?.toLowerCase().includes('pending');
-                return (
-                  <TableRow key={m.id} hover>
-                    <TableCell>
-                      <Typography variant="body2" fontWeight={600}>
-                        {m.full_name || `${m.first_name} ${m.last_name}`}
-                      </Typography>
-                    </TableCell>
-                    <TableCell><Typography variant="body2">{m.email}</Typography></TableCell>
-                    <TableCell><Chip label={m.role || 'viewer'} size="small" sx={{ fontSize: '0.72rem' }} /></TableCell>
-                    <TableCell>
-                      <Chip
-                        label={m.is_locked ? 'Locked' : 'Active'}
-                        size="small"
-                        color={m.is_locked ? 'error' : 'success'}
-                        variant={m.is_locked ? 'outlined' : 'filled'}
-                      />
-                    </TableCell>
-                    <TableCell><Typography variant="body2" color="text.secondary">{formatDate(m.created_at)}</Typography></TableCell>
-                    <TableCell align="right">
-                      {isPending && (
-                        <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
-                          <Button
-                            variant="contained" size="small" color="success"
-                            startIcon={actionLoading === m.id ? <CircularProgress size={14} color="inherit" /> : <ApproveIcon />}
-                            disabled={actionLoading !== null}
-                            onClick={() => handleApproveMember(m.id, m.email)}
-                            sx={{ textTransform: 'none', fontSize: '0.78rem' }}
-                          >
-                            Approve
-                          </Button>
-                          <Button
-                            variant="outlined" size="small" color="error"
-                            startIcon={<RejectIcon />}
-                            disabled={actionLoading !== null}
-                            onClick={() => setRejectDialog({ open: true, userId: m.id, email: m.email })}
-                            sx={{ textTransform: 'none', fontSize: '0.78rem' }}
-                          >
-                            Reject
-                          </Button>
-                        </Box>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Paper>
-
-      {/* Tokens */}
-      <Paper
-        elevation={0}
-        sx={{ overflow: 'hidden', border: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'}`, borderRadius: 2 }}
-      >
-        <Box sx={{ px: 2.5, py: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <TokenIcon sx={{ color: COLOR, fontSize: 20 }} />
-            <Typography variant="subtitle1" fontWeight={700}>Token History</Typography>
-          </Box>
-          {!hasActiveToken && (
-            <Button
-              variant="contained" size="small"
-              startIcon={generatingToken ? <CircularProgress size={14} color="inherit" /> : <TokenIcon />}
-              disabled={generatingToken}
-              onClick={handleGenerateToken}
-              sx={{ textTransform: 'none', bgcolor: COLOR, '&:hover': { bgcolor: alpha(COLOR, 0.85) } }}
-            >
-              Generate Token
-            </Button>
-          )}
-        </Box>
-        <TableContainer>
-          <Table size="small">
-            <TableHead>
-              <TableRow sx={{ bgcolor: alpha(COLOR, isDark ? 0.08 : 0.04) }}>
-                <TableCell sx={{ fontWeight: 700 }}>Token</TableCell>
-                <TableCell sx={{ fontWeight: 700 }}>Status</TableCell>
-                <TableCell sx={{ fontWeight: 700 }}>Created</TableCell>
-                <TableCell sx={{ fontWeight: 700 }}>Created By</TableCell>
-                <TableCell sx={{ fontWeight: 700 }} align="right">Actions</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {tokens.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={5} align="center" sx={{ py: 4 }}>
-                    <Typography color="text.secondary">No tokens found</Typography>
-                  </TableCell>
-                </TableRow>
-              ) : tokens.map(t => (
-                <TableRow key={t.id} hover>
-                  <TableCell>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                      <Typography variant="body2" sx={{ fontFamily: 'monospace', fontSize: '0.8rem', maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {t.token}
-                      </Typography>
-                      <Tooltip title="Copy token">
-                        <IconButton size="small" onClick={() => copyToClipboard(t.token, 'Token copied')}>
-                          <CopyIcon sx={{ fontSize: 16 }} />
-                        </IconButton>
-                      </Tooltip>
-                    </Box>
-                  </TableCell>
-                  <TableCell>
-                    <Chip label={t.is_active ? 'Active' : 'Inactive'} size="small" color={t.is_active ? 'success' : 'default'} variant={t.is_active ? 'filled' : 'outlined'} />
-                  </TableCell>
-                  <TableCell><Typography variant="body2" color="text.secondary">{formatDate(t.created_at)}</Typography></TableCell>
-                  <TableCell><Typography variant="body2" color="text.secondary">{t.created_by || '—'}</Typography></TableCell>
-                  <TableCell align="right">
-                    {t.is_active ? (
-                      <Tooltip title="Deactivate token">
-                        <IconButton size="small" color="error" disabled={deactivatingToken === t.id} onClick={() => handleDeactivateToken(t.id)}>
-                          {deactivatingToken === t.id ? <CircularProgress size={18} /> : <DeactivateIcon fontSize="small" />}
-                        </IconButton>
-                      </Tooltip>
-                    ) : (
-                      <Typography variant="caption" color="text.disabled">—</Typography>
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Paper>
-    </>
-  );
-
-  /* --- Timeline Tab -------------------------------------------------- */
-  const buildTimeline = (): TimelineEntry[] => {
-    const entries: TimelineEntry[] = [];
-
-    // CRM activities
-    for (const a of activities) {
-      entries.push({
-        id: `crm-${a.id}`,
-        type: 'crm_activity',
-        icon: ACTIVITY_ICONS[a.activity_type] || <NoteIcon fontSize="small" />,
-        color: ACTIVITY_COLORS[a.activity_type] || '#9e9e9e',
-        title: a.subject,
-        detail: a.body || undefined,
-        date: a.created_at,
-      });
-    }
-
-    // Pipeline activities
-    for (const a of pipelineActivities) {
-      entries.push({
-        id: `pipe-${a.id}`,
-        type: 'pipeline',
-        icon: <TaskIcon fontSize="small" />,
-        color: '#00bcd4',
-        title: a.summary,
-        detail: a.activity_type,
-        date: a.created_at,
-      });
-    }
-
-    // Emails
-    for (const e of pipelineEmails) {
-      entries.push({
-        id: `email-${e.id}`,
-        type: 'email',
-        icon: <EmailIcon fontSize="small" />,
-        color: '#2196f3',
-        title: `${e.email_type.replace(/_/g, ' ')}: ${e.subject}`,
-        detail: `To: ${e.recipients} — ${e.status}`,
-        date: e.sent_at || e.created_at,
-      });
-    }
-
-    // Token events
-    for (const t of tokens) {
-      entries.push({
-        id: `token-${t.id}`,
-        type: 'token',
-        icon: <TokenIcon fontSize="small" />,
-        color: '#00bcd4',
-        title: t.is_active ? 'Registration token generated' : 'Token deactivated',
-        date: t.created_at,
-      });
-    }
-
-    // Member joins
-    for (const m of members) {
-      entries.push({
-        id: `member-${m.id}`,
-        type: 'member',
-        icon: <PersonIcon fontSize="small" />,
-        color: '#4caf50',
-        title: `${m.full_name || m.first_name} joined as ${m.role || 'viewer'}`,
-        detail: m.email,
-        date: m.created_at,
-      });
-    }
-
-    // Sort descending by date
-    entries.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    return entries;
-  };
-
-  const renderTimeline = () => {
-    const timeline = buildTimeline();
-
-    if (timeline.length === 0) {
-      return <Typography color="text.secondary" sx={{ py: 4, textAlign: 'center' }}>No timeline events yet</Typography>;
-    }
-
-    let lastDateStr = '';
-
-    return (
-      <Box sx={{ position: 'relative', pl: 3.5 }}>
-        {/* Vertical line */}
-        <Box sx={{ position: 'absolute', left: 14, top: 0, bottom: 0, width: 2, bgcolor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)' }} />
-
-        {timeline.map(entry => {
-          const d = new Date(entry.date);
-          const dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-          const showDate = dateStr !== lastDateStr;
-          lastDateStr = dateStr;
-
-          return (
-            <React.Fragment key={entry.id}>
-              {showDate && (
-                <Typography variant="caption" fontWeight={700} color="text.secondary" sx={{ display: 'block', mt: 2, mb: 1, ml: 1.5 }}>
-                  {dateStr}
-                </Typography>
-              )}
-              <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5, mb: 1.5, position: 'relative' }}>
-                {/* Dot */}
-                <Avatar
-                  sx={{
-                    width: 28, height: 28,
-                    bgcolor: alpha(entry.color, isDark ? 0.25 : 0.12),
-                    color: entry.color,
-                    position: 'absolute',
-                    left: -28,
-                  }}
-                >
-                  {entry.icon}
-                </Avatar>
-                {/* Content */}
-                <Box sx={{ flex: 1, ml: 1 }}>
-                  <Typography variant="body2" fontWeight={600}>{entry.title}</Typography>
-                  {entry.detail && (
-                    <Typography variant="caption" color="text.secondary">{entry.detail}</Typography>
-                  )}
-                  <Typography variant="caption" color="text.disabled" sx={{ display: 'block' }}>
-                    {d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
-                  </Typography>
-                </Box>
-              </Box>
-            </React.Fragment>
-          );
-        })}
-      </Box>
-    );
-  };
 
   /* ------------------------------------------------------------------ */
   /*  Main Render                                                        */
@@ -1944,14 +716,74 @@ const ChurchLifecycleDetailPage: React.FC = () => {
 
             {/* Tab content */}
             <Box>
-              {visibleTabs[tab]?.label === 'Overview' && renderOverview()}
-              {visibleTabs[tab]?.label === 'Contacts' && renderContacts()}
-              {visibleTabs[tab]?.label === 'Activity' && renderActivity()}
-              {visibleTabs[tab]?.label === 'Follow-ups' && renderFollowUps()}
-              {visibleTabs[tab]?.label === 'Requirements' && renderRequirements()}
-              {visibleTabs[tab]?.label === 'Email Workflow' && renderEmailWorkflow()}
-              {visibleTabs[tab]?.label === 'Onboarding' && renderOnboarding()}
-              {visibleTabs[tab]?.label === 'Timeline' && renderTimeline()}
+              {visibleTabs[tab]?.label === 'Overview' && (
+                <OverviewPanel
+                  hasOnboarding={hasOnboarding} hasCrm={hasCrm} checklist={checklist}
+                  getActiveStep={getActiveStep} sectionPaper={sectionPaper} churchName={churchName}
+                  crm={crm} onboarded={onboarded} formatDate={formatDate} notes={notes}
+                  setNotes={setNotes} notesOriginal={notesOriginal} notesSaving={notesSaving}
+                  handleSaveNotes={handleSaveNotes} followUps={followUps}
+                  handleCompleteFollowUp={handleCompleteFollowUp} editingDiscovery={editingDiscovery}
+                  discoveryDraft={discoveryDraft} setDiscoveryDraft={setDiscoveryDraft}
+                  setEditingDiscovery={setEditingDiscovery} pipelineSaving={pipelineSaving}
+                  handleSaveInlineField={handleSaveInlineField} editingBlockers={editingBlockers}
+                  blockersDraft={blockersDraft} setBlockersDraft={setBlockersDraft}
+                  setEditingBlockers={setEditingBlockers} provisionChecklist={provisionChecklist}
+                  handleMarkProvisioning={handleMarkProvisioning} pipelineRequirements={pipelineRequirements}
+                  togglingSetup={togglingSetup} handleToggleSetup={handleToggleSetup} isDark={isDark}
+                />
+              )}
+              {visibleTabs[tab]?.label === 'Contacts' && (
+                <ContactsPanel
+                  contacts={contacts} setEditingContact={setEditingContact}
+                  setContactForm={setContactForm} setContactDialogOpen={setContactDialogOpen}
+                  handleDeleteContact={handleDeleteContact} isDark={isDark}
+                />
+              )}
+              {visibleTabs[tab]?.label === 'Activity' && (
+                <ActivityPanel
+                  activities={activities} setActivityForm={setActivityForm}
+                  setActivityDialogOpen={setActivityDialogOpen} isDark={isDark} timeAgo={timeAgo}
+                />
+              )}
+              {visibleTabs[tab]?.label === 'Follow-ups' && (
+                <FollowUpsPanel
+                  followUps={followUps} handleCompleteFollowUp={handleCompleteFollowUp}
+                  setFollowUpForm={setFollowUpForm} setFollowUpDialogOpen={setFollowUpDialogOpen}
+                  formatDate={formatDate}
+                />
+              )}
+              {visibleTabs[tab]?.label === 'Requirements' && (
+                <RequirementsPanel
+                  pipelineRequirements={pipelineRequirements} setReqForm={setReqForm}
+                  setReqDialogOpen={setReqDialogOpen} handleDeleteRequirement={handleDeleteRequirement}
+                  sampleTemplates={sampleTemplates}
+                />
+              )}
+              {visibleTabs[tab]?.label === 'Email Workflow' && (
+                <EmailWorkflowPanel
+                  pipelineEmails={pipelineEmails} openEmailComposer={openEmailComposer}
+                  handleUpdateEmailStatus={handleUpdateEmailStatus} formatDateTime={formatDateTime}
+                  isDark={isDark}
+                />
+              )}
+              {visibleTabs[tab]?.label === 'Onboarding' && (
+                <OnboardingPanel
+                  members={members} tokens={tokens} isDark={isDark} totalMembers={totalMembers}
+                  activeMembers={activeMembers} pendingMembers={pendingMembers} formatDate={formatDate}
+                  actionLoading={actionLoading} handleApproveMember={handleApproveMember}
+                  setRejectDialog={setRejectDialog} hasActiveToken={hasActiveToken}
+                  generatingToken={generatingToken} handleGenerateToken={handleGenerateToken}
+                  deactivatingToken={deactivatingToken} handleDeactivateToken={handleDeactivateToken}
+                  copyToClipboard={copyToClipboard}
+                />
+              )}
+              {visibleTabs[tab]?.label === 'Timeline' && (
+                <TimelinePanel
+                  activities={activities} pipelineActivities={pipelineActivities}
+                  pipelineEmails={pipelineEmails} tokens={tokens} members={members} isDark={isDark}
+                />
+              )}
             </Box>
           </>
         )}
