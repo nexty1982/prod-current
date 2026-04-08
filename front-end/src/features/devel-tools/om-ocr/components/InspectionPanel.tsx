@@ -10,9 +10,6 @@ import {
     Button,
     Chip,
     CircularProgress,
-    Dialog,
-    DialogContent,
-    DialogTitle,
     Divider,
     FormControlLabel,
     IconButton,
@@ -33,25 +30,20 @@ import {
     IconLayoutColumns,
     IconMaximize,
     IconWand,
-    IconX,
     IconZoomIn,
     IconZoomOut
 } from '@tabler/icons-react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { lazy, Suspense } from 'react';
 import { OcrSelectionItem, useOcrSelection } from '../context/OcrSelectionContext';
 import { BBox, VisionResponse } from '../types/fusion';
 import type { BoundingBox, JobDetail, TextAnnotation } from '../types/inspection';
-import { getImageViewportMetrics } from '../utils/imageViewportMetrics';
-import { getVisionPageSize, parseVisionResponse } from '../utils/visionParser';
+import { parseVisionResponse } from '../utils/visionParser';
 import FusionOverlay, { OverlayBox } from './FusionOverlay';
 import MappingTab from './MappingTab';
 import ReviewFinalizeTab from './ReviewFinalizeTab';
 import TranscriptionPanel from './TranscriptionPanel';
-
-// Lazy load FusionTab at module level - React.lazy requires module-level declaration
-const FusionTabLazy = lazy(() => import('./FusionTab'));
+import FusionDialog from './FusionDialog';
 
 // Re-export types for backward compatibility (components/index.ts still exports these)
 export type { BoundingBox, FullTextAnnotation, JobDetail, OCRResult, TextAnnotation } from '../types/inspection';
@@ -106,9 +98,7 @@ const InspectionPanel: React.FC<InspectionPanelProps> = ({
   const [activeTab, setActiveTab] = useState(0);
   const [zoom, setZoom] = useState(100);
   const [showOverlay, setShowOverlay] = useState(true);
-  const [overlayGranularity, setOverlayGranularity] = useState<'words' | 'lines'>('words');
   const [overlayOpacity, setOverlayOpacity] = useState(40);
-  const [searchText, setSearchText] = useState('');
   const [highlightedIndex, setHighlightedIndex] = useState<number | null>(null);
   const [imageDimensions, setImageDimensions] = useState({ width: 0, height: 0, naturalWidth: 0, naturalHeight: 0 });
   const [copiedText, setCopiedText] = useState(false);
@@ -116,8 +106,6 @@ const InspectionPanel: React.FC<InspectionPanelProps> = ({
   const [fusionOverlayBoxes, setFusionOverlayBoxes] = useState<OverlayBox[]>([]); // Always initialized as empty array
   const [showFusionOverlay, setShowFusionOverlay] = useState(true);
   const [fusionDialogOpen, setFusionDialogOpen] = useState(false);
-  const [fusionZoom, setFusionZoom] = useState(100);
-  const fusionImageRef = useRef<HTMLImageElement | null>(null);
   
   // OCR Selection context
   const { setSelection, addSelection } = useOcrSelection();
@@ -221,27 +209,6 @@ const InspectionPanel: React.FC<InspectionPanelProps> = ({
     }
   }, [onTokenDoubleClick]);
 
-  // Debug: Check for debug flag (query param or localStorage)
-  const showDebugMetrics = useMemo(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const queryFlag = urlParams.get('debugMetrics') === 'true';
-    const storageFlag = localStorage.getItem('om.ocr.debugMetrics') === 'true';
-    return queryFlag || storageFlag;
-  }, []);
-
-  // Get image viewport metrics for debug display
-  const [debugMetrics, setDebugMetrics] = useState<ReturnType<typeof getImageViewportMetrics> | null>(null);
-  useEffect(() => {
-    if (!showDebugMetrics || !fusionImageRef.current) return;
-    const updateMetrics = () => {
-      const metrics = getImageViewportMetrics(fusionImageRef.current);
-      setDebugMetrics(metrics);
-    };
-    updateMetrics();
-    const interval = setInterval(updateMetrics, 100);
-    return () => clearInterval(interval);
-  }, [showDebugMetrics, fusionImageRef.current, fusionZoom]);
-
   // Handle image load to get dimensions
   const handleImageLoad = useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {
     const img = e.currentTarget;
@@ -258,11 +225,6 @@ const InspectionPanel: React.FC<InspectionPanelProps> = ({
   const handleZoomOut = () => setZoom(prev => Math.max(prev - 25, 25));
   const handleZoomFit = () => setZoom(100);
 
-  // Fusion dialog zoom controls
-  const handleFusionZoomIn = () => setFusionZoom(prev => Math.min(prev + 25, 300));
-  const handleFusionZoomOut = () => setFusionZoom(prev => Math.max(prev - 25, 25));
-  const handleFusionZoomFit = () => setFusionZoom(100);
-
   // Copy handlers
   const handleCopyText = async () => {
     if (jobOcrText) {
@@ -278,18 +240,6 @@ const InspectionPanel: React.FC<InspectionPanelProps> = ({
       setCopiedJson(true);
       setTimeout(() => setCopiedJson(false), 2000);
     }
-  };
-
-  // Search highlighting
-  const getHighlightedText = (text: string, search: string) => {
-    if (!search.trim()) return text;
-    
-    const parts = text.split(new RegExp(`(${search})`, 'gi'));
-    return parts.map((part, i) => 
-      part.toLowerCase() === search.toLowerCase() 
-        ? <mark key={i} style={{ backgroundColor: theme.palette.warning.light, padding: '0 2px' }}>{part}</mark>
-        : part
-    );
   };
 
   // Calculate bounding box position relative to displayed image
@@ -812,245 +762,33 @@ const InspectionPanel: React.FC<InspectionPanelProps> = ({
     </Paper>
 
     {/* Fusion Dialog - Full Screen */}
-    <Dialog
+    <FusionDialog
       open={fusionDialogOpen}
       onClose={() => setFusionDialogOpen(false)}
-      maxWidth={false}
-      fullScreen
-      PaperProps={{
-        sx: { bgcolor: 'background.default' }
+      jobFilename={jobFilename}
+      jobRecordType={jobRecordType}
+      jobOcrText={jobOcrText}
+      jobOcrResult={jobOcrResult}
+      imageUrl={imageUrl}
+      job={job}
+      churchId={churchId}
+      fusionOverlayBoxes={fusionOverlayBoxes}
+      showFusionOverlay={showFusionOverlay}
+      bboxEditMode={bboxEditMode}
+      imageDimensions={imageDimensions}
+      setImageDimensions={setImageDimensions}
+      ocrTokens={ocrTokens}
+      onHighlightBbox={handleHighlightBbox}
+      onHighlightMultiple={handleHighlightMultiple}
+      onTokenClick={handleTokenClick}
+      onTokenDoubleClick={handleTokenDoubleClick}
+      onSendToReview={() => {
+        setFusionDialogOpen(false);
+        setActiveTab(4);
       }}
-    >
-      <DialogTitle sx={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center',
-        borderBottom: '1px solid',
-        borderColor: 'divider',
-        py: 1.5,
-      }}>
-        <Stack direction="row" spacing={2} alignItems="center">
-          <IconWand size={24} />
-          <Typography variant="h6">
-            Fusion Workflow: {jobFilename}
-          </Typography>
-          <Chip size="small" label={jobRecordType} color="primary" />
-        </Stack>
-        <IconButton onClick={() => setFusionDialogOpen(false)}>
-          <IconX size={24} />
-        </IconButton>
-      </DialogTitle>
-      <DialogContent sx={{ p: 0, display: 'flex', height: 'calc(100vh - 64px)' }}>
-        {/* Left: Image with Overlay */}
-        <Box 
-          sx={{
-            width: '50%',
-            height: '100%', 
-            overflow: 'auto', 
-            bgcolor: 'background.default',
-            position: 'relative',
-            display: 'flex',
-            flexDirection: 'column',
-          }}
-        >
-          {/* Zoom Controls */}
-          <Box
-            sx={{
-              position: 'absolute',
-              top: 8,
-              right: 8,
-              zIndex: 10,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 0.5,
-              bgcolor: 'background.paper',
-              borderRadius: 1,
-              boxShadow: 2,
-              p: 0.5,
-            }}
-          >
-            <Tooltip title="Zoom Out">
-              <IconButton size="small" onClick={handleFusionZoomOut}>
-                <IconZoomOut size={18} />
-              </IconButton>
-            </Tooltip>
-            <Typography variant="caption" sx={{ minWidth: 40, textAlign: 'center', px: 1 }}>
-              {fusionZoom}%
-            </Typography>
-            <Tooltip title="Zoom In">
-              <IconButton size="small" onClick={handleFusionZoomIn}>
-                <IconZoomIn size={18} />
-              </IconButton>
-            </Tooltip>
-            <Tooltip title="Fit to View">
-              <IconButton size="small" onClick={handleFusionZoomFit}>
-                <IconMaximize size={18} />
-              </IconButton>
-            </Tooltip>
-          </Box>
-
-          <Box
-            sx={{
-              flex: 1,
-              overflow: 'auto',
-              display: 'flex',
-              alignItems: 'flex-start',
-              justifyContent: 'center',
-              p: 2,
-              // Disable scrolling when editing bboxes
-              ...(bboxEditMode && {
-                overflow: 'hidden',
-                touchAction: 'none',
-                userSelect: 'none',
-              }),
-            }}
-            onWheel={(e) => {
-              // Prevent zoom when editing bboxes
-              if (bboxEditMode) {
-                e.preventDefault();
-                e.stopPropagation();
-              }
-            }}
-            onPointerDown={(e) => {
-              // Allow pointer events to pass through to overlay when editing
-              if (bboxEditMode) {
-                // Don't prevent default - let EditableBBox handle it
-                // But stop propagation to prevent container scroll
-                if (e.target === e.currentTarget) {
-                  e.preventDefault();
-                }
-              }
-            }}
-            onScroll={(e) => {
-              // Prevent scroll when editing bboxes
-              if (bboxEditMode) {
-                e.preventDefault();
-                e.stopPropagation();
-              }
-            }}
-          >
-            {imageUrl && (
-              <Box 
-                sx={{ 
-                  position: 'relative', 
-                  display: 'inline-block',
-                  // Ensure overlay is scoped to this container only (clip overlay to image viewport)
-                  overflow: 'hidden',
-                }}
-              >
-                <img
-                  ref={fusionImageRef}
-                  src={imageUrl}
-                  alt={jobFilename}
-                  style={{ 
-                    maxWidth: '100%', 
-                    width: 'auto',
-                    height: 'auto',
-                    objectFit: 'contain',
-                    display: 'block',
-                    transform: `scale(${fusionZoom / 100})`,
-                    transformOrigin: 'top left',
-                    // Image should always allow pointer events for text selection when not editing
-                    pointerEvents: 'auto',
-                  }}
-                  onLoad={(e) => {
-                    const img = e.currentTarget;
-                    setImageDimensions({
-                      width: img.clientWidth,
-                      height: img.clientHeight,
-                      naturalWidth: img.naturalWidth,
-                      naturalHeight: img.naturalHeight
-                    });
-                  }}
-                />
-              {showFusionOverlay && fusionImageRef.current && (() => {
-                // Get Vision page dimensions from Vision response (not image natural dimensions)
-                // Vision API coordinates are in Vision page space, which may differ from image dimensions
-                const visionPageSize = getVisionPageSize(jobOcrResult as any);
-                const visionWidth = visionPageSize.width || imageDimensions.naturalWidth || 0;
-                const visionHeight = visionPageSize.height || imageDimensions.naturalHeight || 0;
-                
-                return (
-                  <FusionOverlay
-                    boxes={fusionOverlayBoxes}
-                    imageElement={fusionImageRef.current}
-                    visionWidth={visionWidth}
-                    visionHeight={visionHeight}
-                    showLabels={true}
-                    ocrTokens={ocrTokens || []}
-                    onTokenClick={handleTokenClick}
-                    onTokenDoubleClick={handleTokenDoubleClick}
-                    editMode={bboxEditMode || false} // Pass edit mode to overlay
-                  />
-                );
-              })()}
-
-              {/* Debug Metrics Overlay */}
-              {showDebugMetrics && debugMetrics && (
-                <Box
-                  sx={{
-                    position: 'absolute',
-                    top: 8,
-                    left: 8,
-                    bgcolor: 'rgba(0, 0, 0, 0.8)',
-                    color: 'white',
-                    p: 1,
-                    borderRadius: 1,
-                    fontSize: '10px',
-                    fontFamily: 'monospace',
-                    zIndex: 1000,
-                    pointerEvents: 'none',
-                  }}
-                >
-                  <div>scaleX: {debugMetrics.scaleX.toFixed(4)}</div>
-                  <div>scaleY: {debugMetrics.scaleY.toFixed(4)}</div>
-                  <div>img rect: ({Math.round(debugMetrics.left)}, {Math.round(debugMetrics.top)}, {Math.round(debugMetrics.width)}×{Math.round(debugMetrics.height)})</div>
-                  <div>natural: {debugMetrics.naturalWidth}×{debugMetrics.naturalHeight}</div>
-                  <div>zoom: {fusionZoom}%</div>
-                </Box>
-              )}
-              </Box>
-            )}
-          </Box>
-        </Box>
-
-        {/* Right: Fusion Tab */}
-        <Box sx={{ width: '50%', height: '100%', overflow: 'auto', borderLeft: '1px solid', borderColor: 'divider' }}>
-          {job && churchId && (
-            <Suspense fallback={
-              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-                <CircularProgress />
-              </Box>
-            }>
-              <FusionTabLazy
-                jobId={parseInt(job.id?.toString() || '0')}
-                churchId={churchId}
-                ocrText={jobOcrText}
-                ocrResult={jobOcrResult as VisionResponse | null}
-                recordType={(jobRecordType as 'baptism' | 'marriage' | 'funeral') || 'baptism'}
-                imageUrl={imageUrl}
-                onHighlightBbox={handleHighlightBbox}
-                onHighlightMultiple={handleHighlightMultiple}
-                onSendToReview={() => {
-                  // Close the Fusion dialog and switch to Review & Finalize tab
-                  setFusionDialogOpen(false);
-                  setActiveTab(4); // Review & Finalize tab
-                }}
-                onBboxEditModeChange={(enabled) => {
-                  // bboxEditMode is passed as prop, no need to set state here
-                  // The prop will be updated by FusionTab's state
-                }}
-                onTokenClick={handleTokenClick}
-                onTokenDoubleClick={handleTokenDoubleClick}
-              />
-            </Suspense>
-          )}
-        </Box>
-      </DialogContent>
-    </Dialog>
+    />
     </>
   );
 };
 
 export default InspectionPanel;
-
