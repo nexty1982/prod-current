@@ -4,16 +4,10 @@ import {
   Typography,
   IconButton,
   Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
   Alert,
   useTheme,
   Paper,
   Stack,
-  Chip,
   FormControl,
   InputLabel,
   Select,
@@ -26,15 +20,10 @@ import {
   IconPhoto,
   IconTrash,
   IconDownload,
-  IconFolder,
-  IconFolderPlus,
-  IconSparkles,
 } from '@tabler/icons-react';
 import { DataGrid, GridRowSelectionModel } from '@mui/x-data-grid';
-import { OMLoading } from '@/components/common/OMLoading';
 import {
   CANONICAL_IMAGE_DIRECTORIES,
-  isCanonicalDirectory,
   buildImageUrl,
   extractDirectoryFromPath,
   IMAGES_BASE_PATH
@@ -49,6 +38,9 @@ import { sortImages } from './Gallery/galleryUtils';
 import type { SortBy, SortOrder, UsageFilter } from './Gallery/galleryUtils';
 import { useGalleryUpload } from './Gallery/useGalleryUpload';
 import { useGallerySuggestions } from './Gallery/useGallerySuggestions';
+import DirectorySidebar from './Gallery/DirectorySidebar';
+import MoveRenameDialogs from './Gallery/MoveRenameDialogs';
+import { openImageInNewWindow } from './Gallery/openInNewWindow';
 
 const Gallery: React.FC = () => {
   const theme = useTheme();
@@ -498,136 +490,7 @@ const Gallery: React.FC = () => {
     setImageDialogOpen(true);
   };
 
-  const handleOpenInNewWindow = (image: GalleryImage) => {
-    const newWindow = window.open('', '_blank');
-    if (newWindow) {
-      newWindow.document.write(`
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <title>${image.name}</title>
-            <style>
-              body {
-                margin: 0;
-                padding: 20px;
-                font-family: Arial, sans-serif;
-                background: #f5f5f5;
-              }
-              .container {
-                max-width: 1200px;
-                margin: 0 auto;
-                background: white;
-                padding: 20px;
-                border-radius: 8px;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-              }
-              .image-info {
-                margin-bottom: 20px;
-                padding: 15px;
-                background: #f9f9f9;
-                border-radius: 4px;
-              }
-              .image-info h2 {
-                margin: 0 0 10px 0;
-                color: #333;
-              }
-              .image-info p {
-                margin: 5px 0;
-                color: #666;
-              }
-              .image-container {
-                text-align: center;
-                margin: 20px 0;
-              }
-              .image-container img {
-                max-width: 100%;
-                height: auto;
-                border-radius: 4px;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-              }
-              .actions {
-                margin-top: 20px;
-                text-align: center;
-              }
-              .btn {
-                padding: 10px 20px;
-                margin: 0 10px;
-                border: none;
-                border-radius: 4px;
-                cursor: pointer;
-                font-size: 14px;
-              }
-              .btn-delete {
-                background: #d32f2f;
-                color: white;
-              }
-              .btn-delete:hover {
-                background: #b71c1c;
-              }
-              .btn-close {
-                background: #666;
-                color: white;
-              }
-              .btn-close:hover {
-                background: #444;
-              }
-            </style>
-          </head>
-          <body>
-            <div class="container">
-              <div class="image-info">
-                <h2>Image Information</h2>
-                <p><strong>Image Name:</strong> ${image.name}</p>
-                <p><strong>Image Path:</strong> ${image.path}</p>
-                <p><strong>Image Type:</strong> ${image.type || 'Unknown'}</p>
-                ${image.size ? `<p><strong>Image Size:</strong> ${(image.size / 1024).toFixed(2)} KB</p>` : ''}
-                ${image.created ? `<p><strong>Created:</strong> ${new Date(image.created).toLocaleString()}</p>` : ''}
-              </div>
-              <div class="image-container">
-                <img src="${image.url}" alt="${image.name}" onerror="this.src='/images/incode/placeholder.png'" />
-              </div>
-              <div class="actions">
-                <button class="btn btn-delete" onclick="deleteImage()">Delete Image</button>
-                <button class="btn btn-close" onclick="window.close()">Close</button>
-              </div>
-            </div>
-            <script>
-              function deleteImage() {
-                if (confirm('Are you sure you want to delete this image?')) {
-                  const relativePath = '${image.path}'.replace(/^\\/images\\//, '');
-                  fetch('/api/gallery/file', {
-                    method: 'DELETE',
-                    headers: {
-                      'Content-Type': 'application/json',
-                    },
-                    credentials: 'include',
-                    body: JSON.stringify({ path: relativePath })
-                  })
-                  .then(response => response.json())
-                  .then(data => {
-                    if (data.success) {
-                      alert('Image deleted successfully');
-                      window.close();
-                      if (window.opener) {
-                        window.opener.location.reload();
-                      }
-                    } else {
-                      alert('Failed to delete image: ' + (data.message || 'Unknown error'));
-                    }
-                  })
-                  .catch(error => {
-                    console.error('Error:', error);
-                    alert('Failed to delete image');
-                  });
-                }
-              }
-            </script>
-          </body>
-        </html>
-      `);
-      newWindow.document.close();
-    }
-  };
+  const handleOpenInNewWindow = openImageInNewWindow;
 
   const handleDeleteImage = async (image: GalleryImage) => {
     if (!window.confirm(`Are you sure you want to delete "${image.name}"?`)) {
@@ -1050,138 +913,17 @@ const Gallery: React.FC = () => {
     }
   };
 
-  // Render directory tree recursively
-  const renderDirectoryTree = (dirs: any[], level: number = 0) => {
-    // Get existing directory names for comparison
-    const existingDirNames = new Set(dirs.map(d => d.name.toLowerCase()));
-    
-    // Ensure canonical directories are always shown, even if empty
-    const canonicalDirsToShow = CANONICAL_IMAGE_DIRECTORIES.map(dirName => {
-      const existing = dirs.find(d => d.name.toLowerCase() === dirName.toLowerCase());
-      if (existing) {
-        return existing;
-      }
-      // Return placeholder for missing canonical directory
-      return {
-        name: dirName,
-        path: dirName,
-        childrenCount: 0,
-        isEmpty: true, // Mark as empty so we can show it differently
-      };
-    });
-    
-    // Combine canonical directories (with placeholders) and other directories
-    const otherDirs = dirs.filter(d => !isCanonicalDirectory(d.name));
-    const allDirs = [...canonicalDirsToShow, ...otherDirs];
-    
-    return allDirs.map((dir) => {
-      const isDefault = isCanonicalDirectory(dir.name);
-      const isEmpty = dir.isEmpty === true;
-      
-      return (
-        <Box key={dir.path} sx={{ pl: level * 2 }}>
-          <Button
-            fullWidth
-            startIcon={<IconFolder size={16} />}
-            onClick={() => !isEmpty && setSelectedDirectory(dir.path)}
-            disabled={isEmpty}
-            sx={{
-              justifyContent: 'flex-start',
-              textTransform: 'none',
-              color: isEmpty 
-                ? 'text.disabled' 
-                : selectedDirectory === dir.path 
-                  ? '#C8A24B' 
-                  : (isDefault ? '#1976d2' : 'inherit'),
-              fontWeight: selectedDirectory === dir.path ? 'bold' : (isDefault ? '600' : 'normal'),
-              backgroundColor: isEmpty 
-                ? 'rgba(0, 0, 0, 0.02)' 
-                : isDefault && selectedDirectory !== dir.path 
-                  ? 'rgba(25, 118, 210, 0.08)' 
-                  : 'transparent',
-              border: isDefault ? '1px solid rgba(25, 118, 210, 0.2)' : 'none',
-              borderRadius: isDefault ? 1 : 0,
-              mb: isDefault ? 0.5 : 0,
-              opacity: isEmpty ? 0.6 : 1,
-              '&:hover': {
-                backgroundColor: isEmpty 
-                  ? 'rgba(0, 0, 0, 0.02)' 
-                  : isDefault 
-                    ? 'rgba(25, 118, 210, 0.12)' 
-                    : 'rgba(0, 0, 0, 0.04)',
-              },
-            }}
-          >
-            {dir.name} {isEmpty ? '(empty)' : `(${dir.childrenCount})`}
-            {isDefault && (
-              <Chip 
-                label={isEmpty ? "Empty" : "Default"} 
-                size="small" 
-                sx={{ 
-                  ml: 1, 
-                  height: 18, 
-                  fontSize: '0.65rem',
-                  backgroundColor: isEmpty 
-                    ? 'rgba(0, 0, 0, 0.05)' 
-                    : 'rgba(25, 118, 210, 0.1)',
-                  color: isEmpty ? 'text.disabled' : '#1976d2',
-                }} 
-              />
-            )}
-          </Button>
-        </Box>
-      );
-    });
-  };
-
   return (
     <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'row' }}>
       {/* Directory Tree Sidebar */}
-      <Box sx={{ width: 250, minWidth: 250, p: 2, borderRight: 1, borderColor: 'divider', bgcolor: 'background.paper' }}>
-        <Typography variant="h6" sx={{ mb: 2 }}>Directories</Typography>
-        <Button
-          fullWidth
-          startIcon={<IconFolder size={16} />}
-          onClick={() => setSelectedDirectory('')}
-          sx={{
-            justifyContent: 'flex-start',
-            textTransform: 'none',
-            mb: 1,
-            color: selectedDirectory === '' ? '#C8A24B' : 'inherit',
-            fontWeight: selectedDirectory === '' ? 'bold' : 'normal',
-          }}
-        >
-          Root (All Images)
-        </Button>
-        {loadingTree ? (
-          <OMLoading size="sm" label="Loading directories" />
-        ) : directoryTree.directories && directoryTree.directories.length > 0 ? (
-          renderDirectoryTree(directoryTree.directories)
-        ) : (
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 1, p: 1 }}>
-            No directories found. Images may still be available in root.
-          </Typography>
-        )}
-        <Button
-          fullWidth
-          startIcon={<IconFolderPlus size={16} />}
-          onClick={() => {
-            const dirName = prompt('Enter directory name:');
-            if (dirName) handleCreateDirectory(dirName);
-          }}
-          sx={{ mt: 2, justifyContent: 'flex-start', textTransform: 'none' }}
-        >
-          New Folder
-        </Button>
-        <Button
-          fullWidth
-          startIcon={<IconSparkles size={16} />}
-          onClick={handleGetSuggestions}
-          sx={{ mt: 1, justifyContent: 'flex-start', textTransform: 'none' }}
-        >
-          Catalog Suggestions
-        </Button>
-      </Box>
+      <DirectorySidebar
+        selectedDirectory={selectedDirectory}
+        setSelectedDirectory={setSelectedDirectory}
+        directoryTree={directoryTree}
+        loadingTree={loadingTree}
+        onCreateDirectory={handleCreateDirectory}
+        onGetSuggestions={handleGetSuggestions}
+      />
 
       {/* Main Content */}
       <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
@@ -1513,41 +1255,20 @@ const Gallery: React.FC = () => {
       </GalleryContainer>
       </Box>
 
-      {/* Move Dialog */}
-      <Dialog open={moveDialogOpen} onClose={() => setMoveDialogOpen(false)}>
-        <DialogTitle>Move Image</DialogTitle>
-        <DialogContent>
-          <TextField
-            fullWidth
-            label="Target Directory"
-            value={targetDir}
-            onChange={(e) => setTargetDir(e.target.value)}
-            sx={{ mt: 1 }}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setMoveDialogOpen(false)}>Cancel</Button>
-          <Button onClick={() => itemToMove && handleMoveImage(itemToMove, targetDir)}>Move</Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Rename Dialog */}
-      <Dialog open={renameDialogOpen} onClose={() => setRenameDialogOpen(false)}>
-        <DialogTitle>Rename Image</DialogTitle>
-        <DialogContent>
-          <TextField
-            fullWidth
-            label="New Name"
-            value={newName}
-            onChange={(e) => setNewName(e.target.value)}
-            sx={{ mt: 1 }}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setRenameDialogOpen(false)}>Cancel</Button>
-          <Button onClick={() => itemToMove && handleRenameImage(itemToMove, newName)}>Rename</Button>
-        </DialogActions>
-      </Dialog>
+      {/* Move/Rename Dialogs */}
+      <MoveRenameDialogs
+        moveDialogOpen={moveDialogOpen}
+        renameDialogOpen={renameDialogOpen}
+        itemToMove={itemToMove}
+        targetDir={targetDir}
+        newName={newName}
+        setTargetDir={setTargetDir}
+        setNewName={setNewName}
+        onCloseMove={() => setMoveDialogOpen(false)}
+        onCloseRename={() => setRenameDialogOpen(false)}
+        onMove={handleMoveImage}
+        onRename={handleRenameImage}
+      />
 
       {/* Catalog Suggestions Dialog */}
       <SuggestionsDialog
