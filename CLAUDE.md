@@ -155,7 +155,17 @@ To register a new feature, add it to `FEATURE_REGISTRY` in `featureRegistry.ts` 
 
 ### Workspace Rule
 
-**Always work from your assigned worktree.** Never work from `/var/www/omai/` directly — it is deploy-only.
+**Always work from your assigned worktree.** Never work from deploy directories directly — they are deploy-only.
+
+#### OrthodoxMetrics (OM) workspaces — repo: `prod-current`
+
+| Agent | Workspace |
+|-------|-----------|
+| Claude CLI | `/var/www/om-workspaces/agent-claude` |
+| Cursor | `/var/www/om-workspaces/agent-cursor` |
+| Windsurf | `/var/www/om-workspaces/agent-windsurf` |
+
+#### OMAI workspaces — repo: `omai`
 
 | Agent | Workspace |
 |-------|-----------|

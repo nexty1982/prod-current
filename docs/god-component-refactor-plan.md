@@ -40,13 +40,14 @@ Every critical item is a single-file component that has grown too large. The fix
 
 Windsurf handles **Tier 1 and Tier 2** items from the OM list. These are files with clear extraction boundaries: tab panels, dialog components, inline sub-components, or utility functions that can be moved to sibling files with minimal risk.
 
-**Workspace**: `/var/www/omai-workspaces/agent-windsurf`
+**Workspace**: `/var/www/om-workspaces/agent-windsurf` (worktree of `prod-current` repo)
 
 ### Claude CLI (OM — harder items + OMAI)
 
 Claude handles **Tier 3** items from OM (deeply entangled state, complex hooks, high useState counts) and all OMAI items.
 
-**Workspace**: `/var/www/omai-workspaces/agent-claude`
+**OM Workspace**: `/var/www/om-workspaces/agent-claude` (worktree of `prod-current` repo)  
+**OMAI Workspace**: `/var/www/omai-workspaces/agent-claude` (worktree of `omai` repo)
 
 ### Coordination Rules
 
