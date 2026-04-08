@@ -13,10 +13,10 @@
 |----------|----------|----------|-----------|
 | OM Tier 1 (Windsurf) | 14 | 13 | 1 |
 | OM Tier 2 (Windsurf) | 9 | 5 | 4 |
-| OM Tier 3 (Claude CLI) | 13 | 6 + 1 skip | 6 |
-| **OM Total** | **36** | **25** | **11** |
+| OM Tier 3 (Claude CLI) | 13 | 11 + 1 skip | 1 |
+| **OM Total** | **36** | **30** | **6** |
 | OMAI | 12 | — | 12 (not started) |
-| **Grand Total** | **48** | **25** | **23** |
+| **Grand Total** | **48** | **30** | **18** |
 
 ---
 
@@ -189,6 +189,11 @@ These items have been refactored and merged. Listed with original and current LO
 | 29 | `ConversationLogPage.tsx` | 2070 | 834 | #369 |
 | 36 | `FieldMapperPage.tsx` | 3239 | 819 | #391 |
 | 14 | `ChurchForm.tsx` | 1399 | 1008 | #393 |
+| 25 | `FusionTab.tsx` | 1985 | 1769 | #395 |
+| 26 | `RecordsPage.tsx` | 1787 | 1401 | #396 |
+| 30 | `Gallery.tsx` | 1604 | 1325 | #397 |
+| 32 | `EnhancedOCRUploader.tsx` | 1078 | 850 | #398 |
+| 33 | `ChurchLifecycleDetailPage.tsx` | 1037 | 812 | #399 |
 
 ---
 
@@ -207,15 +212,10 @@ These items have been refactored and merged. Listed with original and current LO
 
 | Priority | File | LOC | Tier | Patterns | What to Extract |
 |----------|------|-----|------|----------|----------------|
-| 1 | `FusionTab.tsx` | 1985 | 3 | B, C, D | **LARGEST** — hooks, modals, sub-components |
-| 2 | `RecordsPage.tsx` | 1787 | 3 | A, B, C | 10 useEffects, tabs, modals |
-| 3 | `Gallery.tsx` | 1604 | 3 | B, C, D | 7 inline components, 18 states, modals |
 | — | `OMBigBook.tsx` | 1530 | 3 | — | **SKIP** — legacy code, do not refactor |
 | 5 | `ChurchSetupWizard.tsx` | 1291 | 2 | A, B, D | Wizard steps, modals, inline components |
 | 6 | `GlobalOMAI.tsx` | 1237 | 3 | A, B, C | Global provider — panels, dialogs, hooks (used app-wide) |
 | 7 | `USChurchMapPage.tsx` | 1234 | 1 | A, B, D | **Defer** — canonical version moving to OMAI |
-| 8 | `EnhancedOCRUploader.tsx` | 1078 | 3 | B, C | Upload logic hook, panels |
-| 9 | `ChurchLifecycleDetailPage.tsx` | 1037 | 3 | A, B, C | Tabs, dialogs, lifecycle hooks |
 
 ### Already Below 1000 LOC (resolved or borderline)
 
