@@ -14,152 +14,45 @@ import {
   Button,
   Card,
   CardContent,
-  Chip,
   CircularProgress,
-  Collapse,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
   Divider,
-  FormControl,
   FormControlLabel,
   IconButton,
-  InputLabel,
-  LinearProgress,
-  MenuItem,
   Paper,
   Radio,
   RadioGroup,
-  Select,
-  Slider,
   Snackbar,
   Stack,
   Step,
   StepLabel,
   Stepper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   TextField,
-  Tooltip,
   Typography,
   useTheme,
 } from '@mui/material';
 import {
   ArrowBack,
   ArrowForward,
-  Check,
-  Close,
   Delete as DeleteIcon,
-  Edit as EditIcon,
-  Error as ErrorIcon,
-  Info as InfoIcon,
-  Preview as PreviewIcon,
-  Refresh as RefreshIcon,
-  Save as SaveIcon,
-  Storage as SeedIcon,
-  Warning as WarningIcon,
 } from '@mui/icons-material';
-import Download from '@mui/icons-material/Download';
 import PageContainer from '@/shared/ui/PageContainer';
 import Breadcrumb from '@/layouts/full/shared/breadcrumb/Breadcrumb';
 import * as XLSX from 'xlsx';
+import type { Church, FieldConfig, WizardState, Preset, RecordType } from './recordWizardTypes';
+import { RECORD_TYPE_META, STEPS, today, yearAgo, apiJson } from './recordWizardTypes';
+import WizardConfigureStep from './WizardConfigureStep';
+import WizardPreviewStep from './WizardPreviewStep';
+import WizardCreateStep from './WizardCreateStep';
 
 const BCrumb = [
   { to: '/', title: 'Home' },
   { title: 'Developer Tools' },
   { title: 'Record Creation Wizard' },
 ];
-
-// ============================================================================
-// TYPES
-// ============================================================================
-interface Church {
-  id: number;
-  name: string;
-  database_name?: string;
-}
-
-interface FieldConfig {
-  key: string;
-  label: string;
-  type: string;
-  required: boolean;
-  dbColumn: string;
-  generationStrategy: string;
-  generationDependsOn?: string;
-  options?: Array<{ value: string; label: string }>;
-  defaultValue?: any;
-  group?: string;
-  displayOrder: number;
-  visibleInPreview: boolean;
-  dateConstraint?: any;
-}
-
-interface ValidationIssue {
-  row: number;
-  field: string;
-  severity: 'error' | 'warning' | 'info';
-  message: string;
-}
-
-interface WizardState {
-  recordType: string;
-  church: Church | null;
-  mode: 'single' | 'batch' | 'auto' | 'template';
-  count: number;
-  dateStart: string;
-  dateEnd: string;
-  distribution: 'even' | 'random' | 'seasonal' | 'chronological';
-  maxPerDay: number;
-  overrides: Record<string, any>;
-  records: Record<string, any>[];
-  validationIssues: ValidationIssue[];
-}
-
-interface Preset {
-  id: number;
-  name: string;
-  record_type: string;
-  church_id?: number;
-  preset_json: any;
-}
-
-type RecordType = 'baptism' | 'marriage' | 'funeral';
-
-const RECORD_TYPE_META: Record<RecordType, { label: string; color: string; icon: string }> = {
-  baptism: { label: 'Baptism', color: '#1565c0', icon: '💧' },
-  marriage: { label: 'Marriage', color: '#7b1fa2', icon: '💍' },
-  funeral: { label: 'Funeral', color: '#455a64', icon: '🕊️' },
-};
-
-const STEPS = [
-  'Record Type',
-  'Church',
-  'Creation Mode',
-  'Configure',
-  'Preview & Validate',
-  'Create',
-];
-
-const today = new Date().toISOString().split('T')[0];
-const yearAgo = new Date(Date.now() - 365 * 86400000).toISOString().split('T')[0];
-
-// ============================================================================
-// API HELPER
-// ============================================================================
-async function apiJson(url: string, options?: RequestInit) {
-  const res = await fetch(url, {
-    credentials: 'include',
-    ...options,
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-  });
-  return res.json();
-}
 
 // ============================================================================
 // WIZARD COMPONENT
@@ -637,505 +530,71 @@ export default function RecordCreationWizard() {
     </Box>
   );
 
-  // STEP 3: Configure
-  const renderConfigureStep = () => {
-    const meta = RECORD_TYPE_META[state.recordType as RecordType];
-
-    if (state.mode === 'single') {
-      // Single record: show all fields as a form
-      return (
-        <Box sx={{ py: 2 }}>
-          <Typography variant="h6" fontWeight={600} gutterBottom>
-            Configure {meta?.label} Record
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-            Fill in the fields for your record. Required fields are marked.
-          </Typography>
-          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>
-            {fieldConfigs.map(field => renderFieldInput(field, state.overrides, (key, val) => {
-              updateState({ overrides: { ...state.overrides, [key]: val } });
-            }))}
-          </Box>
-        </Box>
-      );
-    }
-
-    // Batch / Auto modes
-    return (
-      <Box sx={{ py: 2 }}>
-        <Typography variant="h6" fontWeight={600} gutterBottom>
-          Configure {meta?.label} Batch Generation
-        </Typography>
-
-        {/* Count */}
-        <Box sx={{ mb: 3 }}>
-          <Typography variant="subtitle2" sx={{ mb: 1 }}>Number of Records</Typography>
-          <Stack direction="row" spacing={2} alignItems="center">
-            <TextField
-              type="number"
-              size="small"
-              value={state.count}
-              onChange={(e) => updateState({ count: Math.min(500, Math.max(1, parseInt(e.target.value) || 1)) })}
-              inputProps={{ min: 1, max: 500 }}
-              sx={{ width: 120 }}
-            />
-            <Stack direction="row" spacing={1}>
-              {[5, 10, 25, 50, 100, 250, 500].map(n => (
-                <Chip
-                  key={n}
-                  label={n}
-                  size="small"
-                  onClick={() => updateState({ count: n })}
-                  variant={state.count === n ? 'filled' : 'outlined'}
-                  color={state.count === n ? 'primary' : 'default'}
-                  sx={{ cursor: 'pointer' }}
-                />
-              ))}
-            </Stack>
-          </Stack>
-        </Box>
-
-        {/* Date Range */}
-        <Box sx={{ mb: 3 }}>
-          <Typography variant="subtitle2" sx={{ mb: 1 }}>Date Range</Typography>
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-            <TextField
-              type="date"
-              size="small"
-              label="Start Date"
-              value={state.dateStart}
-              onChange={(e) => updateState({ dateStart: e.target.value })}
-              InputLabelProps={{ shrink: true }}
-              fullWidth
-            />
-            <TextField
-              type="date"
-              size="small"
-              label="End Date"
-              value={state.dateEnd}
-              onChange={(e) => updateState({ dateEnd: e.target.value })}
-              InputLabelProps={{ shrink: true }}
-              fullWidth
-            />
-          </Stack>
-          <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
-            {[
-              { label: 'Last Year', start: yearAgo, end: today },
-              { label: '2025', start: '2025-01-01', end: '2025-12-31' },
-              { label: '2024', start: '2024-01-01', end: '2024-12-31' },
-              { label: 'Last 5 Years', start: new Date(Date.now() - 5 * 365 * 86400000).toISOString().split('T')[0], end: today },
-              { label: 'Historic (1960-2000)', start: '1960-01-01', end: '2000-12-31' },
-            ].map(preset => (
-              <Chip
-                key={preset.label}
-                label={preset.label}
-                size="small"
-                variant="outlined"
-                onClick={() => updateState({ dateStart: preset.start, dateEnd: preset.end })}
-                sx={{ cursor: 'pointer' }}
-              />
-            ))}
-          </Stack>
-        </Box>
-
-        {/* Distribution */}
-        <Box sx={{ mb: 3 }}>
-          <Typography variant="subtitle2" sx={{ mb: 1 }}>Date Distribution</Typography>
-          <FormControl size="small" fullWidth>
-            <Select
-              value={state.distribution}
-              onChange={(e) => updateState({ distribution: e.target.value as WizardState['distribution'] })}
-            >
-              <MenuItem value="random">Natural Randomized</MenuItem>
-              <MenuItem value="even">Evenly Distributed</MenuItem>
-              <MenuItem value="seasonal">Seasonal Weighted (Spring/Fall heavy)</MenuItem>
-              <MenuItem value="chronological">Chronological Sequence</MenuItem>
-            </Select>
-          </FormControl>
-        </Box>
-
-        {/* Max per day */}
-        <Box sx={{ mb: 3 }}>
-          <Typography variant="subtitle2" sx={{ mb: 0.5 }}>
-            Max Records Per Day: {state.maxPerDay}
-          </Typography>
-          <Slider
-            value={state.maxPerDay}
-            onChange={(_, v) => updateState({ maxPerDay: v as number })}
-            min={1}
-            max={10}
-            step={1}
-            marks
-            valueLabelDisplay="auto"
-            sx={{ maxWidth: 300 }}
-          />
-        </Box>
-
-        {/* Field overrides */}
-        <Divider sx={{ mb: 2 }} />
-        <Typography variant="subtitle2" sx={{ mb: 1 }}>Field Overrides (Optional)</Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          Set fixed values for specific fields. Leave empty to auto-generate.
-        </Typography>
-        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr' }, gap: 2 }}>
-          {fieldConfigs.map(field => renderFieldInput(field, state.overrides, (key, val) => {
-            const overrides = { ...state.overrides };
-            if (val === '' || val === null || val === undefined) {
-              delete overrides[key];
-            } else {
-              overrides[key] = val;
-            }
-            updateState({ overrides });
-          }, true))}
-        </Box>
-
-        {/* Preset save */}
-        <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end' }}>
-          <Button size="small" variant="outlined" startIcon={<SaveIcon />} onClick={() => setPresetDialogOpen(true)}>
-            Save as Preset
-          </Button>
-        </Box>
-      </Box>
-    );
-  };
-
-  // Field input renderer (config-driven)
-  const renderFieldInput = (
-    field: FieldConfig,
-    values: Record<string, any>,
-    onChange: (key: string, val: any) => void,
-    isOverride = false
-  ) => {
-    const val = values[field.key] ?? '';
-    const label = isOverride ? `${field.label} (override)` : `${field.label}${field.required ? ' *' : ''}`;
-
-    if (field.type === 'select' && field.options) {
-      return (
-        <FormControl key={field.key} size="small" fullWidth>
-          <InputLabel>{label}</InputLabel>
-          <Select
-            value={val}
-            label={label}
-            onChange={(e) => onChange(field.key, e.target.value)}
-          >
-            {isOverride && <MenuItem value=""><em>Auto-generate</em></MenuItem>}
-            {field.options.map(opt => (
-              <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-      );
-    }
-
-    if (field.generationStrategy === 'clergy') {
-      return (
-        <Autocomplete
-          key={field.key}
-          size="small"
-          options={clergyOptions}
-          value={val || null}
-          onChange={(_e, v) => onChange(field.key, v || '')}
-          freeSolo
-          renderInput={(params) => <TextField {...params} label={label} />}
-        />
-      );
-    }
-
-    return (
-      <TextField
-        key={field.key}
-        size="small"
-        fullWidth
-        label={label}
-        type={field.type === 'number' ? 'number' : field.type === 'date' ? 'date' : 'text'}
-        value={val}
-        onChange={(e) => onChange(field.key, e.target.value)}
-        InputLabelProps={field.type === 'date' ? { shrink: true } : undefined}
-        multiline={field.type === 'textarea'}
-        rows={field.type === 'textarea' ? 2 : undefined}
-        required={!isOverride && field.required}
-      />
-    );
-  };
-
-  // STEP 4: Preview & Validate
-  const renderPreviewStep = () => {
-    if (loading) {
-      return (
-        <Box sx={{ py: 4, textAlign: 'center' }}>
-          <CircularProgress size={40} />
-          <Typography variant="body1" sx={{ mt: 2 }}>Generating preview...</Typography>
-        </Box>
-      );
-    }
-
-    if (state.records.length === 0) {
-      return (
-        <Box sx={{ py: 4, textAlign: 'center' }}>
-          <Typography variant="body1" color="text.secondary">No records generated. Go back and configure.</Typography>
-          <Button sx={{ mt: 2 }} onClick={handleGeneratePreview} startIcon={<RefreshIcon />}>
-            Generate Preview
-          </Button>
-        </Box>
-      );
-    }
-
-    const meta = RECORD_TYPE_META[state.recordType as RecordType];
-
-    return (
-      <Box sx={{ py: 2 }}>
-        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-          <Box>
-            <Typography variant="h6" fontWeight={600}>
-              Preview: {state.records.length} {meta?.label} Records
-            </Typography>
-            <Stack direction="row" spacing={1} sx={{ mt: 0.5 }}>
-              {errorCount > 0 && (
-                <Chip icon={<ErrorIcon />} label={`${errorCount} error${errorCount > 1 ? 's' : ''}`} size="small" color="error" />
-              )}
-              {warningCount > 0 && (
-                <Chip icon={<WarningIcon />} label={`${warningCount} warning${warningCount > 1 ? 's' : ''}`} size="small" color="warning" />
-              )}
-              {errorCount === 0 && warningCount === 0 && (
-                <Chip icon={<Check />} label="All valid" size="small" color="success" />
-              )}
-            </Stack>
-          </Box>
-          <Stack direction="row" spacing={1}>
-            <Button size="small" variant="outlined" startIcon={<RefreshIcon />} onClick={handleGeneratePreview}>
-              Regenerate All
-            </Button>
-          </Stack>
-        </Stack>
-
-        {/* Validation issues summary */}
-        {state.validationIssues.length > 0 && (
-          <Box sx={{ mb: 2 }}>
-            {state.validationIssues.slice(0, 10).map((issue, idx) => (
-              <Alert
-                key={idx}
-                severity={issue.severity}
-                icon={issue.severity === 'error' ? <ErrorIcon fontSize="small" /> : issue.severity === 'warning' ? <WarningIcon fontSize="small" /> : <InfoIcon fontSize="small" />}
-                sx={{ mb: 0.5, py: 0 }}
-              >
-                <Typography variant="body2">
-                  Row {issue.row}: {issue.message}
-                  {issue.field !== 'duplicate' && ` (${issue.field})`}
-                </Typography>
-              </Alert>
-            ))}
-            {state.validationIssues.length > 10 && (
-              <Typography variant="caption" color="text.secondary">
-                ...and {state.validationIssues.length - 10} more issues
-              </Typography>
-            )}
-          </Box>
-        )}
-
-        {/* Records table */}
-        <TableContainer component={Paper} variant="outlined" sx={{ maxHeight: 500 }}>
-          <Table size="small" stickyHeader>
-            <TableHead>
-              <TableRow>
-                <TableCell sx={{ fontWeight: 700, width: 50 }}>#</TableCell>
-                {fieldConfigs.map(f => (
-                  <TableCell key={f.key} sx={{ fontWeight: 700, whiteSpace: 'nowrap', fontSize: '0.75rem' }}>
-                    {f.label}
-                  </TableCell>
-                ))}
-                <TableCell sx={{ fontWeight: 700, width: 120 }}>Actions</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {state.records.map((record, idx) => {
-                const rowIssues = state.validationIssues.filter(v => v.row === idx + 1);
-                const hasError = rowIssues.some(v => v.severity === 'error');
-                const isEditing = editingRow === idx;
-
-                return (
-                  <TableRow
-                    key={idx}
-                    sx={{
-                      bgcolor: hasError ? alpha(theme.palette.error.main, isDark ? 0.1 : 0.04) : undefined,
-                    }}
-                  >
-                    <TableCell>
-                      <Typography variant="caption" fontWeight={600}>{idx + 1}</Typography>
-                      {hasError && <ErrorIcon fontSize="small" color="error" sx={{ ml: 0.5, fontSize: 14 }} />}
-                    </TableCell>
-                    {fieldConfigs.map(f => (
-                      <TableCell key={f.key} sx={{ fontSize: '0.75rem', maxWidth: 160 }}>
-                        {isEditing ? (
-                          <TextField
-                            size="small"
-                            variant="standard"
-                            value={editRowData[f.key] ?? ''}
-                            onChange={(e) => setEditRowData(prev => ({ ...prev, [f.key]: e.target.value }))}
-                            type={f.type === 'number' ? 'number' : f.type === 'date' ? 'date' : 'text'}
-                            fullWidth
-                            InputProps={{ sx: { fontSize: '0.75rem' } }}
-                          />
-                        ) : (
-                          <Tooltip title={String(record[f.key] || '')}>
-                            <Typography variant="body2" fontSize="0.75rem" noWrap>
-                              {record[f.key] ?? '—'}
-                            </Typography>
-                          </Tooltip>
-                        )}
-                      </TableCell>
-                    ))}
-                    <TableCell>
-                      {isEditing ? (
-                        <Stack direction="row" spacing={0.5}>
-                          <IconButton size="small" color="primary" onClick={handleSaveRow}><Check fontSize="small" /></IconButton>
-                          <IconButton size="small" onClick={() => setEditingRow(null)}><Close fontSize="small" /></IconButton>
-                        </Stack>
-                      ) : (
-                        <Stack direction="row" spacing={0.5}>
-                          <IconButton size="small" onClick={() => handleEditRow(idx)}><EditIcon fontSize="small" /></IconButton>
-                          <IconButton size="small" onClick={() => handleRegenerateRow(idx)}><RefreshIcon fontSize="small" /></IconButton>
-                          <IconButton size="small" color="error" onClick={() => handleDeleteRow(idx)}><DeleteIcon fontSize="small" /></IconButton>
-                        </Stack>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Box>
-    );
-  };
-
-  // STEP 5: Create / Summary
-  const renderCreateStep = () => {
-    if (createResult) {
-      return (
-        <Box sx={{ py: 4, textAlign: 'center' }}>
-          <Check sx={{ fontSize: 64, color: 'success.main', mb: 2 }} />
-          <Typography variant="h5" fontWeight={700} gutterBottom>
-            {createResult.downloaded ? 'Records Downloaded' : 'Records Created Successfully'}
-          </Typography>
-          <Box sx={{ display: 'inline-block', textAlign: 'left', mt: 2 }}>
-            <Stack spacing={1}>
-              {createResult.downloaded ? (
-                <>
-                  <Typography variant="body1">Format: <strong>{createResult.format?.toUpperCase()}</strong></Typography>
-                  <Typography variant="body1">Records: <strong>{createResult.count}</strong></Typography>
-                  <Typography variant="body1">Record Type: <strong>{createResult.record_type}</strong></Typography>
-                  <Typography variant="body1">Church: <strong>{createResult.church}</strong></Typography>
-                </>
-              ) : (
-                <>
-                  <Typography variant="body1">Requested: <strong>{createResult.requested}</strong></Typography>
-                  <Typography variant="body1">Inserted: <strong>{createResult.inserted}</strong></Typography>
-                  {createResult.skipped > 0 && (
-                    <Typography variant="body1" color="warning.main">Skipped: <strong>{createResult.skipped}</strong></Typography>
-                  )}
-                  <Typography variant="body1">Record Type: <strong>{createResult.record_type}</strong></Typography>
-                  <Typography variant="body1">Church: <strong>{createResult.church}</strong></Typography>
-                  <Typography variant="body1">Database: <strong>{createResult.database}</strong></Typography>
-                </>
-              )}
-            </Stack>
-          </Box>
-          {createResult.warnings?.length > 0 && (
-            <Alert severity="warning" sx={{ mt: 3, maxWidth: 500, mx: 'auto' }}>
-              {createResult.warnings.length} warning(s) encountered during creation.
-            </Alert>
-          )}
-          <Box sx={{ mt: 4 }}>
-            <Button
-              variant="contained"
-              onClick={() => {
-                setActiveStep(0);
-                setState({
-                  recordType: '',
-                  church: null,
-                  mode: 'auto',
-                  count: 25,
-                  dateStart: yearAgo,
-                  dateEnd: today,
-                  distribution: 'random',
-                  maxPerDay: 3,
-                  overrides: {},
-                  records: [],
-                  validationIssues: [],
-                });
-                setCreateResult(null);
-                setOutputFormat('database');
-              }}
-            >
-              Create More Records
-            </Button>
-          </Box>
-        </Box>
-      );
-    }
-
-    // Confirmation view before create
-    const meta = RECORD_TYPE_META[state.recordType as RecordType];
-    return (
-      <Box sx={{ py: 2 }}>
-        <Typography variant="h6" fontWeight={600} gutterBottom>Confirm & Create</Typography>
-        <Paper variant="outlined" sx={{ p: 3, mb: 3 }}>
-          <Stack spacing={1.5}>
-            <Typography variant="body1">Record Type: <strong>{meta?.label}</strong></Typography>
-            <Typography variant="body1">Church: <strong>{state.church?.name}</strong></Typography>
-            <Typography variant="body1">Records: <strong>{state.records.length}</strong></Typography>
-            <Typography variant="body1">Date Range: <strong>{state.dateStart} to {state.dateEnd}</strong></Typography>
-            {errorCount > 0 && (
-              <Alert severity="error">Cannot create — {errorCount} validation error(s) must be resolved first.</Alert>
-            )}
-            {warningCount > 0 && (
-              <Alert severity="warning">{warningCount} warning(s) — records will be created but review recommended.</Alert>
-            )}
-          </Stack>
-        </Paper>
-
-        {/* Output format selection */}
-        <Typography variant="subtitle2" sx={{ mb: 1 }}>Output Format</Typography>
-        <RadioGroup
-          row
-          value={outputFormat}
-          onChange={(e) => setOutputFormat(e.target.value as 'database' | 'csv' | 'xlsx')}
-          sx={{ mb: 3 }}
-        >
-          <FormControlLabel value="database" control={<Radio />} label="Insert into Church Database" />
-          <FormControlLabel value="csv" control={<Radio />} label="Download as CSV" />
-          <FormControlLabel value="xlsx" control={<Radio />} label="Download as Excel (.xlsx)" />
-        </RadioGroup>
-
-        {outputFormat === 'database' ? (
-          <Button
-            variant="contained"
-            size="large"
-            color="primary"
-            onClick={handleCreate}
-            disabled={creating || errorCount > 0}
-            startIcon={creating ? <CircularProgress size={20} color="inherit" /> : <SeedIcon />}
-          >
-            {creating ? 'Creating...' : `Create ${state.records.length} Records in Database`}
-          </Button>
-        ) : (
-          <Button
-            variant="contained"
-            size="large"
-            color="primary"
-            onClick={() => handleDownloadFile(outputFormat)}
-            startIcon={<Download />}
-          >
-            Download {state.records.length} Records as {outputFormat.toUpperCase()}
-          </Button>
-        )}
-      </Box>
-    );
-  };
 
   // ============================================================================
   // MAIN RENDER
   // ============================================================================
+  const renderConfigureStep = () => (
+    <WizardConfigureStep
+      state={state}
+      fieldConfigs={fieldConfigs}
+      clergyOptions={clergyOptions}
+      updateState={updateState}
+      onOpenPresetDialog={() => setPresetDialogOpen(true)}
+    />
+  );
+
+  const renderPreviewStep = () => (
+    <WizardPreviewStep
+      state={state}
+      loading={loading}
+      fieldConfigs={fieldConfigs}
+      editingRow={editingRow}
+      editRowData={editRowData}
+      errorCount={errorCount}
+      warningCount={warningCount}
+      handleGeneratePreview={handleGeneratePreview}
+      handleEditRow={handleEditRow}
+      handleSaveRow={handleSaveRow}
+      handleDeleteRow={handleDeleteRow}
+      handleRegenerateRow={handleRegenerateRow}
+      setEditingRow={setEditingRow}
+      setEditRowData={setEditRowData}
+    />
+  );
+
+  const renderCreateStep = () => (
+    <WizardCreateStep
+      state={state}
+      createResult={createResult}
+      creating={creating}
+      outputFormat={outputFormat}
+      errorCount={errorCount}
+      warningCount={warningCount}
+      setOutputFormat={setOutputFormat}
+      handleCreate={handleCreate}
+      handleDownloadFile={handleDownloadFile}
+      onReset={() => {
+        setActiveStep(0);
+        setState({
+          recordType: '',
+          church: null,
+          mode: 'auto',
+          count: 25,
+          dateStart: yearAgo,
+          dateEnd: today,
+          distribution: 'random',
+          maxPerDay: 3,
+          overrides: {},
+          records: [],
+          validationIssues: [],
+        });
+        setCreateResult(null);
+        setOutputFormat('database');
+      }}
+    />
+  );
+
   const stepContent = [
     renderRecordTypeStep,
     renderChurchStep,
