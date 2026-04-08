@@ -10,33 +10,31 @@
 import Breadcrumb from '@/layouts/full/shared/breadcrumb/Breadcrumb';
 import PageContainer from '@/shared/ui/PageContainer';
 import {
-  Add as AddIcon,
-  ArrowBack as ArrowBackIcon,
-  Call as CallIcon,
   Check as CheckIcon,
-  Close as CloseIcon,
-  Delete as DeleteIcon,
-  Edit as EditIcon,
-  Email as EmailIcon,
   Event as EventIcon,
-  FilterList as FilterIcon,
-  Language as WebIcon,
-  MeetingRoom as MeetingIcon,
   Note as NoteIcon,
   People as PeopleIcon,
-  Person as PersonIcon,
-  Phone as PhoneIcon,
-  Place as PlaceIcon,
   Refresh as RefreshIcon,
-  Rocket as ProvisionIcon,
   Search as SearchIcon,
-  Star as StarIcon,
-  Timeline as TimelineIcon,
 } from '@mui/icons-material';
+import {
+  ACTIVITY_COLORS,
+  ACTIVITY_ICONS,
+  PRIORITY_COLORS,
+  formatDate,
+  relativeTime,
+  type CRMActivity,
+  type CRMChurch,
+  type CRMContact,
+  type CRMFollowUp,
+  type DashboardData,
+  type PipelineStage,
+} from './types';
+import ChurchDetailDrawer from './ChurchDetailDrawer';
+import CRMDialogs from './CRMDialogs';
 import {
   Alert,
   alpha,
-  Autocomplete,
   Avatar,
   Box,
   Button,
@@ -44,17 +42,11 @@ import {
   CardContent,
   Chip,
   CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
   Divider,
-  Drawer,
   FormControl,
   IconButton,
   InputAdornment,
   InputLabel,
-  Link,
   MenuItem,
   Paper,
   Select,
@@ -69,155 +61,6 @@ import {
 } from '@mui/material';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 // Berry CRM components removed — Leads, Contacts, Sales tabs retired
-
-// ─── Types ──────────────────────────────────────────────────────────
-
-interface PipelineStage {
-  id: number;
-  stage_key: string;
-  label: string;
-  color: string;
-  sort_order: number;
-  is_terminal: number;
-}
-
-interface CRMChurch {
-  id: number;
-  ext_id: string;
-  name: string;
-  street: string | null;
-  city: string | null;
-  state_code: string;
-  zip: string | null;
-  phone: string | null;
-  website: string | null;
-  latitude: number | null;
-  longitude: number | null;
-  jurisdiction: string;
-  pipeline_stage: string;
-  stage_label: string;
-  stage_color: string;
-  assigned_to: number | null;
-  is_client: number;
-  provisioned_church_id: number | null;
-  last_contacted_at: string | null;
-  next_follow_up: string | null;
-  priority: string;
-  tags: any;
-  crm_notes: string | null;
-  contact_count: number;
-  activity_count: number;
-  pending_followups: number;
-  created_at: string;
-}
-
-interface CRMContact {
-  id: number;
-  church_id: number;
-  first_name: string;
-  last_name: string | null;
-  role: string | null;
-  email: string | null;
-  phone: string | null;
-  is_primary: number;
-  notes: string | null;
-}
-
-interface CRMActivity {
-  id: number;
-  church_id: number;
-  contact_id: number | null;
-  activity_type: string;
-  subject: string;
-  body: string | null;
-  metadata: any;
-  created_by: number | null;
-  created_at: string;
-  church_name?: string;
-  state_code?: string;
-}
-
-interface CRMFollowUp {
-  id: number;
-  church_id: number;
-  assigned_to: number | null;
-  due_date: string;
-  subject: string;
-  description: string | null;
-  status: string;
-  completed_at: string | null;
-  church_name?: string;
-  state_code?: string;
-  city?: string;
-  pipeline_stage?: string;
-  is_overdue?: boolean;
-}
-
-interface DashboardData {
-  pipeline: { pipeline_stage: string; label: string; color: string; sort_order: number; count: number }[];
-  overdue: number;
-  todayFollowups: number;
-  upcomingFollowups: CRMFollowUp[];
-  recentActivity: CRMActivity[];
-  totalChurches: number;
-  totalClients: number;
-  activeStates: { state_code: string; count: number }[];
-}
-
-// ─── Helper ─────────────────────────────────────────────────────────
-
-const ACTIVITY_ICONS: Record<string, React.ReactNode> = {
-  note: <NoteIcon fontSize="small" />,
-  call: <CallIcon fontSize="small" />,
-  email: <EmailIcon fontSize="small" />,
-  meeting: <MeetingIcon fontSize="small" />,
-  task: <EventIcon fontSize="small" />,
-  stage_change: <TimelineIcon fontSize="small" />,
-  provision: <ProvisionIcon fontSize="small" />,
-};
-
-const ACTIVITY_COLORS: Record<string, string> = {
-  note: '#9e9e9e',
-  call: '#4caf50',
-  email: '#2196f3',
-  meeting: '#ff9800',
-  task: '#9c27b0',
-  stage_change: '#e91e63',
-  provision: '#00bcd4',
-};
-
-const PRIORITY_COLORS: Record<string, string> = {
-  low: '#9e9e9e',
-  medium: '#2196f3',
-  high: '#ff9800',
-  urgent: '#f44336',
-};
-
-function formatDate(d: string | null) {
-  if (!d) return '—';
-  const date = new Date(d);
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-}
-
-function formatDateTime(d: string | null) {
-  if (!d) return '—';
-  const date = new Date(d);
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
-}
-
-function relativeTime(d: string) {
-  const now = Date.now();
-  const then = new Date(d).getTime();
-  const diff = now - then;
-  const mins = Math.floor(diff / 60000);
-  if (mins < 1) return 'just now';
-  if (mins < 60) return `${mins}m ago`;
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h ago`;
-  const days = Math.floor(hrs / 24);
-  if (days < 7) return `${days}d ago`;
-  return formatDate(d);
-}
 
 // ─── Component ──────────────────────────────────────────────────────
 
@@ -778,286 +621,10 @@ const CRMPage: React.FC = () => {
   );
 
   // ─── CHURCH DETAIL DRAWER ────────────────────────────────────────
-
-  const renderDrawer = () => {
-    if (!selectedChurch) return null;
-    const c = selectedChurch;
-    return (
-      <Drawer anchor="right" open={drawerOpen} onClose={() => setDrawerOpen(false)} PaperProps={{ sx: { width: { xs: '100%', sm: 520 } } }}>
-        {detailLoading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}><CircularProgress /></Box>
-        ) : (
-          <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-            {/* Header */}
-            <Box sx={{ p: 2, borderBottom: `1px solid ${isDark ? '#333' : '#eee'}` }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                <IconButton size="small" onClick={() => setDrawerOpen(false)}><ArrowBackIcon fontSize="small" /></IconButton>
-                <Typography variant="h6" sx={{ flex: 1, fontSize: '1.05rem' }}>{c.name}</Typography>
-                <IconButton size="small" onClick={() => { fetchChurchDetail(c.id); }}><RefreshIcon fontSize="small" /></IconButton>
-              </Box>
-              <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mb: 1 }}>
-                {renderStageChip(c.pipeline_stage, c.stage_color, c.stage_label)}
-                {renderPriorityChip(c.priority || 'medium')}
-                <Chip size="small" label={c.jurisdiction} variant="outlined" sx={{ fontSize: '0.68rem', height: 22 }} />
-                {c.provisioned_church_id && <Chip size="small" label={`Client #${c.provisioned_church_id}`} color="success" sx={{ fontSize: '0.68rem', height: 22 }} />}
-              </Box>
-              <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
-                <Button size="small" variant="outlined" startIcon={<TimelineIcon />} onClick={() => { setNewStage(c.pipeline_stage); setStageDialogOpen(true); }}>Change Stage</Button>
-                <Button size="small" variant="outlined" startIcon={<AddIcon />} onClick={() => { setActivityForm({ activity_type: 'note', subject: '', body: '' }); setActivityDialogOpen(true); }}>Log Activity</Button>
-                <Button size="small" variant="outlined" startIcon={<EventIcon />} onClick={() => { setFollowUpForm({ due_date: '', subject: '', description: '' }); setFollowUpDialogOpen(true); }}>Follow-up</Button>
-                {!c.provisioned_church_id && (
-                  <Button size="small" variant="contained" color="success" startIcon={<ProvisionIcon />} onClick={() => setProvisionDialogOpen(true)}>Provision</Button>
-                )}
-              </Box>
-            </Box>
-
-            {/* Tabs */}
-            <Tabs value={drawerTab} onChange={(_, v) => setDrawerTab(v)} sx={{ borderBottom: `1px solid ${isDark ? '#333' : '#eee'}` }}>
-              <Tab label="Overview" sx={{ fontSize: '0.78rem', minHeight: 40 }} />
-              <Tab label={`Contacts (${churchContacts.length})`} sx={{ fontSize: '0.78rem', minHeight: 40 }} />
-              <Tab label={`Activity (${churchActivities.length})`} sx={{ fontSize: '0.78rem', minHeight: 40 }} />
-            </Tabs>
-
-            {/* Tab Content */}
-            <Box sx={{ flex: 1, overflow: 'auto', p: 2 }}>
-              {/* OVERVIEW */}
-              {drawerTab === 0 && (
-                <Stack spacing={2}>
-                  <Box>
-                    <Typography variant="subtitle2" gutterBottom>Location</Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                      <PlaceIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
-                      <Typography variant="body2">{[c.street, c.city, c.state_code, c.zip].filter(Boolean).join(', ')}</Typography>
-                    </Box>
-                  </Box>
-                  {c.phone && (
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                      <PhoneIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
-                      <Typography variant="body2">{c.phone}</Typography>
-                    </Box>
-                  )}
-                  {c.website && (
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                      <WebIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
-                      <Link href={c.website} target="_blank" rel="noopener" variant="body2">{c.website}</Link>
-                    </Box>
-                  )}
-                  <Divider />
-                  <Box>
-                    <Typography variant="subtitle2" gutterBottom>Priority</Typography>
-                    <Box sx={{ display: 'flex', gap: 0.5 }}>
-                      {['low', 'medium', 'high', 'urgent'].map(p => (
-                        <Chip key={p} size="small" label={p} sx={{ textTransform: 'capitalize', cursor: 'pointer', bgcolor: c.priority === p ? alpha(PRIORITY_COLORS[p], 0.2) : undefined, color: c.priority === p ? PRIORITY_COLORS[p] : undefined }}
-                          onClick={() => handlePriorityChange(p)} />
-                      ))}
-                    </Box>
-                  </Box>
-                  <Box>
-                    <Typography variant="subtitle2" gutterBottom>Notes</Typography>
-                    <TextField
-                      multiline rows={3} fullWidth size="small"
-                      defaultValue={c.crm_notes || ''}
-                      onBlur={(e) => handleNotesChange(e.target.value)}
-                      placeholder="Add CRM notes..."
-                    />
-                  </Box>
-                  <Divider />
-                  <Box>
-                    <Typography variant="subtitle2" gutterBottom>Follow-ups</Typography>
-                    {churchFollowUps.length === 0 ? (
-                      <Typography variant="body2" color="text.secondary">No follow-ups</Typography>
-                    ) : churchFollowUps.map(f => (
-                      <Box key={f.id} sx={{ display: 'flex', alignItems: 'center', gap: 1, py: 0.5 }}>
-                        {f.status === 'pending' ? (
-                          <IconButton size="small" color="success" onClick={() => handleCompleteFollowUp(f.id)}><CheckIcon sx={{ fontSize: 16 }} /></IconButton>
-                        ) : <CheckIcon sx={{ fontSize: 16, color: 'success.main', ml: 1 }} />}
-                        <Box sx={{ flex: 1 }}>
-                          <Typography variant="body2" sx={{ textDecoration: f.status === 'completed' ? 'line-through' : 'none', fontSize: '0.82rem' }}>{f.subject}</Typography>
-                        </Box>
-                        <Typography variant="caption" color={f.status === 'pending' && new Date(f.due_date) < new Date(new Date().toDateString()) ? 'error' : 'text.secondary'}>
-                          {formatDate(f.due_date)}
-                        </Typography>
-                      </Box>
-                    ))}
-                  </Box>
-                  {c.last_contacted_at && (
-                    <Typography variant="caption" color="text.secondary">Last contacted: {formatDateTime(c.last_contacted_at)}</Typography>
-                  )}
-                </Stack>
-              )}
-
-              {/* CONTACTS */}
-              {drawerTab === 1 && (
-                <Stack spacing={1}>
-                  <Button size="small" startIcon={<AddIcon />} onClick={() => { setEditingContact(null); setContactForm({ first_name: '', last_name: '', role: '', email: '', phone: '', is_primary: false, notes: '' }); setContactDialogOpen(true); }}>
-                    Add Contact
-                  </Button>
-                  {churchContacts.length === 0 ? (
-                    <Typography variant="body2" color="text.secondary">No contacts yet</Typography>
-                  ) : churchContacts.map(contact => (
-                    <Paper key={contact.id} variant="outlined" sx={{ p: 1.5 }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Avatar sx={{ width: 32, height: 32, bgcolor: contact.is_primary ? 'primary.main' : 'grey.500', fontSize: '0.8rem' }}>
-                          {contact.first_name[0]}{contact.last_name?.[0] || ''}
-                        </Avatar>
-                        <Box sx={{ flex: 1 }}>
-                          <Typography variant="body2" fontWeight={600}>
-                            {contact.first_name} {contact.last_name || ''}
-                            {contact.is_primary ? <StarIcon sx={{ fontSize: 14, color: 'warning.main', ml: 0.5, verticalAlign: 'text-top' }} /> : null}
-                          </Typography>
-                          {contact.role && <Typography variant="caption" color="text.secondary">{contact.role}</Typography>}
-                        </Box>
-                        <IconButton size="small" onClick={() => {
-                          setEditingContact(contact);
-                          setContactForm({ first_name: contact.first_name, last_name: contact.last_name || '', role: contact.role || '', email: contact.email || '', phone: contact.phone || '', is_primary: !!contact.is_primary, notes: contact.notes || '' });
-                          setContactDialogOpen(true);
-                        }}><EditIcon sx={{ fontSize: 16 }} /></IconButton>
-                        <IconButton size="small" color="error" onClick={() => handleDeleteContact(contact.id)}><DeleteIcon sx={{ fontSize: 16 }} /></IconButton>
-                      </Box>
-                      <Box sx={{ ml: 5.5, display: 'flex', gap: 1.5, flexWrap: 'wrap', mt: 0.3 }}>
-                        {contact.email && <Typography variant="caption" color="text.secondary">{contact.email}</Typography>}
-                        {contact.phone && <Typography variant="caption" color="text.secondary">{contact.phone}</Typography>}
-                      </Box>
-                    </Paper>
-                  ))}
-                </Stack>
-              )}
-
-              {/* ACTIVITY LOG */}
-              {drawerTab === 2 && (
-                <Stack spacing={0}>
-                  {churchActivities.length === 0 ? (
-                    <Typography variant="body2" color="text.secondary">No activities logged</Typography>
-                  ) : churchActivities.map(a => (
-                    <Box key={a.id} sx={{ display: 'flex', gap: 1, py: 1, borderBottom: `1px solid ${isDark ? '#333' : '#f0f0f0'}` }}>
-                      <Avatar sx={{ width: 28, height: 28, bgcolor: alpha(ACTIVITY_COLORS[a.activity_type] || '#999', 0.2), color: ACTIVITY_COLORS[a.activity_type] || '#999' }}>
-                        {ACTIVITY_ICONS[a.activity_type] || <NoteIcon fontSize="small" />}
-                      </Avatar>
-                      <Box sx={{ flex: 1, minWidth: 0 }}>
-                        <Typography variant="body2" fontWeight={600} sx={{ fontSize: '0.82rem' }}>{a.subject}</Typography>
-                        {a.body && <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.78rem', mt: 0.3 }}>{a.body}</Typography>}
-                        <Typography variant="caption" color="text.secondary">{relativeTime(a.created_at)}</Typography>
-                      </Box>
-                    </Box>
-                  ))}
-                </Stack>
-              )}
-            </Box>
-          </Box>
-        )}
-      </Drawer>
-    );
-  };
+  // Extracted to ChurchDetailDrawer.tsx
 
   // ─── DIALOGS ─────────────────────────────────────────────────────
-
-  const renderDialogs = () => (
-    <>
-      {/* Activity Dialog */}
-      <Dialog open={activityDialogOpen} onClose={() => setActivityDialogOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Log Activity</DialogTitle>
-        <DialogContent>
-          <Stack spacing={2} sx={{ mt: 1 }}>
-            <FormControl fullWidth size="small">
-              <InputLabel>Type</InputLabel>
-              <Select value={activityForm.activity_type} label="Type" onChange={(e) => setActivityForm(prev => ({ ...prev, activity_type: e.target.value }))}>
-                <MenuItem value="note">Note</MenuItem>
-                <MenuItem value="call">Call</MenuItem>
-                <MenuItem value="email">Email</MenuItem>
-                <MenuItem value="meeting">Meeting</MenuItem>
-                <MenuItem value="task">Task</MenuItem>
-              </Select>
-            </FormControl>
-            <TextField label="Subject" size="small" fullWidth value={activityForm.subject} onChange={(e) => setActivityForm(prev => ({ ...prev, subject: e.target.value }))} required />
-            <TextField label="Details" size="small" fullWidth multiline rows={3} value={activityForm.body} onChange={(e) => setActivityForm(prev => ({ ...prev, body: e.target.value }))} />
-          </Stack>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setActivityDialogOpen(false)}>Cancel</Button>
-          <Button variant="contained" onClick={handleAddActivity} disabled={!activityForm.subject}>Save</Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Contact Dialog */}
-      <Dialog open={contactDialogOpen} onClose={() => setContactDialogOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>{editingContact ? 'Edit Contact' : 'Add Contact'}</DialogTitle>
-        <DialogContent>
-          <Stack spacing={2} sx={{ mt: 1 }}>
-            <Stack direction="row" spacing={1}>
-              <TextField label="First Name" size="small" fullWidth value={contactForm.first_name} onChange={(e) => setContactForm(prev => ({ ...prev, first_name: e.target.value }))} required />
-              <TextField label="Last Name" size="small" fullWidth value={contactForm.last_name} onChange={(e) => setContactForm(prev => ({ ...prev, last_name: e.target.value }))} />
-            </Stack>
-            <TextField label="Role" size="small" fullWidth value={contactForm.role} onChange={(e) => setContactForm(prev => ({ ...prev, role: e.target.value }))} placeholder="e.g. Pastor, Secretary" />
-            <TextField label="Email" size="small" fullWidth value={contactForm.email} onChange={(e) => setContactForm(prev => ({ ...prev, email: e.target.value }))} />
-            <TextField label="Phone" size="small" fullWidth value={contactForm.phone} onChange={(e) => setContactForm(prev => ({ ...prev, phone: e.target.value }))} />
-            <TextField label="Notes" size="small" fullWidth multiline rows={2} value={contactForm.notes} onChange={(e) => setContactForm(prev => ({ ...prev, notes: e.target.value }))} />
-          </Stack>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setContactDialogOpen(false)}>Cancel</Button>
-          <Button variant="contained" onClick={handleSaveContact} disabled={!contactForm.first_name}>Save</Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Follow-up Dialog */}
-      <Dialog open={followUpDialogOpen} onClose={() => setFollowUpDialogOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Create Follow-up</DialogTitle>
-        <DialogContent>
-          <Stack spacing={2} sx={{ mt: 1 }}>
-            <TextField label="Due Date" type="date" size="small" fullWidth value={followUpForm.due_date} onChange={(e) => setFollowUpForm(prev => ({ ...prev, due_date: e.target.value }))} InputLabelProps={{ shrink: true }} required />
-            <TextField label="Subject" size="small" fullWidth value={followUpForm.subject} onChange={(e) => setFollowUpForm(prev => ({ ...prev, subject: e.target.value }))} required />
-            <TextField label="Description" size="small" fullWidth multiline rows={2} value={followUpForm.description} onChange={(e) => setFollowUpForm(prev => ({ ...prev, description: e.target.value }))} />
-          </Stack>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setFollowUpDialogOpen(false)}>Cancel</Button>
-          <Button variant="contained" onClick={handleAddFollowUp} disabled={!followUpForm.due_date || !followUpForm.subject}>Save</Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Stage Change Dialog */}
-      <Dialog open={stageDialogOpen} onClose={() => setStageDialogOpen(false)} maxWidth="xs" fullWidth>
-        <DialogTitle>Change Pipeline Stage</DialogTitle>
-        <DialogContent>
-          <FormControl fullWidth size="small" sx={{ mt: 1 }}>
-            <InputLabel>Stage</InputLabel>
-            <Select value={newStage} label="Stage" onChange={(e) => setNewStage(e.target.value)}>
-              {stages.map(s => (
-                <MenuItem key={s.stage_key} value={s.stage_key}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: s.color }} />
-                    {s.label}
-                  </Box>
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setStageDialogOpen(false)}>Cancel</Button>
-          <Button variant="contained" onClick={handleStageChange}>Update</Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Provision Confirmation Dialog */}
-      <Dialog open={provisionDialogOpen} onClose={() => setProvisionDialogOpen(false)}>
-        <DialogTitle>Provision Church</DialogTitle>
-        <DialogContent>
-          <Typography>
-            This will create <strong>{selectedChurch?.name}</strong> as an OrthodoxMetrics client church,
-            adding it to the churches table and marking it as a client in the CRM.
-          </Typography>
-          {churchContacts.filter(c => c.is_primary).length === 0 && (
-            <Alert severity="warning" sx={{ mt: 2 }}>No primary contact set. Consider adding one first.</Alert>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setProvisionDialogOpen(false)}>Cancel</Button>
-          <Button variant="contained" color="success" onClick={handleProvision} startIcon={<ProvisionIcon />}>Provision</Button>
-        </DialogActions>
-      </Dialog>
-    </>
-  );
+  // Extracted to CRMDialogs.tsx
 
   // ─── Main Render ─────────────────────────────────────────────────
 
@@ -1089,8 +656,63 @@ const CRMPage: React.FC = () => {
         {mainTab === 3 && renderFollowUps()}
       </Box>
 
-      {renderDrawer()}
-      {renderDialogs()}
+      <ChurchDetailDrawer
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        church={selectedChurch}
+        detailLoading={detailLoading}
+        drawerTab={drawerTab}
+        onDrawerTabChange={setDrawerTab}
+        churchContacts={churchContacts}
+        churchActivities={churchActivities}
+        churchFollowUps={churchFollowUps}
+        onRefresh={fetchChurchDetail}
+        onStageChange={() => { if (selectedChurch) { setNewStage(selectedChurch.pipeline_stage); setStageDialogOpen(true); } }}
+        onLogActivity={() => { setActivityForm({ activity_type: 'note', subject: '', body: '' }); setActivityDialogOpen(true); }}
+        onAddFollowUp={() => { setFollowUpForm({ due_date: '', subject: '', description: '' }); setFollowUpDialogOpen(true); }}
+        onProvision={() => setProvisionDialogOpen(true)}
+        onPriorityChange={handlePriorityChange}
+        onNotesChange={handleNotesChange}
+        onCompleteFollowUp={handleCompleteFollowUp}
+        onAddContact={() => { setEditingContact(null); setContactForm({ first_name: '', last_name: '', role: '', email: '', phone: '', is_primary: false, notes: '' }); setContactDialogOpen(true); }}
+        onEditContact={(contact) => {
+          setEditingContact(contact);
+          setContactForm({ first_name: contact.first_name, last_name: contact.last_name || '', role: contact.role || '', email: contact.email || '', phone: contact.phone || '', is_primary: !!contact.is_primary, notes: contact.notes || '' });
+          setContactDialogOpen(true);
+        }}
+        onDeleteContact={handleDeleteContact}
+        renderStageChip={renderStageChip}
+        renderPriorityChip={renderPriorityChip}
+      />
+      <CRMDialogs
+        activityDialogOpen={activityDialogOpen}
+        onActivityDialogClose={() => setActivityDialogOpen(false)}
+        activityForm={activityForm}
+        onActivityFormChange={setActivityForm}
+        onAddActivity={handleAddActivity}
+        contactDialogOpen={contactDialogOpen}
+        onContactDialogClose={() => setContactDialogOpen(false)}
+        contactForm={contactForm}
+        onContactFormChange={setContactForm}
+        editingContact={editingContact}
+        onSaveContact={handleSaveContact}
+        followUpDialogOpen={followUpDialogOpen}
+        onFollowUpDialogClose={() => setFollowUpDialogOpen(false)}
+        followUpForm={followUpForm}
+        onFollowUpFormChange={setFollowUpForm}
+        onAddFollowUp={handleAddFollowUp}
+        stageDialogOpen={stageDialogOpen}
+        onStageDialogClose={() => setStageDialogOpen(false)}
+        newStage={newStage}
+        onNewStageChange={setNewStage}
+        stages={stages}
+        onStageChange={handleStageChange}
+        provisionDialogOpen={provisionDialogOpen}
+        onProvisionDialogClose={() => setProvisionDialogOpen(false)}
+        selectedChurch={selectedChurch}
+        churchContacts={churchContacts}
+        onProvision={handleProvision}
+      />
 
       <Snackbar open={toast.open} autoHideDuration={3000} onClose={() => setToast(prev => ({ ...prev, open: false }))}>
         <Alert severity={toast.severity} onClose={() => setToast(prev => ({ ...prev, open: false }))}>{toast.message}</Alert>
