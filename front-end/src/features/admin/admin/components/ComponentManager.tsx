@@ -27,10 +27,10 @@ import {
     type ComponentFilters 
 } from '@/api/components.api';
 import { useAuth } from '@/context/AuthContext';
-import { getComponentHealthStatus, getHealthIssues } from './ComponentManager/healthUtils';
 import LogsDialog from './ComponentManager/LogsDialog';
 import TestResultDialog from './ComponentManager/TestResultDialog';
 import ComponentCard from './ComponentManager/ComponentCard';
+import { analyzeComponentHealth, getFilteredSummary, exportDegradedLogs } from './ComponentManager/utils';
 
 /**
  * Component Manager - Production Frontend with Live Backend Integration
@@ -117,135 +117,6 @@ const ComponentManager: React.FC = () => {
         console.log('ComponentManager mounted');
         fetchComponents();
     }, []);
-
-    // Analyze component health based on recent logs
-    const analyzeComponentHealth = async (data: ComponentsResponse): Promise<ComponentsResponse> => {
-        try {
-            console.log('Starting health analysis for components...');
-            
-            // Validate data structure
-            if (!data || !data.components || !Array.isArray(data.components)) {
-                console.warn('Invalid components data structure, skipping health analysis:', data);
-                return data;
-            }
-            
-            // Create promises for log analysis of each component
-            const analysisPromises = data.components.map(async (component) => {
-                try {
-                    // Fetch recent logs for this component
-                    const logsResponse = await componentsAPI.getLogs(component.id);
-                    const logs = logsResponse.logs || [];
-                    
-                    // Analyze health based on logs
-                    const analyzedHealth = getComponentHealthStatus(logs);
-                    const healthIssues = getHealthIssues(logs);
-                    
-                    // Update component with analyzed health
-                    const updatedComponent: Component = {
-                        ...component,
-                        health: analyzedHealth,
-                        healthIssues: healthIssues.length > 0 ? healthIssues : component.healthIssues,
-                        lastHealthCheck: new Date().toISOString()
-                    };
-                    
-                    // Log health changes for debugging
-                    if (analyzedHealth !== component.health) {
-                        console.log(`Health updated for ${component.name}: ${component.health} → ${analyzedHealth}`, {
-                            issues: healthIssues,
-                            analyzedLogs: logs.length
-                        });
-                    }
-                    
-                    return updatedComponent;
-                } catch (logError) {
-                    // If log analysis fails, keep original component health
-                    console.warn(`Failed to analyze health for ${component.name}:`, logError);
-                    return {
-                        ...component,
-                        lastHealthCheck: new Date().toISOString()
-                    };
-                }
-            });
-            
-            // Wait for all analyses to complete
-            const analyzedComponents = await Promise.all(analysisPromises);
-            
-            // Recalculate meta information based on new health statuses
-            const updatedMeta = {
-                ...data.meta,
-                // Update category breakdown to reflect new health statuses
-                categoryBreakdown: calculateCategoryBreakdown(analyzedComponents),
-                usageStats: {
-                    ...data.meta.usageStats,
-                    // Add health-related stats
-                    healthyComponents: analyzedComponents.filter(c => c.health === 'healthy').length,
-                    degradedComponents: analyzedComponents.filter(c => c.health === 'degraded').length,
-                    failedComponents: analyzedComponents.filter(c => c.health === 'failed').length
-                }
-            };
-            
-            const healthChanges = analyzedComponents.filter(c => {
-                const original = data.components.find(orig => orig.id === c.id);
-                return original && original.health !== c.health;
-            });
-            
-            console.log(`Health analysis completed. Updated ${analyzedComponents.length} components.`, {
-                totalAnalyzed: analyzedComponents.length,
-                healthChanges: healthChanges.length,
-                changedComponents: healthChanges.map(c => ({
-                    name: c.name,
-                    oldHealth: data.components.find(orig => orig.id === c.id)?.health,
-                    newHealth: c.health,
-                    issues: c.healthIssues?.length || 0
-                }))
-            });
-            
-            return {
-                components: analyzedComponents,
-                meta: updatedMeta
-            };
-            
-        } catch (error) {
-            console.error('Health analysis failed, using original data:', error);
-            // Return original data if analysis fails
-            return data;
-        }
-    };
-
-    // Helper function to calculate category breakdown with health info
-    const calculateCategoryBreakdown = (components: Component[]) => {
-        const breakdown: Record<string, any> = {};
-        
-        // Validate components is an array
-        if (!Array.isArray(components)) {
-            console.warn('calculateCategoryBreakdown: components is not an array:', components);
-            return breakdown;
-        }
-        
-        components.forEach(component => {
-            const category = component.category || 'Uncategorized';
-            if (!breakdown[category]) {
-                breakdown[category] = {
-                    total: 0,
-                    healthy: 0,
-                    degraded: 0,
-                    failed: 0,
-                    enabled: 0,
-                    disabled: 0,
-                    active: 0,
-                    inactive: 0,
-                    unused: 0
-                };
-            }
-            
-            breakdown[category].total++;
-            breakdown[category][component.health]++;
-            breakdown[category][component.enabled ? 'enabled' : 'disabled']++;
-            breakdown[category][component.usageStatus]++;
-        });
-        
-        return breakdown;
-    };
 
     // Fetch components with filters and pagination
     const fetchComponents = async (newFilters?: Partial<ComponentFilters>) => {
@@ -421,140 +292,61 @@ const ComponentManager: React.FC = () => {
         }
     };
 
-    // Handle export of degraded component logs
-    // Creates a plain text report with format:
-    // Component: [Name]
-    // Health Status: DEGRADED
-    // Category: [Category]
-    // Last Updated: [Date]
-    // Issues: [Health Issues]
-    // ------------------------------
-    // [LEVEL] [Timestamp] - [Message]
-    // ****************************
     const handleExportDegradedLogs = async () => {
+        setLoading(true);
         try {
-            setLoading(true);
-            
-            // Filter degraded components
-            const degradedComponents = (Array.isArray(componentsData?.components) ? componentsData.components : []).filter(
-                component => component.health === 'degraded'
-            );
-            
-            if (degradedComponents.length === 0) {
-                showToast('No degraded components found to export', 'info');
-                return;
+            const result = await exportDegradedLogs(componentsData);
+            if (!result.success) {
+                showToast(result.error || 'No degraded components found', 'info');
+            } else {
+                showToast(`Exported logs for ${result.count} degraded components`, 'success');
             }
-            
-            showToast(`Gathering logs for ${degradedComponents.length} degraded components...`, 'info');
-            
-            let exportContent = `DEGRADED COMPONENTS LOG REPORT\n`;
-            exportContent += `Generated: ${new Date().toLocaleString()}\n`;
-            exportContent += `Total degraded components: ${degradedComponents.length}\n\n`;
-            exportContent += `${'='.repeat(60)}\n\n`;
-            
-            // Fetch logs for each degraded component
-            const logPromises = degradedComponents.map(async (component) => {
-                try {
-                    const logsResponse = await componentsAPI.getLogs(component.id);
-                    return {
-                        component,
-                        logs: logsResponse.logs || [],
-                        success: true
-                    };
-                } catch (err) {
-                    console.error(`Failed to fetch logs for ${component.name}:`, err);
-                    return {
-                        component,
-                        logs: [],
-                        success: false,
-                        error: err
-                    };
-                }
-            });
-            
-            const logResults = await Promise.all(logPromises);
-            
-            // Format the export content
-            logResults.forEach((result, index) => {
-                const { component, logs, success, error } = result;
-                
-                exportContent += `Component: ${component.name}\n`;
-                exportContent += `Health Status: ${component.health.toUpperCase()}\n`;
-                exportContent += `Category: ${component.category || 'Uncategorized'}\n`;
-                exportContent += `Last Updated: ${component.lastUpdated ? new Date(component.lastUpdated).toLocaleString() : 'Unknown'}\n`;
-                
-                if (component.healthIssues && component.healthIssues.length > 0) {
-                    exportContent += `Issues: ${component.healthIssues.join(', ')}\n`;
-                }
-                
-                exportContent += `${'-'.repeat(30)}\n`;
-                
-                if (!success) {
-                    exportContent += `[ERROR] Failed to retrieve logs: ${error?.response?.data?.message || error?.message || 'Unknown error'}\n`;
-                } else if (logs.length === 0) {
-                    exportContent += `[INFO] No logs available for this component\n`;
-                } else {
-                    // Sort logs by timestamp (newest first)
-                    const sortedLogs = logs.sort((a, b) => 
-                        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-                    );
-                    
-                    // Take only the most recent 20 logs
-                    const recentLogs = sortedLogs.slice(0, 20);
-                    
-                    recentLogs.forEach(log => {
-                        const timestamp = new Date(log.timestamp).toLocaleString();
-                        const level = log.level.toUpperCase();
-                        exportContent += `[${level}] ${timestamp} - ${log.message}\n`;
-                    });
-                    
-                    if (sortedLogs.length > 20) {
-                        exportContent += `... and ${sortedLogs.length - 20} more log entries\n`;
-                    }
-                }
-                
-                exportContent += `\n${'*'.repeat(28)}\n\n`;
-            });
-            
-            // Add summary at the end
-            exportContent += `EXPORT SUMMARY\n`;
-            exportContent += `${'-'.repeat(15)}\n`;
-            exportContent += `Total components processed: ${logResults.length}\n`;
-            exportContent += `Successful log retrievals: ${logResults.filter(r => r.success).length}\n`;
-            exportContent += `Failed log retrievals: ${logResults.filter(r => !r.success).length}\n`;
-            exportContent += `Export completed: ${new Date().toLocaleString()}\n`;
-            
-            // Create and download the file
-            const blob = new Blob([exportContent], { type: 'text/plain;charset=utf-8' });
-            const url = URL.createObjectURL(blob);
-            
-            const link = document.createElement('a');
-            link.href = url;
-            const timestamp = new Date().toISOString().replace(/[:.]/g, '-').split('T');
-            const dateStr = timestamp[0];
-            const timeStr = timestamp[1].split('.')[0];
-            link.download = `degraded-components-log-report-${dateStr}-${timeStr}.txt`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            URL.revokeObjectURL(url);
-            
-            showToast(
-                `Successfully exported logs for ${degradedComponents.length} degraded components`,
-                'success'
-            );
-            
         } catch (err: any) {
-            console.error('Error exporting degraded component logs:', err);
-            showToast(
-                `Failed to export logs: ${err.message || 'Unknown error'}`,
-                'error'
-            );
+            showToast(`Failed to export logs: ${err.message || 'Unknown error'}`, 'error');
         } finally {
             setLoading(false);
         }
     };
+
+    /* --- Filter / pagination helpers (restored) -------------------- */
+
+    const getAvailableCategories = (): string[] => {
+        if (!componentsData?.components || !Array.isArray(componentsData.components)) return [];
+        const categories = new Set(componentsData.components.map(c => c.category));
+        return Array.from(categories).sort();
+    };
+
+    const handleCategoryChange = (category: string) => {
+        setCategoryTab(category);
+        fetchComponents({ category: category === 'all' ? 'all' : category, page: 1 });
+    };
+
+    const handlePageChange = (_event: React.ChangeEvent<unknown>, page: number) => {
+        fetchComponents({ page });
+    };
+
+    const debouncedSearch = useMemo(() => {
+        let timeoutId: NodeJS.Timeout;
+        return (value: string) => {
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(() => {
+                setFilters(prev => ({ ...prev, search: value, page: 1 }));
+                fetchComponents({ search: value, page: 1 });
+            }, 500);
+        };
+    }, [fetchComponents]);
+
+    const handleSearchChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+        const value = event.target.value;
+        setSearchTerm(value);
+        debouncedSearch(value);
+    }, [debouncedSearch]);
+
+    const handleFilterChange = (filterType: keyof ComponentFilters, value: string) => {
+        fetchComponents({ [filterType]: value, page: 1 });
+    };
+
+    const summary = getFilteredSummary(componentsData);
 
     // Loading state
     if (loading) {
@@ -798,25 +590,25 @@ const ComponentManager: React.FC = () => {
                             <Stack direction="row" spacing={2} sx={{ mb: 1 }}>
                                 <Chip 
                                     size="small" 
-                                    label={`${getFilteredSummary().healthy} Healthy`}
+                                    label={`${summary.healthy} Healthy`}
                                     color="success"
                                     variant="outlined"
                                 />
                                 <Chip 
                                     size="small" 
-                                    label={`${getFilteredSummary().degraded} Degraded`}
+                                    label={`${summary.degraded} Degraded`}
                                     color="warning"
                                     variant="outlined"
                                 />
                                 <Chip 
                                     size="small" 
-                                    label={`${getFilteredSummary().failed} Failed`}
+                                    label={`${summary.failed} Failed`}
                                     color="error"
                                     variant="outlined"
                                 />
                             </Stack>
                             <Typography variant="h6" color="text.primary">
-                                {getFilteredSummary().total} Total Components
+                                {summary.total} Total Components
                             </Typography>
                         </Box>
                     </Grid2>
@@ -830,17 +622,17 @@ const ComponentManager: React.FC = () => {
                             <Stack direction="row" spacing={2} sx={{ mb: 1 }}>
                                 <Chip 
                                     size="small" 
-                                    label={`${getFilteredSummary().active} Active`}
+                                    label={`${summary.active} Active`}
                                     sx={{ backgroundColor: '#e8f5e8', color: '#4caf50' }}
                                 />
                                 <Chip 
                                     size="small" 
-                                    label={`${getFilteredSummary().inactive} Inactive`}
+                                    label={`${summary.inactive} Inactive`}
                                     sx={{ backgroundColor: '#fff3e0', color: '#ff9800' }}
                                 />
                                 <Chip 
                                     size="small" 
-                                    label={`${getFilteredSummary().unused} Unused`}
+                                    label={`${summary.unused} Unused`}
                                     sx={{ backgroundColor: '#f5f5f5', color: '#9e9e9e' }}
                                 />
                             </Stack>
@@ -859,13 +651,13 @@ const ComponentManager: React.FC = () => {
                             <Stack direction="row" spacing={2} sx={{ mb: 1 }}>
                                 <Chip 
                                     size="small" 
-                                    label={`${getFilteredSummary().enabled} Enabled`}
+                                    label={`${summary.enabled} Enabled`}
                                     color="success"
                                     variant="outlined"
                                 />
                                 <Chip 
                                     size="small" 
-                                    label={`${getFilteredSummary().disabled} Disabled`}
+                                    label={`${summary.disabled} Disabled`}
                                     color="default"
                                     variant="outlined"
                                 />
