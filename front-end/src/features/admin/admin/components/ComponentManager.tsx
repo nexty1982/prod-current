@@ -1,15 +1,11 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import Grid2 from '@/components/compat/Grid2';
 
-import { Box, Typography, Card, CardContent, Chip, Switch, FormControlLabel, Alert, IconButton, Tooltip, Stack, Avatar, CircularProgress, Dialog, DialogTitle, DialogContent, DialogActions, Button, LinearProgress, Snackbar, DialogContentText, Pagination, TextField, InputAdornment, Tab, Tabs, Badge, Paper, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
+import { Box, Typography, Card, CardContent, Chip, Switch, FormControlLabel, Alert, IconButton, Tooltip, Stack, Avatar, CircularProgress, Button, LinearProgress, Snackbar, Pagination, TextField, InputAdornment, Tab, Tabs, Badge, Paper, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
 import {
     IconSettings,
     IconEye,
     IconTestPipe,
-    IconCircleCheck,
-    IconAlertTriangle,
-    IconCircleX,
-    IconActivity,
     IconRefresh,
     IconShield,
     IconBug,
@@ -28,8 +24,21 @@ import {
 } from '@/api/components.api';
 import { useAuth } from '@/context/AuthContext';
 import { getComponentHealthStatus, getHealthIssues } from './ComponentManager/healthUtils';
+import {
+    calculateCategoryBreakdown,
+    formatLastUpdated,
+    getComponentCardClass,
+    getFilteredSummary,
+    getHealthColor,
+    getHealthTooltip,
+    getRelativeTime,
+    getToggleTooltip,
+    getUsageChip,
+    isHealthAutoDetected,
+} from './ComponentManager/helpers';
 import LogsDialog from './ComponentManager/LogsDialog';
 import TestResultDialog from './ComponentManager/TestResultDialog';
+import ToggleConfirmDialog from './ComponentManager/ToggleConfirmDialog';
 
 /**
  * Component Manager - Production Frontend with Live Backend Integration
@@ -211,40 +220,6 @@ const ComponentManager: React.FC = () => {
         }
     };
 
-    // Helper function to calculate category breakdown with health info
-    const calculateCategoryBreakdown = (components: Component[]) => {
-        const breakdown: Record<string, any> = {};
-        
-        // Validate components is an array
-        if (!Array.isArray(components)) {
-            console.warn('calculateCategoryBreakdown: components is not an array:', components);
-            return breakdown;
-        }
-        
-        components.forEach(component => {
-            const category = component.category || 'Uncategorized';
-            if (!breakdown[category]) {
-                breakdown[category] = {
-                    total: 0,
-                    healthy: 0,
-                    degraded: 0,
-                    failed: 0,
-                    enabled: 0,
-                    disabled: 0,
-                    active: 0,
-                    inactive: 0,
-                    unused: 0
-                };
-            }
-            
-            breakdown[category].total++;
-            breakdown[category][component.health]++;
-            breakdown[category][component.enabled ? 'enabled' : 'disabled']++;
-            breakdown[category][component.usageStatus]++;
-        });
-        
-        return breakdown;
-    };
 
     // Fetch components with filters and pagination
     const fetchComponents = async (newFilters?: Partial<ComponentFilters>) => {
@@ -555,146 +530,6 @@ const ComponentManager: React.FC = () => {
         }
     };
 
-    const getHealthColor = (health: string) => {
-        switch (health) {
-            case 'healthy':
-                return { color: 'success', icon: IconCircleCheck, bgColor: '#e8f5e8' };
-            case 'degraded':
-                return { color: 'warning', icon: IconAlertTriangle, bgColor: '#fff8e1' };
-            case 'failed':
-                return { color: 'error', icon: IconCircleX, bgColor: '#ffebee' };
-            default:
-                return { color: 'default', icon: IconActivity, bgColor: '#f5f5f5' };
-        }
-    };
-
-    const formatLastUpdated = (dateString?: string) => {
-        if (!dateString) return 'Unknown';
-        const date = new Date(dateString);
-        return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
-    };
-
-    // Enhanced tooltip content with health detection info
-    const getHealthTooltip = (component: Component) => {
-        const { health, healthIssues, lastHealthCheck } = component;
-        
-        let baseMessage = '';
-        switch (health) {
-            case 'healthy':
-                baseMessage = 'This component is running normally and all checks are passing';
-                break;
-            case 'degraded':
-                baseMessage = 'This component is experiencing issues but is still partially functional';
-                break;
-            case 'failed':
-                baseMessage = 'This component has critical issues and may not be functioning properly';
-                break;
-            default:
-                baseMessage = 'Component health status unknown';
-        }
-        
-        // Add health detection info
-        let detectionInfo = '';
-        if (health !== 'healthy' && healthIssues && healthIssues.length > 0) {
-            detectionInfo = `\n\nDetected Issues:\n• ${healthIssues.join('\n• ')}`;
-        }
-        
-        // Add last health check info
-        let healthCheckInfo = '';
-        if (lastHealthCheck) {
-            const checkTime = new Date(lastHealthCheck);
-            const timeAgo = Math.round((Date.now() - checkTime.getTime()) / (1000 * 60)); // minutes ago
-            healthCheckInfo = `\n\nLast health check: ${timeAgo < 1 ? 'Just now' : `${timeAgo}m ago`}`;
-        }
-        
-        return `${baseMessage}${detectionInfo}${healthCheckInfo}`;
-    };
-
-    // Check if health status was automatically detected based on logs
-    const isHealthAutoDetected = (component: Component): boolean => {
-        return !!(component.healthIssues && 
-                component.healthIssues.length > 0 && 
-                component.lastHealthCheck &&
-                component.health !== 'healthy');
-    };
-
-    // Get component card styling based on enabled/disabled state
-    const getComponentCardClass = (component: Component) => {
-        if (!component.enabled) {
-            return {
-                opacity: 0.5,
-                filter: 'grayscale(0.7)',
-                cursor: 'not-allowed',
-                '&:hover': {
-                    boxShadow: 1, // Reduced hover effect for disabled
-                    transform: 'none' // No transform for disabled
-                }
-            };
-        }
-        return {
-            '&:hover': {
-                boxShadow: 3,
-                transform: 'translateY(-2px)'
-            }
-        };
-    };
-
-    const getToggleTooltip = (enabled: boolean, canManage: boolean) => {
-        if (!canManage) {
-            return 'You need admin permissions to enable or disable components';
-        }
-        return enabled 
-            ? 'Click to disable this component across the system' 
-            : 'Click to enable this component across the system';
-    };
-
-    // Helper function to format relative time
-    const getRelativeTime = (timestamp: string | null): string => {
-        if (!timestamp) return 'Never used';
-        
-        const now = new Date();
-        const past = new Date(timestamp);
-        const diffMs = now.getTime() - past.getTime();
-        const diffMinutes = Math.floor(diffMs / (1000 * 60));
-        const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-
-        if (diffMinutes < 1) return 'Just now';
-        if (diffMinutes < 60) return `${diffMinutes}m ago`;
-        if (diffHours < 24) return `${diffHours}h ago`;
-        if (diffDays < 30) return `${diffDays}d ago`;
-        
-        return past.toLocaleDateString();
-    };
-
-    // Helper function to render usage status chip
-    const getUsageChip = (usageStatus: string, lastUsed: string | null) => {
-        const configs = {
-            active: { color: '#4caf50', bgColor: '#e8f5e8', icon: '🟢', label: 'Active' },
-            inactive: { color: '#ff9800', bgColor: '#fff3e0', icon: '🟡', label: 'Inactive' },
-            unused: { color: '#9e9e9e', bgColor: '#f5f5f5', icon: '⚪', label: 'Unused' }
-        };
-        
-        const config = configs[usageStatus as keyof typeof configs] || configs.unused;
-        
-        return (
-            <Chip
-                size="small"
-                label={
-                    <Box display="flex" alignItems="center" gap={0.5}>
-                        <span>{config.icon}</span>
-                        <span>{config.label}</span>
-                    </Box>
-                }
-                sx={{
-                    backgroundColor: config.bgColor,
-                    color: config.color,
-                    fontWeight: 500,
-                    fontSize: '0.75rem'
-                }}
-            />
-        );
-    };
 
     // Get unique categories from components data
     const getAvailableCategories = (): string[] => {
@@ -738,40 +573,7 @@ const ComponentManager: React.FC = () => {
         fetchComponents({ [filterType]: value, page: 1 });
     };
 
-    // Calculate filtered summary stats - use API meta data for accurate totals
-    const getFilteredSummary = () => {
-        const components = Array.isArray(componentsData?.components) ? componentsData.components : [];
-        const meta = componentsData?.meta;
-        
-        // If we have meta data from API with breakdown, use it for accuracy
-        if (meta?.categoryBreakdown || meta?.usageStats) {
-            return {
-                total: meta.total || 0,
-                healthy: meta.usageStats?.healthBreakdown?.healthy || components.filter(c => c.health === 'healthy').length,
-                degraded: meta.usageStats?.healthBreakdown?.degraded || components.filter(c => c.health === 'degraded').length,
-                failed: meta.usageStats?.healthBreakdown?.failed || components.filter(c => c.health === 'failed').length,
-                active: meta.usageStats?.usageBreakdown?.active || components.filter(c => c.usageStatus === 'active').length,
-                inactive: meta.usageStats?.usageBreakdown?.inactive || components.filter(c => c.usageStatus === 'inactive').length,
-                unused: meta.usageStats?.usageBreakdown?.unused || components.filter(c => c.usageStatus === 'unused').length,
-                enabled: meta.usageStats?.statusBreakdown?.enabled || components.filter(c => c.enabled).length,
-                disabled: meta.usageStats?.statusBreakdown?.disabled || components.filter(c => !c.enabled).length
-            };
-        }
-        
-        // Fallback to current page data if meta not available
-        const summary = {
-            total: meta?.total || components.length,
-            healthy: components.filter(c => c.health === 'healthy').length,
-            degraded: components.filter(c => c.health === 'degraded').length,
-            failed: components.filter(c => c.health === 'failed').length,
-            active: components.filter(c => c.usageStatus === 'active').length,
-            inactive: components.filter(c => c.usageStatus === 'inactive').length,
-            unused: components.filter(c => c.usageStatus === 'unused').length,
-            enabled: components.filter(c => c.enabled).length,
-            disabled: components.filter(c => !c.enabled).length
-        };
-        return summary;
-    };
+    const summary = getFilteredSummary(componentsData);
 
     // Loading state
     if (loading) {
@@ -1015,25 +817,25 @@ const ComponentManager: React.FC = () => {
                             <Stack direction="row" spacing={2} sx={{ mb: 1 }}>
                                 <Chip 
                                     size="small" 
-                                    label={`${getFilteredSummary().healthy} Healthy`}
+                                    label={`${summary.healthy} Healthy`}
                                     color="success"
                                     variant="outlined"
                                 />
                                 <Chip 
                                     size="small" 
-                                    label={`${getFilteredSummary().degraded} Degraded`}
+                                    label={`${summary.degraded} Degraded`}
                                     color="warning"
                                     variant="outlined"
                                 />
                                 <Chip 
                                     size="small" 
-                                    label={`${getFilteredSummary().failed} Failed`}
+                                    label={`${summary.failed} Failed`}
                                     color="error"
                                     variant="outlined"
                                 />
                             </Stack>
                             <Typography variant="h6" color="text.primary">
-                                {getFilteredSummary().total} Total Components
+                                {summary.total} Total Components
                             </Typography>
                         </Box>
                     </Grid2>
@@ -1047,17 +849,17 @@ const ComponentManager: React.FC = () => {
                             <Stack direction="row" spacing={2} sx={{ mb: 1 }}>
                                 <Chip 
                                     size="small" 
-                                    label={`${getFilteredSummary().active} Active`}
+                                    label={`${summary.active} Active`}
                                     sx={{ backgroundColor: '#e8f5e8', color: '#4caf50' }}
                                 />
                                 <Chip 
                                     size="small" 
-                                    label={`${getFilteredSummary().inactive} Inactive`}
+                                    label={`${summary.inactive} Inactive`}
                                     sx={{ backgroundColor: '#fff3e0', color: '#ff9800' }}
                                 />
                                 <Chip 
                                     size="small" 
-                                    label={`${getFilteredSummary().unused} Unused`}
+                                    label={`${summary.unused} Unused`}
                                     sx={{ backgroundColor: '#f5f5f5', color: '#9e9e9e' }}
                                 />
                             </Stack>
@@ -1076,13 +878,13 @@ const ComponentManager: React.FC = () => {
                             <Stack direction="row" spacing={2} sx={{ mb: 1 }}>
                                 <Chip 
                                     size="small" 
-                                    label={`${getFilteredSummary().enabled} Enabled`}
+                                    label={`${summary.enabled} Enabled`}
                                     color="success"
                                     variant="outlined"
                                 />
                                 <Chip 
                                     size="small" 
-                                    label={`${getFilteredSummary().disabled} Disabled`}
+                                    label={`${summary.disabled} Disabled`}
                                     color="default"
                                     variant="outlined"
                                 />
@@ -1337,44 +1139,13 @@ const ComponentManager: React.FC = () => {
             )}
 
             {/* Toggle Confirmation Dialog */}
-            <Dialog
+            <ToggleConfirmDialog
                 open={toggleConfirmDialog.open}
+                component={toggleConfirmDialog.component}
+                newState={toggleConfirmDialog.newState}
                 onClose={() => setToggleConfirmDialog({ open: false, component: null, newState: false })}
-            >
-                <DialogTitle>
-                    <Box display="flex" alignItems="center" gap={1}>
-                        <IconShield size={20} />
-                        Confirm Component Toggle
-                    </Box>
-                </DialogTitle>
-                <DialogContent>
-                    <DialogContentText>
-                        Are you sure you want to <strong>{toggleConfirmDialog.newState ? 'enable' : 'disable'}</strong> the{' '}
-                        <strong>"{toggleConfirmDialog.component?.name}"</strong> component?
-                    </DialogContentText>
-                    <Alert severity={toggleConfirmDialog.newState ? 'info' : 'warning'} sx={{ mt: 2 }}>
-                        {toggleConfirmDialog.newState 
-                            ? 'Enabling this component will make it available across the system.'
-                            : 'Disabling this component may affect system functionality and user experience.'
-                        }
-                    </Alert>
-                </DialogContent>
-                <DialogActions>
-                    <Button 
-                        onClick={() => setToggleConfirmDialog({ open: false, component: null, newState: false })}
-                    >
-                        Cancel
-                    </Button>
-                    <Button 
-                        onClick={handleConfirmToggle}
-                        variant="contained"
-                        color={toggleConfirmDialog.newState ? 'primary' : 'error'}
-                        startIcon={toggleConfirmDialog.newState ? <IconCircleCheck size={16} /> : <IconCircleX size={16} />}
-                    >
-                        {toggleConfirmDialog.newState ? 'Enable Component' : 'Disable Component'}
-                    </Button>
-                </DialogActions>
-            </Dialog>
+                onConfirm={handleConfirmToggle}
+            />
 
             {/* Logs Dialog */}
             <LogsDialog
