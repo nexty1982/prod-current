@@ -1,11 +1,15 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import Grid2 from '@/components/compat/Grid2';
 
-import { Box, Typography, Card, CardContent, Chip, Switch, FormControlLabel, Alert, IconButton, Tooltip, Stack, Avatar, CircularProgress, Button, LinearProgress, Snackbar, Pagination, TextField, InputAdornment, Tab, Tabs, Badge, Paper, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
+import { Box, Typography, Card, CardContent, Chip, Switch, FormControlLabel, Alert, IconButton, Tooltip, Stack, Avatar, CircularProgress, Dialog, DialogTitle, DialogContent, DialogActions, Button, LinearProgress, Snackbar, DialogContentText, Pagination, TextField, InputAdornment, Tab, Tabs, Badge, Paper, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
 import {
     IconSettings,
     IconEye,
     IconTestPipe,
+    IconCircleCheck,
+    IconAlertTriangle,
+    IconCircleX,
+    IconActivity,
     IconRefresh,
     IconShield,
     IconBug,
@@ -24,21 +28,9 @@ import {
 } from '@/api/components.api';
 import { useAuth } from '@/context/AuthContext';
 import { getComponentHealthStatus, getHealthIssues } from './ComponentManager/healthUtils';
-import {
-    calculateCategoryBreakdown,
-    formatLastUpdated,
-    getComponentCardClass,
-    getFilteredSummary,
-    getHealthColor,
-    getHealthTooltip,
-    getRelativeTime,
-    getToggleTooltip,
-    getUsageChip,
-    isHealthAutoDetected,
-} from './ComponentManager/helpers';
 import LogsDialog from './ComponentManager/LogsDialog';
 import TestResultDialog from './ComponentManager/TestResultDialog';
-import ToggleConfirmDialog from './ComponentManager/ToggleConfirmDialog';
+import ComponentCard from './ComponentManager/ComponentCard';
 
 /**
  * Component Manager - Production Frontend with Live Backend Integration
@@ -46,19 +38,19 @@ import ToggleConfirmDialog from './ComponentManager/ToggleConfirmDialog';
  * PRODUCTION STATUS: Fully integrated with live backend API
  * 
  * Features implemented:
- * ✅ Component listing with health status indicators
- * ✅ Toggle enable/disable with confirmation dialogs
- * ✅ Logs viewing with enhanced modal interface
- * ✅ Component testing with detailed results display
- * ✅ Role-based access control (admin/super_admin only)
- * ✅ Toast notifications for all actions
- * ✅ Responsive design with comprehensive tooltips
- * ✅ Advanced filtering and search capabilities
- * ✅ Usage tracking and analytics
- * ✅ Category-based organization
- * ✅ Pagination for large datasets
- * ✅ Live backend API integration
- * ✅ Comprehensive error handling
+ * Component listing with health status indicators
+ * Toggle enable/disable with confirmation dialogs
+ * Logs viewing with enhanced modal interface
+ * Component testing with detailed results display
+ * Role-based access control (admin/super_admin only)
+ * Toast notifications for all actions
+ * Responsive design with comprehensive tooltips
+ * Advanced filtering and search capabilities
+ * Usage tracking and analytics
+ * Category-based organization
+ * Pagination for large datasets
+ * Live backend API integration
+ * Comprehensive error handling
  * 
  * Backend API Integration:
  * - GET /api/admin/components (list all components with filters/pagination)
@@ -220,6 +212,40 @@ const ComponentManager: React.FC = () => {
         }
     };
 
+    // Helper function to calculate category breakdown with health info
+    const calculateCategoryBreakdown = (components: Component[]) => {
+        const breakdown: Record<string, any> = {};
+        
+        // Validate components is an array
+        if (!Array.isArray(components)) {
+            console.warn('calculateCategoryBreakdown: components is not an array:', components);
+            return breakdown;
+        }
+        
+        components.forEach(component => {
+            const category = component.category || 'Uncategorized';
+            if (!breakdown[category]) {
+                breakdown[category] = {
+                    total: 0,
+                    healthy: 0,
+                    degraded: 0,
+                    failed: 0,
+                    enabled: 0,
+                    disabled: 0,
+                    active: 0,
+                    inactive: 0,
+                    unused: 0
+                };
+            }
+            
+            breakdown[category].total++;
+            breakdown[category][component.health]++;
+            breakdown[category][component.enabled ? 'enabled' : 'disabled']++;
+            breakdown[category][component.usageStatus]++;
+        });
+        
+        return breakdown;
+    };
 
     // Fetch components with filters and pagination
     const fetchComponents = async (newFilters?: Partial<ComponentFilters>) => {
@@ -530,51 +556,6 @@ const ComponentManager: React.FC = () => {
         }
     };
 
-
-    // Get unique categories from components data
-    const getAvailableCategories = (): string[] => {
-        if (!componentsData?.components || !Array.isArray(componentsData.components)) return [];
-        const categories = new Set(componentsData.components.map(c => c.category));
-        return Array.from(categories).sort();
-    };
-
-    // Handle filter changes
-    const handleCategoryChange = (category: string) => {
-        setCategoryTab(category);
-        fetchComponents({ category: category === 'all' ? 'all' : category, page: 1 });
-    };
-
-    const handlePageChange = (event: React.ChangeEvent<unknown>, page: number) => {
-        fetchComponents({ page });
-    };
-
-    // Debounced search implementation to prevent focus loss
-    const debouncedSearch = useMemo(
-        () => {
-            let timeoutId: NodeJS.Timeout;
-            return (value: string) => {
-                clearTimeout(timeoutId);
-                timeoutId = setTimeout(() => {
-                    setFilters(prev => ({ ...prev, search: value, page: 1 }));
-                    fetchComponents({ search: value, page: 1 });
-                }, 500); // Increased delay to 500ms for better UX
-            };
-        },
-        [fetchComponents]
-    );
-
-    const handleSearchChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-        const value = event.target.value;
-        setSearchTerm(value);
-        debouncedSearch(value);
-    }, [debouncedSearch]);
-
-    const handleFilterChange = (filterType: keyof ComponentFilters, value: string) => {
-        fetchComponents({ [filterType]: value, page: 1 });
-    };
-
-    const summary = getFilteredSummary(componentsData);
-
     // Loading state
     if (loading) {
         return (
@@ -817,25 +798,25 @@ const ComponentManager: React.FC = () => {
                             <Stack direction="row" spacing={2} sx={{ mb: 1 }}>
                                 <Chip 
                                     size="small" 
-                                    label={`${summary.healthy} Healthy`}
+                                    label={`${getFilteredSummary().healthy} Healthy`}
                                     color="success"
                                     variant="outlined"
                                 />
                                 <Chip 
                                     size="small" 
-                                    label={`${summary.degraded} Degraded`}
+                                    label={`${getFilteredSummary().degraded} Degraded`}
                                     color="warning"
                                     variant="outlined"
                                 />
                                 <Chip 
                                     size="small" 
-                                    label={`${summary.failed} Failed`}
+                                    label={`${getFilteredSummary().failed} Failed`}
                                     color="error"
                                     variant="outlined"
                                 />
                             </Stack>
                             <Typography variant="h6" color="text.primary">
-                                {summary.total} Total Components
+                                {getFilteredSummary().total} Total Components
                             </Typography>
                         </Box>
                     </Grid2>
@@ -849,17 +830,17 @@ const ComponentManager: React.FC = () => {
                             <Stack direction="row" spacing={2} sx={{ mb: 1 }}>
                                 <Chip 
                                     size="small" 
-                                    label={`${summary.active} Active`}
+                                    label={`${getFilteredSummary().active} Active`}
                                     sx={{ backgroundColor: '#e8f5e8', color: '#4caf50' }}
                                 />
                                 <Chip 
                                     size="small" 
-                                    label={`${summary.inactive} Inactive`}
+                                    label={`${getFilteredSummary().inactive} Inactive`}
                                     sx={{ backgroundColor: '#fff3e0', color: '#ff9800' }}
                                 />
                                 <Chip 
                                     size="small" 
-                                    label={`${summary.unused} Unused`}
+                                    label={`${getFilteredSummary().unused} Unused`}
                                     sx={{ backgroundColor: '#f5f5f5', color: '#9e9e9e' }}
                                 />
                             </Stack>
@@ -878,13 +859,13 @@ const ComponentManager: React.FC = () => {
                             <Stack direction="row" spacing={2} sx={{ mb: 1 }}>
                                 <Chip 
                                     size="small" 
-                                    label={`${summary.enabled} Enabled`}
+                                    label={`${getFilteredSummary().enabled} Enabled`}
                                     color="success"
                                     variant="outlined"
                                 />
                                 <Chip 
                                     size="small" 
-                                    label={`${summary.disabled} Disabled`}
+                                    label={`${getFilteredSummary().disabled} Disabled`}
                                     color="default"
                                     variant="outlined"
                                 />
@@ -899,203 +880,18 @@ const ComponentManager: React.FC = () => {
 
             {/* Components Grid */}
             <Grid2 container spacing={3}>
-                {(Array.isArray(componentsData?.components) ? componentsData.components : []).map((component, index) => {
-                    const healthConfig = getHealthColor(component.health);
-                    const HealthIcon = healthConfig.icon;
-                    const isActionLoading = actionLoading[component.id];
-                    
-                    return (
-                        <Grid2 item xs={12} md={6} lg={4} key={component.id || index}>
-                            <Card 
-                                variant="outlined"
-                                sx={{ 
-                                    height: '100%',
-                                    transition: 'all 0.2s ease-in-out',
-                                    ...(isActionLoading ? { opacity: 0.7 } : getComponentCardClass(component))
-                                }}
-                            >
-                                {isActionLoading && (
-                                    <LinearProgress />
-                                )}
-                                <CardContent>
-                                    <Stack spacing={2}>
-                                        {/* Component Header */}
-                                        <Box display="flex" alignItems="center" justifyContent="space-between">
-                                            <Box display="flex" alignItems="center">
-                                                <Tooltip title={getHealthTooltip(component)} arrow>
-                                                    <Avatar 
-                                                        sx={{ 
-                                                            bgcolor: healthConfig.bgColor, 
-                                                            color: `${healthConfig.color}.main`,
-                                                            mr: 2,
-                                                            width: 40,
-                                                            height: 40,
-                                                            cursor: 'help'
-                                                        }}
-                                                    >
-                                                        <HealthIcon size={20} />
-                                                    </Avatar>
-                                                </Tooltip>
-                                                <Typography 
-                                                    variant="h6" 
-                                                    component="h3"
-                                                    sx={{ 
-                                                        color: !component.enabled ? 'text.disabled' : 'text.primary'
-                                                    }}
-                                                >
-                                                    {component.name}
-                                                </Typography>
-                                            </Box>
-                                            {!canManageComponents && (
-                                                <Tooltip title="Admin access required">
-                                                    <IconShield size={16} color="#ff9800" />
-                                                </Tooltip>
-                                            )}
-                                        </Box>
-
-                                        {/* Component Description */}
-                                        {component.description && (
-                                            <Typography 
-                                                variant="body2" 
-                                                color="text.secondary" 
-                                                sx={{ 
-                                                    fontStyle: 'italic',
-                                                    opacity: !component.enabled ? 0.6 : 1
-                                                }}
-                                            >
-                                                {component.description}
-                                            </Typography>
-                                        )}
-
-                                        {/* Usage Information */}
-                                        <Box display="flex" alignItems="center" justifyContent="space-between" sx={{ py: 1 }}>
-                                            <Box display="flex" alignItems="center" gap={1}>
-                                                {getUsageChip(component.usageStatus || 'unused', component.lastUsed)}
-                                                <Typography variant="caption" color="text.secondary">
-                                                    {component.lastUsedFormatted || getRelativeTime(component.lastUsed)}
-                                                </Typography>
-                                            </Box>
-                                            <Box display="flex" alignItems="center" gap={1}>
-                                                <Tooltip title={`Total accesses: ${component.totalAccesses || 0}`} arrow>
-                                                    <Chip
-                                                        size="small"
-                                                        icon={<IconUsers size={14} />}
-                                                        label={component.uniqueUsers || 0}
-                                                        variant="outlined"
-                                                        sx={{ fontSize: '0.7rem' }}
-                                                    />
-                                                </Tooltip>
-                                                <Tooltip title={`Category: ${component.category || 'Uncategorized'}`} arrow>
-                                                    <Chip
-                                                        size="small"
-                                                        icon={<IconTarget size={14} />}
-                                                        label={component.category || 'Other'}
-                                                        variant="outlined"
-                                                        color="secondary"
-                                                        sx={{ fontSize: '0.7rem' }}
-                                                    />
-                                                </Tooltip>
-                                            </Box>
-                                        </Box>
-
-                                        {/* Status and Health */}
-                                        <Box display="flex" alignItems="center" justifyContent="space-between">
-                                            <Tooltip title={getToggleTooltip(component.enabled, canManageComponents)} arrow>
-                                                <FormControlLabel
-                                                    control={
-                                                        <Switch
-                                                            checked={component.enabled}
-                                                            onChange={() => handleStatusToggle(component)}
-                                                            disabled={!canManageComponents || isActionLoading}
-                                                            color="primary"
-                                                        />
-                                                    }
-                                                    label={component.enabled ? "Enabled" : "Disabled"}
-                                                />
-                                            </Tooltip>
-                                            <Box display="flex" alignItems="center" gap={0.5}>
-                                                <Tooltip title={getHealthTooltip(component)} arrow>
-                                                    <Chip
-                                                        label={component.health.charAt(0).toUpperCase() + component.health.slice(1)}
-                                                        color={healthConfig.color as any}
-                                                        variant="filled"
-                                                        size="small"
-                                                        icon={<HealthIcon size={16} />}
-                                                    />
-                                                </Tooltip>
-                                                {isHealthAutoDetected(component) && (
-                                                    <Tooltip title="Health status automatically detected based on log analysis in past 24h" arrow>
-                                                        <IconBug size={14} style={{ 
-                                                            color: '#ff9800', 
-                                                            opacity: 0.7 
-                                                        }} />
-                                                    </Tooltip>
-                                                )}
-                                            </Box>
-                                        </Box>
-
-                                        {/* Last Updated */}
-                                        <Typography 
-                                            variant="body2" 
-                                            color="text.secondary"
-                                            sx={{ opacity: !component.enabled ? 0.6 : 1 }}
-                                        >
-                                            Last Updated: {formatLastUpdated(component.lastUpdated)}
-                                        </Typography>
-
-                                        {/* Action Buttons */}
-                                        <Box display="flex" justifyContent="flex-end" gap={1}>
-                                            <Tooltip title={!component.enabled ? "Component is disabled - enable to view logs" : "View recent log output from this component"} arrow>
-                                                <span>
-                                                    <IconButton 
-                                                        size="small" 
-                                                        onClick={() => handleViewLogs(component)}
-                                                        disabled={!component.enabled || isActionLoading}
-                                                        color="primary"
-                                                        sx={{ opacity: !component.enabled ? 0.5 : 1 }}
-                                                    >
-                                                        <IconEye size={16} />
-                                                    </IconButton>
-                                                </span>
-                                            </Tooltip>
-                                            <Tooltip title={
-                                                !component.enabled ? "Component is disabled - enable to run tests" :
-                                                canManageComponents ? "Run automated self-test for this component" : 
-                                                "Admin access required to run tests"
-                                            } arrow>
-                                                <span>
-                                                    <IconButton 
-                                                        size="small"
-                                                        onClick={() => handleRunTest(component)}
-                                                        disabled={!component.enabled || !canManageComponents || isActionLoading}
-                                                        color="secondary"
-                                                        sx={{ opacity: !component.enabled ? 0.5 : 1 }}
-                                                    >
-                                                        <IconTestPipe size={16} />
-                                                    </IconButton>
-                                                </span>
-                                            </Tooltip>
-                                            <Tooltip title={
-                                                !component.enabled ? "Component is disabled - enable to access settings" :
-                                                "Component configuration and advanced settings (Coming Soon)"
-                                            } arrow>
-                                                <span>
-                                                    <IconButton 
-                                                        size="small" 
-                                                        disabled
-                                                        sx={{ opacity: !component.enabled ? 0.3 : 0.5 }}
-                                                    >
-                                                        <IconSettings size={16} />
-                                                    </IconButton>
-                                                </span>
-                                            </Tooltip>
-                                        </Box>
-                                    </Stack>
-                                </CardContent>
-                            </Card>
-                        </Grid2>
-                    );
-                })}
+                {(Array.isArray(componentsData?.components) ? componentsData.components : []).map((component, index) => (
+                    <Grid2 item xs={12} md={6} lg={4} key={component.id || index}>
+                        <ComponentCard
+                            component={component}
+                            isActionLoading={!!actionLoading[component.id]}
+                            canManageComponents={canManageComponents}
+                            onToggle={handleStatusToggle}
+                            onViewLogs={handleViewLogs}
+                            onRunTest={handleRunTest}
+                        />
+                    </Grid2>
+                ))}
             </Grid2>
 
             {/* Pagination Controls */}
@@ -1139,13 +935,44 @@ const ComponentManager: React.FC = () => {
             )}
 
             {/* Toggle Confirmation Dialog */}
-            <ToggleConfirmDialog
+            <Dialog
                 open={toggleConfirmDialog.open}
-                component={toggleConfirmDialog.component}
-                newState={toggleConfirmDialog.newState}
                 onClose={() => setToggleConfirmDialog({ open: false, component: null, newState: false })}
-                onConfirm={handleConfirmToggle}
-            />
+            >
+                <DialogTitle>
+                    <Box display="flex" alignItems="center" gap={1}>
+                        <IconShield size={20} />
+                        Confirm Component Toggle
+                    </Box>
+                </DialogTitle>
+                <DialogContent>
+                    <DialogContentText>
+                        Are you sure you want to <strong>{toggleConfirmDialog.newState ? 'enable' : 'disable'}</strong> the{' '}
+                        <strong>"{toggleConfirmDialog.component?.name}"</strong> component?
+                    </DialogContentText>
+                    <Alert severity={toggleConfirmDialog.newState ? 'info' : 'warning'} sx={{ mt: 2 }}>
+                        {toggleConfirmDialog.newState 
+                            ? 'Enabling this component will make it available across the system.'
+                            : 'Disabling this component may affect system functionality and user experience.'
+                        }
+                    </Alert>
+                </DialogContent>
+                <DialogActions>
+                    <Button 
+                        onClick={() => setToggleConfirmDialog({ open: false, component: null, newState: false })}
+                    >
+                        Cancel
+                    </Button>
+                    <Button 
+                        onClick={handleConfirmToggle}
+                        variant="contained"
+                        color={toggleConfirmDialog.newState ? 'primary' : 'error'}
+                        startIcon={toggleConfirmDialog.newState ? <IconCircleCheck size={16} /> : <IconCircleX size={16} />}
+                    >
+                        {toggleConfirmDialog.newState ? 'Enable Component' : 'Disable Component'}
+                    </Button>
+                </DialogActions>
+            </Dialog>
 
             {/* Logs Dialog */}
             <LogsDialog
