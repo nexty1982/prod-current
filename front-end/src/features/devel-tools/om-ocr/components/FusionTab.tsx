@@ -17,21 +17,9 @@ import {
   CircularProgress,
   Alert,
   Paper,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemText,
-  TextField,
-  Select,
-  MenuItem,
-  FormControl,
   FormControlLabel,
-  InputLabel,
-  IconButton,
-  Tooltip,
   alpha,
   useTheme,
-  LinearProgress,
   Switch,
   Dialog,
   DialogTitle,
@@ -48,11 +36,6 @@ import {
   IconAlertCircle,
   IconChevronRight,
   IconChevronLeft,
-  IconFocusCentered,
-  IconPlayerPlay,
-  IconTrash,
-  IconEdit,
-  IconCopy,
   IconAlertTriangle,
 } from '@tabler/icons-react';
 
@@ -69,7 +52,7 @@ import {
   FieldExtraction,
 } from '../types/fusion';
 import { RECORD_FIELDS } from '../config/recordFields';
-import { getRecordSchema, validateFieldKeys, type RecordFieldSchema } from '@/shared/recordSchemas/registry';
+import { getRecordSchema, validateFieldKeys } from '@/shared/recordSchemas/registry';
 import {
   detectEntries,
   detectLabels,
@@ -79,8 +62,6 @@ import {
   filterEntryByBbox,
 } from '../utils/visionParser';
 import { apiClient } from '@/shared/lib/axiosInstance';
-import { getDefaultColumns } from '../config/defaultRecordColumns';
-import { Box as MuiBox } from '@mui/material';
 import { useOcrSelection } from '../context/OcrSelectionContext';
 
 // EntryEditorDialog - import directly (no lazy needed, it's a simple dialog with no cycles)
@@ -88,6 +69,10 @@ import EntryEditorDialog from './EntryEditorDialog';
 import type { FusionTabProps } from './FusionTab/types';
 import EntryListPanel from './FusionTab/EntryListPanel';
 import SaveCommitStep from './FusionTab/SaveCommitStep';
+import { getEntryColor } from './FusionTab/fusionConstants';
+import { useFusionDrafts } from './FusionTab/useFusionDrafts';
+import AnchorLabelsStep from './FusionTab/AnchorLabelsStep';
+import MapFieldsStep from './FusionTab/MapFieldsStep';
 
 // ============================================================================
 // Component
@@ -124,7 +109,6 @@ const FusionTab: React.FC<FusionTabProps> = ({
   const [selectedEntryIndex, setSelectedEntryIndex] = useState<number | null>(null);
   const [detectedLabels, setDetectedLabels] = useState<DetectedLabel[]>([]);
   const [mappedFields, setMappedFields] = useState<Record<string, MappedField>>({});
-  const [drafts, setDrafts] = useState<FusionDraft[]>([]);
   const [recordType, setRecordType] = useState<'baptism' | 'marriage' | 'funeral'>(initialRecordType);
   // Entry areas - single source of truth for entry bounding boxes
   const [entryAreas, setEntryAreas] = useState<EntryArea[]>([]);
@@ -142,12 +126,25 @@ const FusionTab: React.FC<FusionTabProps> = ({
     recordType: 'baptism' | 'marriage' | 'funeral';
   }>>(new Map());
 
-  // Auto-save state
-  const [autoSaveEnabled, setAutoSaveEnabled] = useState(true);
-  const [lastSaved, setLastSaved] = useState<Date | null>(null);
-  const [isSaving, setIsSaving] = useState(false);
-  const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const pendingSaveRef = useRef(false);
+  // Draft management (save, auto-save, validate, commit)
+  const {
+    drafts, setDrafts,
+    autoSaveEnabled, setAutoSaveEnabled,
+    lastSaved, isSaving,
+    isProcessing: draftProcessing, setIsProcessing: setDraftProcessing,
+    validationResult,
+    showCommitDialog, setShowCommitDialog,
+    commitSuccess, setCommitSuccess,
+    pendingSaveRef,
+    normalizeDraftsResponse,
+    saveDraftForEntry, handleSaveDraft, triggerAutoSave,
+    handleSaveAllDrafts, handleSendToReview: handleSendToReviewDrafts,
+    handleValidateDrafts, handleOpenCommitDialog, handleCommitDrafts,
+  } = useFusionDrafts({
+    entries, entryData, entryAreas, recordType, mappedFields,
+    selectedEntryIndex, churchId, jobId, initialRecordType,
+    onSendToReview,
+  });
 
   // Entry completion tracking
   const [completedEntries, setCompletedEntries] = useState<Set<number>>(new Set());
@@ -354,21 +351,6 @@ const FusionTab: React.FC<FusionTabProps> = ({
   const [dirtyEntries, setDirtyEntries] = useState<Set<number>>(new Set());
   const [originalBboxes, setOriginalBboxes] = useState<Map<number, BBox>>(new Map());
 
-  // Validation and commit state
-  const [validationResult, setValidationResult] = useState<{
-    valid: boolean;
-    church_name?: string;
-    drafts: Array<{
-      id: number;
-      entry_index: number;
-      record_type: string;
-      missing_fields: string[];
-      warnings: string[];
-    }>;
-    summary?: { total: number; valid: number; invalid: number; warnings: number };
-  } | null>(null);
-  const [showCommitDialog, setShowCommitDialog] = useState(false);
-  const [commitSuccess, setCommitSuccess] = useState(false);
 
   // Check if Vision JSON is available
   const hasVisionData = useMemo(() => {
@@ -380,31 +362,7 @@ const FusionTab: React.FC<FusionTabProps> = ({
     return getVisionPageSize(ocrResult);
   }, [ocrResult]);
 
-  // Required fields for completion check per record type
-  const REQUIRED_FIELDS: Record<string, string[]> = {
-    baptism: ['child_name', 'date_of_baptism'],
-    marriage: ['groom_name', 'bride_name'],
-    funeral: ['deceased_name'],
-  };
 
-  // Consistent color mapping for entries (matches overlay colors)
-  const ENTRY_COLORS = ['#4CAF50', '#2196F3', '#FF9800', '#9C27B0'];
-  const getEntryColor = (index: number) => ENTRY_COLORS[index % ENTRY_COLORS.length];
-
-  // Helper function to normalize drafts API response
-  const normalizeDraftsResponse = useCallback((response: any): FusionDraft[] => {
-    const responseData = response?.data ?? response;
-    
-    if (Array.isArray(responseData)) {
-      return responseData;
-    } else if (responseData?.drafts && Array.isArray(responseData.drafts)) {
-      return responseData.drafts;
-    } else if (responseData?.data?.drafts && Array.isArray(responseData.data.drafts)) {
-      return responseData.data.drafts;
-    } else {
-      return [];
-    }
-  }, []);
 
   // Check if an entry is complete (ready for review)
   // An entry is complete if it has been saved as a draft OR has any mapped fields
@@ -1318,138 +1276,8 @@ const FusionTab: React.FC<FusionTabProps> = ({
   }, [mappedFields, onHighlightBbox]);
 
   // ============================================================================
-  // Step 4: Save Drafts & Commit
+  // Step 4: Save Drafts & Commit (handlers in useFusionDrafts hook)
   // ============================================================================
-
-  // Core save function (used by both manual and auto-save)
-  const saveDraftForEntry = useCallback(async (entryIndex: number, silent = false) => {
-    if (entryIndex === null || !entries[entryIndex]) return false;
-
-    if (!silent) setIsProcessing(true);
-    setIsSaving(true);
-
-    try {
-      const entry = entries[entryIndex];
-      const data = entryData.get(entryIndex);
-      const currentRecordType = data?.recordType || recordType;
-      const fields = data?.fields || (entryIndex === selectedEntryIndex ? mappedFields : {});
-
-      // Build payload
-      const payload: Record<string, any> = {};
-      for (const [fieldName, field] of Object.entries(fields)) {
-        if (field.value) {
-          payload[fieldName] = field.value;
-        }
-      }
-
-      // Include normalized transcription if available (server normalization feature flag)
-      // Check localStorage for flag and workbench context for normalized text
-      try {
-        const serverNormalizationEnabled = localStorage.getItem('OCR_NORMALIZE_SERVER') === '1';
-        if (serverNormalizationEnabled) {
-          // Try to get normalized text from workbench context (if available)
-          // This is a best-effort approach - if context isn't available, we'll skip it
-          const workbenchState = (window as any).__workbenchState;
-          if (workbenchState?.normalizedText) {
-            payload.ocr_text_normalized = workbenchState.normalizedText;
-          }
-        }
-      } catch (e) {
-        // Silently fail if context isn't available
-        console.debug('[FusionTab] Could not access normalized text:', e);
-      }
-
-      // Skip if no data to save
-      if (Object.keys(payload).length === 0) {
-        setIsSaving(false);
-        if (!silent) setIsProcessing(false);
-        return false;
-      }
-
-      // Get entryArea for this entry (single source of truth)
-      const entryArea = entryAreas.find(a => a.entryId === entry.id);
-      
-      const bboxJson = {
-        // Legacy support
-        entryBbox: entry.bbox,
-        // New format - include entryAreas if available
-        entryAreas: entryAreas.length > 0 ? entryAreas : undefined,
-        fieldBboxes: Object.fromEntries(
-          Object.entries(fields).map(([name, f]) => [
-            name,
-            { label: f.labelBbox, value: f.valueBbox },
-          ])
-        ),
-        // Selections keyed by entryId and fieldKey (structure ready, will be populated when selections are attached)
-        selections: {},
-      };
-
-      const response = await apiClient.post(
-        `/api/church/${churchId}/ocr/jobs/${jobId}/fusion/drafts`,
-        {
-          entries: [{
-            entry_index: entryIndex,
-            record_type: currentRecordType,
-            record_number: entry.recordNumber,
-            payload_json: payload,
-            bbox_json: bboxJson,
-          }],
-        }
-      );
-
-      // Normalize API response shape
-      const savedDrafts = normalizeDraftsResponse(response);
-      setDrafts(prev => {
-        const updated = [...prev];
-        for (const draft of savedDrafts) {
-          const idx = updated.findIndex(d => d.entry_index === draft.entry_index);
-          if (idx >= 0) {
-            updated[idx] = draft;
-          } else {
-            updated.push(draft);
-          }
-        }
-        return updated;
-      });
-
-      setLastSaved(new Date());
-      if (!silent) setError(null);
-      return true;
-    } catch (err: any) {
-      console.error('[Fusion] Save draft error:', err);
-      if (!silent) setError(err.message || 'Failed to save draft');
-      return false;
-    } finally {
-      setIsSaving(false);
-      if (!silent) setIsProcessing(false);
-    }
-  }, [entries, entryData, recordType, mappedFields, selectedEntryIndex, churchId, jobId]);
-
-  const handleSaveDraft = useCallback(async () => {
-    if (selectedEntryIndex === null) return;
-    await saveDraftForEntry(selectedEntryIndex, false);
-  }, [selectedEntryIndex, saveDraftForEntry]);
-
-  // Auto-save: debounced save when fields change
-  const triggerAutoSave = useCallback(() => {
-    if (!autoSaveEnabled || selectedEntryIndex === null) return;
-
-    // Clear existing timer
-    if (autoSaveTimerRef.current) {
-      clearTimeout(autoSaveTimerRef.current);
-    }
-
-    pendingSaveRef.current = true;
-
-    // Set new timer (2 second debounce)
-    autoSaveTimerRef.current = setTimeout(async () => {
-      if (pendingSaveRef.current && selectedEntryIndex !== null) {
-        console.log('[Fusion] Auto-saving draft...');
-        await saveDraftForEntry(selectedEntryIndex, true);
-        pendingSaveRef.current = false;
-      }
-    }, 2000);
-  }, [autoSaveEnabled, selectedEntryIndex, saveDraftForEntry]);
 
   // Trigger auto-save when mappedFields or entryData changes (during Map Fields step)
   useEffect(() => {
@@ -1459,16 +1287,13 @@ const FusionTab: React.FC<FusionTabProps> = ({
     }
     
     return () => {
-      if (autoSaveTimerRef.current) {
-        clearTimeout(autoSaveTimerRef.current);
-      }
+      // Cleanup handled by hook
     };
   }, [mappedFields, entryData, activeStep, autoSaveEnabled, triggerAutoSave]);
 
   // Save on step change (when leaving Map Fields step)
   useEffect(() => {
     if (autoSaveEnabled && selectedEntryIndex !== null) {
-      // Save when moving away from Map Fields step
       return () => {
         if (pendingSaveRef.current) {
           saveDraftForEntry(selectedEntryIndex, true);
@@ -1478,191 +1303,21 @@ const FusionTab: React.FC<FusionTabProps> = ({
     }
   }, [activeStep, autoSaveEnabled, selectedEntryIndex, saveDraftForEntry]);
 
-  const handleSaveAllDrafts = useCallback(async () => {
-    setIsProcessing(true);
-    setError(null);
-
-    try {
-      const entriesToSave = entries.map((entry, idx) => {
-        const data = entryData.get(idx);
-        const currentRecordType = data?.recordType || recordType;
-        const fields = data?.fields || {};
-
-        const payload: Record<string, any> = {};
-        for (const [fieldName, field] of Object.entries(fields)) {
-          if (field.value) {
-            payload[fieldName] = field.value;
-          }
-        }
-
-        return {
-          entry_index: idx,
-          record_type: currentRecordType,
-          record_number: entry.recordNumber,
-          payload_json: payload,
-          bbox_json: {
-            // Legacy support
-            entryBbox: entry.bbox,
-            // New format - include entryAreas (single source of truth)
-            entryAreas: entryAreas.length > 0 ? entryAreas : undefined,
-            fieldBboxes: Object.fromEntries(
-              Object.entries(fields).map(([name, f]) => [
-                name,
-                { label: f.labelBbox, value: f.valueBbox },
-              ])
-            ),
-            // Selections keyed by entryId and fieldKey
-            selections: {},
-          },
-        };
-      });
-
-      const response = await apiClient.post(
-        `/api/church/${churchId}/ocr/jobs/${jobId}/fusion/drafts`,
-        { entries: entriesToSave }
-      );
-
-      // Normalize API response shape
-      const savedDrafts = normalizeDraftsResponse(response);
-      setDrafts(savedDrafts);
-    } catch (err: any) {
-      console.error('[Fusion] Save all drafts error:', err);
-      setError(err.message || 'Failed to save drafts');
-    } finally {
-      setIsProcessing(false);
-    }
-  }, [entries, entryData, recordType, churchId, jobId]);
-
-  // Send to Review & Finalize
+  // Wrap handleSendToReview to also use component's isProcessing
   const handleSendToReview = useCallback(async () => {
     setIsProcessing(true);
-    setError(null);
-
     try {
-      // First save all drafts
-      await handleSaveAllDrafts();
-
-      // Mark as ready for review
-      const entryIndexes = entries.map((_, idx) => idx);
-      await apiClient.post(
-        `/api/church/${churchId}/ocr/jobs/${jobId}/fusion/ready-for-review`,
-        { entry_indexes: entryIndexes }
-      );
-
-      // Refresh drafts
-      const response = await apiClient.get(`/api/church/${churchId}/ocr/jobs/${jobId}/fusion/drafts`);
-      // Normalize API response shape
-      const loadedDrafts = normalizeDraftsResponse(response);
-      setDrafts(loadedDrafts);
-
-      // Show success message
-      setError(null);
-      
-      // Call the callback to switch to Review tab and close dialog
-      if (onSendToReview) {
-        onSendToReview();
-      }
-    } catch (err: any) {
-      console.error('[Fusion] Send to Review error:', err);
-      setError(err.message || 'Failed to send to review');
+      await handleSendToReviewDrafts();
     } finally {
       setIsProcessing(false);
     }
-  }, [entries, churchId, jobId, handleSaveAllDrafts, onSendToReview]);
-
-  // Validate drafts before commit
-  const handleValidateDrafts = useCallback(async () => {
-    if (drafts.length === 0) {
-      setError('No drafts to validate. Save drafts first.');
-      return;
-    }
-
-    setIsProcessing(true);
-    setError(null);
-
-    try {
-      const response = await apiClient.post(
-        `/api/church/${churchId}/ocr/jobs/${jobId}/fusion/validate`
-      );
-
-      const result = (response as any).data;
-      setValidationResult(result);
-
-      if (!result.valid) {
-        const invalidCount = result.summary?.invalid || 0;
-        setError(`Validation failed: ${invalidCount} draft(s) have missing required fields.`);
-      }
-    } catch (err: any) {
-      console.error('[Fusion] Validation error:', err);
-      setError(err.message || 'Failed to validate drafts');
-    } finally {
-      setIsProcessing(false);
-    }
-  }, [drafts, churchId, jobId]);
-
-  // Open commit confirmation dialog
-  const handleOpenCommitDialog = useCallback(() => {
-    if (!validationResult?.valid) {
-      setError('Please validate drafts first. All required fields must be filled.');
-      return;
-    }
-    setShowCommitDialog(true);
-  }, [validationResult]);
-
-  // Commit drafts to database
-  const handleCommitDrafts = useCallback(async () => {
-    if (drafts.length === 0) {
-      setError('No drafts to commit. Save drafts first.');
-      return;
-    }
-
-    setIsProcessing(true);
-    setError(null);
-    setShowCommitDialog(false);
-
-    try {
-      const draftIds = drafts.filter(d => d.status === 'draft').map(d => d.id!);
-      
-      if (draftIds.length === 0) {
-        setError('All drafts are already committed.');
-        setIsProcessing(false);
-        return;
-      }
-
-      const response = await apiClient.post(
-        `/api/church/${churchId}/ocr/jobs/${jobId}/fusion/commit`,
-        { draft_ids: draftIds }
-      );
-
-      const result = (response as any).data;
-      
-      if (result.errors?.length > 0) {
-        setError(`Committed ${result.committed?.length || 0} records. Errors: ${result.errors.map((e: any) => e.error).join(', ')}`);
-      } else {
-        setCommitSuccess(true);
-      }
-
-      // Refresh drafts
-      const draftsResponse = await apiClient.get(
-        `/api/church/${churchId}/ocr/jobs/${jobId}/fusion/drafts`
-      );
-      // Normalize API response shape
-      const loadedDrafts = normalizeDraftsResponse(draftsResponse);
-      setDrafts(loadedDrafts);
-      setValidationResult(null); // Clear validation after commit
-    } catch (err: any) {
-      console.error('[Fusion] Commit error:', err);
-      setError(err.message || 'Failed to commit drafts');
-    } finally {
-      setIsProcessing(false);
-    }
-  }, [drafts, churchId, jobId]);
+  }, [handleSendToReviewDrafts]);
 
   // ============================================================================
   // Navigation
   // ============================================================================
 
-  const handleNext = () => setActiveStep(prev => Math.min(prev + 1, 3)); // 4 steps total (0-3)
+  const handleNext = () => setActiveStep(prev => Math.min(prev + 1, 3));
   const handleBack = () => setActiveStep(prev => Math.max(prev - 1, 0));
 
   const handleEntrySelect = (index: number) => {
@@ -1699,15 +1354,12 @@ const FusionTab: React.FC<FusionTabProps> = ({
   useEffect(() => {
     const loadExistingData = async () => {
       try {
-        // Load fusion drafts
         const draftsResponse = await apiClient.get(
           `/api/church/${churchId}/ocr/jobs/${jobId}/fusion/drafts`
         );
         
-        // Normalize API response shape
         const loadedDrafts = normalizeDraftsResponse(draftsResponse);
 
-        // Log for debugging
         console.log('[FusionTab] Loaded drafts on mount:', {
           draftsCount: loadedDrafts.length,
         });
@@ -1723,7 +1375,6 @@ const FusionTab: React.FC<FusionTabProps> = ({
                 ? JSON.parse(draft.payload_json) 
                 : draft.payload_json || {};
               
-              // Convert payload to MappedField format
               const fields: Record<string, MappedField> = {};
               for (const [key, value] of Object.entries(payload)) {
                 if (value) {
@@ -1752,7 +1403,6 @@ const FusionTab: React.FC<FusionTabProps> = ({
           const existingMapping = (mappingResponse as any).data;
           
           if (existingMapping?.mapping_json && Object.keys(existingMapping.mapping_json).length > 0) {
-            // If no drafts but we have mapping, use it for entry 0
             setEntryData(prev => {
               if (prev.size === 0 || !prev.has(0)) {
                 const newData = new Map(prev);
@@ -1779,7 +1429,6 @@ const FusionTab: React.FC<FusionTabProps> = ({
             });
           }
         } catch (mappingErr) {
-          // Mapping endpoint may not exist or have data - that's ok
           console.debug('[Fusion] No existing mapping found');
         }
       } catch (err) {
@@ -1792,12 +1441,6 @@ const FusionTab: React.FC<FusionTabProps> = ({
   // ============================================================================
   // Render Helpers
   // ============================================================================
-
-  const getConfidenceColor = (confidence: number) => {
-    if (confidence >= 0.8) return 'success';
-    if (confidence >= 0.5) return 'warning';
-    return 'error';
-  };
 
   const selectedEntry = selectedEntryIndex !== null ? entries[selectedEntryIndex] : null;
   
@@ -2141,78 +1784,17 @@ const FusionTab: React.FC<FusionTabProps> = ({
             </Typography>
           </StepLabel>
           <StepContent>
-            {selectedEntry ? (
-              <>
-                <Typography variant="body2" color="text.secondary" mb={2}>
-                  Find form labels (e.g., "NAME OF CHILD", "DATE OF BIRTH") to anchor field extraction.
-                </Typography>
-
-                <Stack direction="row" spacing={2} alignItems="center" mb={2}>
-                  <FormControl size="small" sx={{ minWidth: 150 }}>
-                    <InputLabel>Record Type</InputLabel>
-                    <Select
-                      value={recordType}
-                      label="Record Type"
-                      onChange={(e) => handleRecordTypeChange(e.target.value as any)}
-                    >
-                      <MenuItem value="baptism">Baptism</MenuItem>
-                      <MenuItem value="marriage">Marriage</MenuItem>
-                      <MenuItem value="funeral">Funeral</MenuItem>
-                    </Select>
-                  </FormControl>
-
-                  <Button
-                    variant="outlined"
-                    onClick={handleDetectLabels}
-                    disabled={isProcessing}
-                    startIcon={isProcessing ? <CircularProgress size={16} /> : <IconTarget size={18} />}
-                  >
-                    {isProcessing ? 'Detecting...' : 'Detect Labels'}
-                  </Button>
-                </Stack>
-
-                {detectedLabels.length > 0 && (
-                  <Paper variant="outlined" sx={{ p: 1, maxHeight: 200, overflow: 'auto', mb: 2 }}>
-                    <List dense disablePadding>
-                      {detectedLabels.map((label, idx) => (
-                        <ListItem key={idx} disablePadding>
-                          <ListItemButton
-                            onClick={() => onHighlightBbox?.(label.bbox, '#2196F3')}
-                            dense
-                          >
-                            <ListItemText
-                              primary={label.label}
-                              secondary={`→ ${label.canonicalField} (${Math.round(label.confidence * 100)}%)`}
-                            />
-                            <Chip
-                              size="small"
-                              label={`${Math.round(label.confidence * 100)}%`}
-                              color={getConfidenceColor(label.confidence)}
-                            />
-                          </ListItemButton>
-                        </ListItem>
-                      ))}
-                    </List>
-                  </Paper>
-                )}
-
-                <Stack direction="row" spacing={1}>
-                  <Button size="small" onClick={handleBack} startIcon={<IconChevronLeft size={16} />}>
-                    Back
-                  </Button>
-                  <Button
-                    size="small"
-                    onClick={handleNext}
-                    endIcon={<IconChevronRight size={16} />}
-                    disabled={detectedLabels.length === 0}
-                  >
-                    Continue
-                  </Button>
-                </Stack>
-              </>
-            ) : (
-              <Alert severity="info">Select an entry first to detect labels.</Alert>
-            )}
+            <AnchorLabelsStep
+              selectedEntry={selectedEntry}
+              detectedLabels={detectedLabels}
+              recordType={recordType}
+              isProcessing={isProcessing}
+              onDetectLabels={handleDetectLabels}
+              onRecordTypeChange={handleRecordTypeChange}
+              onHighlightBbox={onHighlightBbox}
+              onNext={handleNext}
+              onBack={handleBack}
+            />
           </StepContent>
         </Step>
 
@@ -2241,96 +1823,21 @@ const FusionTab: React.FC<FusionTabProps> = ({
             </Typography>
           </StepLabel>
           <StepContent>
-            {selectedEntry ? (
-              <>
-                <Typography variant="body2" color="text.secondary" mb={2}>
-                  Extract and map values from the detected labels to database fields.
-                </Typography>
-
-                <Stack direction="row" spacing={2} alignItems="center" mb={2}>
-                  <Button
-                    variant="outlined"
-                    onClick={handleAutoMap}
-                    disabled={isProcessing || manualEditMode.has(selectedEntryIndex ?? -1)}
-                    startIcon={isProcessing ? <CircularProgress size={16} /> : <IconPlayerPlay size={18} />}
-                  >
-                    {isProcessing ? 'Mapping...' : 'Auto-Map Fields'}
-                  </Button>
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        size="small"
-                        checked={manualEditMode.has(selectedEntryIndex ?? -1)}
-                        onChange={() => selectedEntryIndex !== null && toggleManualEditMode(selectedEntryIndex)}
-                      />
-                    }
-                    label="Manual Edit Mode"
-                  />
-                  {manualEditMode.has(selectedEntryIndex ?? -1) && (
-                    <Typography variant="caption" color="text.secondary">
-                      (Auto-mapping disabled, enter values manually)
-                    </Typography>
-                  )}
-                </Stack>
-
-                <Paper variant="outlined" sx={{ p: 2, maxHeight: 300, overflow: 'auto', mb: 2 }}>
-                  <Stack spacing={1.5}>
-                    {currentFields.map((field) => {
-                      const mapped = mappedFields[field.name];
-                      return (
-                        <Stack key={field.name} direction="row" spacing={1} alignItems="center">
-                          <Typography variant="caption" sx={{ width: 120, flexShrink: 0 }}>
-                            {field.label}
-                            {field.required && <span style={{ color: 'red' }}>*</span>}
-                          </Typography>
-                          <TextField
-                            size="small"
-                            fullWidth
-                            value={mapped?.value || ''}
-                            onChange={(e) => handleFieldChange(field.name, e.target.value)}
-                            onFocus={() => handleFieldFocus(field.name)}
-                            placeholder={`Enter ${field.label.toLowerCase()}`}
-                            multiline={field.type === 'textarea'}
-                            rows={field.type === 'textarea' ? 2 : 1}
-                          />
-                          {mapped && (
-                            <Tooltip title={`Confidence: ${Math.round(mapped.confidence * 100)}%`}>
-                              <Chip
-                                size="small"
-                                label={`${Math.round(mapped.confidence * 100)}%`}
-                                color={getConfidenceColor(mapped.confidence)}
-                                sx={{ minWidth: 50 }}
-                              />
-                            </Tooltip>
-                          )}
-                          {mapped?.valueBbox && (
-                            <Tooltip title="Highlight on image">
-                              <IconButton
-                                size="small"
-                                onClick={() => onHighlightBbox?.(mapped.valueBbox!, '#FF9800')}
-                              >
-                                <IconFocusCentered size={16} />
-                              </IconButton>
-                            </Tooltip>
-                          )}
-                        </Stack>
-                      );
-                    })}
-                  </Stack>
-                </Paper>
-
-                <Stack direction="row" spacing={1}>
-                  <Button size="small" onClick={handleBack} startIcon={<IconChevronLeft size={16} />}>
-                    Back
-                  </Button>
-                  <Button size="small" onClick={handleNext} endIcon={<IconChevronRight size={16} />}>
-                    Continue
-                  </Button>
-                </Stack>
-              </>
-            ) : (
-              <Alert severity="info">Select an entry first to map fields.</Alert>
-            )}
+            <MapFieldsStep
+              selectedEntry={selectedEntry}
+              selectedEntryIndex={selectedEntryIndex}
+              mappedFields={mappedFields}
+              currentFields={currentFields}
+              isProcessing={isProcessing}
+              manualEditMode={manualEditMode}
+              onAutoMap={handleAutoMap}
+              onFieldChange={handleFieldChange}
+              onFieldFocus={handleFieldFocus}
+              onToggleManualEdit={toggleManualEditMode}
+              onHighlightBbox={onHighlightBbox}
+              onNext={handleNext}
+              onBack={handleBack}
+            />
           </StepContent>
         </Step>
 
