@@ -14,7 +14,6 @@ import {
   Avatar,
   CircularProgress,
   Alert,
-  Divider,
   Menu,
   MenuItem,
   Switch,
@@ -23,26 +22,10 @@ import {
   Card,
   CardContent,
   ListItemIcon,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  FormControl,
-  InputLabel,
-  Select,
-  ToggleButton,
-  ToggleButtonGroup,
-  Slider,
   Button,
-  Stack,
-  Grid,
   Tabs,
   Tab,
   Badge,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  ToggleButtonGroup as FilterToggleGroup
 } from '@mui/material';
 import {
   Psychology as AIIcon,
@@ -53,86 +36,22 @@ import {
   Security as SecurityIcon,
   Info as InfoIcon,
   Terminal as TerminalIcon,
-  Visibility as EyeIcon,
-  Code as CodeIcon,
   Settings as SettingsIcon,
   Minimize as MinimizeIcon,
   Maximize as MaximizeIcon,
   OpenInFull as ResizeIcon,
-  ExpandMore as ExpandMoreIcon,
-  Palette as PaletteIcon,
-  Language as LanguageIcon,
-  AutoMode as AutoModeIcon,
-  Speed as SpeedIcon,
-  Storage as StorageIcon,
-  CloudQueue as CloudIcon,
-  Analytics as AnalyticsIcon,
-  Download as DownloadIcon,
-  PersonOutline as PersonIcon,
-  School as SchoolIcon,
-  Build as BuildIcon,
-  Engineering as EngineeringIcon,
   Error as ErrorIcon,
-  Warning as WarningIcon,
-  BugReport as BugIcon,
   Task as TaskIcon,
-  Delete as DeleteIcon,
   Refresh as RefreshIcon,
-  CheckCircle as CheckIcon,
-  Clear as ClearIcon,
-  FilterList as FilterIcon,
-  Visibility as ShowIcon,
-  VisibilityOff as HideIcon
 } from '@mui/icons-material';
 import { useAuth } from '../../context/AuthContext.tsx';
 import { useLocation } from 'react-router-dom';
 import { useGlobalErrorStore, GlobalError } from '../../hooks/useGlobalErrorStore.tsx';
 import { KanbanDataContext } from '../../context/kanbancontext';
-import ErrorDetailsCard from './ErrorDetailsCard.tsx';
-
-interface OMAICommand {
-  id: string;
-  command: string;
-  timestamp: string;
-  result?: string;
-  status: 'pending' | 'success' | 'error';
-  context?: string;
-}
-
-interface PageContext {
-  pathname: string;
-  componentName?: string;
-  dbModel?: string;
-  userRole: string;
-  churchId?: string;
-  description?: string;
-}
-
-interface OMAISettings {
-  // Core Assistant Settings
-  handsOnModeEnabled: boolean;
-  destructiveCommandsWarning: boolean;
-  defaultAIMode: 'passive' | 'assistive' | 'hands-on';
-  defaultLanguage: string;
-  uiTheme: 'light' | 'dark' | 'orthodox-blue' | 'custom';
-  
-  // OMAI Behavior Settings
-  autonomousActions: boolean;
-  errorRecoveryMode: 'auto-refresh' | 'retry' | 'report';
-  verbosityLevel: 'minimal' | 'normal' | 'debug';
-  agentPersonality: 'classic' | 'liturgical' | 'debugging-expert' | 'project-manager' | 'orthodox-educator';
-  
-  // Backend Integration
-  databaseContextOverride: string;
-  serviceEnvironment: 'prod' | 'dev' | 'sandbox';
-  
-  // Logs & Analytics
-  showMetrics: boolean;
-  exportLogsFormat: 'json' | 'csv' | 'txt';
-  trackExecutionTime: boolean;
-  trackQueryCount: boolean;
-  trackSuccessRate: boolean;
-}
+import type { OMAICommand, PageContext, OMAISettings } from './GlobalOMAI/types';
+import { getComponentNameFromPath, getDbModelFromPath, getPageDescription, getSeverityColor, determinePriorityFromSeverity, generateTaskDescription } from './GlobalOMAI/utils';
+import ErrorsTab from './GlobalOMAI/ErrorsTab';
+import TaskCreationDialog from './GlobalOMAI/TaskCreationDialog';
 
 const GlobalOMAI: React.FC = () => {
   const { user } = useAuth();
@@ -179,7 +98,6 @@ const GlobalOMAI: React.FC = () => {
   });
   
   // Error filtering state
-  const [showFilters, setShowFilters] = useState(false);
   
   // Data State
   const [commandHistory, setCommandHistory] = useState<OMAICommand[]>([]);
@@ -272,43 +190,6 @@ const GlobalOMAI: React.FC = () => {
     generateContextualSuggestions(context);
   };
 
-  const getComponentNameFromPath = (pathname: string): string => {
-    const pathMap: { [key: string]: string } = {
-      '/admin/ai': 'AI Administration Panel',
-      '/admin/bigbook': 'OM Big Book Console',
-      '/admin/build': 'Build Console',
-      '/admin/users': 'User Management',
-      '/apps/records-ui': 'Church Records Browser',
-      '/apps/records': 'Records Dashboard',
-      '/apps/kanban': 'Kanban Board',
-      '/omb/editor': 'OMB Editor',
-      '/dashboards/modern': 'Modern Dashboard',
-      '/admin/orthodox-metrics': 'Orthodox Metrics Dashboard'
-    };
-    return pathMap[pathname] || 'Unknown Component';
-  };
-
-  const getDbModelFromPath = (pathname: string): string => {
-    if (pathname.includes('records')) return 'church_records';
-    if (pathname.includes('users')) return 'users';
-    if (pathname.includes('church')) return 'churches';
-    if (pathname.includes('ai')) return 'ai_metrics';
-    if (pathname.includes('kanban')) return 'orthodoxmetrics_db';
-    return 'orthodoxmetrics_db'; // Default to main application database
-  };
-
-  const getPageDescription = (pathname: string): string => {
-    const descriptions: { [key: string]: string } = {
-      '/admin/ai': 'AI system monitoring and configuration',
-      '/admin/bigbook': 'Big Book content management and AI learning',
-      '/admin/build': 'Frontend build and deployment console',
-      '/admin/users': 'User account and permission management',
-      '/apps/records-ui': 'Professional church records browser with filtering',
-      '/apps/records': 'Card-based records dashboard',
-      '/omb/editor': 'Visual component editor and builder'
-    };
-    return descriptions[pathname] || 'OrthodoxMetrics application page';
-  };
 
   const generateContextualSuggestions = (context: PageContext) => {
     const suggestions: string[] = [];
@@ -711,71 +592,7 @@ const GlobalOMAI: React.FC = () => {
     }
   };
 
-  const determinePriorityFromSeverity = (severity: GlobalError['severity']): 'low' | 'medium' | 'high' | 'urgent' => {
-    switch (severity) {
-      case 'critical': return 'urgent';
-      case 'high': return 'high';
-      case 'medium': return 'medium';
-      case 'low': return 'low';
-      default: return 'medium';
-    }
-  };
 
-  const generateTaskDescription = (error: GlobalError): string => {
-    return `## 🐛 Bug Report
-
-**Error Hash:** \`${error.hash}\`
-**Severity:** ${error.severity.toUpperCase()}
-**Occurrences:** ${error.occurrenceCount}
-
-### 📍 Location
-- **Component:** ${error.component || 'Unknown'}
-- **Route:** \`${error.route}\`
-- **File:** \`${error.filename || 'N/A'}\`${error.lineno ? `:${error.lineno}` : ''}
-
-### 💬 Error Message
-\`\`\`
-${error.message}
-\`\`\`
-
-### 🔍 Stack Trace
-\`\`\`
-${error.stack || 'No stack trace available'}
-\`\`\`
-
-### ⏰ Timeline
-- **First:** ${new Date(error.firstOccurrence).toLocaleString()}
-- **Last:** ${new Date(error.lastOccurrence).toLocaleString()}
-- **Count:** ${error.occurrenceCount} occurrence${error.occurrenceCount !== 1 ? 's' : ''}
-
-### 🎯 Action Items
-- [ ] Investigate root cause
-- [ ] Reproduce error in dev environment  
-- [ ] Implement fix
-- [ ] Test fix thoroughly
-- [ ] Deploy and monitor
-
-### 🏷️ Tags
-${error.tags?.join(', ') || 'None'}
-
-### 🌐 Context
-- **URL:** ${error.context?.url || 'N/A'}
-- **User Role:** ${error.userRole || 'N/A'}
-- **Viewport:** ${error.context?.viewport || 'N/A'}
-
----
-*Auto-generated from OMAI Error Console*`;
-  };
-
-  const getSeverityColor = (severity: GlobalError['severity']): string => {
-    switch (severity) {
-      case 'critical': return '#d32f2f';
-      case 'high': return '#f57c00';
-      case 'medium': return '#1976d2';
-      case 'low': return '#388e3c';
-      default: return '#757575';
-    }
-  };
 
   const handleDragStart = useCallback((e: React.MouseEvent) => {
     if (!dragRef.current) return;
@@ -842,259 +659,6 @@ ${error.tags?.join(', ') || 'None'}
   };
 
   // Enhanced Errors Tab Content with filtering and enhanced features
-  const renderErrorsTab = () => (
-    <Box>
-      {/* Error Statistics Dashboard */}
-      <Card sx={{ mb: 2, bgcolor: '#f8f9fa', border: '1px solid #e9ecef' }}>
-        <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
-          <Box display="flex" alignItems="center" gap={1} mb={2}>
-            <ErrorIcon fontSize="small" sx={{ color: '#f57c00' }} />
-            <Typography variant="subtitle2" fontWeight="bold" sx={{ color: '#424242' }}>
-              Error Dashboard
-            </Typography>
-            <Box ml="auto" display="flex" gap={1}>
-              <Tooltip title="Toggle Filters">
-                <IconButton
-                  size="small"
-                  onClick={() => setShowFilters(!showFilters)}
-                  sx={{ 
-                    bgcolor: showFilters ? '#e3f2fd' : 'transparent',
-                    color: showFilters ? '#1976d2' : '#666'
-                  }}
-                >
-                  <FilterIcon />
-                </IconButton>
-              </Tooltip>
-            </Box>
-          </Box>
-          
-          {/* Stats Grid */}
-          <Grid container spacing={1} mb={2}>
-            <Grid item xs={3}>
-              <Chip 
-                label={`Total: ${stats.total}`} 
-                size="small" 
-                sx={{ width: '100%', bgcolor: '#e0e0e0', color: '#424242', fontWeight: 'bold' }} 
-              />
-            </Grid>
-            <Grid item xs={3}>
-              <Chip 
-                label={`Unique: ${stats.unique}`} 
-                size="small" 
-                sx={{ width: '100%', bgcolor: '#e8f4fd', color: '#1976d2', fontWeight: 'bold' }} 
-              />
-            </Grid>
-            <Grid item xs={3}>
-              <Chip 
-                label={`Active: ${stats.unresolved}`} 
-                size="small" 
-                sx={{ 
-                  width: '100%',
-                  bgcolor: stats.unresolved > 0 ? '#ffebee' : '#e8f5e8', 
-                  color: stats.unresolved > 0 ? '#c62828' : '#2e7d32',
-                  fontWeight: 'bold'
-                }} 
-              />
-            </Grid>
-            <Grid item xs={3}>
-              <Chip 
-                label={`Dismissed: ${stats.dismissed}`} 
-                size="small" 
-                sx={{ width: '100%', bgcolor: '#f5f5f5', color: '#666', fontWeight: 'bold' }} 
-              />
-            </Grid>
-          </Grid>
-
-          {/* Severity Breakdown */}
-          <Grid container spacing={0.5}>
-            <Grid item xs={3}>
-              <Chip 
-                label={`Critical: ${stats.criticalCount}`} 
-                size="small" 
-                sx={{ width: '100%', bgcolor: '#d32f2f', color: 'white', fontSize: '0.7rem' }} 
-              />
-            </Grid>
-            <Grid item xs={3}>
-              <Chip 
-                label={`High: ${stats.highCount}`} 
-                size="small" 
-                sx={{ width: '100%', bgcolor: '#f57c00', color: 'white', fontSize: '0.7rem' }} 
-              />
-            </Grid>
-            <Grid item xs={3}>
-              <Chip 
-                label={`Medium: ${stats.mediumCount}`} 
-                size="small" 
-                sx={{ width: '100%', bgcolor: '#1976d2', color: 'white', fontSize: '0.7rem' }} 
-              />
-            </Grid>
-            <Grid item xs={3}>
-              <Chip 
-                label={`Low: ${stats.lowCount}`} 
-                size="small" 
-                sx={{ width: '100%', bgcolor: '#388e3c', color: 'white', fontSize: '0.7rem' }} 
-              />
-            </Grid>
-          </Grid>
-
-          {/* Action Buttons */}
-          {(stats.unresolved > 0 || stats.dismissed > 0) && (
-            <Box mt={2} display="flex" gap={1} flexWrap="wrap">
-              {stats.unresolved > 0 && (
-                <Button
-                  size="small"
-                  startIcon={<ClearIcon />}
-                  onClick={clearErrors}
-                  sx={{ textTransform: 'none' }}
-                >
-                  Clear All
-                </Button>
-              )}
-              {stats.dismissed > 0 && (
-                <Button
-                  size="small"
-                  startIcon={<ShowIcon />}
-                  onClick={clearDismissedErrors}
-                  sx={{ textTransform: 'none' }}
-                >
-                  Restore Dismissed
-                </Button>
-              )}
-              <Button
-                size="small"
-                startIcon={<RefreshIcon />}
-                onClick={() => window.location.reload()}
-                sx={{ textTransform: 'none' }}
-              >
-                Refresh Page
-              </Button>
-            </Box>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Filter Panel */}
-      <Collapse in={showFilters}>
-        <Card sx={{ mb: 2, bgcolor: '#f8fffe', border: '1px solid #b2dfdb' }}>
-          <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
-            <Typography variant="subtitle2" fontWeight="bold" gutterBottom sx={{ color: '#00695c' }}>
-              🔍 Filters
-            </Typography>
-            
-            <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
-                <FormControl fullWidth size="small">
-                  <InputLabel>Severity</InputLabel>
-                  <Select
-                    multiple
-                    value={filter.severity || []}
-                    label="Severity"
-                    onChange={(e) => setFilter(prev => ({...prev, severity: e.target.value as any}))}
-                  >
-                    <MenuItem value="critical">Critical</MenuItem>
-                    <MenuItem value="high">High</MenuItem>
-                    <MenuItem value="medium">Medium</MenuItem>
-                    <MenuItem value="low">Low</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-              
-              <Grid item xs={12} sm={6}>
-                <FormControl fullWidth size="small">
-                  <InputLabel>Status</InputLabel>
-                  <Select
-                    value={filter.resolved !== undefined ? (filter.resolved ? 'resolved' : 'unresolved') : 'all'}
-                    label="Status"
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      setFilter(prev => ({
-                        ...prev, 
-                        resolved: value === 'all' ? undefined : value === 'resolved'
-                      }));
-                    }}
-                  >
-                    <MenuItem value="all">All</MenuItem>
-                    <MenuItem value="unresolved">Unresolved</MenuItem>
-                    <MenuItem value="resolved">Resolved</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-
-              <Grid item xs={12}>
-                <Stack direction="row" spacing={1} flexWrap="wrap">
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        checked={filter.dismissed === false}
-                        onChange={(e) => setFilter(prev => ({
-                          ...prev, 
-                          dismissed: e.target.checked ? false : undefined
-                        }))}
-                        size="small"
-                      />
-                    }
-                    label="Hide Dismissed"
-                  />
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        checked={filter.showOnlyNew || false}
-                        onChange={(e) => setFilter(prev => ({
-                          ...prev, 
-                          showOnlyNew: e.target.checked
-                        }))}
-                        size="small"
-                      />
-                    }
-                    label="Only New/Unique"
-                  />
-                </Stack>
-              </Grid>
-            </Grid>
-          </CardContent>
-        </Card>
-      </Collapse>
-
-      {/* Error List using ErrorDetailsCard */}
-      <Box>
-        <Typography variant="subtitle2" gutterBottom sx={{ color: '#424242', fontWeight: 'bold' }}>
-          Recent Errors ({filteredErrors.length} shown)
-        </Typography>
-        
-        {filteredErrors.length === 0 ? (
-          <Card sx={{ bgcolor: '#e8f5e8', border: '1px solid #4caf50' }}>
-            <CardContent sx={{ textAlign: 'center', py: 3 }}>
-              <CheckIcon sx={{ fontSize: 48, color: '#4caf50', mb: 1 }} />
-              <Typography variant="h6" sx={{ color: '#2e7d32', fontWeight: 'bold' }}>
-                No errors to display!
-              </Typography>
-              <Typography variant="body2" sx={{ color: '#4caf50' }}>
-                {errors.length === 0 
-                  ? 'Your application is running smoothly.' 
-                  : 'All errors have been filtered out or dismissed.'
-                }
-              </Typography>
-            </CardContent>
-          </Card>
-        ) : (
-          <Box sx={{ maxHeight: 400, overflow: 'auto' }}>
-            {filteredErrors.map((error) => (
-              <ErrorDetailsCard
-                key={error.id}
-                error={error}
-                onToggleExpansion={toggleErrorExpansion}
-                onCreateTask={handleCreateTaskFromError}
-                onDismiss={dismissError}
-                onUndismiss={undismissError}
-                onDelete={deleteError}
-                showTrackButton={true}
-              />
-            ))}
-          </Box>
-        )}
-      </Box>
-    </Box>
-  );
 
   return (
     <>
@@ -1607,7 +1171,9 @@ ${error.tags?.join(', ') || 'None'}
               </Box>
                          )}
 
-                {activeTab === 1 && renderErrorsTab()}
+                {activeTab === 1 && (
+                  <ErrorsTab handleCreateTaskFromError={handleCreateTaskFromError} />
+                )}
               </Box>
              
              {/* Resize Handle */}
@@ -1657,99 +1223,14 @@ ${error.tags?.join(', ') || 'None'}
         )}
       </Menu>
 
-      {/* Enhanced Task Creation Dialog */}
-      <Dialog 
-        open={taskCreationDialog} 
-        onClose={() => setTaskCreationDialog(false)} 
-        maxWidth="md" 
-        fullWidth
-      >
-        <DialogTitle>
-          <Box display="flex" alignItems="center" gap={1}>
-            <TaskIcon sx={{ color: '#1976d2' }} />
-            📌 Create Bug Task from Error
-          </Box>
-        </DialogTitle>
-        <DialogContent>
-          {selectedError && (
-            <Box>
-              {/* Enhanced Error Summary */}
-              <Card sx={{ mb: 2, bgcolor: '#fff3e0', border: '1px solid #ffb74d' }}>
-                <CardContent sx={{ p: 2 }}>
-                  <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
-                    🐛 Error Details
-                  </Typography>
-                  <Typography variant="body2" gutterBottom>
-                    <strong>Hash:</strong> {selectedError.hash}
-                  </Typography>
-                  <Typography variant="body2" gutterBottom>
-                    <strong>Message:</strong> {selectedError.message}
-                  </Typography>
-                  <Typography variant="body2" gutterBottom>
-                    <strong>Component:</strong> {selectedError.component}
-                  </Typography>
-                  <Typography variant="body2" gutterBottom>
-                    <strong>Severity:</strong> {selectedError.severity} | <strong>Occurrences:</strong> {selectedError.occurrenceCount}
-                  </Typography>
-                  <Typography variant="body2">
-                    <strong>First/Last:</strong> {new Date(selectedError.firstOccurrence).toLocaleString()} / {new Date(selectedError.lastOccurrence).toLocaleString()}
-                  </Typography>
-                </CardContent>
-              </Card>
-
-              {/* Task Form */}
-              <Stack spacing={2}>
-                <TextField
-                  fullWidth
-                  label="Task Title"
-                  value={taskForm.title}
-                  onChange={(e) => setTaskForm(prev => ({...prev, title: e.target.value}))}
-                  placeholder="🐛 Fix: Error description..."
-                />
-                <TextField
-                  fullWidth
-                  multiline
-                  rows={8}
-                  label="Task Description (Markdown)"
-                  value={taskForm.description}
-                  onChange={(e) => setTaskForm(prev => ({...prev, description: e.target.value}))}
-                  placeholder="Bug report will be auto-generated..."
-                />
-                <FormControl fullWidth>
-                  <InputLabel>Priority</InputLabel>
-                  <Select
-                    value={taskForm.priority}
-                    label="Priority"
-                    onChange={(e) => setTaskForm(prev => ({...prev, priority: e.target.value as any}))}
-                  >
-                    <MenuItem value="low">Low</MenuItem>
-                    <MenuItem value="medium">Medium</MenuItem>
-                    <MenuItem value="high">High</MenuItem>
-                    <MenuItem value="urgent">Urgent</MenuItem>
-                  </Select>
-                </FormControl>
-                
-                <Alert severity="info">
-                  Task will be created in the Bugs column (or first available column) with appropriate labels and priority based on error severity.
-                </Alert>
-              </Stack>
-            </Box>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setTaskCreationDialog(false)}>
-            Cancel
-          </Button>
-          <Button 
-            onClick={() => handleCreateTaskFromError()} 
-            variant="contained"
-            disabled={!taskForm.title.trim()}
-            startIcon={<TaskIcon />}
-          >
-            📌 Create Bug Task
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <TaskCreationDialog
+        open={taskCreationDialog}
+        onClose={() => setTaskCreationDialog(false)}
+        selectedError={selectedError}
+        taskForm={taskForm}
+        setTaskForm={setTaskForm}
+        onCreateTask={() => handleCreateTaskFromError()}
+      />
     </>
   );
 };
