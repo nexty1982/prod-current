@@ -244,7 +244,7 @@ const AdminDashboardLayout = Loadable(lazy(() => import('../features/admin/admin
 const AdminPageFallback = Loadable(lazy(() => import('../features/admin/admin/AdminPageFallback')));
 
 // Big Book System
-const OMBigBook = Loadable(lazy(() => import('../features/admin/admin/OMBigBook')));
+const OMBigBook = Loadable(lazy(() => import('../features/admin/OMBigBook')));
 const BigBookDynamicRoute = Loadable(lazy(() => import('../features/admin/admin/BigBookDynamicRoute')));
 
 // OMAI Mobile
