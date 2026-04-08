@@ -50,6 +50,7 @@ interface SessionData {
 
 import { SnackbarState, SNACKBAR_CLOSED, SNACKBAR_DURATION } from './accountConstants';
 import { sessionsApi, extractErrorMessage } from './accountApi';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface ConfirmDialog {
   open: boolean;
@@ -150,6 +151,7 @@ const AccountSessionsPage: React.FC = () => {
   const [revoking, setRevoking] = useState<number | 'all' | null>(null);
   const [snackbar, setSnackbar] = useState<SnackbarState>(SNACKBAR_CLOSED);
   const [confirmDialog, setConfirmDialog] = useState<ConfirmDialog>({ open: false, title: '', message: '', onConfirm: () => {} });
+  const { t } = useLanguage();
 
   // ── Load sessions ──
 
@@ -178,17 +180,17 @@ const AccountSessionsPage: React.FC = () => {
     const { browser, os } = parseUserAgent(session.user_agent);
     setConfirmDialog({
       open: true,
-      title: 'Revoke Session',
+      title: t('account.revoke_session_title'),
       message: `This will sign out the ${browser} on ${os} session (signed in ${formatRelativeTime(session.created_at)}). The device will need to log in again.`,
       onConfirm: async () => {
         setConfirmDialog((d) => ({ ...d, open: false }));
         setRevoking(session.id);
         try {
           await sessionsApi.revokeSession(String(session.id));
-          setSnackbar({ open: true, message: 'Session revoked successfully.', severity: 'success' });
+          setSnackbar({ open: true, message: t('account.session_revoked_success'), severity: 'success' });
           fetchSessions();
         } catch (err: any) {
-          setSnackbar({ open: true, message: err.message || 'Failed to revoke session.', severity: 'error' });
+          setSnackbar({ open: true, message: err.message || t('account.session_revoke_failed'), severity: 'error' });
         } finally {
           setRevoking(null);
         }
@@ -201,7 +203,7 @@ const AccountSessionsPage: React.FC = () => {
   const handleRevokeAll = useCallback(() => {
     setConfirmDialog({
       open: true,
-      title: 'Sign Out All Other Sessions',
+      title: t('account.sign_out_all_title'),
       message: `This will revoke ${activeOtherSessions.length} other active session(s). Those devices will need to log in again. Your current session will not be affected.`,
       onConfirm: async () => {
         setConfirmDialog((d) => ({ ...d, open: false }));
@@ -212,7 +214,7 @@ const AccountSessionsPage: React.FC = () => {
           setSnackbar({ open: true, message: `Revoked ${count} session(s).`, severity: 'success' });
           fetchSessions();
         } catch (err: any) {
-          setSnackbar({ open: true, message: err.message || 'Failed to revoke sessions.', severity: 'error' });
+          setSnackbar({ open: true, message: err.message || t('account.sessions_revoke_failed'), severity: 'error' });
         } finally {
           setRevoking(null);
         }
@@ -240,12 +242,11 @@ const AccountSessionsPage: React.FC = () => {
           <Box display="flex" alignItems="center" gap={1} mb={0.5}>
             <SecurityIcon color="primary" />
             <Typography variant="h5" fontWeight={600}>
-              Active Sessions
+              {t('account.active_sessions')}
             </Typography>
           </Box>
           <Typography variant="body2" color="text.secondary">
-            Manage the devices and browsers that are currently signed in to your account.
-            If you notice any sessions you don&apos;t recognize, revoke them immediately and change your password.
+            {t('account.sessions_description')}
           </Typography>
         </CardContent>
       </Card>
@@ -265,10 +266,10 @@ const AccountSessionsPage: React.FC = () => {
               <Box display="flex" alignItems="center" gap={1}>
                 <DevicesIcon color="primary" />
                 <Typography variant="subtitle1" fontWeight={600}>
-                  Current Session
+                  {t('account.current_session')}
                 </Typography>
               </Box>
-              <Chip label="This Device" color="primary" size="small" />
+              <Chip label={t('account.this_device')} color="primary" size="small" />
             </Box>
             <SessionDetails session={currentSession} />
           </CardContent>
@@ -282,11 +283,11 @@ const AccountSessionsPage: React.FC = () => {
             <Box display="flex" alignItems="center" gap={1}>
               <DevicesIcon color="action" />
               <Typography variant="subtitle1" fontWeight={600}>
-                Other Sessions
+                {t('account.other_sessions')}
               </Typography>
               {activeOtherSessions.length > 0 && (
                 <Chip
-                  label={`${activeOtherSessions.length} active`}
+                  label={`${activeOtherSessions.length} ${t('account.active')}`}
                   size="small"
                   color="default"
                   variant="outlined"
@@ -302,7 +303,7 @@ const AccountSessionsPage: React.FC = () => {
                 onClick={handleRevokeAll}
                 disabled={revoking !== null}
               >
-                Sign Out All Others
+                {t('account.sign_out_all_others')}
               </Button>
             )}
           </Box>
@@ -311,10 +312,10 @@ const AccountSessionsPage: React.FC = () => {
             <Box textAlign="center" py={4}>
               <SecurityIcon sx={{ fontSize: 48, color: 'text.disabled', mb: 1 }} />
               <Typography variant="body1" color="text.secondary">
-                No other sessions found.
+                {t('account.no_other_sessions')}
               </Typography>
               <Typography variant="body2" color="text.disabled" mt={0.5}>
-                You are only signed in on this device.
+                {t('account.only_this_device')}
               </Typography>
             </Box>
           ) : (
@@ -339,11 +340,11 @@ const AccountSessionsPage: React.FC = () => {
                         disabled={revoking !== null}
                         startIcon={revoking === session.id ? <CircularProgress size={16} /> : <LogoutIcon />}
                       >
-                        {revoking === session.id ? 'Revoking...' : 'Revoke'}
+                        {revoking === session.id ? t('account.revoking') : t('account.revoke')}
                       </Button>
                     ) : (
                       <Chip
-                        label={session.status === 'revoked' ? 'Revoked' : 'Expired'}
+                        label={session.status === 'revoked' ? t('account.revoked') : t('account.expired')}
                         size="small"
                         color={session.status === 'revoked' ? 'error' : 'default'}
                         variant="outlined"
@@ -359,8 +360,7 @@ const AccountSessionsPage: React.FC = () => {
 
       {/* Info Note */}
       <Alert severity="info" sx={{ mt: 3 }} icon={<SecurityIcon />}>
-        Sessions expire automatically after 30 days of inactivity.
-        For security, we recommend periodically reviewing your active sessions and revoking any you don&apos;t recognize.
+        {t('account.sessions_expire_info')}
       </Alert>
 
       {/* Confirmation Dialog */}
@@ -370,9 +370,9 @@ const AccountSessionsPage: React.FC = () => {
           <DialogContentText>{confirmDialog.message}</DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setConfirmDialog((d) => ({ ...d, open: false }))}>Cancel</Button>
+          <Button onClick={() => setConfirmDialog((d) => ({ ...d, open: false }))}>{t('common.cancel')}</Button>
           <Button onClick={confirmDialog.onConfirm} color="error" variant="contained">
-            Revoke
+            {t('account.revoke')}
           </Button>
         </DialogActions>
       </Dialog>
@@ -396,6 +396,7 @@ const AccountSessionsPage: React.FC = () => {
 
 const SessionDetails: React.FC<{ session: SessionData }> = ({ session }) => {
   const { browser, os, deviceType } = parseUserAgent(session.user_agent);
+  const { t } = useLanguage();
 
   return (
     <Box display="flex" alignItems="flex-start" gap={2} flex={1} minWidth={0}>
@@ -431,7 +432,7 @@ const SessionDetails: React.FC<{ session: SessionData }> = ({ session }) => {
             <Box display="flex" alignItems="center" gap={0.5}>
               <AccessTimeIcon sx={{ fontSize: 14, color: 'text.disabled' }} />
               <Typography variant="caption" color="text.secondary">
-                Signed in {formatRelativeTime(session.created_at)}
+                {t('account.signed_in')} {formatRelativeTime(session.created_at)}
               </Typography>
             </Box>
           </Tooltip>

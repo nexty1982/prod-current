@@ -34,6 +34,7 @@ import {
   useTheme,
 } from '@mui/material';
 import { IconEye, IconEyeOff } from '@tabler/icons-react';
+import { useLanguage } from '@/context/LanguageContext';
 import LockIcon from '@mui/icons-material/Lock';
 import ShieldIcon from '@mui/icons-material/Shield';
 import SecurityIcon from '@mui/icons-material/Security';
@@ -66,25 +67,25 @@ import { profileApi, extractErrorMessage } from './accountApi';
 
 interface StrengthResult {
   score: number; // 0–4
-  label: string;
+  labelKey: string;
   color: 'error' | 'warning' | 'info' | 'success';
-  checks: { label: string; met: boolean }[];
+  checks: { labelKey: string; met: boolean }[];
 }
 
 function evaluateStrength(pw: string): StrengthResult {
   const checks = [
-    { label: 'At least 8 characters', met: pw.length >= 8 },
-    { label: 'Contains uppercase letter', met: /[A-Z]/.test(pw) },
-    { label: 'Contains lowercase letter', met: /[a-z]/.test(pw) },
-    { label: 'Contains a number', met: /\d/.test(pw) },
-    { label: 'Contains special character', met: /[^A-Za-z0-9]/.test(pw) },
+    { labelKey: 'account.check_8_characters', met: pw.length >= 8 },
+    { labelKey: 'account.check_uppercase', met: /[A-Z]/.test(pw) },
+    { labelKey: 'account.check_lowercase', met: /[a-z]/.test(pw) },
+    { labelKey: 'account.check_number', met: /\d/.test(pw) },
+    { labelKey: 'account.check_special', met: /[^A-Za-z0-9]/.test(pw) },
   ];
   const score = checks.filter((c) => c.met).length;
-  if (score <= 1) return { score: 0, label: 'Very weak', color: 'error', checks };
-  if (score === 2) return { score: 1, label: 'Weak', color: 'error', checks };
-  if (score === 3) return { score: 2, label: 'Fair', color: 'warning', checks };
-  if (score === 4) return { score: 3, label: 'Good', color: 'info', checks };
-  return { score: 4, label: 'Strong', color: 'success', checks };
+  if (score <= 1) return { score: 0, labelKey: 'account.strength_very_weak', color: 'error', checks };
+  if (score === 2) return { score: 1, labelKey: 'account.strength_weak', color: 'error', checks };
+  if (score === 3) return { score: 2, labelKey: 'account.strength_fair', color: 'warning', checks };
+  if (score === 4) return { score: 3, labelKey: 'account.strength_good', color: 'info', checks };
+  return { score: 4, labelKey: 'account.strength_strong', color: 'success', checks };
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────────
@@ -129,6 +130,7 @@ const useActionStyles = () => {
 
 const AccountPasswordPage: React.FC = () => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const { accent, accentHover, accentBorder, accentBorderHover, accentBgHover, onAccent } = useActionStyles();
 
   // Password form
@@ -171,9 +173,9 @@ const AccountPasswordPage: React.FC = () => {
       loadSecurityStatus(); // Refresh to pick up verification_sent_at
     } catch (err: any) {
       if (err.status === 429) {
-        setSnackbar({ open: true, message: err.message || 'Please wait before requesting another verification email.', severity: 'info' });
+        setSnackbar({ open: true, message: err.message || t('account.verification_wait'), severity: 'info' });
       } else {
-        setSnackbar({ open: true, message: err.message || 'Failed to send verification email.', severity: 'error' });
+        setSnackbar({ open: true, message: err.message || t('account.verification_failed'), severity: 'error' });
       }
     } finally {
       setSendingVerification(false);
@@ -189,13 +191,13 @@ const AccountPasswordPage: React.FC = () => {
   const validationErrors = useMemo(() => {
     const errors: Record<string, string> = {};
     if (form.newPassword && form.newPassword.length < 8) {
-      errors.newPassword = 'Must be at least 8 characters';
+      errors.newPassword = t('account.error_min_8');
     }
     if (form.confirmPassword && form.newPassword !== form.confirmPassword) {
-      errors.confirmPassword = 'Passwords do not match';
+      errors.confirmPassword = t('account.error_passwords_no_match');
     }
     if (form.newPassword && form.currentPassword && form.newPassword === form.currentPassword) {
-      errors.newPassword = 'New password must be different from current password';
+      errors.newPassword = t('account.error_same_password');
     }
     return errors;
   }, [form]);
@@ -235,11 +237,11 @@ const AccountPasswordPage: React.FC = () => {
         data.sessions_revoked > 0
           ? ` ${data.sessions_revoked} other session${data.sessions_revoked > 1 ? 's' : ''} signed out for security.`
           : '';
-      setSnackbar({ open: true, message: `Password changed successfully.${revokedMsg}`, severity: 'success' });
+      setSnackbar({ open: true, message: `${t('account.password_changed_success')}${revokedMsg}`, severity: 'success' });
       // Refresh security status to reflect new password_changed_at
       loadSecurityStatus();
     } catch (err: any) {
-      setSnackbar({ open: true, message: err.message || 'Failed to change password', severity: 'error' });
+      setSnackbar({ open: true, message: err.message || t('account.password_change_failed'), severity: 'error' });
     } finally {
       setSaving(false);
     }
@@ -251,24 +253,24 @@ const AccountPasswordPage: React.FC = () => {
     if (!security) return [];
     const items: { text: string; severity: 'warning' | 'info' }[] = [];
     if (!security.password_changed_at) {
-      items.push({ text: 'You have never changed your password. Consider updating it regularly.', severity: 'warning' });
+      items.push({ text: t('account.never_changed_password'), severity: 'warning' });
     } else {
       const daysSince = Math.floor((Date.now() - new Date(security.password_changed_at).getTime()) / 86400000);
       if (daysSince > 180) {
-        items.push({ text: `Your password was last changed ${daysSince} days ago. Consider updating it.`, severity: 'warning' });
+        items.push({ text: t('account.password_old_warning').replace('{days}', String(daysSince)), severity: 'warning' });
       }
     }
     if (security.active_sessions > 3) {
       items.push({
-        text: `You have ${security.active_sessions} active sessions. Review them to ensure they are all yours.`,
+        text: t('account.sessions_review_warning').replace('{count}', String(security.active_sessions)),
         severity: 'info',
       });
     }
     if (!security.email_verified) {
-      items.push({ text: 'Your email is not verified. Verify it to ensure you can receive password resets and security alerts.', severity: 'warning' });
+      items.push({ text: t('account.email_not_verified_rec'), severity: 'warning' });
     }
     if (!security.two_factor_enabled) {
-      items.push({ text: 'Two-factor authentication is not yet available. It will add an extra layer of security when released.', severity: 'info' });
+      items.push({ text: t('account.twofactor_not_available_rec'), severity: 'info' });
     }
     return items;
   }, [security]);
@@ -312,11 +314,11 @@ const AccountPasswordPage: React.FC = () => {
           <Box display="flex" alignItems="center" gap={1} mb={0.5}>
             <SecurityIcon color="primary" />
             <Typography variant="h5" fontWeight={600}>
-              Security Overview
+              {t('account.security_overview')}
             </Typography>
           </Box>
           <Typography variant="body2" color="text.secondary" mb={2}>
-            A summary of your account's security status.
+            {t('account.security_overview_desc')}
           </Typography>
           <Divider sx={{ mb: 2 }} />
 
@@ -332,20 +334,20 @@ const AccountPasswordPage: React.FC = () => {
             >
               <StatusItem
                 icon={<ScheduleIcon sx={{ fontSize: 20 }} />}
-                label="Account created"
+                label={t('account.account_created')}
                 value={formatRelativeDate(security.account_created_at)}
                 tooltip={formatAbsoluteDate(security.account_created_at)}
               />
               <StatusItem
                 icon={<LockIcon sx={{ fontSize: 20 }} />}
-                label="Password last changed"
-                value={security.password_changed_at ? formatRelativeDate(security.password_changed_at) : 'Never'}
-                tooltip={security.password_changed_at ? formatAbsoluteDate(security.password_changed_at) : 'Password has not been changed since account creation'}
+                label={t('account.password_last_changed')}
+                value={security.password_changed_at ? formatRelativeDate(security.password_changed_at) : t('account.never')}
+                tooltip={security.password_changed_at ? formatAbsoluteDate(security.password_changed_at) : t('account.password_not_changed_tooltip')}
                 warn={!security.password_changed_at}
               />
               <StatusItem
                 icon={<DevicesIcon sx={{ fontSize: 20 }} />}
-                label="Active sessions"
+                label={t('account.label_active_sessions')}
                 value={String(security.active_sessions)}
                 action={
                   <Button
@@ -372,14 +374,14 @@ const AccountPasswordPage: React.FC = () => {
                       },
                     }}
                   >
-                    View
+                    {t('account.label_view')}
                   </Button>
                 }
               />
               <StatusItem
                 icon={<MarkEmailReadIcon sx={{ fontSize: 20 }} />}
-                label="Email verification"
-                value={security.email_verified ? 'Verified' : 'Not verified'}
+                label={t('account.email_verification_label')}
+                value={security.email_verified ? t('account.verified') : t('account.not_verified')}
                 chipColor={security.email_verified ? 'success' : 'warning'}
                 action={
                   !security.email_verified ? (
@@ -409,21 +411,21 @@ const AccountPasswordPage: React.FC = () => {
                         },
                       }}
                     >
-                      {sendingVerification ? 'Sending...' : 'Verify'}
+                      {sendingVerification ? t('account.sending') : t('account.verify')}
                     </Button>
                   ) : undefined
                 }
               />
               <StatusItem
                 icon={<ShieldIcon sx={{ fontSize: 20 }} />}
-                label="Two-factor auth"
-                value={security.two_factor_enabled ? 'Enabled' : 'Not available'}
+                label={t('account.twofactor_auth')}
+                value={security.two_factor_enabled ? t('account.enabled') : t('account.not_available')}
                 chipColor={security.two_factor_enabled ? 'success' : 'default'}
               />
             </Box>
           ) : (
             <Typography variant="body2" color="text.secondary">
-              Unable to load security status.
+              {t('account.unable_to_load_security')}
             </Typography>
           )}
         </CardContent>
@@ -436,11 +438,11 @@ const AccountPasswordPage: React.FC = () => {
             <Box display="flex" alignItems="center" gap={1} mb={0.5}>
               <MarkEmailReadIcon color="primary" />
               <Typography variant="h5" fontWeight={600}>
-                Email Verification
+                {t('account.email_verification')}
               </Typography>
             </Box>
             <Typography variant="body2" color="text.secondary" mb={3}>
-              Verify your email address to secure your account and enable all platform features.
+              {t('account.email_verification_desc')}
             </Typography>
             <Divider sx={{ mb: 3 }} />
 
@@ -459,16 +461,15 @@ const AccountPasswordPage: React.FC = () => {
               <WarningAmberIcon sx={{ color: 'warning.dark', mt: 0.25 }} />
               <Box sx={{ flex: 1 }}>
                 <Typography variant="body2" fontWeight={600} color="warning.dark" mb={0.5}>
-                  Your email is not verified
+                  {t('account.email_not_verified')}
                 </Typography>
                 <Typography variant="body2" color="text.secondary" mb={1.5}>
-                  Without a verified email, you may not receive password reset links, security alerts,
-                  or important notifications about your account. Verify now to ensure uninterrupted access.
+                  {t('account.email_not_verified_warning')}
                 </Typography>
                 {security.verification_sent_at && (
                   <Typography variant="caption" color="text.disabled" display="block" mb={1}>
                     Last sent {formatAbsoluteDate(security.verification_sent_at)}.
-                    Check your inbox and spam folder.
+                    {t('account.check_inbox')}
                   </Typography>
                 )}
                 <Button
@@ -493,7 +494,7 @@ const AccountPasswordPage: React.FC = () => {
                     },
                   }}
                 >
-                  {sendingVerification ? 'Sending...' : 'Send Verification Email'}
+                  {sendingVerification ? t('account.sending') : t('account.send_verification_email')}
                 </Button>
               </Box>
             </Box>
@@ -507,30 +508,30 @@ const AccountPasswordPage: React.FC = () => {
           <Box display="flex" alignItems="center" gap={1} mb={0.5}>
             <LockIcon color="primary" />
             <Typography variant="h5" fontWeight={600}>
-              Change Password
+              {t('account.change_password')}
             </Typography>
           </Box>
           <Typography variant="body2" color="text.secondary" mb={0.5}>
-            Choose a strong, unique password you don't use elsewhere.
+            {t('account.choose_strong_password')}
           </Typography>
           <Typography variant="caption" color="text.disabled" mb={3} component="div">
-            Changing your password will sign out all other devices for security.
+            {t('account.password_signout_warning')}
           </Typography>
           <Divider sx={{ mb: 3 }} />
 
           <Stack spacing={2.5} sx={{ maxWidth: 480 }}>
-            {pwField('Current Password', 'current', 'currentPassword')}
-            {pwField('New Password', 'new', 'newPassword', 'Minimum 8 characters')}
+            {pwField(t('account.label_current_password'), 'current', 'currentPassword')}
+            {pwField(t('account.label_new_password'), 'new', 'newPassword', t('account.minimum_8_characters'))}
 
             {/* Strength indicator */}
             {form.newPassword.length > 0 && (
               <Box>
                 <Box display="flex" alignItems="center" justifyContent="space-between" mb={0.5}>
                   <Typography variant="caption" color="text.secondary">
-                    Password strength
+                    {t('account.password_strength')}
                   </Typography>
                   <Typography variant="caption" color={`${strength.color}.main`} fontWeight={600}>
-                    {strength.label}
+                    {t(strength.labelKey)}
                   </Typography>
                 </Box>
                 <LinearProgress
@@ -548,14 +549,14 @@ const AccountPasswordPage: React.FC = () => {
                       sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}
                     >
                       {c.met ? <CheckCircleOutlineIcon sx={{ fontSize: 14 }} /> : <InfoOutlinedIcon sx={{ fontSize: 14 }} />}
-                      {c.label}
+                      {t(c.labelKey)}
                     </Typography>
                   ))}
                 </Stack>
               </Box>
             )}
 
-            {pwField('Confirm New Password', 'confirm', 'confirmPassword')}
+            {pwField(t('account.label_confirm_new_password'), 'confirm', 'confirmPassword')}
 
             <Button
               variant="contained"
@@ -578,7 +579,7 @@ const AccountPasswordPage: React.FC = () => {
                 },
               }}
             >
-              {saving ? <CircularProgress size={20} color="inherit" /> : 'Change Password'}
+              {saving ? <CircularProgress size={20} color="inherit" /> : t('account.change_password')}
             </Button>
           </Stack>
         </CardContent>
@@ -590,11 +591,11 @@ const AccountPasswordPage: React.FC = () => {
           <Box display="flex" alignItems="center" gap={1} mb={0.5}>
             <ShieldIcon color="primary" />
             <Typography variant="h5" fontWeight={600}>
-              Two-Factor Authentication
+              {t('account.twofactor_authentication')}
             </Typography>
           </Box>
           <Typography variant="body2" color="text.secondary" mb={3}>
-            Add an extra layer of security by requiring a second verification step when signing in.
+            {t('account.twofactor_desc')}
           </Typography>
           <Divider sx={{ mb: 3 }} />
 
@@ -612,10 +613,10 @@ const AccountPasswordPage: React.FC = () => {
             <Box>
               <Box display="flex" alignItems="center" gap={1} mb={0.5}>
                 <Typography variant="body2" fontWeight={600}>
-                  Status
+                  {t('account.status')}
                 </Typography>
                 <Chip
-                  label="Not Available"
+                  label={t('account.not_available_chip')}
                   size="small"
                   variant="outlined"
                   color="default"
@@ -623,9 +624,7 @@ const AccountPasswordPage: React.FC = () => {
                 />
               </Box>
               <Typography variant="body2" color="text.secondary">
-                Two-factor authentication is not yet implemented on this platform. When available,
-                you'll be able to use an authenticator app (TOTP) to add a second verification
-                step during sign-in. This section will update automatically when the feature is released.
+                {t('account.twofactor_not_implemented')}
               </Typography>
             </Box>
           </Box>
@@ -639,11 +638,11 @@ const AccountPasswordPage: React.FC = () => {
             <Box display="flex" alignItems="center" gap={1} mb={0.5}>
               <InfoOutlinedIcon color="primary" />
               <Typography variant="h5" fontWeight={600}>
-                Security Recommendations
+                {t('account.security_recommendations')}
               </Typography>
             </Box>
             <Typography variant="body2" color="text.secondary" mb={2}>
-              Suggestions to improve your account security.
+              {t('account.security_recommendations_desc')}
             </Typography>
             <Divider sx={{ mb: 2 }} />
 

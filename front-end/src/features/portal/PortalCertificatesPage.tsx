@@ -49,6 +49,7 @@ import {
 import Breadcrumb from '@/layouts/full/shared/breadcrumb/Breadcrumb';
 import PageContainer from '@/shared/ui/PageContainer';
 import { apiClient } from '@/api/utils/axiosInstance';
+import { useLanguage } from '@/context/LanguageContext';
 
 // ─── Types ───────────────────────────────────────────────────
 
@@ -84,10 +85,11 @@ interface GeneratedCert {
 
 // ─── Constants ───────────────────────────────────────────────
 
-const RECORD_TYPES = [
-  { key: 'baptism', label: 'Baptism', icon: <BaptismIcon sx={{ fontSize: 40 }} />, color: '#1976d2', desc: 'Adult & child baptism certificates' },
-  { key: 'marriage', label: 'Marriage', icon: <MarriageIcon sx={{ fontSize: 40 }} />, color: '#7b1fa2', desc: 'Marriage certificates' },
-  { key: 'reception', label: 'Reception', icon: <ReceptionIcon sx={{ fontSize: 40 }} />, color: '#388e3c', desc: 'Reception into Orthodoxy' },
+// Labels injected in component via t()
+const RECORD_TYPE_DEFS = [
+  { key: 'baptism', labelKey: 'portal.certs_type_baptism', descKey: 'portal.certs_desc_baptism', icon: <BaptismIcon sx={{ fontSize: 40 }} />, color: '#1976d2' },
+  { key: 'marriage', labelKey: 'portal.certs_type_marriage', descKey: 'portal.certs_desc_marriage', icon: <MarriageIcon sx={{ fontSize: 40 }} />, color: '#7b1fa2' },
+  { key: 'reception', labelKey: 'portal.certs_type_reception', descKey: 'portal.certs_desc_reception', icon: <ReceptionIcon sx={{ fontSize: 40 }} />, color: '#388e3c' },
 ];
 
 function formatDate(d: string | null | undefined) {
@@ -119,6 +121,13 @@ function formatBytes(bytes: number) {
 const PortalCertificatesPage: React.FC = () => {
   const theme = useTheme();
   const navigate = useNavigate();
+  const { t } = useLanguage();
+
+  const RECORD_TYPES = RECORD_TYPE_DEFS.map(rt => ({
+    ...rt,
+    label: t(rt.labelKey),
+    desc: t(rt.descKey),
+  }));
 
   // State
   const [step, setStep] = useState<'type' | 'record' | 'confirm'>('type');
@@ -221,7 +230,7 @@ const PortalCertificatesPage: React.FC = () => {
 
   const renderTypeSelection = () => (
     <Box>
-      <Typography variant="h6" sx={{ mb: 3 }}>Select Certificate Type</Typography>
+      <Typography variant="h6" sx={{ mb: 3 }}>{t('portal.certs_select_type')}</Typography>
       <Grid container spacing={3}>
         {RECORD_TYPES.map((rt) => (
           <Grid item xs={12} sm={6} md={4} key={rt.key}>
@@ -252,25 +261,25 @@ const PortalCertificatesPage: React.FC = () => {
       <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
         <IconButton onClick={handleBack}><BackIcon /></IconButton>
         <Typography variant="h6">
-          Select {RECORD_TYPES.find(t => t.key === selectedType)?.label} Record
+          {t('portal.certs_select_record').replace('{type}', RECORD_TYPES.find(rt => rt.key === selectedType)?.label || '')}
         </Typography>
-        <Chip label={`${records.length} records`} size="small" />
+        <Chip label={t('portal.certs_records_count').replace('{count}', String(records.length))} size="small" />
       </Stack>
 
       {recordsLoading ? (
         <Box sx={{ py: 6, textAlign: 'center' }}><CircularProgress /></Box>
       ) : !records.length ? (
-        <Alert severity="info">No {selectedType} records found for this church.</Alert>
+        <Alert severity="info">{t('portal.certs_no_records').replace('{type}', selectedType || '')}</Alert>
       ) : (
         <TableContainer component={Paper} variant="outlined">
           <Table size="small">
             <TableHead>
               <TableRow>
-                <TableCell>Name</TableCell>
-                <TableCell>Date</TableCell>
-                <TableCell>Clergy</TableCell>
-                {selectedType === 'reception' && <TableCell>Entry Type</TableCell>}
-                <TableCell align="right">Action</TableCell>
+                <TableCell>{t('portal.certs_col_name')}</TableCell>
+                <TableCell>{t('portal.certs_col_date')}</TableCell>
+                <TableCell>{t('portal.certs_col_clergy')}</TableCell>
+                {selectedType === 'reception' && <TableCell>{t('portal.certs_col_entry_type')}</TableCell>}
+                <TableCell align="right">{t('portal.certs_col_action')}</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -286,7 +295,7 @@ const PortalCertificatesPage: React.FC = () => {
                   {selectedType === 'reception' && <TableCell><Chip label={r.entry_type} size="small" /></TableCell>}
                   <TableCell align="right">
                     <Button size="small" variant="outlined" onClick={(e) => { e.stopPropagation(); handleSelectRecord(r); }}>
-                      Select
+                      {t('common.select')}
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -307,32 +316,32 @@ const PortalCertificatesPage: React.FC = () => {
       <Box>
         <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 3 }}>
           <IconButton onClick={handleBack}><BackIcon /></IconButton>
-          <Typography variant="h6">Generate Certificate</Typography>
+          <Typography variant="h6">{t('portal.certs_generate_title')}</Typography>
         </Stack>
 
         <Card variant="outlined" sx={{ mb: 3 }}>
           <CardContent>
             <Grid container spacing={2}>
               <Grid item xs={12} sm={6}>
-                <Typography variant="caption" color="text.secondary">Certificate Type</Typography>
+                <Typography variant="caption" color="text.secondary">{t('portal.certs_label_cert_type')}</Typography>
                 <Typography variant="body1" fontWeight={600}>
-                  {typeInfo?.label} Certificate
+                  {t('portal.certs_cert_suffix').replace('{type}', typeInfo?.label || '')}
                 </Typography>
               </Grid>
               <Grid item xs={12} sm={6}>
-                <Typography variant="caption" color="text.secondary">Record</Typography>
+                <Typography variant="caption" color="text.secondary">{t('portal.certs_label_record')}</Typography>
                 <Typography variant="body1" fontWeight={600}>
                   {getRecordName(selectedRecord!, selectedType!)}
                 </Typography>
               </Grid>
               <Grid item xs={12} sm={6}>
-                <Typography variant="caption" color="text.secondary">Date</Typography>
+                <Typography variant="caption" color="text.secondary">{t('portal.certs_label_date')}</Typography>
                 <Typography variant="body1">
                   {formatDate(getRecordDate(selectedRecord!, selectedType!))}
                 </Typography>
               </Grid>
               <Grid item xs={12} sm={6}>
-                <Typography variant="caption" color="text.secondary">Clergy</Typography>
+                <Typography variant="caption" color="text.secondary">{t('portal.certs_label_clergy')}</Typography>
                 <Typography variant="body1">{selectedRecord?.clergy || '—'}</Typography>
               </Grid>
             </Grid>
@@ -352,7 +361,7 @@ const PortalCertificatesPage: React.FC = () => {
                 startIcon={<DownloadIcon />}
                 onClick={() => handleDownload(genResult.certificateId)}
               >
-                Download PDF
+                {t('common.download_pdf')}
               </Button>
             }
           >
@@ -367,7 +376,7 @@ const PortalCertificatesPage: React.FC = () => {
             disabled={generating}
             sx={{ minWidth: 200 }}
           >
-            {generating ? 'Generating…' : 'Generate Certificate'}
+            {generating ? t('common.generating') : t('portal.certs_generate_btn')}
           </Button>
         )}
       </Box>
@@ -380,7 +389,7 @@ const PortalCertificatesPage: React.FC = () => {
     <Dialog open={showHistory} onClose={() => setShowHistory(false)} maxWidth="md" fullWidth>
       <DialogTitle>
         <Stack direction="row" justifyContent="space-between" alignItems="center">
-          <Typography variant="h6">Generated Certificates</Typography>
+          <Typography variant="h6">{t('portal.certs_history_title')}</Typography>
           <IconButton onClick={loadHistory} disabled={historyLoading}><RefreshIcon /></IconButton>
         </Stack>
       </DialogTitle>
@@ -388,7 +397,7 @@ const PortalCertificatesPage: React.FC = () => {
         {historyLoading ? (
           <Box sx={{ py: 4, textAlign: 'center' }}><CircularProgress /></Box>
         ) : !history.length ? (
-          <Alert severity="info">No certificates generated yet.</Alert>
+          <Alert severity="info">{t('portal.certs_history_none')}</Alert>
         ) : (
           <TableContainer>
             <Table size="small">
@@ -431,7 +440,7 @@ const PortalCertificatesPage: React.FC = () => {
         )}
       </DialogContent>
       <DialogActions>
-        <Button onClick={() => setShowHistory(false)}>Close</Button>
+        <Button onClick={() => setShowHistory(false)}>{t('common.close')}</Button>
       </DialogActions>
     </Dialog>
   );
@@ -439,21 +448,21 @@ const PortalCertificatesPage: React.FC = () => {
   // ─── Main ──────────────────────────────────────────────────
 
   return (
-    <PageContainer title="Certificates" description="Generate sacramental certificates">
+    <PageContainer title={t('portal.certs_page_title')} description={t('portal.certs_page_desc')}>
       <Breadcrumb
-        title="Certificates"
+        title={t('portal.certs_breadcrumb_certs')}
         items={[
-          { title: 'Portal', to: '/portal' },
-          { title: 'Certificates' },
+          { title: t('portal.certs_breadcrumb_portal'), to: '/portal' },
+          { title: t('portal.certs_breadcrumb_certs') },
         ]}
       />
 
       <Paper sx={{ p: 3 }}>
         <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
           <Box>
-            <Typography variant="h5">Certificate Generator</Typography>
+            <Typography variant="h5">{t('portal.certs_generator_title')}</Typography>
             <Typography variant="body2" color="text.secondary">
-              Generate official sacramental certificates from your records
+              {t('portal.certs_generator_desc')}
             </Typography>
           </Box>
           <Button
@@ -461,7 +470,7 @@ const PortalCertificatesPage: React.FC = () => {
             startIcon={<HistoryIcon />}
             onClick={() => { setShowHistory(true); loadHistory(); }}
           >
-            History
+            {t('common.history')}
           </Button>
         </Stack>
 

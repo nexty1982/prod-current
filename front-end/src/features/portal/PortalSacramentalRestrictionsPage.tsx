@@ -9,10 +9,12 @@ import React from 'react';
 import { Box, Button, Typography } from '@mui/material';
 import { IconArrowLeft } from '@tabler/icons-react';
 import { useNavigate } from 'react-router-dom';
+import { useLanguage } from '@/context/LanguageContext';
 import SacramentalRestrictionsViewer from '@/shared/components/SacramentalRestrictionsViewer';
 
 const PortalSacramentalRestrictionsPage: React.FC = () => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   return (
     <Box>
@@ -22,12 +24,12 @@ const PortalSacramentalRestrictionsPage: React.FC = () => {
           onClick={() => navigate('/portal')}
           size="small"
         >
-          Back to Portal
+          {t('portal.restrictions_back')}
         </Button>
       </Box>
 
       <Typography variant="h4" sx={{ mb: 3 }}>
-        Sacramental Date Restrictions
+        {t('portal.restrictions_title')}
       </Typography>
 
       <SacramentalRestrictionsViewer />

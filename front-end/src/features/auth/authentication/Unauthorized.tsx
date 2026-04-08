@@ -3,10 +3,12 @@ import { Box, Typography, Button, Container } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { IconShieldX } from '@tabler/icons-react';
 import { useAuth } from '../../../context/AuthContext';
+import { useLanguage } from '@/context/LanguageContext';
 
 const Unauthorized: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t } = useLanguage();
 
   const handleGoBack = () => {
     navigate(-1);
@@ -36,10 +38,10 @@ const Unauthorized: React.FC = () => {
           403
         </Typography>
         <Typography variant="h4" component="h2" gutterBottom>
-          Access Denied
+          {t('auth.error_403_title')}
         </Typography>
         <Typography variant="body1" color="textSecondary" paragraph>
-          You don't have permission to access this page or resource.
+          {t('auth.error_403_message')}
         </Typography>
         <Box mt={3}>
           <Button
@@ -48,14 +50,14 @@ const Unauthorized: React.FC = () => {
             onClick={handleGoHome}
             sx={{ mr: 2 }}
           >
-            Go to Home
+            {t('auth.error_403_go_home')}
           </Button>
           <Button
             variant="outlined"
             color="primary"
             onClick={handleGoBack}
           >
-            Go Back
+            {t('auth.error_403_go_back')}
           </Button>
         </Box>
       </Box>

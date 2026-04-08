@@ -13,6 +13,7 @@ import CloudUploadOutlinedIcon from '@mui/icons-material/CloudUploadOutlined';
 import ImageOutlinedIcon from '@mui/icons-material/ImageOutlined';
 import SaveOutlinedIcon from '@mui/icons-material/SaveOutlined';
 import { useChurch } from '@/context/ChurchContext';
+import { useLanguage } from '@/context/LanguageContext';
 import apiClient from '@/api/utils/axiosInstance';
 import { useParishSettingsWithLocal } from './useParishSettings';
 
@@ -26,15 +27,16 @@ const LandingPageBrandingPage: React.FC = () => {
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
   const { churchMetadata, refreshChurchData } = useChurch();
+  const { t } = useLanguage();
 
   // Text fields from parish_settings
   const {
     data, loading, saving, dirty, updateLocal, save,
   } = useParishSettingsWithLocal<BrandingText>('branding');
 
-  const title = data.title || churchMetadata?.church_name_display || 'Your Parish Name';
-  const subtitle = data.subtitle || 'Welcome to Our Parish Community';
-  const welcomeMessage = data.welcomeMessage || 'We are a vibrant Orthodox Christian community serving families in our area.';
+  const title = data.title || churchMetadata?.church_name_display || t('parish.default_title');
+  const subtitle = data.subtitle || t('parish.default_subtitle');
+  const welcomeMessage = data.welcomeMessage || t('parish.default_welcome');
 
   // File upload state
   const [uploading, setUploading] = useState<string | null>(null);
@@ -47,11 +49,11 @@ const LandingPageBrandingPage: React.FC = () => {
       await apiClient.post(`/my/church-branding/${field}`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
-      setSnack({ msg: `${field} uploaded successfully`, severity: 'success' });
+      setSnack({ msg: t('parish.upload_success').replace('{field}', field), severity: 'success' });
       // Refresh church metadata to get new logo_url
       refreshChurchData?.();
     } catch (err: any) {
-      setSnack({ msg: err?.message || `Failed to upload ${field}`, severity: 'error' });
+      setSnack({ msg: err?.message || t('parish.upload_failed').replace('{field}', field), severity: 'error' });
     } finally {
       setUploading(null);
     }
@@ -59,7 +61,7 @@ const LandingPageBrandingPage: React.FC = () => {
 
   const handleSaveText = useCallback(async () => {
     const ok = await save();
-    setSnack({ msg: ok ? 'Branding text saved' : 'Failed to save', severity: ok ? 'success' : 'error' });
+    setSnack({ msg: ok ? t('parish.branding_text_saved') : t('parish.branding_save_failed'), severity: ok ? 'success' : 'error' });
   }, [save]);
 
   const updateField = (key: keyof BrandingText, value: string) => {
@@ -131,10 +133,10 @@ const LandingPageBrandingPage: React.FC = () => {
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
         <Box>
           <Typography sx={{ fontFamily: "'Inter'", fontSize: '1.25rem', fontWeight: 600, color: isDark ? '#f3f4f6' : '#111827', mb: 0.5 }}>
-            Landing Page Branding
+            {t('parish.landing_page_branding')}
           </Typography>
           <Typography sx={{ fontFamily: "'Inter'", fontSize: '0.8125rem', color: isDark ? '#9ca3af' : '#6b7280' }}>
-            Customize your parish landing page with branding and welcome content
+            {t('parish.landing_page_branding_desc')}
           </Typography>
         </Box>
         <Button
@@ -152,7 +154,7 @@ const LandingPageBrandingPage: React.FC = () => {
             '&.Mui-disabled': { bgcolor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.12)' },
           }}
         >
-          {saving ? 'Saving…' : dirty ? 'Save Text' : 'Saved'}
+          {saving ? t('common.saving') : dirty ? t('parish.save_text') : t('parish.saved')}
         </Button>
       </Box>
 
@@ -165,7 +167,7 @@ const LandingPageBrandingPage: React.FC = () => {
             sx={{ p: 2.5, borderRadius: 2, borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.08)', bgcolor: isDark ? 'rgba(255,255,255,0.02)' : '#fff' }}
           >
             <Typography sx={{ fontFamily: "'Inter'", fontSize: '0.875rem', fontWeight: 600, color: isDark ? '#f3f4f6' : '#111827', mb: 2 }}>
-              Church Logo
+              {t('parish.church_logo')}
             </Typography>
             {churchMetadata?.logo_url && (
               <Box sx={{ mb: 2, textAlign: 'center' }}>
@@ -175,11 +177,11 @@ const LandingPageBrandingPage: React.FC = () => {
                   style={{ maxHeight: 80, maxWidth: '100%', objectFit: 'contain', borderRadius: 8 }}
                 />
                 <Typography sx={{ fontFamily: "'Inter'", fontSize: '0.6875rem', color: isDark ? '#6b7280' : '#9ca3af', mt: 0.5 }}>
-                  Current logo
+                  {t('parish.current_logo')}
                 </Typography>
               </Box>
             )}
-            <UploadArea field="logo" icon={CloudUploadOutlinedIcon} label="Upload Logo Image" hint="PNG, JPG up to 2MB (recommended: 400x400px)" />
+            <UploadArea field="logo" icon={CloudUploadOutlinedIcon} label={t('parish.upload_logo')} hint={t('parish.upload_logo_hint')} />
           </Paper>
 
           {/* Header Background — placeholder upload area, no backend endpoint yet */}
@@ -188,7 +190,7 @@ const LandingPageBrandingPage: React.FC = () => {
             sx={{ p: 2.5, borderRadius: 2, borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.08)', bgcolor: isDark ? 'rgba(255,255,255,0.02)' : '#fff' }}
           >
             <Typography sx={{ fontFamily: "'Inter'", fontSize: '0.875rem', fontWeight: 600, color: isDark ? '#f3f4f6' : '#111827', mb: 2 }}>
-              Header Background
+              {t('parish.header_background')}
             </Typography>
             <Box
               sx={{
@@ -201,7 +203,7 @@ const LandingPageBrandingPage: React.FC = () => {
             >
               <ImageOutlinedIcon sx={{ fontSize: 40, color: isDark ? '#6b7280' : '#9ca3af', mb: 1 }} />
               <Typography sx={{ fontFamily: "'Inter'", fontSize: '0.8125rem', color: isDark ? '#6b7280' : '#9ca3af' }}>
-                Background upload coming soon
+                {t('parish.background_coming_soon')}
               </Typography>
             </Box>
           </Paper>
@@ -212,12 +214,12 @@ const LandingPageBrandingPage: React.FC = () => {
             sx={{ p: 2.5, borderRadius: 2, borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.08)', bgcolor: isDark ? 'rgba(255,255,255,0.02)' : '#fff' }}
           >
             <Typography sx={{ fontFamily: "'Inter'", fontSize: '0.875rem', fontWeight: 600, color: isDark ? '#f3f4f6' : '#111827', mb: 2 }}>
-              Header Text
+              {t('parish.header_text')}
             </Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
               <Box>
                 <Typography sx={{ fontFamily: "'Inter'", fontSize: '0.75rem', fontWeight: 500, color: isDark ? '#d1d5db' : '#374151', mb: 0.75 }}>
-                  Title
+                  {t('parish.title')}
                 </Typography>
                 <TextField
                   fullWidth
@@ -229,7 +231,7 @@ const LandingPageBrandingPage: React.FC = () => {
               </Box>
               <Box>
                 <Typography sx={{ fontFamily: "'Inter'", fontSize: '0.75rem', fontWeight: 500, color: isDark ? '#d1d5db' : '#374151', mb: 0.75 }}>
-                  Subtitle
+                  {t('parish.subtitle')}
                 </Typography>
                 <TextField
                   fullWidth
@@ -241,7 +243,7 @@ const LandingPageBrandingPage: React.FC = () => {
               </Box>
               <Box>
                 <Typography sx={{ fontFamily: "'Inter'", fontSize: '0.75rem', fontWeight: 500, color: isDark ? '#d1d5db' : '#374151', mb: 0.75 }}>
-                  Welcome Message
+                  {t('parish.welcome_message')}
                 </Typography>
                 <TextField
                   fullWidth

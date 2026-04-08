@@ -1,6 +1,7 @@
 import React from 'react';
 import { Box, Typography, Chip } from '@mui/material';
 import { IconShieldCheck, IconClock } from '@tabler/icons-react';
+import { useLanguage } from '@/context/LanguageContext';
 
 /* ─── Per-church image config ─── */
 
@@ -27,6 +28,7 @@ const HeroBanner: React.FC<HeroBannerProps> = ({
   roleLabel,
   sessionTimeLeft,
 }) => {
+  const { t } = useLanguage();
   const config = HERO_IMAGES[churchId];
   if (!config) return null;
 
@@ -115,7 +117,7 @@ const HeroBanner: React.FC<HeroBannerProps> = ({
               mb: 1,
             }}
           >
-            Parish Management Portal
+            {t('portal.parish_management_portal')}
           </Typography>
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75 }}>
             <Chip

@@ -20,6 +20,7 @@ import {
     IconRocket,
     IconScan,
     IconSettings,
+    IconClipboardCheck,
     IconShield,
     IconSitemap,
     IconTerminal,
@@ -441,6 +442,12 @@ const Menuitems: MenuitemsType[] = [
         title: 'Page Content Editor',
         icon: IconEdit,
         href: '/devel-tools/page-editor',
+      },
+      {
+        id: uniqueId(),
+        title: 'Page Edit Audit',
+        icon: IconClipboardCheck,
+        href: '/devel-tools/page-edit-audit',
       },
       {
         id: uniqueId(),

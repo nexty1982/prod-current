@@ -532,3 +532,7 @@ router.get('/source/:pageId', requireAuth, requireRole(['super_admin']), (req, r
 });
 
 module.exports = router;
+module.exports.PAGE_REGISTRY = PAGE_REGISTRY;
+module.exports.resolveLocalImports = resolveLocalImports;
+module.exports.resolveFilePath = resolveFilePath;
+module.exports.FRONTEND_SRC = FRONTEND_SRC;

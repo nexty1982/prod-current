@@ -28,6 +28,7 @@ import DescriptionIcon from '@mui/icons-material/Description';
 import EventNoteIcon from '@mui/icons-material/EventNote';
 import { SnackbarState, SNACKBAR_CLOSED, SNACKBAR_DURATION } from './accountConstants';
 import { notificationsApi, extractErrorMessage } from './accountApi';
+import { useLanguage } from '@/context/LanguageContext';
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -43,68 +44,68 @@ interface NotifPref {
 
 // ── Category & Type Metadata ───────────────────────────────────────────────
 
-/** User-facing labels and descriptions for notification types. */
-const TYPE_META: Record<string, { label: string; description: string }> = {
+/** Translation keys for notification types. */
+const TYPE_META: Record<string, { labelKey: string; descriptionKey: string }> = {
   // Security
-  login_alert: { label: 'Login Alerts', description: 'Notify when a new device signs in to your account' },
-  password_reset: { label: 'Password Changes', description: 'Confirmations when your password is changed' },
-  account_locked: { label: 'Account Lock Warnings', description: 'Alert when your account is locked due to failed login attempts' },
+  login_alert: { labelKey: 'account.notif_login_alerts', descriptionKey: 'account.notif_login_alerts_desc' },
+  password_reset: { labelKey: 'account.notif_password_changes', descriptionKey: 'account.notif_password_changes_desc' },
+  account_locked: { labelKey: 'account.notif_account_lock', descriptionKey: 'account.notif_account_lock_desc' },
 
   // User / Account
-  welcome: { label: 'Welcome Messages', description: 'Onboarding notifications for new accounts' },
-  profile_updated: { label: 'Profile Updates', description: 'Confirmation when your profile information changes' },
-  church_invitation: { label: 'Parish Invitations', description: 'Invitations to join a parish on the platform' },
-  role_changed: { label: 'Role Changes', description: 'Notifications when your role is updated by an administrator' },
-  weekly_digest: { label: 'Weekly Digest', description: 'A weekly summary of activity in your parish' },
+  welcome: { labelKey: 'account.notif_welcome', descriptionKey: 'account.notif_welcome_desc' },
+  profile_updated: { labelKey: 'account.notif_profile_updates', descriptionKey: 'account.notif_profile_updates_desc' },
+  church_invitation: { labelKey: 'account.notif_parish_invitations', descriptionKey: 'account.notif_parish_invitations_desc' },
+  role_changed: { labelKey: 'account.notif_role_changes', descriptionKey: 'account.notif_role_changes_desc' },
+  weekly_digest: { labelKey: 'account.notif_weekly_digest', descriptionKey: 'account.notif_weekly_digest_desc' },
 
   // Records & Certificates
-  certificate_ready: { label: 'Certificate Ready', description: 'When a certificate is generated and available for download' },
-  certificate_expiring: { label: 'Certificate Expiring', description: 'Reminders about certificates nearing expiration' },
-  reminder_baptism: { label: 'Baptism Reminders', description: 'Upcoming baptism record reminders' },
-  reminder_marriage: { label: 'Marriage Reminders', description: 'Upcoming marriage record reminders' },
-  reminder_funeral: { label: 'Funeral Reminders', description: 'Upcoming funeral record reminders' },
-  data_export_ready: { label: 'Data Export Ready', description: 'When a requested data export is available for download' },
+  certificate_ready: { labelKey: 'account.notif_certificate_ready', descriptionKey: 'account.notif_certificate_ready_desc' },
+  certificate_expiring: { labelKey: 'account.notif_certificate_expiring', descriptionKey: 'account.notif_certificate_expiring_desc' },
+  reminder_baptism: { labelKey: 'account.notif_baptism_reminders', descriptionKey: 'account.notif_baptism_reminders_desc' },
+  reminder_marriage: { labelKey: 'account.notif_marriage_reminders', descriptionKey: 'account.notif_marriage_reminders_desc' },
+  reminder_funeral: { labelKey: 'account.notif_funeral_reminders', descriptionKey: 'account.notif_funeral_reminders_desc' },
+  data_export_ready: { labelKey: 'account.notif_data_export', descriptionKey: 'account.notif_data_export_desc' },
 
   // System
-  system_alert: { label: 'System Alerts', description: 'Important platform alerts and announcements' },
-  system_maintenance: { label: 'Maintenance Notices', description: 'Scheduled maintenance and downtime notifications' },
+  system_alert: { labelKey: 'account.notif_system_alerts', descriptionKey: 'account.notif_system_alerts_desc' },
+  system_maintenance: { labelKey: 'account.notif_maintenance', descriptionKey: 'account.notif_maintenance_desc' },
 
   // Notes & Collaboration
-  note_shared: { label: 'Shared Notes', description: 'When someone shares a note with you' },
-  note_comment: { label: 'Note Comments', description: 'When someone comments on your note' },
+  note_shared: { labelKey: 'account.notif_shared_notes', descriptionKey: 'account.notif_shared_notes_desc' },
+  note_comment: { labelKey: 'account.notif_note_comments', descriptionKey: 'account.notif_note_comments_desc' },
 };
 
 /** Categories shown to regular users, in display order. */
-const USER_CATEGORIES: { key: string; label: string; icon: React.ReactNode; description: string }[] = [
+const USER_CATEGORIES: { key: string; labelKey: string; icon: React.ReactNode; descriptionKey: string }[] = [
   {
     key: 'security',
-    label: 'Security',
+    labelKey: 'account.cat_security',
     icon: <SecurityIcon fontSize="small" />,
-    description: 'Critical alerts about your account security. We recommend keeping these enabled.',
+    descriptionKey: 'account.cat_security_desc',
   },
   {
     key: 'user',
-    label: 'Account & Activity',
+    labelKey: 'account.cat_account_activity',
     icon: <NotificationsIcon fontSize="small" />,
-    description: 'Notifications about your account, invitations, and weekly summaries.',
+    descriptionKey: 'account.cat_account_activity_desc',
   },
   {
     key: 'certificates',
-    label: 'Certificates & Records',
+    labelKey: 'account.cat_certificates',
     icon: <DescriptionIcon fontSize="small" />,
-    description: 'Alerts about certificates and record-related activity.',
+    descriptionKey: 'account.cat_certificates_desc',
   },
   {
     key: 'reminders',
-    label: 'Reminders',
+    labelKey: 'account.cat_reminders',
     icon: <EventNoteIcon fontSize="small" />,
-    description: 'Reminders for upcoming sacramental events.',
+    descriptionKey: 'account.cat_reminders_desc',
   },
   {
     key: 'system',
-    label: 'System',
+    labelKey: 'account.cat_system',
     icon: <NotificationsActiveIcon fontSize="small" />,
-    description: 'Platform alerts and maintenance notices.',
+    descriptionKey: 'account.cat_system_desc',
   },
 ];
 
@@ -121,11 +122,11 @@ function toBool(v: number | boolean): boolean {
 }
 
 function getTypeLabel(typeName: string): string {
-  return TYPE_META[typeName]?.label || typeName.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+  return TYPE_META[typeName]?.labelKey || typeName;
 }
 
 function getTypeDescription(typeName: string): string {
-  return TYPE_META[typeName]?.description || '';
+  return TYPE_META[typeName]?.descriptionKey || '';
 }
 
 // ── Component ──────────────────────────────────────────────────────────────
@@ -136,6 +137,7 @@ const AccountNotificationsPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [snackbar, setSnackbar] = useState<SnackbarState>(SNACKBAR_CLOSED);
+  const { t } = useLanguage();
 
   // ── Load ──
 
@@ -225,9 +227,9 @@ const AccountNotificationsPage: React.FC = () => {
         })),
       );
       setSaved([...prefs]);
-      setSnackbar({ open: true, message: 'Notification preferences saved.', severity: 'success' });
+      setSnackbar({ open: true, message: t('account.preferences_saved'), severity: 'success' });
     } catch (err: any) {
-      setSnackbar({ open: true, message: err.message || 'Failed to save preferences.', severity: 'error' });
+      setSnackbar({ open: true, message: err.message || t('account.preferences_save_failed'), severity: 'error' });
     } finally {
       setSaving(false);
     }
@@ -253,11 +255,11 @@ const AccountNotificationsPage: React.FC = () => {
           <Box display="flex" alignItems="center" gap={1} mb={0.5}>
             <NotificationsActiveIcon color="primary" />
             <Typography variant="h5" fontWeight={600}>
-              Notification Preferences
+              {t('account.notification_preferences_title')}
             </Typography>
           </Box>
           <Typography variant="body2" color="text.secondary">
-            Control how and when you receive notifications. Changes apply to your account across all devices.
+            {t('account.notification_preferences_desc')}
           </Typography>
         </CardContent>
       </Card>
@@ -273,11 +275,11 @@ const AccountNotificationsPage: React.FC = () => {
               <Box display="flex" alignItems="center" gap={1} mb={0.5}>
                 {cat.icon}
                 <Typography variant="subtitle1" fontWeight={600}>
-                  {cat.label}
+                  {t(cat.labelKey)}
                 </Typography>
               </Box>
               <Typography variant="body2" color="text.secondary" mb={2}>
-                {cat.description}
+                {t(cat.descriptionKey)}
               </Typography>
               <Divider sx={{ mb: 1 }} />
 
@@ -290,22 +292,22 @@ const AccountNotificationsPage: React.FC = () => {
                 py={0.5}
               >
                 <Typography variant="caption" color="text.disabled" sx={{ flex: 1 }}>
-                  Notification
+                  {t('account.col_notification')}
                 </Typography>
                 <Box display="flex" gap={4} sx={{ minWidth: 160, justifyContent: 'center' }}>
-                  <Tooltip title="Receive email notifications">
+                  <Tooltip title={t('account.tooltip_receive_email')}>
                     <Box display="flex" alignItems="center" gap={0.5}>
                       <EmailIcon sx={{ fontSize: 16, color: 'text.disabled' }} />
                       <Typography variant="caption" color="text.disabled">
-                        Email
+                        {t('account.col_email')}
                       </Typography>
                     </Box>
                   </Tooltip>
-                  <Tooltip title="Receive in-app notifications">
+                  <Tooltip title={t('account.tooltip_receive_inapp')}>
                     <Box display="flex" alignItems="center" gap={0.5}>
                       <NotificationsIcon sx={{ fontSize: 16, color: 'text.disabled' }} />
                       <Typography variant="caption" color="text.disabled">
-                        In-App
+                        {t('account.col_in_app')}
                       </Typography>
                     </Box>
                   </Tooltip>
@@ -330,16 +332,16 @@ const AccountNotificationsPage: React.FC = () => {
                   >
                     <Box sx={{ flex: 1, minWidth: 0, pr: 2 }}>
                       <Typography variant="body2" fontWeight={500}>
-                        {getTypeLabel(p.type_name)}
+                        {t(getTypeLabel(p.type_name))}
                       </Typography>
                       {getTypeDescription(p.type_name) && (
                         <Typography variant="caption" color="text.secondary">
-                          {getTypeDescription(p.type_name)}
+                          {t(getTypeDescription(p.type_name))}
                         </Typography>
                       )}
                     </Box>
                     <Box display="flex" gap={4} sx={{ minWidth: 160, justifyContent: 'center' }}>
-                      <Tooltip title={isLocked ? 'This notification cannot be disabled for security reasons' : ''}>
+                      <Tooltip title={isLocked ? t('account.tooltip_locked') : ''}>
                         <span>
                           <Switch
                             size="small"
@@ -349,7 +351,7 @@ const AccountNotificationsPage: React.FC = () => {
                           />
                         </span>
                       </Tooltip>
-                      <Tooltip title={isLocked ? 'This notification cannot be disabled for security reasons' : ''}>
+                      <Tooltip title={isLocked ? t('account.tooltip_locked') : ''}>
                         <span>
                           <Switch
                             size="small"
@@ -371,10 +373,10 @@ const AccountNotificationsPage: React.FC = () => {
       {/* Actions */}
       <Box display="flex" justifyContent="flex-end" gap={1.5} mt={1} mb={3}>
         <Button variant="outlined" disabled={!isDirty || saving} onClick={handleCancel}>
-          Cancel
+          {t('common.cancel')}
         </Button>
         <Button variant="contained" disabled={!isDirty || saving} onClick={handleSave}>
-          {saving ? 'Saving...' : 'Save Preferences'}
+          {saving ? t('common.saving') : t('account.save_preferences')}
         </Button>
       </Box>
 

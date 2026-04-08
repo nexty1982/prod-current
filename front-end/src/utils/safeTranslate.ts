@@ -59,6 +59,21 @@ const AUTH_FALLBACKS: Record<string, string> = {
   'auth.error_status_page': 'status page',
   'auth.error_check_status_suffix': 'for updates.',
 
+  // Error pages (403, 404, generic)
+  'auth.error_403_title': 'Access Denied',
+  'auth.error_403_message': 'You don\'t have permission to access this page or resource.',
+  'auth.error_403_go_home': 'Go to Home',
+  'auth.error_403_go_back': 'Go Back',
+  'auth.error_404_title': 'Page Not Found',
+  'auth.error_404_message': 'The page you\'re looking for doesn\'t exist or may have been moved.',
+  'auth.error_404_go_home': 'Go to Homepage',
+  'auth.error_404_browse_records': 'Browse Records',
+  'auth.error_404_contact_support': 'Contact Support',
+  'auth.error_404_breadcrumb': 'You are here',
+  'auth.error_generic_title': 'Opps!!!',
+  'auth.error_generic_message': 'This page you are looking for could not be found.',
+  'auth.error_generic_go_home': 'Go Back to Home',
+
   // Navigation
   'nav.home': 'Home',
   'nav.about': 'About',
@@ -83,6 +98,49 @@ const AUTH_FALLBACKS: Record<string, string> = {
 
 // Track already-reported missing keys to avoid spam
 const reportedKeys = new Set<string>();
+
+// ── Fallback event tracking (dev-mode observability) ───────────────────────
+
+interface FallbackEvent {
+  key: string;
+  level: 'curated' | 'humanized';
+  timestamp: number;
+}
+
+const fallbackLog: FallbackEvent[] = [];
+const MAX_FALLBACK_LOG = 500;
+
+/**
+ * Record a fallback event for audit visibility.
+ * Deduplicates by key — only the first occurrence is logged.
+ */
+function recordFallback(key: string, level: 'curated' | 'humanized'): void {
+  if (reportedKeys.has(key)) return;
+  if (fallbackLog.length < MAX_FALLBACK_LOG) {
+    fallbackLog.push({ key, level, timestamp: Date.now() });
+  }
+}
+
+/**
+ * Get all recorded fallback events (for dev tools / audit).
+ * Returns a snapshot — safe to read without side effects.
+ */
+export function getFallbackLog(): readonly FallbackEvent[] {
+  return [...fallbackLog];
+}
+
+/**
+ * Get summary counts of fallback usage.
+ */
+export function getFallbackSummary(): { curated: number; humanized: number; total: number } {
+  let curated = 0;
+  let humanized = 0;
+  for (const e of fallbackLog) {
+    if (e.level === 'curated') curated++;
+    else humanized++;
+  }
+  return { curated, humanized, total: fallbackLog.length };
+}
 
 /**
  * Check if a string looks like a raw translation key (e.g. "auth.label_email").
@@ -136,18 +194,19 @@ export function safeTranslate(
   // 2. Check curated fallbacks
   const fallback = AUTH_FALLBACKS[key];
   if (fallback) {
-    // Report missing key in development
+    recordFallback(key, 'curated');
     if (process.env.NODE_ENV === 'development' && !reportedKeys.has(key)) {
       reportedKeys.add(key);
-      console.debug(`[safeTranslate] Using fallback for missing key: "${key}"`);
+      console.debug(`[safeTranslate] Using curated fallback for: "${key}"`);
     }
     return fallback;
   }
 
   // 3. Last resort: humanize the key
+  recordFallback(key, 'humanized');
   if (process.env.NODE_ENV === 'development' && !reportedKeys.has(key)) {
     reportedKeys.add(key);
-    console.warn(`[safeTranslate] No translation or fallback for key: "${key}"`);
+    console.warn(`[safeTranslate] No translation or fallback — humanized: "${key}"`);
   }
   return humanizeKey(key);
 }

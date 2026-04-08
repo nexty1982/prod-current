@@ -369,6 +369,7 @@ const SampleRecordsExplorer = () => {
         badge={t('explorer.hero_badge')}
         title={t('explorer.hero_title')}
         subtitle={t('explorer.hero_subtitle')}
+        editKeyPrefix="explorer.hero"
       />
 
       {/* ─── Toolbar ─── */}

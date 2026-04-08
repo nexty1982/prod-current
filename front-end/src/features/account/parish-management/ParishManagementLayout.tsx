@@ -25,47 +25,48 @@ import PaletteOutlinedIcon from '@mui/icons-material/PaletteOutlined';
 import TuneOutlinedIcon from '@mui/icons-material/TuneOutlined';
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface NavItem {
-  label: string;
+  labelKey: string;
   path: string;
   icon: React.ReactNode;
 }
 
 interface NavGroup {
-  section: string;
+  sectionKey: string;
   items: NavItem[];
 }
 
 const BASE = '/account/parish-management';
 
-const navigation: NavGroup[] = [
+const NAV_GROUPS: NavGroup[] = [
   {
-    section: 'Overview',
+    sectionKey: 'parish.overview',
     items: [
-      { label: 'Parish Dashboard', path: `${BASE}`, icon: <DashboardOutlinedIcon fontSize="small" /> },
+      { labelKey: 'parish.parish_dashboard', path: `${BASE}`, icon: <DashboardOutlinedIcon fontSize="small" /> },
     ],
   },
   {
-    section: 'Data Configuration',
+    sectionKey: 'parish.data_configuration',
     items: [
-      { label: 'Database Mapping', path: `${BASE}/database-mapping`, icon: <StorageOutlinedIcon fontSize="small" /> },
-      { label: 'Record Settings', path: `${BASE}/record-settings`, icon: <DescriptionOutlinedIcon fontSize="small" /> },
+      { labelKey: 'parish.database_mapping', path: `${BASE}/database-mapping`, icon: <StorageOutlinedIcon fontSize="small" /> },
+      { labelKey: 'parish.record_settings', path: `${BASE}/record-settings`, icon: <DescriptionOutlinedIcon fontSize="small" /> },
     ],
   },
   {
-    section: 'Appearance',
+    sectionKey: 'parish.appearance',
     items: [
-      { label: 'Landing Page Branding', path: `${BASE}/landing-page-branding`, icon: <BrushOutlinedIcon fontSize="small" /> },
-      { label: 'Theme Studio', path: `${BASE}/theme-studio`, icon: <PaletteOutlinedIcon fontSize="small" /> },
-      { label: 'UI Theme', path: `${BASE}/ui-theme`, icon: <TuneOutlinedIcon fontSize="small" /> },
+      { labelKey: 'parish.landing_page_branding', path: `${BASE}/landing-page-branding`, icon: <BrushOutlinedIcon fontSize="small" /> },
+      { labelKey: 'parish.theme_studio', path: `${BASE}/theme-studio`, icon: <PaletteOutlinedIcon fontSize="small" /> },
+      { labelKey: 'parish.ui_theme', path: `${BASE}/ui-theme`, icon: <TuneOutlinedIcon fontSize="small" /> },
     ],
   },
   {
-    section: 'Advanced',
+    sectionKey: 'parish.advanced',
     items: [
-      { label: 'Search Configuration', path: `${BASE}/search-configuration`, icon: <SearchOutlinedIcon fontSize="small" /> },
-      { label: 'System Behavior', path: `${BASE}/system-behavior`, icon: <SettingsOutlinedIcon fontSize="small" /> },
+      { labelKey: 'parish.search_configuration', path: `${BASE}/search-configuration`, icon: <SearchOutlinedIcon fontSize="small" /> },
+      { labelKey: 'parish.system_behavior', path: `${BASE}/system-behavior`, icon: <SettingsOutlinedIcon fontSize="small" /> },
     ],
   },
 ];
@@ -75,6 +76,7 @@ const ParishManagementLayout: React.FC = () => {
   const navigate = useNavigate();
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
+  const { t } = useLanguage();
 
   const isActive = (path: string) => {
     if (path === BASE) return location.pathname === BASE || location.pathname === `${BASE}/`;
@@ -103,8 +105,8 @@ const ParishManagementLayout: React.FC = () => {
           borderRadius: 2,
         }}
       >
-        {navigation.map((group) => (
-          <Box key={group.section} sx={{ mb: 2 }}>
+        {NAV_GROUPS.map((group) => (
+          <Box key={group.sectionKey} sx={{ mb: 2 }}>
             <Typography
               variant="subtitle2"
               sx={{
@@ -118,7 +120,7 @@ const ParishManagementLayout: React.FC = () => {
                 color: isDark ? '#6b7280' : '#9ca3af',
               }}
             >
-              {group.section}
+              {t(group.sectionKey)}
             </Typography>
             <List disablePadding>
               {group.items.map((item) => {
@@ -165,7 +167,7 @@ const ParishManagementLayout: React.FC = () => {
                       {item.icon}
                     </ListItemIcon>
                     <ListItemText
-                      primary={item.label}
+                      primary={t(item.labelKey)}
                       primaryTypographyProps={{
                         variant: 'body2',
                         fontWeight: active ? 500 : 400,

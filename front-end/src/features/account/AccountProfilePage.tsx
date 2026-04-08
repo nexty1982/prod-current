@@ -16,6 +16,7 @@ import {
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import { useAuth } from '@/context/AuthContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { RoleAvatar, getRoleLabel } from '@/utils/roleAvatars';
 import { profileApi } from './accountApi';
 
@@ -31,6 +32,7 @@ interface ProfileData {
 
 const AccountProfilePage: React.FC = () => {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -69,13 +71,13 @@ const AccountProfilePage: React.FC = () => {
   }
 
   const infoRows: { label: string; value: string }[] = [
-    { label: 'Email', value: profile?.email || '—' },
-    { label: 'Display Name', value: profile?.display_name || '—' },
-    { label: 'Phone', value: profile?.phone || '—' },
-    { label: 'Organization', value: profile?.company || '—' },
-    { label: 'Location', value: profile?.location || '—' },
-    { label: 'Role', value: getRoleLabel(user?.role) },
-    { label: 'Church', value: user?.church_name || '—' },
+    { label: t('account.label_email'), value: profile?.email || '—' },
+    { label: t('account.label_display_name'), value: profile?.display_name || '—' },
+    { label: t('account.label_phone'), value: profile?.phone || '—' },
+    { label: t('account.label_organization'), value: profile?.company || '—' },
+    { label: t('account.label_location'), value: profile?.location || '—' },
+    { label: t('account.label_role'), value: getRoleLabel(user?.role) },
+    { label: t('account.label_church'), value: user?.church_name || '—' },
   ];
 
   return (
@@ -102,7 +104,7 @@ const AccountProfilePage: React.FC = () => {
             startIcon={<EditIcon />}
             onClick={() => navigate('/account/personal-info')}
           >
-            Edit Profile
+            {t('account.edit_profile')}
           </Button>
         </Box>
 

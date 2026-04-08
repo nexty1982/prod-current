@@ -6,44 +6,45 @@ import React, { useState } from 'react';
 import { Box, Paper, Typography, Switch, useTheme } from '@mui/material';
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
 import FavoriteOutlinedIcon from '@mui/icons-material/FavoriteOutlined';
+import { useLanguage } from '@/context/LanguageContext';
 import PreviewBanner from './PreviewBanner';
 
 interface RecordTypeConfig {
-  name: string;
+  nameKey: string;
   icon: React.ElementType;
   count: number;
-  settings: { label: string; enabled: boolean }[];
+  settings: { labelKey: string; enabled: boolean }[];
 }
 
 const initialRecordTypes: RecordTypeConfig[] = [
   {
-    name: 'Baptism Records',
+    nameKey: 'parish.baptism_records',
     icon: DescriptionOutlinedIcon,
     count: 1248,
     settings: [
-      { label: 'Require godparent information', enabled: true },
-      { label: 'Auto-generate certificate numbers', enabled: true },
-      { label: 'Send notification emails', enabled: false },
+      { labelKey: 'parish.require_godparent', enabled: true },
+      { labelKey: 'parish.auto_certificate', enabled: true },
+      { labelKey: 'parish.send_notifications', enabled: false },
     ],
   },
   {
-    name: 'Marriage Records',
+    nameKey: 'parish.marriage_records',
     icon: FavoriteOutlinedIcon,
     count: 456,
     settings: [
-      { label: 'Require witness information', enabled: true },
-      { label: 'Track pre-marital counseling', enabled: true },
-      { label: 'Generate marriage certificates', enabled: true },
+      { labelKey: 'parish.require_witness', enabled: true },
+      { labelKey: 'parish.track_premarital', enabled: true },
+      { labelKey: 'parish.generate_marriage_cert', enabled: true },
     ],
   },
   {
-    name: 'Funeral Records',
+    nameKey: 'parish.funeral_records',
     icon: DescriptionOutlinedIcon,
     count: 892,
     settings: [
-      { label: 'Record burial location', enabled: true },
-      { label: 'Track memorial services', enabled: false },
-      { label: 'Link to family records', enabled: true },
+      { labelKey: 'parish.record_burial', enabled: true },
+      { labelKey: 'parish.track_memorial', enabled: false },
+      { labelKey: 'parish.link_family', enabled: true },
     ],
   },
 ];
@@ -51,6 +52,7 @@ const initialRecordTypes: RecordTypeConfig[] = [
 const RecordSettingsPage: React.FC = () => {
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
+  const { t } = useLanguage();
   const [recordTypes, setRecordTypes] = useState(initialRecordTypes);
 
   const toggleSetting = (rtIdx: number, settingIdx: number) => {
@@ -72,10 +74,10 @@ const RecordSettingsPage: React.FC = () => {
     <Box>
       <Box sx={{ mb: 3 }}>
         <Typography sx={{ fontFamily: "'Inter'", fontSize: '1.25rem', fontWeight: 600, color: isDark ? '#f3f4f6' : '#111827', mb: 0.5 }}>
-          Record Settings
+          {t('parish.record_settings')}
         </Typography>
         <Typography sx={{ fontFamily: "'Inter'", fontSize: '0.8125rem', color: isDark ? '#9ca3af' : '#6b7280' }}>
-          Configure behavior and requirements for each record type
+          {t('parish.record_settings_desc')}
         </Typography>
       </Box>
 
@@ -86,7 +88,7 @@ const RecordSettingsPage: React.FC = () => {
           const Icon = rt.icon;
           return (
             <Paper
-              key={rt.name}
+              key={rt.nameKey}
               variant="outlined"
               sx={{
                 borderRadius: 2,
@@ -111,10 +113,10 @@ const RecordSettingsPage: React.FC = () => {
                   </Box>
                   <Box>
                     <Typography sx={{ fontFamily: "'Inter'", fontSize: '0.875rem', fontWeight: 600, color: isDark ? '#f3f4f6' : '#111827' }}>
-                      {rt.name}
+                      {t(rt.nameKey)}
                     </Typography>
                     <Typography sx={{ fontFamily: "'Inter'", fontSize: '0.6875rem', color: isDark ? '#9ca3af' : '#6b7280' }}>
-                      {rt.count.toLocaleString()} records
+                      {rt.count.toLocaleString()} {t('parish.records_count')}
                     </Typography>
                   </Box>
                 </Box>
@@ -122,7 +124,7 @@ const RecordSettingsPage: React.FC = () => {
                   component="span"
                   role="button"
                   tabIndex={0}
-                  aria-label={`Configure ${rt.name}`}
+                  aria-label={`Configure ${t(rt.nameKey)}`}
                   sx={{
                     fontFamily: "'Inter'",
                     fontSize: '0.75rem',
@@ -132,13 +134,13 @@ const RecordSettingsPage: React.FC = () => {
                     '&:hover': { textDecoration: 'underline' },
                   }}
                 >
-                  Configure
+                  {t('parish.configure')}
                 </Typography>
               </Box>
               <Box sx={{ px: 2.5 }}>
                 {rt.settings.map((setting, sIdx) => (
                   <Box
-                    key={setting.label}
+                    key={setting.labelKey}
                     sx={{
                       display: 'flex',
                       alignItems: 'center',
@@ -148,7 +150,7 @@ const RecordSettingsPage: React.FC = () => {
                     }}
                   >
                     <Typography sx={{ fontFamily: "'Inter'", fontSize: '0.8125rem', color: isDark ? '#f3f4f6' : '#111827' }}>
-                      {setting.label}
+                      {t(setting.labelKey)}
                     </Typography>
                     <Switch
                       size="small"

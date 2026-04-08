@@ -29,6 +29,7 @@ import {
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
 import { useAuth } from '@/context/AuthContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { canEditBasicChurchInfo } from './accountPermissions';
 import {
   SnackbarState,
@@ -107,6 +108,7 @@ function trimFields(data: ChurchFormData): ChurchFormData {
 
 const AccountChurchDetailsPage: React.FC = () => {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const editable = canEditBasicChurchInfo(user);
 
   const [form, setForm] = useState<ChurchFormData>(EMPTY_FORM);
@@ -180,8 +182,8 @@ const AccountChurchDetailsPage: React.FC = () => {
 
   // ── Validation ──
 
-  const emailError = !isValidEmail(form.email) ? 'Invalid email format' : '';
-  const websiteError = !isValidWebsite(form.website) ? 'Invalid website format' : '';
+  const emailError = !isValidEmail(form.email) ? t('account.invalid_email') : '';
+  const websiteError = !isValidWebsite(form.website) ? t('account.invalid_website') : '';
   const hasErrors = !!emailError || !!websiteError;
 
   // ── Derived: selected jurisdiction details ──
@@ -263,10 +265,10 @@ const AccountChurchDetailsPage: React.FC = () => {
       await churchApi.updateSettings(payload);
       setSaved({ ...form });
       setCrmApplied(false);
-      setSnackbar({ open: true, message: 'Church details saved successfully.', severity: 'success' });
+      setSnackbar({ open: true, message: t('account.church_details_saved'), severity: 'success' });
     } catch (err: any) {
       console.error('Failed to save church details:', err);
-      setSnackbar({ open: true, message: err.message || 'Network error. Please try again.', severity: 'error' });
+      setSnackbar({ open: true, message: err.message || t('account.network_error'), severity: 'error' });
     } finally {
       setSaving(false);
     }
@@ -288,7 +290,7 @@ const AccountChurchDetailsPage: React.FC = () => {
         <CardContent sx={{ p: 3, textAlign: 'center', py: 6 }}>
           <InfoOutlinedIcon sx={{ fontSize: 48, color: 'text.disabled', mb: 1 }} />
           <Typography variant="body1" color="text.secondary">
-            Church details are available when you are affiliated with a parish.
+            {t('account.no_church_context')}
           </Typography>
         </CardContent>
       </Card>
@@ -301,7 +303,7 @@ const AccountChurchDetailsPage: React.FC = () => {
     <>
       {!editable && (
         <Alert severity="info" sx={{ mb: 2 }}>
-          You are viewing your church&apos;s information in read-only mode.
+          {t('account.readonly_mode')}
         </Alert>
       )}
 
@@ -310,18 +312,18 @@ const AccountChurchDetailsPage: React.FC = () => {
           <Box display="flex" alignItems="center" gap={1} mb={0.5}>
             <InfoOutlinedIcon color="primary" />
             <Typography variant="h5" fontWeight={600}>
-              Church Details
+              {t('account.church_details')}
             </Typography>
           </Box>
           <Typography variant="body2" color="text.secondary" mb={3}>
-            Basic information about your parish — name, contact, address, and liturgical settings.
+            {t('account.church_details_desc')}
           </Typography>
           <Divider sx={{ mb: 3 }} />
 
           {/* ── Church Name ── */}
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2.5, maxWidth: 700 }}>
             <TextField
-              label="Church Name"
+              label={t('account.label_church_name')}
               value={form.name}
               onChange={handleChange('name')}
               fullWidth
@@ -331,7 +333,7 @@ const AccountChurchDetailsPage: React.FC = () => {
 
             {/* ── Contact ── */}
             <TextField
-              label="Email"
+              label={t('account.label_email')}
               value={form.email}
               onChange={handleChange('email')}
               fullWidth
@@ -341,14 +343,14 @@ const AccountChurchDetailsPage: React.FC = () => {
               type="email"
             />
             <TextField
-              label="Phone"
+              label={t('account.label_phone')}
               value={form.phone}
               onChange={handleChange('phone')}
               fullWidth
               disabled={!editable}
             />
             <TextField
-              label="Website"
+              label={t('account.label_website')}
               value={form.website}
               onChange={handleChange('website')}
               fullWidth
@@ -363,11 +365,11 @@ const AccountChurchDetailsPage: React.FC = () => {
 
           {/* ── Address ── */}
           <Typography variant="subtitle2" color="text.secondary" mb={2}>
-            Address
+            {t('account.label_address')}
           </Typography>
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2.5, maxWidth: 700 }}>
             <TextField
-              label="Street Address"
+              label={t('account.label_street_address')}
               value={form.address}
               onChange={handleChange('address')}
               fullWidth
@@ -375,28 +377,28 @@ const AccountChurchDetailsPage: React.FC = () => {
               sx={{ gridColumn: { sm: '1 / -1' } }}
             />
             <TextField
-              label="City"
+              label={t('account.label_city')}
               value={form.city}
               onChange={handleChange('city')}
               fullWidth
               disabled={!editable}
             />
             <TextField
-              label="State / Province"
+              label={t('account.label_state_province')}
               value={form.state_province}
               onChange={handleChange('state_province')}
               fullWidth
               disabled={!editable}
             />
             <TextField
-              label="Postal Code"
+              label={t('account.label_postal_code')}
               value={form.postal_code}
               onChange={handleChange('postal_code')}
               fullWidth
               disabled={!editable}
             />
             <TextField
-              label="Country"
+              label={t('account.label_country')}
               value={form.country}
               onChange={handleChange('country')}
               fullWidth
@@ -409,13 +411,13 @@ const AccountChurchDetailsPage: React.FC = () => {
           {/* ── Liturgical Settings ── */}
           <Box display="flex" alignItems="center" gap={1} mb={2}>
             <Typography variant="subtitle2" color="text.secondary">
-              Liturgical Settings
+              {t('account.liturgical_settings')}
             </Typography>
             {hasCrmSuggestion && editable && (
               <Tooltip title={`CRM data suggests: ${crmMatch?.jurisdiction_name || crmMatch?.jurisdiction}`}>
                 <Chip
                   icon={<AutoFixHighIcon />}
-                  label="Auto-fill from CRM"
+                  label={t('account.autofill_from_crm')}
                   size="small"
                   color="primary"
                   variant="outlined"
@@ -429,7 +431,7 @@ const AccountChurchDetailsPage: React.FC = () => {
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2.5, maxWidth: 700 }}>
             <TextField
               select
-              label="Jurisdiction"
+              label={t('account.label_jurisdiction')}
               value={form.jurisdiction_id ?? ''}
               onChange={handleJurisdictionChange}
               fullWidth
@@ -437,11 +439,11 @@ const AccountChurchDetailsPage: React.FC = () => {
               helperText={
                 selectedJurisdiction
                   ? `Calendar: ${selectedJurisdiction.calendar_type}`
-                  : 'Select a jurisdiction to auto-set calendar type'
+                  : t('account.jurisdiction_helper')
               }
             >
               <MenuItem value="">
-                <em>Not set</em>
+                <em>{t('account.not_set')}</em>
               </MenuItem>
               {jurisdictions.map((j) => (
                 <MenuItem key={j.id} value={j.id}>
@@ -450,16 +452,16 @@ const AccountChurchDetailsPage: React.FC = () => {
               ))}
             </TextField>
             <TextField
-              label="Calendar Type"
-              value={form.calendar_type || 'Not set'}
+              label={t('account.label_calendar_type')}
+              value={form.calendar_type || t('account.not_set')}
               fullWidth
               disabled
-              helperText="Determined by jurisdiction"
+              helperText={t('account.determined_by_jurisdiction')}
               InputProps={{ readOnly: true }}
             />
             <TextField
               select
-              label="Preferred Language"
+              label={t('account.label_preferred_language')}
               value={form.preferred_language}
               onChange={handleChange('preferred_language')}
               fullWidth
@@ -467,7 +469,7 @@ const AccountChurchDetailsPage: React.FC = () => {
             >
               {LANGUAGE_OPTIONS.map((opt) => (
                 <MenuItem key={opt.value} value={opt.value}>
-                  {opt.label}
+                  {t(opt.labelKey)}
                 </MenuItem>
               ))}
             </TextField>
@@ -477,10 +479,10 @@ const AccountChurchDetailsPage: React.FC = () => {
           {editable && (
             <Box display="flex" justifyContent="flex-end" gap={1.5} mt={4}>
               <Button variant="outlined" disabled={!isDirty || saving} onClick={handleCancel}>
-                Cancel
+                {t('common.cancel')}
               </Button>
               <Button variant="contained" disabled={!isDirty || hasErrors || saving} onClick={handleSave}>
-                {saving ? 'Saving...' : 'Save Changes'}
+                {saving ? t('common.saving') : t('common.save_changes')}
               </Button>
             </Box>
           )}

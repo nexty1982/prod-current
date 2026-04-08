@@ -5,7 +5,13 @@
  */
 
 const { getTenantPool } = require('../config/db');
-const { askOMAIWithMetadata } = require('/var/www/orthodoxmetrics/prod/misc/omai/services/index.js');
+let askOMAIWithMetadata;
+try {
+  ({ askOMAIWithMetadata } = require('/var/www/orthodoxmetrics/prod/misc/omai/services/index.js'));
+} catch (e) {
+  console.warn('[emailParser] Failed to load OMAI services:', e.message);
+  askOMAIWithMetadata = async () => ({ error: 'OMAI services unavailable' });
+}
 
 // Whitelist of valid record tables to prevent SQL injection
 const VALID_RECORD_TABLES = {

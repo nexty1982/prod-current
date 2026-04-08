@@ -68,6 +68,7 @@ import { AgGridReact } from 'ag-grid-react';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import RecordSection from '../../common/RecordSection';
+import { useLanguage } from '@/context/LanguageContext';
 
 registerAgGridModulesOnce();
 
@@ -219,12 +220,6 @@ interface BaptismRecord {
   _matchSummary?: string;
 }
 
-interface RecordType {
-  value: string;
-  label: string;
-  apiEndpoint: string;
-}
-
 type SortDirection = 'asc' | 'desc';
 
 interface SortConfig {
@@ -232,12 +227,12 @@ interface SortConfig {
   direction: SortDirection;
 }
 
-// Record types configuration
-const recordTypes: RecordType[] = [
-  { value: 'baptism', label: 'Baptism Records', apiEndpoint: 'baptism' },
-  { value: 'marriage', label: 'Marriage Records', apiEndpoint: 'marriage' },
-  { value: 'funeral', label: 'Funeral Records', apiEndpoint: 'funeral' },
-];
+// Record types configuration (labels resolved via t() inside component)
+const RECORD_TYPE_CONFIGS = [
+  { value: 'baptism', labelKey: 'records.baptism_records_label', apiEndpoint: 'baptism' },
+  { value: 'marriage', labelKey: 'records.marriage_records_label', apiEndpoint: 'marriage' },
+  { value: 'funeral', labelKey: 'records.funeral_records_label', apiEndpoint: 'funeral' },
+] as const;
 
 // Function to get column definitions based on record type
 const getColumnDefinitions = (recordType: string) => {
@@ -463,6 +458,7 @@ interface RecordsPageProps {
 }
 
 const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism' }) => {
+  const { t } = useLanguage();
   const [searchParams, setSearchParams] = useSearchParams();
   
   // State management
@@ -801,7 +797,7 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
       }
       setError(null);
       
-      const selectedType = recordTypes.find(type => type.value === recordType);
+      const selectedType = RECORD_TYPE_CONFIGS.find(type => type.value === recordType);
       if (!selectedType) {
         throw new Error('Invalid record type selected');
       }
@@ -843,10 +839,10 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
       setTotalRecords(total);
       
       if (isSearchFetch) {
-        showToast(`Found ${total} match${total !== 1 ? 'es' : ''} for "${search}" in ${selectedType.label} records`, 'success');
+        showToast(`Found ${total} match${total !== 1 ? 'es' : ''} for "${search}" in ${t(selectedType.labelKey)}`, 'success');
       } else {
         const displayCount = Math.min(requestLimit, total);
-        showToast(`Displaying ${displayCount} of ${total} ${selectedType.label.toLowerCase()} records`, 'success');
+        showToast(`Displaying ${displayCount} of ${total} ${t(selectedType.labelKey).toLowerCase()}`, 'success');
       }
       
     } catch (err) {
@@ -963,29 +959,29 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
         try {
           // Build fields array based on record type
           let fields = [
-            { key: 'registryNumber', label: 'Registry #', value: originalRecord.registryNumber || '', type: 'text' as const, editable: false },
+            { key: 'registryNumber', label: t('records.label_registry_number'), value: originalRecord.registryNumber || '', type: 'text' as const, editable: false },
           ];
 
           if (selectedRecordType === 'marriage') {
             // For marriage records, combine groom and bride names
             const groomName = `${originalRecord.fname_groom || ''} ${originalRecord.lname_groom || ''}`.trim();
             const brideName = `${originalRecord.fname_bride || ''} ${originalRecord.lname_bride || ''}`.trim();
-            
+
             fields.push(
-              { key: 'groom', label: 'Groom', value: groomName, type: 'text' as const, editable: false },
-              { key: 'bride', label: 'Bride', value: brideName, type: 'text' as const, editable: false },
-              { key: 'mdate', label: 'Date', value: originalRecord.mdate || '', type: 'text' as const, editable: false },
-              { key: 'churchName', label: 'Church', value: originalRecord.churchName || '', type: 'text' as const, editable: false },
-              { key: 'clergy', label: 'Priest', value: originalRecord.clergy || '', type: 'text' as const, editable: false }
+              { key: 'groom', label: t('records.section_groom').replace(' Information', ''), value: groomName, type: 'text' as const, editable: false },
+              { key: 'bride', label: t('records.section_bride').replace(' Information', ''), value: brideName, type: 'text' as const, editable: false },
+              { key: 'mdate', label: t('common.date'), value: originalRecord.mdate || '', type: 'text' as const, editable: false },
+              { key: 'churchName', label: t('records.label_church'), value: originalRecord.churchName || '', type: 'text' as const, editable: false },
+              { key: 'clergy', label: t('records.label_priest_select'), value: originalRecord.clergy || '', type: 'text' as const, editable: false }
             );
           } else {
             // For baptism and funeral records
             fields.push(
-              { key: 'firstName', label: 'First Name', value: originalRecord.firstName || '', type: 'text' as const, editable: false },
-              { key: 'lastName', label: 'Last Name', value: originalRecord.lastName || '', type: 'text' as const, editable: false },
-              { key: 'dateOfBaptism', label: 'Date', value: originalRecord.dateOfBaptism || '', type: 'text' as const, editable: false },
-              { key: 'churchName', label: 'Church', value: originalRecord.churchName || '', type: 'text' as const, editable: false },
-              { key: 'priest', label: 'Priest', value: originalRecord.priest || '', type: 'text' as const, editable: false }
+              { key: 'firstName', label: t('common.first_name'), value: originalRecord.firstName || '', type: 'text' as const, editable: false },
+              { key: 'lastName', label: t('common.last_name'), value: originalRecord.lastName || '', type: 'text' as const, editable: false },
+              { key: 'dateOfBaptism', label: t('common.date'), value: originalRecord.dateOfBaptism || '', type: 'text' as const, editable: false },
+              { key: 'churchName', label: t('records.label_church'), value: originalRecord.churchName || '', type: 'text' as const, editable: false },
+              { key: 'priest', label: t('records.label_priest_select'), value: originalRecord.priest || '', type: 'text' as const, editable: false }
             );
           }
 
@@ -1244,13 +1240,13 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
     const isUpdated = isRecordUpdatedWithin24Hours(record, nowReference);
     if (isNew) {
       return (
-        <Chip label="New" size="small" color="success" variant="filled"
+        <Chip label={t('records.chip_new')} size="small" color="success" variant="filled"
           sx={{ fontSize: '0.65rem', height: 20, fontWeight: 700 }} />
       );
     }
     if (isUpdated) {
       return (
-        <Chip label="Upd" size="small" color="warning" variant="filled"
+        <Chip label={t('records.chip_updated')} size="small" color="warning" variant="filled"
           sx={{ fontSize: '0.65rem', height: 20, fontWeight: 700 }} />
       );
     }
@@ -1263,23 +1259,23 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
     if (!record) return null;
     return (
       <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center', height: '100%' }}>
-        <Tooltip title="View">
+        <Tooltip title={t('records.tooltip_view')}>
           <IconButton size="small" onClick={() => handleViewRecord(record)} sx={{ opacity: 0.7, color: 'text.secondary', '&:hover': { opacity: 1, color: 'text.primary' } }}>
             <Eye size={16} strokeWidth={1.5} />
           </IconButton>
         </Tooltip>
-        <Tooltip title="Edit">
+        <Tooltip title={t('records.tooltip_edit')}>
           <IconButton size="small" onClick={() => handleEditRecord(record)} sx={{ opacity: 0.7, color: 'text.secondary', '&:hover': { opacity: 1, color: 'text.primary' } }}>
             <Pencil size={16} strokeWidth={1.5} />
           </IconButton>
         </Tooltip>
-        <Tooltip title="Delete">
+        <Tooltip title={t('records.tooltip_delete')}>
           <IconButton size="small" onClick={() => handleDeleteClick(record)} sx={{ opacity: 0.7, color: 'text.secondary', '&:hover': { opacity: 1, color: 'error.main' } }}>
             <Trash2 size={16} strokeWidth={1.5} />
           </IconButton>
         </Tooltip>
         {(selectedRecordType === 'baptism' || selectedRecordType === 'marriage') && (
-          <Tooltip title="Certificate">
+          <Tooltip title={t('records.tooltip_certificate')}>
             <IconButton size="small" onClick={() => handleGenerateCertificate()} sx={{ opacity: 0.7, color: 'text.secondary', '&:hover': { opacity: 1, color: 'text.primary' } }}>
               <FileText size={16} strokeWidth={1.5} />
             </IconButton>
@@ -1535,138 +1531,138 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
       <Stack spacing={4}>
         {selectedRecordType === 'baptism' && (
           <>
-            <RecordSection title="Personal Information">
+            <RecordSection title={t('records.section_personal')}>
               <Stack spacing={2.5} sx={{ mt: 2 }}>
                 <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-                  <Autocomplete freeSolo disableClearable sx={{ flex: 1 }} options={getAcOptions('firstName', formData.firstName || '')} loading={acLoading['firstName']} inputValue={formData.firstName || ''} onInputChange={(_e, val, reason) => { if (reason === 'input' || reason === 'clear') { setFormData(prev => ({ ...prev, firstName: val })); fetchAutocompleteSuggestions('firstName', val); } }} onChange={(_e, val) => { if (val) setFormData(prev => ({ ...prev, firstName: val })); }} renderOption={(props, option) => { const s = getAcSuggestionsWithCount('firstName', formData.firstName || '').find(x => x.value === option); return <li {...props} key={option}><Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}><span>{option}</span>{s && <Chip label={s.count} size="small" sx={{ ml: 1, minWidth: 28, height: 20, fontSize: '0.7rem' }} />}</Box></li>; }} renderInput={(params) => <TextField {...params} label="First Name" required sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }} />} />
-                  <Autocomplete freeSolo disableClearable sx={{ flex: 1 }} options={getAcOptions('lastName', formData.lastName || '')} loading={acLoading['lastName']} inputValue={formData.lastName || ''} onInputChange={(_e, val, reason) => { if (reason === 'input' || reason === 'clear') { setFormData(prev => ({ ...prev, lastName: val })); fetchAutocompleteSuggestions('lastName', val); } }} onChange={(_e, val) => { if (val) setFormData(prev => ({ ...prev, lastName: val })); }} renderOption={(props, option) => { const s = getAcSuggestionsWithCount('lastName', formData.lastName || '').find(x => x.value === option); return <li {...props} key={option}><Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}><span>{option}</span>{s && <Chip label={s.count} size="small" sx={{ ml: 1, minWidth: 28, height: 20, fontSize: '0.7rem' }} />}</Box></li>; }} renderInput={(params) => <TextField {...params} label="Last Name" required sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }} />} />
+                  <Autocomplete freeSolo disableClearable sx={{ flex: 1 }} options={getAcOptions('firstName', formData.firstName || '')} loading={acLoading['firstName']} inputValue={formData.firstName || ''} onInputChange={(_e, val, reason) => { if (reason === 'input' || reason === 'clear') { setFormData(prev => ({ ...prev, firstName: val })); fetchAutocompleteSuggestions('firstName', val); } }} onChange={(_e, val) => { if (val) setFormData(prev => ({ ...prev, firstName: val })); }} renderOption={(props, option) => { const s = getAcSuggestionsWithCount('firstName', formData.firstName || '').find(x => x.value === option); return <li {...props} key={option}><Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}><span>{option}</span>{s && <Chip label={s.count} size="small" sx={{ ml: 1, minWidth: 28, height: 20, fontSize: '0.7rem' }} />}</Box></li>; }} renderInput={(params) => <TextField {...params} label={t('common.first_name')} required sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }} />} />
+                  <Autocomplete freeSolo disableClearable sx={{ flex: 1 }} options={getAcOptions('lastName', formData.lastName || '')} loading={acLoading['lastName']} inputValue={formData.lastName || ''} onInputChange={(_e, val, reason) => { if (reason === 'input' || reason === 'clear') { setFormData(prev => ({ ...prev, lastName: val })); fetchAutocompleteSuggestions('lastName', val); } }} onChange={(_e, val) => { if (val) setFormData(prev => ({ ...prev, lastName: val })); }} renderOption={(props, option) => { const s = getAcSuggestionsWithCount('lastName', formData.lastName || '').find(x => x.value === option); return <li {...props} key={option}><Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}><span>{option}</span>{s && <Chip label={s.count} size="small" sx={{ ml: 1, minWidth: 28, height: 20, fontSize: '0.7rem' }} />}</Box></li>; }} renderInput={(params) => <TextField {...params} label={t('common.last_name')} required sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }} />} />
                 </Stack>
                 <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-                  <TextField label="Date of Birth" type="date" value={formData.dateOfBirth || ''} onChange={(e) => setFormData(prev => ({ ...prev, dateOfBirth: e.target.value }))} InputLabelProps={{ shrink: true }} sx={{ flex: 1, '& .MuiOutlinedInput-root': { borderRadius: 2 } }} />
-                  <Autocomplete freeSolo disableClearable sx={{ flex: 1 }} options={getAcOptions('placeOfBirth', formData.placeOfBirth || '')} loading={acLoading['placeOfBirth']} inputValue={formData.placeOfBirth || ''} onInputChange={(_e, val, reason) => { if (reason === 'input' || reason === 'clear') { setFormData(prev => ({ ...prev, placeOfBirth: val })); fetchAutocompleteSuggestions('placeOfBirth', val); } }} onChange={(_e, val) => { if (val) setFormData(prev => ({ ...prev, placeOfBirth: val })); }} renderOption={(props, option) => { const s = getAcSuggestionsWithCount('placeOfBirth', formData.placeOfBirth || '').find(x => x.value === option); return <li {...props} key={option}><Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}><span>{option}</span>{s && <Chip label={s.count} size="small" sx={{ ml: 1, minWidth: 28, height: 20, fontSize: '0.7rem' }} />}</Box></li>; }} renderInput={(params) => <TextField {...params} label="Place of Birth" sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }} />} />
+                  <TextField label={t('records.label_date_of_birth')} type="date" value={formData.dateOfBirth || ''} onChange={(e) => setFormData(prev => ({ ...prev, dateOfBirth: e.target.value }))} InputLabelProps={{ shrink: true }} sx={{ flex: 1, '& .MuiOutlinedInput-root': { borderRadius: 2 } }} />
+                  <Autocomplete freeSolo disableClearable sx={{ flex: 1 }} options={getAcOptions('placeOfBirth', formData.placeOfBirth || '')} loading={acLoading['placeOfBirth']} inputValue={formData.placeOfBirth || ''} onInputChange={(_e, val, reason) => { if (reason === 'input' || reason === 'clear') { setFormData(prev => ({ ...prev, placeOfBirth: val })); fetchAutocompleteSuggestions('placeOfBirth', val); } }} onChange={(_e, val) => { if (val) setFormData(prev => ({ ...prev, placeOfBirth: val })); }} renderOption={(props, option) => { const s = getAcSuggestionsWithCount('placeOfBirth', formData.placeOfBirth || '').find(x => x.value === option); return <li {...props} key={option}><Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}><span>{option}</span>{s && <Chip label={s.count} size="small" sx={{ ml: 1, minWidth: 28, height: 20, fontSize: '0.7rem' }} />}</Box></li>; }} renderInput={(params) => <TextField {...params} label={t('records.label_place_of_birth')} sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }} />} />
                 </Stack>
                 <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-                  <Autocomplete freeSolo disableClearable sx={{ flex: 1 }} options={getAcOptions('fatherName', formData.fatherName || '')} loading={acLoading['fatherName']} inputValue={formData.fatherName || ''} onInputChange={(_e, val, reason) => { if (reason === 'input' || reason === 'clear') { setFormData(prev => ({ ...prev, fatherName: val })); fetchAutocompleteSuggestions('fatherName', val); } }} onChange={(_e, val) => { if (val) setFormData(prev => ({ ...prev, fatherName: val })); }} renderOption={(props, option) => { const s = getAcSuggestionsWithCount('fatherName', formData.fatherName || '').find(x => x.value === option); return <li {...props} key={option}><Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}><span>{option}</span>{s && <Chip label={s.count} size="small" sx={{ ml: 1, minWidth: 28, height: 20, fontSize: '0.7rem' }} />}</Box></li>; }} renderInput={(params) => <TextField {...params} label="Father's Name" sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }} />} />
-                  <Autocomplete freeSolo disableClearable sx={{ flex: 1 }} options={getAcOptions('motherName', formData.motherName || '')} loading={acLoading['motherName']} inputValue={formData.motherName || ''} onInputChange={(_e, val, reason) => { if (reason === 'input' || reason === 'clear') { setFormData(prev => ({ ...prev, motherName: val })); fetchAutocompleteSuggestions('motherName', val); } }} onChange={(_e, val) => { if (val) setFormData(prev => ({ ...prev, motherName: val })); }} renderOption={(props, option) => { const s = getAcSuggestionsWithCount('motherName', formData.motherName || '').find(x => x.value === option); return <li {...props} key={option}><Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}><span>{option}</span>{s && <Chip label={s.count} size="small" sx={{ ml: 1, minWidth: 28, height: 20, fontSize: '0.7rem' }} />}</Box></li>; }} renderInput={(params) => <TextField {...params} label="Mother's Name" sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }} />} />
+                  <Autocomplete freeSolo disableClearable sx={{ flex: 1 }} options={getAcOptions('fatherName', formData.fatherName || '')} loading={acLoading['fatherName']} inputValue={formData.fatherName || ''} onInputChange={(_e, val, reason) => { if (reason === 'input' || reason === 'clear') { setFormData(prev => ({ ...prev, fatherName: val })); fetchAutocompleteSuggestions('fatherName', val); } }} onChange={(_e, val) => { if (val) setFormData(prev => ({ ...prev, fatherName: val })); }} renderOption={(props, option) => { const s = getAcSuggestionsWithCount('fatherName', formData.fatherName || '').find(x => x.value === option); return <li {...props} key={option}><Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}><span>{option}</span>{s && <Chip label={s.count} size="small" sx={{ ml: 1, minWidth: 28, height: 20, fontSize: '0.7rem' }} />}</Box></li>; }} renderInput={(params) => <TextField {...params} label={t('records.label_father_name')} sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }} />} />
+                  <Autocomplete freeSolo disableClearable sx={{ flex: 1 }} options={getAcOptions('motherName', formData.motherName || '')} loading={acLoading['motherName']} inputValue={formData.motherName || ''} onInputChange={(_e, val, reason) => { if (reason === 'input' || reason === 'clear') { setFormData(prev => ({ ...prev, motherName: val })); fetchAutocompleteSuggestions('motherName', val); } }} onChange={(_e, val) => { if (val) setFormData(prev => ({ ...prev, motherName: val })); }} renderOption={(props, option) => { const s = getAcSuggestionsWithCount('motherName', formData.motherName || '').find(x => x.value === option); return <li {...props} key={option}><Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}><span>{option}</span>{s && <Chip label={s.count} size="small" sx={{ ml: 1, minWidth: 28, height: 20, fontSize: '0.7rem' }} />}</Box></li>; }} renderInput={(params) => <TextField {...params} label={t('records.label_mother_name')} sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }} />} />
                 </Stack>
               </Stack>
             </RecordSection>
-            <RecordSection title="Baptism Details">
+            <RecordSection title={t('records.section_baptism')}>
               <Stack spacing={2.5} sx={{ mt: 2 }}>
                 <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-                  <TextField label="Date of Baptism" type="date" value={formData.dateOfBaptism || ''} onChange={(e) => setFormData(prev => ({ ...prev, dateOfBaptism: e.target.value }))} InputLabelProps={{ shrink: true }} required sx={{ flex: 1, '& .MuiOutlinedInput-root': { borderRadius: 2 } }} />
+                  <TextField label={t('records.label_date_of_baptism')} type="date" value={formData.dateOfBaptism || ''} onChange={(e) => setFormData(prev => ({ ...prev, dateOfBaptism: e.target.value }))} InputLabelProps={{ shrink: true }} required sx={{ flex: 1, '& .MuiOutlinedInput-root': { borderRadius: 2 } }} />
                   <FormControl sx={{ flex: 1 }}>
-                    <InputLabel>Received By</InputLabel>
-                    <Select label="Received By" value={formData.entryType || ''} onChange={(e) => setFormData(prev => ({ ...prev, entryType: e.target.value }))} sx={{ borderRadius: 2 }}>
+                    <InputLabel>{t('records.label_received_by')}</InputLabel>
+                    <Select label={t('records.label_received_by')} value={formData.entryType || ''} onChange={(e) => setFormData(prev => ({ ...prev, entryType: e.target.value }))} sx={{ borderRadius: 2 }}>
                       <MenuItem value="Baptism">Baptism</MenuItem>
                       <MenuItem value="Chrismation">Chrismation</MenuItem>
                     </Select>
                   </FormControl>
                 </Stack>
-                <Autocomplete freeSolo disableClearable options={getAcOptions('godparentNames', formData.godparentNames || '')} loading={acLoading['godparentNames']} inputValue={formData.godparentNames || ''} onInputChange={(_e, val, reason) => { if (reason === 'input' || reason === 'clear') { setFormData(prev => ({ ...prev, godparentNames: val })); fetchAutocompleteSuggestions('godparentNames', val); } }} onChange={(_e, val) => { if (val) setFormData(prev => ({ ...prev, godparentNames: val })); }} renderOption={(props, option) => { const s = getAcSuggestionsWithCount('godparentNames', formData.godparentNames || '').find(x => x.value === option); return <li {...props} key={option}><Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}><span>{option}</span>{s && <Chip label={s.count} size="small" sx={{ ml: 1, minWidth: 28, height: 20, fontSize: '0.7rem' }} />}</Box></li>; }} renderInput={(params) => <TextField {...params} label="Godparent Names" placeholder="Enter godparent names separated by commas" sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }} />} />
+                <Autocomplete freeSolo disableClearable options={getAcOptions('godparentNames', formData.godparentNames || '')} loading={acLoading['godparentNames']} inputValue={formData.godparentNames || ''} onInputChange={(_e, val, reason) => { if (reason === 'input' || reason === 'clear') { setFormData(prev => ({ ...prev, godparentNames: val })); fetchAutocompleteSuggestions('godparentNames', val); } }} onChange={(_e, val) => { if (val) setFormData(prev => ({ ...prev, godparentNames: val })); }} renderOption={(props, option) => { const s = getAcSuggestionsWithCount('godparentNames', formData.godparentNames || '').find(x => x.value === option); return <li {...props} key={option}><Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}><span>{option}</span>{s && <Chip label={s.count} size="small" sx={{ ml: 1, minWidth: 28, height: 20, fontSize: '0.7rem' }} />}</Box></li>; }} renderInput={(params) => <TextField {...params} label={t('records.label_godparents')} placeholder={t('records.placeholder_godparents')} sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }} />} />
               </Stack>
             </RecordSection>
-            <RecordSection title="Church & Registry Information">
+            <RecordSection title={t('records.section_church_registry')}>
               <Stack spacing={2.5} sx={{ mt: 2 }}>
                 <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
                   <FormControl sx={{ flex: 1 }}>
-                    <InputLabel>Priest</InputLabel>
-                    <Select label="Priest" value={formData.priest || ''} onChange={(e) => { const value = e.target.value; if (value === 'custom') { setFormData(prev => ({ ...prev, priest: '', customPriest: true })); } else { setFormData(prev => ({ ...prev, priest: value, customPriest: false })); } }} sx={{ borderRadius: 2 }}>
-                      <MenuItem value=""><em>Select a priest...</em></MenuItem>
+                    <InputLabel>{t('records.label_priest_select')}</InputLabel>
+                    <Select label={t('records.label_priest_select')} value={formData.priest || ''} onChange={(e) => { const value = e.target.value; if (value === 'custom') { setFormData(prev => ({ ...prev, priest: '', customPriest: true })); } else { setFormData(prev => ({ ...prev, priest: value, customPriest: false })); } }} sx={{ borderRadius: 2 }}>
+                      <MenuItem value=""><em>{t('records.placeholder_select_priest')}</em></MenuItem>
                       {priestOptions.map((priest) => (<MenuItem key={priest} value={priest}>{priest}</MenuItem>))}
-                      <MenuItem value="custom"><em>Other (enter manually)...</em></MenuItem>
+                      <MenuItem value="custom"><em>{t('records.option_other_priest')}</em></MenuItem>
                     </Select>
                   </FormControl>
-                  <TextField label="Church" value={churches.find(c => c.id === selectedChurch)?.church_name || 'No church selected'} InputProps={{ readOnly: true }} sx={{ flex: 1, '& .MuiOutlinedInput-root': { borderRadius: 2 }, '& .MuiInputBase-input': { color: 'text.secondary' } }} />
+                  <TextField label={t('records.label_church')} value={churches.find(c => c.id === selectedChurch)?.church_name || t('records.label_no_church')} InputProps={{ readOnly: true }} sx={{ flex: 1, '& .MuiOutlinedInput-root': { borderRadius: 2 }, '& .MuiInputBase-input': { color: 'text.secondary' } }} />
                 </Stack>
                 {formData.customPriest && (
-                  <TextField label="Enter Priest Name" value={formData.priest || ''} onChange={(e) => setFormData(prev => ({ ...prev, priest: e.target.value }))} fullWidth placeholder="Enter the priest's name" sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }} />
+                  <TextField label={t('records.label_priest')} value={formData.priest || ''} onChange={(e) => setFormData(prev => ({ ...prev, priest: e.target.value }))} fullWidth placeholder={t('records.placeholder_priest_name')} sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }} />
                 )}
-                <TextField label="Registry Number" value={formData.registryNumber || ''} onChange={(e) => setFormData(prev => ({ ...prev, registryNumber: e.target.value }))} placeholder="Enter registry number" sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }} />
+                <TextField label={t('records.label_registry_number')} value={formData.registryNumber || ''} onChange={(e) => setFormData(prev => ({ ...prev, registryNumber: e.target.value }))} placeholder={t('records.placeholder_registry')} sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }} />
               </Stack>
             </RecordSection>
-            <RecordSection title="Additional Notes">
-              <TextField label="Notes" multiline rows={4} value={formData.notes || ''} onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))} placeholder="Enter any additional notes or comments..." fullWidth sx={{ mt: 2, '& .MuiOutlinedInput-root': { borderRadius: 2 } }} />
+            <RecordSection title={t('records.section_notes')}>
+              <TextField label={t('records.label_notes')} multiline rows={4} value={formData.notes || ''} onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))} placeholder={t('records.placeholder_notes')} fullWidth sx={{ mt: 2, '& .MuiOutlinedInput-root': { borderRadius: 2 } }} />
             </RecordSection>
           </>
         )}
 
         {selectedRecordType === 'marriage' && (
           <>
-            <RecordSection title="Groom Information">
+            <RecordSection title={t('records.section_groom')}>
               <Stack spacing={2.5} sx={{ mt: 2 }}>
                 <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-                  <Autocomplete freeSolo disableClearable sx={{ flex: 1 }} options={getAcOptions('groomFirstName', formData.groomFirstName || '')} loading={acLoading['groomFirstName']} inputValue={formData.groomFirstName || ''} onInputChange={(_e, val, reason) => { if (reason === 'input' || reason === 'clear') { setFormData(prev => ({ ...prev, groomFirstName: val })); fetchAutocompleteSuggestions('groomFirstName', val); } }} onChange={(_e, val) => { if (val) setFormData(prev => ({ ...prev, groomFirstName: val })); }} renderOption={(props, option) => { const s = getAcSuggestionsWithCount('groomFirstName', formData.groomFirstName || '').find(x => x.value === option); return <li {...props} key={option}><Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}><span>{option}</span>{s && <Chip label={s.count} size="small" sx={{ ml: 1, minWidth: 28, height: 20, fontSize: '0.7rem' }} />}</Box></li>; }} renderInput={(params) => <TextField {...params} label="First Name" required sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }} />} />
-                  <Autocomplete freeSolo disableClearable sx={{ flex: 1 }} options={getAcOptions('groomLastName', formData.groomLastName || '')} loading={acLoading['groomLastName']} inputValue={formData.groomLastName || ''} onInputChange={(_e, val, reason) => { if (reason === 'input' || reason === 'clear') { setFormData(prev => ({ ...prev, groomLastName: val })); fetchAutocompleteSuggestions('groomLastName', val); } }} onChange={(_e, val) => { if (val) setFormData(prev => ({ ...prev, groomLastName: val })); }} renderOption={(props, option) => { const s = getAcSuggestionsWithCount('groomLastName', formData.groomLastName || '').find(x => x.value === option); return <li {...props} key={option}><Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}><span>{option}</span>{s && <Chip label={s.count} size="small" sx={{ ml: 1, minWidth: 28, height: 20, fontSize: '0.7rem' }} />}</Box></li>; }} renderInput={(params) => <TextField {...params} label="Last Name" required sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }} />} />
+                  <Autocomplete freeSolo disableClearable sx={{ flex: 1 }} options={getAcOptions('groomFirstName', formData.groomFirstName || '')} loading={acLoading['groomFirstName']} inputValue={formData.groomFirstName || ''} onInputChange={(_e, val, reason) => { if (reason === 'input' || reason === 'clear') { setFormData(prev => ({ ...prev, groomFirstName: val })); fetchAutocompleteSuggestions('groomFirstName', val); } }} onChange={(_e, val) => { if (val) setFormData(prev => ({ ...prev, groomFirstName: val })); }} renderOption={(props, option) => { const s = getAcSuggestionsWithCount('groomFirstName', formData.groomFirstName || '').find(x => x.value === option); return <li {...props} key={option}><Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}><span>{option}</span>{s && <Chip label={s.count} size="small" sx={{ ml: 1, minWidth: 28, height: 20, fontSize: '0.7rem' }} />}</Box></li>; }} renderInput={(params) => <TextField {...params} label={t('common.first_name')} required sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }} />} />
+                  <Autocomplete freeSolo disableClearable sx={{ flex: 1 }} options={getAcOptions('groomLastName', formData.groomLastName || '')} loading={acLoading['groomLastName']} inputValue={formData.groomLastName || ''} onInputChange={(_e, val, reason) => { if (reason === 'input' || reason === 'clear') { setFormData(prev => ({ ...prev, groomLastName: val })); fetchAutocompleteSuggestions('groomLastName', val); } }} onChange={(_e, val) => { if (val) setFormData(prev => ({ ...prev, groomLastName: val })); }} renderOption={(props, option) => { const s = getAcSuggestionsWithCount('groomLastName', formData.groomLastName || '').find(x => x.value === option); return <li {...props} key={option}><Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}><span>{option}</span>{s && <Chip label={s.count} size="small" sx={{ ml: 1, minWidth: 28, height: 20, fontSize: '0.7rem' }} />}</Box></li>; }} renderInput={(params) => <TextField {...params} label={t('common.last_name')} required sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }} />} />
                 </Stack>
-                <TextField label="Groom's Parents" value={formData.groomParents || ''} onChange={(e) => setFormData(prev => ({ ...prev, groomParents: e.target.value }))} placeholder="Enter groom's parents" sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }} />
+                <TextField label={t('records.label_groom_parents')} value={formData.groomParents || ''} onChange={(e) => setFormData(prev => ({ ...prev, groomParents: e.target.value }))} placeholder={t('records.placeholder_groom_parents')} sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }} />
               </Stack>
             </RecordSection>
-            <RecordSection title="Bride Information">
+            <RecordSection title={t('records.section_bride')}>
               <Stack spacing={2.5} sx={{ mt: 2 }}>
                 <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-                  <Autocomplete freeSolo disableClearable sx={{ flex: 1 }} options={getAcOptions('brideFirstName', formData.brideFirstName || '')} loading={acLoading['brideFirstName']} inputValue={formData.brideFirstName || ''} onInputChange={(_e, val, reason) => { if (reason === 'input' || reason === 'clear') { setFormData(prev => ({ ...prev, brideFirstName: val })); fetchAutocompleteSuggestions('brideFirstName', val); } }} onChange={(_e, val) => { if (val) setFormData(prev => ({ ...prev, brideFirstName: val })); }} renderOption={(props, option) => { const s = getAcSuggestionsWithCount('brideFirstName', formData.brideFirstName || '').find(x => x.value === option); return <li {...props} key={option}><Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}><span>{option}</span>{s && <Chip label={s.count} size="small" sx={{ ml: 1, minWidth: 28, height: 20, fontSize: '0.7rem' }} />}</Box></li>; }} renderInput={(params) => <TextField {...params} label="First Name" required sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }} />} />
-                  <Autocomplete freeSolo disableClearable sx={{ flex: 1 }} options={getAcOptions('brideLastName', formData.brideLastName || '')} loading={acLoading['brideLastName']} inputValue={formData.brideLastName || ''} onInputChange={(_e, val, reason) => { if (reason === 'input' || reason === 'clear') { setFormData(prev => ({ ...prev, brideLastName: val })); fetchAutocompleteSuggestions('brideLastName', val); } }} onChange={(_e, val) => { if (val) setFormData(prev => ({ ...prev, brideLastName: val })); }} renderOption={(props, option) => { const s = getAcSuggestionsWithCount('brideLastName', formData.brideLastName || '').find(x => x.value === option); return <li {...props} key={option}><Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}><span>{option}</span>{s && <Chip label={s.count} size="small" sx={{ ml: 1, minWidth: 28, height: 20, fontSize: '0.7rem' }} />}</Box></li>; }} renderInput={(params) => <TextField {...params} label="Last Name" required sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }} />} />
+                  <Autocomplete freeSolo disableClearable sx={{ flex: 1 }} options={getAcOptions('brideFirstName', formData.brideFirstName || '')} loading={acLoading['brideFirstName']} inputValue={formData.brideFirstName || ''} onInputChange={(_e, val, reason) => { if (reason === 'input' || reason === 'clear') { setFormData(prev => ({ ...prev, brideFirstName: val })); fetchAutocompleteSuggestions('brideFirstName', val); } }} onChange={(_e, val) => { if (val) setFormData(prev => ({ ...prev, brideFirstName: val })); }} renderOption={(props, option) => { const s = getAcSuggestionsWithCount('brideFirstName', formData.brideFirstName || '').find(x => x.value === option); return <li {...props} key={option}><Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}><span>{option}</span>{s && <Chip label={s.count} size="small" sx={{ ml: 1, minWidth: 28, height: 20, fontSize: '0.7rem' }} />}</Box></li>; }} renderInput={(params) => <TextField {...params} label={t('common.first_name')} required sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }} />} />
+                  <Autocomplete freeSolo disableClearable sx={{ flex: 1 }} options={getAcOptions('brideLastName', formData.brideLastName || '')} loading={acLoading['brideLastName']} inputValue={formData.brideLastName || ''} onInputChange={(_e, val, reason) => { if (reason === 'input' || reason === 'clear') { setFormData(prev => ({ ...prev, brideLastName: val })); fetchAutocompleteSuggestions('brideLastName', val); } }} onChange={(_e, val) => { if (val) setFormData(prev => ({ ...prev, brideLastName: val })); }} renderOption={(props, option) => { const s = getAcSuggestionsWithCount('brideLastName', formData.brideLastName || '').find(x => x.value === option); return <li {...props} key={option}><Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}><span>{option}</span>{s && <Chip label={s.count} size="small" sx={{ ml: 1, minWidth: 28, height: 20, fontSize: '0.7rem' }} />}</Box></li>; }} renderInput={(params) => <TextField {...params} label={t('common.last_name')} required sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }} />} />
                 </Stack>
-                <TextField label="Bride's Parents" value={formData.brideParents || ''} onChange={(e) => setFormData(prev => ({ ...prev, brideParents: e.target.value }))} placeholder="Enter bride's parents" sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }} />
+                <TextField label={t('records.label_bride_parents')} value={formData.brideParents || ''} onChange={(e) => setFormData(prev => ({ ...prev, brideParents: e.target.value }))} placeholder={t('records.placeholder_bride_parents')} sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }} />
               </Stack>
             </RecordSection>
-            <RecordSection title="Marriage Details">
+            <RecordSection title={t('records.section_marriage')}>
               <Stack spacing={2.5} sx={{ mt: 2 }}>
                 <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-                  <TextField label="Marriage Date" type="date" value={formData.marriageDate || ''} onChange={(e) => setFormData(prev => ({ ...prev, marriageDate: e.target.value }))} InputLabelProps={{ shrink: true }} required sx={{ flex: 1, '& .MuiOutlinedInput-root': { borderRadius: 2 } }} />
-                  <Autocomplete freeSolo disableClearable sx={{ flex: 1 }} options={getAcOptions('marriageLocation', formData.marriageLocation || '')} loading={acLoading['marriageLocation']} inputValue={formData.marriageLocation || ''} onInputChange={(_e, val, reason) => { if (reason === 'input' || reason === 'clear') { setFormData(prev => ({ ...prev, marriageLocation: val })); fetchAutocompleteSuggestions('marriageLocation', val); } }} onChange={(_e, val) => { if (val) setFormData(prev => ({ ...prev, marriageLocation: val })); }} renderOption={(props, option) => { const s = getAcSuggestionsWithCount('marriageLocation', formData.marriageLocation || '').find(x => x.value === option); return <li {...props} key={option}><Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}><span>{option}</span>{s && <Chip label={s.count} size="small" sx={{ ml: 1, minWidth: 28, height: 20, fontSize: '0.7rem' }} />}</Box></li>; }} renderInput={(params) => <TextField {...params} label="Marriage Location" sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }} />} />
+                  <TextField label={t('records.label_marriage_date')} type="date" value={formData.marriageDate || ''} onChange={(e) => setFormData(prev => ({ ...prev, marriageDate: e.target.value }))} InputLabelProps={{ shrink: true }} required sx={{ flex: 1, '& .MuiOutlinedInput-root': { borderRadius: 2 } }} />
+                  <Autocomplete freeSolo disableClearable sx={{ flex: 1 }} options={getAcOptions('marriageLocation', formData.marriageLocation || '')} loading={acLoading['marriageLocation']} inputValue={formData.marriageLocation || ''} onInputChange={(_e, val, reason) => { if (reason === 'input' || reason === 'clear') { setFormData(prev => ({ ...prev, marriageLocation: val })); fetchAutocompleteSuggestions('marriageLocation', val); } }} onChange={(_e, val) => { if (val) setFormData(prev => ({ ...prev, marriageLocation: val })); }} renderOption={(props, option) => { const s = getAcSuggestionsWithCount('marriageLocation', formData.marriageLocation || '').find(x => x.value === option); return <li {...props} key={option}><Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}><span>{option}</span>{s && <Chip label={s.count} size="small" sx={{ ml: 1, minWidth: 28, height: 20, fontSize: '0.7rem' }} />}</Box></li>; }} renderInput={(params) => <TextField {...params} label={t('records.label_marriage_location')} sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }} />} />
                 </Stack>
                 <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-                  <Autocomplete freeSolo disableClearable sx={{ flex: 1 }} options={getAcOptions('witness1', formData.witness1 || '')} loading={acLoading['witness1']} inputValue={formData.witness1 || ''} onInputChange={(_e, val, reason) => { if (reason === 'input' || reason === 'clear') { setFormData(prev => ({ ...prev, witness1: val })); fetchAutocompleteSuggestions('witness1', val); } }} onChange={(_e, val) => { if (val) setFormData(prev => ({ ...prev, witness1: val })); }} renderOption={(props, option) => { const s = getAcSuggestionsWithCount('witness1', formData.witness1 || '').find(x => x.value === option); return <li {...props} key={option}><Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}><span>{option}</span>{s && <Chip label={s.count} size="small" sx={{ ml: 1, minWidth: 28, height: 20, fontSize: '0.7rem' }} />}</Box></li>; }} renderInput={(params) => <TextField {...params} label="Witness 1" sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }} />} />
-                  <Autocomplete freeSolo disableClearable sx={{ flex: 1 }} options={getAcOptions('witness2', formData.witness2 || '')} loading={acLoading['witness2']} inputValue={formData.witness2 || ''} onInputChange={(_e, val, reason) => { if (reason === 'input' || reason === 'clear') { setFormData(prev => ({ ...prev, witness2: val })); fetchAutocompleteSuggestions('witness2', val); } }} onChange={(_e, val) => { if (val) setFormData(prev => ({ ...prev, witness2: val })); }} renderOption={(props, option) => { const s = getAcSuggestionsWithCount('witness2', formData.witness2 || '').find(x => x.value === option); return <li {...props} key={option}><Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}><span>{option}</span>{s && <Chip label={s.count} size="small" sx={{ ml: 1, minWidth: 28, height: 20, fontSize: '0.7rem' }} />}</Box></li>; }} renderInput={(params) => <TextField {...params} label="Witness 2" sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }} />} />
+                  <Autocomplete freeSolo disableClearable sx={{ flex: 1 }} options={getAcOptions('witness1', formData.witness1 || '')} loading={acLoading['witness1']} inputValue={formData.witness1 || ''} onInputChange={(_e, val, reason) => { if (reason === 'input' || reason === 'clear') { setFormData(prev => ({ ...prev, witness1: val })); fetchAutocompleteSuggestions('witness1', val); } }} onChange={(_e, val) => { if (val) setFormData(prev => ({ ...prev, witness1: val })); }} renderOption={(props, option) => { const s = getAcSuggestionsWithCount('witness1', formData.witness1 || '').find(x => x.value === option); return <li {...props} key={option}><Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}><span>{option}</span>{s && <Chip label={s.count} size="small" sx={{ ml: 1, minWidth: 28, height: 20, fontSize: '0.7rem' }} />}</Box></li>; }} renderInput={(params) => <TextField {...params} label={t('records.label_witness_1')} sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }} />} />
+                  <Autocomplete freeSolo disableClearable sx={{ flex: 1 }} options={getAcOptions('witness2', formData.witness2 || '')} loading={acLoading['witness2']} inputValue={formData.witness2 || ''} onInputChange={(_e, val, reason) => { if (reason === 'input' || reason === 'clear') { setFormData(prev => ({ ...prev, witness2: val })); fetchAutocompleteSuggestions('witness2', val); } }} onChange={(_e, val) => { if (val) setFormData(prev => ({ ...prev, witness2: val })); }} renderOption={(props, option) => { const s = getAcSuggestionsWithCount('witness2', formData.witness2 || '').find(x => x.value === option); return <li {...props} key={option}><Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}><span>{option}</span>{s && <Chip label={s.count} size="small" sx={{ ml: 1, minWidth: 28, height: 20, fontSize: '0.7rem' }} />}</Box></li>; }} renderInput={(params) => <TextField {...params} label={t('records.label_witness_2')} sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }} />} />
                 </Stack>
               </Stack>
             </RecordSection>
             <FormControl fullWidth>
-              <InputLabel>Priest</InputLabel>
-              <Select label="Priest" value={formData.priest || ''} onChange={(e) => { const value = e.target.value; if (value === 'custom') { setFormData(prev => ({ ...prev, priest: '', customPriest: true })); } else { setFormData(prev => ({ ...prev, priest: value, customPriest: false })); } }}>
-                <MenuItem value=""><em>Select a priest...</em></MenuItem>
+              <InputLabel>{t('records.label_priest_select')}</InputLabel>
+              <Select label={t('records.label_priest_select')} value={formData.priest || ''} onChange={(e) => { const value = e.target.value; if (value === 'custom') { setFormData(prev => ({ ...prev, priest: '', customPriest: true })); } else { setFormData(prev => ({ ...prev, priest: value, customPriest: false })); } }}>
+                <MenuItem value=""><em>{t('records.placeholder_select_priest')}</em></MenuItem>
                 {priestOptions.map((priest) => (<MenuItem key={priest} value={priest}>{priest}</MenuItem>))}
-                <MenuItem value="custom"><em>Other (enter manually)...</em></MenuItem>
+                <MenuItem value="custom"><em>{t('records.option_other_priest')}</em></MenuItem>
               </Select>
             </FormControl>
             {formData.customPriest && (
-              <TextField label="Enter Priest Name" value={formData.priest || ''} onChange={(e) => setFormData(prev => ({ ...prev, priest: e.target.value }))} fullWidth placeholder="Enter the priest's name" />
+              <TextField label={t('records.label_priest')} value={formData.priest || ''} onChange={(e) => setFormData(prev => ({ ...prev, priest: e.target.value }))} fullWidth placeholder={t('records.placeholder_priest_name')} />
             )}
           </>
         )}
 
         {selectedRecordType === 'funeral' && (
           <>
-            <RecordSection title="Deceased Information">
+            <RecordSection title={t('records.section_deceased')}>
               <Stack spacing={2.5} sx={{ mt: 2 }}>
                 <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-                  <Autocomplete freeSolo disableClearable sx={{ flex: 1 }} options={getAcOptions('deceasedFirstName', formData.deceasedFirstName || formData.firstName || '')} loading={acLoading['deceasedFirstName']} inputValue={formData.deceasedFirstName || formData.firstName || ''} onInputChange={(_e, val, reason) => { if (reason === 'input' || reason === 'clear') { setFormData(prev => ({ ...prev, deceasedFirstName: val, firstName: val })); fetchAutocompleteSuggestions('deceasedFirstName', val); } }} onChange={(_e, val) => { if (val) setFormData(prev => ({ ...prev, deceasedFirstName: val, firstName: val })); }} renderOption={(props, option) => { const s = getAcSuggestionsWithCount('deceasedFirstName', formData.deceasedFirstName || formData.firstName || '').find(x => x.value === option); return <li {...props} key={option}><Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}><span>{option}</span>{s && <Chip label={s.count} size="small" sx={{ ml: 1, minWidth: 28, height: 20, fontSize: '0.7rem' }} />}</Box></li>; }} renderInput={(params) => <TextField {...params} label="First Name" required sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }} />} />
-                  <Autocomplete freeSolo disableClearable sx={{ flex: 1 }} options={getAcOptions('deceasedLastName', formData.deceasedLastName || formData.lastName || '')} loading={acLoading['deceasedLastName']} inputValue={formData.deceasedLastName || formData.lastName || ''} onInputChange={(_e, val, reason) => { if (reason === 'input' || reason === 'clear') { setFormData(prev => ({ ...prev, deceasedLastName: val, lastName: val })); fetchAutocompleteSuggestions('deceasedLastName', val); } }} onChange={(_e, val) => { if (val) setFormData(prev => ({ ...prev, deceasedLastName: val, lastName: val })); }} renderOption={(props, option) => { const s = getAcSuggestionsWithCount('deceasedLastName', formData.deceasedLastName || formData.lastName || '').find(x => x.value === option); return <li {...props} key={option}><Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}><span>{option}</span>{s && <Chip label={s.count} size="small" sx={{ ml: 1, minWidth: 28, height: 20, fontSize: '0.7rem' }} />}</Box></li>; }} renderInput={(params) => <TextField {...params} label="Last Name" required sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }} />} />
+                  <Autocomplete freeSolo disableClearable sx={{ flex: 1 }} options={getAcOptions('deceasedFirstName', formData.deceasedFirstName || formData.firstName || '')} loading={acLoading['deceasedFirstName']} inputValue={formData.deceasedFirstName || formData.firstName || ''} onInputChange={(_e, val, reason) => { if (reason === 'input' || reason === 'clear') { setFormData(prev => ({ ...prev, deceasedFirstName: val, firstName: val })); fetchAutocompleteSuggestions('deceasedFirstName', val); } }} onChange={(_e, val) => { if (val) setFormData(prev => ({ ...prev, deceasedFirstName: val, firstName: val })); }} renderOption={(props, option) => { const s = getAcSuggestionsWithCount('deceasedFirstName', formData.deceasedFirstName || formData.firstName || '').find(x => x.value === option); return <li {...props} key={option}><Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}><span>{option}</span>{s && <Chip label={s.count} size="small" sx={{ ml: 1, minWidth: 28, height: 20, fontSize: '0.7rem' }} />}</Box></li>; }} renderInput={(params) => <TextField {...params} label={t('common.first_name')} required sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }} />} />
+                  <Autocomplete freeSolo disableClearable sx={{ flex: 1 }} options={getAcOptions('deceasedLastName', formData.deceasedLastName || formData.lastName || '')} loading={acLoading['deceasedLastName']} inputValue={formData.deceasedLastName || formData.lastName || ''} onInputChange={(_e, val, reason) => { if (reason === 'input' || reason === 'clear') { setFormData(prev => ({ ...prev, deceasedLastName: val, lastName: val })); fetchAutocompleteSuggestions('deceasedLastName', val); } }} onChange={(_e, val) => { if (val) setFormData(prev => ({ ...prev, deceasedLastName: val, lastName: val })); }} renderOption={(props, option) => { const s = getAcSuggestionsWithCount('deceasedLastName', formData.deceasedLastName || formData.lastName || '').find(x => x.value === option); return <li {...props} key={option}><Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}><span>{option}</span>{s && <Chip label={s.count} size="small" sx={{ ml: 1, minWidth: 28, height: 20, fontSize: '0.7rem' }} />}</Box></li>; }} renderInput={(params) => <TextField {...params} label={t('common.last_name')} required sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }} />} />
                 </Stack>
-                <TextField label="Age at Death" type="number" value={formData.age || ''} onChange={(e) => setFormData(prev => ({ ...prev, age: e.target.value }))} sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }} />
+                <TextField label={t('records.label_age_at_death')} type="number" value={formData.age || ''} onChange={(e) => setFormData(prev => ({ ...prev, age: e.target.value }))} sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }} />
               </Stack>
             </RecordSection>
-            <RecordSection title="Funeral Details">
+            <RecordSection title={t('records.section_funeral')}>
               <Stack spacing={2.5} sx={{ mt: 2 }}>
                 <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-                  <TextField label="Date of Death" type="date" value={formData.deathDate || formData.dateOfDeath || ''} onChange={(e) => setFormData(prev => ({ ...prev, deathDate: e.target.value, dateOfDeath: e.target.value }))} InputLabelProps={{ shrink: true }} required sx={{ flex: 1, '& .MuiOutlinedInput-root': { borderRadius: 2 } }} />
-                  <TextField label="Burial Date" type="date" value={formData.burialDate || ''} onChange={(e) => setFormData(prev => ({ ...prev, burialDate: e.target.value }))} InputLabelProps={{ shrink: true }} sx={{ flex: 1, '& .MuiOutlinedInput-root': { borderRadius: 2 } }} />
+                  <TextField label={t('records.label_date_of_death')} type="date" value={formData.deathDate || formData.dateOfDeath || ''} onChange={(e) => setFormData(prev => ({ ...prev, deathDate: e.target.value, dateOfDeath: e.target.value }))} InputLabelProps={{ shrink: true }} required sx={{ flex: 1, '& .MuiOutlinedInput-root': { borderRadius: 2 } }} />
+                  <TextField label={t('records.label_burial_date')} type="date" value={formData.burialDate || ''} onChange={(e) => setFormData(prev => ({ ...prev, burialDate: e.target.value }))} InputLabelProps={{ shrink: true }} sx={{ flex: 1, '& .MuiOutlinedInput-root': { borderRadius: 2 } }} />
                 </Stack>
-                <Autocomplete freeSolo disableClearable fullWidth options={getAcOptions('burialLocation', formData.burialLocation || '')} loading={acLoading['burialLocation']} inputValue={formData.burialLocation || ''} onInputChange={(_e, val, reason) => { if (reason === 'input' || reason === 'clear') { setFormData(prev => ({ ...prev, burialLocation: val })); fetchAutocompleteSuggestions('burialLocation', val); } }} onChange={(_e, val) => { if (val) setFormData(prev => ({ ...prev, burialLocation: val })); }} renderOption={(props, option) => { const s = getAcSuggestionsWithCount('burialLocation', formData.burialLocation || '').find(x => x.value === option); return <li {...props} key={option}><Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}><span>{option}</span>{s && <Chip label={s.count} size="small" sx={{ ml: 1, minWidth: 28, height: 20, fontSize: '0.7rem' }} />}</Box></li>; }} renderInput={(params) => <TextField {...params} label="Burial Location" sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }} />} />
+                <Autocomplete freeSolo disableClearable fullWidth options={getAcOptions('burialLocation', formData.burialLocation || '')} loading={acLoading['burialLocation']} inputValue={formData.burialLocation || ''} onInputChange={(_e, val, reason) => { if (reason === 'input' || reason === 'clear') { setFormData(prev => ({ ...prev, burialLocation: val })); fetchAutocompleteSuggestions('burialLocation', val); } }} onChange={(_e, val) => { if (val) setFormData(prev => ({ ...prev, burialLocation: val })); }} renderOption={(props, option) => { const s = getAcSuggestionsWithCount('burialLocation', formData.burialLocation || '').find(x => x.value === option); return <li {...props} key={option}><Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}><span>{option}</span>{s && <Chip label={s.count} size="small" sx={{ ml: 1, minWidth: 28, height: 20, fontSize: '0.7rem' }} />}</Box></li>; }} renderInput={(params) => <TextField {...params} label={t('records.label_burial_location')} sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }} />} />
               </Stack>
             </RecordSection>
             <FormControl fullWidth>
-              <InputLabel>Priest</InputLabel>
-              <Select label="Priest" value={formData.priest || ''} onChange={(e) => { const value = e.target.value; if (value === 'custom') { setFormData(prev => ({ ...prev, priest: '', customPriest: true })); } else { setFormData(prev => ({ ...prev, priest: value, customPriest: false })); } }}>
-                <MenuItem value=""><em>Select a priest...</em></MenuItem>
+              <InputLabel>{t('records.label_priest_select')}</InputLabel>
+              <Select label={t('records.label_priest_select')} value={formData.priest || ''} onChange={(e) => { const value = e.target.value; if (value === 'custom') { setFormData(prev => ({ ...prev, priest: '', customPriest: true })); } else { setFormData(prev => ({ ...prev, priest: value, customPriest: false })); } }}>
+                <MenuItem value=""><em>{t('records.placeholder_select_priest')}</em></MenuItem>
                 {priestOptions.map((priest) => (<MenuItem key={priest} value={priest}>{priest}</MenuItem>))}
-                <MenuItem value="custom"><em>Other (enter manually)...</em></MenuItem>
+                <MenuItem value="custom"><em>{t('records.option_other_priest')}</em></MenuItem>
               </Select>
             </FormControl>
             {formData.customPriest && (
-              <TextField label="Enter Priest Name" value={formData.priest || ''} onChange={(e) => setFormData(prev => ({ ...prev, priest: e.target.value }))} fullWidth placeholder="Enter the priest's name" />
+              <TextField label={t('records.label_priest')} value={formData.priest || ''} onChange={(e) => setFormData(prev => ({ ...prev, priest: e.target.value }))} fullWidth placeholder={t('records.placeholder_priest_name')} />
             )}
           </>
         )}
@@ -1710,14 +1706,14 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
                   {/* Church selector or static name */}
                   {churches.filter(c => c.id !== 0).length === 1 ? (
                     <Typography variant="body1" fontWeight={700} sx={{ minWidth: 200 }}>
-                      {churches.find(c => c.id !== 0)?.church_name || 'Church'}
+                      {churches.find(c => c.id !== 0)?.church_name || t('records.label_church')}
                     </Typography>
                   ) : (
                     <FormControl sx={{ minWidth: 220 }} size="small">
-                      <InputLabel>Church</InputLabel>
+                      <InputLabel>{t('records.label_church')}</InputLabel>
                       <Select
                         value={selectedChurch}
-                        label="Church"
+                        label={t('records.label_church')}
                         onChange={(e) => setSelectedChurch(e.target.value)}
                         disabled={loading}
                       >
@@ -1736,16 +1732,16 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
                   )}
 
                   <FormControl sx={{ minWidth: 200 }} size="small">
-                    <InputLabel>Record Type</InputLabel>
+                    <InputLabel>{t('records.label_record_type')}</InputLabel>
                     <Select
                       value={selectedRecordType}
-                      label="Record Type"
+                      label={t('records.label_record_type')}
                       onChange={(e) => handleRecordTypeChange(e.target.value)}
                       disabled={loading}
                     >
-                      {recordTypes.map((type) => (
+                      {RECORD_TYPE_CONFIGS.map((type) => (
                         <MenuItem key={type.value} value={type.value}>
-                          {type.label}
+                          {t(type.labelKey)}
                         </MenuItem>
                       ))}
                     </Select>
@@ -1761,10 +1757,10 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
                       bgcolor: 'action.hover',
                     }}>
                       {([
-                        { key: 'table' as ViewMode, icon: <LayoutGrid size={15} />, label: 'Table' },
-                        { key: 'card' as ViewMode, icon: <List size={15} />, label: 'Cards' },
-                        { key: 'timeline' as ViewMode, icon: <Clock size={15} />, label: 'Timeline' },
-                        { key: 'analytics' as ViewMode, icon: <BarChart3 size={15} />, label: 'Analytics' },
+                        { key: 'table' as ViewMode, icon: <LayoutGrid size={15} />, label: t('records.view_table') },
+                        { key: 'card' as ViewMode, icon: <List size={15} />, label: t('records.view_cards') },
+                        { key: 'timeline' as ViewMode, icon: <Clock size={15} />, label: t('records.view_timeline') },
+                        { key: 'analytics' as ViewMode, icon: <BarChart3 size={15} />, label: t('records.view_analytics') },
                       ]).map(({ key, icon, label }) => {
                         const isActive = activeView === key;
                         return (
@@ -1812,7 +1808,7 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
                     <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems={{ xs: 'stretch', sm: 'center' }}>
                       {/* Search */}
                       <TextField
-                        placeholder="Search records..."
+                        placeholder={t('records.search_placeholder')}
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         onKeyDown={(e) => {
@@ -1853,11 +1849,11 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
                           whiteSpace: 'nowrap',
                         }}
                       >
-                        Add Record
+                        {t('records.add_record')}
                       </Button>
 
                       {/* More Actions menu */}
-                      <Tooltip title="More actions">
+                      <Tooltip title={t('records.more_actions')}>
                         <IconButton
                           onClick={(e) => setMoreMenuAnchor(e.currentTarget)}
                           size="small"
@@ -1880,29 +1876,29 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
                       >
                         <MenuItem onClick={() => { handleExport(); setMoreMenuAnchor(null); }}>
                           <ListItemIcon><Download size={18} /></ListItemIcon>
-                          <ListItemText>Export Records</ListItemText>
+                          <ListItemText>{t('records.export_records')}</ListItemText>
                         </MenuItem>
                         <MenuItem onClick={() => { setMoreMenuAnchor(null); /* TODO: Import */ }}>
                           <ListItemIcon><Upload size={18} /></ListItemIcon>
-                          <ListItemText>Import Records</ListItemText>
+                          <ListItemText>{t('records.import_records')}</ListItemText>
                         </MenuItem>
                         <MenuItem onClick={() => { handleGenerateReport(); setMoreMenuAnchor(null); }} disabled={!selectedRecordType}>
                           <ListItemIcon><FileBarChart size={18} /></ListItemIcon>
-                          <ListItemText>Generate Report</ListItemText>
+                          <ListItemText>{t('records.generate_report')}</ListItemText>
                         </MenuItem>
                         <MenuItem onClick={() => { handleCollaborativeReport(); setMoreMenuAnchor(null); }}>
                           <ListItemIcon><Users size={18} /></ListItemIcon>
-                          <ListItemText>Collaboration Link</ListItemText>
+                          <ListItemText>{t('records.collaboration_link')}</ListItemText>
                         </MenuItem>
                         <Divider />
                         <MenuItem onClick={() => { setAdvancedGridOpen(true); setMoreMenuAnchor(null); }}>
                           <ListItemIcon><Settings size={18} /></ListItemIcon>
-                          <ListItemText>Grid Options</ListItemText>
+                          <ListItemText>{t('records.grid_options')}</ListItemText>
                         </MenuItem>
                         {!agGridFailed && (
                           <MenuItem onClick={() => { setUseAgGrid(!useAgGrid); setMoreMenuAnchor(null); }}>
                             <ListItemIcon><LayoutGrid size={18} /></ListItemIcon>
-                            <ListItemText>{useAgGrid ? 'Use Standard Table' : 'Use Advanced Grid'}</ListItemText>
+                            <ListItemText>{useAgGrid ? t('records.use_standard_table') : t('records.use_advanced_grid')}</ListItemText>
                           </MenuItem>
                         )}
                       </Menu>
@@ -1927,10 +1923,10 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
           {!selectedRecordType && (
             <Box sx={{ textAlign: 'center', py: 8, color: 'text.secondary' }}>
               <Typography variant="h5" sx={{ mb: 1, fontWeight: 600, color: 'text.primary' }}>
-                Welcome to Church Records
+                {t('records.welcome_title')}
               </Typography>
               <Typography variant="body1" sx={{ maxWidth: 400, mx: 'auto', lineHeight: 1.6 }}>
-                Select a record type above to browse baptism, marriage, or funeral records.
+                {t('records.welcome_desc')}
               </Typography>
             </Box>
           )}
@@ -1942,7 +1938,7 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
                   {debouncedSearch && (
                     <Chip
                       size="small"
-                      label={`Best Matches${showBestMatches ? ' ✓' : ''}`}
+                      label={`${t('records.best_matches')}${showBestMatches ? ' ✓' : ''}`}
                       color={showBestMatches ? 'primary' : 'default'}
                       variant={showBestMatches ? 'filled' : 'outlined'}
                       onClick={() => setShowBestMatches(prev => !prev)}
@@ -1961,7 +1957,7 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
                       onClick={clearSelection}
                       sx={{ ml: 'auto', fontSize: '0.75rem' }}
                     >
-                      Clear Selection
+                      {t('records.clear_selection')}
                     </Button>
                   )}
                 </Box>
@@ -2037,14 +2033,14 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
                                 </TableSortLabel>
                               </TableCell>
                             ))}
-                            <TableCell sx={{ minWidth: '150px', position: 'sticky', right: 0, bgcolor: 'primary.main', color: 'primary.contrastText', zIndex: 2 }} align="center">Actions</TableCell>
+                            <TableCell sx={{ minWidth: '150px', position: 'sticky', right: 0, bgcolor: 'primary.main', color: 'primary.contrastText', zIndex: 2 }} align="center">{t('common.actions')}</TableCell>
                           </TableRow>
                         </TableHead>
                         <TableBody>
                           {loading ? (
-                            <TableRow><TableCell colSpan={getColumnDefinitions(selectedRecordType).length + 1} align="center" sx={{ py: 8 }}><CircularProgress /><Typography variant="body2" sx={{ mt: 2 }}>Loading records...</Typography></TableCell></TableRow>
+                            <TableRow><TableCell colSpan={getColumnDefinitions(selectedRecordType).length + 1} align="center" sx={{ py: 8 }}><CircularProgress /><Typography variant="body2" sx={{ mt: 2 }}>{t('records.loading_records')}</Typography></TableCell></TableRow>
                           ) : paginatedRecords.length === 0 ? (
-                            <TableRow><TableCell colSpan={getColumnDefinitions(selectedRecordType).length + 1} align="center" sx={{ py: 8 }}><Typography variant="body1" color="text.secondary">No records found</Typography></TableCell></TableRow>
+                            <TableRow><TableCell colSpan={getColumnDefinitions(selectedRecordType).length + 1} align="center" sx={{ py: 8 }}><Typography variant="body1" color="text.secondary">{t('records.no_records_found')}</Typography></TableCell></TableRow>
                           ) : (
                             paginatedRecords.map((record, index) => (
                               <TableRow key={record.id} onClick={() => handleRowSelect(record.id)} sx={{ bgcolor: index % 2 === 0 ? 'background.default' : 'background.paper', ...getRecordRowStyle(record, isRecordSelected(record.id), nowReference, isDarkMode), cursor: 'pointer', '&:hover': { backgroundColor: 'action.hover' } }}>
@@ -2055,9 +2051,9 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
                                 })}
                                 <TableCell sx={{ minWidth: '150px', position: 'sticky', right: 0, bgcolor: index % 2 === 0 ? 'background.default' : 'background.paper', zIndex: 1 }} align="center">
                                   <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'center' }}>
-                                    <Tooltip title="View Details"><IconButton size="small" onClick={() => handleViewRecord(record)}><Eye size={16} strokeWidth={1.5} /></IconButton></Tooltip>
-                                    <Tooltip title="Edit Record"><IconButton size="small" onClick={() => handleEditRecord(record)}><Pencil size={16} strokeWidth={1.5} /></IconButton></Tooltip>
-                                    <Tooltip title="Delete Record"><IconButton size="small" onClick={() => handleDeleteClick(record)}><Trash2 size={16} strokeWidth={1.5} /></IconButton></Tooltip>
+                                    <Tooltip title={t('records.tooltip_view')}><IconButton size="small" onClick={() => handleViewRecord(record)}><Eye size={16} strokeWidth={1.5} /></IconButton></Tooltip>
+                                    <Tooltip title={t('records.tooltip_edit')}><IconButton size="small" onClick={() => handleEditRecord(record)}><Pencil size={16} strokeWidth={1.5} /></IconButton></Tooltip>
+                                    <Tooltip title={t('records.tooltip_delete')}><IconButton size="small" onClick={() => handleDeleteClick(record)}><Trash2 size={16} strokeWidth={1.5} /></IconButton></Tooltip>
                                   </Box>
                                 </TableCell>
                               </TableRow>
@@ -2131,7 +2127,7 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
                           color: 'primary.contrastText',
                           zIndex: 2,
                         }} align="center">
-                          Actions
+                          {t('common.actions')}
                         </TableCell>
                       </TableRow>
                     </TableHead>
@@ -2141,7 +2137,7 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
                           <TableCell colSpan={getColumnDefinitions(selectedRecordType).length + 1} align="center" sx={{ py: 8 }}>
                             <CircularProgress />
                             <Typography variant="body2" sx={{ mt: 2 }}>
-                              Loading records...
+                              {t('records.loading_records')}
                             </Typography>
                           </TableCell>
                         </TableRow>
@@ -2149,10 +2145,10 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
                         <TableRow>
                           <TableCell colSpan={getColumnDefinitions(selectedRecordType).length + 1} align="center" sx={{ py: 8 }}>
                             <Typography variant="body1" color="text.secondary">
-                              No records found
+                              {t('records.no_records_found')}
                             </Typography>
                             <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                              {searchTerm ? 'Try adjusting your search terms' : 'Click "Add Record" to create the first record'}
+                              {searchTerm ? t('records.no_records_hint_search') : t('records.no_records_hint_add')}
                             </Typography>
                           </TableCell>
                         </TableRow>
@@ -2188,23 +2184,23 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
                               zIndex: 1,
                             }} align="center">
                               <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'center' }} className="record-actions">
-                                <Tooltip title="View Details">
+                                <Tooltip title={t('records.tooltip_view')}>
                                   <IconButton size="small" onClick={() => handleViewRecord(record)} sx={{ opacity: 0.7, color: 'text.secondary', '&:hover': { opacity: 1, color: 'text.primary' } }}>
                                     <Eye size={16} strokeWidth={1.5} />
                                   </IconButton>
                                 </Tooltip>
-                                <Tooltip title="Edit Record">
+                                <Tooltip title={t('records.tooltip_edit')}>
                                   <IconButton size="small" onClick={() => handleEditRecord(record)} sx={{ opacity: 0.7, color: 'text.secondary', '&:hover': { opacity: 1, color: 'text.primary' } }}>
                                     <Pencil size={16} strokeWidth={1.5} />
                                   </IconButton>
                                 </Tooltip>
-                                <Tooltip title="Delete Record">
+                                <Tooltip title={t('records.tooltip_delete')}>
                                   <IconButton size="small" onClick={() => handleDeleteClick(record)} sx={{ opacity: 0.7, color: 'text.secondary', '&:hover': { opacity: 1, color: 'error.main' } }}>
                                     <Trash2 size={16} strokeWidth={1.5} />
                                   </IconButton>
                                 </Tooltip>
                                 {(selectedRecordType === 'baptism' || selectedRecordType === 'marriage') && (
-                                  <Tooltip title="Generate Certificate">
+                                  <Tooltip title={t('records.tooltip_certificate')}>
                                     <IconButton 
                                       size="small" 
                                       onClick={() => {
@@ -2282,7 +2278,7 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
                 </Box>
                 <Box>
                   <Typography variant="h5" component="div" sx={{ fontWeight: 600, mb: 0.5 }}>
-                    {editingRecord ? 'Edit Record' : 'Add New Record'}
+                    {editingRecord ? t('records.edit_record') : t('records.add_new_record')}
                   </Typography>
                   <Typography variant="body2" sx={{ opacity: 0.9 }}>
                     {selectedRecordType.charAt(0).toUpperCase() + selectedRecordType.slice(1)} Record
@@ -2294,11 +2290,11 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
                   {selectedRecordType === 'baptism' && (
                     <>
                       {/* Personal Information Section */}
-                      <RecordSection title="Personal Information">
+                      <RecordSection title={t('records.section_personal')}>
                         <Stack spacing={2.5} sx={{ mt: 2 }}>
                           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
                             <TextField
-                              label="First Name"
+                              label={t('common.first_name')}
                               value={formData.firstName || ''}
                               onChange={(e) => setFormData(prev => ({ ...prev, firstName: e.target.value }))}
                               required
@@ -2310,7 +2306,7 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
                               }}
                             />
                             <TextField
-                              label="Last Name"
+                              label={t('common.last_name')}
                               value={formData.lastName || ''}
                               onChange={(e) => setFormData(prev => ({ ...prev, lastName: e.target.value }))}
                               required
@@ -2325,7 +2321,7 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
                           
                           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
                             <TextField
-                              label="Date of Birth"
+                              label={t('records.label_date_of_birth')}
                               type="date"
                               value={formData.dateOfBirth || ''}
                               onChange={(e) => setFormData(prev => ({ ...prev, dateOfBirth: e.target.value }))}
@@ -2338,7 +2334,7 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
                               }}
                             />
                             <TextField
-                              label="Place of Birth"
+                              label={t('records.label_place_of_birth')}
                               value={formData.placeOfBirth || ''}
                               onChange={(e) => setFormData(prev => ({ ...prev, placeOfBirth: e.target.value }))}
                               sx={{ 
@@ -2352,7 +2348,7 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
                           
                           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
                             <TextField
-                              label="Father's Name"
+                              label={t('records.label_father_name')}
                               value={formData.fatherName || ''}
                               onChange={(e) => setFormData(prev => ({ ...prev, fatherName: e.target.value }))}
                               sx={{ 
@@ -2363,7 +2359,7 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
                               }}
                             />
                             <TextField
-                              label="Mother's Name"
+                              label={t('records.label_mother_name')}
                               value={formData.motherName || ''}
                               onChange={(e) => setFormData(prev => ({ ...prev, motherName: e.target.value }))}
                               sx={{ 
@@ -2378,11 +2374,11 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
                       </RecordSection>
                       
                       {/* Baptism Details Section */}
-                      <RecordSection title="Baptism Details">
+                      <RecordSection title={t('records.section_baptism')}>
                         <Stack spacing={2.5} sx={{ mt: 2 }}>
                           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
                             <TextField
-                              label="Date of Baptism"
+                              label={t('records.label_date_of_baptism')}
                               type="date"
                               value={formData.dateOfBaptism || ''}
                               onChange={(e) => setFormData(prev => ({ ...prev, dateOfBaptism: e.target.value }))}
@@ -2396,9 +2392,9 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
                               }}
                             />
                             <FormControl sx={{ flex: 1 }}>
-                              <InputLabel>Received By</InputLabel>
+                              <InputLabel>{t('records.label_received_by')}</InputLabel>
                               <Select
-                                label="Received By"
+                                label={t('records.label_received_by')}
                                 value={formData.entryType || ''}
                                 onChange={(e) => setFormData(prev => ({ ...prev, entryType: e.target.value }))}
                                 sx={{ borderRadius: 2 }}
@@ -2410,10 +2406,10 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
                           </Stack>
                           
                           <TextField
-                            label="Godparent Names"
+                            label={t('records.label_godparents')}
                             value={formData.godparentNames || ''}
                             onChange={(e) => setFormData(prev => ({ ...prev, godparentNames: e.target.value }))}
-                            placeholder="Enter godparent names separated by commas"
+                            placeholder={t('records.placeholder_godparents')}
                             sx={{
                               '& .MuiOutlinedInput-root': {
                                 borderRadius: 2,
@@ -2424,13 +2420,13 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
                       </RecordSection>
                       
                       {/* Church & Registry Information Section */}
-                      <RecordSection title="Church & Registry Information">
+                      <RecordSection title={t('records.section_church_registry')}>
                         <Stack spacing={2.5} sx={{ mt: 2 }}>
                           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
                             <FormControl sx={{ flex: 1 }}>
-                              <InputLabel>Priest</InputLabel>
+                              <InputLabel>{t('records.label_priest_select')}</InputLabel>
                               <Select
-                                label="Priest"
+                                label={t('records.label_priest_select')}
                                 value={formData.priest || ''}
                                 onChange={(e) => {
                                   const value = e.target.value;
@@ -2445,7 +2441,7 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
                                 }}
                               >
                                 <MenuItem value="">
-                                  <em>Select a priest...</em>
+                                  <em>{t('records.placeholder_select_priest')}</em>
                                 </MenuItem>
                                 {priestOptions.map((priest) => (
                                   <MenuItem key={priest} value={priest}>
@@ -2453,13 +2449,13 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
                                   </MenuItem>
                                 ))}
                                 <MenuItem value="custom">
-                                  <em>Other (enter manually)...</em>
+                                  <em>{t('records.option_other_priest')}</em>
                                 </MenuItem>
                               </Select>
                             </FormControl>
                             <TextField
-                              label="Church"
-                              value={churches.find(c => c.id === selectedChurch)?.church_name || 'No church selected'}
+                              label={t('records.label_church')}
+                              value={churches.find(c => c.id === selectedChurch)?.church_name || t('records.label_no_church')}
                               InputProps={{ readOnly: true }}
                               sx={{
                                 flex: 1,
@@ -2470,11 +2466,11 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
                           </Stack>
                           {formData.customPriest && (
                             <TextField
-                              label="Enter Priest Name"
+                              label={t('records.label_priest')}
                               value={formData.priest || ''}
                               onChange={(e) => setFormData(prev => ({ ...prev, priest: e.target.value }))}
                               fullWidth
-                              placeholder="Enter the priest's name"
+                              placeholder={t('records.placeholder_priest_name')}
                               sx={{
                                 '& .MuiOutlinedInput-root': {
                                   borderRadius: 2,
@@ -2483,10 +2479,10 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
                             />
                           )}
                           <TextField
-                            label="Registry Number"
+                            label={t('records.label_registry_number')}
                             value={formData.registryNumber || ''}
                             onChange={(e) => setFormData(prev => ({ ...prev, registryNumber: e.target.value }))}
-                            placeholder="Enter registry number"
+                            placeholder={t('records.placeholder_registry')}
                             sx={{
                               '& .MuiOutlinedInput-root': {
                                 borderRadius: 2,
@@ -2497,14 +2493,14 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
                       </RecordSection>
                       
                       {/* Additional Notes Section */}
-                      <RecordSection title="Additional Notes">
+                      <RecordSection title={t('records.section_notes')}>
                         <TextField
-                          label="Notes"
+                          label={t('records.label_notes')}
                           multiline
                           rows={4}
                           value={formData.notes || ''}
                           onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
-                          placeholder="Enter any additional notes or comments..."
+                          placeholder={t('records.placeholder_notes')}
                           fullWidth
                           sx={{ 
                             mt: 2,
@@ -2520,11 +2516,11 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
                   {selectedRecordType === 'marriage' && (
                     <>
                       {/* Groom Information Section */}
-                      <RecordSection title="Groom Information">
+                      <RecordSection title={t('records.section_groom')}>
                         <Stack spacing={2.5} sx={{ mt: 2 }}>
                           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
                             <TextField
-                              label="First Name"
+                              label={t('common.first_name')}
                               value={formData.groomFirstName || ''}
                               onChange={(e) => setFormData(prev => ({ ...prev, groomFirstName: e.target.value }))}
                               required
@@ -2536,7 +2532,7 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
                               }}
                             />
                             <TextField
-                              label="Last Name"
+                              label={t('common.last_name')}
                               value={formData.groomLastName || ''}
                               onChange={(e) => setFormData(prev => ({ ...prev, groomLastName: e.target.value }))}
                               required
@@ -2549,21 +2545,21 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
                             />
                           </Stack>
                           <TextField
-                            label="Groom's Parents"
+                            label={t('records.label_groom_parents')}
                             value={formData.groomParents || ''}
                             onChange={(e) => setFormData(prev => ({ ...prev, groomParents: e.target.value }))}
-                            placeholder="Enter groom's parents"
+                            placeholder={t('records.placeholder_groom_parents')}
                             sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                           />
                         </Stack>
                       </RecordSection>
 
                       {/* Bride Information Section */}
-                      <RecordSection title="Bride Information">
+                      <RecordSection title={t('records.section_bride')}>
                         <Stack spacing={2.5} sx={{ mt: 2 }}>
                           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
                             <TextField
-                              label="First Name"
+                              label={t('common.first_name')}
                               value={formData.brideFirstName || ''}
                               onChange={(e) => setFormData(prev => ({ ...prev, brideFirstName: e.target.value }))}
                               required
@@ -2575,7 +2571,7 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
                               }}
                             />
                             <TextField
-                              label="Last Name"
+                              label={t('common.last_name')}
                               value={formData.brideLastName || ''}
                               onChange={(e) => setFormData(prev => ({ ...prev, brideLastName: e.target.value }))}
                               required
@@ -2588,21 +2584,21 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
                             />
                           </Stack>
                           <TextField
-                            label="Bride's Parents"
+                            label={t('records.label_bride_parents')}
                             value={formData.brideParents || ''}
                             onChange={(e) => setFormData(prev => ({ ...prev, brideParents: e.target.value }))}
-                            placeholder="Enter bride's parents"
+                            placeholder={t('records.placeholder_bride_parents')}
                             sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                           />
                         </Stack>
                       </RecordSection>
                       
                       {/* Marriage Details Section */}
-                      <RecordSection title="Marriage Details">
+                      <RecordSection title={t('records.section_marriage')}>
                         <Stack spacing={2.5} sx={{ mt: 2 }}>
                           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
                             <TextField
-                              label="Marriage Date"
+                              label={t('records.label_marriage_date')}
                               type="date"
                               value={formData.marriageDate || ''}
                               onChange={(e) => setFormData(prev => ({ ...prev, marriageDate: e.target.value }))}
@@ -2616,7 +2612,7 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
                               }}
                             />
                             <TextField
-                              label="Marriage Location"
+                              label={t('records.label_marriage_location')}
                               value={formData.marriageLocation || ''}
                               onChange={(e) => setFormData(prev => ({ ...prev, marriageLocation: e.target.value }))}
                               sx={{ 
@@ -2630,7 +2626,7 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
                           
                           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
                             <TextField
-                              label="Witness 1"
+                              label={t('records.label_witness_1')}
                               value={formData.witness1 || ''}
                               onChange={(e) => setFormData(prev => ({ ...prev, witness1: e.target.value }))}
                               sx={{ 
@@ -2641,7 +2637,7 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
                               }}
                             />
                             <TextField
-                              label="Witness 2"
+                              label={t('records.label_witness_2')}
                               value={formData.witness2 || ''}
                               onChange={(e) => setFormData(prev => ({ ...prev, witness2: e.target.value }))}
                               sx={{ 
@@ -2656,9 +2652,9 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
                       </RecordSection>
                       
                       <FormControl fullWidth>
-                        <InputLabel>Priest</InputLabel>
+                        <InputLabel>{t('records.label_priest_select')}</InputLabel>
                         <Select
-                          label="Priest"
+                          label={t('records.label_priest_select')}
                           value={formData.priest || ''}
                           onChange={(e) => {
                             const value = e.target.value;
@@ -2670,7 +2666,7 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
                           }}
                         >
                           <MenuItem value="">
-                            <em>Select a priest...</em>
+                            <em>{t('records.placeholder_select_priest')}</em>
                           </MenuItem>
                           {priestOptions.map((priest) => (
                             <MenuItem key={priest} value={priest}>
@@ -2678,17 +2674,17 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
                             </MenuItem>
                           ))}
                           <MenuItem value="custom">
-                            <em>Other (enter manually)...</em>
+                            <em>{t('records.option_other_priest')}</em>
                           </MenuItem>
                         </Select>
                       </FormControl>
                       {formData.customPriest && (
                         <TextField
-                          label="Enter Priest Name"
+                          label={t('records.label_priest')}
                           value={formData.priest || ''}
                           onChange={(e) => setFormData(prev => ({ ...prev, priest: e.target.value }))}
                           fullWidth
-                          placeholder="Enter the priest's name"
+                          placeholder={t('records.placeholder_priest_name')}
                         />
                       )}
                     </>
@@ -2697,11 +2693,11 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
                   {selectedRecordType === 'funeral' && (
                     <>
                       {/* Deceased Information Section */}
-                      <RecordSection title="Deceased Information">
+                      <RecordSection title={t('records.section_deceased')}>
                         <Stack spacing={2.5} sx={{ mt: 2 }}>
                           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
                             <TextField
-                              label="First Name"
+                              label={t('common.first_name')}
                               value={formData.deceasedFirstName || formData.firstName || ''}
                               onChange={(e) => setFormData(prev => ({ ...prev, deceasedFirstName: e.target.value, firstName: e.target.value }))}
                               required
@@ -2713,7 +2709,7 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
                               }}
                             />
                             <TextField
-                              label="Last Name"
+                              label={t('common.last_name')}
                               value={formData.deceasedLastName || formData.lastName || ''}
                               onChange={(e) => setFormData(prev => ({ ...prev, deceasedLastName: e.target.value, lastName: e.target.value }))}
                               required
@@ -2728,7 +2724,7 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
                           
                           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
                             <TextField
-                              label="Age at Death"
+                              label={t('records.label_age_at_death')}
                               type="number"
                               value={formData.age || ''}
                               onChange={(e) => setFormData(prev => ({ ...prev, age: e.target.value }))}
@@ -2744,11 +2740,11 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
                       </RecordSection>
                       
                       {/* Funeral Details Section */}
-                      <RecordSection title="Funeral Details">
+                      <RecordSection title={t('records.section_funeral')}>
                         <Stack spacing={2.5} sx={{ mt: 2 }}>
                           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
                             <TextField
-                              label="Date of Death"
+                              label={t('records.label_date_of_death')}
                               type="date"
                               value={formData.deathDate || formData.dateOfDeath || ''}
                               onChange={(e) => setFormData(prev => ({ ...prev, deathDate: e.target.value, dateOfDeath: e.target.value }))}
@@ -2762,7 +2758,7 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
                               }}
                             />
                             <TextField
-                              label="Burial Date"
+                              label={t('records.label_burial_date')}
                               type="date"
                               value={formData.burialDate || ''}
                               onChange={(e) => setFormData(prev => ({ ...prev, burialDate: e.target.value }))}
@@ -2777,7 +2773,7 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
                           </Stack>
                           
                           <TextField
-                            label="Burial Location"
+                            label={t('records.label_burial_location')}
                             value={formData.burialLocation || ''}
                             onChange={(e) => setFormData(prev => ({ ...prev, burialLocation: e.target.value }))}
                             fullWidth
@@ -2791,9 +2787,9 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
                       </RecordSection>
                       
                       <FormControl fullWidth>
-                        <InputLabel>Priest</InputLabel>
+                        <InputLabel>{t('records.label_priest_select')}</InputLabel>
                         <Select
-                          label="Priest"
+                          label={t('records.label_priest_select')}
                           value={formData.priest || ''}
                           onChange={(e) => {
                             const value = e.target.value;
@@ -2805,7 +2801,7 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
                           }}
                         >
                           <MenuItem value="">
-                            <em>Select a priest...</em>
+                            <em>{t('records.placeholder_select_priest')}</em>
                           </MenuItem>
                           {priestOptions.map((priest) => (
                             <MenuItem key={priest} value={priest}>
@@ -2813,17 +2809,17 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
                             </MenuItem>
                           ))}
                           <MenuItem value="custom">
-                            <em>Other (enter manually)...</em>
+                            <em>{t('records.option_other_priest')}</em>
                           </MenuItem>
                         </Select>
                       </FormControl>
                       {formData.customPriest && (
                         <TextField
-                          label="Enter Priest Name"
+                          label={t('records.label_priest')}
                           value={formData.priest || ''}
                           onChange={(e) => setFormData(prev => ({ ...prev, priest: e.target.value }))}
                           fullWidth
-                          placeholder="Enter the priest's name"
+                          placeholder={t('records.placeholder_priest_name')}
                         />
                       )}
                     </>
@@ -2851,9 +2847,9 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
                     fontWeight: 500,
                   }}
                 >
-                  Cancel
+                  {t('common.cancel')}
                 </Button>
-                <Button 
+                <Button
                   onClick={handleSaveRecord} 
                   variant="contained"
                   disabled={loading}
@@ -2874,10 +2870,10 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
                   {loading ? (
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       <CircularProgress size={20} color="inherit" />
-                      <span>Saving...</span>
+                      <span>{t('common.saving')}</span>
                     </Box>
                   ) : (
-                    editingRecord ? 'Update Record' : 'Save Record'
+                    editingRecord ? t('records.update_record') : t('records.save_record')
                   )}
                 </Button>
               </DialogActions>
@@ -2917,26 +2913,26 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
               }}
             >
               <DialogTitle sx={{ fontWeight: 600 }}>
-                Delete Record?
+                {t('records.delete_confirm_title')}
               </DialogTitle>
               <DialogContent>
                 <Typography>
-                  Are you sure you want to delete '{recordToDelete?.name}'?
+                  Are you sure you want to delete &apos;{recordToDelete?.name}&apos;?
                 </Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                  This action cannot be undone.
+                  {t('records.delete_confirm_warning')}
                 </Typography>
               </DialogContent>
               <DialogActions sx={{ px: 3, pb: 2.5 }}>
                 <Button onClick={handleCancelDelete} variant="outlined">
-                  Cancel
+                  {t('common.cancel')}
                 </Button>
                 <Button
                   onClick={handleConfirmDelete}
                   variant="contained"
                   color="error"
                 >
-                  Delete
+                  {t('common.delete')}
                 </Button>
               </DialogActions>
             </Dialog>
@@ -2972,7 +2968,7 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
               recordType="baptism"
               onRefresh={() => {
                 fetchRecords(selectedRecordType, selectedChurch);
-                showToast('Records refreshed successfully!', 'success');
+                showToast(t('records.records_refreshed'), 'success');
               }}
             />
 

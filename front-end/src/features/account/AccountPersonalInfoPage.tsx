@@ -17,6 +17,7 @@ import {
   Typography,
 } from '@mui/material';
 import { useAuth } from '@/context/AuthContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { SnackbarState, SNACKBAR_CLOSED, SNACKBAR_DURATION } from './accountConstants';
 import { profileApi, extractErrorMessage } from './accountApi';
 
@@ -38,6 +39,7 @@ const EMPTY_FIELDS: ProfileFields = {
 
 const AccountPersonalInfoPage: React.FC = () => {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [fields, setFields] = useState<ProfileFields>(EMPTY_FIELDS);
@@ -90,9 +92,9 @@ const AccountPersonalInfoPage: React.FC = () => {
         phone: fields.phone,
       });
       setSaved(fields);
-      setSnackbar({ open: true, message: 'Profile saved successfully.', severity: 'success' });
+      setSnackbar({ open: true, message: t('account.profile_saved'), severity: 'success' });
     } catch (err: any) {
-      setSnackbar({ open: true, message: err.message || 'Failed to save profile.', severity: 'error' });
+      setSnackbar({ open: true, message: err.message || t('account.profile_save_failed'), severity: 'error' });
     } finally {
       setSaving(false);
     }
@@ -111,10 +113,10 @@ const AccountPersonalInfoPage: React.FC = () => {
       <Card variant="outlined">
         <CardContent sx={{ p: 3 }}>
           <Typography variant="h5" fontWeight={600} mb={0.5}>
-            Personal Information
+            {t('account.personal_information')}
           </Typography>
           <Typography variant="body2" color="text.secondary" mb={3}>
-            Update your personal details
+            {t('account.update_your_personal_details')}
           </Typography>
           <Divider sx={{ mb: 3 }} />
 
@@ -127,32 +129,32 @@ const AccountPersonalInfoPage: React.FC = () => {
             }}
           >
             <TextField
-              label="Email Address"
+              label={t('account.label_email_address')}
               value={fields.email}
               disabled
               fullWidth
-              helperText="Email cannot be changed"
+              helperText={t('account.email_cannot_be_changed')}
             />
             <TextField
-              label="Display Name"
+              label={t('account.label_display_name')}
               value={fields.display_name}
               onChange={handleChange('display_name')}
               fullWidth
             />
             <TextField
-              label="Phone Number"
+              label={t('account.label_phone_number')}
               value={fields.phone}
               onChange={handleChange('phone')}
               fullWidth
             />
             <TextField
-              label="Organization"
+              label={t('account.label_organization')}
               value={fields.company}
               onChange={handleChange('company')}
               fullWidth
             />
             <TextField
-              label="Location"
+              label={t('account.label_location')}
               value={fields.location}
               onChange={handleChange('location')}
               fullWidth
@@ -162,10 +164,10 @@ const AccountPersonalInfoPage: React.FC = () => {
 
           <Box display="flex" justifyContent="flex-end" gap={1.5} mt={4}>
             <Button variant="outlined" disabled={!isDirty || saving} onClick={handleCancel}>
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button variant="contained" onClick={handleSave} disabled={!isDirty || saving}>
-              {saving ? 'Saving...' : 'Save Changes'}
+              {saving ? t('common.saving') : t('common.save_changes')}
             </Button>
           </Box>
         </CardContent>

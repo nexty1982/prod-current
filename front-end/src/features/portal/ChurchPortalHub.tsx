@@ -36,6 +36,7 @@ import {
 } from '@/ui/icons';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useLanguage } from '@/context/LanguageContext';
 
 /* ─── Types ─── */
 
@@ -139,6 +140,7 @@ function RecordCard({ title, count, icon: Icon, iconColor, records, loading, onV
   iconColor: string; records: RecentRecord[]; loading: boolean;
   onViewAll: () => void; onAddNew: () => void;
 }) {
+  const { t } = useLanguage();
   return (
     <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm overflow-hidden">
       {/* Header */}
@@ -160,7 +162,7 @@ function RecordCard({ title, count, icon: Icon, iconColor, records, loading, onV
           <div className="space-y-2">{[0, 1, 2].map(i => <Skeleton key={i} height={20} />)}</div>
         ) : records.length === 0 ? (
           <p className="font-['Inter'] text-[13px] text-gray-400 dark:text-gray-500 text-center py-3">
-            No records yet
+            {t('common.no_records_yet')}
           </p>
         ) : (
           <div className="space-y-2">
@@ -184,13 +186,13 @@ function RecordCard({ title, count, icon: Icon, iconColor, records, loading, onV
           onClick={onViewAll}
           className="flex items-center gap-1.5 px-3 py-1.5 text-[13px] font-['Inter'] font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
         >
-          <Eye size={14} /> View All
+          <Eye size={14} /> {t('common.view_all')}
         </button>
         <button
           onClick={onAddNew}
           className="flex items-center gap-1.5 px-3 py-1.5 text-[13px] font-['Inter'] font-medium text-gray-900 dark:text-white bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors ml-auto"
         >
-          <Plus size={14} /> Add New
+          <Plus size={14} /> {t('common.add_new')}
         </button>
       </div>
     </div>
@@ -224,10 +226,11 @@ const ChurchPortalHub: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { activeChurchId, churchMetadata } = useChurch();
+  const { t } = useLanguage();
   const role = user?.role || '';
   const isAdmin = ADMIN_ROLES.has(role);
 
-  const greeting = user?.first_name ? `Welcome back, ${user.first_name}` : 'Welcome';
+  const greeting = user?.first_name ? `${t('portal.welcome_back').replace('{name}', user.first_name)}` : t('portal.welcome');
   const roleLabel = ROLE_LABELS[role] || role;
   const todayFormatted = getTodayFormatted();
 
@@ -539,14 +542,14 @@ const ChurchPortalHub: React.FC = () => {
               onClick={() => navigate('/portal/upload')}
               className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg font-['Inter'] text-[13px] font-medium text-gray-700 dark:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600 transition-colors shadow-sm"
             >
-              <Upload size={15} /> Upload Records
+              <Upload size={15} /> {t('portal.upload_records')}
             </button>
             <div ref={addRecordRef} className="relative">
               <button
                 onClick={() => setAddRecordOpen((p) => !p)}
                 className="flex items-center gap-2 px-4 py-2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-lg font-['Inter'] text-[13px] font-medium hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors shadow-sm"
               >
-                <Plus size={15} /> Add Record <ChevronDown size={14} className={`transition-transform ${addRecordOpen ? 'rotate-180' : ''}`} />
+                <Plus size={15} /> {t('portal.add_record')} <ChevronDown size={14} className={`transition-transform ${addRecordOpen ? 'rotate-180' : ''}`} />
               </button>
               {addRecordOpen && (
                 <div className="absolute right-0 top-full mt-1 w-52 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 overflow-hidden">
@@ -554,19 +557,19 @@ const ChurchPortalHub: React.FC = () => {
                     onClick={() => { navigate('/portal/records/baptism/new'); setAddRecordOpen(false); }}
                     className="flex items-center gap-3 w-full px-4 py-2.5 text-left font-['Inter'] text-[13px] text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                   >
-                    <Users size={15} className="text-blue-600 dark:text-blue-400" /> Baptism Record
+                    <Users size={15} className="text-blue-600 dark:text-blue-400" /> {t('portal.baptism_record')}
                   </button>
                   <button
                     onClick={() => { navigate('/portal/records/marriage/new'); setAddRecordOpen(false); }}
                     className="flex items-center gap-3 w-full px-4 py-2.5 text-left font-['Inter'] text-[13px] text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                   >
-                    <Heart size={15} className="text-rose-600 dark:text-rose-400" /> Marriage Record
+                    <Heart size={15} className="text-rose-600 dark:text-rose-400" /> {t('portal.marriage_record')}
                   </button>
                   <button
                     onClick={() => { navigate('/portal/records/funeral/new'); setAddRecordOpen(false); }}
                     className="flex items-center gap-3 w-full px-4 py-2.5 text-left font-['Inter'] text-[13px] text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                   >
-                    <Cross size={15} className="text-violet-600 dark:text-violet-400" /> Funeral Record
+                    <Cross size={15} className="text-violet-600 dark:text-violet-400" /> {t('portal.funeral_record')}
                   </button>
                 </div>
               )}
@@ -585,7 +588,7 @@ const ChurchPortalHub: React.FC = () => {
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search baptism, marriage, and funeral records..."
+              placeholder={t('portal.search_placeholder')}
               className="w-full pl-11 pr-10 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl font-['Inter'] text-[14px] text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-gray-400 dark:focus:border-gray-500 focus:ring-1 focus:ring-gray-400 dark:focus:ring-gray-500 shadow-sm transition-colors"
             />
             {searchTerm && (
@@ -660,17 +663,16 @@ const ChurchPortalHub: React.FC = () => {
               <Upload className="text-gray-500 dark:text-gray-400" size={28} />
             </div>
             <h2 className="font-['Inter'] text-xl font-semibold text-gray-900 dark:text-white mb-2">
-              Upload Historical Parish Records
+              {t('portal.upload_historical')}
             </h2>
             <p className="font-['Inter'] text-[14px] text-gray-500 dark:text-gray-400 max-w-md mx-auto mb-6">
-              Scan or upload parish ledger images to begin building your parish digital archive.
-              Our system will process and digitize your records automatically.
+              {t('portal.upload_historical_desc')}
             </p>
             <button
               onClick={() => navigate('/portal/upload')}
               className="inline-flex items-center gap-2 px-6 py-3 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-lg font-['Inter'] text-[14px] font-medium hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors shadow-sm"
             >
-              <Upload size={18} /> Upload Records
+              <Upload size={18} /> {t('portal.upload_records')}
             </button>
           </div>
         </section>
@@ -697,11 +699,11 @@ const ChurchPortalHub: React.FC = () => {
           {totalRecords > 0 && (
             <section className="mb-8">
               <h2 className="font-['Inter'] font-semibold text-[17px] text-gray-900 dark:text-white mb-4">
-                Parish Records
+                {t('portal.parish_records')}
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <RecordCard
-                  title="Baptisms"
+                  title={t('portal.baptisms')}
                   count={counts.baptism}
                   icon={Users}
                   iconColor="bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400"
@@ -711,7 +713,7 @@ const ChurchPortalHub: React.FC = () => {
                   onAddNew={() => navigate('/portal/records/baptism/new')}
                 />
                 <RecordCard
-                  title="Marriages"
+                  title={t('portal.marriages')}
                   count={counts.marriage}
                   icon={Heart}
                   iconColor="bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400"
@@ -721,7 +723,7 @@ const ChurchPortalHub: React.FC = () => {
                   onAddNew={() => navigate('/portal/records/marriage/new')}
                 />
                 <RecordCard
-                  title="Funerals"
+                  title={t('portal.funerals')}
                   count={counts.funeral}
                   icon={Cross}
                   iconColor="bg-violet-50 dark:bg-violet-900/20 text-violet-600 dark:text-violet-400"
@@ -738,7 +740,7 @@ const ChurchPortalHub: React.FC = () => {
           <section className="mb-8">
             <div className="flex items-center justify-between mb-4">
               <h2 className="font-['Inter'] font-semibold text-[17px] text-gray-900 dark:text-white">
-                Recent Activity
+                {t('portal.recent_activity')}
               </h2>
               <div className="flex items-center gap-1">
                 {(['all', 'baptism', 'marriage', 'funeral'] as const).map((f) => (
@@ -751,7 +753,7 @@ const ChurchPortalHub: React.FC = () => {
                         : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
                     }`}
                   >
-                    {f === 'all' ? 'All' : f.charAt(0).toUpperCase() + f.slice(1) + 's'}
+                    {f === 'all' ? t('portal.all') : f === 'baptism' ? t('portal.baptisms') : f === 'marriage' ? t('portal.marriages') : t('portal.funerals')}
                   </button>
                 ))}
               </div>
@@ -764,7 +766,7 @@ const ChurchPortalHub: React.FC = () => {
               ) : allActivity.length === 0 ? (
                 <div className="text-center py-10">
                   <p className="font-['Inter'] text-[13px] text-gray-400 dark:text-gray-500">
-                    No recent activity
+                    {t('portal.no_recent_activity')}
                   </p>
                 </div>
               ) : (
@@ -798,31 +800,31 @@ const ChurchPortalHub: React.FC = () => {
           {/* ── Section 5: Tools ── */}
           <section className="mb-8">
             <h2 className="font-['Inter'] font-semibold text-[17px] text-gray-900 dark:text-white mb-4">
-              Tools
+              {t('portal.tools')}
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
               <ToolItem
                 icon={BookOpen}
-                label="Certificates"
-                description="Generate documents"
+                label={t('portal.certificates')}
+                description={t('portal.generate_documents')}
                 onClick={() => navigate('/portal/certificates')}
               />
               <ToolItem
                 icon={Calendar}
-                label="Sacramental Calendar"
-                description="Restriction dates"
+                label={t('portal.sacramental_calendar')}
+                description={t('portal.restriction_dates')}
                 onClick={() => navigate('/portal/sacramental-restrictions')}
               />
               <ToolItem
                 icon={ClipboardList}
-                label="Interactive Reports"
-                description="Delegate record collection"
+                label={t('portal.interactive_reports')}
+                description={t('portal.delegate_record_collection')}
                 onClick={() => navigate('/apps/records/interactive-reports')}
               />
               <ToolItem
                 icon={Settings}
-                label="Parish Settings"
-                description="Church configuration"
+                label={t('portal.parish_settings')}
+                description={t('portal.church_configuration')}
                 onClick={() => navigate('/account/church-details')}
               />
             </div>

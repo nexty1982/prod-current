@@ -19,6 +19,10 @@ const {
   deleteOrphanedOverrides,
   detectCandidates,
 } = require('../../services/frontendPageEditAuditService');
+const {
+  previewTransform,
+  applyTransform,
+} = require('../../services/wireEditModeService');
 
 // ── Auth ────────────────────────────────────────────────────────────────
 
@@ -114,6 +118,43 @@ router.get('/candidates', async (req, res) => {
     res.json({ success: true, timestamp: new Date().toISOString(), ...result });
   } catch (err) {
     console.error('[frontend-page-audit] candidates error:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// ── POST /wire-edit-mode/preview — Preview Edit Mode transform ──────────
+
+router.post('/wire-edit-mode/preview', async (req, res) => {
+  try {
+    const { file } = req.body;
+    if (!file || typeof file !== 'string') {
+      return res.status(400).json({ success: false, error: 'Request body must include a "file" string (relative path from front-end/src)' });
+    }
+    const result = previewTransform(file);
+    res.json({ timestamp: new Date().toISOString(), ...result });
+  } catch (err) {
+    console.error('[frontend-page-audit] wire-edit-mode preview error:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// ── POST /wire-edit-mode/apply — Apply Edit Mode transform ──────────────
+
+router.post('/wire-edit-mode/apply', async (req, res) => {
+  try {
+    const { file } = req.body;
+    if (!file || typeof file !== 'string') {
+      return res.status(400).json({ success: false, error: 'Request body must include a "file" string (relative path from front-end/src)' });
+    }
+    const actor = {
+      userId: req.user?.id || null,
+      username: req.user?.username || req.user?.email || 'unknown',
+    };
+    console.log(`[wire-edit-mode] Apply requested by ${actor.username} for file: ${file}`);
+    const result = applyTransform(file);
+    res.json({ timestamp: new Date().toISOString(), actor: actor.username, ...result });
+  } catch (err) {
+    console.error('[frontend-page-audit] wire-edit-mode apply error:', err);
     res.status(500).json({ success: false, error: err.message });
   }
 });

@@ -36,21 +36,22 @@ import ImageIcon from '@mui/icons-material/Image';
 import DescriptionIcon from '@mui/icons-material/Description';
 import DeleteSweepIcon from '@mui/icons-material/DeleteSweep';
 import { useAuth } from '@/context/AuthContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { canManageOcrPreferences } from './accountPermissions';
 import { SnackbarState, SNACKBAR_CLOSED, SNACKBAR_DURATION } from './accountConstants';
 import { ocrApi, extractErrorMessage } from './accountApi';
 
 /* ── Language options ── */
 const LANGUAGES = [
-  { code: 'eng', label: 'English', flag: '🇺🇸' },
-  { code: 'ell', label: 'Greek (Modern)', flag: '🇬🇷' },
-  { code: 'grc', label: 'Greek (Ancient/Church)', flag: '🇬🇷' },
-  { code: 'rus', label: 'Russian', flag: '🇷🇺' },
-  { code: 'ron', label: 'Romanian', flag: '🇷🇴' },
-  { code: 'srp', label: 'Serbian', flag: '🇷🇸' },
-  { code: 'bul', label: 'Bulgarian', flag: '🇧🇬' },
-  { code: 'ukr', label: 'Ukrainian', flag: '🇺🇦' },
-];
+  { code: 'eng', labelKey: 'account.ocr_lang_english', flag: '🇺🇸' },
+  { code: 'ell', labelKey: 'account.ocr_lang_greek_modern', flag: '🇬🇷' },
+  { code: 'grc', labelKey: 'account.ocr_lang_greek_ancient', flag: '🇬🇷' },
+  { code: 'rus', labelKey: 'account.ocr_lang_russian', flag: '🇷🇺' },
+  { code: 'ron', labelKey: 'account.ocr_lang_romanian', flag: '🇷🇴' },
+  { code: 'srp', labelKey: 'account.ocr_lang_serbian', flag: '🇷🇸' },
+  { code: 'bul', labelKey: 'account.ocr_lang_bulgarian', flag: '🇧🇬' },
+  { code: 'ukr', labelKey: 'account.ocr_lang_ukrainian', flag: '🇺🇦' },
+] as const;
 
 /* ── Types ── */
 interface OcrPreferences {
@@ -91,6 +92,7 @@ const DEFAULT_PREFS: OcrPreferences = {
 
 const AccountOcrPreferencesPage: React.FC = () => {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [prefs, setPrefs] = useState<OcrPreferences>(DEFAULT_PREFS);
   const [ocrEnabled, setOcrEnabled] = useState(true);
   const [loading, setLoading] = useState(true);
@@ -110,7 +112,7 @@ const AccountOcrPreferencesPage: React.FC = () => {
         setOcrEnabled(data.ocrEnabled !== false);
       }
     } catch (err: any) {
-      setSnackbar({ open: true, message: err.message || 'Failed to load OCR preferences.', severity: 'error' });
+      setSnackbar({ open: true, message: err.message || t('account.ocr_load_failed'), severity: 'error' });
     } finally {
       setLoading(false);
     }
@@ -126,10 +128,10 @@ const AccountOcrPreferencesPage: React.FC = () => {
     try {
       setSaving(true);
       await ocrApi.updatePreferences(prefs);
-      setSnackbar({ open: true, message: 'OCR preferences saved successfully.', severity: 'success' });
+      setSnackbar({ open: true, message: t('account.ocr_saved'), severity: 'success' });
       setDirty(false);
     } catch (err: any) {
-      setSnackbar({ open: true, message: err.message || 'Failed to save OCR preferences.', severity: 'error' });
+      setSnackbar({ open: true, message: err.message || t('account.ocr_save_failed'), severity: 'error' });
     } finally {
       setSaving(false);
     }
@@ -162,10 +164,10 @@ const AccountOcrPreferencesPage: React.FC = () => {
     return (
       <Box>
         <Typography variant="h5" fontWeight={600} gutterBottom>
-          OCR Preferences
+          {t('account.ocr_preferences_title')}
         </Typography>
         <Alert severity="info" sx={{ mt: 2 }}>
-          OCR preferences are available to church administrators. Contact your church admin to manage these settings.
+          {t('account.ocr_no_access')}
         </Alert>
       </Box>
     );
@@ -187,16 +189,16 @@ const AccountOcrPreferencesPage: React.FC = () => {
           <Stack direction="row" alignItems="center" spacing={1}>
             <DocumentScannerIcon color="primary" />
             <Typography variant="h5" fontWeight={600}>
-              OCR Preferences
+              {t('account.ocr_preferences_title')}
             </Typography>
           </Stack>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-            Configure document scanning and processing settings for your church
+            {t('account.ocr_preferences_desc')}
           </Typography>
         </Box>
         <Stack direction="row" spacing={1} alignItems="center">
           {!ocrEnabled && (
-            <Chip label="OCR Disabled" color="warning" size="small" variant="outlined" />
+            <Chip label={t('account.ocr_disabled_chip')} color="warning" size="small" variant="outlined" />
           )}
           <Button
             variant="contained"
@@ -205,14 +207,14 @@ const AccountOcrPreferencesPage: React.FC = () => {
             disabled={saving || !dirty}
             size="small"
           >
-            {saving ? 'Saving...' : 'Save Changes'}
+            {saving ? t('common.saving') : t('common.save_changes')}
           </Button>
         </Stack>
       </Stack>
 
       {!ocrEnabled && (
         <Alert severity="warning" sx={{ mb: 2 }}>
-          OCR is currently disabled for your church. These preferences will take effect when OCR is enabled.
+          {t('account.ocr_disabled_warning')}
         </Alert>
       )}
 
@@ -223,22 +225,22 @@ const AccountOcrPreferencesPage: React.FC = () => {
             <Stack direction="row" alignItems="center" spacing={1} mb={2}>
               <TranslateIcon fontSize="small" color="primary" />
               <Typography variant="subtitle1" fontWeight={600}>
-                Document Language
+                {t('account.ocr_document_language')}
               </Typography>
             </Stack>
             <Typography variant="body2" color="text.secondary" mb={2}>
-              Primary language used in your church's historical records and documents.
+              {t('account.ocr_document_language_desc')}
             </Typography>
             <FormControl size="small" sx={{ minWidth: 280 }}>
-              <InputLabel>OCR Language</InputLabel>
+              <InputLabel>{t('account.ocr_language_label')}</InputLabel>
               <Select
                 value={prefs.language}
-                label="OCR Language"
+                label={t('account.ocr_language_label')}
                 onChange={(e) => updateField('language', e.target.value)}
               >
                 {LANGUAGES.map((lang) => (
                   <MenuItem key={lang.code} value={lang.code}>
-                    {lang.flag} {lang.label}
+                    {lang.flag} {t(lang.labelKey)}
                   </MenuItem>
                 ))}
               </Select>
@@ -252,11 +254,11 @@ const AccountOcrPreferencesPage: React.FC = () => {
             <Stack direction="row" alignItems="center" spacing={1} mb={2}>
               <TuneIcon fontSize="small" color="primary" />
               <Typography variant="subtitle1" fontWeight={600}>
-                Confidence Threshold
+                {t('account.ocr_confidence_threshold')}
               </Typography>
             </Stack>
             <Typography variant="body2" color="text.secondary" mb={2}>
-              Minimum confidence level for OCR results. Characters below this threshold will be flagged for manual review.
+              {t('account.ocr_confidence_desc')}
             </Typography>
             <Stack direction="row" alignItems="center" spacing={3} sx={{ maxWidth: 500 }}>
               <Slider
@@ -282,7 +284,7 @@ const AccountOcrPreferencesPage: React.FC = () => {
               />
             </Stack>
             <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-              Recommended: 75% for standard documents, 50% for aged or damaged records.
+              {t('account.ocr_confidence_recommend')}
             </Typography>
           </CardContent>
         </Card>
@@ -293,11 +295,11 @@ const AccountOcrPreferencesPage: React.FC = () => {
             <Stack direction="row" alignItems="center" spacing={1} mb={2}>
               <ImageIcon fontSize="small" color="primary" />
               <Typography variant="subtitle1" fontWeight={600}>
-                Image Preprocessing
+                {t('account.ocr_image_preprocessing')}
               </Typography>
             </Stack>
             <Typography variant="body2" color="text.secondary" mb={2}>
-              Automatic image corrections applied before text extraction.
+              {t('account.ocr_image_preprocessing_desc')}
             </Typography>
             <Stack spacing={1}>
               <FormControlLabel
@@ -310,9 +312,9 @@ const AccountOcrPreferencesPage: React.FC = () => {
                 }
                 label={
                   <Box>
-                    <Typography variant="body2">Enable Image Preprocessing</Typography>
+                    <Typography variant="body2">{t('account.ocr_enable_preprocessing')}</Typography>
                     <Typography variant="caption" color="text.secondary">
-                      Master toggle for all image preprocessing
+                      {t('account.ocr_master_toggle')}
                     </Typography>
                   </Box>
                 }
@@ -330,10 +332,10 @@ const AccountOcrPreferencesPage: React.FC = () => {
                 label={
                   <Box>
                     <Typography variant="body2" color={!prefs.preprocessImages ? 'text.disabled' : undefined}>
-                      Auto-Deskew & Rotate
+                      {t('account.ocr_auto_deskew')}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
-                      Straighten tilted scans and correct rotation
+                      {t('account.ocr_auto_deskew_desc')}
                     </Typography>
                   </Box>
                 }
@@ -350,10 +352,10 @@ const AccountOcrPreferencesPage: React.FC = () => {
                 label={
                   <Box>
                     <Typography variant="body2" color={!prefs.preprocessImages ? 'text.disabled' : undefined}>
-                      Noise Removal
+                      {t('account.ocr_noise_removal')}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
-                      Remove spots, stains, and artifacts from scanned images
+                      {t('account.ocr_noise_removal_desc')}
                     </Typography>
                   </Box>
                 }
@@ -368,46 +370,46 @@ const AccountOcrPreferencesPage: React.FC = () => {
             <Stack direction="row" alignItems="center" spacing={1} mb={2}>
               <DescriptionIcon fontSize="small" color="primary" />
               <Typography variant="subtitle1" fontWeight={600}>
-                Document Processing
+                {t('account.ocr_document_processing')}
               </Typography>
             </Stack>
             <Typography variant="body2" color="text.secondary" mb={2}>
-              Post-extraction processing options for scanned text.
+              {t('account.ocr_document_processing_desc')}
             </Typography>
             <Stack spacing={2.5}>
               <FormControl size="small" sx={{ maxWidth: 300 }}>
-                <InputLabel>Spelling Correction</InputLabel>
+                <InputLabel>{t('account.ocr_spelling_correction')}</InputLabel>
                 <Select
                   value={prefs.documentProcessing.spellingCorrection}
-                  label="Spelling Correction"
+                  label={t('account.ocr_spelling_correction')}
                   onChange={(e) => updateDocProcessing('spellingCorrection', e.target.value)}
                 >
-                  <MenuItem value="fix">Auto-fix</MenuItem>
-                  <MenuItem value="suggest">Suggest only</MenuItem>
-                  <MenuItem value="off">Disabled</MenuItem>
+                  <MenuItem value="fix">{t('account.ocr_autofix')}</MenuItem>
+                  <MenuItem value="suggest">{t('account.ocr_suggest_only')}</MenuItem>
+                  <MenuItem value="off">{t('account.ocr_disabled')}</MenuItem>
                 </Select>
               </FormControl>
               <FormControl size="small" sx={{ maxWidth: 300 }}>
-                <InputLabel>Extract All Text</InputLabel>
+                <InputLabel>{t('account.ocr_extract_all')}</InputLabel>
                 <Select
                   value={prefs.documentProcessing.extractAllText}
-                  label="Extract All Text"
+                  label={t('account.ocr_extract_all')}
                   onChange={(e) => updateDocProcessing('extractAllText', e.target.value)}
                 >
-                  <MenuItem value="yes">Yes — extract everything</MenuItem>
-                  <MenuItem value="tables">Tables only</MenuItem>
-                  <MenuItem value="no">No — manual selection</MenuItem>
+                  <MenuItem value="yes">{t('account.ocr_extract_everything')}</MenuItem>
+                  <MenuItem value="tables">{t('account.ocr_tables_only')}</MenuItem>
+                  <MenuItem value="no">{t('account.ocr_manual_selection')}</MenuItem>
                 </Select>
               </FormControl>
               <FormControl size="small" sx={{ maxWidth: 300 }}>
-                <InputLabel>Improve Formatting</InputLabel>
+                <InputLabel>{t('account.ocr_improve_formatting')}</InputLabel>
                 <Select
                   value={prefs.documentProcessing.improveFormatting}
-                  label="Improve Formatting"
+                  label={t('account.ocr_improve_formatting')}
                   onChange={(e) => updateDocProcessing('improveFormatting', e.target.value)}
                 >
-                  <MenuItem value="yes">Yes</MenuItem>
-                  <MenuItem value="no">No</MenuItem>
+                  <MenuItem value="yes">{t('account.ocr_yes')}</MenuItem>
+                  <MenuItem value="no">{t('account.ocr_no')}</MenuItem>
                 </Select>
               </FormControl>
             </Stack>
@@ -420,16 +422,16 @@ const AccountOcrPreferencesPage: React.FC = () => {
             <Stack direction="row" alignItems="center" spacing={1} mb={2}>
               <DeleteSweepIcon fontSize="small" color="primary" />
               <Typography variant="subtitle1" fontWeight={600}>
-                Document Retention
+                {t('account.ocr_document_retention')}
               </Typography>
             </Stack>
             <Typography variant="body2" color="text.secondary" mb={2}>
-              How long uploaded document images are retained after processing.
+              {t('account.ocr_retention_desc')}
             </Typography>
             <Stack direction="row" spacing={2} alignItems="flex-start">
               <TextField
                 size="small"
-                label="Delete After"
+                label={t('account.ocr_delete_after')}
                 type="number"
                 value={prefs.documentDeletion.deleteAfter}
                 onChange={(e) => {
@@ -440,20 +442,20 @@ const AccountOcrPreferencesPage: React.FC = () => {
                 sx={{ width: 120 }}
               />
               <FormControl size="small" sx={{ minWidth: 130 }}>
-                <InputLabel>Unit</InputLabel>
+                <InputLabel>{t('account.ocr_unit')}</InputLabel>
                 <Select
                   value={prefs.documentDeletion.deleteUnit}
-                  label="Unit"
+                  label={t('account.ocr_unit')}
                   onChange={(e) => updateDocDeletion('deleteUnit', e.target.value)}
                 >
-                  <MenuItem value="minutes">Minutes</MenuItem>
-                  <MenuItem value="hours">Hours</MenuItem>
-                  <MenuItem value="days">Days</MenuItem>
+                  <MenuItem value="minutes">{t('account.ocr_minutes')}</MenuItem>
+                  <MenuItem value="hours">{t('account.ocr_hours')}</MenuItem>
+                  <MenuItem value="days">{t('account.ocr_days')}</MenuItem>
                 </Select>
               </FormControl>
             </Stack>
             <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-              Processed records are saved permanently. This setting only applies to the uploaded image files.
+              {t('account.ocr_retention_note')}
             </Typography>
           </CardContent>
         </Card>
@@ -476,7 +478,7 @@ const AccountOcrPreferencesPage: React.FC = () => {
           }}
         >
           <Typography variant="body2" color="text.secondary">
-            You have unsaved changes
+            {t('account.ocr_unsaved_changes')}
           </Typography>
           <Stack direction="row" spacing={1}>
             <Button
@@ -487,7 +489,7 @@ const AccountOcrPreferencesPage: React.FC = () => {
                 setDirty(false);
               }}
             >
-              Discard
+              {t('account.ocr_discard')}
             </Button>
             <Button
               variant="contained"
@@ -496,7 +498,7 @@ const AccountOcrPreferencesPage: React.FC = () => {
               onClick={handleSave}
               disabled={saving}
             >
-              {saving ? 'Saving...' : 'Save Changes'}
+              {saving ? t('common.saving') : t('common.save_changes')}
             </Button>
           </Stack>
         </Box>

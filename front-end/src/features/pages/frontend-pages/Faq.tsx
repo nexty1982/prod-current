@@ -12,9 +12,13 @@ import PageContainer from '@/shared/ui/PageContainer';
 
 import { Box, Container, Typography } from '@mui/material';
 
+import { useLanguage } from '@/context/LanguageContext';
+
 
 
 const Faq = () => {
+
+  const { t } = useLanguage();
 
   return (
 
@@ -30,13 +34,13 @@ const Faq = () => {
 
           <Typography variant="h2" fontWeight={700} mb={1}>
 
-            Frequently Asked Questions
+            {t('faq.page_title')}
 
           </Typography>
 
           <Typography variant="body1" color="text.secondary" fontSize="16px">
 
-            Find answers to common questions about Orthodox Metrics
+            {t('faq.page_subtitle')}
 
           </Typography>
 

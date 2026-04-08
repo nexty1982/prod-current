@@ -2,19 +2,50 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, Globe, BookOpen, Shield, Users, Church, Calendar, CheckCircle2 } from '@/ui/icons';
 import { PUBLIC_ROUTES } from '@/config/publicRoutes';
 import { HeroSection, SectionHeader, CTASection } from '@/components/frontend-pages/shared/sections';
-import EditableText from '@/components/frontend-pages/shared/EditableText';
 import ScrollToTop from '@/components/frontend-pages/shared/scroll-to-top';
 import PageContainer from '@/shared/ui/PageContainer';
+import { useLanguage } from '@/context/LanguageContext';
 import user1 from '@/assets/images/frontend-pages/homepage/user1.jpg';
+import EditableText from '@/components/frontend-pages/shared/EditableText';
 
 const About = () => {
+  const { t } = useLanguage();
+
+  const missionPoints = [
+    'about.mission_point1',
+    'about.mission_point2',
+    'about.mission_point3',
+    'about.mission_point4',
+  ];
+
+  const stats = [
+    { valueKey: 'about.stat1_value', labelKey: 'about.stat1_label' },
+    { valueKey: 'about.stat2_value', labelKey: 'about.stat2_label' },
+    { valueKey: 'about.stat3_value', labelKey: 'about.stat3_label' },
+  ];
+
+  const features = [
+    { icon: BookOpen, titleKey: 'about.feature1_title', descriptionKey: 'about.feature1_desc' },
+    { icon: Globe, titleKey: 'about.feature2_title', descriptionKey: 'about.feature2_desc' },
+    { icon: Calendar, titleKey: 'about.feature3_title', descriptionKey: 'about.feature3_desc' },
+    { icon: Shield, titleKey: 'about.feature4_title', descriptionKey: 'about.feature4_desc' },
+    { icon: Church, titleKey: 'about.feature5_title', descriptionKey: 'about.feature5_desc' },
+    { icon: Users, titleKey: 'about.feature6_title', descriptionKey: 'about.feature6_desc' },
+  ];
+
+  const steps = [
+    { number: 1, titleKey: 'about.step1_title', descriptionKey: 'about.step1_desc' },
+    { number: 2, titleKey: 'about.step2_title', descriptionKey: 'about.step2_desc' },
+    { number: 3, titleKey: 'about.step3_title', descriptionKey: 'about.step3_desc' },
+  ];
+
   return (
     <PageContainer title="About Us" description="About Orthodox Metrics">
       {/* Hero */}
       <HeroSection
-        badge="Our Story"
-        title="Built for Orthodox Parishes"
-        subtitle="Orthodox Metrics was created to give Orthodox Christian churches a modern, purpose-built platform for managing sacramental records, honoring tradition while simplifying administration."
+        badge={t('about.hero_badge')}
+        title={t('about.hero_title')}
+        subtitle={t('about.hero_subtitle')}
         editKeyPrefix="about.hero"
       />
 
@@ -24,22 +55,22 @@ const About = () => {
           <div className="grid md:grid-cols-2 gap-16 items-center">
             <div>
               <div className="om-badge-primary mb-6 inline-flex">
-                <span className="om-text-primary text-[14px]">Our Mission</span>
+                <EditableText contentKey="about.mission_badge" as="span" className="om-text-primary text-[14px]">{t('about.mission_badge')}</EditableText>
               </div>
-              <h2 className="om-heading-primary mb-6">
-                Preserving Sacred Records for Generations
-              </h2>
-              <p className="font-['Inter'] text-lg text-[#4a5565] dark:text-gray-400 leading-relaxed mb-8">
-                For centuries, Orthodox parishes have maintained baptism, marriage, and funeral records in handwritten ledgers. These irreplaceable documents deserve better than filing cabinets and fading ink.
-              </p>
-              <p className="font-['Inter'] text-lg text-[#4a5565] dark:text-gray-400 leading-relaxed mb-8">
-                Orthodox Metrics brings these records into a secure digital platform designed specifically for the Orthodox Church &mdash; with support for Old and New calendar systems, multilingual entries in Greek, Russian, Romanian, Georgian, and English, and certificate generation that respects liturgical tradition.
-              </p>
+              <EditableText contentKey="about.mission_title" as="h2" className="om-heading-primary mb-6">
+                {t('about.mission_title')}
+              </EditableText>
+              <EditableText contentKey="about.mission_p1" as="p" className="font-['Inter'] text-lg text-[#4a5565] dark:text-gray-400 leading-relaxed mb-8">
+                {t('about.mission_p1')}
+              </EditableText>
+              <EditableText contentKey="about.mission_p2" as="p" className="font-['Inter'] text-lg text-[#4a5565] dark:text-gray-400 leading-relaxed mb-8">
+                {t('about.mission_p2')}
+              </EditableText>
               <div className="space-y-4">
-                {MISSION_POINTS.map((item, i) => (
+                {missionPoints.map((item, i) => (
                   <div key={i} className="flex items-start gap-3">
                     <CheckCircle2 className="text-[#d4af37] flex-shrink-0 mt-1" size={20} />
-                    <span className="font-['Inter'] text-[16px] text-[#4a5565] dark:text-gray-400">{item}</span>
+                    <EditableText contentKey={item} as="span" className="font-['Inter'] text-[16px] text-[#4a5565] dark:text-gray-400">{t(item)}</EditableText>
                   </div>
                 ))}
               </div>
@@ -47,12 +78,12 @@ const About = () => {
 
             <div className="bg-gradient-to-br from-[#f9fafb] to-[#f3f4f6] dark:from-gray-800 dark:to-gray-700 rounded-2xl p-12 border border-[rgba(45,27,78,0.1)] dark:border-gray-600">
               <div className="space-y-8">
-                {STATS.map((stat, i) => (
+                {stats.map((stat, i) => (
                   <div key={i} className="bg-white dark:bg-gray-900 rounded-xl p-6 shadow-sm">
                     <div className={`${i % 2 === 0 ? 'text-[#d4af37]' : 'text-[#2d1b4e] dark:text-[#d4af37]'} font-['Georgia'] text-5xl mb-2`}>
-                      {stat.value}
+                      <EditableText contentKey={stat.valueKey} as="span">{t(stat.valueKey)}</EditableText>
                     </div>
-                    <p className="font-['Inter'] text-[16px] text-[#4a5565] dark:text-gray-400">{stat.label}</p>
+                    <EditableText contentKey={stat.labelKey} as="p" className="font-['Inter'] text-[16px] text-[#4a5565] dark:text-gray-400">{t(stat.labelKey)}</EditableText>
                   </div>
                 ))}
               </div>
@@ -65,19 +96,20 @@ const About = () => {
       <section className="py-20 om-section-elevated">
         <div className="max-w-7xl mx-auto px-6">
           <SectionHeader
-            badge="Why Orthodox Metrics"
-            title="Purpose-Built for the Orthodox Church"
-            subtitle="Not a generic database adapted for church use. Every feature was designed with Orthodox parishes in mind."
+            badge={t('about.features_badge')}
+            title={t('about.features_title')}
+            subtitle={t('about.features_subtitle')}
+            editKeyPrefix="about.features"
           />
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {PLATFORM_FEATURES.map((f, i) => (
+            {features.map((f, i) => (
               <div key={i} className="om-card-compact p-6 hover:shadow-md transition-shadow">
                 <div className="om-icon-container-small mb-4">
                   <f.icon className="text-[#d4af37] dark:text-[#2d1b4e]" size={28} />
                 </div>
-                <h3 className="font-['Inter'] font-medium text-xl text-[#2d1b4e] dark:text-white mb-2">{f.title}</h3>
-                <p className="font-['Inter'] text-[15px] text-[#4a5565] dark:text-gray-400 leading-relaxed">{f.description}</p>
+                <EditableText contentKey={f.titleKey} as="h3" className="font-['Inter'] font-medium text-xl text-[#2d1b4e] dark:text-white mb-2">{t(f.titleKey)}</EditableText>
+                <EditableText contentKey={f.descriptionKey} as="p" className="font-['Inter'] text-[15px] text-[#4a5565] dark:text-gray-400 leading-relaxed">{t(f.descriptionKey)}</EditableText>
               </div>
             ))}
           </div>
@@ -88,13 +120,14 @@ const About = () => {
       <section className="py-20 om-section-base">
         <div className="max-w-7xl mx-auto px-6">
           <SectionHeader
-            badge="Getting Started"
-            title="Simple Onboarding, Lasting Value"
-            subtitle="We handle the heavy lifting so your parish can focus on what matters."
+            badge={t('about.steps_badge')}
+            title={t('about.steps_title')}
+            subtitle={t('about.steps_subtitle')}
+            editKeyPrefix="about.steps"
           />
 
           <div className="grid md:grid-cols-3 gap-12">
-            {STEPS.map((step) => (
+            {steps.map((step) => (
               <div key={step.number} className="relative">
                 <div className="flex items-start gap-4">
                   <div className={`flex-shrink-0 w-12 h-12 ${
@@ -105,8 +138,8 @@ const About = () => {
                     {step.number}
                   </div>
                   <div>
-                    <h3 className="font-['Inter'] font-medium text-xl text-[#2d1b4e] dark:text-white mb-2">{step.title}</h3>
-                    <p className="font-['Inter'] text-[16px] text-[#4a5565] dark:text-gray-400 leading-relaxed">{step.description}</p>
+                    <EditableText contentKey={step.titleKey} as="h3" className="font-['Inter'] font-medium text-xl text-[#2d1b4e] dark:text-white mb-2">{t(step.titleKey)}</EditableText>
+                    <EditableText contentKey={step.descriptionKey} as="p" className="font-['Inter'] text-[16px] text-[#4a5565] dark:text-gray-400 leading-relaxed">{t(step.descriptionKey)}</EditableText>
                   </div>
                 </div>
               </div>
@@ -123,29 +156,29 @@ const About = () => {
               <div className="relative">
                 <img
                   src={user1}
-                  alt="Nectarios Parsells"
+                  alt={t('about.founder_name')}
                   className="w-72 h-80 object-cover rounded-2xl shadow-lg"
                 />
                 <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 bg-white dark:bg-gray-800 rounded-xl shadow-md px-6 py-3 text-center min-w-[200px]">
-                  <h4 className="font-['Inter'] font-semibold text-lg text-[#2d1b4e] dark:text-white">Nectarios Parsells</h4>
-                  <p className="font-['Inter'] text-sm text-[#d4af37]">Founder</p>
+                  <EditableText contentKey="about.founder_name" as="h4" className="font-['Inter'] font-semibold text-lg text-[#2d1b4e] dark:text-white">{t('about.founder_name')}</EditableText>
+                  <EditableText contentKey="about.founder_role" as="p" className="font-['Inter'] text-sm text-[#d4af37]">{t('about.founder_role')}</EditableText>
                 </div>
               </div>
             </div>
 
             <div>
               <div className="om-badge-primary mb-6 inline-flex">
-                <span className="om-text-primary text-[14px]">Leadership</span>
+                <EditableText contentKey="about.founder_badge" as="span" className="om-text-primary text-[14px]">{t('about.founder_badge')}</EditableText>
               </div>
-              <h2 className="om-heading-primary mb-6">
-                From Parish Need to Platform
-              </h2>
-              <p className="font-['Inter'] text-lg text-[#4a5565] dark:text-gray-400 leading-relaxed mb-6">
-                Orthodox Metrics was born from firsthand experience in an Orthodox parish, where the need for a modern, tradition-aware records system was clear. Existing solutions were either generic church management tools or outdated spreadsheets that didn't respect the unique requirements of Orthodox recordkeeping.
-              </p>
-              <p className="font-['Inter'] text-lg text-[#4a5565] dark:text-gray-400 leading-relaxed">
-                Built with input from clergy and parish administrators across multiple jurisdictions, Orthodox Metrics is designed to serve the real needs of the Orthodox Church in North America &mdash; from small mission parishes to established cathedral communities.
-              </p>
+              <EditableText contentKey="about.founder_title" as="h2" className="om-heading-primary mb-6">
+                {t('about.founder_title')}
+              </EditableText>
+              <EditableText contentKey="about.founder_p1" as="p" className="font-['Inter'] text-lg text-[#4a5565] dark:text-gray-400 leading-relaxed mb-6">
+                {t('about.founder_p1')}
+              </EditableText>
+              <EditableText contentKey="about.founder_p2" as="p" className="font-['Inter'] text-lg text-[#4a5565] dark:text-gray-400 leading-relaxed">
+                {t('about.founder_p2')}
+              </EditableText>
             </div>
           </div>
         </div>
@@ -153,22 +186,22 @@ const About = () => {
 
       {/* CTA */}
       <CTASection
-        title="Ready to Modernize Your Parish Records?"
-        subtitle="Join parishes across the United States and Canada already using Orthodox Metrics to preserve their sacramental records with care and precision."
+        title={t('about.cta_title')}
+        subtitle={t('about.cta_subtitle')}
         editKeyPrefix="about.cta"
       >
         <Link
           to={PUBLIC_ROUTES.CONTACT}
           className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-[#d4af37] text-[#2d1b4e] rounded-lg font-['Inter'] font-medium text-[16px] hover:bg-[#c29d2f] transition-colors no-underline"
         >
-          Get in Touch
+          <EditableText contentKey="about.cta_button" as="span">{t('about.cta_button')}</EditableText>
           <ArrowRight size={20} />
         </Link>
         <Link
           to={PUBLIC_ROUTES.TOUR}
           className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-sm border border-white/20 text-white rounded-lg font-['Inter'] font-medium text-[16px] hover:bg-white/20 transition-colors no-underline"
         >
-          Take the Tour
+          <EditableText contentKey="about.cta_tour" as="span">{t('about.cta_tour')}</EditableText>
         </Link>
       </CTASection>
 
@@ -178,33 +211,3 @@ const About = () => {
 };
 
 export default About;
-
-// ── Static data ──
-
-const MISSION_POINTS = [
-  'OCA-compliant record formats and certificate templates',
-  'Dual calendar support for Old and New calendar parishes',
-  'Five-language support: English, Greek, Russian, Romanian, Georgian',
-  'OCR digitization of historical handwritten ledgers',
-];
-
-const STATS = [
-  { value: '2025', label: 'Founded to serve the Orthodox Church' },
-  { value: '5', label: 'Languages supported across the platform' },
-  { value: '8', label: 'Liturgical color themes for parish branding' },
-];
-
-const PLATFORM_FEATURES = [
-  { icon: BookOpen, title: 'Sacramental Records', description: 'Complete baptism, marriage, and funeral recordkeeping with fields designed around Orthodox canonical requirements.' },
-  { icon: Globe, title: 'Multilingual Support', description: 'Enter and display records in English, Greek, Russian, Romanian, and Georgian with proper character support.' },
-  { icon: Calendar, title: 'Dual Calendar System', description: 'Track liturgical dates on both Old and New calendars, making it easy to schedule sacraments around feast days.' },
-  { icon: Shield, title: 'Secure & Private', description: 'Church data stays protected with per-parish database isolation, encrypted connections, and role-based access controls.' },
-  { icon: Church, title: 'Built for Parishes', description: 'Not a generic CRM. Every workflow, form, and certificate template was designed for Orthodox parish administration.' },
-  { icon: Users, title: 'Multi-Role Access', description: 'From parish priest to deacon to office staff, each user gets the access level appropriate to their role.' },
-];
-
-const STEPS = [
-  { number: 1, title: 'Register Your Parish', description: 'Create an account and tell us about your church. We set up your isolated, secure database and configure your parish profile.' },
-  { number: 2, title: 'We Handle the Intake', description: 'Send us your existing records, whether digital files or photographs of handwritten ledgers. Our OCR pipeline digitizes them for you.' },
-  { number: 3, title: 'Start Managing Records', description: 'Access your parish dashboard to add new records, generate certificates, and manage your sacramental data from any device.' },
-];

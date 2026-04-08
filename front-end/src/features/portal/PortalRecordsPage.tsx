@@ -48,6 +48,7 @@ import {
 } from '@tabler/icons-react';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useLanguage } from '@/context/LanguageContext';
 
 /* ─── Types ─── */
 
@@ -133,57 +134,14 @@ const CustomStepIcon: React.FC<StepIconProps> = ({ active, completed, stepIndex 
   );
 };
 
-/* ─── Onboarding Steps Config ─── */
+/* ─── Static config (labels injected in component) ─── */
 
-const ONBOARDING_STEPS = [
-  {
-    label: 'Upload Your Records',
-    description: 'Scan or photograph your sacramental ledgers and upload them through our guided workflow. We accept JPEG, PNG, and TIFF images of baptism, marriage, and funeral registers.',
-  },
-  {
-    label: 'AI Processing & Review',
-    description: 'Our OCR engine automatically recognizes text in English, Greek, Cyrillic, and Romanian. You\'ll review extracted data and confirm accuracy before records are committed.',
-  },
-  {
-    label: 'Records in Your Database',
-    description: 'Validated records appear here — fully searchable by name, date, record type, and any field. Every record links back to the original scanned image for provenance.',
-  },
-  {
-    label: 'Certificates & Reports',
-    description: 'Generate official baptism and marriage certificates directly from your records. Run analytics and export data for parish reports and diocesan submissions.',
-  },
-];
+const STEP_KEYS = ['step1', 'step2', 'step3', 'step4'] as const;
 
-/* ─── Record Type Cards Config ─── */
-
-const RECORD_TYPES = [
-  {
-    key: 'baptism' as const,
-    title: 'Baptism Records',
-    description: 'Baptisms, chrismations, and receptions into the faith',
-    icon: IconBook2,
-    color: '#7B4F9E',
-    to: '/portal/records/baptism',
-    newTo: '/portal/records/baptism/new',
-  },
-  {
-    key: 'marriage' as const,
-    title: 'Marriage Records',
-    description: 'Marriage sacraments and related documentation',
-    icon: IconHeart,
-    color: '#E91E63',
-    to: '/portal/records/marriage',
-    newTo: '/portal/records/marriage/new',
-  },
-  {
-    key: 'funeral' as const,
-    title: 'Funeral Records',
-    description: 'Funeral and memorial service records',
-    icon: IconCross,
-    color: '#555',
-    to: '/portal/records/funeral',
-    newTo: '/portal/records/funeral/new',
-  },
+const RECORD_TYPE_CONFIGS = [
+  { key: 'baptism' as const, titleKey: 'portal.records_baptism_title', descKey: 'portal.records_baptism_desc', icon: IconBook2, color: '#7B4F9E', to: '/portal/records/baptism', newTo: '/portal/records/baptism/new' },
+  { key: 'marriage' as const, titleKey: 'portal.records_marriage_title', descKey: 'portal.records_marriage_desc', icon: IconHeart, color: '#E91E63', to: '/portal/records/marriage', newTo: '/portal/records/marriage/new' },
+  { key: 'funeral' as const, titleKey: 'portal.records_funeral_title', descKey: 'portal.records_funeral_desc', icon: IconCross, color: '#555', to: '/portal/records/funeral', newTo: '/portal/records/funeral/new' },
 ];
 
 /* ─── Main Component ─── */
@@ -193,9 +151,23 @@ const PortalRecordsPage: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { activeChurchId } = useChurch();
+  const { t } = useLanguage();
   const isDark = theme.palette.mode === 'dark';
   const role = user?.role || '';
   const canUpload = ['super_admin', 'admin', 'church_admin', 'priest'].includes(role);
+
+  const ONBOARDING_STEPS = [
+    { label: t('portal.step1_label'), description: t('portal.step1_desc') },
+    { label: t('portal.step2_label'), description: t('portal.step2_desc') },
+    { label: t('portal.step3_label'), description: t('portal.step3_desc') },
+    { label: t('portal.step4_label'), description: t('portal.step4_desc') },
+  ];
+
+  const RECORD_TYPES = RECORD_TYPE_CONFIGS.map(rt => ({
+    ...rt,
+    title: t(rt.titleKey),
+    description: t(rt.descKey),
+  }));
 
   const [counts, setCounts] = useState<RecordCounts>({ baptism: null, marriage: null, funeral: null });
   const [loading, setLoading] = useState(true);
@@ -257,12 +229,12 @@ const PortalRecordsPage: React.FC = () => {
                 fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2rem' },
               }}
             >
-              Parish Records
+              {t('portal.records_title')}
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-              {loading ? 'Loading records...' : hasRecords
-                ? `${totalRecords.toLocaleString()} total record${totalRecords === 1 ? '' : 's'} across all types`
-                : 'Get started by uploading your first sacramental records'}
+              {loading ? t('portal.records_loading') : hasRecords
+                ? t('portal.records_total').replace('{count}', totalRecords.toLocaleString()).replace('{s}', totalRecords === 1 ? '' : 's')
+                : t('portal.records_get_started')}
             </Typography>
           </Box>
           {canUpload && (
@@ -279,7 +251,7 @@ const PortalRecordsPage: React.FC = () => {
                 '&:hover': { background: 'linear-gradient(135deg, #6A3F8E 0%, #8B5FAF 100%)' },
               }}
             >
-              Upload Records
+              {t('portal.records_upload_btn')}
             </Button>
           )}
         </Box>
@@ -349,7 +321,7 @@ const PortalRecordsPage: React.FC = () => {
                         <Skeleton width={80} height={28} sx={{ borderRadius: 2 }} />
                       ) : (
                         <Chip
-                          label={isEmpty ? 'No records yet' : `${count?.toLocaleString()} record${count === 1 ? '' : 's'}`}
+                          label={isEmpty ? t('common.no_records_yet') : t('portal.records_count').replace('{count}', count?.toLocaleString() || '0').replace('{s}', count === 1 ? '' : 's')}
                           size="small"
                           sx={{
                             fontWeight: 600,
@@ -409,12 +381,10 @@ const PortalRecordsPage: React.FC = () => {
                 mb: 1,
               }}
             >
-              Your Records Are Waiting
+              {t('portal.records_empty_title')}
             </Typography>
             <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 600, mx: 'auto', lineHeight: 1.7 }}>
-              Once your parish records are digitized, this page becomes your central hub for
-              searching, browsing, and managing every baptism, marriage, and funeral record
-              in your church's history. Here's how to get started:
+              {t('portal.records_empty_desc')}
             </Typography>
           </Box>
 
@@ -528,10 +498,10 @@ const PortalRecordsPage: React.FC = () => {
                   '&:hover': { background: 'linear-gradient(135deg, #6A3F8E 0%, #8B5FAF 100%)' },
                 }}
               >
-                Upload Your First Records
+                {t('portal.upload_first_records')}
               </Button>
               <Typography variant="caption" display="block" color="text.secondary" sx={{ mt: 1.5 }}>
-                Accepts scanned images (JPEG, PNG, TIFF) of sacramental ledgers
+                {t('portal.upload_format_note')}
               </Typography>
             </Box>
           )}
@@ -542,32 +512,32 @@ const PortalRecordsPage: React.FC = () => {
       {allLoaded && !hasRecords && (
         <Box sx={{ mb: 4 }}>
           <Typography variant="overline" sx={{ color: 'text.secondary', fontWeight: 700, letterSpacing: 2, fontSize: '0.75rem', mb: 2, display: 'block' }}>
-            What You'll See Here
+            {t('portal.what_youll_see')}
           </Typography>
           <Grid container spacing={3}>
             {[
               {
                 icon: IconSearch,
-                title: 'Searchable Records',
-                text: 'Every field is indexed and searchable. Find any record instantly by name, date, clergy, sponsors, or free text across your entire archive.',
+                title: t('portal.feature_search_title'),
+                text: t('portal.feature_search_desc'),
                 color: '#7B4F9E',
               },
               {
                 icon: IconShieldCheck,
-                title: 'Audit Trail & Provenance',
-                text: 'Each digitized record links to the original scanned image. Every edit is tracked with timestamps and user attribution for full accountability.',
+                title: t('portal.feature_audit_title'),
+                text: t('portal.feature_audit_desc'),
                 color: '#4CAF50',
               },
               {
                 icon: IconChartBar,
-                title: 'Analytics & Insights',
-                text: 'Visualize sacramental trends over decades. See baptism counts by year, seasonal patterns, and clergy activity across your parish history.',
+                title: t('portal.feature_analytics_title'),
+                text: t('portal.feature_analytics_desc'),
                 color: '#F5B800',
               },
               {
                 icon: IconCertificate,
-                title: 'Certificate Generation',
-                text: 'Generate official baptism and marriage certificates directly from your records with one click. Professional formatting ready for parish use.',
+                title: t('portal.feature_certs_title'),
+                text: t('portal.feature_certs_desc'),
                 color: '#2196F3',
               },
             ].map((item) => {
@@ -628,7 +598,7 @@ const PortalRecordsPage: React.FC = () => {
           }}
         >
           <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.secondary', mr: 1 }}>
-            Quick Actions
+            {t('portal.quick_actions')}
           </Typography>
           <Divider orientation="vertical" flexItem sx={{ mx: 0.5 }} />
           {canUpload && (
@@ -639,7 +609,7 @@ const PortalRecordsPage: React.FC = () => {
               onClick={() => navigate('/portal/upload')}
               sx={{ textTransform: 'none', borderRadius: 2 }}
             >
-              Upload More Records
+              {t('portal.upload_more_records')}
             </Button>
           )}
           <Button
@@ -649,7 +619,7 @@ const PortalRecordsPage: React.FC = () => {
             onClick={() => navigate('/portal/certificates/generate')}
             sx={{ textTransform: 'none', borderRadius: 2 }}
           >
-            Generate Certificate
+            {t('portal.generate_certificate')}
           </Button>
           <Button
             size="small"
@@ -658,7 +628,7 @@ const PortalRecordsPage: React.FC = () => {
             onClick={() => navigate('/portal/charts')}
             sx={{ textTransform: 'none', borderRadius: 2 }}
           >
-            View Analytics
+            {t('portal.view_analytics')}
           </Button>
         </Paper>
       )}

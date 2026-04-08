@@ -25,23 +25,23 @@ export const SNACKBAR_DURATION_LONG = 6000;
 
 /** Canonical language options for church settings. ISO 639-1 codes. */
 export const LANGUAGE_OPTIONS = [
-  { value: 'en', label: 'English' },
-  { value: 'gr', label: 'Greek' },
-  { value: 'ru', label: 'Russian' },
-  { value: 'ro', label: 'Romanian' },
-  { value: 'ka', label: 'Georgian' },
+  { value: 'en', labelKey: 'account.lang_english' },
+  { value: 'gr', labelKey: 'account.lang_greek' },
+  { value: 'ru', labelKey: 'account.lang_russian' },
+  { value: 'ro', labelKey: 'account.lang_romanian' },
+  { value: 'ka', labelKey: 'account.lang_georgian' },
 ] as const;
 
-/** ISO 639-1 code to display label mapping. */
-export const LANGUAGE_LABELS: Record<string, string> = Object.fromEntries(
-  LANGUAGE_OPTIONS.map((o) => [o.value, o.label]),
+/** ISO 639-1 code to translation key mapping. Use with t() for display. */
+export const LANGUAGE_LABEL_KEYS: Record<string, string> = Object.fromEntries(
+  LANGUAGE_OPTIONS.map((o) => [o.value, o.labelKey]),
 );
 
 /** Calendar type options. Empty string = not set, mapped to null on save. */
 export const CALENDAR_OPTIONS = [
-  { value: '', label: 'Not set' },
-  { value: 'Julian', label: 'Julian (Old Calendar)' },
-  { value: 'Revised Julian', label: 'Revised Julian (New Calendar)' },
+  { value: '', labelKey: 'account.calendar_not_set' },
+  { value: 'Julian', labelKey: 'account.calendar_julian' },
+  { value: 'Revised Julian', labelKey: 'account.calendar_revised_julian' },
 ] as const;
 
 // ── Church Settings Response Helper ──────────────────────────────────────────
@@ -67,14 +67,14 @@ export function getChurchDisplayName(settings: Record<string, any>): string {
 
 // ── Role Metadata ────────────────────────────────────────────────────────────
 
-/** User-facing descriptions for each role. */
-export const ROLE_DESCRIPTIONS: Record<string, string> = {
-  super_admin: 'Full platform access including all administrative functions.',
-  admin: 'Church administration and user management.',
-  church_admin: 'Manage church settings, records, and parish operations.',
-  priest: 'View and manage sacramental records.',
-  deacon: 'View records and assist with parish operations.',
-  editor: 'Edit and manage church records.',
-  viewer: 'View-only access to church records.',
-  guest: 'Limited access to public information.',
+/** Translation keys for role descriptions. Use with t() for display. */
+export const ROLE_DESCRIPTION_KEYS: Record<string, string> = {
+  super_admin: 'account.role_super_admin',
+  admin: 'account.role_admin',
+  church_admin: 'account.role_church_admin',
+  priest: 'account.role_priest',
+  deacon: 'account.role_deacon',
+  editor: 'account.role_editor',
+  viewer: 'account.role_viewer',
+  guest: 'account.role_guest',
 };

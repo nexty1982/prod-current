@@ -31,84 +31,85 @@ import Breadcrumb from '@/layouts/full/shared/breadcrumb/Breadcrumb';
 import DocumentScannerIcon from '@mui/icons-material/DocumentScanner';
 import DashboardCustomizeOutlinedIcon from '@mui/icons-material/DashboardCustomizeOutlined';
 import { useAuth } from '@/context/AuthContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { hasChurchContext, canManageOcrPreferences } from './accountPermissions';
 
 interface NavItem {
-  label: string;
+  labelKey: string;
   path: string;
   icon: React.ReactNode;
-  description: string;
+  descriptionKey: string;
   /** When set, item only shows if predicate returns true. */
   visible?: (user: any) => boolean;
 }
 
-const navItems: NavItem[] = [
+const NAV_ITEMS: NavItem[] = [
   // ── Self-service (always visible) ──
   {
-    label: 'Profile Overview',
+    labelKey: 'account.profile_overview',
     path: '/account/profile',
     icon: <PersonOutlineIcon />,
-    description: 'Account summary',
+    descriptionKey: 'account.account_summary',
   },
   {
-    label: 'Personal Info',
+    labelKey: 'account.personal_info',
     path: '/account/personal-info',
     icon: <EditIcon />,
-    description: 'Edit your details',
+    descriptionKey: 'account.edit_your_details',
   },
   {
-    label: 'Password & Auth',
+    labelKey: 'account.password_and_auth',
     path: '/account/password',
     icon: <LockIcon />,
-    description: 'Security settings',
+    descriptionKey: 'account.security_settings',
   },
   {
-    label: 'Active Sessions',
+    labelKey: 'account.active_sessions',
     path: '/account/sessions',
     icon: <DevicesIcon />,
-    description: 'Manage signed-in devices',
+    descriptionKey: 'account.manage_signed_in_devices',
   },
   {
-    label: 'Notifications',
+    labelKey: 'account.notifications_label',
     path: '/account/notifications',
     icon: <NotificationsActiveIcon />,
-    description: 'Notification preferences',
+    descriptionKey: 'account.notification_preferences',
   },
   // ── Church-context (visible when user has a church) ──
   {
-    label: 'Parish Info',
+    labelKey: 'account.parish_info',
     path: '/account/parish',
     icon: <ChurchIcon />,
-    description: 'Your church & role',
+    descriptionKey: 'account.your_church_and_role',
     visible: (user) => hasChurchContext(user),
   },
   {
-    label: 'Church Details',
+    labelKey: 'account.church_details',
     path: '/account/church-details',
     icon: <InfoOutlinedIcon />,
-    description: 'Parish information',
+    descriptionKey: 'account.parish_information',
     visible: (user) => hasChurchContext(user),
   },
   {
-    label: 'Branding',
+    labelKey: 'account.branding',
     path: '/account/branding',
     icon: <PaletteIcon />,
-    description: 'Logo & brand identity',
+    descriptionKey: 'account.logo_and_brand_identity',
     visible: (user) => hasChurchContext(user),
   },
   {
-    label: 'OCR Preferences',
+    labelKey: 'account.ocr_preferences',
     path: '/account/ocr-preferences',
     icon: <DocumentScannerIcon />,
-    description: 'Document scanning settings',
+    descriptionKey: 'account.document_scanning_settings',
     visible: (user) => canManageOcrPreferences(user),
   },
   // ── Parish Management ──
   {
-    label: 'Parish Management',
+    labelKey: 'account.parish_management',
     path: '/account/parish-management',
     icon: <DashboardCustomizeOutlinedIcon />,
-    description: 'Database mapping, themes, settings',
+    descriptionKey: 'account.database_mapping_themes_settings',
     visible: (user) => hasChurchContext(user),
   },
 ];
@@ -117,21 +118,22 @@ const AccountLayout: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t } = useLanguage();
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
 
   const visibleItems = useMemo(
-    () => navItems.filter((item) => !item.visible || item.visible(user)),
+    () => NAV_ITEMS.filter((item) => !item.visible || item.visible(user)),
     [user],
   );
 
   return (
-    <PageContainer title="Account Hub" description="Manage your account and church settings">
+    <PageContainer title={t('account.hub_title')} description={t('account.hub_description')}>
       <Breadcrumb
-        title="Account Hub"
+        title={t('account.hub_title')}
         items={[
-          { to: '/', title: 'Home' },
-          { title: 'Account Hub' },
+          { to: '/', title: t('nav.home') },
+          { title: t('account.hub_title') },
         ]}
       />
 
@@ -168,7 +170,7 @@ const AccountLayout: React.FC = () => {
               color: isDark ? '#6b7280' : '#9ca3af',
             }}
           >
-            Account Settings
+            {t('account.account_settings')}
           </Typography>
           <List disablePadding>
             {visibleItems.map((item) => {
@@ -215,8 +217,8 @@ const AccountLayout: React.FC = () => {
                     {item.icon}
                   </ListItemIcon>
                   <ListItemText
-                    primary={item.label}
-                    secondary={item.description}
+                    primary={t(item.labelKey)}
+                    secondary={t(item.descriptionKey)}
                     primaryTypographyProps={{
                       variant: 'body2',
                       fontWeight: isActive ? 500 : 400,

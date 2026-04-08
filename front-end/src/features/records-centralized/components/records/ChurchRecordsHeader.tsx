@@ -3,6 +3,7 @@ import { alpha, Box, Chip, Skeleton, Stack, Typography } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { IconDroplet, IconHeart, IconCross } from '@tabler/icons-react';
 import React from 'react';
+import { useLanguage } from '@/context/LanguageContext';
 
 export interface AnalyticsHighlights {
   baptisms: number;
@@ -35,6 +36,7 @@ const ChurchRecordsHeader: React.FC<ChurchRecordsHeaderProps> = ({
 }) => {
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
+  const { t } = useLanguage();
 
   if (loading) {
     return (
@@ -45,8 +47,8 @@ const ChurchRecordsHeader: React.FC<ChurchRecordsHeaderProps> = ({
   }
 
   // Resolve display values with defaults
-  const title = branding?.title || churchName || 'Records Management';
-  const subtitle = branding?.subtitle || 'Church Sacramental Records';
+  const title = branding?.title || churchName || t('records.management_title');
+  const subtitle = branding?.subtitle || t('records.sacramental_records');
   const welcomeText = branding?.welcome_text || null;
   const accentColor = branding?.accent_color || (isDark ? '#60a5fa' : '#2563eb');
   const logoPath = branding?.logo_path || null;
@@ -191,9 +193,9 @@ const ChurchRecordsHeader: React.FC<ChurchRecordsHeaderProps> = ({
               alignItems: 'center',
             }}
           >
-            <Chip icon={<IconDroplet size={14} />} label={`${highlights.baptisms.toLocaleString()} Baptisms`} size="small" sx={{ bgcolor: alpha('#1e88e5', 0.1), color: '#1e88e5', fontWeight: 600 }} />
-            <Chip icon={<IconHeart size={14} />} label={`${highlights.marriages.toLocaleString()} Marriages`} size="small" sx={{ bgcolor: alpha('#e91e63', 0.1), color: '#e91e63', fontWeight: 600 }} />
-            <Chip icon={<IconCross size={14} />} label={`${highlights.funerals.toLocaleString()} Funerals`} size="small" sx={{ bgcolor: alpha('#7b1fa2', 0.1), color: '#7b1fa2', fontWeight: 600 }} />
+            <Chip icon={<IconDroplet size={14} />} label={`${highlights.baptisms.toLocaleString()} ${t('portal.baptisms')}`} size="small" sx={{ bgcolor: alpha('#1e88e5', 0.1), color: '#1e88e5', fontWeight: 600 }} />
+            <Chip icon={<IconHeart size={14} />} label={`${highlights.marriages.toLocaleString()} ${t('portal.marriages')}`} size="small" sx={{ bgcolor: alpha('#e91e63', 0.1), color: '#e91e63', fontWeight: 600 }} />
+            <Chip icon={<IconCross size={14} />} label={`${highlights.funerals.toLocaleString()} ${t('portal.funerals')}`} size="small" sx={{ bgcolor: alpha('#7b1fa2', 0.1), color: '#7b1fa2', fontWeight: 600 }} />
             {highlights.changePercent !== undefined && highlights.changePercent !== 0 && (
               <Chip
                 label={`${highlights.changePercent > 0 ? '+' : ''}${highlights.changePercent}% YoY`}

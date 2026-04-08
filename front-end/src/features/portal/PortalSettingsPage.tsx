@@ -28,6 +28,7 @@ import {
   Phone,
 } from '@/ui/icons';
 import { Alert, Snackbar } from '@mui/material';
+import { useLanguage } from '@/context/LanguageContext';
 
 /* ─── Types ─── */
 
@@ -75,10 +76,10 @@ const EMPTY_CHURCH: ChurchData = {
   has_funeral_records: true, setup_complete: false,
 };
 
-const TAB_ITEMS = [
-  { label: 'Church Identity', icon: Church },
-  { label: 'Configuration', icon: Settings },
-  { label: 'Database Mapping', icon: Database },
+const TAB_KEYS = [
+  { labelKey: 'portal.settings_tab_identity', icon: Church },
+  { labelKey: 'portal.settings_tab_config', icon: Settings },
+  { labelKey: 'portal.settings_tab_dbmap', icon: Database },
 ] as const;
 
 /* ─── Reusable sub-components ─── */
@@ -163,6 +164,7 @@ function SectionHeader({ icon: Icon, title, subtitle, color = '#2d1b4e' }: {
 const PortalSettingsPage: React.FC = () => {
   const { user } = useAuth();
   const { activeChurchId } = useChurch();
+  const { t } = useLanguage();
   const churchId = activeChurchId || user?.church_id;
 
   const [activeTab, setActiveTab] = useState(0);
@@ -234,7 +236,7 @@ const PortalSettingsPage: React.FC = () => {
     try {
       setSaving(true);
       await apiClient.put('/my/church-settings', church);
-      setToast({ open: true, message: 'Parish settings saved successfully', severity: 'success' });
+      setToast({ open: true, message: t('portal.settings_save_success'), severity: 'success' });
     } catch (err: any) {
       setToast({ open: true, message: err.message, severity: 'error' });
     } finally {
@@ -301,7 +303,7 @@ const PortalSettingsPage: React.FC = () => {
         mappings,
         field_settings: { visibility, sortable, default_sort_field: defaultSortField, default_sort_direction: defaultSortDirection },
       });
-      setToast({ open: true, message: 'Database mapping saved', severity: 'success' });
+      setToast({ open: true, message: t('portal.settings_dbmap_save_success'), severity: 'success' });
     } catch (err: any) {
       setToast({ open: true, message: err.message, severity: 'error' });
     } finally {
@@ -330,15 +332,15 @@ const PortalSettingsPage: React.FC = () => {
     <div className="max-w-[1200px] mx-auto">
       {/* Page Header */}
       <div className="mb-6">
-        <h1 className="font-['Georgia'] text-3xl om-text-primary mb-1">Parish Settings</h1>
+        <h1 className="font-['Georgia'] text-3xl om-text-primary mb-1">{t('portal.settings_title')}</h1>
         <p className="font-['Inter'] text-[14px] om-text-secondary">
-          Manage your parish configuration, contact information, and record table settings.
+          {t('portal.settings_desc')}
         </p>
       </div>
 
       {/* Tab Navigation */}
       <div className="flex gap-1 mb-6 bg-[#f3f4f6] dark:bg-gray-800 rounded-xl p-1">
-        {TAB_ITEMS.map((tab, idx) => {
+        {TAB_KEYS.map((tab, idx) => {
           const Icon = tab.icon;
           const isActive = activeTab === idx;
           return (
@@ -352,7 +354,7 @@ const PortalSettingsPage: React.FC = () => {
               }`}
             >
               <Icon size={16} />
-              {tab.label}
+              {t(tab.labelKey)}
             </button>
           );
         })}
@@ -361,10 +363,10 @@ const PortalSettingsPage: React.FC = () => {
       {/* ─── Tab 0: Church Identity & Contact ─── */}
       {activeTab === 0 && (
         <div className="om-card p-6">
-          <SectionHeader icon={Building2} title="Church Identity & Contact" subtitle="Basic parish information and contact details" />
+          <SectionHeader icon={Building2} title={t('portal.settings_identity_title')} subtitle={t('portal.settings_identity_subtitle')} />
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <FormField label="Church Name" className="md:col-span-2">
+            <FormField label={t('portal.settings_label_church_name')} className="md:col-span-2">
               <div className="relative">
                 <Church size={16} className="absolute left-3 top-1/2 -translate-y-1/2 om-text-tertiary" />
                 <input
@@ -375,7 +377,7 @@ const PortalSettingsPage: React.FC = () => {
               </div>
             </FormField>
 
-            <FormField label="Email Address">
+            <FormField label={t('portal.settings_label_email')}>
               <div className="relative">
                 <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 om-text-tertiary" />
                 <input
@@ -387,7 +389,7 @@ const PortalSettingsPage: React.FC = () => {
               </div>
             </FormField>
 
-            <FormField label="Phone Number">
+            <FormField label={t('portal.settings_label_phone')}>
               <div className="relative">
                 <Phone size={16} className="absolute left-3 top-1/2 -translate-y-1/2 om-text-tertiary" />
                 <input
@@ -398,7 +400,7 @@ const PortalSettingsPage: React.FC = () => {
               </div>
             </FormField>
 
-            <FormField label="Website">
+            <FormField label={t('portal.settings_label_website')}>
               <div className="relative">
                 <Globe size={16} className="absolute left-3 top-1/2 -translate-y-1/2 om-text-tertiary" />
                 <input
@@ -410,7 +412,7 @@ const PortalSettingsPage: React.FC = () => {
               </div>
             </FormField>
 
-            <FormField label="Address" className="md:col-span-2">
+            <FormField label={t('portal.settings_label_address')} className="md:col-span-2">
               <div className="relative">
                 <MapPin size={16} className="absolute left-3 top-3 om-text-tertiary" />
                 <textarea
@@ -422,16 +424,16 @@ const PortalSettingsPage: React.FC = () => {
               </div>
             </FormField>
 
-            <FormField label="City">
+            <FormField label={t('portal.settings_label_city')}>
               <TextInput value={church.city} onChange={v => updateChurch('city', v)} />
             </FormField>
-            <FormField label="State / Province">
+            <FormField label={t('portal.settings_label_state')}>
               <TextInput value={church.state_province} onChange={v => updateChurch('state_province', v)} />
             </FormField>
-            <FormField label="Postal Code">
+            <FormField label={t('portal.settings_label_postal_code')}>
               <TextInput value={church.postal_code} onChange={v => updateChurch('postal_code', v)} />
             </FormField>
-            <FormField label="Country">
+            <FormField label={t('portal.settings_label_country')}>
               <SelectInput
                 value={church.country}
                 onChange={v => updateChurch('country', v)}
@@ -449,12 +451,12 @@ const PortalSettingsPage: React.FC = () => {
               />
             </FormField>
 
-            <FormField label="Description" className="md:col-span-2">
+            <FormField label={t('portal.settings_label_description')} className="md:col-span-2">
               <textarea
                 value={church.description_multilang}
                 onChange={e => updateChurch('description_multilang', e.target.value)}
                 rows={3}
-                placeholder="Brief description of the parish..."
+                placeholder={t('portal.settings_placeholder_desc')}
                 className="w-full px-3 py-2 rounded-lg border border-[#e5e7eb] dark:border-gray-600 bg-white dark:bg-gray-800 om-text-primary font-['Inter'] text-[14px] focus:ring-2 focus:ring-[#d4af37]/40 focus:border-[#d4af37] outline-none resize-none"
               />
             </FormField>
@@ -468,7 +470,7 @@ const PortalSettingsPage: React.FC = () => {
               className="flex items-center gap-2 px-6 py-2.5 bg-[#2d1b4e] dark:bg-[#d4af37] text-white dark:text-[#2d1b4e] rounded-lg font-['Inter'] font-medium text-[14px] hover:bg-[#1f1236] dark:hover:bg-[#c29d2f] transition-colors disabled:opacity-50"
             >
               {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
-              {saving ? 'Saving...' : 'Save Changes'}
+              {saving ? t('common.saving') : t('common.save_changes')}
             </button>
           </div>
         </div>
@@ -477,15 +479,15 @@ const PortalSettingsPage: React.FC = () => {
       {/* ─── Tab 1: Configuration ─── */}
       {activeTab === 1 && (
         <div className="om-card p-6">
-          <SectionHeader icon={Settings} title="Configuration" subtitle="Settings and preferences" color="#16a34a" />
+          <SectionHeader icon={Settings} title={t('portal.settings_config_title')} subtitle={t('portal.settings_config_subtitle')} color="#16a34a" />
 
           {/* Status */}
           <div className={`p-4 rounded-xl mb-6 border ${church.is_active ? 'bg-green-50 dark:bg-green-900/10 border-green-200 dark:border-green-800' : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700'}`}>
-            <ToggleSwitch checked={church.is_active} onChange={v => updateChurch('is_active', v)} label={church.is_active ? 'Parish Active' : 'Parish Inactive'} />
+            <ToggleSwitch checked={church.is_active} onChange={v => updateChurch('is_active', v)} label={church.is_active ? t('portal.settings_parish_active') : t('portal.settings_parish_inactive')} />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            <FormField label="Language">
+            <FormField label={t('portal.settings_label_language')}>
               <SelectInput value={church.preferred_language} onChange={v => updateChurch('preferred_language', v)} options={[
                 { value: 'en', label: 'English' }, { value: 'el', label: 'Greek' },
                 { value: 'ru', label: 'Russian' }, { value: 'ro', label: 'Romanian' },
@@ -494,7 +496,7 @@ const PortalSettingsPage: React.FC = () => {
               ]} />
             </FormField>
 
-            <FormField label="Timezone">
+            <FormField label={t('portal.settings_label_timezone')}>
               <SelectInput value={church.timezone} onChange={v => updateChurch('timezone', v)} options={[
                 { value: 'America/New_York', label: 'Eastern (ET)' },
                 { value: 'America/Chicago', label: 'Central (CT)' },
@@ -507,7 +509,7 @@ const PortalSettingsPage: React.FC = () => {
               ]} />
             </FormField>
 
-            <FormField label="Currency">
+            <FormField label={t('portal.settings_label_currency')}>
               <SelectInput value={church.currency} onChange={v => updateChurch('currency', v)} options={[
                 { value: 'USD', label: 'USD ($)' }, { value: 'EUR', label: 'EUR' },
                 { value: 'GBP', label: 'GBP' }, { value: 'CAD', label: 'CAD' },
@@ -515,14 +517,14 @@ const PortalSettingsPage: React.FC = () => {
               ]} />
             </FormField>
 
-            <FormField label="Calendar Type">
+            <FormField label={t('portal.settings_label_calendar')}>
               <SelectInput value={church.calendar_type} onChange={v => updateChurch('calendar_type', v)} options={[
                 { value: 'Revised Julian', label: 'New Calendar (Revised Julian)' },
                 { value: 'Julian', label: 'Old Calendar (Julian)' },
               ]} />
             </FormField>
 
-            <FormField label="Tax ID">
+            <FormField label={t('portal.settings_label_tax_id')}>
               <TextInput value={church.tax_id} onChange={v => updateChurch('tax_id', v)} />
             </FormField>
 
@@ -530,11 +532,11 @@ const PortalSettingsPage: React.FC = () => {
 
           {/* Record Types */}
           <div className="mt-6">
-            <p className="font-['Inter'] text-[13px] font-medium om-text-secondary mb-3">Record Types Enabled</p>
+            <p className="font-['Inter'] text-[13px] font-medium om-text-secondary mb-3">{t('portal.settings_record_types')}</p>
             <div className="flex flex-wrap gap-4 p-4 rounded-xl bg-blue-50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-800">
-              <ToggleSwitch checked={church.has_baptism_records} onChange={v => updateChurch('has_baptism_records', v)} label="Baptism" />
-              <ToggleSwitch checked={church.has_marriage_records} onChange={v => updateChurch('has_marriage_records', v)} label="Marriage" />
-              <ToggleSwitch checked={church.has_funeral_records} onChange={v => updateChurch('has_funeral_records', v)} label="Funeral" />
+              <ToggleSwitch checked={church.has_baptism_records} onChange={v => updateChurch('has_baptism_records', v)} label={t('common.record_baptism')} />
+              <ToggleSwitch checked={church.has_marriage_records} onChange={v => updateChurch('has_marriage_records', v)} label={t('common.record_marriage')} />
+              <ToggleSwitch checked={church.has_funeral_records} onChange={v => updateChurch('has_funeral_records', v)} label={t('common.record_funeral')} />
             </div>
           </div>
 
@@ -546,7 +548,7 @@ const PortalSettingsPage: React.FC = () => {
               className="flex items-center gap-2 px-6 py-2.5 bg-[#2d1b4e] dark:bg-[#d4af37] text-white dark:text-[#2d1b4e] rounded-lg font-['Inter'] font-medium text-[14px] hover:bg-[#1f1236] dark:hover:bg-[#c29d2f] transition-colors disabled:opacity-50"
             >
               {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
-              {saving ? 'Saving...' : 'Save Changes'}
+              {saving ? t('common.saving') : t('common.save_changes')}
             </button>
           </div>
         </div>
@@ -555,12 +557,12 @@ const PortalSettingsPage: React.FC = () => {
       {/* ─── Tab 2: Database Mapping ─── */}
       {activeTab === 2 && (
         <div className="om-card p-6">
-          <SectionHeader icon={Database} title="Database Mapping" subtitle="Configure column visibility, display names, and sort order" color="#7c3aed" />
+          <SectionHeader icon={Database} title={t('portal.settings_dbmap_title')} subtitle={t('portal.settings_dbmap_subtitle')} color="#7c3aed" />
 
           {/* Table Selector + Actions */}
           <div className="flex flex-col sm:flex-row gap-3 mb-6">
             <div className="flex-1">
-              <label className="block font-['Inter'] text-[12px] font-medium om-text-tertiary uppercase tracking-wide mb-1.5">Select Table</label>
+              <label className="block font-['Inter'] text-[12px] font-medium om-text-tertiary uppercase tracking-wide mb-1.5">{t('portal.settings_dbmap_select_table')}</label>
               <SelectInput
                 value={dbTableName}
                 onChange={v => setDbTableName(v)}
@@ -582,7 +584,7 @@ const PortalSettingsPage: React.FC = () => {
                 className="flex items-center gap-1.5 px-4 py-2 border border-[#e5e7eb] dark:border-gray-600 rounded-lg font-['Inter'] text-[13px] om-text-primary hover:bg-[#f9fafb] dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
               >
                 {dbLoading ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
-                Reload
+                {t('common.reload')}
               </button>
             </div>
           </div>
@@ -590,15 +592,15 @@ const PortalSettingsPage: React.FC = () => {
           {/* Stats */}
           <div className="grid grid-cols-3 gap-3 mb-6">
             <div className="p-3 rounded-lg bg-[#f9fafb] dark:bg-gray-800 border border-[#e5e7eb] dark:border-gray-700 text-center">
-              <p className="font-['Inter'] text-[11px] om-text-tertiary uppercase tracking-wide">Columns</p>
+              <p className="font-['Inter'] text-[11px] om-text-tertiary uppercase tracking-wide">{t('portal.settings_dbmap_stat_columns')}</p>
               <p className="font-['Georgia'] text-xl om-text-primary mt-1">{columns.length || '—'}</p>
             </div>
             <div className="p-3 rounded-lg bg-[#f9fafb] dark:bg-gray-800 border border-[#e5e7eb] dark:border-gray-700 text-center">
-              <p className="font-['Inter'] text-[11px] om-text-tertiary uppercase tracking-wide">Visible</p>
+              <p className="font-['Inter'] text-[11px] om-text-tertiary uppercase tracking-wide">{t('portal.settings_dbmap_stat_visible')}</p>
               <p className="font-['Georgia'] text-xl om-text-primary mt-1">{columns.filter(c => c.is_visible).length || '—'}</p>
             </div>
             <div className="p-3 rounded-lg bg-[#f9fafb] dark:bg-gray-800 border border-[#e5e7eb] dark:border-gray-700 text-center">
-              <p className="font-['Inter'] text-[11px] om-text-tertiary uppercase tracking-wide">Records</p>
+              <p className="font-['Inter'] text-[11px] om-text-tertiary uppercase tracking-wide">{t('portal.settings_dbmap_stat_records')}</p>
               <p className="font-['Georgia'] text-xl om-text-primary mt-1">{rowCount !== null ? rowCount.toLocaleString() : '—'}</p>
             </div>
           </div>
@@ -608,14 +610,14 @@ const PortalSettingsPage: React.FC = () => {
             <div className="flex flex-col sm:flex-row gap-3 mb-6 p-4 rounded-xl bg-[#f9fafb] dark:bg-gray-800 border border-[#e5e7eb] dark:border-gray-700">
               <div className="flex items-center gap-2 om-text-secondary">
                 <ArrowUpDown size={16} />
-                <span className="font-['Inter'] text-[13px] font-medium">Default Sort</span>
+                <span className="font-['Inter'] text-[13px] font-medium">{t('portal.settings_dbmap_default_sort')}</span>
               </div>
               <div className="flex-1">
                 <SelectInput
                   value={defaultSortField}
                   onChange={v => setDefaultSortField(v)}
                   options={[
-                    { value: '', label: 'No default sort' },
+                    { value: '', label: t('portal.settings_dbmap_no_sort') },
                     ...columns.filter(c => c.is_visible && c.is_sortable).map(c => ({
                       value: c.column_name,
                       label: c.new_name || c.column_name,
@@ -646,23 +648,23 @@ const PortalSettingsPage: React.FC = () => {
           {dbLoading ? (
             <div className="flex items-center justify-center py-12">
               <Loader2 size={24} className="animate-spin text-[#d4af37]" />
-              <span className="ml-2 font-['Inter'] text-[14px] om-text-secondary">Loading columns...</span>
+              <span className="ml-2 font-['Inter'] text-[14px] om-text-secondary">{t('portal.settings_dbmap_loading')}</span>
             </div>
           ) : columns.length === 0 ? (
             <div className="text-center py-12">
               <Database size={32} className="mx-auto om-text-tertiary mb-2" />
-              <p className="font-['Inter'] text-[14px] om-text-secondary">No columns loaded. Click Reload to fetch the schema.</p>
+              <p className="font-['Inter'] text-[14px] om-text-secondary">{t('portal.settings_dbmap_empty')}</p>
             </div>
           ) : (
             <div className="overflow-x-auto rounded-xl border border-[#e5e7eb] dark:border-gray-700">
               <table className="w-full">
                 <thead>
                   <tr className="bg-[#f9fafb] dark:bg-gray-800">
-                    <th className="px-4 py-3 text-left font-['Inter'] text-[12px] font-semibold om-text-tertiary uppercase tracking-wide">#</th>
-                    <th className="px-4 py-3 text-left font-['Inter'] text-[12px] font-semibold om-text-tertiary uppercase tracking-wide">Column Name</th>
-                    <th className="px-4 py-3 text-left font-['Inter'] text-[12px] font-semibold om-text-tertiary uppercase tracking-wide">Display Name</th>
-                    <th className="px-4 py-3 text-center font-['Inter'] text-[12px] font-semibold om-text-tertiary uppercase tracking-wide">Visible</th>
-                    <th className="px-4 py-3 text-center font-['Inter'] text-[12px] font-semibold om-text-tertiary uppercase tracking-wide">Sortable</th>
+                    <th className="px-4 py-3 text-left font-['Inter'] text-[12px] font-semibold om-text-tertiary uppercase tracking-wide">{t('portal.settings_dbmap_col_number')}</th>
+                    <th className="px-4 py-3 text-left font-['Inter'] text-[12px] font-semibold om-text-tertiary uppercase tracking-wide">{t('portal.settings_dbmap_col_column')}</th>
+                    <th className="px-4 py-3 text-left font-['Inter'] text-[12px] font-semibold om-text-tertiary uppercase tracking-wide">{t('portal.settings_dbmap_col_display')}</th>
+                    <th className="px-4 py-3 text-center font-['Inter'] text-[12px] font-semibold om-text-tertiary uppercase tracking-wide">{t('portal.settings_dbmap_col_visible')}</th>
+                    <th className="px-4 py-3 text-center font-['Inter'] text-[12px] font-semibold om-text-tertiary uppercase tracking-wide">{t('portal.settings_dbmap_col_sortable')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#f3f4f6] dark:divide-gray-700">
@@ -722,7 +724,7 @@ const PortalSettingsPage: React.FC = () => {
                 className="flex items-center gap-2 px-6 py-2.5 bg-[#2d1b4e] dark:bg-[#d4af37] text-white dark:text-[#2d1b4e] rounded-lg font-['Inter'] font-medium text-[14px] hover:bg-[#1f1236] dark:hover:bg-[#c29d2f] transition-colors disabled:opacity-50"
               >
                 {dbSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
-                {dbSaving ? 'Saving...' : 'Save Database Mapping'}
+                {dbSaving ? t('common.saving') : t('portal.settings_dbmap_save_btn')}
               </button>
             </div>
           )}

@@ -31,6 +31,7 @@ import {
     IconPoint,
     IconRocket,
     IconSettings,
+    IconClipboardCheck,
     IconShield,
     IconSitemap,
     IconTerminal,
@@ -346,6 +347,12 @@ export const SuperAdminMenuTemplate: MenuTemplateItem[] = [
         title: 'Refactor Console',
         icon: IconTool,
         href: '/devel-tools/refactor-console',
+      },
+      {
+        id: 'devel.page-edit-audit',
+        title: 'Page Edit Audit',
+        icon: IconClipboardCheck,
+        href: '/devel-tools/page-edit-audit',
       },
       // Daily Tasks — retired, now on OMAI Operations Hub
       {

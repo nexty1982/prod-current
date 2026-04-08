@@ -24,6 +24,7 @@ import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import ImageIcon from '@mui/icons-material/Image';
 import { useAuth } from '@/context/AuthContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { canEditChurchSettings } from './accountPermissions';
 import { SnackbarState, SNACKBAR_CLOSED, SNACKBAR_DURATION, getChurchDisplayName } from './accountConstants';
 import { churchApi, extractErrorMessage } from './accountApi';
@@ -64,6 +65,7 @@ function isValidColor(v: string): boolean {
 
 const AccountBrandingPage: React.FC = () => {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const editable = canEditChurchSettings(user);
 
   // Data state
@@ -122,11 +124,11 @@ const AccountBrandingPage: React.FC = () => {
 
   const handleSave = async () => {
     if (!isValidColor(branding.primary_color)) {
-      setSnackbar({ open: true, message: 'Primary color must be in #RRGGBB format', severity: 'error' });
+      setSnackbar({ open: true, message: t('account.primary_color_invalid'), severity: 'error' });
       return;
     }
     if (!isValidColor(branding.secondary_color)) {
-      setSnackbar({ open: true, message: 'Secondary color must be in #RRGGBB format', severity: 'error' });
+      setSnackbar({ open: true, message: t('account.secondary_color_invalid'), severity: 'error' });
       return;
     }
 
@@ -144,7 +146,7 @@ const AccountBrandingPage: React.FC = () => {
         secondary_color: branding.secondary_color || null,
       });
       setOriginal({ ...branding });
-      setSnackbar({ open: true, message: 'Branding settings saved', severity: 'success' });
+      setSnackbar({ open: true, message: t('account.branding_saved'), severity: 'success' });
     } catch (err: any) {
       setSnackbar({ open: true, message: err.message || 'Failed to save', severity: 'error' });
     } finally {
@@ -173,7 +175,7 @@ const AccountBrandingPage: React.FC = () => {
       const newPath = result.path + '?t=' + Date.now();
       setBranding((prev) => ({ ...prev, [pathKey]: newPath }));
       setOriginal((prev) => ({ ...prev, [pathKey]: newPath }));
-      setSnackbar({ open: true, message: `${field} uploaded successfully`, severity: 'success' });
+      setSnackbar({ open: true, message: t('account.uploaded_success').replace('{field}', field), severity: 'success' });
     } catch (err: any) {
       setSnackbar({ open: true, message: err.message || 'Upload failed', severity: 'error' });
     } finally {
@@ -188,7 +190,7 @@ const AccountBrandingPage: React.FC = () => {
       const pathKey = field === 'logo' ? 'logo_path' : field === 'logo-dark' ? 'logo_dark_path' : 'favicon_path';
       setBranding((prev) => ({ ...prev, [pathKey]: null }));
       setOriginal((prev) => ({ ...prev, [pathKey]: null }));
-      setSnackbar({ open: true, message: `${field} removed`, severity: 'success' });
+      setSnackbar({ open: true, message: t('account.removed_success').replace('{field}', field), severity: 'success' });
     } catch (err: any) {
       setSnackbar({ open: true, message: err.message || 'Failed to remove', severity: 'error' });
     } finally {
@@ -210,7 +212,7 @@ const AccountBrandingPage: React.FC = () => {
         <CardContent sx={{ p: 3, textAlign: 'center', py: 6 }}>
           <PaletteIcon sx={{ fontSize: 48, color: 'text.disabled', mb: 1 }} />
           <Typography variant="body1" color="text.secondary">
-            Branding settings are available when you are affiliated with a parish.
+            {t('account.branding_no_parish')}
           </Typography>
         </CardContent>
       </Card>
@@ -231,7 +233,7 @@ const AccountBrandingPage: React.FC = () => {
     <>
       {!editable && (
         <Alert severity="info" sx={{ mb: 2 }}>
-          You are viewing your church&apos;s branding settings in read-only mode. Contact a church administrator to make changes.
+          {t('account.branding_readonly')}
         </Alert>
       )}
 
@@ -241,11 +243,11 @@ const AccountBrandingPage: React.FC = () => {
           <Box display="flex" alignItems="center" gap={1} mb={0.5}>
             <PaletteIcon color="primary" />
             <Typography variant="h5" fontWeight={600}>
-              Church Identity
+              {t('account.church_identity')}
             </Typography>
           </Box>
           <Typography variant="body2" color="text.secondary" mb={3}>
-            Display name, abbreviation, and brand colors
+            {t('account.church_identity_desc')}
           </Typography>
           <Divider sx={{ mb: 3 }} />
 
@@ -258,7 +260,7 @@ const AccountBrandingPage: React.FC = () => {
             }}
           >
             <TextField
-              label="Church Display Name"
+              label={t('account.label_church_display_name')}
               value={branding.name}
               onChange={(e) => setBranding((p) => ({ ...p, name: e.target.value }))}
               fullWidth
@@ -266,24 +268,24 @@ const AccountBrandingPage: React.FC = () => {
               sx={{ gridColumn: { sm: '1 / -1' } }}
             />
             <TextField
-              label="Short Name / Abbreviation"
+              label={t('account.label_short_name')}
               value={branding.short_name}
               onChange={(e) => setBranding((p) => ({ ...p, short_name: e.target.value }))}
               fullWidth
               disabled={!editable}
-              placeholder="e.g. St. George"
+              placeholder={t('account.placeholder_church_name')}
               inputProps={{ maxLength: 50 }}
             />
             <Box /> {/* spacer */}
             <TextField
-              label="Primary Color"
+              label={t('account.label_primary_color')}
               value={branding.primary_color}
               onChange={(e) => setBranding((p) => ({ ...p, primary_color: e.target.value }))}
               fullWidth
               disabled={!editable}
               placeholder="#5B21B6"
               error={!!branding.primary_color && !isValidColor(branding.primary_color)}
-              helperText={branding.primary_color && !isValidColor(branding.primary_color) ? 'Use #RRGGBB format' : ''}
+              helperText={branding.primary_color && !isValidColor(branding.primary_color) ? t('account.use_rrggbb_format') : ''}
               InputProps={{
                 startAdornment: branding.primary_color && isValidColor(branding.primary_color) ? (
                   <Box sx={{ width: 20, height: 20, borderRadius: 0.5, bgcolor: branding.primary_color, mr: 1, border: '1px solid', borderColor: 'divider' }} />
@@ -291,14 +293,14 @@ const AccountBrandingPage: React.FC = () => {
               }}
             />
             <TextField
-              label="Secondary Color"
+              label={t('account.label_secondary_color')}
               value={branding.secondary_color}
               onChange={(e) => setBranding((p) => ({ ...p, secondary_color: e.target.value }))}
               fullWidth
               disabled={!editable}
               placeholder="#D97706"
               error={!!branding.secondary_color && !isValidColor(branding.secondary_color)}
-              helperText={branding.secondary_color && !isValidColor(branding.secondary_color) ? 'Use #RRGGBB format' : ''}
+              helperText={branding.secondary_color && !isValidColor(branding.secondary_color) ? t('account.use_rrggbb_format') : ''}
               InputProps={{
                 startAdornment: branding.secondary_color && isValidColor(branding.secondary_color) ? (
                   <Box sx={{ width: 20, height: 20, borderRadius: 0.5, bgcolor: branding.secondary_color, mr: 1, border: '1px solid', borderColor: 'divider' }} />
@@ -314,10 +316,10 @@ const AccountBrandingPage: React.FC = () => {
                 disabled={!isDirty || saving}
                 onClick={() => setBranding({ ...original })}
               >
-                Cancel
+                {t('common.cancel')}
               </Button>
               <Button variant="contained" disabled={!isDirty || saving} onClick={handleSave}>
-                {saving ? <CircularProgress size={20} /> : 'Save Changes'}
+                {saving ? <CircularProgress size={20} /> : t('common.save_changes')}
               </Button>
             </Box>
           )}
@@ -330,18 +332,18 @@ const AccountBrandingPage: React.FC = () => {
           <Box display="flex" alignItems="center" gap={1} mb={0.5}>
             <ImageIcon color="primary" />
             <Typography variant="h5" fontWeight={600}>
-              Logos & Assets
+              {t('account.logos_and_assets')}
             </Typography>
           </Box>
           <Typography variant="body2" color="text.secondary" mb={3}>
-            Upload your church logo and favicon. PNG, JPEG, SVG, or WebP up to {MAX_SIZE_MB}MB.
+            {t('account.logos_desc').replace('{size}', String(MAX_SIZE_MB))}
           </Typography>
           <Divider sx={{ mb: 3 }} />
 
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr 1fr' }, gap: 3 }}>
             <ImageUploadCard
-              label="Primary Logo"
-              description="Used in headers and documents"
+              label={t('account.primary_logo')}
+              description={t('account.used_in_headers')}
               imagePath={branding.logo_path}
               uploading={!!uploading['logo']}
               editable={editable}
@@ -349,8 +351,8 @@ const AccountBrandingPage: React.FC = () => {
               onDelete={() => handleDelete('logo')}
             />
             <ImageUploadCard
-              label="Dark Mode Logo"
-              description="Alternate logo for dark backgrounds"
+              label={t('account.dark_mode_logo')}
+              description={t('account.dark_mode_logo_desc')}
               imagePath={branding.logo_dark_path}
               uploading={!!uploading['logo-dark']}
               editable={editable}
@@ -359,8 +361,8 @@ const AccountBrandingPage: React.FC = () => {
               darkPreview
             />
             <ImageUploadCard
-              label="Favicon"
-              description="Browser tab icon (square recommended)"
+              label={t('account.favicon')}
+              description={t('account.favicon_desc')}
               imagePath={branding.favicon_path}
               uploading={!!uploading['favicon']}
               editable={editable}
@@ -382,7 +384,7 @@ const AccountBrandingPage: React.FC = () => {
         <Card variant="outlined">
           <CardContent sx={{ p: 3 }}>
             <Typography variant="h6" fontWeight={600} mb={2}>
-              Preview
+              {t('account.preview')}
             </Typography>
             <Divider sx={{ mb: 3 }} />
             <Box
@@ -407,7 +409,7 @@ const AccountBrandingPage: React.FC = () => {
               )}
               <Box>
                 <Typography variant="h6" fontWeight={600} sx={{ color: branding.primary_color || undefined }}>
-                  {branding.short_name || branding.name || 'Church Name'}
+                  {branding.short_name || branding.name || t('account.church_name_fallback')}
                 </Typography>
                 {branding.secondary_color && (
                   <Box sx={{ width: 40, height: 3, borderRadius: 1, bgcolor: branding.secondary_color, mt: 0.5 }} />
@@ -457,6 +459,7 @@ const ImageUploadCard: React.FC<ImageUploadCardProps> = ({
   darkPreview,
   small,
 }) => {
+  const { t } = useLanguage();
   const previewHeight = small ? 64 : 100;
 
   return (
@@ -512,7 +515,7 @@ const ImageUploadCard: React.FC<ImageUploadCardProps> = ({
           <Box sx={{ textAlign: 'center' }}>
             <CloudUploadIcon sx={{ fontSize: 32, color: 'text.disabled' }} />
             <Typography variant="caption" display="block" color="text.disabled">
-              No image
+              {t('account.no_image')}
             </Typography>
           </Box>
         )}
@@ -528,10 +531,10 @@ const ImageUploadCard: React.FC<ImageUploadCardProps> = ({
             onClick={onUploadClick}
             disabled={uploading}
           >
-            {imagePath ? 'Replace' : 'Upload'}
+            {imagePath ? t('account.replace') : t('common.upload')}
           </Button>
           {imagePath && (
-            <Tooltip title="Remove image">
+            <Tooltip title={t('account.remove_image')}>
               <IconButton size="small" color="error" onClick={onDelete} disabled={uploading}>
                 <DeleteOutlineIcon fontSize="small" />
               </IconButton>

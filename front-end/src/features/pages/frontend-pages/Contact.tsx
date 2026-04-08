@@ -4,19 +4,21 @@ import { PUBLIC_ROUTES } from '@/config/publicRoutes';
 import { HeroSection, CTASection } from '@/components/frontend-pages/shared/sections';
 import ScrollToTop from '@/components/frontend-pages/shared/scroll-to-top';
 import PageContainer from '@/shared/ui/PageContainer';
+import { useLanguage } from '@/context/LanguageContext';
 import axios from 'axios';
 import React, { useState } from 'react';
 
-const ENQUIRY_TYPES = [
-  { value: 'general', label: 'General Enquiry' },
-  { value: 'parish_registration', label: 'Parish Registration' },
-  { value: 'records', label: 'Records & Certificates' },
-  { value: 'technical', label: 'Technical Support' },
-  { value: 'billing', label: 'Billing & Pricing' },
-  { value: 'other', label: 'Other' },
+const ENQUIRY_TYPE_KEYS = [
+  { value: 'general', key: 'contact.option_general' },
+  { value: 'parish_registration', key: 'contact.option_parish_registration' },
+  { value: 'records', key: 'contact.option_records' },
+  { value: 'technical', key: 'contact.option_technical' },
+  { value: 'billing', key: 'contact.option_billing' },
+  { value: 'other', key: 'contact.option_other' },
 ];
 
 const Contact = () => {
+  const { t } = useLanguage();
   const [form, setForm] = useState({
     firstName: '',
     lastName: '',
@@ -34,12 +36,12 @@ const Contact = () => {
   };
 
   const validate = (): string | null => {
-    if (!form.firstName.trim()) return 'First name is required.';
-    if (!form.lastName.trim()) return 'Last name is required.';
-    if (!form.email.trim()) return 'Email is required.';
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) return 'Please enter a valid email address.';
-    if (!form.phone.trim()) return 'Phone number is required.';
-    if (!form.message.trim()) return 'Please enter a message.';
+    if (!form.firstName.trim()) return t('contact.validation_first_name');
+    if (!form.lastName.trim()) return t('contact.validation_last_name');
+    if (!form.email.trim()) return t('contact.validation_email_required');
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) return t('contact.validation_email_invalid');
+    if (!form.phone.trim()) return t('contact.validation_phone');
+    if (!form.message.trim()) return t('contact.validation_message');
     return null;
   };
 
@@ -54,10 +56,10 @@ const Contact = () => {
     setFeedback(null);
     try {
       await axios.post('/api/contact', form);
-      setFeedback({ type: 'success', text: 'Thank you! Your message has been sent. We will get back to you shortly.' });
+      setFeedback({ type: 'success', text: t('contact.success_message') });
       setForm({ firstName: '', lastName: '', phone: '', email: '', enquiryType: 'general', message: '' });
     } catch (error: any) {
-      setFeedback({ type: 'error', text: error.response?.data?.message || 'Failed to send message. Please try again.' });
+      setFeedback({ type: 'error', text: error.response?.data?.message || t('contact.error_message') });
     } finally {
       setSubmitting(false);
     }
@@ -67,9 +69,9 @@ const Contact = () => {
     <PageContainer title="Contact" description="Contact Orthodox Metrics">
       {/* Hero */}
       <HeroSection
-        badge="Contact Us"
-        title="We'd Love to Hear from You"
-        subtitle="Whether you're ready to register your parish, have questions about the platform, or need technical support, we're here to help."
+        badge={t('contact.hero_badge')}
+        title={t('contact.hero_title')}
+        subtitle={t('contact.hero_subtitle')}
         editKeyPrefix="contact.hero"
       />
 
@@ -79,9 +81,9 @@ const Contact = () => {
           <div className="grid lg:grid-cols-3 gap-12">
             {/* Contact Form */}
             <div className="lg:col-span-2">
-              <h2 className="font-['Georgia'] text-3xl text-[#2d1b4e] dark:text-white mb-2">Send a Message</h2>
+              <h2 className="font-['Georgia'] text-3xl text-[#2d1b4e] dark:text-white mb-2">{t('contact.form_title')}</h2>
               <p className="font-['Inter'] text-[16px] text-[#4a5565] dark:text-gray-400 mb-8">
-                Fill out the form below and we'll respond as soon as possible.
+                {t('contact.form_desc')}
               </p>
 
               {feedback && (
@@ -99,18 +101,18 @@ const Contact = () => {
 
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid sm:grid-cols-2 gap-6">
-                  <FormField label="First Name" id="fname" placeholder="Your first name" value={form.firstName} onChange={handleChange('firstName')} required />
-                  <FormField label="Last Name" id="lname" placeholder="Your last name" value={form.lastName} onChange={handleChange('lastName')} required />
+                  <FormField label={t('contact.label_first_name')} id="fname" placeholder={t('contact.placeholder_first_name')} value={form.firstName} onChange={handleChange('firstName')} required />
+                  <FormField label={t('contact.label_last_name')} id="lname" placeholder={t('contact.placeholder_last_name')} value={form.lastName} onChange={handleChange('lastName')} required />
                 </div>
 
                 <div className="grid sm:grid-cols-2 gap-6">
-                  <FormField label="Phone Number" id="phone" placeholder="(555) 123-4567" value={form.phone} onChange={handleChange('phone')} required />
-                  <FormField label="Email" id="email" type="email" placeholder="you@example.com" value={form.email} onChange={handleChange('email')} required />
+                  <FormField label={t('contact.label_phone')} id="phone" placeholder={t('contact.placeholder_phone')} value={form.phone} onChange={handleChange('phone')} required />
+                  <FormField label={t('contact.label_email')} id="email" type="email" placeholder={t('contact.placeholder_email')} value={form.email} onChange={handleChange('email')} required />
                 </div>
 
                 <div>
                   <label htmlFor="enquiry" className="block font-['Inter'] text-[14px] font-medium text-[#2d1b4e] dark:text-white mb-2">
-                    Enquiry Type
+                    {t('contact.label_enquiry_type')}
                   </label>
                   <select
                     id="enquiry"
@@ -118,20 +120,20 @@ const Contact = () => {
                     onChange={handleChange('enquiryType')}
                     className="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-[#2d1b4e] dark:text-white font-['Inter'] text-[15px] focus:outline-none focus:ring-2 focus:ring-[#2d1b4e] dark:focus:ring-[#d4af37] focus:border-transparent transition-colors appearance-none"
                   >
-                    {ENQUIRY_TYPES.map((opt) => (
-                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    {ENQUIRY_TYPE_KEYS.map((opt) => (
+                      <option key={opt.value} value={opt.value}>{t(opt.key)}</option>
                     ))}
                   </select>
                 </div>
 
                 <div>
                   <label htmlFor="message" className="block font-['Inter'] text-[14px] font-medium text-[#2d1b4e] dark:text-white mb-2">
-                    Message <span className="text-red-500">*</span>
+                    {t('contact.label_message')} <span className="text-red-500">*</span>
                   </label>
                   <textarea
                     id="message"
                     rows={5}
-                    placeholder="Tell us how we can help..."
+                    placeholder={t('contact.placeholder_message')}
                     value={form.message}
                     onChange={handleChange('message')}
                     required
@@ -150,11 +152,11 @@ const Contact = () => {
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                       </svg>
-                      Sending...
+                      {t('contact.btn_sending')}
                     </>
                   ) : (
                     <>
-                      Send Message
+                      {t('contact.btn_send')}
                       <ArrowRight size={20} />
                     </>
                   )}
@@ -165,28 +167,28 @@ const Contact = () => {
             {/* Info Panel */}
             <div className="lg:col-span-1">
               <div className="bg-gradient-to-br from-[#2d1b4e] via-[#3a2461] to-[#4a2f74] dark:from-gray-800 dark:via-gray-750 dark:to-gray-700 rounded-2xl p-8 text-white h-full">
-                <h3 className="font-['Georgia'] text-2xl mb-2">Get in Touch</h3>
+                <h3 className="font-['Georgia'] text-2xl mb-2">{t('contact.info_title')}</h3>
                 <p className="font-['Inter'] text-[15px] text-[rgba(255,255,255,0.7)] mb-8 leading-relaxed">
-                  Have questions or need assistance? We're here to help you get started with Orthodox Metrics.
+                  {t('contact.info_desc')}
                 </p>
 
                 <div className="space-y-6">
-                  <ContactInfoItem icon={Mail} label="Email" value="support@orthodoxmetrics.com" />
-                  <ContactInfoItem icon={Phone} label="Phone" value="Available upon request" />
-                  <ContactInfoItem icon={MapPin} label="Location" value="United States" />
-                  <ContactInfoItem icon={Clock} label="Response Time" value="Within 24 hours" />
+                  <ContactInfoItem icon={Mail} label={t('contact.info1_label')} value={t('contact.info1_value')} />
+                  <ContactInfoItem icon={Phone} label={t('contact.info2_label')} value={t('contact.info2_value')} />
+                  <ContactInfoItem icon={MapPin} label={t('contact.info3_label')} value={t('contact.info3_value')} />
+                  <ContactInfoItem icon={Clock} label={t('contact.info4_label')} value={t('contact.info4_value')} />
                 </div>
 
                 <div className="mt-10 pt-8 border-t border-white/10">
-                  <h4 className="font-['Inter'] font-medium text-[15px] text-[#d4af37] mb-3">Ready to register?</h4>
+                  <h4 className="font-['Inter'] font-medium text-[15px] text-[#d4af37] mb-3">{t('contact.register_heading')}</h4>
                   <p className="font-['Inter'] text-[14px] text-[rgba(255,255,255,0.6)] leading-relaxed mb-4">
-                    If your parish is ready to get started, select "Parish Registration" from the enquiry type and we'll walk you through the process.
+                    {t('contact.register_desc')}
                   </p>
                   <Link
                     to={PUBLIC_ROUTES.PRICING}
                     className="inline-flex items-center gap-2 font-['Inter'] text-[14px] text-[#d4af37] hover:text-[#e8c84a] transition-colors no-underline"
                   >
-                    View pricing plans
+                    {t('contact.register_link')}
                     <ArrowRight size={16} />
                   </Link>
                 </div>
@@ -198,22 +200,22 @@ const Contact = () => {
 
       {/* CTA */}
       <CTASection
-        title="Ready to Get Started?"
-        subtitle="Join Orthodox parishes across North America already preserving their records with Orthodox Metrics."
+        title={t('contact.cta_title')}
+        subtitle={t('contact.cta_subtitle')}
         editKeyPrefix="contact.cta"
       >
         <Link
           to={PUBLIC_ROUTES.TOUR}
           className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-[#d4af37] text-[#2d1b4e] rounded-lg font-['Inter'] font-medium text-[16px] hover:bg-[#c29d2f] transition-colors no-underline"
         >
-          Take the Tour
+          {t('contact.cta_tour')}
           <ArrowRight size={20} />
         </Link>
         <Link
           to={PUBLIC_ROUTES.PRICING}
           className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-sm border border-white/20 text-white rounded-lg font-['Inter'] font-medium text-[16px] hover:bg-white/20 transition-colors no-underline"
         >
-          View Pricing
+          {t('contact.cta_pricing')}
         </Link>
       </CTASection>
 

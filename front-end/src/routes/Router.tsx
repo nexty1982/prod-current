@@ -44,6 +44,7 @@ const LoadingDemo = Loadable(lazy(() => import('../features/devel-tools/loading-
 const OmtraceConsole = Loadable(lazy(() => import('../features/devel-tools/omtrace/OmtraceConsole')));
 const MenuEditor = Loadable(lazy(() => import('../features/devel-tools/menu-editor/MenuEditor')));
 const PageEditor = Loadable(lazy(() => import('../features/devel-tools/page-editor/PageEditor')));
+const PageEditAuditPage = Loadable(lazy(() => import('../features/devel-tools/page-edit-audit/PageEditAuditPage')));
 const Kanban = Loadable(lazy(() => import('../features/apps/kanban/Kanban')));
 const InvoiceList = Loadable(lazy(() => import('../features/apps/invoice/List')));
 const InvoiceCreate = Loadable(lazy(() => import('../features/apps/invoice/Create')));
@@ -1210,6 +1211,16 @@ const Router = [
             <EnvironmentAwarePage featureId="page-editor" priority={2} featureName="Page Content Editor">
               <PageEditor />
             </EnvironmentAwarePage>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/devel-tools/page-edit-audit',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin']}>
+            <AdminErrorBoundary>
+              <PageEditAuditPage />
+            </AdminErrorBoundary>
           </ProtectedRoute>
         )
       },

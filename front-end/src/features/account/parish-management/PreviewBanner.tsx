@@ -6,6 +6,7 @@
 import React from 'react';
 import { Box, Typography, useTheme } from '@mui/material';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface PreviewBannerProps {
   /** Override the default message */
@@ -13,8 +14,9 @@ interface PreviewBannerProps {
 }
 
 const PreviewBanner: React.FC<PreviewBannerProps> = ({
-  message = 'This page is an interactive preview. Settings shown here are not saved yet.',
+  message,
 }) => {
+  const { t } = useLanguage();
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
 
@@ -40,7 +42,7 @@ const PreviewBanner: React.FC<PreviewBannerProps> = ({
           color: isDark ? '#93c5fd' : '#2563eb',
         }}
       >
-        {message}
+        {message || t('parish.preview_banner')}
       </Typography>
     </Box>
   );

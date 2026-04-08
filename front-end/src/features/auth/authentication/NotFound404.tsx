@@ -9,6 +9,7 @@ import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
 import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
+import { useLanguage } from '@/context/LanguageContext';
 
 // ── 3-bar Orthodox Christian cross ──────────────────────────────────────────
 function OrthodoxCrossIcon({ size = 40, color = 'currentColor' }: { size?: number; color?: string }) {
@@ -27,6 +28,7 @@ const NotFound404: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const theme = useTheme();
+  const { t } = useLanguage();
   const isDark = theme.palette.mode === 'dark';
 
   const pageBg    = isDark ? '#0a1929' : '#fafaf7';
@@ -60,7 +62,7 @@ const NotFound404: React.FC = () => {
         {/* Breadcrumb bar */}
         <Box sx={{ px: 3, py: 1.25, bgcolor: breadBg, borderBottom: `1px solid ${cardBorder}` }}>
           <Typography sx={{ fontSize: '0.75rem', color: breadText, fontFamily: 'monospace', letterSpacing: '0.02em' }}>
-            You are here &nbsp;/&nbsp; <span style={{ opacity: 0.7 }}>{crumbPath}</span>
+            {t('auth.error_404_breadcrumb')} &nbsp;/&nbsp; <span style={{ opacity: 0.7 }}>{crumbPath}</span>
           </Typography>
         </Box>
 
@@ -74,12 +76,12 @@ const NotFound404: React.FC = () => {
 
           {/* Heading */}
           <Typography sx={{ fontSize: '1.625rem', fontWeight: 600, color: heading, letterSpacing: '-0.01em', mb: 1.5 }}>
-            Page Not Found
+            {t('auth.error_404_title')}
           </Typography>
 
           {/* Subtitle */}
           <Typography sx={{ fontSize: '0.9375rem', color: subtext, lineHeight: 1.65, maxWidth: 320, mb: 3.5 }}>
-            The page you're looking for doesn't exist or may have been moved.
+            {t('auth.error_404_message')}
           </Typography>
 
           {/* Primary button */}
@@ -101,7 +103,7 @@ const NotFound404: React.FC = () => {
               transition: 'all 0.2s',
             }}
           >
-            Go to Homepage
+            {t('auth.error_404_go_home')}
           </Button>
 
           {/* Secondary links */}
@@ -112,7 +114,7 @@ const NotFound404: React.FC = () => {
               sx={{ display: 'flex', alignItems: 'center', gap: 0.5, background: 'none', border: 'none', cursor: 'pointer', color: linkColor, fontSize: '0.8125rem', p: 0, '&:hover': { opacity: 0.75 } }}
             >
               <BookmarkBorderIcon sx={{ fontSize: 14 }} />
-              Browse Records
+              {t('auth.error_404_browse_records')}
             </Box>
             <Typography sx={{ color: subtext, fontSize: '0.75rem' }}>·</Typography>
             <Box
@@ -121,7 +123,7 @@ const NotFound404: React.FC = () => {
               sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: linkColor, textDecoration: 'none', fontSize: '0.8125rem', '&:hover': { opacity: 0.75 } }}
             >
               <ArrowForwardIcon sx={{ fontSize: 14 }} />
-              Contact Support
+              {t('auth.error_404_contact_support')}
             </Box>
           </Box>
         </Box>

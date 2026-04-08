@@ -7,6 +7,7 @@
  */
 
 import { CheckCircle2, Circle, Loader2 } from '@/ui/icons';
+import { useLanguage } from '@/context/LanguageContext';
 import React from 'react';
 
 export interface PipelineStageCounts {
@@ -30,17 +31,19 @@ interface RecordPipelineStatusProps {
 }
 
 const RecordPipelineStatus: React.FC<RecordPipelineStatusProps> = ({ counts, isAdmin }) => {
+  const { t } = useLanguage();
+
   const stages: PipelineStage[] = isAdmin
     ? [
-        { key: 'uploaded', label: 'Uploaded', count: counts.uploaded, active: counts.uploaded > 0 },
-        { key: 'processing', label: 'Processing', count: counts.processing, active: counts.processing > 0 },
-        { key: 'admin_review', label: 'Admin Review', count: counts.admin_review, active: counts.admin_review > 0 },
-        { key: 'approved', label: 'Ready', count: counts.approved + counts.published, active: (counts.approved + counts.published) > 0 },
+        { key: 'uploaded', label: t('portal.pipeline_uploaded'), count: counts.uploaded, active: counts.uploaded > 0 },
+        { key: 'processing', label: t('portal.pipeline_processing'), count: counts.processing, active: counts.processing > 0 },
+        { key: 'admin_review', label: t('portal.pipeline_admin_review'), count: counts.admin_review, active: counts.admin_review > 0 },
+        { key: 'approved', label: t('portal.pipeline_ready'), count: counts.approved + counts.published, active: (counts.approved + counts.published) > 0 },
       ]
     : [
-        { key: 'uploaded', label: 'Uploaded', count: counts.uploaded, active: counts.uploaded > 0 },
-        { key: 'processing', label: 'Processing', count: counts.processing + counts.admin_review, active: (counts.processing + counts.admin_review) > 0 },
-        { key: 'approved', label: 'Ready', count: counts.approved + counts.published, active: (counts.approved + counts.published) > 0 },
+        { key: 'uploaded', label: t('portal.pipeline_uploaded'), count: counts.uploaded, active: counts.uploaded > 0 },
+        { key: 'processing', label: t('portal.pipeline_processing'), count: counts.processing + counts.admin_review, active: (counts.processing + counts.admin_review) > 0 },
+        { key: 'approved', label: t('portal.pipeline_ready'), count: counts.approved + counts.published, active: (counts.approved + counts.published) > 0 },
       ];
 
   return (
@@ -48,10 +51,10 @@ const RecordPipelineStatus: React.FC<RecordPipelineStatusProps> = ({ counts, isA
       <div className="flex items-center justify-between mb-6">
         <div>
           <h3 className="font-['Inter'] font-semibold text-[15px] text-gray-900 dark:text-white">
-            Record Pipeline
+            {t('portal.pipeline_title')}
           </h3>
           <p className="font-['Inter'] text-[13px] text-gray-500 dark:text-gray-400 mt-0.5">
-            Your parish records are being prepared.
+            {t('portal.pipeline_subtitle')}
           </p>
         </div>
       </div>

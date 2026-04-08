@@ -13,6 +13,7 @@ import PaletteOutlinedIcon from '@mui/icons-material/PaletteOutlined';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import BrushOutlinedIcon from '@mui/icons-material/BrushOutlined';
 import { useChurch } from '@/context/ChurchContext';
+import { useLanguage } from '@/context/LanguageContext';
 import apiClient from '@/api/utils/axiosInstance';
 
 const BASE = '/account/parish-management';
@@ -26,38 +27,39 @@ interface ParishStats {
 
 const quickActions = [
   {
-    title: 'Configure Database Mapping',
-    description: 'Set up field mappings for Baptism, Marriage, and Funeral records',
+    titleKey: 'parish.configure_database_mapping',
+    descriptionKey: 'parish.configure_database_mapping_desc',
     href: `${BASE}/database-mapping`,
     Icon: StorageOutlinedIcon,
   },
   {
-    title: 'Customize Landing Page',
-    description: 'Update your parish branding, logo, and welcome message',
+    titleKey: 'parish.customize_landing_page',
+    descriptionKey: 'parish.customize_landing_page_desc',
     href: `${BASE}/landing-page-branding`,
     Icon: BrushOutlinedIcon,
   },
-];
+] as const;
 
 const recentActivity = [
-  { action: 'Database mapping updated', time: '2 hours ago', user: 'Admin' },
-  { action: 'Theme changed to Pascha', time: '1 day ago', user: 'Fr. John' },
-  { action: 'New baptism record added', time: '2 days ago', user: 'Secretary' },
-];
+  { actionKey: 'parish.activity_mapping_updated', time: '2 hours ago', user: 'Admin' },
+  { actionKey: 'parish.activity_theme_changed', time: '1 day ago', user: 'Fr. John' },
+  { actionKey: 'parish.activity_new_baptism', time: '2 days ago', user: 'Secretary' },
+] as const;
 
 const statsDef = [
-  { key: 'total' as const, name: 'Total Records', icon: StorageOutlinedIcon },
-  { key: 'baptisms' as const, name: 'Baptisms', icon: PeopleOutlinedIcon },
-  { key: 'marriages' as const, name: 'Marriages', icon: EventOutlinedIcon },
-  { key: 'funerals' as const, name: 'Funerals', icon: PaletteOutlinedIcon },
-];
+  { key: 'total' as const, nameKey: 'parish.total_records', icon: StorageOutlinedIcon },
+  { key: 'baptisms' as const, nameKey: 'parish.baptisms', icon: PeopleOutlinedIcon },
+  { key: 'marriages' as const, nameKey: 'parish.marriages', icon: EventOutlinedIcon },
+  { key: 'funerals' as const, nameKey: 'parish.funerals', icon: PaletteOutlinedIcon },
+] as const;
 
 const ParishDashboard: React.FC = () => {
   const navigate = useNavigate();
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
   const { churchMetadata, activeChurchId } = useChurch();
-  const churchName = churchMetadata?.church_name_display || 'Your Parish';
+  const { t } = useLanguage();
+  const churchName = churchMetadata?.church_name_display || t('parish.default_title');
 
   const [stats, setStats] = useState<ParishStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -89,7 +91,7 @@ const ParishDashboard: React.FC = () => {
             mb: 0.5,
           }}
         >
-          Parish Dashboard
+          {t('parish.parish_dashboard')}
         </Typography>
         <Typography
           sx={{
@@ -98,7 +100,7 @@ const ParishDashboard: React.FC = () => {
             color: isDark ? '#9ca3af' : '#6b7280',
           }}
         >
-          Overview of {churchName} management system
+          {t('parish.dashboard_desc').replace('{name}', churchName)}
         </Typography>
       </Box>
 
@@ -158,7 +160,7 @@ const ParishDashboard: React.FC = () => {
                   color: isDark ? '#9ca3af' : '#6b7280',
                 }}
               >
-                {stat.name}
+                {t(stat.nameKey)}
               </Typography>
             </Paper>
           );
@@ -176,7 +178,7 @@ const ParishDashboard: React.FC = () => {
             mb: 1.5,
           }}
         >
-          Quick Actions
+          {t('parish.quick_actions')}
         </Typography>
         <Box
           sx={{
@@ -189,7 +191,7 @@ const ParishDashboard: React.FC = () => {
             const { Icon } = action;
             return (
               <Paper
-                key={action.title}
+                key={action.titleKey}
                 variant="outlined"
                 onClick={() => navigate(action.href)}
                 sx={{
@@ -225,7 +227,7 @@ const ParishDashboard: React.FC = () => {
                           mr: 0.5,
                         }}
                       >
-                        {action.title}
+                        {t(action.titleKey)}
                       </Typography>
                       <ArrowForwardIcon
                         className="action-arrow"
@@ -240,7 +242,7 @@ const ParishDashboard: React.FC = () => {
                         mt: 0.25,
                       }}
                     >
-                      {action.description}
+                      {t(action.descriptionKey)}
                     </Typography>
                   </Box>
                 </Box>
@@ -269,7 +271,7 @@ const ParishDashboard: React.FC = () => {
             mb: 2,
           }}
         >
-          Recent Activity
+          {t('parish.recent_activity')}
         </Typography>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
           {recentActivity.map((activity, i) => (
@@ -292,7 +294,7 @@ const ParishDashboard: React.FC = () => {
                     color: isDark ? '#f3f4f6' : '#111827',
                   }}
                 >
-                  {activity.action}
+                  {t(activity.actionKey)}
                 </Typography>
                 <Typography
                   sx={{

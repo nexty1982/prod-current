@@ -6,8 +6,15 @@ const fs = require('fs').promises;
 const path = require('path');
 const { formatTimestamp, formatTimestampUser, formatRelativeTime } = require('../utils/formatTimestamp');
 
-// Import OMAI services
-const { askOMAI, askOMAIWithMetadata, getOMAIHealth, getOMAIStats } = require('/var/www/orthodoxmetrics/prod/misc/omai/services/index.js');
+// Import OMAI services (safe-loaded — file may be in broken ESM/CJS state)
+let askOMAI, askOMAIWithMetadata, getOMAIHealth, getOMAIStats;
+try {
+  ({ askOMAI, askOMAIWithMetadata, getOMAIHealth, getOMAIStats } = require('/var/www/orthodoxmetrics/prod/misc/omai/services/index.js'));
+} catch (e) {
+  console.warn('[omai] Failed to load OMAI services:', e.message);
+  const stub = async () => ({ error: 'OMAI services unavailable' });
+  askOMAI = stub; askOMAIWithMetadata = stub; getOMAIHealth = stub; getOMAIStats = stub;
+}
 // const { OMAIOrchestrator } = require('../omai/services/orchestrator');
 const omaiBackgroundService = require('../services/omaiBackgroundService');
 
