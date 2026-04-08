@@ -12,12 +12,8 @@ import PageContainer from '@/shared/ui/PageContainer';
 import type { SupportedLanguage } from '@/types/orthodox-metrics.types';
 import { logger } from '@/utils/logger';
 import {
-    Add as AddIcon,
     ArrowBack as ArrowBackIcon,
-    Edit as EditIcon,
-    Refresh as RefreshIcon,
     Save as SaveIcon,
-    VpnKey as VpnKeyIcon
 } from '@mui/icons-material';
 import {
     Alert,
@@ -29,42 +25,33 @@ import {
     Dialog,
     DialogContent,
     DialogTitle,
-    Divider,
     FormControl,
     FormControlLabel,
     Grid,
     IconButton,
     InputLabel,
     MenuItem,
-    Paper,
     Select,
     Snackbar,
     Stack,
     Switch,
     Tab,
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
     Tabs,
     TextField,
-    Tooltip,
     Typography
 } from '@mui/material';
 import {
     IconBuilding,
     IconDatabase,
-    IconRefresh,
     IconSettings,
-    IconTrash,
-    IconUsers
+    IconUsers,
 } from '@tabler/icons-react';
 import { useFormik } from 'formik';
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import * as Yup from 'yup';
+import DatabaseTab from './ChurchForm/DatabaseTab';
+import UsersTab from './ChurchForm/UsersTab';
 import UserManagementDialog from './UserManagementDialog';
 
 const validationSchema = Yup.object({
@@ -401,8 +388,6 @@ const ChurchForm: React.FC = () => {
       template_church_id: null as number | null,
       default_landing_page: 'church_records',
       church_id: null as number | null,
-      // Removed: enable_ag_grid, ag_grid_record_types, enable_multilingual, enable_notifications, public_calendar
-      // These fields don't exist in the churches table
     },
     validationSchema,
     onSubmit: async (values) => {
@@ -485,7 +470,6 @@ const ChurchForm: React.FC = () => {
           template_church_id: church?.template_church_id || null,
           default_landing_page: church?.default_landing_page || 'church_records',
           church_id: church?.id || church?.church_id || null,
-          // Removed: enable_ag_grid, ag_grid_record_types, enable_multilingual, enable_notifications, public_calendar
         });
 
         // Load users and database info
@@ -873,20 +857,6 @@ const ChurchForm: React.FC = () => {
                           </Stack>
                         </Box>
 
-                        {/* REMOVED: Feature Flags section - columns don't exist in DB
-                        <Box sx={{ mt: 2 }}>
-                          <Typography variant="subtitle1" fontWeight={600} color="secondary.main" mb={2}>
-                            Feature Flags
-                          </Typography>
-                          <Stack spacing={1.5} sx={{ p: 2, borderRadius: 2, bgcolor: 'secondary.50', border: '1px solid', borderColor: 'secondary.200' }}>
-                            <FormControlLabel control={<Switch checked={formik.values.enable_multilingual} onChange={(e) => formik.setFieldValue('enable_multilingual', e.target.checked)} size="small" />} label="Multilingual Support" />
-                            <FormControlLabel control={<Switch checked={formik.values.enable_notifications} onChange={(e) => formik.setFieldValue('enable_notifications', e.target.checked)} size="small" />} label="Email Notifications" />
-                            <FormControlLabel control={<Switch checked={formik.values.public_calendar} onChange={(e) => formik.setFieldValue('public_calendar', e.target.checked)} size="small" />} label="Public Calendar Access" />
-                            <FormControlLabel control={<Switch checked={formik.values.setup_complete} onChange={(e) => formik.setFieldValue('setup_complete', e.target.checked)} size="small" />} label="Setup Complete" />
-                          </Stack>
-                        </Box>
-                        */}
-
                         <Box>
                           <Typography variant="subtitle1" fontWeight={600} color="secondary.main" mb={2}>
                             Setup Status
@@ -896,46 +866,6 @@ const ChurchForm: React.FC = () => {
                           </Stack>
                         </Box>
 
-                        {/* REMOVED: AG Grid section - columns don't exist in DB
-                        <Box sx={{ mt: 2 }}>
-                          <Typography variant="subtitle1" fontWeight={600} color="warning.main" mb={2}>
-                            AG Grid
-                          </Typography>
-                          <Box sx={{ p: 2, borderRadius: 2, bgcolor: 'warning.50', border: '1px solid', borderColor: 'warning.200' }}>
-                            <FormControlLabel
-                              control={<Switch checked={formik.values.enable_ag_grid} onChange={(e) => {
-                                formik.setFieldValue('enable_ag_grid', e.target.checked);
-                                if (!e.target.checked) formik.setFieldValue('ag_grid_record_types', []);
-                              }} size="small" />}
-                              label={<Stack direction="row" spacing={1} alignItems="center"><Typography fontWeight={500}>Enable AG Grid</Typography><Chip label={formik.values.enable_ag_grid ? 'Enabled' : 'Disabled'} color={formik.values.enable_ag_grid ? 'warning' : 'default'} size="small" /></Stack>}
-                            />
-                            {formik.values.enable_ag_grid && (
-                              <Stack direction="row" spacing={2} flexWrap="wrap" sx={{ pl: 2, mt: 1.5 }}>
-                            {['baptism', 'marriage', 'funeral'].map((type) => (
-                              <FormControlLabel
-                                key={type}
-                                control={
-                                  <Switch
-                                    checked={formik.values.ag_grid_record_types.includes(type)}
-                                    onChange={(e) => {
-                                      const current = formik.values.ag_grid_record_types || [];
-                                      if (e.target.checked) {
-                                        formik.setFieldValue('ag_grid_record_types', [...current, type]);
-                                      } else {
-                                        formik.setFieldValue('ag_grid_record_types', current.filter((t: string) => t !== type));
-                                      }
-                                    }}
-                                    size="small"
-                                  />
-                                }
-                                label={type.charAt(0).toUpperCase() + type.slice(1)}
-                              />
-                            ))}
-                              </Stack>
-                            )}
-                          </Box>
-                        </Box>
-                        */}
                       </Stack>
                     </CardContent>
                   </BlankCard>
@@ -1008,358 +938,38 @@ const ChurchForm: React.FC = () => {
 
           {/* Tab 1: User Management */}
           {activeTab === 1 && isEdit && (
-            <BlankCard>
-              <CardContent>
-                <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
-                  <Box>
-                    <Typography variant="h5">
-                      <IconUsers size={22} style={{ marginRight: 8, verticalAlign: 'middle' }} />
-                      User Management
-                    </Typography>
-                    <Typography color="textSecondary">Manage users assigned to this church (ID: {id})</Typography>
-                  </Box>
-                  <Stack direction="row" spacing={1}>
-                    <Button startIcon={<RefreshIcon />} onClick={() => id && loadChurchUsers(id)} disabled={loadingUsers}>
-                      Refresh
-                    </Button>
-                    <Button variant="contained" startIcon={<AddIcon />} onClick={() => { setUserDialogAction('add'); setSelectedUser(null); setUserDialogOpen(true); }}>
-                      Add User
-                    </Button>
-                  </Stack>
-                </Stack>
-
-                {loadingUsers ? (
-                  <Box display="flex" justifyContent="center" py={4}><CircularProgress /></Box>
-                ) : churchUsers.length === 0 ? (
-                  <Alert severity="info">
-                    No users assigned to this church. Click "Add User" to create one.
-                  </Alert>
-                ) : (
-                  <TableContainer component={Paper} variant="outlined">
-                    <Table size="small">
-                      <TableHead>
-                        <TableRow>
-                          <TableCell>Name</TableCell>
-                          <TableCell>Email</TableCell>
-                          <TableCell>Role</TableCell>
-                          <TableCell>Status</TableCell>
-                          <TableCell align="right">Actions</TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {churchUsers.map((u: any) => (
-                          <TableRow key={u.id} hover>
-                            <TableCell>
-                              <Typography variant="subtitle2">{u.first_name} {u.last_name}</Typography>
-                            </TableCell>
-                            <TableCell>{u.email}</TableCell>
-                            <TableCell>
-                              <Chip label={u.role} size="small" variant="outlined" />
-                            </TableCell>
-                            <TableCell>
-                              <Chip label={u.is_active ? 'Active' : 'Inactive'} color={u.is_active ? 'success' : 'default'} size="small" />
-                            </TableCell>
-                            <TableCell align="right">
-                              <Stack direction="row" spacing={0.5} justifyContent="flex-end">
-                                <Tooltip title="Edit">
-                                  <IconButton size="small" onClick={() => { setUserDialogAction('edit'); setSelectedUser(u); setUserDialogOpen(true); }}>
-                                    <EditIcon fontSize="small" />
-                                  </IconButton>
-                                </Tooltip>
-                                <Tooltip title="Reset Password">
-                                  <IconButton size="small" onClick={() => handlePasswordReset(u.id, u.email)}>
-                                    <VpnKeyIcon fontSize="small" />
-                                  </IconButton>
-                                </Tooltip>
-                                <Tooltip title={u.is_active ? 'Deactivate' : 'Activate'}>
-                                  <IconButton size="small" onClick={() => handleUserAction(u.id, u.is_active ? 'deactivate' : 'activate')} sx={{ color: u.is_active ? 'warning.main' : 'success.main' }}>
-                                    {u.is_active ? <IconTrash size={16} /> : <IconRefresh size={16} />}
-                                  </IconButton>
-                                </Tooltip>
-                              </Stack>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                )}
-              </CardContent>
-            </BlankCard>
+            <UsersTab
+              churchId={id}
+              churchUsers={churchUsers}
+              loadingUsers={loadingUsers}
+              loadChurchUsers={loadChurchUsers}
+              handlePasswordReset={handlePasswordReset}
+              handleUserAction={handleUserAction}
+              onAddUser={() => { setUserDialogAction('add'); setSelectedUser(null); setUserDialogOpen(true); }}
+              onEditUser={(u) => { setUserDialogAction('edit'); setSelectedUser(u); setUserDialogOpen(true); }}
+            />
           )}
 
           {/* Tab 2: Database Management */}
           {activeTab === 2 && isEdit && (
-            <BlankCard>
-              <CardContent>
-                <Typography variant="h5" mb={1}>
-                  <IconDatabase size={22} style={{ marginRight: 8, verticalAlign: 'middle' }} />
-                  Database Management
-                </Typography>
-                <Typography color="textSecondary" mb={3}>Database info and template updates</Typography>
-
-                {databaseInfo && (
-                  <Grid container spacing={2} sx={{ mb: 3 }}>
-                    <Grid item xs={12} sm={4}>
-                      <Paper variant="outlined" sx={{ p: 2 }}>
-                        <Typography variant="subtitle2" color="textSecondary">Database Name</Typography>
-                        <Typography variant="body1" fontFamily="monospace">{databaseInfo.name || formik.values.database_name || 'N/A'}</Typography>
-                      </Paper>
-                    </Grid>
-                    <Grid item xs={12} sm={4}>
-                      <Paper variant="outlined" sx={{ p: 2 }}>
-                        <Typography variant="subtitle2" color="textSecondary">Size</Typography>
-                        <Typography variant="body1">{databaseInfo.size || 'N/A'}</Typography>
-                      </Paper>
-                    </Grid>
-                    <Grid item xs={12} sm={4}>
-                      <Paper variant="outlined" sx={{ p: 2 }}>
-                        <Typography variant="subtitle2" color="textSecondary">Tables</Typography>
-                        <Typography variant="body1">{databaseInfo.table_count ?? 'N/A'}</Typography>
-                      </Paper>
-                    </Grid>
-                  </Grid>
-                )}
-
-                <Stack direction="row" spacing={2} mb={3}>
-                  <Button variant="outlined" startIcon={loadingDatabase ? <CircularProgress size={16} /> : <RefreshIcon />} onClick={() => id && loadDatabaseInfo(id)} disabled={loadingDatabase}>
-                    Refresh Info
-                  </Button>
-                  <Button variant="outlined" color="secondary" onClick={() => id && testDatabaseConnection(id)} disabled={loadingDatabase}>
-                    Test Connection
-                  </Button>
-                </Stack>
-
-                <Divider sx={{ my: 3 }} />
-
-                <Typography variant="h6" mb={2}>Update Database from Template</Typography>
-                <Grid container spacing={2} alignItems="center">
-                  <Grid item xs={12} md={6}>
-                    <FormControl fullWidth>
-                      <InputLabel>Select Template</InputLabel>
-                      <Select value={selectedTemplate} onChange={(e) => setSelectedTemplate(e.target.value)} label="Select Template">
-                        <MenuItem value="record_template1">record_template1</MenuItem>
-                      </Select>
-                    </FormControl>
-                  </Grid>
-                  <Grid item xs={12} md={6}>
-                    <Button
-                      variant="contained" color="secondary" fullWidth
-                      onClick={handleUpdateDatabase}
-                      disabled={!selectedTemplate || updatingDatabase}
-                      startIcon={updatingDatabase ? <CircularProgress size={16} /> : null}
-                    >
-                      {updatingDatabase ? 'Updating...' : 'Update Database'}
-                    </Button>
-                  </Grid>
-                </Grid>
-                {databaseUpdateResult && (
-                  <Alert severity={databaseUpdateResult.success ? 'success' : 'error'} sx={{ mt: 2 }}>
-                    {databaseUpdateResult.message}
-                  </Alert>
-                )}
-
-                <Divider sx={{ my: 4 }} />
-
-                {/* Features Enabled Section */}
-                <Typography variant="h6" mb={2}>
-                  <IconSettings size={22} style={{ marginRight: 8, verticalAlign: 'middle' }} />
-                  Features Enabled
-                </Typography>
-                <Typography color="textSecondary" mb={1}>
-                  Advanced features for this church (Global defaults + Church overrides)
-                </Typography>
-                {hasRole(['super_admin']) && featureData.globalDefaults && (
-                  <Alert severity="info" sx={{ mb: 2 }}>
-                    <strong>Resolution:</strong> Church Override → Global Default → Disabled
-                  </Alert>
-                )}
-
-                {loadingFeatures ? (
-                  <Box sx={{ display: 'flex', justifyContent: 'center', py: 3 }}>
-                    <CircularProgress size={24} />
-                  </Box>
-                ) : (
-                  <Grid container spacing={2}>
-                    {/* AG Grid Feature */}
-                    <Grid item xs={12} md={6}>
-                      <Paper variant="outlined" sx={{ p: 2 }}>
-                        <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1}>
-                          <Typography variant="subtitle1" fontWeight={600}>
-                            AG Grid
-                          </Typography>
-                          {hasRole(['super_admin']) ? (
-                            <Switch
-                              checked={featureData.effective.ag_grid_enabled}
-                              onChange={(e) => updateFeature('ag_grid_enabled', e.target.checked)}
-                              disabled={updatingFeatures}
-                              size="small"
-                            />
-                          ) : (
-                            <Chip
-                              label={featureData.effective.ag_grid_enabled ? 'Enabled' : 'Disabled'}
-                              color={featureData.effective.ag_grid_enabled ? 'success' : 'default'}
-                              size="small"
-                            />
-                          )}
-                        </Stack>
-                        <Typography variant="body2" color="textSecondary" mb={1}>
-                          Advanced data grid UI with sorting, filtering, and Excel-like features
-                        </Typography>
-                        {hasRole(['super_admin']) && featureData.globalDefaults && (
-                          <Typography variant="caption" color="textSecondary">
-                            Global: {featureData.globalDefaults.ag_grid_enabled ? 'ON' : 'OFF'} | 
-                            Override: {featureData.overrides?.ag_grid_enabled !== undefined ? (featureData.overrides.ag_grid_enabled ? 'ON' : 'OFF') : 'None'}
-                          </Typography>
-                        )}
-                      </Paper>
-                    </Grid>
-
-                    {/* Power Search Feature */}
-                    <Grid item xs={12} md={6}>
-                      <Paper variant="outlined" sx={{ p: 2 }}>
-                        <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1}>
-                          <Typography variant="subtitle1" fontWeight={600}>
-                            Power Search
-                          </Typography>
-                          {hasRole(['super_admin']) ? (
-                            <Switch
-                              checked={featureData.effective.power_search_enabled}
-                              onChange={(e) => updateFeature('power_search_enabled', e.target.checked)}
-                              disabled={updatingFeatures}
-                              size="small"
-                            />
-                          ) : (
-                            <Chip
-                              label={featureData.effective.power_search_enabled ? 'Enabled' : 'Disabled'}
-                              color={featureData.effective.power_search_enabled ? 'success' : 'default'}
-                              size="small"
-                            />
-                          )}
-                        </Stack>
-                        <Typography variant="body2" color="textSecondary" mb={1}>
-                          Operator-aware search with advanced query capabilities
-                        </Typography>
-                        {hasRole(['super_admin']) && featureData.globalDefaults && (
-                          <Typography variant="caption" color="textSecondary">
-                            Global: {featureData.globalDefaults.power_search_enabled ? 'ON' : 'OFF'} | 
-                            Override: {featureData.overrides?.power_search_enabled !== undefined ? (featureData.overrides.power_search_enabled ? 'ON' : 'OFF') : 'None'}
-                          </Typography>
-                        )}
-                      </Paper>
-                    </Grid>
-
-                    {/* Custom Field Mapping Feature */}
-                    <Grid item xs={12} md={6}>
-                      <Paper variant="outlined" sx={{ p: 2 }}>
-                        <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1}>
-                          <Typography variant="subtitle1" fontWeight={600}>
-                            Custom Field Mapping
-                          </Typography>
-                          {hasRole(['super_admin']) ? (
-                            <Switch
-                              checked={featureData.effective.custom_field_mapping_enabled}
-                              onChange={(e) => updateFeature('custom_field_mapping_enabled', e.target.checked)}
-                              disabled={updatingFeatures}
-                              size="small"
-                            />
-                          ) : (
-                            <Chip
-                              label={featureData.effective.custom_field_mapping_enabled ? 'Enabled' : 'Disabled'}
-                              color={featureData.effective.custom_field_mapping_enabled ? 'success' : 'default'}
-                              size="small"
-                            />
-                          )}
-                        </Stack>
-                        <Typography variant="body2" color="textSecondary" mb={1}>
-                          OCR and record field mapping tools for data import
-                        </Typography>
-                        {hasRole(['super_admin']) && featureData.globalDefaults && (
-                          <Typography variant="caption" color="textSecondary">
-                            Global: {featureData.globalDefaults.custom_field_mapping_enabled ? 'ON' : 'OFF'} |
-                            Override: {featureData.overrides?.custom_field_mapping_enabled !== undefined ? (featureData.overrides.custom_field_mapping_enabled ? 'ON' : 'OFF') : 'None'}
-                          </Typography>
-                        )}
-                      </Paper>
-                    </Grid>
-
-                    {/* OM Charts */}
-                    <Grid item xs={12} md={6}>
-                      <Paper variant="outlined" sx={{ p: 2 }}>
-                        <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1}>
-                          <Typography variant="subtitle1" fontWeight={600}>
-                            OM Charts
-                          </Typography>
-                          {hasRole(['super_admin']) ? (
-                            <Switch
-                              checked={featureData.effective.om_charts_enabled}
-                              onChange={(e) => updateFeature('om_charts_enabled', e.target.checked)}
-                              disabled={updatingFeatures}
-                              size="small"
-                            />
-                          ) : (
-                            <Chip
-                              label={featureData.effective.om_charts_enabled ? 'Enabled' : 'Disabled'}
-                              color={featureData.effective.om_charts_enabled ? 'success' : 'default'}
-                              size="small"
-                            />
-                          )}
-                        </Stack>
-                        <Typography variant="body2" color="textSecondary" mb={1}>
-                          Graphical charts from church sacramental records
-                        </Typography>
-                        {hasRole(['super_admin']) && featureData.globalDefaults && (
-                          <Typography variant="caption" color="textSecondary">
-                            Global: {featureData.globalDefaults.om_charts_enabled ? 'ON' : 'OFF'} |
-                            Override: {featureData.overrides?.om_charts_enabled !== undefined ? (featureData.overrides.om_charts_enabled ? 'ON' : 'OFF') : 'None'}
-                          </Typography>
-                        )}
-                      </Paper>
-                    </Grid>
-
-                    {/* OM Assistant */}
-                    <Grid item xs={12} md={6}>
-                      <Paper variant="outlined" sx={{ p: 2 }}>
-                        <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1}>
-                          <Typography variant="subtitle1" fontWeight={600}>
-                            OM Assistant
-                          </Typography>
-                          {hasRole(['super_admin']) ? (
-                            <Switch
-                              checked={featureData.effective.om_assistant_enabled}
-                              onChange={(e) => updateFeature('om_assistant_enabled', e.target.checked)}
-                              disabled={updatingFeatures}
-                              size="small"
-                            />
-                          ) : (
-                            <Chip
-                              label={featureData.effective.om_assistant_enabled ? 'Enabled' : 'Disabled'}
-                              color={featureData.effective.om_assistant_enabled ? 'success' : 'default'}
-                              size="small"
-                            />
-                          )}
-                        </Stack>
-                        <Typography variant="body2" color="textSecondary" mb={1}>
-                          AI assistant for chat, email intake, and record queries
-                        </Typography>
-                        {hasRole(['super_admin']) && featureData.globalDefaults && (
-                          <Typography variant="caption" color="textSecondary">
-                            Global: {featureData.globalDefaults.om_assistant_enabled ? 'ON' : 'OFF'} |
-                            Override: {featureData.overrides?.om_assistant_enabled !== undefined ? (featureData.overrides.om_assistant_enabled ? 'ON' : 'OFF') : 'None'}
-                          </Typography>
-                        )}
-                      </Paper>
-                    </Grid>
-                  </Grid>
-                )}
-
-                {!hasRole(['super_admin']) && (
-                  <Alert severity="info" sx={{ mt: 2 }}>
-                    Only Super Admins can modify feature flags. Contact your administrator to enable or disable features.
-                  </Alert>
-                )}
-              </CardContent>
-            </BlankCard>
+            <DatabaseTab
+              churchId={id}
+              databaseName={formik.values.database_name}
+              databaseInfo={databaseInfo}
+              loadingDatabase={loadingDatabase}
+              loadDatabaseInfo={loadDatabaseInfo}
+              testDatabaseConnection={testDatabaseConnection}
+              selectedTemplate={selectedTemplate}
+              setSelectedTemplate={setSelectedTemplate}
+              updatingDatabase={updatingDatabase}
+              handleUpdateDatabase={handleUpdateDatabase}
+              databaseUpdateResult={databaseUpdateResult}
+              loadingFeatures={loadingFeatures}
+              featureData={featureData}
+              updatingFeatures={updatingFeatures}
+              updateFeature={updateFeature}
+              hasRole={hasRole}
+            />
           )}
         </>
       )}
