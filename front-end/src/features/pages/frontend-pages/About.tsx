@@ -5,7 +5,7 @@ import { HeroSection, SectionHeader, CTASection } from '@/components/frontend-pa
 import ScrollToTop from '@/components/frontend-pages/shared/scroll-to-top';
 import PageContainer from '@/shared/ui/PageContainer';
 import { useLanguage } from '@/context/LanguageContext';
-import user1 from '@/assets/images/frontend-pages/homepage/user1.jpg';
+import leadershipBanner from '@/assets/images/frontend-pages/about/Orthodox-Leadership-banner.png';
 import EditableText from '@/components/frontend-pages/shared/EditableText';
 
 const About = () => {
@@ -155,9 +155,9 @@ const About = () => {
             <div className="flex justify-center">
               <div className="relative">
                 <img
-                  src={user1}
+                  src={leadershipBanner}
                   alt={t('about.founder_name')}
-                  className="w-72 h-80 object-cover rounded-2xl shadow-lg"
+                  className="w-full max-w-md object-cover rounded-2xl shadow-lg"
                 />
                 <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 bg-white dark:bg-gray-800 rounded-xl shadow-md px-6 py-3 text-center min-w-[200px]">
                   <EditableText contentKey="about.founder_name" as="h4" className="font-['Inter'] font-semibold text-lg text-[#2d1b4e] dark:text-white">{t('about.founder_name')}</EditableText>
