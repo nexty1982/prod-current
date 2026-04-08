@@ -641,6 +641,10 @@ app.use('/api/admin/change-sets', changeSetsRouter);
 console.log('✅ [Server] Mounted /api/admin/change-sets route (SDLC delivery container)');
 app.use('/api/churches', churchesRouter);
 // Mount churches router at /api/my to handle /api/my/churches
+// UI Preferences — per-user UI settings (FAB positions, etc.) (mount BEFORE /api/my catchall)
+const uiPreferencesRouter = require('./routes/ui-preferences');
+app.use('/api/my/ui-preferences', uiPreferencesRouter);
+console.log('✅ [Server] Mounted /api/my/ui-preferences route');
 // OCR Preferences — self-service proxy for church-scoped OCR settings (mount BEFORE /api/my catchall)
 const ocrPreferencesRouter = require('./routes/ocr-preferences');
 app.use('/api/my/ocr-preferences', ocrPreferencesRouter);

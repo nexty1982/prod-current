@@ -78,6 +78,8 @@ import React, { Component, useEffect, useState } from 'react';
 
 import { apiClient } from '@/api/utils/axiosInstance';
 
+import { useDraggableFab } from '@/hooks/useDraggableFab';
+
 import type { OmAssistantProps } from './omAssistant.types';
 
 import OmAssistantInput from './OmAssistantInput';
@@ -167,6 +169,12 @@ function OmAssistantInner({ pageContext }: OmAssistantProps) {
   }, [pageContext.churchId]);
 
 
+
+  const { dragProps, positionSx, wrapClick } = useDraggableFab({
+    fabId: 'om-assistant',
+    defaultRight: 24,
+    defaultBottom: isMobile ? 80 : 88,
+  });
 
   if (enabled === false) return null;
 
@@ -290,15 +298,20 @@ function OmAssistantInner({ pageContext }: OmAssistantProps) {
 
 
 
-      {/* FAB — responsive positioning */}
+      {/* FAB — draggable positioning */}
 
-      <Box sx={{ position: 'fixed', bottom: { xs: 80, sm: 88 }, right: 24, zIndex: 1301 }}>
+      <Box
+        ref={dragProps.ref}
+        onMouseDown={dragProps.onMouseDown}
+        onTouchStart={dragProps.onTouchStart}
+        sx={{ ...positionSx, zIndex: 1301 }}
+      >
 
         <Fab
 
           color="primary"
 
-          onClick={() => setOpen(prev => !prev)}
+          onClick={wrapClick(() => setOpen(prev => !prev))}
 
           aria-label="Open OM Assistant"
 
