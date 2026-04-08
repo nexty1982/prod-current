@@ -8,62 +8,38 @@ import RecordsAnalyticsView from './RecordsAnalyticsView';
 import RecordsCardView from './RecordsCardView';
 import RecordsTimelineView from './RecordsTimelineView';
 import ModernRecordViewerModal from '@/features/records-centralized/common/ModernRecordViewerModal';
-import { getAgGridRowClassRules, getRecordRowStyle, isRecordNewWithin24Hours, isRecordUpdatedWithin24Hours, useNowReference } from '@/features/records-centralized/common/recordsHighlighting';
+import { getAgGridRowClassRules, isRecordNewWithin24Hours, isRecordUpdatedWithin24Hours, useNowReference } from '@/features/records-centralized/common/recordsHighlighting';
 import '@/features/records-centralized/common/recordsHighlighting.css';
 import { usePersistedRowSelection } from '@/features/records-centralized/common/usePersistedRowSelection';
 import { createRecordsApiService } from '@/features/records-centralized/components/records/RecordsApiService';
-import { FIELD_DEFINITIONS, RECORD_TYPES } from '@/features/records-centralized/constants';
 import { getPersistedChurchId, getPersistedLastView, useRecordsPersistence } from '@/hooks/useRecordsPersistence';
 import churchService, { Church } from '@/shared/lib/churchService';
 import LookupService from '@/shared/lib/lookupService';
-import { BarChart3, ChevronDown, ChevronUp, Clock, Download, Eye, FileBarChart, FileText, LayoutGrid, List, MoreVertical, Pencil, Plus, Search, Settings, Trash2, Upload, Users, X } from '@/shared/ui/icons';
+import { Eye, FileText, Pencil, Search, Trash2 } from '@/shared/ui/icons';
 import { ChurchRecord } from '@/types/church-records-advanced.types';
 import { agGridIconMap } from '@/ui/agGridIcons';
 import { apiClient } from '@/api/utils/axiosInstance';
 import { formatRecordDate } from '@/utils/formatDate';
 import CollaborationWizardDialog from '@/features/records-centralized/components/collaborationLinks/CollaborationWizardDialog';
 import EditRecordDialog from './RecordsPage/EditRecordDialog';
-import { BaptismRecord, SortConfig, SortDirection, RecordsPageProps } from './RecordsPage/types';
+import DeleteConfirmDialog from './RecordsPage/DeleteConfirmDialog';
+import RecordsControlsCard from './RecordsPage/RecordsControlsCard';
+import StandardRecordsTable from './RecordsPage/StandardRecordsTable';
+import { BaptismRecord, SortConfig, RecordsPageProps } from './RecordsPage/types';
 import { useRecordsAutocomplete } from './RecordsPage/useRecordsAutocomplete';
 import RecordEditForm from './RecordsPage/RecordEditForm';
 import { parseJsonField, displayJsonField, highlightMatch, getCellValue, getColumnDefinitions, getSortFields, RECORD_TYPE_CONFIGS, DEFAULT_DATE_SORT_FIELD } from './RecordsPage/utils';
 import {
     Alert,
-    Autocomplete,
     Box,
     Button,
-    Card,
-    CardContent,
     Chip,
     CircularProgress,
-    Collapse,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogTitle,
-    Divider,
-    Drawer,
-    FormControl,
     IconButton,
-    InputAdornment,
-    InputLabel,
-    ListItemIcon,
-    ListItemText,
-    Menu,
-    MenuItem,
     Paper,
-    Select,
     Snackbar,
     Stack,
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
     TablePagination,
-    TableRow,
-    TableSortLabel,
-    TextField,
     Tooltip,
     Typography
 } from '@mui/material';
@@ -237,8 +213,6 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
   
   // Advanced Grid Modal State
   const [advancedGridOpen, setAdvancedGridOpen] = useState(false);
-  // "More Actions" menu anchor
-  const [moreMenuAnchor, setMoreMenuAnchor] = useState<null | HTMLElement>(null);
 
   // View Details Dialog state
   const [viewDialogOpen, setViewDialogOpen] = useState<boolean>(false);
@@ -1115,225 +1089,31 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
           />
 
           {/* Controls Section */}
-          <Card
-            elevation={0}
-            sx={{
-              mb: 3,
-              border: '1px solid',
-              borderColor: 'divider',
-              borderRadius: 2,
-              overflow: 'visible',
-            }}
-          >
-            <CardContent sx={{ py: 2, '&:last-child': { pb: 2 } }}>
-              <Stack spacing={2}>
-                {/* Row 1: Church + Record Type selectors + View toggle + collapse */}
-                <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} alignItems={{ xs: 'stretch', md: 'center' }}>
-                  {/* Church selector or static name */}
-                  {churches.filter(c => c.id !== 0).length === 1 ? (
-                    <Typography variant="body1" fontWeight={700} sx={{ minWidth: 200 }}>
-                      {churches.find(c => c.id !== 0)?.church_name || t('records.label_church')}
-                    </Typography>
-                  ) : (
-                    <FormControl sx={{ minWidth: 220 }} size="small">
-                      <InputLabel>{t('records.label_church')}</InputLabel>
-                      <Select
-                        value={selectedChurch}
-                        label={t('records.label_church')}
-                        onChange={(e) => setSelectedChurch(e.target.value)}
-                        disabled={loading}
-                      >
-                        {churches.map((church) => {
-                          const countKey = `${selectedRecordType}_count` as keyof Church;
-                          const count = church.id !== 0 ? church[countKey] : undefined;
-                          return (
-                            <MenuItem key={church.id} value={church.id}>
-                              {church.church_name}
-                              {count !== undefined && ` (${count})`}
-                            </MenuItem>
-                          );
-                        })}
-                      </Select>
-                    </FormControl>
-                  )}
-
-                  <FormControl sx={{ minWidth: 200 }} size="small">
-                    <InputLabel>{t('records.label_record_type')}</InputLabel>
-                    <Select
-                      value={selectedRecordType}
-                      label={t('records.label_record_type')}
-                      onChange={(e) => handleRecordTypeChange(e.target.value)}
-                      disabled={loading}
-                    >
-                      {RECORD_TYPE_CONFIGS.map((type) => (
-                        <MenuItem key={type.value} value={type.value}>
-                          {t(type.labelKey)}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-
-                  {/* View mode toggle */}
-                  {selectedRecordType && (
-                    <Stack direction="row" spacing={0.25} sx={{
-                      border: '1px solid',
-                      borderColor: 'divider',
-                      borderRadius: 1.5,
-                      p: 0.25,
-                      bgcolor: 'action.hover',
-                    }}>
-                      {([
-                        { key: 'table' as ViewMode, icon: <LayoutGrid size={15} />, label: t('records.view_table') },
-                        { key: 'card' as ViewMode, icon: <List size={15} />, label: t('records.view_cards') },
-                        { key: 'timeline' as ViewMode, icon: <Clock size={15} />, label: t('records.view_timeline') },
-                        { key: 'analytics' as ViewMode, icon: <BarChart3 size={15} />, label: t('records.view_analytics') },
-                      ]).map(({ key, icon, label }) => {
-                        const isActive = activeView === key;
-                        return (
-                          <Button
-                            key={key}
-                            size="small"
-                            variant={isActive ? 'contained' : 'text'}
-                            onClick={() => setActiveView(key)}
-                            startIcon={icon}
-                            sx={{
-                              textTransform: 'none',
-                              fontWeight: isActive ? 600 : 400,
-                              px: { xs: 1, sm: 1.5 },
-                              py: 0.5,
-                              minWidth: 'auto',
-                              borderRadius: 1,
-                              boxShadow: isActive ? 1 : 0,
-                              fontSize: { xs: '0.75rem', sm: '0.8125rem' },
-                              ...(isActive ? {} : { color: 'text.secondary', '&:hover': { bgcolor: 'action.selected' } }),
-                            }}
-                          >
-                            <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>{label}</Box>
-                          </Button>
-                        );
-                      })}
-                    </Stack>
-                  )}
-
-                  {/* Spacer */}
-                  <Box sx={{ flex: 1, display: { xs: 'none', md: 'block' } }} />
-
-                  {/* Collapse toggle */}
-                  <IconButton
-                    onClick={() => setIsFiltersCollapsed(!isFiltersCollapsed)}
-                    size="small"
-                    sx={{ alignSelf: { xs: 'flex-end', md: 'center' } }}
-                  >
-                    <ChevronUp size={20} style={{ transform: isFiltersCollapsed ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
-                  </IconButton>
-                </Stack>
-
-                {/* Row 2 (collapsible): Search + Add Record + More Actions */}
-                <Collapse in={!isFiltersCollapsed}>
-                  {selectedRecordType && (
-                    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems={{ xs: 'stretch', sm: 'center' }}>
-                      {/* Search */}
-                      <TextField
-                        placeholder={t('records.search_placeholder')}
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') {
-                            if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
-                            setDebouncedSearch(searchTerm);
-                          }
-                        }}
-                        InputProps={{
-                          startAdornment: (
-                            <InputAdornment position="start">
-                              <Search size={18} style={{ color: 'inherit' }} />
-                            </InputAdornment>
-                          ),
-                          endAdornment: searchTerm ? (
-                            <InputAdornment position="end">
-                              <IconButton size="small" onClick={() => setSearchTerm('')} edge="end" aria-label="clear search">
-                                <X size={16} />
-                              </IconButton>
-                            </InputAdornment>
-                          ) : searchLoading ? <CircularProgress size={16} /> : null,
-                        }}
-                        size="small"
-                        sx={{ flex: 1, maxWidth: { sm: 400 } }}
-                      />
-
-                      {/* Add Record — prominent primary button */}
-                      <Button
-                        variant="contained"
-                        startIcon={<Plus size={18} />}
-                        onClick={handleAddRecord}
-                        disabled={loading}
-                        sx={{
-                          textTransform: 'none',
-                          fontWeight: 600,
-                          px: 2.5,
-                          borderRadius: 1.5,
-                          whiteSpace: 'nowrap',
-                        }}
-                      >
-                        {t('records.add_record')}
-                      </Button>
-
-                      {/* More Actions menu */}
-                      <Tooltip title={t('records.more_actions')}>
-                        <IconButton
-                          onClick={(e) => setMoreMenuAnchor(e.currentTarget)}
-                          size="small"
-                          sx={{
-                            border: '1px solid',
-                            borderColor: 'divider',
-                            borderRadius: 1.5,
-                          }}
-                        >
-                          <MoreVertical size={18} />
-                        </IconButton>
-                      </Tooltip>
-                      <Menu
-                        anchorEl={moreMenuAnchor}
-                        open={Boolean(moreMenuAnchor)}
-                        onClose={() => setMoreMenuAnchor(null)}
-                        transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-                        anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-                        slotProps={{ paper: { sx: { minWidth: 200, mt: 0.5 } } }}
-                      >
-                        <MenuItem onClick={() => { handleExport(); setMoreMenuAnchor(null); }}>
-                          <ListItemIcon><Download size={18} /></ListItemIcon>
-                          <ListItemText>{t('records.export_records')}</ListItemText>
-                        </MenuItem>
-                        <MenuItem onClick={() => { setMoreMenuAnchor(null); /* TODO: Import */ }}>
-                          <ListItemIcon><Upload size={18} /></ListItemIcon>
-                          <ListItemText>{t('records.import_records')}</ListItemText>
-                        </MenuItem>
-                        <MenuItem onClick={() => { handleGenerateReport(); setMoreMenuAnchor(null); }} disabled={!selectedRecordType}>
-                          <ListItemIcon><FileBarChart size={18} /></ListItemIcon>
-                          <ListItemText>{t('records.generate_report')}</ListItemText>
-                        </MenuItem>
-                        <MenuItem onClick={() => { handleCollaborativeReport(); setMoreMenuAnchor(null); }}>
-                          <ListItemIcon><Users size={18} /></ListItemIcon>
-                          <ListItemText>{t('records.collaboration_link')}</ListItemText>
-                        </MenuItem>
-                        <Divider />
-                        <MenuItem onClick={() => { setAdvancedGridOpen(true); setMoreMenuAnchor(null); }}>
-                          <ListItemIcon><Settings size={18} /></ListItemIcon>
-                          <ListItemText>{t('records.grid_options')}</ListItemText>
-                        </MenuItem>
-                        {!agGridFailed && (
-                          <MenuItem onClick={() => { setUseAgGrid(!useAgGrid); setMoreMenuAnchor(null); }}>
-                            <ListItemIcon><LayoutGrid size={18} /></ListItemIcon>
-                            <ListItemText>{useAgGrid ? t('records.use_standard_table') : t('records.use_advanced_grid')}</ListItemText>
-                          </MenuItem>
-                        )}
-                      </Menu>
-                    </Stack>
-                  )}
-                </Collapse>
-              </Stack>
-            </CardContent>
-          </Card>
+          <RecordsControlsCard
+            churches={churches}
+            selectedChurch={selectedChurch}
+            setSelectedChurch={setSelectedChurch}
+            selectedRecordType={selectedRecordType}
+            onRecordTypeChange={handleRecordTypeChange}
+            activeView={activeView}
+            setActiveView={setActiveView}
+            loading={loading}
+            searchLoading={searchLoading}
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            searchDebounceRef={searchDebounceRef}
+            setDebouncedSearch={setDebouncedSearch}
+            isFiltersCollapsed={isFiltersCollapsed}
+            setIsFiltersCollapsed={setIsFiltersCollapsed}
+            useAgGrid={useAgGrid}
+            setUseAgGrid={setUseAgGrid}
+            agGridFailed={agGridFailed}
+            onAddRecord={handleAddRecord}
+            onExport={handleExport}
+            onGenerateReport={handleGenerateReport}
+            onCollaborativeReport={handleCollaborativeReport}
+            onAdvancedGrid={() => setAdvancedGridOpen(true)}
+          />
                 
           {/* Status Information */}
           {selectedRecordType && !loading && totalRecords > 0 && (
@@ -1442,52 +1222,23 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
                   <AGGridErrorBoundary
                     onFallbackActivated={(err) => { setAgGridFailed(true); console.error('[Records] AG Grid fallback activated:', err.message); }}
                     fallback={
-                      <TableContainer sx={{
-                        textAlign: 'left', width: '100%', overflowX: 'auto',
-                        bgcolor: isDarkMode ? 'background.paper' : undefined,
-                        '&::-webkit-scrollbar': { height: '8px' },
-                        '&::-webkit-scrollbar-track': { backgroundColor: isDarkMode ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.1)' },
-                        '&::-webkit-scrollbar-thumb': { backgroundColor: isDarkMode ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.3)', borderRadius: '4px' },
-                      }}>
-                      <Table stickyHeader sx={{ minWidth: 650 }}>
-                        <TableHead>
-                          <TableRow>
-                            {getColumnDefinitions(selectedRecordType).map((column: any, index: number) => (
-                              <TableCell key={index} sx={{ bgcolor: 'primary.main', color: 'primary.contrastText', fontWeight: 'bold', '& .MuiTableSortLabel-root': { color: 'inherit' }, '& .MuiTableSortLabel-root.Mui-active': { color: 'inherit' }, '& .MuiTableSortLabel-icon': { color: 'inherit !important' } }}>
-                                <TableSortLabel active={sortConfig.key === column.field} direction={sortConfig.direction} onClick={() => handleSort(column.field)}>
-                                  {column.headerName}
-                                </TableSortLabel>
-                              </TableCell>
-                            ))}
-                            <TableCell sx={{ minWidth: '150px', position: 'sticky', right: 0, bgcolor: 'primary.main', color: 'primary.contrastText', zIndex: 2 }} align="center">{t('common.actions')}</TableCell>
-                          </TableRow>
-                        </TableHead>
-                        <TableBody>
-                          {loading ? (
-                            <TableRow><TableCell colSpan={getColumnDefinitions(selectedRecordType).length + 1} align="center" sx={{ py: 8 }}><CircularProgress /><Typography variant="body2" sx={{ mt: 2 }}>{t('records.loading_records')}</Typography></TableCell></TableRow>
-                          ) : paginatedRecords.length === 0 ? (
-                            <TableRow><TableCell colSpan={getColumnDefinitions(selectedRecordType).length + 1} align="center" sx={{ py: 8 }}><Typography variant="body1" color="text.secondary">{t('records.no_records_found')}</Typography></TableCell></TableRow>
-                          ) : (
-                            paginatedRecords.map((record, index) => (
-                              <TableRow key={record.id} onClick={() => handleRowSelect(record.id)} sx={{ bgcolor: index % 2 === 0 ? 'background.default' : 'background.paper', ...getRecordRowStyle(record, isRecordSelected(record.id), nowReference, isDarkMode), cursor: 'pointer', '&:hover': { backgroundColor: 'action.hover' } }}>
-                                {getColumnDefinitions(selectedRecordType).map((column: any, colIndex: number) => {
-                                  const cellVal = getCellValue(record, column);
-                                  const cellText = typeof cellVal === 'string' ? cellVal : String(cellVal ?? '');
-                                  return <TableCell key={colIndex}>{debouncedSearch ? highlightSearchMatch(cellText, debouncedSearch) : cellVal}</TableCell>;
-                                })}
-                                <TableCell sx={{ minWidth: '150px', position: 'sticky', right: 0, bgcolor: index % 2 === 0 ? 'background.default' : 'background.paper', zIndex: 1 }} align="center">
-                                  <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'center' }}>
-                                    <Tooltip title={t('records.tooltip_view')}><IconButton size="small" onClick={() => handleViewRecord(record)}><Eye size={16} strokeWidth={1.5} /></IconButton></Tooltip>
-                                    <Tooltip title={t('records.tooltip_edit')}><IconButton size="small" onClick={() => handleEditRecord(record)}><Pencil size={16} strokeWidth={1.5} /></IconButton></Tooltip>
-                                    <Tooltip title={t('records.tooltip_delete')}><IconButton size="small" onClick={() => handleDeleteClick(record)}><Trash2 size={16} strokeWidth={1.5} /></IconButton></Tooltip>
-                                  </Box>
-                                </TableCell>
-                              </TableRow>
-                            ))
-                          )}
-                        </TableBody>
-                      </Table>
-                      </TableContainer>
+                      <StandardRecordsTable
+                        records={paginatedRecords}
+                        selectedRecordType={selectedRecordType}
+                        sortConfig={sortConfig}
+                        loading={loading}
+                        searchTerm={searchTerm}
+                        debouncedSearch={debouncedSearch}
+                        isDarkMode={isDarkMode}
+                        nowReference={nowReference}
+                        isRecordSelected={isRecordSelected}
+                        onSort={handleSort}
+                        onRowSelect={handleRowSelect}
+                        onViewRecord={handleViewRecord}
+                        onEditRecord={handleEditRecord}
+                        onDeleteClick={handleDeleteClick}
+                        highlightSearchMatch={highlightSearchMatch}
+                      />
                     }
                   >
                     {/* AG Grid View — primary renderer */}
@@ -1515,137 +1266,27 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
                   </AGGridErrorBoundary>
                 ) : (
                   // Standard Material-UI Table View (manual toggle or auto-fallback)
-                  <TableContainer sx={{
-                    textAlign: 'left',
-                    width: '100%',
-                    overflowX: 'auto',
-                    bgcolor: isDarkMode ? 'background.paper' : undefined,
-                    '&::-webkit-scrollbar': {
-                      height: '8px',
-                    },
-                    '&::-webkit-scrollbar-track': {
-                      backgroundColor: isDarkMode ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.1)',
-                    },
-                    '&::-webkit-scrollbar-thumb': {
-                      backgroundColor: isDarkMode ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.3)',
-                      borderRadius: '4px',
-                    },
-                  }}>
-                  <Table stickyHeader sx={{ minWidth: 650 }}>
-                    <TableHead>
-                      <TableRow>
-                        {getColumnDefinitions(selectedRecordType).map((column: any, index: number) => (
-                          <TableCell key={index} sx={{ bgcolor: 'primary.main', color: 'primary.contrastText', fontWeight: 'bold', '& .MuiTableSortLabel-root': { color: 'inherit' }, '& .MuiTableSortLabel-root.Mui-active': { color: 'inherit' }, '& .MuiTableSortLabel-icon': { color: 'inherit !important' } }}>
-                            <TableSortLabel
-                              active={sortConfig.key === column.field}
-                              direction={sortConfig.direction}
-                              onClick={() => handleSort(column.field)}
-                            >
-                              {column.headerName}
-                            </TableSortLabel>
-                          </TableCell>
-                        ))}
-                        <TableCell sx={{
-                          minWidth: '150px',
-                          position: 'sticky',
-                          right: 0,
-                          bgcolor: 'primary.main',
-                          color: 'primary.contrastText',
-                          zIndex: 2,
-                        }} align="center">
-                          {t('common.actions')}
-                        </TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {loading ? (
-                        <TableRow>
-                          <TableCell colSpan={getColumnDefinitions(selectedRecordType).length + 1} align="center" sx={{ py: 8 }}>
-                            <CircularProgress />
-                            <Typography variant="body2" sx={{ mt: 2 }}>
-                              {t('records.loading_records')}
-                            </Typography>
-                          </TableCell>
-                        </TableRow>
-                      ) : paginatedRecords.length === 0 ? (
-                        <TableRow>
-                          <TableCell colSpan={getColumnDefinitions(selectedRecordType).length + 1} align="center" sx={{ py: 8 }}>
-                            <Typography variant="body1" color="text.secondary">
-                              {t('records.no_records_found')}
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                              {searchTerm ? t('records.no_records_hint_search') : t('records.no_records_hint_add')}
-                            </Typography>
-                          </TableCell>
-                        </TableRow>
-                      ) : (
-                        paginatedRecords.map((record, index) => (
-                          <TableRow
-                            key={record.id}
-                            onClick={() => handleRowSelect(record.id)}
-                            sx={{
-                              bgcolor: index % 2 === 0 ? 'background.default' : 'background.paper',
-                              ...getRecordRowStyle(record, isRecordSelected(record.id), nowReference, isDarkMode),
-                              cursor: 'pointer',
-                              '&:hover': {
-                                backgroundColor: 'action.hover',
-                              }
-                            }}
-                            title={record._matchSummary || 'Click to select row'}
-                          >
-                            {getColumnDefinitions(selectedRecordType).map((column: any, colIndex: number) => {
-                              const cellVal = getCellValue(record, column);
-                              const cellText = typeof cellVal === 'string' ? cellVal : String(cellVal ?? '');
-                              return (
-                                <TableCell key={colIndex}>
-                                  {debouncedSearch ? highlightSearchMatch(cellText, debouncedSearch) : cellVal}
-                                </TableCell>
-                              );
-                            })}
-                            <TableCell sx={{
-                              minWidth: '150px',
-                              position: 'sticky',
-                              right: 0,
-                              bgcolor: index % 2 === 0 ? 'background.default' : 'background.paper',
-                              zIndex: 1,
-                            }} align="center">
-                              <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'center' }} className="record-actions">
-                                <Tooltip title={t('records.tooltip_view')}>
-                                  <IconButton size="small" onClick={() => handleViewRecord(record)} sx={{ opacity: 0.7, color: 'text.secondary', '&:hover': { opacity: 1, color: 'text.primary' } }}>
-                                    <Eye size={16} strokeWidth={1.5} />
-                                  </IconButton>
-                                </Tooltip>
-                                <Tooltip title={t('records.tooltip_edit')}>
-                                  <IconButton size="small" onClick={() => handleEditRecord(record)} sx={{ opacity: 0.7, color: 'text.secondary', '&:hover': { opacity: 1, color: 'text.primary' } }}>
-                                    <Pencil size={16} strokeWidth={1.5} />
-                                  </IconButton>
-                                </Tooltip>
-                                <Tooltip title={t('records.tooltip_delete')}>
-                                  <IconButton size="small" onClick={() => handleDeleteClick(record)} sx={{ opacity: 0.7, color: 'text.secondary', '&:hover': { opacity: 1, color: 'error.main' } }}>
-                                    <Trash2 size={16} strokeWidth={1.5} />
-                                  </IconButton>
-                                </Tooltip>
-                                {(selectedRecordType === 'baptism' || selectedRecordType === 'marriage') && (
-                                  <Tooltip title={t('records.tooltip_certificate')}>
-                                    <IconButton 
-                                      size="small" 
-                                      onClick={() => {
-                                        setViewingRecord(record);
-                                        handleGenerateCertificate();
-                                      }} 
-                                      sx={{ opacity: 0.7, color: 'text.secondary', '&:hover': { opacity: 1, color: 'text.primary' } }}
-                                    >
-                                      <FileText size={16} strokeWidth={1.5} />
-                                    </IconButton>
-                                  </Tooltip>
-                                )}
-                              </Box>
-                            </TableCell>
-                          </TableRow>
-                        ))
-                      )}              </TableBody>
-                  </Table>
-                  </TableContainer>
+                  <StandardRecordsTable
+                    records={paginatedRecords}
+                    selectedRecordType={selectedRecordType}
+                    sortConfig={sortConfig}
+                    loading={loading}
+                    searchTerm={searchTerm}
+                    debouncedSearch={debouncedSearch}
+                    isDarkMode={isDarkMode}
+                    nowReference={nowReference}
+                    isRecordSelected={isRecordSelected}
+                    onSort={handleSort}
+                    onRowSelect={handleRowSelect}
+                    onViewRecord={handleViewRecord}
+                    onEditRecord={handleEditRecord}
+                    onDeleteClick={handleDeleteClick}
+                    onCertificateClick={(record) => {
+                      setViewingRecord(record);
+                      handleGenerateCertificate();
+                    }}
+                    highlightSearchMatch={highlightSearchMatch}
+                  />
                 )}
 
               </Paper>
@@ -1704,39 +1345,12 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
             />
 
             {/* Delete Confirmation Dialog */}
-            <Dialog
+            <DeleteConfirmDialog
               open={deleteDialogOpen}
-              onClose={handleCancelDelete}
-              maxWidth="xs"
-              fullWidth
-              PaperProps={{
-                sx: { borderRadius: 3 }
-              }}
-            >
-              <DialogTitle sx={{ fontWeight: 600 }}>
-                {t('records.delete_confirm_title')}
-              </DialogTitle>
-              <DialogContent>
-                <Typography>
-                  Are you sure you want to delete &apos;{recordToDelete?.name}&apos;?
-                </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                  {t('records.delete_confirm_warning')}
-                </Typography>
-              </DialogContent>
-              <DialogActions sx={{ px: 3, pb: 2.5 }}>
-                <Button onClick={handleCancelDelete} variant="outlined">
-                  {t('common.cancel')}
-                </Button>
-                <Button
-                  onClick={handleConfirmDelete}
-                  variant="contained"
-                  color="error"
-                >
-                  {t('common.delete')}
-                </Button>
-              </DialogActions>
-            </Dialog>
+              recordName={recordToDelete?.name || ''}
+              onCancel={handleCancelDelete}
+              onConfirm={handleConfirmDelete}
+            />
 
 
             {/* Toast Snackbar — centered on screen */}
