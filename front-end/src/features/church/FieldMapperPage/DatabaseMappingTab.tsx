@@ -2,7 +2,6 @@ import {
     ArrowDownward as ArrowDownIcon,
     ArrowUpward as ArrowUpIcon,
     CalendarToday as CalendarIcon,
-    CircularProgress,
     Delete as DeleteIcon,
     Download as DownloadIcon,
     Refresh as RefreshIcon,
@@ -15,6 +14,7 @@ import {
 import {
     Alert,
     Box,
+    CircularProgress,
     Button,
     Card,
     CardContent,
