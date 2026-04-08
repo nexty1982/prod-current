@@ -35,13 +35,8 @@ import {
   MenuItem,
   Select,
   FormControl,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
   Snackbar,
   Checkbox,
-  LinearProgress,
 } from '@mui/material';
 import {
   IconRefresh,
@@ -56,8 +51,6 @@ import {
   IconGitMerge,
   IconGitFork,
   IconTrash,
-  IconEye,
-  IconArchive,
   IconTerminal2,
   IconServer,
   IconBrowser,
@@ -71,101 +64,11 @@ import {
 import { getBuildInfo } from '@/shared/lib/buildInfo';
 import { useServerVersion } from '@/hooks/useServerVersion';
 import apiClient from '@/api/utils/axiosInstance';
-
-// ── Types ───────────────────────────────────────────────────────
-
-type BranchClassification = 'Already Merged' | 'Safe To Delete' | 'Fast-Forward Safe' | 'Needs Rebase' | 'Parked Work' | 'Stale / Diverged' | 'Manual Review';
-type RecommendedAction = 'Delete' | 'Merge' | 'Review' | 'Rebase' | 'Archive' | 'Push';
-type ConfidenceLevel = 'high' | 'medium' | 'low';
-type BranchSource = 'remote' | 'local' | 'both';
-
-interface RemoteBranch {
-  name: string;
-  remoteRef: string;
-  ahead: number;
-  behind: number;
-  lastCommit: string;
-  lastCommitDate: string;
-  lastCommitSha: string;
-  changedFiles: number;
-  classification: BranchClassification;
-  recommendedAction: RecommendedAction;
-  confidence: ConfidenceLevel;
-  commitAgeDays: number;
-  mergeBase: string;
-  isMerged: boolean;
-  hasLocal: boolean;
-  isCurrent: boolean;
-  source: BranchSource;
-  note: string | null;
-  noteUpdated: string | null;
-}
-
-interface LocalOnlyBranch {
-  name: string;
-  ahead: number;
-  behind: number;
-  lastCommit: string;
-  lastCommitDate: string;
-  lastCommitSha: string;
-  isCurrent: boolean;
-  hasUnpushedCommits: boolean;
-  isMerged: boolean;
-  recommendedAction: RecommendedAction;
-  source: 'local';
-}
-
-interface BranchAnalysis {
-  fetchOk: boolean;
-  comparisonTarget: string;
-  originMainSha: string;
-  localContext: {
-    currentBranch: string;
-    headSha: string;
-    isClean: boolean;
-    trackingRemote: string | null;
-  };
-  remoteBranches: RemoteBranch[];
-  localOnlyBranches: LocalOnlyBranch[];
-  summary: {
-    totalRemote: number;
-    totalLocalOnly: number;
-    alreadyMerged: number;
-    safeToDelete: number;
-    fastForwardSafe: number;
-    needsRebase: number;
-    parkedWork: number;
-    staleDiverged: number;
-    manualReview: number;
-  };
-}
-
-// ── Helpers ─────────────────────────────────────────────────────
-
-const CLASSIFICATION_COLORS: Record<BranchClassification, { bg: string; bgDark: string; color: string; colorDark: string; border: string; borderDark: string }> = {
-  'Already Merged': { bg: '#f3e8ff', bgDark: 'rgba(139,92,246,0.15)', color: '#7c3aed', colorDark: '#a78bfa', border: '#ddd6fe', borderDark: 'rgba(139,92,246,0.3)' },
-  'Safe To Delete': { bg: '#f3e8ff', bgDark: 'rgba(139,92,246,0.12)', color: '#6d28d9', colorDark: '#c4b5fd', border: '#ddd6fe', borderDark: 'rgba(139,92,246,0.25)' },
-  'Fast-Forward Safe': { bg: '#dcfce7', bgDark: 'rgba(34,197,94,0.15)', color: '#16a34a', colorDark: '#4ade80', border: '#bbf7d0', borderDark: 'rgba(34,197,94,0.3)' },
-  'Needs Rebase': { bg: '#fef3c7', bgDark: 'rgba(245,158,11,0.15)', color: '#d97706', colorDark: '#fbbf24', border: '#fde68a', borderDark: 'rgba(245,158,11,0.3)' },
-  'Parked Work': { bg: '#e0f2fe', bgDark: 'rgba(14,165,233,0.15)', color: '#0284c7', colorDark: '#38bdf8', border: '#bae6fd', borderDark: 'rgba(14,165,233,0.3)' },
-  'Stale / Diverged': { bg: '#fce4ec', bgDark: 'rgba(233,30,99,0.15)', color: '#c62828', colorDark: '#ef9a9a', border: '#f8bbd0', borderDark: 'rgba(233,30,99,0.3)' },
-  'Manual Review': { bg: '#fee2e2', bgDark: 'rgba(239,68,68,0.15)', color: '#dc2626', colorDark: '#f87171', border: '#fecaca', borderDark: 'rgba(239,68,68,0.3)' },
-};
-
-const ACTION_ICONS: Record<RecommendedAction, React.ElementType> = {
-  Delete: IconTrash,
-  Merge: IconGitMerge,
-  Review: IconEye,
-  Rebase: IconGitFork,
-  Archive: IconArchive,
-  Push: IconUpload,
-};
-
-const SOURCE_CONFIG: Record<BranchSource, { icon: React.ElementType; label: string }> = {
-  remote: { icon: IconCloud, label: 'remote only' },
-  local: { icon: IconDeviceDesktop, label: 'local only' },
-  both: { icon: IconGitBranch, label: 'tracked' },
-};
+import type { BranchAnalysis, BranchClassification, BranchSource, RemoteBranch } from './RepoOpsPage/types';
+import { CLASSIFICATION_COLORS, ACTION_ICONS, SOURCE_CONFIG } from './RepoOpsPage/constants';
+import DeleteBranchDialog from './RepoOpsPage/DeleteBranchDialog';
+import MergeBranchDialog from './RepoOpsPage/MergeBranchDialog';
+import BulkDeleteDialog from './RepoOpsPage/BulkDeleteDialog';
 
 // ── Component ───────────────────────────────────────────────────
 
@@ -1424,210 +1327,41 @@ const RepoOpsPage: React.FC = () => {
         )}
       </Drawer>
 
-      {/* ── Delete Confirmation Dialog ─────────────────────── */}
-      <Dialog
+      {/* ── Confirmation Dialogs ─────────────────────────── */}
+      <DeleteBranchDialog
         open={deleteDialogOpen}
-        onClose={() => !deleting && setDeleteDialogOpen(false)}
-        PaperProps={{ sx: { borderRadius: 2, maxWidth: 480, fontFamily: f } }}
-      >
-        <DialogTitle sx={{ fontFamily: f, fontWeight: 600, fontSize: '1.05rem', pb: 0.5 }}>
-          Delete Branch
-        </DialogTitle>
-        <DialogContent>
-          {deleteTarget && (
-            <Box sx={{ mt: 1 }}>
-              <Paper variant="outlined" sx={{ p: 1.5, mb: 2, fontFamily: 'monospace', fontSize: '0.8125rem', wordBreak: 'break-all', bgcolor: isDark ? 'rgba(255,255,255,0.03)' : '#f9fafb' }}>
-                {deleteTarget.name}
-              </Paper>
-
-              <Chip
-                size="small"
-                label={deleteTarget.classification}
-                sx={{ mb: 2, fontFamily: f, fontSize: '0.75rem', fontWeight: 600, ...classChip(deleteTarget.classification) }}
-              />
-
-              <Typography sx={{ fontFamily: f, fontSize: '0.8125rem', color: labelColor, mb: 1.5 }}>
-                {deleteTarget.classification === 'Already Merged'
-                  ? 'All commits on this branch have been merged into main. No unique work will be lost.'
-                  : deleteTarget.classification === 'Stale / Diverged'
-                  ? `This branch has ${deleteTarget.ahead} commit(s) ahead but is ${deleteTarget.behind} commit(s) behind main. It is stale or significantly diverged and unlikely to merge cleanly.`
-                  : 'This branch has no unique commits ahead of main. No work will be lost.'}
-              </Typography>
-
-              {deleteTarget.hasLocal && (
-                <Alert severity="info" sx={{ mb: 1.5, fontFamily: f, fontSize: '0.8125rem' }}>
-                  The local tracking branch will also be removed (safe delete).
-                </Alert>
-              )}
-
-              <Typography sx={{ fontFamily: f, fontSize: '0.75rem', color: labelColor }}>
-                This will run <code>git push origin --delete {deleteTarget.name}</code>
-              </Typography>
-            </Box>
-          )}
-        </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 2, gap: 1 }}>
-          <Button
-            onClick={() => setDeleteDialogOpen(false)}
-            disabled={deleting}
-            sx={{ fontFamily: f, textTransform: 'none', fontSize: '0.8125rem' }}
-          >
-            Cancel
-          </Button>
-          <Button
-            variant="contained"
-            onClick={handleDeleteBranch}
-            disabled={deleting}
-            startIcon={deleting ? <CircularProgress size={14} color="inherit" /> : <IconTrash size={14} />}
-            sx={{
-              fontFamily: f, textTransform: 'none', fontSize: '0.8125rem',
-              bgcolor: isDark ? 'rgba(139,92,246,0.8)' : '#7c3aed',
-              '&:hover': { bgcolor: isDark ? 'rgba(139,92,246,0.95)' : '#6d28d9' },
-            }}
-          >
-            {deleting ? 'Deleting...' : 'Confirm Delete'}
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* ── Merge Confirmation Dialog ─────────────────────── */}
-      <Dialog
+        onClose={() => setDeleteDialogOpen(false)}
+        onConfirm={handleDeleteBranch}
+        target={deleteTarget}
+        deleting={deleting}
+        isDark={isDark}
+        fontFamily={f}
+        labelColor={labelColor}
+        classChip={classChip}
+      />
+      <MergeBranchDialog
         open={mergeDialogOpen}
-        onClose={() => !merging && setMergeDialogOpen(false)}
-        PaperProps={{ sx: { borderRadius: 2, maxWidth: 480, fontFamily: f } }}
-      >
-        <DialogTitle sx={{ fontFamily: f, fontWeight: 600, fontSize: '1.05rem', pb: 0.5 }}>
-          Merge Branch
-        </DialogTitle>
-        <DialogContent>
-          {mergeTarget && (
-            <Box sx={{ mt: 1 }}>
-              <Paper variant="outlined" sx={{ p: 1.5, mb: 2, fontFamily: 'monospace', fontSize: '0.8125rem', wordBreak: 'break-all', bgcolor: isDark ? 'rgba(255,255,255,0.03)' : '#f9fafb' }}>
-                {mergeTarget.name}
-              </Paper>
-
-              <Typography sx={{ fontFamily: f, fontSize: '0.8125rem', color: labelColor, mb: 1.5 }}>
-                This branch has <strong>{mergeTarget.ahead}</strong> unique commit{mergeTarget.ahead !== 1 ? 's' : ''} and is not behind main.
-                It will be fast-forward merged into <strong>main</strong>, pushed to origin, and the branch will be deleted.
-              </Typography>
-
-              <Typography sx={{ fontFamily: f, fontSize: '0.75rem', color: labelColor }}>
-                This will run <code>git merge --ff-only {mergeTarget.name}</code> into main
-              </Typography>
-            </Box>
-          )}
-        </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 2, gap: 1 }}>
-          <Button
-            onClick={() => setMergeDialogOpen(false)}
-            disabled={merging}
-            sx={{ fontFamily: f, textTransform: 'none', fontSize: '0.8125rem' }}
-          >
-            Cancel
-          </Button>
-          <Button
-            variant="contained"
-            onClick={handleMergeBranch}
-            disabled={merging}
-            startIcon={merging ? <CircularProgress size={14} color="inherit" /> : <IconGitMerge size={14} />}
-            sx={{
-              fontFamily: f, textTransform: 'none', fontSize: '0.8125rem',
-              bgcolor: isDark ? 'rgba(34,197,94,0.8)' : '#16a34a',
-              '&:hover': { bgcolor: isDark ? 'rgba(34,197,94,0.95)' : '#15803d' },
-            }}
-          >
-            {merging ? 'Merging...' : 'Confirm Merge'}
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* ── Bulk Delete Confirmation Dialog ──────────────── */}
-      <Dialog
+        onClose={() => setMergeDialogOpen(false)}
+        onConfirm={handleMergeBranch}
+        target={mergeTarget}
+        merging={merging}
+        isDark={isDark}
+        fontFamily={f}
+        labelColor={labelColor}
+      />
+      <BulkDeleteDialog
         open={bulkDeleteDialogOpen}
-        onClose={() => !bulkDeleting && setBulkDeleteDialogOpen(false)}
-        PaperProps={{ sx: { borderRadius: 2, maxWidth: 520, fontFamily: f } }}
-      >
-        <DialogTitle sx={{ fontFamily: f, fontWeight: 600, fontSize: '1.05rem', pb: 0.5 }}>
-          Delete {selectedForDelete.size} Branch{selectedForDelete.size !== 1 ? 'es' : ''}
-        </DialogTitle>
-        <DialogContent>
-          <Box sx={{ mt: 1 }}>
-            <Typography sx={{ fontFamily: f, fontSize: '0.8125rem', color: labelColor, mb: 2 }}>
-              The following branches are classified as <strong>Already Merged</strong>, <strong>Safe To Delete</strong>, or <strong>Stale / Diverged</strong>.
-              Each branch will be independently verified server-side before deletion.
-            </Typography>
-
-            <Paper
-              variant="outlined"
-              sx={{
-                maxHeight: 200, overflow: 'auto', mb: 2,
-                bgcolor: isDark ? 'rgba(255,255,255,0.03)' : '#f9fafb',
-              }}
-            >
-              {Array.from(selectedForDelete).map(name => {
-                const branch = analysis?.remoteBranches.find(b => b.name === name);
-                return (
-                  <Box
-                    key={name}
-                    sx={{
-                      px: 1.5, py: 0.75,
-                      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                      borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)'}`,
-                      '&:last-child': { borderBottom: 'none' },
-                    }}
-                  >
-                    <Typography sx={{ fontFamily: 'monospace', fontSize: '0.75rem', color: textColor }}>
-                      {name}
-                    </Typography>
-                    {branch && (
-                      <Chip
-                        size="small"
-                        label={branch.classification}
-                        sx={{ fontFamily: f, fontSize: '0.55rem', height: 18, ...classChip(branch.classification) }}
-                      />
-                    )}
-                  </Box>
-                );
-              })}
-            </Paper>
-
-            <Alert severity="info" sx={{ fontFamily: f, fontSize: '0.8125rem' }}>
-              Remote branches will be deleted. Local tracking branches will also be removed (safe delete) where they exist.
-            </Alert>
-
-            {bulkDeleting && (
-              <Box sx={{ mt: 2 }}>
-                <LinearProgress sx={{ borderRadius: 1 }} />
-                <Typography sx={{ fontFamily: f, fontSize: '0.75rem', color: labelColor, mt: 0.5, textAlign: 'center' }}>
-                  Deleting branches...
-                </Typography>
-              </Box>
-            )}
-          </Box>
-        </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 2, gap: 1 }}>
-          <Button
-            onClick={() => setBulkDeleteDialogOpen(false)}
-            disabled={bulkDeleting}
-            sx={{ fontFamily: f, textTransform: 'none', fontSize: '0.8125rem' }}
-          >
-            Cancel
-          </Button>
-          <Button
-            variant="contained"
-            onClick={handleBulkDelete}
-            disabled={bulkDeleting}
-            startIcon={bulkDeleting ? <CircularProgress size={14} color="inherit" /> : <IconTrash size={14} />}
-            sx={{
-              fontFamily: f, textTransform: 'none', fontSize: '0.8125rem',
-              bgcolor: isDark ? 'rgba(139,92,246,0.8)' : '#7c3aed',
-              '&:hover': { bgcolor: isDark ? 'rgba(139,92,246,0.95)' : '#6d28d9' },
-            }}
-          >
-            {bulkDeleting ? 'Deleting...' : `Delete ${selectedForDelete.size} Branch${selectedForDelete.size !== 1 ? 'es' : ''}`}
-          </Button>
-        </DialogActions>
-      </Dialog>
+        onClose={() => setBulkDeleteDialogOpen(false)}
+        onConfirm={handleBulkDelete}
+        selectedForDelete={selectedForDelete}
+        analysis={analysis}
+        bulkDeleting={bulkDeleting}
+        isDark={isDark}
+        fontFamily={f}
+        labelColor={labelColor}
+        textColor={textColor}
+        classChip={classChip}
+      />
 
       {/* ── Snackbar feedback ─────────────────────────────── */}
       <Snackbar
