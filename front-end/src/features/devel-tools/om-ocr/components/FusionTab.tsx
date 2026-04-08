@@ -21,11 +21,8 @@ import {
   alpha,
   useTheme,
   Switch,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
   Snackbar,
+  Tooltip,
 } from '@mui/material';
 import {
   IconWand,
@@ -36,7 +33,6 @@ import {
   IconAlertCircle,
   IconChevronRight,
   IconChevronLeft,
-  IconAlertTriangle,
 } from '@tabler/icons-react';
 
 import {
@@ -72,9 +68,11 @@ import SaveCommitStep from './FusionTab/SaveCommitStep';
 import { getEntryColor } from './FusionTab/fusionConstants';
 import { useFusionDrafts } from './FusionTab/useFusionDrafts';
 import AnchorLabelsStep from './FusionTab/AnchorLabelsStep';
-import MapFieldsStep from './FusionTab/MapFieldsStep';
-import DetectEntriesStepContent from './FusionTab/DetectEntriesStepContent';
+import CommitDialog from './FusionTab/CommitDialog';
+import DetectEntriesStep from './FusionTab/DetectEntriesStep';
 import FusionProgressHeader from './FusionTab/FusionProgressHeader';
+import MapFieldsStep from './FusionTab/MapFieldsStep';
+import StepIcon from './FusionTab/StepIcon';
 
 // ============================================================================
 // Component
@@ -1551,14 +1549,14 @@ const FusionTab: React.FC<FusionTabProps> = ({
         <FusionProgressHeader
           entries={entries}
           selectedEntryIndex={selectedEntryIndex}
+          setSelectedEntryIndex={setSelectedEntryIndex}
           completionState={completionState}
           inProgressEntries={inProgressEntries}
           allEntriesComplete={allEntriesComplete}
-          manualEditMode={manualEditMode}
           hideCompleted={hideCompleted}
+          setHideCompleted={setHideCompleted}
+          manualEditMode={manualEditMode}
           isProcessing={isProcessing}
-          onSetSelectedEntryIndex={setSelectedEntryIndex}
-          onSetHideCompleted={setHideCompleted}
           onSendToReview={handleSendToReview}
         />
       )}
@@ -1567,24 +1565,7 @@ const FusionTab: React.FC<FusionTabProps> = ({
       <Stepper activeStep={activeStep} orientation="vertical" sx={{ flex: 1, overflow: 'auto' }}>
         {/* Step 1: Detect Entries */}
         <Step>
-          <StepLabel
-            StepIconComponent={() => (
-              <Box
-                sx={{
-                  width: 32,
-                  height: 32,
-                  borderRadius: '50%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  bgcolor: activeStep >= 0 ? 'primary.main' : 'grey.300',
-                  color: 'white',
-                }}
-              >
-                {activeStep > 0 ? <IconCheck size={18} /> : <IconWand size={18} />}
-              </Box>
-            )}
-          >
+          <StepLabel StepIconComponent={() => <StepIcon activeStep={activeStep} stepIndex={0} icon={<IconWand size={18} />} />}>
             <Typography fontWeight={activeStep === 0 ? 600 : 400}>
               Detect Entries
               {entries.length > 0 && (
@@ -1593,7 +1574,7 @@ const FusionTab: React.FC<FusionTabProps> = ({
             </Typography>
           </StepLabel>
           <StepContent>
-            <DetectEntriesStepContent
+            <DetectEntriesStep
               entries={entries}
               entryAreas={entryAreas}
               drafts={drafts}
@@ -1603,23 +1584,20 @@ const FusionTab: React.FC<FusionTabProps> = ({
               dirtyEntries={dirtyEntries}
               hideCompleted={hideCompleted}
               bboxEditMode={bboxEditMode}
+              setBboxEditMode={setBboxEditMode}
               showFieldBoxes={showFieldBoxes}
-              isProcessing={isProcessing}
+              setShowFieldBoxes={setShowFieldBoxes}
               manualEntryCount={manualEntryCount}
+              setManualEntryCount={setManualEntryCount}
+              isProcessing={isProcessing}
               onDetectEntries={handleDetectEntries}
               onManualEntryCount={handleManualEntryCount}
-              onSetManualEntryCount={setManualEntryCount}
-              onSetBboxEditMode={setBboxEditMode}
-              onSetShowFieldBoxes={setShowFieldBoxes}
               onEntrySelect={handleEntrySelect}
               onAddEntry={handleAddEntry}
               onDeleteEntry={handleDeleteEntry}
               onSaveBbox={handleSaveBbox}
               onResetBbox={handleResetBbox}
-              onEditEntry={(idx) => {
-                setEditingEntryIndex(idx);
-                setEntryEditorOpen(true);
-              }}
+              onEditEntry={(idx) => { setEditingEntryIndex(idx); setEntryEditorOpen(true); }}
               onNext={handleNext}
             />
           </StepContent>
@@ -1629,20 +1607,7 @@ const FusionTab: React.FC<FusionTabProps> = ({
         <Step>
           <StepLabel
             StepIconComponent={() => (
-              <Box
-                sx={{
-                  width: 32,
-                  height: 32,
-                  borderRadius: '50%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  bgcolor: activeStep >= 1 ? 'primary.main' : 'grey.300',
-                  color: 'white',
-                }}
-              >
-                {activeStep > 1 ? <IconCheck size={18} /> : <IconTarget size={18} />}
-              </Box>
+              <StepIcon activeStep={activeStep} stepIndex={1} icon={<IconTarget size={18} />} />
             )}
           >
             <Typography fontWeight={activeStep === 1 ? 600 : 400}>
@@ -1671,20 +1636,7 @@ const FusionTab: React.FC<FusionTabProps> = ({
         <Step>
           <StepLabel
             StepIconComponent={() => (
-              <Box
-                sx={{
-                  width: 32,
-                  height: 32,
-                  borderRadius: '50%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  bgcolor: activeStep >= 2 ? 'primary.main' : 'grey.300',
-                  color: 'white',
-                }}
-              >
-                {activeStep > 2 ? <IconCheck size={18} /> : <IconMap size={18} />}
-              </Box>
+              <StepIcon activeStep={activeStep} stepIndex={2} icon={<IconMap size={18} />} />
             )}
           >
             <Typography fontWeight={activeStep === 2 ? 600 : 400}>
@@ -1714,20 +1666,7 @@ const FusionTab: React.FC<FusionTabProps> = ({
         <Step>
           <StepLabel
             StepIconComponent={() => (
-              <Box
-                sx={{
-                  width: 32,
-                  height: 32,
-                  borderRadius: '50%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  bgcolor: activeStep >= 3 ? 'primary.main' : 'grey.300',
-                  color: 'white',
-                }}
-              >
-                <IconDeviceFloppy size={18} />
-              </Box>
+              <StepIcon activeStep={activeStep} stepIndex={3} icon={<IconDeviceFloppy size={18} />} />
             )}
           >
             <Typography fontWeight={activeStep === 3 ? 600 : 400}>
@@ -1765,39 +1704,15 @@ const FusionTab: React.FC<FusionTabProps> = ({
       </Stepper>
 
       {/* Commit Confirmation Dialog */}
-      <Dialog open={showCommitDialog} onClose={() => setShowCommitDialog(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>
-          <Stack direction="row" spacing={1} alignItems="center">
-            <IconAlertTriangle size={24} color={theme.palette.warning.main} />
-            <Typography variant="h6">Confirm Commit to Database</Typography>
-          </Stack>
-        </DialogTitle>
-        <DialogContent>
-          <Alert severity="warning" sx={{ mb: 2 }}>
-            <Typography variant="body2" fontWeight={600}>
-              You are about to create {drafts.filter(d => d.status === 'draft').length} {recordType} record(s) in:
-            </Typography>
-            <Typography variant="body1" fontWeight={700} sx={{ mt: 1 }}>
-              {validationResult?.church_name || `Church ${churchId}`}
-            </Typography>
-          </Alert>
-          <Typography variant="body2" color="text.secondary">
-            This action is reversible only by manual deletion of the created records.
-            Please ensure all field values are correct before proceeding.
-          </Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setShowCommitDialog(false)}>Cancel</Button>
-          <Button 
-            variant="contained" 
-            color="success" 
-            onClick={handleCommitDrafts}
-            startIcon={<IconCheck size={18} />}
-          >
-            Yes, Commit Records
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <CommitDialog
+        open={showCommitDialog}
+        onClose={() => setShowCommitDialog(false)}
+        onConfirm={handleCommitDrafts}
+        drafts={drafts}
+        recordType={recordType}
+        churchId={churchId}
+        churchName={validationResult?.church_name}
+      />
 
       {/* Processing overlay */}
       {isProcessing && (

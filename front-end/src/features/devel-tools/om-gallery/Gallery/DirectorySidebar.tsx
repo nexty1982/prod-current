@@ -1,7 +1,3 @@
-/**
- * DirectorySidebar — Directory tree navigation for the Gallery.
- * Extracted from Gallery.tsx (renderDirectoryTree + sidebar JSX).
- */
 import React from 'react';
 import { Box, Button, Chip, Typography } from '@mui/material';
 import { IconFolder, IconFolderPlus, IconSparkles } from '@tabler/icons-react';

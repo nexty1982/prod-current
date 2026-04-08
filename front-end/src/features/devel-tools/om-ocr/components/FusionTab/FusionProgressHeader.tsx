@@ -1,11 +1,7 @@
-/**
- * FusionProgressHeader — Progress bar with record navigation,
- * completion status, and "Send to Review" action.
- * Extracted from FusionTab.tsx
- */
 import React from 'react';
 import {
   Alert,
+  Box,
   Button,
   Chip,
   CircularProgress,
@@ -17,48 +13,44 @@ import {
   alpha,
   useTheme,
 } from '@mui/material';
-import {
-  IconCheck,
-  IconChevronLeft,
-  IconChevronRight,
-} from '@tabler/icons-react';
+import { IconCheck, IconChevronLeft, IconChevronRight } from '@tabler/icons-react';
 import type { FusionEntry } from '../../types/fusion';
 
 interface FusionProgressHeaderProps {
   entries: FusionEntry[];
   selectedEntryIndex: number | null;
+  setSelectedEntryIndex: (idx: number) => void;
   completionState: Set<number>;
   inProgressEntries: Set<number>;
   allEntriesComplete: boolean;
-  manualEditMode: Set<number>;
   hideCompleted: boolean;
+  setHideCompleted: (val: boolean) => void;
+  manualEditMode: Set<number>;
   isProcessing: boolean;
-  onSetSelectedEntryIndex: (index: number) => void;
-  onSetHideCompleted: (hide: boolean) => void;
   onSendToReview: () => void;
 }
 
 const FusionProgressHeader: React.FC<FusionProgressHeaderProps> = ({
   entries,
   selectedEntryIndex,
+  setSelectedEntryIndex,
   completionState,
   inProgressEntries,
   allEntriesComplete,
-  manualEditMode,
   hideCompleted,
+  setHideCompleted,
+  manualEditMode,
   isProcessing,
-  onSetSelectedEntryIndex,
-  onSetHideCompleted,
   onSendToReview,
 }) => {
   const theme = useTheme();
 
   return (
-    <Paper 
-      variant="outlined" 
-      sx={{ 
-        p: 1.5, 
-        mb: 2, 
+    <Paper
+      variant="outlined"
+      sx={{
+        p: 1.5,
+        mb: 2,
         bgcolor: allEntriesComplete ? alpha(theme.palette.success.main, 0.1) : 'background.paper',
         borderColor: allEntriesComplete ? 'success.main' : 'divider',
       }}
@@ -68,14 +60,14 @@ const FusionProgressHeader: React.FC<FusionProgressHeaderProps> = ({
           <Typography variant="subtitle1" fontWeight={600}>
             Record {(selectedEntryIndex ?? 0) + 1} of {entries.length}
           </Typography>
-          <Chip 
-            size="small" 
+          <Chip
+            size="small"
             label={`${inProgressEntries.size - completionState.size} in progress`}
             color="info"
             sx={{ display: inProgressEntries.size > completionState.size ? 'flex' : 'none' }}
           />
-          <Chip 
-            size="small" 
+          <Chip
+            size="small"
             label={`${completionState.size} saved`}
             color={allEntriesComplete ? 'success' : 'warning'}
             icon={allEntriesComplete ? <IconCheck size={14} /> : undefined}
@@ -90,7 +82,7 @@ const FusionProgressHeader: React.FC<FusionProgressHeaderProps> = ({
             variant="outlined"
             onClick={() => {
               const prevIdx = (selectedEntryIndex ?? 0) - 1;
-              if (prevIdx >= 0) onSetSelectedEntryIndex(prevIdx);
+              if (prevIdx >= 0) setSelectedEntryIndex(prevIdx);
             }}
             disabled={selectedEntryIndex === 0 || selectedEntryIndex === null}
             startIcon={<IconChevronLeft size={16} />}
@@ -102,7 +94,7 @@ const FusionProgressHeader: React.FC<FusionProgressHeaderProps> = ({
             variant="outlined"
             onClick={() => {
               const nextIdx = (selectedEntryIndex ?? 0) + 1;
-              if (nextIdx < entries.length) onSetSelectedEntryIndex(nextIdx);
+              if (nextIdx < entries.length) setSelectedEntryIndex(nextIdx);
             }}
             disabled={selectedEntryIndex === entries.length - 1 || selectedEntryIndex === null}
             endIcon={<IconChevronRight size={16} />}
@@ -114,7 +106,7 @@ const FusionProgressHeader: React.FC<FusionProgressHeaderProps> = ({
               <Switch
                 size="small"
                 checked={hideCompleted}
-                onChange={(e) => onSetHideCompleted(e.target.checked)}
+                onChange={(e) => setHideCompleted(e.target.checked)}
               />
             }
             label="Hide completed"

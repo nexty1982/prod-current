@@ -4,16 +4,10 @@ import {
   Typography,
   IconButton,
   Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
   Alert,
   useTheme,
   Paper,
   Stack,
-  Chip,
   FormControl,
   InputLabel,
   Select,
@@ -26,15 +20,10 @@ import {
   IconPhoto,
   IconTrash,
   IconDownload,
-  IconFolder,
-  IconFolderPlus,
-  IconSparkles,
 } from '@tabler/icons-react';
 import { DataGrid, GridRowSelectionModel } from '@mui/x-data-grid';
-import { OMLoading } from '@/components/common/OMLoading';
 import {
   CANONICAL_IMAGE_DIRECTORIES,
-  isCanonicalDirectory,
   buildImageUrl,
   extractDirectoryFromPath,
   IMAGES_BASE_PATH
@@ -49,8 +38,9 @@ import { sortImages } from './Gallery/galleryUtils';
 import type { SortBy, SortOrder, UsageFilter } from './Gallery/galleryUtils';
 import { useGalleryUpload } from './Gallery/useGalleryUpload';
 import { useGallerySuggestions } from './Gallery/useGallerySuggestions';
-import { openImageWindow } from './Gallery/openImageWindow';
 import DirectorySidebar from './Gallery/DirectorySidebar';
+import MoveRenameDialogs from './Gallery/MoveRenameDialogs';
+import { openImageInNewWindow } from './Gallery/openInNewWindow';
 
 const Gallery: React.FC = () => {
   const theme = useTheme();
@@ -500,7 +490,7 @@ const Gallery: React.FC = () => {
     setImageDialogOpen(true);
   };
 
-  const handleOpenInNewWindow = (image: GalleryImage) => openImageWindow(image);
+  const handleOpenInNewWindow = openImageInNewWindow;
 
   const handleDeleteImage = async (image: GalleryImage) => {
     if (!window.confirm(`Are you sure you want to delete "${image.name}"?`)) {
@@ -923,7 +913,6 @@ const Gallery: React.FC = () => {
     }
   };
 
-
   return (
     <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'row' }}>
       {/* Directory Tree Sidebar */}
@@ -1266,41 +1255,20 @@ const Gallery: React.FC = () => {
       </GalleryContainer>
       </Box>
 
-      {/* Move Dialog */}
-      <Dialog open={moveDialogOpen} onClose={() => setMoveDialogOpen(false)}>
-        <DialogTitle>Move Image</DialogTitle>
-        <DialogContent>
-          <TextField
-            fullWidth
-            label="Target Directory"
-            value={targetDir}
-            onChange={(e) => setTargetDir(e.target.value)}
-            sx={{ mt: 1 }}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setMoveDialogOpen(false)}>Cancel</Button>
-          <Button onClick={() => itemToMove && handleMoveImage(itemToMove, targetDir)}>Move</Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Rename Dialog */}
-      <Dialog open={renameDialogOpen} onClose={() => setRenameDialogOpen(false)}>
-        <DialogTitle>Rename Image</DialogTitle>
-        <DialogContent>
-          <TextField
-            fullWidth
-            label="New Name"
-            value={newName}
-            onChange={(e) => setNewName(e.target.value)}
-            sx={{ mt: 1 }}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setRenameDialogOpen(false)}>Cancel</Button>
-          <Button onClick={() => itemToMove && handleRenameImage(itemToMove, newName)}>Rename</Button>
-        </DialogActions>
-      </Dialog>
+      {/* Move/Rename Dialogs */}
+      <MoveRenameDialogs
+        moveDialogOpen={moveDialogOpen}
+        renameDialogOpen={renameDialogOpen}
+        itemToMove={itemToMove}
+        targetDir={targetDir}
+        newName={newName}
+        setTargetDir={setTargetDir}
+        setNewName={setNewName}
+        onCloseMove={() => setMoveDialogOpen(false)}
+        onCloseRename={() => setRenameDialogOpen(false)}
+        onMove={handleMoveImage}
+        onRename={handleRenameImage}
+      />
 
       {/* Catalog Suggestions Dialog */}
       <SuggestionsDialog
