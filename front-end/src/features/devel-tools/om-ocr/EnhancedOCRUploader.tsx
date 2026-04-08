@@ -24,8 +24,6 @@ import {
   Paper,
   Stack,
   Tooltip,
-  Switch,
-  FormControlLabel,
   alpha,
   useTheme,
   Snackbar,
@@ -38,7 +36,6 @@ import {
   IconSettings,
   IconDatabase,
   IconAlertTriangle,
-  IconPhoto,
 } from '@tabler/icons-react';
 import { useAuth } from '@/context/AuthContext';
 import { apiClient } from '@/shared/lib/axiosInstance';
@@ -53,31 +50,32 @@ import type { UploadFile, Church, OCRSettings, DocumentProcessingSettings, Extra
 import { formatFileSize, generateId, FileCard, BatchProgress } from './EnhancedOCRUploader/components';
 import SettingsPanel from './EnhancedOCRUploader/SettingsPanel';
 import AdvancedOptionsPanel from './EnhancedOCRUploader/AdvancedOptionsPanel';
+import { useChurchLoader } from './EnhancedOCRUploader/useChurchLoader';
+import DropZone from './EnhancedOCRUploader/DropZone';
 
 
 // Main Component
 const EnhancedOCRUploader: React.FC = () => {
   const theme = useTheme();
-  const { user, isSuperAdmin } = useAuth();
+  const { isSuperAdmin } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Helper to ensure church ID is valid
+  // Get church_id from URL query params
   const getValidChurchId = (churchId: any): number | null => {
     if (churchId === null || churchId === undefined || churchId === '') return null;
     const num = typeof churchId === 'string' ? parseInt(churchId, 10) : Number(churchId);
     return !isNaN(num) && num > 0 ? num : null;
   };
-
-  // Get church_id from URL query params
   const urlChurchId = getValidChurchId(searchParams.get('church_id'));
   // Get ocr_mode from URL query params
   const urlOcrMode = searchParams.get('ocr_mode');
 
+  // Church loading hook
+  const { churches, selectedChurchId, setSelectedChurchId } = useChurchLoader({ urlChurchId });
+
   // State
   const [files, setFiles] = useState<UploadFile[]>([]);
-  const [churches, setChurches] = useState<Church[]>([]);
-  const [selectedChurchId, setSelectedChurchId] = useState<number | null>(urlChurchId);
   const [isUploading, setIsUploading] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -205,138 +203,6 @@ const EnhancedOCRUploader: React.FC = () => {
   const uploadPath = selectedChurchId 
     ? `/var/www/orthodoxmetrics/prod/uploads/om_church_${selectedChurchId}/uploaded/` 
     : '/var/www/orthodoxmetrics/prod/uploads/';
-
-  // Load churches - try /api/my/churches first, fall back to /api/churches for admins
-  useEffect(() => {
-    const loadChurches = async () => {
-      try {
-        // Step 1: Try /api/my/churches first (works for all roles including priest)
-        let churchList: Church[] = [];
-        let useMyChurches = false;
-
-        try {
-          // Explicitly ensure no church_id headers are sent for this endpoint
-          // The axios interceptor should handle this, but we'll be extra explicit
-          const myChurchesResponse: any = await apiClient.get('/api/my/churches');
-          const myChurchesData = myChurchesResponse.data;
-          churchList = myChurchesData?.churches || myChurchesData || [];
-          useMyChurches = true;
-          
-          if (churchList.length > 0) {
-            console.log(`✅ Loaded ${churchList.length} churches from /api/my/churches`);
-            setChurches(churchList);
-            
-            // Priority: URL param > user's church_id > first church
-            if (urlChurchId) {
-              setSelectedChurchId(urlChurchId);
-            } else if (user?.church_id) {
-              setSelectedChurchId(getValidChurchId(user.church_id) || churchList[0].id);
-            } else if (churchList.length > 0) {
-              setSelectedChurchId(churchList[0].id);
-            }
-            return; // Success, exit early
-          }
-        } catch (myChurchesError: any) {
-          // If 404 or 400, endpoint might not be implemented or invalid request - continue to fallback
-          const status = myChurchesError.response?.status;
-          if (status === 404 || status === 400) {
-            console.log(`⚠️ /api/my/churches returned ${status}, trying fallback`);
-          } else {
-            // Other error (500, etc.) - log but continue to fallback
-            console.warn('⚠️ /api/my/churches error:', status || myChurchesError.message);
-          }
-        }
-
-        // Step 2: Fall back to /api/churches for admin/manager/super_admin roles
-        // Only if /api/my/churches returned empty or 404
-        if (!useMyChurches || churchList.length === 0) {
-          const isAdminRole = user?.role === 'admin' || user?.role === 'manager' || user?.role === 'super_admin' || isSuperAdmin;
-          
-          if (isAdminRole) {
-            try {
-              const response: any = await apiClient.get('/api/churches');
-              const data = response.data;
-              churchList = data?.churches || data || [];
-              
-              if (churchList.length > 0) {
-                console.log(`✅ Loaded ${churchList.length} churches from /api/churches (admin fallback)`);
-                setChurches(churchList);
-                
-                // Priority: URL param > user's church_id > first church
-                if (urlChurchId) {
-                  setSelectedChurchId(urlChurchId);
-                } else if (user?.church_id) {
-                  setSelectedChurchId(getValidChurchId(user.church_id) || churchList[0].id);
-                } else if (churchList.length > 0) {
-                  setSelectedChurchId(churchList[0].id);
-                }
-                return; // Success
-              }
-            } catch (churchesError: any) {
-              // If 403, user doesn't have access - try to use user's church_id
-              if (churchesError.response?.status === 403) {
-                console.warn('⚠️ /api/churches returned 403, using user church_id');
-                
-                // Priority: URL param > user's church_id
-                const fallbackChurchId = urlChurchId || getValidChurchId(user?.church_id);
-                if (fallbackChurchId) {
-                  // Create a minimal church object from church_id
-                  // The OCR endpoints will work with just the church_id
-                  setChurches([{
-                    id: fallbackChurchId,
-                    name: `Church ${fallbackChurchId}`,
-                    database_name: `om_church_${fallbackChurchId}`
-                  }]);
-                  setSelectedChurchId(fallbackChurchId);
-                  return;
-                }
-              }
-              // Re-throw other errors
-              throw churchesError;
-            }
-          }
-        }
-
-        // Step 3: If still no churches, use URL param or user's church_id
-        const fallbackChurchId = urlChurchId || getValidChurchId(user?.church_id);
-        if (churchList.length === 0 && fallbackChurchId) {
-          console.log(`⚠️ No churches loaded, using church_id: ${fallbackChurchId}`);
-          setChurches([{
-            id: fallbackChurchId,
-            name: `Church ${fallbackChurchId}`,
-            database_name: `om_church_${fallbackChurchId}`
-          }]);
-          setSelectedChurchId(fallbackChurchId);
-          return;
-        }
-
-        // Step 4: No churches found and no user church_id
-        if (churchList.length === 0) {
-          console.error('❌ No churches available for user');
-          setChurches([]);
-        }
-
-      } catch (error: any) {
-        console.error('❌ Failed to load churches:', error);
-        
-        // Last resort: use URL param or user's church_id
-        const fallbackChurchId = urlChurchId || getValidChurchId(user?.church_id);
-        if (fallbackChurchId) {
-          console.log(`⚠️ Using church_id as fallback: ${fallbackChurchId}`);
-          setChurches([{
-            id: fallbackChurchId,
-            name: `Church ${fallbackChurchId}`,
-            database_name: `om_church_${fallbackChurchId}`
-          }]);
-          setSelectedChurchId(fallbackChurchId);
-        } else {
-          setChurches([]);
-        }
-      }
-    };
-
-    loadChurches();
-  }, [user, isSuperAdmin, urlChurchId]);
 
   // Handle selecting a job to view in the inspector (from ProcessedImagesTable)
   const handleInspectJob = useCallback(async (job: OCRJobRow) => {
@@ -772,112 +638,18 @@ const EnhancedOCRUploader: React.FC = () => {
         )}
 
         {/* Drop Zone */}
-        <Paper
-          elevation={0}
-          sx={{
-            p: 4,
-            mb: 3,
-            borderRadius: 3,
-            border: '2px dashed',
-            borderColor: dragActive ? 'primary.main' : alpha(theme.palette.primary.main, 0.3),
-            bgcolor: dragActive ? alpha(theme.palette.primary.main, 0.05) : alpha(theme.palette.primary.main, 0.02),
-            textAlign: 'center',
-            cursor: 'pointer',
-            transition: 'all 0.3s ease',
-            '&:hover': {
-              borderColor: 'primary.main',
-              bgcolor: alpha(theme.palette.primary.main, 0.05)
-            }
-          }}
-          onDragEnter={handleDrag}
-          onDragLeave={handleDrag}
-          onDragOver={handleDrag}
+        <DropZone
+          dragActive={dragActive}
+          isUploading={isUploading}
+          simulationMode={simulationMode}
+          isSimulationModeAvailable={isSimulationModeAvailable}
+          fileInputRef={fileInputRef}
+          onDrag={handleDrag}
           onDrop={handleDrop}
-          onClick={() => fileInputRef.current?.click()}
-        >
-          <input
-            ref={fileInputRef}
-            type="file"
-            multiple
-            accept=".jpg,.jpeg,.png,.tiff"
-            onChange={(e) => handleFiles(e.target.files)}
-            style={{ display: 'none' }}
-          />
-          
-          <Box
-            sx={{
-              width: 80,
-              height: 80,
-              mx: 'auto',
-              mb: 2,
-              borderRadius: '50%',
-              bgcolor: alpha(theme.palette.primary.main, 0.1),
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-          >
-            <IconPhoto size={40} color={theme.palette.primary.main} />
-          </Box>
-          
-          <Typography variant="h6" fontWeight={600} color="text.primary">
-            Drag & drop record images here
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-            or click to browse files
-          </Typography>
-          
-          <Stack 
-            direction="row" 
-            spacing={2} 
-            justifyContent="center" 
-            sx={{ mt: 2 }}
-          >
-            <Chip label="• JPG" size="small" variant="outlined" />
-            <Chip label="• PNG" size="small" variant="outlined" />
-            <Chip label="• TIFF" size="small" variant="outlined" />
-          </Stack>
-          
-          <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-            Max 50 files per batch • 10MB per file
-          </Typography>
-          
-          {/* Demo Images and Simulation Mode (only for church 46) */}
-          {isSimulationModeAvailable && (
-            <Box sx={{ mt: 2, display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
-              <Button
-                variant="outlined"
-                color="primary"
-                startIcon={<IconPhoto />}
-                onClick={handleLoadDemoImages}
-                disabled={isUploading}
-                sx={{ mt: 1 }}
-              >
-                Load Demo Images
-              </Button>
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={simulationMode}
-                    onChange={(e) => setSimulationMode(e.target.checked)}
-                    disabled={isUploading}
-                  />
-                }
-                label={
-                  <Box>
-                    <Typography variant="body2" fontWeight={500}>
-                      Simulation Mode
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      Use pre-validated demo OCR results
-                    </Typography>
-                  </Box>
-                }
-                sx={{ mt: 1 }}
-              />
-            </Box>
-          )}
-        </Paper>
+          onFiles={handleFiles}
+          onLoadDemoImages={handleLoadDemoImages}
+          onSimulationModeChange={setSimulationMode}
+        />
 
         {/* Advanced Options */}
         <AdvancedOptionsPanel
