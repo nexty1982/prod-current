@@ -6,17 +6,12 @@
 
 import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
   Alert,
   Box,
   Button,
-  Checkbox,
   Chip,
   CircularProgress,
   FormControl,
-  FormControlLabel,
   IconButton,
   InputLabel,
   MenuItem,
@@ -24,16 +19,17 @@ import {
   Select,
   Snackbar,
   Stack,
-  TextField,
   Tooltip,
   Typography,
   useTheme,
 } from '@mui/material';
-import { IconChevronDown, IconChevronUp, IconSend, IconAlertTriangle, IconColumns, IconUser, IconCalendar, IconHash, IconMapPin, IconBan, IconSettings, IconWand, IconEye, IconEyeOff, IconArrowDown, IconArrowUp, IconCheck, IconFlag } from '@tabler/icons-react';
+import { IconSend, IconAlertTriangle, IconColumns, IconSettings } from '@tabler/icons-react';
 import { apiClient } from '@/shared/lib/axiosInstance';
 import { getCustomFieldsForType } from '../utils/fieldConfig';
 import FieldConfigDialog from './FieldConfigDialog';
-import { FIELD_ENTITY_MAP, type SuggestionResult, type EntityType } from '../utils/fieldSuggestions';
+import { type SuggestionResult } from '../utils/fieldSuggestions';
+import RecordCard from './RecordCard';
+import ReviewSummaryPanel from './ReviewSummaryPanel';
 
 interface RecordCandidate {
   recordType: string;
@@ -72,18 +68,6 @@ interface CellToken {
 /** Check if a string looks like a date */
 function isDateLike(text: string): boolean {
   return /(?:\d{1,2}[\/\-\.]\d{1,2}|\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\b|\d{4})/i.test(text);
-}
-
-/** Validate a date string — returns error message or null */
-function validateDate(text: string): string | null {
-  if (!text.trim()) return null;
-  // Try parsing common formats
-  const d = new Date(text);
-  if (!isNaN(d.getTime())) return null;
-  // Try MM/DD/YYYY
-  const parts = text.split(/[\/\-\.]/);
-  if (parts.length >= 2 && parts.every(p => /^\d+$/.test(p))) return null;
-  return 'Invalid date format';
 }
 
 interface FieldMappingPanelProps {
@@ -185,17 +169,6 @@ const FieldMappingPanel: React.FC<FieldMappingPanelProps> = ({
     const recommendation = scoringV2?.routing_recommendation || null;
     return { total, needReview, autoAccepted, totalFields, fieldsFlagged, pageScore, recommendation };
   }, [hasScoring, scoringRows, scoringV2]);
-
-  // Reason code labels and colors
-  const reasonLabel: Record<string, { label: string; color: string }> = {
-    DATE_PARSE_FAIL: { label: 'Date', color: '#e53e3e' },
-    LOW_OCR_CONF: { label: 'Low OCR', color: '#dd6b20' },
-    AMBIGUOUS_COLUMN: { label: 'Ambig', color: '#d69e2e' },
-    MISSING_REQUIRED: { label: 'Missing', color: '#e53e3e' },
-    SHORT_VALUE: { label: 'Short', color: '#d69e2e' },
-    SUSPICIOUS_CHARS: { label: 'Suspect', color: '#9b2c2c' },
-    FIELD_OK: { label: 'OK', color: '#38a169' },
-  };
 
   // Navigation: find next/prev flagged row
   const flaggedRowIndices = useMemo(() => {
@@ -586,17 +559,6 @@ const FieldMappingPanel: React.FC<FieldMappingPanelProps> = ({
     setFinalizing(false);
   }, [jobId, churchId, recordType, records, isFinalized, onFinalized]);
 
-  // Entity type icon helper
-  const entityIcon = (type: EntityType) => {
-    switch (type) {
-      case 'name': return <IconUser size={14} />;
-      case 'date': return <IconCalendar size={14} />;
-      case 'number': return <IconHash size={14} />;
-      case 'address': return <IconMapPin size={14} />;
-      default: return null;
-    }
-  };
-
   return (
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
       <Box sx={{ flex: 1, overflow: 'auto', p: 0 }}>
@@ -638,93 +600,17 @@ const FieldMappingPanel: React.FC<FieldMappingPanelProps> = ({
 
           {/* Review Summary (from scoring_v2) */}
           {reviewSummary && (
-            <Paper variant="outlined" sx={{ p: 1.5, borderRadius: 2, borderColor: reviewSummary.recommendation === 'accepted' ? 'success.main' : reviewSummary.recommendation === 'retry' ? 'error.main' : 'warning.main' }}>
-              <Stack spacing={1}>
-                <Stack direction="row" spacing={1} alignItems="center" justifyContent="space-between">
-                  <Typography variant="body2" fontWeight={700} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                    <IconFlag size={16} />
-                    Review Summary
-                  </Typography>
-                  {reviewSummary.pageScore !== null && (
-                    <Chip
-                      size="small"
-                      label={`Score: ${Math.round(reviewSummary.pageScore * 100)}%`}
-                      color={reviewSummary.pageScore >= 0.85 ? 'success' : reviewSummary.pageScore >= 0.60 ? 'warning' : 'error'}
-                      sx={{ fontWeight: 700, fontSize: '0.7rem' }}
-                    />
-                  )}
-                </Stack>
-                <Stack direction="row" spacing={1} flexWrap="wrap">
-                  <Chip size="small" variant="outlined" label={`${reviewSummary.total} rows`} sx={{ fontSize: '0.65rem', height: 22 }} />
-                  <Chip size="small" variant="outlined" color="success" icon={<IconCheck size={12} />} label={`${reviewSummary.autoAccepted} clean`} sx={{ fontSize: '0.65rem', height: 22 }} />
-                  <Chip size="small" variant="outlined" color="warning" icon={<IconAlertTriangle size={12} />} label={`${reviewSummary.needReview} flagged`} sx={{ fontSize: '0.65rem', height: 22 }} />
-                  {reviewSummary.fieldsFlagged > 0 && (
-                    <Chip size="small" variant="outlined" color="error" label={`${reviewSummary.fieldsFlagged} fields flagged`} sx={{ fontSize: '0.65rem', height: 22 }} />
-                  )}
-                </Stack>
-                {/* Navigation controls */}
-                {flaggedRowIndices.length > 0 && (
-                  <Stack direction="row" spacing={0.5} alignItems="center">
-                    <Button
-                      size="small"
-                      variant="outlined"
-                      startIcon={<IconArrowUp size={14} />}
-                      onClick={() => navigateToFlaggedRow('prev')}
-                      sx={{ textTransform: 'none', fontSize: '0.7rem', py: 0.25, minWidth: 0 }}
-                    >
-                      Prev
-                    </Button>
-                    <Button
-                      size="small"
-                      variant="outlined"
-                      endIcon={<IconArrowDown size={14} />}
-                      onClick={() => navigateToFlaggedRow('next')}
-                      sx={{ textTransform: 'none', fontSize: '0.7rem', py: 0.25, minWidth: 0 }}
-                    >
-                      Next
-                    </Button>
-                    <Typography variant="caption" color="text.secondary" sx={{ ml: 0.5 }}>
-                      Flagged Row
-                    </Typography>
-                    <Box sx={{ flex: 1 }} />
-                    <Tooltip title={showAllRows ? 'Show only flagged rows' : 'Show all rows'}>
-                      <IconButton size="small" onClick={() => setShowAllRows(!showAllRows)} sx={{ p: 0.5 }}>
-                        {showAllRows ? <IconEyeOff size={16} /> : <IconEye size={16} />}
-                      </IconButton>
-                    </Tooltip>
-                  </Stack>
-                )}
-                {/* Clickable row index */}
-                {scoringRows.length > 0 && (
-                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.25 }}>
-                    {scoringRows.map((row: any) => {
-                      const isActive = expandedIdx === row.candidate_index;
-                      const isFlagged = row.needs_review;
-                      return (
-                        <Chip
-                          key={row.candidate_index}
-                          size="small"
-                          label={row.candidate_index + 1}
-                          variant={isActive ? 'filled' : 'outlined'}
-                          color={isFlagged ? 'warning' : 'success'}
-                          onClick={() => {
-                            onRecordSelect?.(row.candidate_index);
-                            setInternalExpandedIdx(row.candidate_index);
-                          }}
-                          sx={{
-                            fontSize: '0.6rem',
-                            height: 20,
-                            minWidth: 24,
-                            cursor: 'pointer',
-                            fontWeight: isActive ? 700 : 400,
-                          }}
-                        />
-                      );
-                    })}
-                  </Box>
-                )}
-              </Stack>
-            </Paper>
+            <ReviewSummaryPanel
+              reviewSummary={reviewSummary}
+              flaggedRowIndices={flaggedRowIndices}
+              scoringRows={scoringRows}
+              expandedIdx={expandedIdx}
+              showAllRows={showAllRows}
+              setShowAllRows={setShowAllRows}
+              navigateToFlaggedRow={navigateToFlaggedRow}
+              onRecordSelect={onRecordSelect}
+              setInternalExpandedIdx={setInternalExpandedIdx}
+            />
           )}
 
           {/* Auto-extracting loading state */}
@@ -801,8 +687,6 @@ const FieldMappingPanel: React.FC<FieldMappingPanelProps> = ({
           {records.map((rec, idx) => {
             const scoringRow = getScoringRow(idx);
             const rowFlagged = scoringRow?.needs_review ?? rec.needsReview;
-            const rowReasons: string[] = scoringRow?.reasons?.filter((r: string) => r !== 'FIELD_OK') || [];
-            const rowScore = scoringRow?.row_score;
             const isCleanRow = hasScoring && !rowFlagged;
 
             // Flag-first: hide clean rows when not showing all (unless it's the expanded one)
@@ -811,240 +695,29 @@ const FieldMappingPanel: React.FC<FieldMappingPanelProps> = ({
             }
 
             return (
-            <Accordion
-              key={idx}
-              expanded={expandedIdx === idx}
-              onChange={(_, expanded) => handleAccordionChange(idx, expanded)}
-              variant="outlined"
-              disableGutters
-              sx={{
-                borderRadius: '8px !important',
-                '&:before': { display: 'none' },
-                ...(isCleanRow && {
-                  borderColor: 'success.main',
-                  opacity: expandedIdx === idx ? 1 : 0.7,
-                }),
-                ...(rowFlagged && hasScoring && {
-                  borderColor: 'warning.main',
-                  borderWidth: 2,
-                }),
-              }}
-            >
-              <AccordionSummary
-                expandIcon={<IconChevronDown size={18} />}
-                sx={{ minHeight: 44, '& .MuiAccordionSummary-content': { alignItems: 'center', gap: 0.5, my: 0.5, flexWrap: 'wrap' } }}
-              >
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      size="small"
-                      checked={rec.selected}
-                      onClick={(e) => e.stopPropagation()}
-                      onChange={() => handleToggleSelect(idx)}
-                      disabled={isFinalized}
-                    />
-                  }
-                  label=""
-                  sx={{ mr: 0 }}
-                />
-                <Typography variant="body2" fontWeight={600}>
-                  Record {idx + 1}
-                </Typography>
-                {rec.sourceRowIndex >= 0 && (
-                  <Chip size="small" label={`Row ${rec.sourceRowIndex}`} variant="outlined" sx={{ height: 20, fontSize: '0.7rem' }} />
-                )}
-                {/* Scoring V2 row score badge */}
-                {rowScore !== undefined && rowScore !== null && (
-                  <Chip
-                    size="small"
-                    label={`${Math.round(rowScore * 100)}%`}
-                    color={rowScore >= 0.85 ? 'success' : rowScore >= 0.60 ? 'warning' : 'error'}
-                    variant="outlined"
-                    sx={{ height: 20, fontSize: '0.7rem', fontWeight: 700 }}
-                  />
-                )}
-                {/* Fallback confidence if no scoring */}
-                {!hasScoring && rec.confidence > 0 && (
-                  <Chip
-                    size="small"
-                    label={`${Math.round(rec.confidence * 100)}%`}
-                    color={rec.confidence > 0.7 ? 'success' : rec.confidence > 0.4 ? 'warning' : 'error'}
-                    variant="outlined"
-                    sx={{ height: 20, fontSize: '0.7rem' }}
-                  />
-                )}
-                {/* Clean row check mark */}
-                {isCleanRow && (
-                  <IconCheck size={16} color={theme.palette.success.main} />
-                )}
-                {/* Reason code badges from scoring_v2 */}
-                {rowReasons.length > 0 && rowReasons.map((reason: string, ri: number) => {
-                  const info = reasonLabel[reason] || { label: reason, color: '#666' };
-                  return (
-                    <Chip
-                      key={ri}
-                      size="small"
-                      label={info.label}
-                      sx={{
-                        height: 18,
-                        fontSize: '0.6rem',
-                        fontWeight: 700,
-                        bgcolor: info.color,
-                        color: '#fff',
-                      }}
-                    />
-                  );
-                })}
-                {/* Fallback warning icon */}
-                {!hasScoring && rec.needsReview && (
-                  <IconAlertTriangle size={16} color={theme.palette.warning.main} />
-                )}
-                {onRejectRecord && !isFinalized && rec.sourceRowIndex >= 0 && (
-                  <Tooltip title="Not a record — reject and re-extract">
-                    <Box
-                      component="span"
-                      onClick={(e: React.MouseEvent) => {
-                        e.stopPropagation();
-                        onRejectRecord(rec.sourceRowIndex);
-                      }}
-                      sx={{ cursor: 'pointer', display: 'flex', alignItems: 'center', ml: 0.5, '&:hover': { color: 'error.main' } }}
-                    >
-                      <IconBan size={16} />
-                    </Box>
-                  </Tooltip>
-                )}
-              </AccordionSummary>
-              <AccordionDetails sx={{ pt: 0 }}>
-                <Stack spacing={1.5}>
-                  {/* Smart Fill button */}
-                  {expandedIdx === idx && recordCellTokens.length > 0 && !isFinalized && (
-                    <Button
-                      size="small"
-                      variant="outlined"
-                      startIcon={<IconWand size={16} />}
-                      onClick={() => handleSmartFill(idx)}
-                      sx={{ alignSelf: 'flex-start', textTransform: 'none', fontSize: '0.75rem' }}
-                    >
-                      Smart Fill ({recordCellTokens.length} tokens)
-                    </Button>
-                  )}
-                  {/* Split warning banner */}
-                  {expandedIdx === idx && fieldSuggestions?.splitWarning && (
-                    <Alert severity="warning" sx={{ borderRadius: 1.5, py: 0.5 }}>
-                      <Typography variant="caption" fontWeight={600}>
-                        Possible merged records
-                      </Typography>
-                      <Typography variant="caption" display="block">
-                        Found {fieldSuggestions.nameCount} name(s) but this record type expects {fieldSuggestions.expectedNameFields}. This record may contain data from multiple records.
-                      </Typography>
-                    </Alert>
-                  )}
-                  {fields.map((f) => {
-                    const isFocused = expandedIdx === idx && externalFocusedField === f.key;
-                    const showSuggestions = isFocused && fieldSuggestions?.fieldKey === f.key && fieldSuggestions.suggestions.length > 0;
-                    const isDateField = FIELD_ENTITY_MAP[f.key] === 'date';
-                    const fieldValue = rec.fields[f.key] || '';
-                    const dateError = isDateField && fieldValue ? validateDate(fieldValue) : null;
-                    const fieldScoring = getScoringField(idx, f.key);
-
-                    // OCR token chips for this field
-                    const availableTokens = expandedIdx === idx && recordCellTokens.length > 0
-                      ? getAvailableTokens(f.key, isDateField)
-                      : [];
-
-                    const fieldFlagReasons = fieldScoring?.reasons?.filter((r: string) => r !== 'FIELD_OK') || [];
-                    const fieldNeedsReview = fieldScoring?.needs_review && fieldFlagReasons.length > 0;
-
-                    return (
-                      <Box key={f.key} sx={fieldNeedsReview ? {
-                        borderLeft: '3px solid',
-                        borderColor: (fieldScoring?.field_score ?? 1) < 0.4 ? 'error.main' : 'warning.main',
-                        pl: 1,
-                        borderRadius: 0.5,
-                      } : undefined}>
-                        <TextField
-                          label={f.label + (f.required ? ' *' : '')}
-                          size="small"
-                          fullWidth
-                          value={fieldValue}
-                          onChange={(e) => handleFieldChange(idx, f.key, e.target.value)}
-                          onFocus={() => onFieldFocus?.(f.key)}
-                          onBlur={() => {
-                            // Only clear if this field is still the focused one
-                            if (externalFocusedField === f.key) onFieldFocus?.(null);
-                          }}
-                          disabled={isFinalized}
-                          error={!!dateError || (fieldScoring?.field_score !== undefined && fieldScoring.field_score < 0.4)}
-                          helperText={dateError || (fieldFlagReasons.length > 0 ? fieldFlagReasons.map((r: string) => reasonLabel[r]?.label || r).join(', ') : undefined)}
-                          InputLabelProps={{ shrink: true }}
-                          sx={isFocused ? {
-                            '& .MuiOutlinedInput-root': {
-                              borderColor: 'primary.main',
-                              boxShadow: (t: any) => `0 0 0 2px ${t.palette.primary.main}40`,
-                            },
-                          } : undefined}
-                        />
-                        {/* OCR token chips — always visible when record is expanded */}
-                        {availableTokens.length > 0 && !isFinalized && (
-                          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 0.5 }}>
-                            {availableTokens.slice(0, 6).map((t, ti) => {
-                              const isSelected = fieldValue.trim().toLowerCase() === t.text.toLowerCase();
-                              const chipColor = t.confidence != null
-                                ? (t.confidence > 0.9 ? 'success' : t.confidence > 0.7 ? 'warning' : 'error')
-                                : 'default';
-                              return (
-                                <Chip
-                                  key={ti}
-                                  label={t.text.length > 30 ? t.text.substring(0, 30) + '...' : t.text}
-                                  size="small"
-                                  variant={isSelected ? 'filled' : 'outlined'}
-                                  color={isSelected ? 'primary' : chipColor as any}
-                                  onMouseDown={(e) => e.preventDefault()}
-                                  onClick={() => handleClaimToken(idx, f.key, t.text)}
-                                  sx={{
-                                    cursor: 'pointer',
-                                    fontSize: '0.7rem',
-                                    height: 24,
-                                  }}
-                                />
-                              );
-                            })}
-                          </Box>
-                        )}
-                        {/* Entity-based suggestion chips (shown on focus) */}
-                        {showSuggestions && (
-                          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 0.5 }}>
-                            {fieldSuggestions!.suggestions
-                              .filter(s => !FIELD_ENTITY_MAP[f.key] || s.entityType === FIELD_ENTITY_MAP[f.key])
-                              .slice(0, 4).map((s, si) => (
-                              <Chip
-                                key={`sug-${si}`}
-                                icon={entityIcon(s.entityType) || undefined}
-                                label={s.text.length > 35 ? s.text.substring(0, 35) + '...' : s.text}
-                                size="small"
-                                variant={s.score > 0.6 ? 'filled' : 'outlined'}
-                                color={s.score > 0.6 ? 'primary' : 'default'}
-                                onMouseDown={(e) => e.preventDefault()}
-                                onClick={() => {
-                                  handleClaimToken(idx, f.key, s.text);
-                                }}
-                                sx={{
-                                  cursor: 'pointer',
-                                  fontSize: '0.7rem',
-                                  height: 24,
-                                  borderStyle: s.score > 0.6 ? 'solid' : 'dashed',
-                                }}
-                              />
-                            ))}
-                          </Box>
-                        )}
-                      </Box>
-                    );
-                  })}
-                </Stack>
-              </AccordionDetails>
-            </Accordion>
-          );
+              <RecordCard
+                key={idx}
+                idx={idx}
+                rec={rec}
+                expanded={expandedIdx === idx}
+                onAccordionChange={handleAccordionChange}
+                onToggleSelect={handleToggleSelect}
+                onFieldChange={handleFieldChange}
+                onClaimToken={handleClaimToken}
+                onSmartFill={handleSmartFill}
+                onFieldFocus={onFieldFocus}
+                onRejectRecord={onRejectRecord}
+                fields={fields}
+                isFinalized={isFinalized}
+                hasScoring={hasScoring}
+                scoringRow={scoringRow}
+                getScoringField={getScoringField}
+                recordCellTokens={recordCellTokens}
+                getAvailableTokens={getAvailableTokens}
+                externalFocusedField={externalFocusedField}
+                fieldSuggestions={fieldSuggestions}
+              />
+            );
           })}
         </Stack>
       </Box>
