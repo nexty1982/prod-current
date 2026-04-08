@@ -1,30 +1,23 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import Grid2 from '@/components/compat/Grid2';
-import formatTimestamp, { formatRelativeTime } from '@/utils/formatTimestamp';
-import { Box, Typography, Card, CardContent, Chip, Switch, FormControlLabel, Alert, IconButton, Tooltip, Stack, Avatar, CircularProgress, Dialog, DialogTitle, DialogContent, DialogActions, Button, List, ListItem, ListItemText, LinearProgress, Snackbar, Divider, DialogContentText, Pagination, TextField, InputAdornment, Tab, Tabs, Badge, Paper, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
+
+import { Box, Typography, Card, CardContent, Chip, Switch, FormControlLabel, Alert, IconButton, Tooltip, Stack, Avatar, CircularProgress, Dialog, DialogTitle, DialogContent, DialogActions, Button, LinearProgress, Snackbar, DialogContentText, Pagination, TextField, InputAdornment, Tab, Tabs, Badge, Paper, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
 import {
     IconSettings,
     IconEye,
     IconTestPipe,
-    IconToggleLeft,
-    IconToggleRight,
     IconCircleCheck,
     IconAlertTriangle,
     IconCircleX,
     IconActivity,
     IconRefresh,
-    IconReload,
     IconShield,
     IconBug,
-    IconChevronDown,
     IconSearch,
-    IconFilter,
-    IconClock,
     IconUsers,
     IconTarget,
     IconCpu,
     IconDownload,
-    IconFileText
 } from '@tabler/icons-react';
 import {
     componentsAPI, 
@@ -34,145 +27,9 @@ import {
     type ComponentFilters 
 } from '@/api/components.api';
 import { useAuth } from '@/context/AuthContext';
-
-// Health detection utility
-type HealthStatus = 'healthy' | 'degraded' | 'failed';
-
-interface HealthDetectionRule {
-    pattern: string | RegExp;
-    level: ComponentLog['level'][];
-    severity: HealthStatus;
-    description: string;
-}
-
-const HEALTH_DETECTION_RULES: HealthDetectionRule[] = [
-    {
-        pattern: /Error: Service temporarily unavailable/i,
-        level: ['error'],
-        severity: 'degraded',
-        description: 'Service availability issues detected'
-    },
-    {
-        pattern: /Warning: Performance degraded/i,
-        level: ['warn', 'error'],
-        severity: 'degraded',
-        description: 'Performance degradation detected'
-    },
-    {
-        pattern: /Connection timeout|Database connection failed|Service crashed|Critical error/i,
-        level: ['error'],
-        severity: 'failed',
-        description: 'Critical system failures detected'
-    },
-    {
-        pattern: /Memory leak|Out of memory|Disk space|Storage full/i,
-        level: ['error', 'warn'],
-        severity: 'degraded',
-        description: 'Resource constraints detected'
-    }
-];
-
-/**
- * Analyzes component logs to determine health status based on recent errors/warnings
- * @param logs Array of ComponentLog entries
- * @param hoursBack Number of hours to look back (default: 24)
- * @returns HealthStatus based on log analysis
- */
-const getComponentHealthStatus = (logs: ComponentLog[], hoursBack: number = 24): HealthStatus => {
-    if (!logs || !Array.isArray(logs) || logs.length === 0) {
-        return 'healthy'; // No logs available, assume healthy
-    }
-
-    const cutoffTime = new Date(Date.now() - (hoursBack * 60 * 60 * 1000));
-    
-    // Filter recent logs
-    const recentLogs = logs.filter(log => {
-        const logTime = new Date(log.timestamp);
-        return logTime >= cutoffTime;
-    });
-
-    // If no recent logs, check last N logs (fallback)
-    const logsToAnalyze = recentLogs.length > 0 ? recentLogs : logs.slice(-20);
-    
-    let worstStatus: HealthStatus = 'healthy';
-    const detectedIssues: string[] = [];
-
-    // Analyze logs against detection rules
-    for (const log of logsToAnalyze) {
-        for (const rule of HEALTH_DETECTION_RULES) {
-            // Check if log level matches rule
-            if (!rule.level.includes(log.level)) continue;
-            
-            // Check if message matches pattern
-            const matches = typeof rule.pattern === 'string' 
-                ? log.message.includes(rule.pattern)
-                : rule.pattern.test(log.message);
-                
-            if (matches) {
-                detectedIssues.push(`${rule.description} (${log.timestamp})`);
-                
-                // Update worst status (failed > degraded > healthy)
-                if (rule.severity === 'failed' || 
-                    (rule.severity === 'degraded' && worstStatus === 'healthy')) {
-                    worstStatus = rule.severity;
-                }
-            }
-        }
-    }
-
-    // Additional logic: if we have many error logs, escalate to failed
-    const errorCount = logsToAnalyze.filter(log => log.level === 'error').length;
-    if (errorCount >= 10 && worstStatus === 'degraded') {
-        worstStatus = 'failed';
-        detectedIssues.push(`High error frequency detected (${errorCount} errors)`);
-    }
-
-    // Log detection results for debugging
-    if (worstStatus !== 'healthy') {
-        console.log(`Health detection for component: ${worstStatus}`, {
-            analyzedLogs: logsToAnalyze.length,
-            recentLogs: recentLogs.length,
-            detectedIssues,
-            worstStatus
-        });
-    }
-
-    return worstStatus;
-};
-
-/**
- * Analyzes component logs and returns health issues found
- * @param logs Array of ComponentLog entries
- * @param hoursBack Number of hours to look back
- * @returns Array of health issue descriptions
- */
-const getHealthIssues = (logs: ComponentLog[], hoursBack: number = 24): string[] => {
-    if (!logs || !Array.isArray(logs) || logs.length === 0) return [];
-
-    const cutoffTime = new Date(Date.now() - (hoursBack * 60 * 60 * 1000));
-    const recentLogs = logs.filter(log => new Date(log.timestamp) >= cutoffTime);
-    const logsToAnalyze = recentLogs.length > 0 ? recentLogs : logs.slice(-20);
-    
-    const issues: string[] = [];
-
-    for (const log of logsToAnalyze) {
-        for (const rule of HEALTH_DETECTION_RULES) {
-            if (!rule.level.includes(log.level)) continue;
-            
-            const matches = typeof rule.pattern === 'string' 
-                ? log.message.includes(rule.pattern)
-                : rule.pattern.test(log.message);
-                
-            if (matches) {
-                const timeAgo = new Date(Date.now() - new Date(log.timestamp).getTime());
-                const hoursAgo = Math.floor(timeAgo.getTime() / (1000 * 60 * 60));
-                issues.push(`${rule.description} (${hoursAgo}h ago)`);
-            }
-        }
-    }
-
-    return [...new Set(issues)]; // Remove duplicates
-};
+import { getComponentHealthStatus, getHealthIssues } from './ComponentManager/healthUtils';
+import LogsDialog from './ComponentManager/LogsDialog';
+import TestResultDialog from './ComponentManager/TestResultDialog';
 
 /**
  * Component Manager - Production Frontend with Live Backend Integration
@@ -715,16 +572,6 @@ const ComponentManager: React.FC = () => {
         if (!dateString) return 'Unknown';
         const date = new Date(dateString);
         return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
-    };
-
-    const getLogLevelColor = (level: string) => {
-        switch (level) {
-            case 'error': return 'error';
-            case 'warn': return 'warning';
-            case 'info': return 'info';
-            case 'debug': return 'default';
-            default: return 'default';
-        }
     };
 
     // Enhanced tooltip content with health detection info
@@ -1530,161 +1377,20 @@ const ComponentManager: React.FC = () => {
             </Dialog>
 
             {/* Logs Dialog */}
-            <Dialog
+            <LogsDialog
                 open={logsDialogOpen}
                 onClose={() => setLogsDialogOpen(false)}
-                maxWidth="md"
-                fullWidth
-            >
-                <DialogTitle>
-                    <Box display="flex" alignItems="center" gap={1}>
-                        <IconEye size={20} />
-                        {selectedComponentName} - Component Logs
-                    </Box>
-                </DialogTitle>
-                <DialogContent>
-                    {selectedComponentLogs.length === 0 ? (
-                        <Box textAlign="center" py={3}>
-                            <IconBug size={48} color="#ccc" />
-                            <Typography variant="h6" color="text.secondary" mt={1}>
-                                No logs available
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary">
-                                This component hasn't generated any log entries yet.
-                            </Typography>
-                        </Box>
-                    ) : (
-                        <>
-                            <Typography variant="body2" color="text.secondary" mb={2}>
-                                Showing {selectedComponentLogs.length} recent log entries
-                            </Typography>
-                            <List sx={{ maxHeight: 400, overflow: 'auto' }}>
-                                {selectedComponentLogs.map((log, index) => (
-                                    <ListItem key={log.id || index} divider>
-                                        <ListItemText
-                                            primary={
-                                                <Box display="flex" alignItems="center" gap={1} mb={0.5}>
-                                                    <Chip 
-                                                        label={log.level.toUpperCase()} 
-                                                        color={getLogLevelColor(log.level) as any}
-                                                        size="small"
-                                                    />
-                                                    <Typography variant="caption" color="text.secondary">
-                                                        {new Date(log.timestamp).toLocaleString()}
-                                                    </Typography>
-                                                </Box>
-                                            }
-                                            secondary={
-                                                <Typography variant="body2" sx={{ fontFamily: 'monospace', mt: 0.5 }}>
-                                                    {log.message}
-                                                </Typography>
-                                            }
-                                        />
-                                    </ListItem>
-                                ))}
-                            </List>
-                        </>
-                    )}
-                </DialogContent>
-                <DialogActions>
-                    <Button 
-                        onClick={() => setLogsDialogOpen(false)}
-                        startIcon={<IconChevronDown size={16} />}
-                    >
-                        Close
-                    </Button>
-                </DialogActions>
-            </Dialog>
+                componentName={selectedComponentName}
+                logs={selectedComponentLogs}
+            />
 
             {/* Test Results Dialog */}
-            <Dialog
+            <TestResultDialog
                 open={testResultDialog.open}
                 onClose={() => setTestResultDialog({ open: false, component: null, result: null })}
-                maxWidth="sm"
-                fullWidth
-            >
-                <DialogTitle>
-                    <Box display="flex" alignItems="center" gap={1}>
-                        <IconTestPipe size={20} />
-                        Test Results - {testResultDialog.component?.name}
-                    </Box>
-                </DialogTitle>
-                <DialogContent>
-                    {testResultDialog.result ? (
-                        <Stack spacing={2}>
-                            <Box display="flex" alignItems="center" gap={1}>
-                                <Typography variant="subtitle1">Overall Status:</Typography>
-                                <Chip 
-                                    label={testResultDialog.result.status?.toUpperCase() || 'UNKNOWN'}
-                                    color={
-                                        testResultDialog.result.status === 'pass' ? 'success' :
-                                        testResultDialog.result.status === 'fail' ? 'error' : 'warning'
-                                    }
-                                    variant="filled"
-                                />
-                            </Box>
-                            
-                            {testResultDialog.result.details && (
-                                <Alert severity="info">
-                                    {testResultDialog.result.details}
-                                </Alert>
-                            )}
-
-                            {testResultDialog.result.tests && (
-                                <>
-                                    <Divider />
-                                    <Typography variant="subtitle2">Test Details:</Typography>
-                                    <List dense>
-                                        {testResultDialog.result.tests.map((test: any, index: number) => (
-                                            <ListItem key={index}>
-                                                <ListItemText
-                                                    primary={
-                                                        <Box display="flex" alignItems="center" gap={1}>
-                                                            <Typography variant="body2">{test.name}</Typography>
-                                                            <Chip 
-                                                                label={test.status.toUpperCase()}
-                                                                color={
-                                                                    test.status === 'pass' ? 'success' :
-                                                                    test.status === 'fail' ? 'error' : 'warning'
-                                                                }
-                                                                size="small"
-                                                            />
-                                                        </Box>
-                                                    }
-                                                    secondary={
-                                                        <Typography variant="caption" color="text.secondary">
-                                                            Duration: {test.duration}
-                                                            {test.error && ` • Error: ${test.error}`}
-                                                            {test.details && ` • ${test.details}`}
-                                                        </Typography>
-                                                    }
-                                                />
-                                            </ListItem>
-                                        ))}
-                                    </List>
-                                </>
-                            )}
-
-                            {testResultDialog.result.timestamp && (
-                                <Typography variant="caption" color="text.secondary" textAlign="center">
-                                    Test completed at {new Date(testResultDialog.result.timestamp).toLocaleString()}
-                                </Typography>
-                            )}
-                        </Stack>
-                    ) : (
-                        <Typography color="text.secondary">
-                            No test results available.
-                        </Typography>
-                    )}
-                </DialogContent>
-                <DialogActions>
-                    <Button 
-                        onClick={() => setTestResultDialog({ open: false, component: null, result: null })}
-                    >
-                        Close
-                    </Button>
-                </DialogActions>
-            </Dialog>
+                component={testResultDialog.component}
+                result={testResultDialog.result}
+            />
 
             {/* Toast Snackbar */}
             <Snackbar
