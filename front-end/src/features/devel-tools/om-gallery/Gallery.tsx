@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   Box,
-  Container,
   Typography,
   IconButton,
   Button,
@@ -10,10 +9,7 @@ import {
   DialogContent,
   DialogActions,
   TextField,
-  LinearProgress,
   Alert,
-  Card,
-  CardMedia,
   useTheme,
   Paper,
   Stack,
@@ -22,145 +18,33 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  Tooltip,
-  Checkbox,
-  FormControlLabel,
-  Collapse,
-  Divider,
 } from '@mui/material';
 import {
   IconArrowLeft,
   IconArrowRight,
   IconUpload,
-  IconX,
   IconPhoto,
   IconTrash,
   IconDownload,
   IconFolder,
   IconFolderPlus,
-  IconEdit,
-  IconArrowsExchange,
   IconSparkles,
-  IconCopy,
-  IconChevronDown,
-  IconChevronUp,
 } from '@tabler/icons-react';
-import { styled } from '@mui/material/styles';
-import { DataGrid, GridColDef, GridRowSelectionModel, GridRenderCellParams } from '@mui/x-data-grid';
+import { DataGrid, GridRowSelectionModel } from '@mui/x-data-grid';
 import { OMLoading } from '@/components/common/OMLoading';
-import { 
-  CANONICAL_IMAGE_DIRECTORIES, 
-  isCanonicalDirectory, 
-  buildImageUrl, 
+import {
+  CANONICAL_IMAGE_DIRECTORIES,
+  isCanonicalDirectory,
+  buildImageUrl,
   extractDirectoryFromPath,
-  IMAGES_BASE_PATH 
+  IMAGES_BASE_PATH
 } from '../system-documentation/gallery.config';
-
-const GalleryContainer = styled(Container)(({ theme }) => ({
-  paddingTop: theme.spacing(4),
-  paddingBottom: theme.spacing(4),
-  minHeight: '100vh',
-}));
-
-const ThumbnailGrid = styled(Box)(({ theme }) => ({
-  display: 'grid',
-  gridTemplateColumns: 'repeat(4, 1fr)',
-  gap: theme.spacing(2),
-  marginTop: theme.spacing(4),
-  marginBottom: theme.spacing(4),
-  [theme.breakpoints.down('md')]: {
-    gridTemplateColumns: 'repeat(4, 1fr)',
-  },
-  [theme.breakpoints.down('sm')]: {
-    gridTemplateColumns: 'repeat(2, 1fr)',
-    gap: theme.spacing(1),
-  },
-}));
-
-const ImageCard = styled(Card)<{ isUsed?: boolean }>(({ theme, isUsed }) => ({
-  position: 'relative',
-  cursor: 'pointer',
-  transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-  ...(isUsed && {
-    background: 'linear-gradient(90deg, rgba(200, 230, 201, 0.3) 0%, rgba(200, 230, 201, 0.1) 100%)',
-    border: `2px solid rgba(76, 175, 80, 0.5)`,
-  }),
-  '&:hover': {
-    transform: 'scale(1.05)',
-    boxShadow: theme.shadows[8],
-  },
-}));
-
-const ImageThumbnail = styled(CardMedia)(({ theme }) => ({
-  width: '100%',
-  height: '150px',
-  objectFit: 'cover',
-  [theme.breakpoints.down('sm')]: {
-    height: '120px',
-  },
-}));
-
-const CarouselContainer = styled(Box)(({ theme }) => ({
-  position: 'relative',
-  width: '100%',
-  maxWidth: '800px',
-  margin: '0 auto',
-  marginBottom: theme.spacing(4),
-}));
-
-const CarouselButton = styled(IconButton)(({ theme }) => ({
-  position: 'absolute',
-  top: '50%',
-  transform: 'translateY(-50%)',
-  backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)',
-  border: `2px solid ${theme.palette.mode === 'dark' ? '#C8A24B' : '#C8A24B'}`,
-  color: '#C8A24B',
-  width: 56,
-  height: 56,
-  zIndex: 10,
-  '&:hover': {
-    backgroundColor: theme.palette.mode === 'dark' ? 'rgba(200, 162, 75, 0.2)' : 'rgba(200, 162, 75, 0.1)',
-    borderColor: '#B8923A',
-  },
-  [theme.breakpoints.down('sm')]: {
-    width: 44,
-    height: 44,
-  },
-}));
-
-const CarouselImageContainer = styled(Box)<{ isUsed?: boolean }>(({ theme, isUsed }) => ({
-  width: '100%',
-  height: '400px',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  backgroundColor: theme.palette.mode === 'dark' ? '#1a1a1a' : '#f5f5f5',
-  borderRadius: '8px',
-  overflow: 'hidden',
-  ...(isUsed && {
-    background: 'linear-gradient(90deg, rgba(200, 230, 201, 0.3) 0%, rgba(200, 230, 201, 0.1) 100%)',
-    border: `3px solid rgba(76, 175, 80, 0.6)`,
-  }),
-  [theme.breakpoints.down('md')]: {
-    height: '300px',
-  },
-  [theme.breakpoints.down('sm')]: {
-    height: '250px',
-  },
-}));
-
-interface GalleryImage {
-  id?: string;
-  name: string;
-  path: string;
-  url: string;
-  created?: string;
-  modified?: string;
-  size?: number;
-  type?: string;
-  isUsed?: boolean; // Whether image is used in codebase (true=used, false=not_used, undefined=not_checked)
-  metadataError?: string; // Error message if file stats couldn't be read
-}
+import type { GalleryImage, SuggestionStatus, UploadStatus } from './Gallery/types';
+import { GalleryContainer, ThumbnailGrid, ImageCard, ImageThumbnail, CarouselContainer, CarouselButton, CarouselImageContainer } from './Gallery/styledComponents';
+import { createColumns } from './Gallery/columns';
+import UploadDialog from './Gallery/UploadDialog';
+import ImageDetailDialog from './Gallery/ImageDetailDialog';
+import SuggestionsDialog from './Gallery/SuggestionsDialog';
 
 const Gallery: React.FC = () => {
   const theme = useTheme();
@@ -172,7 +56,7 @@ const Gallery: React.FC = () => {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-  const [uploadStatus, setUploadStatus] = useState<{ [key: string]: { progress: number; status: 'pending' | 'uploading' | 'success' | 'error'; error?: string } }>({});
+  const [uploadStatus, setUploadStatus] = useState<Record<string, UploadStatus>>({});
   const [deleting, setDeleting] = useState(false);
   const [selectedRows, setSelectedRows] = useState<GridRowSelectionModel>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -191,11 +75,7 @@ const Gallery: React.FC = () => {
   const [targetDir, setTargetDir] = useState('review-required');
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [suggestionsDialogOpen, setSuggestionsDialogOpen] = useState(false);
-  const [suggestionStatuses, setSuggestionStatuses] = useState<Record<number, {
-    status: 'pending' | 'valid' | 'invalid' | 'applied' | 'failed';
-    message?: string;
-    code?: string;
-  }>>({});
+  const [suggestionStatuses, setSuggestionStatuses] = useState<Record<number, SuggestionStatus>>({});
   const [showFullSummary, setShowFullSummary] = useState(false);
   const [summaryExpanded, setSummaryExpanded] = useState(false);
   const [validating, setValidating] = useState(false);
@@ -1160,29 +1040,6 @@ const Gallery: React.FC = () => {
     });
   };
 
-  const getStatusChip = (idx: number) => {
-    const status = suggestionStatuses[idx];
-    if (!status || status.status === 'pending') {
-      return <Chip label="Pending" size="small" color="default" />;
-    }
-    
-    const colorMap: Record<string, 'success' | 'error' | 'warning' | 'info'> = {
-      'valid': 'success',
-      'invalid': 'error',
-      'applied': 'success',
-      'failed': 'error'
-    };
-    
-    return (
-      <Chip 
-        label={status.status.charAt(0).toUpperCase() + status.status.slice(1)} 
-        size="small" 
-        color={colorMap[status.status] || 'default'}
-        title={status.message}
-      />
-    );
-  };
-
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
     if (files.length === 0) return;
@@ -1324,7 +1181,7 @@ const Gallery: React.FC = () => {
     setUploadProgress(0);
     
     // Initialize upload status for all files
-    const initialStatus: { [key: string]: { progress: number; status: 'pending' | 'uploading' | 'success' | 'error'; error?: string } } = {};
+    const initialStatus: Record<string, UploadStatus> = {};
     selectedFiles.forEach(file => {
       const fileKey = `${file.name}-${file.size}`;
       initialStatus[fileKey] = { progress: 0, status: 'pending' };
@@ -1409,256 +1266,19 @@ const Gallery: React.FC = () => {
     return images;
   };
 
-  // MUI DataGrid column definitions
-  const columns: GridColDef[] = [
-    {
-      field: 'name',
-      headerName: 'Image Name',
-      flex: 1,
-      minWidth: 200,
-      renderCell: (params: GridRenderCellParams) => {
-        if (!params || !params.row) {
-          return <Typography variant="body2">Unknown</Typography>;
-        }
-        const image = params.row as GalleryImage;
-        if (!image) {
-          return <Typography variant="body2">Unknown</Typography>;
-        }
-        return (
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, py: 1 }}>
-            <Box
-              component="img"
-              src={image.url || '/images/incode/placeholder.png'}
-              alt={image.name || 'Unknown'}
-              sx={{
-                width: 40,
-                height: 40,
-                objectFit: 'cover',
-                imageOrientation: 'from-image', // Respect EXIF orientation
-                transform: 'none', // Let CSS handle rotation
-                borderRadius: 1,
-                cursor: 'pointer',
-              }}
-              onError={(e) => {
-                (e.target as HTMLImageElement).src = '/images/incode/placeholder.png';
-              }}
-              onClick={() => handleImageClick(image)}
-            />
-            <Typography
-              variant="body2"
-              sx={{ cursor: 'pointer', color: 'primary.main' }}
-              onClick={() => handleImageClick(image)}
-            >
-              {params.value || 'Unknown'}
-            </Typography>
-          </Box>
-        );
-      },
-    },
-    {
-      field: 'path',
-      headerName: 'Image Location',
-      flex: 2,
-      minWidth: 250,
-    },
-    {
-      field: 'modified',
-      headerName: 'Date Modified',
-      flex: 1,
-      minWidth: 180,
-      valueGetter: (value: any, row: GalleryImage) => {
-        if (!row) return null;
-        // Return the actual date string, not empty string
-        const dateStr = row.modified || row.created;
-        return dateStr || null;
-      },
-      valueFormatter: (value: any, row?: any) => {
-        // Handle both direct value and params object from valueGetter
-        const dateValue = value?.value !== undefined ? value.value : value;
-        const imageRow = row?.row || row;
-        
-        // Check if there's a metadata error
-        if (imageRow && imageRow.metadataError) {
-          return 'Error';
-        }
-        
-        if (!dateValue || dateValue === '') {
-          return 'Unknown';
-        }
-        try {
-          const date = new Date(dateValue);
-          if (isNaN(date.getTime())) {
-            return 'Unknown';
-          }
-          return date.toLocaleString();
-        } catch (e) {
-          return 'Unknown';
-        }
-      },
-      renderCell: (params: GridRenderCellParams) => {
-        if (!params || !params.row) {
-          return <Typography variant="body2">Unknown</Typography>;
-        }
-        const image = params.row as GalleryImage;
-        if (!image) {
-          return <Typography variant="body2">Unknown</Typography>;
-        }
-        
-        // Show error with tooltip if metadata error exists
-        if (image.metadataError) {
-          return (
-            <Tooltip title={image.metadataError} arrow>
-              <Typography variant="body2" color="error">Error</Typography>
-            </Tooltip>
-          );
-        }
-        
-        const dateStr = image.modified || image.created;
-        if (!dateStr) {
-          return <Typography variant="body2">Unknown</Typography>;
-        }
-        
-        try {
-          const date = new Date(dateStr);
-          if (isNaN(date.getTime())) {
-            return <Typography variant="body2">Unknown</Typography>;
-          }
-          return <Typography variant="body2">{date.toLocaleString()}</Typography>;
-        } catch (e) {
-          return <Typography variant="body2">Unknown</Typography>;
-        }
-      },
-    },
-    {
-      field: 'isUsed',
-      headerName: 'Usage Status',
-      width: 130,
-      valueGetter: (value: any, row: GalleryImage) => {
-        if (!row || row.isUsed === undefined) return 'Unknown';
-        return row.isUsed ? 'Used' : 'Not Used';
-      },
-      renderCell: (params: GridRenderCellParams) => {
-        if (!params || !params.row) {
-          return <Chip label="Unknown" size="small" variant="outlined" />;
-        }
-        const image = params.row as GalleryImage;
-        if (!image) {
-          return <Chip label="Unknown" size="small" variant="outlined" />;
-        }
-        // Only show "Checking..." if explicitly undefined (check hasn't run yet)
-        // If false, it means the check completed and the image is not used
-        if (image.isUsed === undefined && checkingUsage) {
-          return <Chip label="Checking..." size="small" variant="outlined" />;
-        }
-        // If undefined and not checking, treat as not checked yet
-        if (image.isUsed === undefined) {
-          return <Chip label="Not Checked" size="small" variant="outlined" color="default" />;
-        }
-        return (
-          <Chip
-            label={image.isUsed ? 'Used' : 'Not Used'}
-            size="small"
-            sx={{
-              backgroundColor: image.isUsed ? 'rgba(76, 175, 80, 0.2)' : 'rgba(244, 67, 54, 0.2)',
-              color: image.isUsed ? 'success.main' : 'error.main',
-              fontWeight: 600,
-            }}
-          />
-        );
-      },
-    },
-    {
-      field: 'type',
-      headerName: 'File Type',
-      width: 120,
-    },
-    {
-      field: 'size',
-      headerName: 'File Size',
-      width: 120,
-      valueGetter: (value: any, row: GalleryImage) => {
-        if (!row) return null;
-        // Return the actual size value, preserving 0 if it's actually 0
-        const size = row.size;
-        return size !== undefined && size !== null ? size : null;
-      },
-      valueFormatter: (value: any, row?: any) => {
-        // Handle both direct value and params object from valueGetter
-        const sizeValue = value?.value !== undefined ? value.value : value;
-        if (sizeValue === undefined || sizeValue === null) {
-          return 'Unknown';
-        }
-        const numValue = typeof sizeValue === 'number' ? sizeValue : Number(sizeValue);
-        if (isNaN(numValue) || numValue < 0) {
-          return 'Unknown';
-        }
-        if (numValue === 0) return '0 KB';
-        const sizeKB = numValue / 1024;
-        if (sizeKB < 1024) {
-          return `${sizeKB.toFixed(2)} KB`;
-        }
-        return `${(sizeKB / 1024).toFixed(2)} MB`;
-      },
-    },
-    {
-      field: 'actions',
-      headerName: 'Actions',
-      width: 200,
-      sortable: false,
-      filterable: false,
-      renderCell: (params: GridRenderCellParams) => {
-        if (!params || !params.row) {
-          return null;
-        }
-        const image = params.row as GalleryImage;
-        if (!image) {
-          return null;
-        }
-        return (
-          <Stack direction="row" spacing={1}>
-            <IconButton
-              size="small"
-              onClick={() => handleImageClick(image)}
-              title="View"
-            >
-              <IconPhoto size={18} />
-            </IconButton>
-            <IconButton
-              size="small"
-              onClick={() => {
-                setItemToMove(image);
-                setNewName(image.name);
-                setRenameDialogOpen(true);
-              }}
-              title="Rename"
-            >
-              <IconEdit size={18} />
-            </IconButton>
-            <IconButton
-              size="small"
-              onClick={() => {
-                setItemToMove(image);
-                setTargetDir(selectedDirectory);
-                setMoveDialogOpen(true);
-              }}
-              title="Move"
-            >
-              <IconArrowsExchange size={18} />
-            </IconButton>
-            <IconButton
-              size="small"
-              color="error"
-              onClick={() => handleDeleteImage(image)}
-              disabled={deleting}
-              title="Delete"
-            >
-              <IconTrash size={18} />
-            </IconButton>
-          </Stack>
-        );
-      },
-    },
-  ];
+  // MUI DataGrid column definitions (extracted to Gallery/columns.tsx)
+  const columns = createColumns({
+    checkingUsage,
+    deleting,
+    selectedDirectory,
+    handleImageClick,
+    setItemToMove,
+    setNewName,
+    setRenameDialogOpen,
+    setTargetDir,
+    setMoveDialogOpen,
+    handleDeleteImage,
+  });
 
   const handleBulkDelete = async () => {
     if (selectedRows.length === 0) {
@@ -2416,457 +2036,52 @@ const Gallery: React.FC = () => {
       </Dialog>
 
       {/* Catalog Suggestions Dialog */}
-      <Dialog open={suggestionsDialogOpen} onClose={() => setSuggestionsDialogOpen(false)} maxWidth="md" fullWidth>
-        <DialogTitle>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Typography variant="h6">Catalog Suggestions</Typography>
-            {Object.keys(suggestionStatuses).length > 0 && (
-              <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                <Typography variant="caption" color="text.secondary">
-                  Total: {suggestions.length} | 
-                  Valid: {Object.values(suggestionStatuses).filter(s => s.status === 'valid').length} | 
-                  Invalid: {Object.values(suggestionStatuses).filter(s => s.status === 'invalid').length}
-                </Typography>
-              </Box>
-            )}
-          </Box>
-        </DialogTitle>
-        <DialogContent>
-          <Box sx={{ mb: 2, display: 'flex', gap: 1, flexWrap: 'wrap', alignItems: 'center' }}>
-            <Button
-              variant="outlined"
-              onClick={handleDryRun}
-              disabled={suggestions.length === 0 || validating || applying}
-              startIcon={validating ? <LinearProgress sx={{ width: 16, height: 16 }} /> : null}
-            >
-              {validating ? 'Validating...' : 'Dry Run'}
-            </Button>
-            <Button
-              variant="contained"
-              onClick={handleApplyAll}
-              disabled={suggestions.length === 0 || applying || validating}
-              startIcon={applying ? <LinearProgress sx={{ width: 16, height: 16 }} /> : null}
-            >
-              {applying ? 'Applying...' : 'Apply All'}
-            </Button>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={showFullSummary}
-                  onChange={(e) => setShowFullSummary(e.target.checked)}
-                />
-              }
-              label="Show full summary"
-            />
-          </Box>
-
-          <Box sx={{ maxHeight: 400, overflow: 'auto' }}>
-            {suggestions.map((suggestion, idx) => {
-              const status = suggestionStatuses[idx];
-              const isPending = !status || status.status === 'pending';
-              const isValid = status?.status === 'valid';
-              const isInvalid = status?.status === 'invalid';
-              const isApplied = status?.status === 'applied';
-              const isFailed = status?.status === 'failed';
-
-              return (
-                <Box 
-                  key={idx} 
-                  sx={{ 
-                    mb: 2, 
-                    p: 2, 
-                    border: 1, 
-                    borderColor: isInvalid || isFailed ? 'error.main' : isValid || isApplied ? 'success.main' : 'divider',
-                    borderRadius: 1,
-                    backgroundColor: isValid || isApplied ? 'action.selected' : 'transparent'
-                  }}
-                >
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
-                    <Box sx={{ flex: 1 }}>
-                      <Typography variant="subtitle2">{suggestion.path}</Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Suggested: {suggestion.suggestedDir}/{suggestion.suggestedName}
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        Confidence: {(suggestion.confidence * 100).toFixed(0)}%
-                      </Typography>
-                    </Box>
-                    <Box sx={{ ml: 2 }}>
-                      {getStatusChip(idx)}
-                    </Box>
-                  </Box>
-                  
-                  {status && status.message && (
-                    <Alert 
-                      severity={isInvalid || isFailed ? 'error' : isValid || isApplied ? 'success' : 'info'}
-                      sx={{ mt: 1, mb: 1 }}
-                    >
-                      {status.message}
-                    </Alert>
-                  )}
-
-                  <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
-                    <Button
-                      size="small"
-                      variant="outlined"
-                      onClick={() => handleApplySingle(idx)}
-                      disabled={isApplied || applying || validating}
-                    >
-                      {isApplied ? 'Applied' : 'Apply'}
-                    </Button>
-                  </Box>
-                </Box>
-              );
-            })}
-          </Box>
-
-          {/* Summary Panel */}
-          {Object.keys(suggestionStatuses).length > 0 && (
-            <>
-              <Divider sx={{ my: 2 }} />
-              <Box>
-                <Box 
-                  sx={{ 
-                    display: 'flex', 
-                    justifyContent: 'space-between', 
-                    alignItems: 'center',
-                    cursor: 'pointer',
-                    p: 1,
-                    '&:hover': { backgroundColor: 'action.hover' }
-                  }}
-                  onClick={() => setSummaryExpanded(!summaryExpanded)}
-                >
-                  <Typography variant="subtitle2">
-                    Summary: Succeeded: {Object.values(suggestionStatuses).filter(s => s.status === 'applied' || s.status === 'valid').length}, 
-                    Failed: {Object.values(suggestionStatuses).filter(s => s.status === 'failed' || s.status === 'invalid').length}
-                  </Typography>
-                  <IconButton size="small">
-                    {summaryExpanded ? <IconChevronUp size={20} /> : <IconChevronDown size={20} />}
-                  </IconButton>
-                </Box>
-                
-                <Collapse in={summaryExpanded}>
-                  <Box sx={{ mt: 1, maxHeight: 300, overflow: 'auto' }}>
-                    {(showFullSummary 
-                      ? Object.entries(suggestionStatuses)
-                      : Object.entries(suggestionStatuses).filter(([_, s]) => s.status === 'invalid' || s.status === 'failed')
-                    ).map(([idxStr, status]) => {
-                      const idx = parseInt(idxStr);
-                      const suggestion = suggestions[idx];
-                      if (!suggestion) return null;
-
-                      return (
-                        <Box 
-                          key={idx}
-                          sx={{ 
-                            p: 1, 
-                            mb: 1, 
-                            border: 1, 
-                            borderColor: 'divider', 
-                            borderRadius: 1,
-                            backgroundColor: status.status === 'invalid' || status.status === 'failed' 
-                              ? 'error.light' 
-                              : 'success.light'
-                          }}
-                        >
-                          <Typography variant="body2" fontWeight="bold">
-                            {suggestion.path} → {suggestion.suggestedDir}/{suggestion.suggestedName}
-                          </Typography>
-                          <Typography variant="caption" color="text.secondary">
-                            Status: {status.status} | Code: {status.code}
-                          </Typography>
-                          {status.message && (
-                            <Typography variant="caption" display="block" sx={{ mt: 0.5 }}>
-                              {status.message}
-                            </Typography>
-                          )}
-                        </Box>
-                      );
-                    })}
-                  </Box>
-                  
-                  <Box sx={{ mt: 1, display: 'flex', justifyContent: 'flex-end' }}>
-                    <Button
-                      size="small"
-                      startIcon={<IconCopy size={16} />}
-                      onClick={handleCopySummary}
-                    >
-                      Copy Summary
-                    </Button>
-                  </Box>
-                </Collapse>
-              </Box>
-            </>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => {
-            setSuggestionsDialogOpen(false);
-            setSuggestionStatuses({});
-            setShowFullSummary(false);
-            setSummaryExpanded(false);
-          }}>
-            Close
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <SuggestionsDialog
+        open={suggestionsDialogOpen}
+        onClose={() => {
+          setSuggestionsDialogOpen(false);
+          setSuggestionStatuses({});
+          setShowFullSummary(false);
+          setSummaryExpanded(false);
+        }}
+        suggestions={suggestions}
+        suggestionStatuses={suggestionStatuses}
+        showFullSummary={showFullSummary}
+        setShowFullSummary={setShowFullSummary}
+        summaryExpanded={summaryExpanded}
+        setSummaryExpanded={setSummaryExpanded}
+        validating={validating}
+        applying={applying}
+        onDryRun={handleDryRun}
+        onApplyAll={handleApplyAll}
+        onApplySingle={handleApplySingle}
+        onCopySummary={handleCopySummary}
+      />
 
       {/* Image Detail Dialog */}
-      <Dialog
+      <ImageDetailDialog
         open={imageDialogOpen}
         onClose={() => setImageDialogOpen(false)}
-        maxWidth="md"
-        fullWidth
-      >
-        <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Typography variant="h6">{selectedImage?.name}</Typography>
-          <IconButton onClick={() => setImageDialogOpen(false)}>
-            <IconX />
-          </IconButton>
-        </DialogTitle>
-        <DialogContent>
-          {selectedImage && (
-            <Box>
-              <Box sx={{ mb: 3, textAlign: 'center' }}>
-                <img
-                  src={selectedImage.url}
-                  alt={selectedImage.name}
-                  style={{
-                    maxWidth: '100%',
-                    maxHeight: '400px',
-                    objectFit: 'contain',
-                    borderRadius: '8px',
-                  }}
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = '/images/incode/placeholder.png';
-                  }}
-                />
-              </Box>
-              <Stack spacing={2}>
-                <Box>
-                  <Typography variant="subtitle2" color="text.secondary">
-                    Image Name
-                  </Typography>
-                  <Typography variant="body1">{selectedImage.name}</Typography>
-                </Box>
-                <Box>
-                  <Typography variant="subtitle2" color="text.secondary">
-                    Image Path
-                  </Typography>
-                  <Typography variant="body1" sx={{ wordBreak: 'break-all' }}>
-                    {selectedImage.path}
-                  </Typography>
-                </Box>
-                {selectedImage.created && (
-                  <Box>
-                    <Typography variant="subtitle2" color="text.secondary">
-                      Image Created
-                    </Typography>
-                    <Typography variant="body1">
-                      {new Date(selectedImage.created).toLocaleString()}
-                    </Typography>
-                  </Box>
-                )}
-                {selectedImage.type && (
-                  <Box>
-                    <Typography variant="subtitle2" color="text.secondary">
-                      File Type
-                    </Typography>
-                    <Chip label={selectedImage.type.toUpperCase()} size="small" />
-                  </Box>
-                )}
-                {selectedImage.size && (
-                  <Box>
-                    <Typography variant="subtitle2" color="text.secondary">
-                      File Size
-                    </Typography>
-                    <Typography variant="body1">
-                      {(selectedImage.size / 1024).toFixed(2)} KB
-                    </Typography>
-                  </Box>
-                )}
-              </Stack>
-            </Box>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button
-            onClick={() => selectedImage && handleOpenInNewWindow(selectedImage)}
-            variant="outlined"
-          >
-            Open in New Window
-          </Button>
-          <Button
-            onClick={() => selectedImage && handleDeleteImage(selectedImage)}
-            variant="contained"
-            color="error"
-            startIcon={<IconTrash size={18} />}
-            disabled={deleting}
-          >
-            {deleting ? 'Deleting...' : 'Delete Image'}
-          </Button>
-          <Button onClick={() => setImageDialogOpen(false)}>
-            Close
-          </Button>
-        </DialogActions>
-      </Dialog>
+        image={selectedImage}
+        deleting={deleting}
+        onOpenInNewWindow={handleOpenInNewWindow}
+        onDelete={handleDeleteImage}
+      />
 
       {/* Upload Dialog */}
-      <Dialog
+      <UploadDialog
         open={uploadDialogOpen}
         onClose={handleCloseUploadDialog}
-        maxWidth="sm"
-        fullWidth
-      >
-        <DialogTitle>
-          Upload Image to Gallery
-          <IconButton
-            aria-label="close"
-            onClick={handleCloseUploadDialog}
-            sx={{
-              position: 'absolute',
-              right: 8,
-              top: 8,
-            }}
-          >
-            <IconX size={20} />
-          </IconButton>
-        </DialogTitle>
-        <DialogContent>
-          <Box sx={{ mt: 2 }}>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept=".jpg,.jpeg,.tiff,.gif,.png"
-              onChange={handleFileSelect}
-              style={{ display: 'none' }}
-              id="image-upload-input"
-              multiple
-            />
-            <label htmlFor="image-upload-input">
-              <Button
-                variant="outlined"
-                component="span"
-                fullWidth
-                startIcon={<IconUpload size={20} />}
-                sx={{ mb: 2 }}
-              >
-                {selectedFiles.length > 0 ? `Select More Images (${selectedFiles.length} selected)` : 'Select Images'}
-              </Button>
-            </label>
-
-            <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 2, textAlign: 'center' }}>
-              Allowed formats: .jpg, .jpeg, .tiff, .gif, .png (You can select multiple files)
-            </Typography>
-
-            {selectedFiles.length > 0 && (
-              <Box sx={{ mb: 2 }}>
-                <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
-                  Selected Images ({selectedFiles.length}):
-                </Typography>
-                <Stack spacing={1}>
-                  {selectedFiles.map((file, index) => {
-                    const fileKey = `${file.name}-${file.size}`;
-                    const status = uploadStatus[fileKey];
-                    return (
-                      <Box
-                        key={index}
-                        sx={{
-                          p: 2,
-                          bgcolor: 'background.default',
-                          borderRadius: 1,
-                          border: '1px solid',
-                          borderColor: status?.status === 'error' ? 'error.main' : status?.status === 'success' ? 'success.main' : 'divider',
-                        }}
-                      >
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
-                          <Box sx={{ flex: 1 }}>
-                            <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
-                              {file.name}
-                            </Typography>
-                            <Typography variant="caption" color="text.secondary" display="block">
-                              Size: {(file.size / 1024 / 1024).toFixed(2)} MB
-                            </Typography>
-                            {status && (
-                              <>
-                                {status.status === 'uploading' && (
-                                  <Box sx={{ mt: 1 }}>
-                                    <LinearProgress variant="determinate" value={status.progress} size="small" />
-                                    <Typography variant="caption" color="text.secondary">
-                                      Uploading... {Math.round(status.progress)}%
-                                    </Typography>
-                                  </Box>
-                                )}
-                                {status.status === 'success' && (
-                                  <Typography variant="caption" color="success.main" sx={{ mt: 0.5, display: 'block' }}>
-                                    ✓ Uploaded successfully
-                                  </Typography>
-                                )}
-                                {status.status === 'error' && (
-                                  <Typography variant="caption" color="error.main" sx={{ mt: 0.5, display: 'block' }}>
-                                    ✗ {status.error || 'Upload failed'}
-                                  </Typography>
-                                )}
-                              </>
-                            )}
-                          </Box>
-                          {!uploading && (
-                            <IconButton
-                              size="small"
-                              onClick={() => handleRemoveFile(index)}
-                              sx={{ ml: 1 }}
-                              color="error"
-                            >
-                              <IconX size={18} />
-                            </IconButton>
-                          )}
-                        </Box>
-                      </Box>
-                    );
-                  })}
-                </Stack>
-              </Box>
-            )}
-
-            {uploading && selectedFiles.length > 0 && (
-              <Box sx={{ mt: 2 }}>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                  Overall Progress: {Math.round(uploadProgress)}%
-                </Typography>
-                <LinearProgress variant="determinate" value={uploadProgress} />
-                <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-                  Uploading {selectedFiles.length} image{selectedFiles.length > 1 ? 's' : ''}...
-                </Typography>
-              </Box>
-            )}
-
-            {uploadError && (
-              <Alert severity="error" sx={{ mt: 2 }}>
-                {uploadError}
-              </Alert>
-            )}
-          </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseUploadDialog} disabled={uploading}>
-            Cancel
-          </Button>
-          <Button
-            onClick={handleUpload}
-            variant="contained"
-            disabled={selectedFiles.length === 0 || uploading}
-            sx={{
-              backgroundColor: '#C8A24B',
-              color: '#1a1a1a',
-              '&:hover': {
-                backgroundColor: '#B8923A',
-              },
-            }}
-          >
-            {uploading ? `Uploading... (${Math.round(uploadProgress)}%)` : `Upload ${selectedFiles.length} Image${selectedFiles.length !== 1 ? 's' : ''}`}
-          </Button>
-        </DialogActions>
-      </Dialog>
+        selectedFiles={selectedFiles}
+        uploadStatus={uploadStatus}
+        uploading={uploading}
+        uploadProgress={uploadProgress}
+        uploadError={uploadError}
+        fileInputRef={fileInputRef}
+        onFileSelect={handleFileSelect}
+        onRemoveFile={handleRemoveFile}
+        onUpload={handleUpload}
+      />
     </Box>
   );
 };
