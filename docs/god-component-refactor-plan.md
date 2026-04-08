@@ -13,10 +13,10 @@
 |----------|----------|----------|-----------|
 | OM Tier 1 (Windsurf) | 14 | 13 | 1 |
 | OM Tier 2 (Windsurf) | 9 | 5 | 4 |
-| OM Tier 3 (Claude CLI) | 13 | 6 | 7 |
-| **OM Total** | **36** | **24** | **12** |
+| OM Tier 3 (Claude CLI) | 13 | 6 + 1 skip | 6 |
+| **OM Total** | **36** | **25** | **11** |
 | OMAI | 12 | — | 12 (not started) |
-| **Grand Total** | **48** | **24** | **24** |
+| **Grand Total** | **48** | **25** | **23** |
 
 ---
 
@@ -210,7 +210,7 @@ These items have been refactored and merged. Listed with original and current LO
 | 1 | `FusionTab.tsx` | 1985 | 3 | B, C, D | **LARGEST** — hooks, modals, sub-components |
 | 2 | `RecordsPage.tsx` | 1787 | 3 | A, B, C | 10 useEffects, tabs, modals |
 | 3 | `Gallery.tsx` | 1604 | 3 | B, C, D | 7 inline components, 18 states, modals |
-| 4 | `OMBigBook.tsx` | 1530 | 3 | A, B, C | Tabs, modals, 3 useEffects |
+| — | `OMBigBook.tsx` | 1530 | 3 | — | **SKIP** — legacy code, do not refactor |
 | 5 | `ChurchSetupWizard.tsx` | 1291 | 2 | A, B, D | Wizard steps, modals, inline components |
 | 6 | `GlobalOMAI.tsx` | 1237 | 3 | A, B, C | Global provider — panels, dialogs, hooks (used app-wide) |
 | 7 | `USChurchMapPage.tsx` | 1234 | 1 | A, B, D | **Defer** — canonical version moving to OMAI |
