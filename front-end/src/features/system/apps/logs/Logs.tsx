@@ -41,36 +41,10 @@ import {
   Clear as ClearIcon,
 } from '@mui/icons-material';
 import { adminAPI } from '@/api/admin.api';
-
-// Types
-interface LogEntry {
-    id: string;
-    timestamp: string;
-    level: 'debug' | 'info' | 'warn' | 'error' | 'fatal';
-    component: string;
-    message: string;
-    details?: any;
-    userId?: string;
-    ip?: string;
-    method?: string;
-    url?: string;
-    statusCode?: number;
-    duration?: number;
-}
-
-interface LogLevel {
-    component: string;
-    level: 'debug' | 'info' | 'warn' | 'error' | 'fatal';
-    enabled: boolean;
-}
-
-interface ComponentInfo {
-    name: string;
-    icon: React.ReactNode;
-    description: string;
-    logCount: number;
-    lastActivity: string;
-}
+import SiteLogsTab from './tabs/SiteLogsTab';
+import ComponentLogsTab from './tabs/ComponentLogsTab';
+import LogLevelsTab from './tabs/LogLevelsTab';
+import type { LogEntry, LogLevel, ComponentInfo, LogStats } from './types';
 
 // Styled components
 const LogContainer = styled(Box)(({ theme }) => ({
@@ -651,406 +625,53 @@ const Logs: React.FC = () => {
 
                     {/* Site Logs Tab */}
                     {activeTab === 0 && (
-                        <Box>
-                            {/* Filters */}
-                            <Box mb={3}>
-                                <Box display="flex" gap={2} flexWrap="wrap" alignItems="center">
-                                    <Box minWidth="200px">
-                                        <FormControl fullWidth size="small">
-                                            <InputLabel>Log Level</InputLabel>
-                                            <Select
-                                                value={selectedLevel}
-                                                label="Log Level"
-                                                onChange={(e) => setSelectedLevel(e.target.value)}
-                                            >
-                                                <MenuItem value="all">All Levels</MenuItem>
-                                                <MenuItem value="debug">Debug</MenuItem>
-                                                <MenuItem value="info">Info</MenuItem>
-                                                <MenuItem value="warn">Warning</MenuItem>
-                                                <MenuItem value="error">Error</MenuItem>
-                                                <MenuItem value="fatal">Fatal</MenuItem>
-                                            </Select>
-                                        </FormControl>
-                                    </Box>
-                                    <Box minWidth="200px">
-                                        <FormControl fullWidth size="small">
-                                            <InputLabel>Component</InputLabel>
-                                            <Select
-                                                value={selectedComponent}
-                                                label="Component"
-                                                onChange={(e) => setSelectedComponent(e.target.value)}
-                                            >
-                                                <MenuItem value="all">All Components</MenuItem>
-                                                {components.map((component) => (
-                                                    <MenuItem key={component.name} value={component.name}>
-                                                        <Box display="flex" alignItems="center" gap={1}>
-                                                            {component.icon}
-                                                            {component.name}
-                                                        </Box>
-                                                    </MenuItem>
-                                                ))}
-                                            </Select>
-                                        </FormControl>
-                                    </Box>
-                                    <Box minWidth="200px">
-                                        <FormControl fullWidth size="small">
-                                            <InputLabel>Log Source</InputLabel>
-                                            <Select
-                                                value={selectedSource}
-                                                label="Log Source"
-                                                onChange={(e) => setSelectedSource(e.target.value)}
-                                            >
-                                                <MenuItem value="both">
-                                                    <Box display="flex" alignItems="center" gap={1}>
-                                                        <IconAdjustments size={16} />
-                                                        All Sources
-                                                    </Box>
-                                                </MenuItem>
-                                                <MenuItem value="memory">
-                                                    <Box display="flex" alignItems="center" gap={1}>
-                                                        <IconTerminal size={16} />
-                                                        Real-time (Memory)
-                                                    </Box>
-                                                </MenuItem>
-                                                <MenuItem value="file">
-                                                    <Box display="flex" alignItems="center" gap={1}>
-                                                        <IconFileText size={16} />
-                                                        Log Files
-                                                    </Box>
-                                                </MenuItem>
-                                            </Select>
-                                        </FormControl>
-                                    </Box>
-                                    <Box flexGrow={1} minWidth="300px">
-                                        <TextField
-                                            fullWidth
-                                            size="small"
-                                            placeholder="Search logs..."
-                                            value={searchTerm}
-                                            onChange={(e) => setSearchTerm(e.target.value)}
-                                            InputProps={{
-                                                startAdornment: <IconSearch size={16} style={{ marginRight: 8 }} />,
-                                            }}
-                                        />
-                                    </Box>
-                                </Box>
-                            </Box>
-
-                            {/* Log Statistics */}
-                            <Box mb={2} display="flex" gap={2} flexWrap="wrap" alignItems="center">
-                                <Typography variant="body2" color="textSecondary" sx={{ fontWeight: 'bold' }}>
-                                    Log Statistics:
-                                </Typography>
-                                <Chip size="small" label={`Total: ${logStats.total}`} variant="outlined" />
-                                <Chip size="small" label={`Debug: ${logStats.debug}`} color="default" variant="outlined" />
-                                <Chip size="small" label={`Info: ${logStats.info}`} color="info" variant="outlined" />
-                                <Chip size="small" label={`Warn: ${logStats.warn}`} color="warning" variant="outlined" />
-                                <Chip size="small" label={`Error: ${logStats.error}`} color="error" variant="outlined" />
-                                <Chip size="small" label={`Fatal: ${logStats.fatal}`} color="error" variant="outlined" />
-                                {(selectedLevel !== 'all' || selectedComponent !== 'all' || searchTerm) && (
-                                    <Chip 
-                                        size="small" 
-                                        label={`Filtered: ${filteredLogs.length}`} 
-                                        color="secondary" 
-                                        variant="filled"
-                                    />
-                                )}
-                            </Box>
-
-                            {/* Real-time Log Display */}
-                            <LogContainer ref={logContainerRef}>
-                                {filteredLogs.length === 0 ? (
-                                    <Box textAlign="center" py={4}>
-                                        <Typography variant="body2" color="textSecondary">
-                                            No logs found matching the current filters
-                                        </Typography>
-                                    </Box>
-                                ) : (
-                                    filteredLogs.map((log) => (
-                                        <LogLine key={log.id} level={log.level}>
-                                            <Box mr={2} display="flex" alignItems="center" minWidth="120px">
-                                                <Typography variant="caption" sx={{ fontFamily: 'monospace' }}>
-                                                    {new Date(log.timestamp).toLocaleTimeString()}
-                                                </Typography>
-                                            </Box>
-                                            <Box mr={2} display="flex" alignItems="center" minWidth="80px">
-                                                <Chip
-                                                    size="small"
-                                                    label={log.level.toUpperCase()}
-                                                    color={getLevelColor(log.level) as any}
-                                                    icon={getLevelIcon(log.level)}
-                                                    sx={{ fontSize: '10px', height: '20px' }}
-                                                />
-                                            </Box>
-                                            <Box mr={2} minWidth="120px">
-                                                <Typography variant="caption" sx={{ fontWeight: 'bold' }}>
-                                                    {log.component}
-                                                </Typography>
-                                            </Box>
-                                            <Box mr={2} minWidth="60px">
-                                                <Chip
-                                                    size="small"
-                                                    label={(log as any).source === 'file' ? 'FILE' : 'LIVE'}
-                                                    color={(log as any).source === 'file' ? 'secondary' : 'success'}
-                                                    sx={{ fontSize: '9px', height: '18px', minWidth: '50px' }}
-                                                />
-                                            </Box>
-                                            <Box flexGrow={1}>
-                                                <Typography variant="caption">{log.message}</Typography>
-                                                {log.details && (
-                                                    <Box mt={0.5}>
-                                                        <Typography variant="caption" sx={{ opacity: 0.7 }}>
-                                                            {JSON.stringify(log.details)}
-                                                        </Typography>
-                                                    </Box>
-                                                )}
-                                            </Box>
-                                        </LogLine>
-                                    ))
-                                )}
-                            </LogContainer>
-
-                            {/* Pagination for table view */}
-                            <Box mt={2}>
-                                <TablePagination
-                                    component="div"
-                                    count={filteredLogs.length}
-                                    page={page}
-                                    onPageChange={(_e, newPage) => setPage(newPage)}
-                                    rowsPerPage={rowsPerPage}
-                                    onRowsPerPageChange={(e) => setRowsPerPage(parseInt(e.target.value, 10))}
-                                    rowsPerPageOptions={[10, 25, 50, 100]}
-                                />
-                            </Box>
-
-                            {/* Log Level Statistics */}
-                            <Box mt={3}>
-                                <Typography variant="subtitle1" gutterBottom>
-                                    Log Level Statistics
-                                </Typography>
-                                <Box display="flex" gap={2}>
-                                    <Chip label={`Total: ${logStats.total}`} color="default" />
-                                    <Chip label={`Debug: ${logStats.debug}`} color="info" />
-                                    <Chip label={`Info: ${logStats.info}`} color="primary" />
-                                    <Chip label={`Warning: ${logStats.warn}`} color="warning" />
-                                    <Chip label={`Error: ${logStats.error}`} color="error" />
-                                    <Chip label={`Fatal: ${logStats.fatal}`} color="error" variant="outlined" />
-                                </Box>
-                            </Box>
-                        </Box>
+                        <SiteLogsTab
+                            filteredLogs={filteredLogs}
+                            selectedLevel={selectedLevel}
+                            setSelectedLevel={setSelectedLevel}
+                            selectedComponent={selectedComponent}
+                            setSelectedComponent={setSelectedComponent}
+                            selectedSource={selectedSource}
+                            setSelectedSource={setSelectedSource}
+                            searchTerm={searchTerm}
+                            setSearchTerm={setSearchTerm}
+                            components={components}
+                            logStats={logStats}
+                            page={page}
+                            setPage={setPage}
+                            rowsPerPage={rowsPerPage}
+                            setRowsPerPage={setRowsPerPage}
+                            logContainerRef={logContainerRef}
+                            getLevelIcon={getLevelIcon}
+                            getLevelColor={getLevelColor}
+                            LogContainer={LogContainer}
+                            LogLine={LogLine}
+                        />
                     )}
 
                     {/* Component Logs Tab */}
                     {activeTab === 1 && (
-                        <Box>
-                            <Typography variant="h6" gutterBottom>
-                                Component Log Sources
-                            </Typography>
-                            <Typography variant="body2" color="textSecondary" mb={3}>
-                                View logs from different components and sources. Each component may have both real-time logs and historical log files.
-                            </Typography>
-
-                            <Box display="grid" gridTemplateColumns="repeat(auto-fit, minmax(350px, 1fr))" gap={2} mb={3}>
-                                {components.map((component) => {
-                                    const componentLogs = filteredLogs.filter(log => log.component === component.name);
-                                    const fileLogs = componentLogs.filter(log => (log as any).source === 'file');
-                                    const liveLogs = componentLogs.filter(log => (log as any).source !== 'file');
-                                    
-                                    return (
-                                        <Card key={component.name} variant="outlined" sx={{ 
-                                            cursor: 'pointer',
-                                            '&:hover': { bgcolor: 'action.hover' }
-                                        }}
-                                        onClick={() => setSelectedComponent(component.name)}>
-                                            <CardContent>
-                                                <Box display="flex" alignItems="center" gap={2} mb={2}>
-                                                    {component.icon}
-                                                    <Box flexGrow={1}>
-                                                        <Typography variant="h6">{component.name}</Typography>
-                                                        <Typography variant="caption" color="textSecondary">
-                                                            {component.description}
-                                                        </Typography>
-                                                    </Box>
-                                                    <Badge badgeContent={componentLogs.length} color="primary" max={999} />
-                                                </Box>
-                                                
-                                                <Box display="flex" gap={1} mb={1}>
-                                                    <Chip 
-                                                        size="small" 
-                                                        label={`${liveLogs.length} Live`}
-                                                        color="success"
-                                                        variant="outlined"
-                                                    />
-                                                    <Chip 
-                                                        size="small" 
-                                                        label={`${fileLogs.length} File`}
-                                                        color="secondary"
-                                                        variant="outlined"
-                                                    />
-                                                </Box>
-                                                
-                                                {componentLogs.length > 0 && (
-                                                    <Typography variant="caption" color="textSecondary">
-                                                        Last activity: {new Date(componentLogs[0].timestamp).toLocaleString()}
-                                                    </Typography>
-                                                )}
-                                            </CardContent>
-                                        </Card>
-                                    );
-                                })}
-                            </Box>
-
-                            {selectedComponent !== 'all' && (
-                                <Card variant="outlined">
-                                    <CardContent>
-                                        <Box display="flex" alignItems="center" gap={2} mb={3}>
-                                            <Typography variant="h6">
-                                                {selectedComponent} Logs
-                                            </Typography>
-                                            <Button 
-                                                size="small" 
-                                                onClick={() => setSelectedComponent('all')}
-                                                variant="outlined"
-                                            >
-                                                Back to All
-                                            </Button>
-                                        </Box>
-                                        
-                                        <LogContainer>
-                                            {filteredLogs
-                                                .filter(log => log.component === selectedComponent)
-                                                .map((log) => (
-                                                    <LogLine key={log.id} level={log.level}>
-                                                        <Box mr={2} display="flex" alignItems="center" minWidth="120px">
-                                                            <Typography variant="caption" sx={{ fontFamily: 'monospace' }}>
-                                                                {new Date(log.timestamp).toLocaleTimeString()}
-                                                            </Typography>
-                                                        </Box>
-                                                        <Box mr={2} display="flex" alignItems="center" minWidth="80px">
-                                                            <Chip
-                                                                size="small"
-                                                                label={log.level.toUpperCase()}
-                                                                color={getLevelColor(log.level) as any}
-                                                                icon={getLevelIcon(log.level)}
-                                                                sx={{ fontSize: '10px', height: '20px' }}
-                                                            />
-                                                        </Box>
-                                                        <Box mr={2} minWidth="60px">
-                                                            <Chip
-                                                                size="small"
-                                                                label={(log as any).source === 'file' ? 'FILE' : 'LIVE'}
-                                                                color={(log as any).source === 'file' ? 'secondary' : 'success'}
-                                                                sx={{ fontSize: '9px', height: '18px', minWidth: '50px' }}
-                                                            />
-                                                        </Box>
-                                                        <Box flexGrow={1}>
-                                                            <Typography variant="caption">{log.message}</Typography>
-                                                            {log.details && (
-                                                                <Box mt={0.5}>
-                                                                    <Typography variant="caption" sx={{ opacity: 0.7 }}>
-                                                                        {JSON.stringify(log.details)}
-                                                                    </Typography>
-                                                                </Box>
-                                                            )}
-                                                        </Box>
-                                                    </LogLine>
-                                                ))}
-                                        </LogContainer>
-                                    </CardContent>
-                                </Card>
-                            )}
-                        </Box>
+                        <ComponentLogsTab
+                            filteredLogs={filteredLogs}
+                            components={components}
+                            selectedComponent={selectedComponent}
+                            setSelectedComponent={setSelectedComponent}
+                            getLevelIcon={getLevelIcon}
+                            getLevelColor={getLevelColor}
+                            LogContainer={LogContainer}
+                            LogLine={LogLine}
+                        />
                     )}
 
                     {/* Log Levels Tab */}
                     {activeTab === 2 && (
-                        <Box>
-                            <Typography variant="h6" gutterBottom>
-                                Configure Log Levels
-                            </Typography>
-                            <Typography variant="body2" color="textSecondary" mb={3}>
-                                Set the minimum log level for each component. Logs below the selected level will not be captured.
-                            </Typography>
-
-                            {components.map((component) => {
-                                const logLevel = logLevels.find(l => l.component === component.name);
-                                return (
-                                    <Accordion key={component.name}>
-                                        <AccordionSummary expandIcon={<IconChevronDown />}>
-                                            <Box display="flex" alignItems="center" gap={2} width="100%">
-                                                {component.icon}
-                                                <Box flexGrow={1}>
-                                                    <Typography variant="h6">{component.name}</Typography>
-                                                    <Typography variant="caption" color="textSecondary">
-                                                        {component.description}
-                                                    </Typography>
-                                                </Box>
-                                                <Box display="flex" alignItems="center" gap={2}>
-                                                    <Chip
-                                                        label={logLevel?.level?.toUpperCase() || 'INFO'}
-                                                        color={getLevelColor(logLevel?.level || 'info') as any}
-                                                        size="small"
-                                                    />
-                                                    <Switch
-                                                        checked={logLevel?.enabled || false}
-                                                        onChange={() => toggleComponent(component.name)}
-                                                        onClick={(e) => e.stopPropagation()}
-                                                    />
-                                                </Box>
-                                            </Box>
-                                        </AccordionSummary>
-                                        <AccordionDetails>
-                                            <Box display="flex" flexDirection="column" gap={2}>
-                                                <FormControl fullWidth>
-                                                    <InputLabel>Log Level</InputLabel>
-                                                    <Select
-                                                        value={logLevel?.level || 'info'}
-                                                        label="Log Level"
-                                                        onChange={(e) => updateLogLevel(component.name, e.target.value)}
-                                                    >
-                                                        <MenuItem value="debug">
-                                                            <Box display="flex" alignItems="center" gap={1}>
-                                                                <IconBug size={16} />
-                                                                Debug - All messages
-                                                            </Box>
-                                                        </MenuItem>
-                                                        <MenuItem value="info">
-                                                            <Box display="flex" alignItems="center" gap={1}>
-                                                                <IconInfoCircle size={16} />
-                                                                Info - General information
-                                                            </Box>
-                                                        </MenuItem>
-                                                        <MenuItem value="warn">
-                                                            <Box display="flex" alignItems="center" gap={1}>
-                                                                <IconAlertTriangle size={16} />
-                                                                Warning - Potential issues
-                                                            </Box>
-                                                        </MenuItem>
-                                                        <MenuItem value="error">
-                                                            <Box display="flex" alignItems="center" gap={1}>
-                                                                <IconX size={16} />
-                                                                Error - Error messages only
-                                                            </Box>
-                                                        </MenuItem>
-                                                        <MenuItem value="fatal">
-                                                            <Box display="flex" alignItems="center" gap={1}>
-                                                                <IconX size={16} />
-                                                                Fatal - Critical errors only
-                                                            </Box>
-                                                        </MenuItem>
-                                                    </Select>
-                                                </FormControl>
-
-                                                <Alert severity="info" sx={{ mt: 1 }}>
-                                                    Current setting: Only <strong>{logLevel?.level || 'info'}</strong> level
-                                                    and above will be logged for {component.name}.
-                                                </Alert>
-                                            </Box>
-                                        </AccordionDetails>
-                                    </Accordion>
-                                );
-                            })}
-                        </Box>
+                        <LogLevelsTab
+                            components={components}
+                            logLevels={logLevels}
+                            toggleComponent={toggleComponent}
+                            updateLogLevel={updateLogLevel}
+                            getLevelColor={getLevelColor}
+                        />
                     )}
                 </CardContent>
             </Card>
