@@ -8,14 +8,13 @@ import RecordsAnalyticsView from './RecordsAnalyticsView';
 import RecordsCardView from './RecordsCardView';
 import RecordsTimelineView from './RecordsTimelineView';
 import ModernRecordViewerModal from '@/features/records-centralized/common/ModernRecordViewerModal';
-import { getAgGridRowClassRules, isRecordNewWithin24Hours, isRecordUpdatedWithin24Hours, useNowReference } from '@/features/records-centralized/common/recordsHighlighting';
+import { useNowReference } from '@/features/records-centralized/common/recordsHighlighting';
 import '@/features/records-centralized/common/recordsHighlighting.css';
 import { usePersistedRowSelection } from '@/features/records-centralized/common/usePersistedRowSelection';
 import { createRecordsApiService } from '@/features/records-centralized/components/records/RecordsApiService';
 import { getPersistedChurchId, getPersistedLastView, useRecordsPersistence } from '@/hooks/useRecordsPersistence';
-import churchService, { Church } from '@/shared/lib/churchService';
-import LookupService from '@/shared/lib/lookupService';
-import { Eye, FileText, Pencil, Search, Trash2 } from '@/shared/ui/icons';
+import { Church } from '@/shared/lib/churchService';
+import { Search } from '@/shared/ui/icons';
 import { ChurchRecord } from '@/types/church-records-advanced.types';
 import { agGridIconMap } from '@/ui/agGridIcons';
 import { apiClient } from '@/api/utils/axiosInstance';
@@ -30,6 +29,9 @@ import { useRecordsAutocomplete } from './RecordsPage/useRecordsAutocomplete';
 import RecordEditForm from './RecordsPage/RecordEditForm';
 import { parseJsonField, displayJsonField, highlightMatch, getCellValue, getColumnDefinitions, getSortFields, RECORD_TYPE_CONFIGS, DEFAULT_DATE_SORT_FIELD } from './RecordsPage/utils';
 import RecordsControlsBar from './RecordsPage/RecordsControlsBar';
+import { fetchChurches as fetchChurchesApi, fetchRecords as fetchRecordsApi, fetchPriestOptions as fetchPriestOptionsApi } from './RecordsPage/useRecordsFetch';
+import { useAgGridConfig } from './RecordsPage/useAgGridConfig';
+import { useRecordSave } from './RecordsPage/useRecordSave';
 import {
     Alert,
     Box,
@@ -45,7 +47,7 @@ import {
     Typography
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
-import { ColDef, ICellRendererParams, themeQuartz } from 'ag-grid-community';
+import { ColDef } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
@@ -240,29 +242,6 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
 
   // Theme hook for dark mode detection
   const theme = useTheme();
-  const isDarkMode = theme.palette.mode === 'dark';
-
-  // AG Grid theme using Theming API (v34+) — matches MUI palette colors
-  const agGridTheme = useMemo(() => {
-    return themeQuartz.withParams(isDarkMode ? {
-      backgroundColor: '#0a0a0a',
-      headerBackgroundColor: theme.palette.primary.main,
-      headerTextColor: theme.palette.primary.contrastText,
-      foregroundColor: '#e0e0e0',
-      oddRowBackgroundColor: '#111111',
-      rowHoverColor: '#222222',
-      selectedRowBackgroundColor: '#333333',
-      borderColor: '#333333',
-    } : {
-      headerBackgroundColor: theme.palette.primary.main,
-      headerTextColor: theme.palette.primary.contrastText,
-      foregroundColor: '#1a1a1a',
-      oddRowBackgroundColor: '#fafafa',
-      rowHoverColor: '#eeeeee',
-      selectedRowBackgroundColor: '#e0e0e0',
-      borderColor: '#e0e0e0',
-    });
-  }, [isDarkMode, theme.palette.primary.main, theme.palette.primary.contrastText]);
 
   // Toast helper functions
   const showToast = useCallback((message: string, severity: 'success' | 'error' | 'info' = 'success') => {
@@ -271,142 +250,12 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
     setToastOpen(true);
   }, []);
 
-  // API functions
-  const fetchChurches = async () => {
-    try {
-      setLoading(true);
-      console.log('🔍 Fetching churches...');
-      
-      const churchData = await churchService.fetchChurches({ includeRecordCounts: true });
-      
-      // Add "All Churches" option at the beginning
-      const allChurchesOption: Church = {
-        id: 0, // Use 0 for "all" option
-        church_name: 'All Churches',
-        email: '',
-        is_active: true,
-        has_baptism_records: true,
-        has_marriage_records: true,
-        has_funeral_records: true,
-        setup_complete: true,
-        created_at: '',
-        updated_at: ''
-      };
-      
-      setChurches([allChurchesOption, ...churchData]);
-      console.log(`✅ Successfully loaded ${churchData.length} churches`);
-    } catch (err) {
-      console.error('❌ Error fetching churches:', err);
-      setError('Failed to fetch churches');
-      showToast('Failed to load churches', 'error');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchRecords = async (
-    recordType: string,
-    churchId?: number,
-    search?: string,
-    serverPage?: number,
-    serverLimit?: number,
-    sortField?: string,
-    sortDir?: string
-  ) => {
-    if (!recordType) return;
-    
-    const isSearchFetch = search !== undefined && search !== '';
-    
-    try {
-      if (isSearchFetch) {
-        setSearchLoading(true);
-      } else {
-        setLoading(true);
-      }
-      setError(null);
-      
-      const selectedType = RECORD_TYPE_CONFIGS.find(type => type.value === recordType);
-      if (!selectedType) {
-        throw new Error('Invalid record type selected');
-      }
-      
-      const querySearch = search !== undefined ? search : searchTerm;
-      const requestPage = (serverPage ?? page) + 1; // Convert 0-indexed to 1-indexed
-      const requestLimit = serverLimit ?? rowsPerPage;
-      
-      const activeSortField = sortField ?? sortConfig.key;
-      const activeSortDir = sortDir ?? sortConfig.direction;
-
-      let recordData;
-      if (churchId && churchId !== 0) {
-        recordData = await churchService.fetchChurchRecords(churchId, selectedType.apiEndpoint, {
-          page: requestPage,
-          limit: requestLimit,
-          search: querySearch,
-          sortField: activeSortField,
-          sortDirection: activeSortDir
-        });
-      } else {
-        const response = await fetch(`/api/${selectedType.apiEndpoint}-records?page=${requestPage}&limit=${requestLimit}&search=${encodeURIComponent(querySearch || '')}&sortField=${encodeURIComponent(activeSortField)}&sortDirection=${encodeURIComponent(activeSortDir)}`);
-        const data = await response.json();
-        
-        if (data && data.records) {
-          recordData = {
-            records: data.records,
-            totalRecords: data.totalRecords || data.pagination?.total || data.records.length,
-            currentPage: data.currentPage || data.pagination?.page || requestPage,
-            totalPages: data.totalPages || data.pagination?.pages || 1
-          };
-        } else {
-          throw new Error('Failed to fetch records from API');
-        }
-      }
-      
-      setRecords(recordData.records || []);
-      const total = recordData.totalRecords || recordData.records?.length || 0;
-      setTotalRecords(total);
-      
-      if (isSearchFetch) {
-        showToast(`Found ${total} match${total !== 1 ? 'es' : ''} for "${search}" in ${t(selectedType.labelKey)}`, 'success');
-      } else {
-        const displayCount = Math.min(requestLimit, total);
-        showToast(`Displaying ${displayCount} of ${total} ${t(selectedType.labelKey).toLowerCase()}`, 'success');
-      }
-      
-    } catch (err) {
-      if (process.env.NODE_ENV === 'development') {
-        console.error(`Error fetching ${recordType} records:`, err);
-      }
-      setError(err instanceof Error ? err.message : 'Failed to fetch records');
-    } finally {
-      setLoading(false);
-      setSearchLoading(false);
-    }
-  };
-
-  const fetchPriestOptions = async (recordType: string) => {
-    if (!selectedChurch) {
-      setPriestOptions([]);
-      return;
-    }
-    try {
-      const response = await LookupService.getClergy({
-        churchId: selectedChurch,
-        recordType,
-      });
-      
-      const validPriests = response.items
-        .map(item => item.value)
-        .filter((name: string) => name && name.trim() !== '');
-      
-      setPriestOptions(validPriests);
-    } catch (err) {
-      if (process.env.NODE_ENV === 'development') {
-        console.error('Error fetching priest options:', err);
-      }
-      setPriestOptions([]);
-    }
-  };
+  // API functions (delegated to extracted module)
+  const fetchCb = { setRecords, setTotalRecords, setLoading, setSearchLoading, setError, setChurches, setPriestOptions, showToast, t, page, rowsPerPage, searchTerm, sortConfig };
+  const fetchChurches = () => fetchChurchesApi({ setLoading, setChurches, setError, showToast });
+  const fetchRecords = (recordType: string, churchId?: number, search?: string, serverPage?: number, serverLimit?: number, sortField?: string, sortDir?: string) =>
+    fetchRecordsApi({ recordType, churchId, search, serverPage, serverLimit, sortField, sortDir }, fetchCb);
+  const fetchPriestOptions = (recordType: string) => fetchPriestOptionsApi(recordType, selectedChurch, setPriestOptions);
 
   // Effective church ID — resolves 0 to the single real church when only 1 exists
   const effectiveChurchId = useMemo(() => {
@@ -472,76 +321,40 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
 
   // Convert records to ChurchRecord format for AG Grid
   const convertToChurchRecords = useCallback((inputRecords: BaptismRecord[]): ChurchRecord[] => {
-    if (!inputRecords || !Array.isArray(inputRecords)) {
-      console.warn('convertToChurchRecords: Invalid records input', inputRecords);
-      return [];
-    }
-
+    if (!inputRecords || !Array.isArray(inputRecords)) return [];
     try {
-      const convertedRecords = inputRecords.map((originalRecord, index) => {
-        if (!originalRecord) {
-          console.warn('convertToChurchRecords: Null record found at index', index);
-          return null;
+      return inputRecords.map((rec, i) => {
+        if (!rec) return null;
+        let fields = [{ key: 'registryNumber', label: t('records.label_registry_number'), value: rec.registryNumber || '', type: 'text' as const, editable: false }];
+        if (selectedRecordType === 'marriage') {
+          const groom = `${rec.fname_groom || ''} ${rec.lname_groom || ''}`.trim();
+          const bride = `${rec.fname_bride || ''} ${rec.lname_bride || ''}`.trim();
+          fields.push(
+            { key: 'groom', label: t('records.section_groom').replace(' Information', ''), value: groom, type: 'text' as const, editable: false },
+            { key: 'bride', label: t('records.section_bride').replace(' Information', ''), value: bride, type: 'text' as const, editable: false },
+            { key: 'mdate', label: t('common.date'), value: rec.mdate || '', type: 'text' as const, editable: false },
+            { key: 'churchName', label: t('records.label_church'), value: rec.churchName || '', type: 'text' as const, editable: false },
+            { key: 'clergy', label: t('records.label_priest_select'), value: rec.clergy || '', type: 'text' as const, editable: false },
+          );
+        } else {
+          fields.push(
+            { key: 'firstName', label: t('common.first_name'), value: rec.firstName || '', type: 'text' as const, editable: false },
+            { key: 'lastName', label: t('common.last_name'), value: rec.lastName || '', type: 'text' as const, editable: false },
+            { key: 'dateOfBaptism', label: t('common.date'), value: rec.dateOfBaptism || '', type: 'text' as const, editable: false },
+            { key: 'churchName', label: t('records.label_church'), value: rec.churchName || '', type: 'text' as const, editable: false },
+            { key: 'priest', label: t('records.label_priest_select'), value: rec.priest || '', type: 'text' as const, editable: false },
+          );
         }
-
-        try {
-          // Build fields array based on record type
-          let fields = [
-            { key: 'registryNumber', label: t('records.label_registry_number'), value: originalRecord.registryNumber || '', type: 'text' as const, editable: false },
-          ];
-
-          if (selectedRecordType === 'marriage') {
-            // For marriage records, combine groom and bride names
-            const groomName = `${originalRecord.fname_groom || ''} ${originalRecord.lname_groom || ''}`.trim();
-            const brideName = `${originalRecord.fname_bride || ''} ${originalRecord.lname_bride || ''}`.trim();
-
-            fields.push(
-              { key: 'groom', label: t('records.section_groom').replace(' Information', ''), value: groomName, type: 'text' as const, editable: false },
-              { key: 'bride', label: t('records.section_bride').replace(' Information', ''), value: brideName, type: 'text' as const, editable: false },
-              { key: 'mdate', label: t('common.date'), value: originalRecord.mdate || '', type: 'text' as const, editable: false },
-              { key: 'churchName', label: t('records.label_church'), value: originalRecord.churchName || '', type: 'text' as const, editable: false },
-              { key: 'clergy', label: t('records.label_priest_select'), value: originalRecord.clergy || '', type: 'text' as const, editable: false }
-            );
-          } else {
-            // For baptism and funeral records
-            fields.push(
-              { key: 'firstName', label: t('common.first_name'), value: originalRecord.firstName || '', type: 'text' as const, editable: false },
-              { key: 'lastName', label: t('common.last_name'), value: originalRecord.lastName || '', type: 'text' as const, editable: false },
-              { key: 'dateOfBaptism', label: t('common.date'), value: originalRecord.dateOfBaptism || '', type: 'text' as const, editable: false },
-              { key: 'churchName', label: t('records.label_church'), value: originalRecord.churchName || '', type: 'text' as const, editable: false },
-              { key: 'priest', label: t('records.label_priest_select'), value: originalRecord.priest || '', type: 'text' as const, editable: false }
-            );
-          }
-
-          const churchRecord: ChurchRecord = {
-            id: originalRecord.id || `record-${index}`,
-            recordType: (selectedRecordType as 'baptism' | 'marriage' | 'funeral') || 'baptism',
-            fields: fields,
-            metadata: {
-              churchId: parseInt(originalRecord.churchId) || 1,
-              createdBy: 1,
-              createdAt: new Date(),
-              updatedAt: undefined,
-              status: 'active' as const,
-              version: 1
-            },
-            colorOverrides: {},
-            tags: []
-          };
-          return churchRecord;
-        } catch (recordError) {
-          console.error('Error converting individual record at index', index, recordError);
-          return null;
-        }
-      });
-
-      const validRecords = convertedRecords.filter(Boolean) as ChurchRecord[];
-      console.log(`Converted ${validRecords.length} out of ${inputRecords.length} records for AG Grid`);
-      return validRecords;
-    } catch (conversionError) {
-      console.error('Error in convertToChurchRecords:', conversionError);
-      return [];
-    }
+        return {
+          id: rec.id || `record-${i}`,
+          recordType: (selectedRecordType as 'baptism' | 'marriage' | 'funeral') || 'baptism',
+          fields,
+          metadata: { churchId: parseInt(rec.churchId) || 1, createdBy: 1, createdAt: new Date(), updatedAt: undefined, status: 'active' as const, version: 1 },
+          colorOverrides: {},
+          tags: [],
+        } as ChurchRecord;
+      }).filter(Boolean) as ChurchRecord[];
+    } catch { return []; }
   }, [selectedRecordType]);
 
   // Server-sorted records — no client-side re-sorting (server handles ORDER BY)
@@ -760,246 +573,19 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
     setRecordToDelete(null);
   }, []);
 
-  // AG Grid cell renderer: Status badge (New/Updated)
-  const agGridStatusRenderer = useCallback((params: ICellRendererParams) => {
-    const record = params.data;
-    if (!record) return null;
-    const isNew = isRecordNewWithin24Hours(record, nowReference);
-    const isUpdated = isRecordUpdatedWithin24Hours(record, nowReference);
-    if (isNew) {
-      return (
-        <Chip label={t('records.chip_new')} size="small" color="success" variant="filled"
-          sx={{ fontSize: '0.65rem', height: 20, fontWeight: 700 }} />
-      );
-    }
-    if (isUpdated) {
-      return (
-        <Chip label={t('records.chip_updated')} size="small" color="warning" variant="filled"
-          sx={{ fontSize: '0.65rem', height: 20, fontWeight: 700 }} />
-      );
-    }
-    return null;
-  }, [nowReference]);
+  // AG Grid config (theme, columns, row class rules) — extracted to hook
+  const { agGridTheme, agGridColumnDefs, agGridRowClassRules } = useAgGridConfig({
+    selectedRecordType, debouncedSearch, nowReference, isRecordSelected,
+    handleViewRecord, handleEditRecord, handleDeleteClick, handleGenerateCertificate,
+    highlightSearchMatch, t,
+  });
 
-  // AG Grid cell renderer: Row actions (View/Edit/Delete/Certificate)
-  const agGridActionsRenderer = useCallback((params: ICellRendererParams) => {
-    const record = params.data;
-    if (!record) return null;
-    return (
-      <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center', height: '100%' }}>
-        <Tooltip title={t('records.tooltip_view')}>
-          <IconButton size="small" onClick={() => handleViewRecord(record)} sx={{ opacity: 0.7, color: 'text.secondary', '&:hover': { opacity: 1, color: 'text.primary' } }}>
-            <Eye size={16} strokeWidth={1.5} />
-          </IconButton>
-        </Tooltip>
-        <Tooltip title={t('records.tooltip_edit')}>
-          <IconButton size="small" onClick={() => handleEditRecord(record)} sx={{ opacity: 0.7, color: 'text.secondary', '&:hover': { opacity: 1, color: 'text.primary' } }}>
-            <Pencil size={16} strokeWidth={1.5} />
-          </IconButton>
-        </Tooltip>
-        <Tooltip title={t('records.tooltip_delete')}>
-          <IconButton size="small" onClick={() => handleDeleteClick(record)} sx={{ opacity: 0.7, color: 'text.secondary', '&:hover': { opacity: 1, color: 'error.main' } }}>
-            <Trash2 size={16} strokeWidth={1.5} />
-          </IconButton>
-        </Tooltip>
-        {(selectedRecordType === 'baptism' || selectedRecordType === 'marriage') && (
-          <Tooltip title={t('records.tooltip_certificate')}>
-            <IconButton size="small" onClick={() => handleGenerateCertificate()} sx={{ opacity: 0.7, color: 'text.secondary', '&:hover': { opacity: 1, color: 'text.primary' } }}>
-              <FileText size={16} strokeWidth={1.5} />
-            </IconButton>
-          </Tooltip>
-        )}
-      </Box>
-    );
-  }, [selectedRecordType, handleViewRecord, handleEditRecord, handleDeleteClick, handleGenerateCertificate]);
-
-  // Memoized AG Grid column definitions to prevent infinite re-renders
-  const agGridColumnDefs = useMemo(() => {
-    const cols: ColDef[] = [];
-    // Status column with New/Updated badge
-    cols.push({
-      headerName: '',
-      field: 'created_at',
-      minWidth: 70,
-      maxWidth: 70,
-      width: 70,
-      sortable: false,
-      filter: false,
-      cellRenderer: agGridStatusRenderer,
-      pinned: 'left',
-    });
-    // Data columns — inject cellRenderer for search-term highlighting
-    getColumnDefinitions(selectedRecordType).forEach((col: any) => {
-      cols.push({
-        field: col.field,
-        headerName: col.headerName,
-        flex: 1,
-        minWidth: 120,
-        sortable: true,
-        filter: false,
-        valueGetter: (params: any) => getCellValue(params.data, col),
-        cellRenderer: debouncedSearch
-          ? (params: ICellRendererParams) => {
-              const text = params.valueFormatted ?? params.value;
-              const str = text == null ? '' : String(text);
-              return highlightSearchMatch(str, debouncedSearch);
-            }
-          : undefined,
-      });
-    });
-    cols.push({
-      headerName: 'Actions',
-      field: 'id',
-      minWidth: 180,
-      width: 180,
-      maxWidth: 180,
-      sortable: false,
-      filter: false,
-      pinned: 'right',
-      cellRenderer: agGridActionsRenderer,
-    });
-    return cols;
-  }, [selectedRecordType, debouncedSearch, agGridStatusRenderer, agGridActionsRenderer]);
-
-  // Memoized AG Grid row class rules — stable reference
-  const agGridRowClassRules = useMemo(
-    () => getAgGridRowClassRules(isRecordSelected, nowReference),
-    [isRecordSelected, nowReference]
-  );
-
-  const handleSaveRecord = async () => {
-    try {
-      setLoading(true);
-      
-      // Record-type specific validation
-      let validationError = '';
-      
-      if (selectedRecordType === 'marriage') {
-        // Marriage records require: groom/bride names, marriage date
-        if (!formData.groomFirstName || !formData.groomLastName || 
-            !formData.brideFirstName || !formData.brideLastName || 
-            !formData.marriageDate) {
-          validationError = 'Please fill in groom names, bride names, and marriage date';
-        }
-      } else if (selectedRecordType === 'funeral') {
-        // Funeral records require: deceased name, death date
-        // Check both form-specific keys (deceasedFirstName) and transform keys (firstName)
-        if (!(formData.deceasedFirstName || formData.firstName) || 
-            !(formData.deceasedLastName || formData.lastName) || 
-            !(formData.deathDate || formData.dateOfDeath)) {
-          validationError = 'Please fill in deceased name and death date';
-        }
-      } else {
-        // Baptism records require: first name, last name, baptism date
-        if (!formData.firstName || !formData.lastName || !formData.dateOfBaptism) {
-          validationError = 'Please fill in first name, last name, and baptism date';
-        }
-      }
-      
-      if (validationError) {
-        showToast(validationError, 'error');
-        return;
-      }
-
-      // Always use selectedChurch as the source of truth — ignore any form-provided churchId
-      const churchId = selectedChurch ? selectedChurch.toString() : '';
-      const churchName = churches.find(c => c.id === selectedChurch)?.church_name || '';
-      
-      // Validate church ID
-      if (!churchId || churchId === '0' || churchId === '') {
-        showToast('Please select a church before saving records', 'error');
-        setLoading(false);
-        return;
-      }
-      
-      const apiService = createRecordsApiService(churchId);
-      
-      if (editingRecord) {
-        // Update existing record
-        const updatedRecord: BaptismRecord = {
-          ...editingRecord,
-          ...formData,
-          churchName,
-          updatedAt: new Date().toISOString(),
-        } as BaptismRecord;
-        
-        // Call the backend API
-        const response = await apiService.updateRecord(selectedRecordType, editingRecord.id, updatedRecord);
-        
-        if (response.success && response.data) {
-          setRecords(prev => prev.map(r => r.id === editingRecord.id ? response.data as BaptismRecord : r));
-          showToast('Record updated successfully', 'success');
-          
-          // If editing from the view modal, update viewing record and switch to view mode
-          if (viewDialogOpen && viewEditMode === 'edit') {
-            setViewingRecord(response.data as BaptismRecord);
-            setViewEditMode('view');
-          } else {
-            setDialogOpen(false);
-          }
-          
-          // Emit event for auto-refresh
-          recordsEvents.emit({
-            churchId: selectedChurch,
-            recordType: selectedRecordType as any,
-            mutationType: 'update',
-            recordId: editingRecord.id
-          });
-        } else {
-          showToast(response.error || 'Failed to update record', 'error');
-        }
-      } else {
-        // Create new record - map fields based on record type
-        let newRecord: any = {
-          ...formData,
-          churchName,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        };
-        
-        // Map funeral record fields to backend schema
-        if (selectedRecordType === 'funeral') {
-          newRecord = {
-            firstName: formData.deceasedFirstName || formData.firstName,
-            lastName: formData.deceasedLastName || formData.lastName,
-            dateOfDeath: formData.deathDate || formData.dateOfDeath,
-            burialDate: formData.burialDate,
-            age: formData.age,
-            priest: formData.priest,
-            burialLocation: formData.burialLocation,
-            church_id: churchId,
-          };
-        }
-        
-        // Call the backend API
-        const response = await apiService.createRecord(selectedRecordType, newRecord);
-        
-        if (response.success && response.data) {
-          setRecords(prev => [...prev, response.data as BaptismRecord]);
-          showToast('Record created successfully', 'success');
-          setDialogOpen(false);
-          
-          // Set the newly created record as selected
-          handleRowSelect(response.data.id);
-          
-          // Emit event for auto-refresh
-          recordsEvents.emit({
-            churchId: selectedChurch,
-            recordType: selectedRecordType as any,
-            mutationType: 'create',
-            recordId: response.data.id
-          });
-        } else {
-          showToast(response.error || 'Failed to create record', 'error');
-        }
-      }
-    } catch (err) {
-      console.error('Save error:', err);
-      showToast('Failed to save record', 'error');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const handleSaveRecord = useRecordSave({
+    selectedRecordType, selectedChurch, churches, editingRecord, formData,
+    viewDialogOpen, viewEditMode,
+    setLoading, setRecords, setDialogOpen, setViewingRecord, setViewEditMode,
+    showToast, handleRowSelect,
+  });
 
   // Navigate to Interactive Reports with pre-selected record type
   const handleGenerateReport = () => {

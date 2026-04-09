@@ -41,6 +41,8 @@ import { useGallerySuggestions } from './Gallery/useGallerySuggestions';
 import DirectorySidebar from './Gallery/DirectorySidebar';
 import MoveRenameDialogs from './Gallery/MoveRenameDialogs';
 import { openImageInNewWindow } from './Gallery/openInNewWindow';
+import { useImageUsage } from './Gallery/useImageUsage';
+import { exportCSV, exportUsedImages } from './Gallery/exportUtils';
 
 const Gallery: React.FC = () => {
   const theme = useTheme();
@@ -53,7 +55,6 @@ const Gallery: React.FC = () => {
   const [sortBy, setSortBy] = useState<SortBy>('date');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
   const [usageFilter, setUsageFilter] = useState<UsageFilter>('all');
-  const [checkingUsage, setCheckingUsage] = useState(false);
   const [exportingUsedImages, setExportingUsedImages] = useState(false);
   const [selectedDirectory, setSelectedDirectory] = useState<string>(''); // Default to root (empty = all images)
   const [directoryTree, setDirectoryTree] = useState<any>({ directories: [], files: [] });
@@ -72,9 +73,8 @@ const Gallery: React.FC = () => {
     handleCloseUploadDialog, handleRemoveFile,
   } = useGalleryUpload();
 
-  const hasAutoCheckedUsage = useRef(false); // Track if auto-check has been triggered
-  const lastCheckedDirectory = useRef<string>(''); // Track which directory we last checked
-  const lastImageCount = useRef<number>(0); // Track image count when we last checked
+  // Image usage checking
+  const { checkingUsage, checkImageUsage } = useImageUsage({ images, setImages, selectedDirectory, usageFilter });
 
 
   // Single source of truth: activeImages combines directory selection, usage filter, and sorting
@@ -117,79 +117,6 @@ const Gallery: React.FC = () => {
     setCurrentIndex((prev) => (prev === activeImages.length - 1 ? 0 : prev + 1));
   };
 
-  // Check image usage in codebase (with batching to handle all images)
-  const checkImageUsage = async (imagesToCheck: GalleryImage[], checkAll = false) => {
-    if (!imagesToCheck || imagesToCheck.length === 0) return;
-    
-    setCheckingUsage(true);
-    
-    try {
-      // Always check all images when explicitly requested
-      // Backend will handle batching internally
-      const imagesToProcess = imagesToCheck.filter(img => img != null);
-      
-      // Process in batches of 500 (backend limit) to avoid timeouts
-      const BATCH_SIZE = 500;
-      const batches: GalleryImage[][] = [];
-      for (let i = 0; i < imagesToProcess.length; i += BATCH_SIZE) {
-        batches.push(imagesToProcess.slice(i, i + BATCH_SIZE));
-      }
-      
-      let allUsage: { [key: string]: boolean } = {};
-      
-      // Process batches sequentially to avoid overwhelming the server
-      for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
-        const batch = batches[batchIndex];
-        
-        const response = await fetch('/api/gallery/check-usage', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          credentials: 'include',
-          body: JSON.stringify({
-            images: batch.map(img => ({
-              name: img.name || '',
-              path: img.path || '',
-            }))
-          })
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          if (data.success && data.usage) {
-            // Merge batch results
-            allUsage = { ...allUsage, ...data.usage };
-          }
-        } else {
-          const errorData = await response.json().catch(() => ({}));
-          console.error(`Usage check failed for batch ${batchIndex + 1}/${batches.length}:`, errorData);
-        }
-      }
-
-      // Update all images with usage information
-      setImages(prevImages => {
-        if (!prevImages || prevImages.length === 0) return prevImages;
-        const updated = prevImages.map(img => {
-          if (!img) return img;
-          // If the image name is in the usage map, use that value
-          // Otherwise, keep as undefined (not checked) if it wasn't in any batch
-          const usageValue = allUsage[img.name];
-          return {
-            ...img,
-            isUsed: usageValue !== undefined ? usageValue : img.isUsed // Preserve undefined if not checked
-          };
-        });
-        return sortImages(updated);
-      });
-    } catch (error: any) {
-      console.error('Error checking image usage:', error);
-      // Don't mark as unknown on error - preserve existing state
-    } finally {
-      setCheckingUsage(false);
-    }
-  };
-
   // Re-sort images when sort criteria changes
   useEffect(() => {
     if (images.length > 0) {
@@ -198,38 +125,6 @@ const Gallery: React.FC = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sortBy, sortOrder]);
-
-  // Auto-check usage when filter changes for the first time (not 'all')
-  useEffect(() => {
-    // Only auto-check once, and only if:
-    // 1. Filter is not 'all' (user wants to see filtered results)
-    // 2. We haven't auto-checked yet
-    // 3. We have images loaded
-    // 4. We're not already checking
-    if (
-      !hasAutoCheckedUsage.current &&
-      usageFilter !== 'all' &&
-      images.length > 0 &&
-      !checkingUsage
-    ) {
-      // Check if there are any images with undefined usage status
-      const hasUncheckedImages = images.some(img => img.isUsed === undefined);
-      
-      if (hasUncheckedImages) {
-        hasAutoCheckedUsage.current = true;
-        console.log(`🔄 Auto-checking usage due to filter change to: ${usageFilter}`);
-        checkImageUsage(images, true);
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [usageFilter]);
-
-  // Reset auto-check flag when directory changes
-  useEffect(() => {
-    hasAutoCheckedUsage.current = false;
-    lastCheckedDirectory.current = '';
-    lastImageCount.current = 0;
-  }, [selectedDirectory]);
 
   // Load directory tree on mount, then cleanup empty directories
   useEffect(() => {
@@ -245,45 +140,6 @@ const Gallery: React.FC = () => {
   useEffect(() => {
     loadImages();
   }, [selectedDirectory]);
-
-  // Automatically check usage after images are loaded for a directory
-  // This effect runs when selectedDirectory changes, then waits for images to load
-  useEffect(() => {
-    // Only auto-check if a specific directory is selected (not root)
-    if (selectedDirectory === '') {
-      return;
-    }
-    
-    // Reset flags when directory changes
-    hasAutoCheckedUsage.current = false;
-    lastImageCount.current = 0;
-    
-    // Wait for images to load, then check usage
-    // Use a longer delay to ensure images are fully loaded
-    const checkTimer = setTimeout(() => {
-      // Only check if:
-      // 1. We have images loaded
-      // 2. We haven't already checked this directory (directory is different or never checked)
-      // 3. We're not already checking
-      // 4. Images have actually been loaded (count > 0)
-      const directoryNotChecked = selectedDirectory !== lastCheckedDirectory.current || lastCheckedDirectory.current === '';
-      
-      if (
-        images.length > 0 &&
-        selectedDirectory !== '' &&
-        directoryNotChecked &&
-        !checkingUsage &&
-        !hasAutoCheckedUsage.current
-      ) {
-        lastCheckedDirectory.current = selectedDirectory;
-        lastImageCount.current = images.length;
-        hasAutoCheckedUsage.current = true;
-        checkImageUsage(images, true);
-      }
-    }, 800); // Wait longer to ensure images are loaded after directory change
-    
-    return () => clearTimeout(checkTimer);
-  }, [selectedDirectory]); // Only trigger on directory change, NOT on images change
 
   const loadDirectoryTree = async () => {
     setLoadingTree(true);
@@ -333,97 +189,47 @@ const Gallery: React.FC = () => {
 
   const loadImages = async () => {
     try {
-      // Root view (empty string) should load all images recursively
-      // Otherwise use selected directory (no default fallback - use exactly what's selected)
       const path = selectedDirectory === '' ? '' : selectedDirectory;
       const url = `/api/gallery/images?path=${encodeURIComponent(path)}&recursive=1`;
-      console.log('Loading images from:', url);
-      
-      const response = await fetch(url, {
-        credentials: 'include',
-      });
-      
+
+      const response = await fetch(url, { credentials: 'include' });
+
       if (response.ok) {
         const data = await response.json();
-        console.log('🖼️ Images loaded:', {
-          count: data.count || 0,
-          path: data.path,
-          recursive: data.recursive
-        });
-        
-        // Log debug info if available
-        if (data.debug) {
-          console.log('🔍 [DEBUG] Images API debug info:', data.debug);
-          if (data.debug.resolvedImagesRoot) {
-            console.log(`🔍 [DEBUG] Images root: ${data.debug.resolvedImagesRoot}`);
-            console.log(`🔍 [DEBUG] Root exists: ${data.debug.rootExists}`);
-            console.log(`🔍 [DEBUG] Root readable: ${data.debug.rootCanRead}`);
-            if (data.debug.sampleImage) {
-              console.log(`🔍 [DEBUG] Sample image:`, data.debug.sampleImage);
-            }
-          }
-        }
-        
-        // Gallery API returns { success: true, count: number, images: [...] }
-        // Filter to only show image files (jpg, jpeg, png, gif, tiff, webp, svg)
+        if (data.debug) console.log('🔍 [DEBUG] Images API:', data.debug);
+
         const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.tiff', '.webp', '.svg'];
         const imageFiles = (data.images || []).filter((file: any) => {
-          const fileName = file.name || file.path || '';
-          const ext = fileName.split('.').pop()?.toLowerCase() || '';
+          const ext = (file.name || file.path || '').split('.').pop()?.toLowerCase() || '';
           return imageExtensions.includes(`.${ext}`);
         });
-        
-        // Debug: Log API response structure if needed
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('debug') === '1' && imageFiles.length > 0) {
-          console.log('🔍 [DEBUG] Sample image from API:', imageFiles[0]);
-          console.log('🔍 [DEBUG] Sample image keys:', Object.keys(imageFiles[0]));
-        }
-        
-        // Transform the data to match GalleryImage interface
+
         const transformedImages = imageFiles.map((file: any, index: number) => {
-          // Handle metadata - preserve actual values or error status from API
           let fileSize: number | null = null;
           let fileModified: string | null = null;
           let fileCreated: string | null = null;
           let metadataError: string | null = null;
-          
-          // Check if API returned error status
+
           if (file.metadataStatus === 'error') {
             metadataError = file.statError || 'Failed to read file metadata';
-            // Keep size/modified/created as null when there's an error
           } else {
-            // Parse size as number - API should always return numeric or null
             if (file.size !== undefined && file.size !== null && file.size !== '') {
               fileSize = typeof file.size === 'number' ? file.size : parseInt(String(file.size), 10);
-              if (isNaN(fileSize) || fileSize < 0) {
-                fileSize = null;
-                metadataError = 'Invalid file size value';
-              }
+              if (isNaN(fileSize) || fileSize < 0) { fileSize = null; metadataError = 'Invalid file size value'; }
             }
-            
-            // Preserve date strings exactly as received - API should return ISO strings or null
             fileModified = (file.modified && file.modified !== '') ? file.modified : null;
             fileCreated = (file.created && file.created !== '') ? file.created : null;
           }
-          
-          // Resolve image URL with proper fallback
-          // Priority: file.url > file.path > derive from path > fallback
+
           let imageUrl = file.url;
           if (!imageUrl && file.path) {
             imageUrl = file.path.startsWith('/') ? file.path : `${IMAGES_BASE_PATH}/${file.path}`;
           }
           if (!imageUrl && file.name) {
-            // Try to extract directory from path if available
             const directory = file.path ? extractDirectoryFromPath(file.path) : null;
-            if (directory) {
-              imageUrl = buildImageUrl(directory, file.name);
-            } else {
-              // Last resort: use first canonical directory (should rarely happen)
-              imageUrl = `${IMAGES_BASE_PATH}/${CANONICAL_IMAGE_DIRECTORIES[0]}/${file.name}`;
-            }
+            imageUrl = directory ? buildImageUrl(directory, file.name) : `${IMAGES_BASE_PATH}/${CANONICAL_IMAGE_DIRECTORIES[0]}/${file.name}`;
           }
-          
+
           return {
             id: `img-${index}-${file.name}`,
             name: file.name || 'Unknown',
@@ -433,43 +239,19 @@ const Gallery: React.FC = () => {
             modified: fileModified,
             size: fileSize,
             type: file.type || file.name?.split('.').pop()?.toLowerCase() || 'unknown',
-            isUsed: undefined, // Will be checked separately
-            metadataError: metadataError || undefined, // Store error if present
+            isUsed: undefined,
+            metadataError: metadataError || undefined,
           };
         });
-        
-        // Don't sort here - sorting will be applied in activeImages useMemo
-        // This ensures sorting is applied after filtering
+
         setImages(transformedImages);
-        
-        // Reset carousel index when images change
         setCurrentIndex(0);
-        
-        // Note: Usage status is not auto-checked on load
-        // Users must click "Refresh Usage" to check which images are used in the codebase
-        // This prevents slow page loads and timeouts for large image collections
       } else {
-        // Log the actual error for debugging
-        const errorData = await response.json().catch(() => ({}));
-        console.error('Gallery API error:', {
-          status: response.status,
-          statusText: response.statusText,
-          error: errorData,
-          url: url
-        });
+        console.error('Gallery API error:', response.status, response.statusText);
         setImages([]);
-        
-        // Show user-friendly error message
-        if (response.status === 502) {
-          console.error('Backend server may be down or the gallery API endpoint is not available');
-        }
       }
     } catch (error: any) {
-      // Log the actual error for debugging
-      console.error('Gallery API request failed:', {
-        error: error.message,
-        stack: error.stack
-      });
+      console.error('Gallery API request failed:', error.message);
       setImages([]);
     }
   };
@@ -742,143 +524,9 @@ const Gallery: React.FC = () => {
     }
   };
 
-  const handleExportCSV = () => {
-    if (images.length === 0) {
-      alert('No images to export');
-      return;
-    }
+  const handleExportCSV = () => exportCSV(images);
 
-    // Create CSV content
-    const headers = ['Name', 'Path', 'Created', 'Type', 'Size'];
-    const rows = images.map(img => [
-      img.name,
-      img.path,
-      img.created || 'Unknown',
-      img.type || 'Unknown',
-      img.size ? `${(img.size / 1024).toFixed(2)} KB` : 'Unknown'
-    ]);
-
-    const csvContent = [
-      headers.join(','),
-      ...rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
-    ].join('\n');
-
-    // Create and download file
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    link.setAttribute('href', url);
-    link.setAttribute('download', `gallery-images-${new Date().toISOString().split('T')[0]}.csv`);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  const handleExportUsedImages = async () => {
-    try {
-      // Show loading state
-      setExportingUsedImages(true);
-      setUploadError(null);
-      
-      // Fetch used images list from API with pagination support
-      // Backend will handle batching internally, but we'll fetch all pages if needed
-      let allUsedImages: any[] = [];
-      let offset = 0;
-      const limit = 200; // Backend batch size
-      let hasMore = true;
-      let totalImages = 0;
-      let checkedImages = 0;
-      let limited = false;
-      
-      while (hasMore) {
-        const response = await fetch(`/api/gallery/used-images?format=json&offset=${offset}&limit=${limit}`, {
-          credentials: 'include',
-        });
-
-        if (!response.ok) {
-          const errorText = await response.text();
-          let errorMessage = 'Failed to export used images list';
-          try {
-            const data = JSON.parse(errorText);
-            errorMessage = data.error || data.message || errorMessage;
-          } catch (e) {
-            errorMessage = errorText || errorMessage;
-          }
-          alert(`Error: ${errorMessage}`);
-          setUploadError(errorMessage);
-          setExportingUsedImages(false);
-          return;
-        }
-        
-        const data = await response.json();
-        
-        if (data.success && data.used) {
-          allUsedImages = [...allUsedImages, ...data.used];
-          totalImages = data.total_images || totalImages;
-          checkedImages = data.checked_images || checkedImages;
-          limited = data.limited || limited;
-          
-          // Check if there are more pages
-          if (data.used.length < limit || offset + limit >= checkedImages) {
-            hasMore = false;
-          } else {
-            offset += limit;
-          }
-        } else {
-          hasMore = false;
-        }
-      }
-      
-      // Generate text output
-      let output = `# Images Actively Used in Production\n\n`;
-      output += `Generated: ${new Date().toISOString()}\n`;
-      output += `Total Images: ${totalImages}\n`;
-      output += `Checked Images: ${checkedImages}\n`;
-      output += `Used Images: ${allUsedImages.length}\n`;
-      if (limited) {
-        output += `Note: Scanning was limited due to performance constraints\n`;
-      }
-      output += `\n## Used Images (${allUsedImages.length})\n\n`;
-      
-      allUsedImages.forEach((img, index) => {
-        output += `${index + 1}. **${img.name}**\n`;
-        output += `   - Path: ${img.path}\n`;
-        output += `   - Size: ${img.size ? (img.size / 1024).toFixed(2) + ' KB' : 'Unknown'}\n`;
-        output += `   - Type: ${img.type ? img.type.toUpperCase() : 'Unknown'}\n`;
-        output += `   - Modified: ${img.modified ? new Date(img.modified).toLocaleString() : 'Unknown'}\n`;
-        if (img.referencedIn && img.referencedIn.length > 0) {
-          output += `   - Referenced in:\n`;
-          img.referencedIn.forEach((ref: string) => {
-            output += `     - ${ref}\n`;
-          });
-        }
-        output += `\n`;
-      });
-      
-      // Create and download file
-      const blob = new Blob([output], { type: 'text/plain;charset=utf-8;' });
-      const link = document.createElement('a');
-      const url = URL.createObjectURL(blob);
-      link.setAttribute('href', url);
-      link.setAttribute('download', `used-images-${new Date().toISOString().split('T')[0]}.txt`);
-      link.style.visibility = 'hidden';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-      
-      // Show success message with counts
-      alert(`Used images list exported successfully!\nTotal: ${totalImages}, Checked: ${checkedImages}, Used: ${allUsedImages.length}${limited ? ' (limited)' : ''}`);
-    } catch (error: any) {
-      console.error('Error exporting used images:', error);
-      const errorMsg = error.message || 'Failed to export used images list. Please check the browser console for details.';
-      alert(`Error: ${errorMsg}`);
-      setUploadError(errorMsg);
-    } finally {
-      setExportingUsedImages(false);
-    }
-  };
+  const handleExportUsedImages = () => exportUsedImages(setExportingUsedImages, null);
 
   // No longer needed - MUI DataGrid uses React components for cell rendering
 

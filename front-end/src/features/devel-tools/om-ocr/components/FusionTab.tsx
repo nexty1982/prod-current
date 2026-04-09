@@ -10,13 +10,11 @@ import {
   Step,
   StepLabel,
   StepContent,
-  Button,
   Typography,
   Stack,
   Chip,
   CircularProgress,
   Alert,
-  Paper,
   FormControlLabel,
   alpha,
   useTheme,
@@ -31,39 +29,24 @@ import {
   IconDeviceFloppy,
   IconCheck,
   IconAlertCircle,
-  IconChevronRight,
-  IconChevronLeft,
 } from '@tabler/icons-react';
 
 import {
   FusionEntry,
-  FusionState,
   DetectedLabel,
   MappedField,
-  FusionDraft,
-  VisionResponse,
   BBox,
   EntryArea,
-  FieldSelection,
   FieldExtraction,
 } from '../types/fusion';
-import { RECORD_FIELDS } from '../config/recordFields';
 import { getRecordSchema, validateFieldKeys } from '@/shared/recordSchemas/registry';
-import {
-  detectEntries,
-  detectLabels,
-  autoMapFields,
-  parseVisionResponse,
-  getVisionPageSize,
-  filterEntryByBbox,
-} from '../utils/visionParser';
+import { getVisionPageSize } from '../utils/visionParser';
 import { apiClient } from '@/shared/lib/axiosInstance';
 import { useOcrSelection } from '../context/OcrSelectionContext';
 
 // EntryEditorDialog - import directly (no lazy needed, it's a simple dialog with no cycles)
 import EntryEditorDialog from './EntryEditorDialog';
 import type { FusionTabProps } from './FusionTab/types';
-import EntryListPanel from './FusionTab/EntryListPanel';
 import SaveCommitStep from './FusionTab/SaveCommitStep';
 import { getEntryColor } from './FusionTab/fusionConstants';
 import { useFusionDrafts } from './FusionTab/useFusionDrafts';
@@ -73,6 +56,12 @@ import DetectEntriesStep from './FusionTab/DetectEntriesStep';
 import FusionProgressHeader from './FusionTab/FusionProgressHeader';
 import MapFieldsStep from './FusionTab/MapFieldsStep';
 import StepIcon from './FusionTab/StepIcon';
+import { handleDetectEntriesLogic } from './FusionTab/detectEntriesHandler';
+import { handleDetectLabelsLogic, handleAutoMapLogic, handleFieldChangeLogic } from './FusionTab/stepHandlers';
+import { handleBboxUpdateLogic, handleSaveBboxLogic } from './FusionTab/bboxHandlers';
+import { handleDeleteEntryLogic } from './FusionTab/deleteEntryHandler';
+import { loadExistingData } from './FusionTab/loadExistingData';
+import { handleEntrySwitch } from './FusionTab/entrySwitchLogic';
 
 // ============================================================================
 // Component
@@ -194,103 +183,11 @@ const FusionTab: React.FC<FusionTabProps> = ({
 
   // Delete an entry (defined early so it can be used in entry editor handlers)
   const handleDeleteEntry = useCallback((entryIndex: number) => {
-    if (entries.length <= 1) {
-      setError('Cannot delete the last entry. At least one entry is required.');
-      return;
-    }
-
-    // Remove entry
-    setEntries(prev => prev.filter((_, idx) => idx !== entryIndex));
-
-    // Adjust selected index if needed
-    if (selectedEntryIndex === entryIndex) {
-      setSelectedEntryIndex(entryIndex > 0 ? entryIndex - 1 : 0);
-    } else if (selectedEntryIndex !== null && selectedEntryIndex > entryIndex) {
-      setSelectedEntryIndex(selectedEntryIndex - 1);
-    }
-
-    // Remove entry data
-    setEntryData(prev => {
-      const newData = new Map<number, any>();
-      // Reindex all entries after the deleted one
-      prev.forEach((data, idx) => {
-        if (idx < entryIndex) {
-          newData.set(idx, data);
-        } else if (idx > entryIndex) {
-          newData.set(idx - 1, data);
-        }
-      });
-      return newData;
+    handleDeleteEntryLogic(entryIndex, {
+      entries, selectedEntryIndex, drafts,
+      setEntries, setSelectedEntryIndex, setEntryData, setDirtyEntries,
+      setOriginalBboxes, setManualEditMode, setCompletedEntries, setDrafts, setError,
     });
-
-    // Remove from dirty entries
-    setDirtyEntries(prev => {
-      const next = new Set(prev);
-      next.delete(entryIndex);
-      // Reindex dirty entries
-      const reindexed = new Set<number>();
-      prev.forEach(idx => {
-        if (idx < entryIndex) {
-          reindexed.add(idx);
-        } else if (idx > entryIndex) {
-          reindexed.add(idx - 1);
-        }
-      });
-      return reindexed;
-    });
-
-    // Remove from original bboxes
-    setOriginalBboxes(prev => {
-      const next = new Map(prev);
-      next.delete(entryIndex);
-      // Reindex bboxes
-      const reindexed = new Map<number, BBox>();
-      prev.forEach((bbox, idx) => {
-        if (idx < entryIndex) {
-          reindexed.set(idx, bbox);
-        } else if (idx > entryIndex) {
-          reindexed.set(idx - 1, bbox);
-        }
-      });
-      return reindexed;
-    });
-
-    // Remove from manual edit mode
-    setManualEditMode(prev => {
-      const next = new Set(prev);
-      next.delete(entryIndex);
-      // Reindex manual edit mode
-      const reindexed = new Set<number>();
-      prev.forEach(idx => {
-        if (idx < entryIndex) {
-          reindexed.add(idx);
-        } else if (idx > entryIndex) {
-          reindexed.add(idx - 1);
-        }
-      });
-      return reindexed;
-    });
-
-    // Remove from completion tracking
-    setCompletedEntries(prev => {
-      const next = new Set(prev);
-      next.delete(entryIndex);
-      const reindexed = new Set<number>();
-      prev.forEach(idx => {
-        if (idx < entryIndex) {
-          reindexed.add(idx);
-        } else if (idx > entryIndex) {
-          reindexed.add(idx - 1);
-        }
-      });
-      return reindexed;
-    });
-
-    // Remove draft if exists
-    const draft = drafts.find(d => d.entry_index === entryIndex);
-    if (draft && draft.id) {
-      setDrafts(prev => prev.filter(d => d.entry_index !== entryIndex));
-    }
   }, [entries.length, selectedEntryIndex, drafts]);
 
   // Entry editor handlers
@@ -351,18 +248,10 @@ const FusionTab: React.FC<FusionTabProps> = ({
   const [dirtyEntries, setDirtyEntries] = useState<Set<number>>(new Set());
   const [originalBboxes, setOriginalBboxes] = useState<Map<number, BBox>>(new Map());
 
-
   // Check if Vision JSON is available
   const hasVisionData = useMemo(() => {
     return ocrResult?.fullTextAnnotation?.pages?.length > 0;
   }, [ocrResult]);
-
-  // Get vision page dimensions
-  const visionPageSize = useMemo(() => {
-    return getVisionPageSize(ocrResult);
-  }, [ocrResult]);
-
-
 
   // Check if an entry is complete (ready for review)
   // An entry is complete if it has been saved as a draft OR has any mapped fields
@@ -428,59 +317,11 @@ const FusionTab: React.FC<FusionTabProps> = ({
   }, [selectedEntryIndex, completionState, entries, allEntriesComplete]);
 
   // Load stored entry data when switching entries
-  // Only auto-advance step if we're already past step 0 (Detect Entries)
-  // This prevents auto-advance when user is editing bboxes on step 0
   useEffect(() => {
-    // Don't auto-advance if we're on step 0 (Detect Entries) - let user manually proceed
-    if (activeStep === 0) {
-      return;
-    }
-
-    if (selectedEntryIndex !== null && entryData.has(selectedEntryIndex)) {
-      const data = entryData.get(selectedEntryIndex)!;
-      setDetectedLabels(data.labels || []);
-      setMappedFields(data.fields || {});
-      setRecordType(data.recordType || initialRecordType);
-      
-      // If this entry has labels detected, go to Map Fields step
-      if (data.labels && data.labels.length > 0) {
-        setActiveStep(2); // Map Fields
-      } else {
-        setActiveStep(1); // Anchor Labels
-      }
-    } else if (selectedEntryIndex !== null && entries[selectedEntryIndex]) {
-      // New entry - reset fields and auto-detect labels, then go to Map Fields
-      setDetectedLabels([]);
-      setMappedFields({});
-      
-      // Auto-detect labels for new entry
-      const entry = entries[selectedEntryIndex];
-      const currentRecordType = initialRecordType;
-      const labels = detectLabels(entry, currentRecordType);
-      
-      if (labels.length > 0) {
-        setDetectedLabels(labels);
-        setEntryData(prev => {
-          const newData = new Map(prev);
-          newData.set(selectedEntryIndex, { labels, fields: {}, recordType: currentRecordType });
-          return newData;
-        });
-        
-        // Auto-map fields based on detected labels
-        const fields = autoMapFields(entry, labels, currentRecordType, stickyDefaults);
-        setMappedFields(fields);
-        setEntryData(prev => {
-          const newData = new Map(prev);
-          const existing = newData.get(selectedEntryIndex) || { labels: [], fields: {}, recordType: currentRecordType };
-          newData.set(selectedEntryIndex, { ...existing, fields });
-          return newData;
-        });
-        
-        setActiveStep(2); // Go to Map Fields
-      } else {
-        setActiveStep(1); // Anchor Labels if no labels detected
-      }
-    }
+    handleEntrySwitch({
+      activeStep, selectedEntryIndex, entries, entryData, initialRecordType, stickyDefaults,
+      setDetectedLabels, setMappedFields, setRecordType, setActiveStep, setEntryData,
+    });
   }, [selectedEntryIndex, entryData, entries, initialRecordType, ocrResult, activeStep]);
 
   // Effect to check for auto-advance after saves
@@ -492,201 +333,19 @@ const FusionTab: React.FC<FusionTabProps> = ({
 
   // Handle bbox update for an entry - updates both entries and entryAreas
   const handleBboxUpdate = useCallback((entryIndex: number, newBbox: BBox) => {
-    const entry = entries[entryIndex];
-    if (!entry) return;
-
-    // Update entry bbox and filter lines/tokens
-    setEntries(prev => {
-      const updated = [...prev];
-      if (updated[entryIndex]) {
-        const entryWithNewBbox = { ...updated[entryIndex], bbox: newBbox };
-        const filteredEntry = filterEntryByBbox(entryWithNewBbox);
-        updated[entryIndex] = filteredEntry;
-      }
-      return updated;
+    handleBboxUpdateLogic(entryIndex, newBbox, {
+      entries, entryAreas, completionState, selectedEntryIndex, hasVisionData,
+      setEntries, setEntryAreas, setDirtyEntries, setEntryData, onHighlightMultiple,
     });
-    
-    // Update entryAreas (single source of truth)
-    setEntryAreas(prev => {
-      const updated = [...prev];
-      const areaIdx = updated.findIndex(a => a.entryId === entry.id);
-      if (areaIdx >= 0) {
-        updated[areaIdx] = {
-          ...updated[areaIdx],
-          bbox: newBbox, // Update bbox in image pixel coordinates
-          source: 'manual', // Mark as manually edited
-        };
-      } else {
-        // Create new entryArea if it doesn't exist
-        updated.push({
-          entryId: entry.id,
-          label: entry.displayName || `Entry ${entryIndex + 1}`,
-          bbox: newBbox,
-          source: 'manual',
-        });
-      }
-      return updated;
-    });
-    
-    // Mark as dirty
-    setDirtyEntries(prev => new Set(prev).add(entryIndex));
-    
-    // Clear labels/fields for this entry since bbox changed (they need to be re-detected)
-    setEntryData(prev => {
-      const newData = new Map(prev);
-      const existing = newData.get(entryIndex);
-      if (existing) {
-        newData.set(entryIndex, {
-          ...existing,
-          labels: [],
-          fields: {},
-        });
-      }
-      return newData;
-    });
-    
-    // Update highlights using entryAreas
-    if (onHighlightMultiple && hasVisionData) {
-      const boxes = entryAreas.length > 0
-        ? entryAreas.map((area, idx) => {
-            const entryIdx = entries.findIndex(e => e.id === area.entryId);
-            const isUpdated = entryIdx === entryIndex;
-            return {
-              bbox: isUpdated ? newBbox : area.bbox,
-              color: getEntryColor(entryIdx >= 0 ? entryIdx : idx),
-              label: area.label,
-              completed: entryIdx >= 0 ? completionState.has(entryIdx) : false,
-              selected: entryIdx === selectedEntryIndex,
-              entryIndex: entryIdx >= 0 ? entryIdx : idx,
-            };
-          })
-        : entries.map((entry, idx) => ({
-            bbox: idx === entryIndex ? newBbox : (entry.bbox || { x: 0, y: 0, w: 0, h: 0 }),
-            color: getEntryColor(idx),
-            label: entry.displayName || `Entry ${idx + 1}${entry.recordNumber ? ` (#${entry.recordNumber})` : ''}`,
-            completed: completionState.has(idx),
-            selected: selectedEntryIndex === idx,
-            entryIndex: idx,
-          }));
-      onHighlightMultiple(boxes);
-    }
   }, [entries, entryAreas, onHighlightMultiple, hasVisionData, completionState, selectedEntryIndex]);
 
   // Save bbox for an entry - persists entryAreas to server
   const handleSaveBbox = useCallback(async (entryIndex: number) => {
-    const entry = entries[entryIndex];
-    if (!entry) return;
-
-    // Get current entryArea for this entry
-    const entryArea = entryAreas.find(a => a.entryId === entry.id);
-    if (!entryArea) {
-      console.warn(`[FusionTab] No entryArea found for entry ${entry.id}`);
-      return;
-    }
-
-    setIsProcessing(true);
-    try {
-      // Find or create a draft to store entryAreas (we store all entryAreas in one place)
-      let draft = drafts.find(d => d.entry_index === 0) || drafts[0]; // Use first draft as "meta" draft
-      
-      if (draft && draft.id) {
-        // Get current entryArea for this entry
-        const currentEntryArea = entryAreas.find(a => a.entryId === entry.id);
-        if (!currentEntryArea) {
-          console.warn(`[FusionTab] No entryArea found for entry ${entry.id}, cannot save`);
-          return;
-        }
-
-        // Update the specific entryArea in the array
-        const updatedEntryAreas = entryAreas.map(a => 
-          a.entryId === entry.id ? currentEntryArea : a
-        );
-
-        const response = await apiClient.patch(
-          `/api/church/${churchId}/ocr/jobs/${jobId}/fusion/drafts/${draft.id}/entry-bbox`,
-          { 
-            entryBbox: entry.bbox, // Legacy support
-            entryAreas: updatedEntryAreas, // New format - send all entryAreas
-          }
-        );
-
-        const updatedDraft = (response as any).data?.draft;
-        if (updatedDraft) {
-          setDrafts(prev => {
-            const updated = [...prev];
-            const idx = updated.findIndex(d => d.id === draft!.id);
-            if (idx >= 0) {
-              updated[idx] = updatedDraft;
-            }
-            return updated;
-          });
-          
-          // Update local entryAreas from response
-          if (updatedDraft.bbox_json?.entryAreas) {
-            setEntryAreas(updatedDraft.bbox_json.entryAreas);
-          }
-        }
-      } else {
-        // Create a new draft with entryAreas
-        const response = await apiClient.post(
-          `/api/church/${churchId}/ocr/jobs/${jobId}/fusion/drafts`,
-          {
-            entries: [{
-              entry_index: entryIndex,
-              record_type: recordType,
-              payload_json: {},
-              bbox_json: {
-                entryBbox: entry.bbox, // Legacy support
-                entryAreas: entryAreas, // Store all entryAreas
-                selections: {}, // Initialize empty selections
-              },
-            }],
-          }
-        );
-
-        // Normalize API response shape
-        const savedDrafts = normalizeDraftsResponse(response);
-        if (savedDrafts.length > 0) {
-          setDrafts(prev => {
-            const updated = [...prev];
-            const newDraft = savedDrafts[0];
-            const existingIdx = updated.findIndex(d => d.entry_index === entryIndex);
-            if (existingIdx >= 0) {
-              updated[existingIdx] = newDraft;
-            } else {
-              updated.push(newDraft);
-            }
-            return updated;
-          });
-          
-          // Update local entryAreas from response
-          if (savedDrafts[0].bbox_json?.entryAreas) {
-            setEntryAreas(savedDrafts[0].bbox_json.entryAreas);
-          }
-        }
-      }
-
-      // Clear dirty flag
-      setDirtyEntries(prev => {
-        const next = new Set(prev);
-        next.delete(entryIndex);
-        return next;
-      });
-
-      // Update original bbox to current value
-      setOriginalBboxes(prev => {
-        const next = new Map(prev);
-        next.set(entryIndex, entry.bbox);
-        return next;
-      });
-
-      setError(null);
-    } catch (err: any) {
-      console.error('[Fusion] Save bbox error:', err);
-      setError(err.message || 'Failed to save bbox');
-    } finally {
-      setIsProcessing(false);
-    }
+    await handleSaveBboxLogic(entryIndex, {
+      entries, entryAreas, drafts, churchId, jobId, recordType,
+      setIsProcessing, setError, setDrafts, setEntryAreas, setDirtyEntries,
+      setOriginalBboxes, normalizeDraftsResponse,
+    });
   }, [entries, entryAreas, drafts, churchId, jobId, recordType]);
 
   // Update highlights when completion state or selection changes - use entryAreas as source of truth
@@ -777,248 +436,13 @@ const FusionTab: React.FC<FusionTabProps> = ({
     }
   }, [drafts]);
 
-  // ============================================================================
   // Step 1: Detect Entries
-  // ============================================================================
 
   const handleDetectEntries = useCallback(async () => {
-    setIsProcessing(true);
-    setError(null);
-
-    try {
-      // Simulate processing time for UX
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      const detected = detectEntries(ocrResult, ocrText || undefined);
-
-      if (detected.length === 0) {
-        setError('No entries detected. Try uploading a clearer image.');
-        setIsProcessing(false);
-        return;
-      }
-
-      // Set recordType on all detected entries
-      const entriesWithRecordType = detected.map(entry => ({
-        ...entry,
-        recordType: entry.recordType || recordType,
-      }));
-      setEntries(entriesWithRecordType);
-      setSelectedEntryIndex(0);
-
-      // Create entryAreas array from detected entries (single source of truth)
-      const newEntryAreas: EntryArea[] = entriesWithRecordType.map((entry, idx) => ({
-        entryId: entry.id,
-        label: entry.displayName || `Entry ${idx + 1}${entry.recordNumber ? ` (#${entry.recordNumber})` : ''}`,
-        bbox: entry.bbox, // Already in image pixel coordinates from detectEntries
-        source: 'auto' as const,
-      }));
-      
-      let finalEntryAreas = newEntryAreas;
-
-      // Store original bboxes (for reset functionality)
-      const newOriginalBboxes = new Map<number, BBox>();
-      detected.forEach((entry, idx) => {
-        newOriginalBboxes.set(idx, entry.bbox);
-      });
-      setOriginalBboxes(newOriginalBboxes);
-
-      // Load persisted entryAreas from drafts (preferred) or fallback to legacy entryBbox
-      try {
-        const draftsResponse = await apiClient.get(
-          `/api/church/${churchId}/ocr/jobs/${jobId}/fusion/drafts`
-        );
-        
-        // Normalize API response shape
-        const loadedDrafts = normalizeDraftsResponse(draftsResponse);
-
-        // Log for debugging
-        console.log('[FusionTab] Loaded drafts from API:', {
-          draftsCount: loadedDrafts.length,
-          sampleDraft: loadedDrafts[0] || null,
-        });
-        
-        if (loadedDrafts.length > 0) {
-          // Try to find a draft with entryAreas (new format)
-          const draftWithEntryAreas = loadedDrafts.find((d: FusionDraft) => 
-            d.bbox_json?.entryAreas && Array.isArray(d.bbox_json.entryAreas) && d.bbox_json.entryAreas.length > 0
-          );
-
-          if (draftWithEntryAreas?.bbox_json?.entryAreas) {
-            // Use entryAreas from draft (preferred)
-            const persistedEntryAreas = draftWithEntryAreas.bbox_json.entryAreas;
-            const updatedEntries = [...entriesWithRecordType];
-            
-            // Match entryAreas to entries by entryId
-            persistedEntryAreas.forEach((area: EntryArea) => {
-              const entryIdx = entriesWithRecordType.findIndex(e => e.id === area.entryId);
-              if (entryIdx >= 0 && entryIdx < updatedEntries.length) {
-                updatedEntries[entryIdx] = {
-                  ...updatedEntries[entryIdx],
-                  bbox: area.bbox, // Use persisted bbox from entryAreas
-                  displayName: area.label || updatedEntries[entryIdx].displayName,
-                };
-              }
-            });
-            setEntries(updatedEntries);
-            
-            // Use persisted entryAreas, merging with new ones for any missing entries
-            finalEntryAreas = newEntryAreas.map((area) => {
-              const persisted = persistedEntryAreas.find((a: EntryArea) => a.entryId === area.entryId);
-              return persisted || area; // Use persisted area if found, otherwise keep new
-            });
-          } else {
-            // Fallback to legacy entryBbox format (backward compatibility)
-            const updatedEntries = [...entriesWithRecordType];
-            loadedDrafts.forEach((draft: FusionDraft) => {
-              const entryIdx = draft.entry_index;
-              if (entryIdx >= 0 && entryIdx < updatedEntries.length && draft.bbox_json?.entryBbox) {
-                updatedEntries[entryIdx] = {
-                  ...updatedEntries[entryIdx],
-                  bbox: draft.bbox_json.entryBbox,
-                  displayName: draft.payload_json?.displayName || updatedEntries[entryIdx].displayName,
-                  mapTargetTable: draft.payload_json?.mapTargetTable || updatedEntries[entryIdx].mapTargetTable,
-                };
-                
-                // Migrate legacy entryBbox to entryAreas
-                if (finalEntryAreas[entryIdx]) {
-                  finalEntryAreas[entryIdx] = {
-                    ...finalEntryAreas[entryIdx],
-                    bbox: draft.bbox_json.entryBbox,
-                    source: 'manual', // Mark as manually adjusted
-                  };
-                }
-              }
-            });
-            setEntries(updatedEntries);
-            
-            // Log warning about legacy format
-            console.warn('[FusionTab] Using legacy entryBbox format. Consider migrating to entryAreas.');
-          }
-        }
-      } catch (err) {
-        console.warn('[Fusion] Could not load persisted bboxes:', err);
-      }
-
-      // Set entryAreas state
-      setEntryAreas(finalEntryAreas);
-
-      // Extract fields using layout extractor (pass all entryAreas for multi-entry support)
-      const extractResults: Record<string, Record<string, FieldExtraction>> = {};
-      if (ocrResult && hasVisionData) {
-        try {
-          const pageSize = getVisionPageSize(ocrResult);
-          if (pageSize && finalEntryAreas.length > 0) {
-            // Pass all entryAreas to extractor for multi-entry extraction
-            try {
-              const response = await apiClient.post(
-                `/api/church/${churchId}/ocr/jobs/${jobId}/fusion/extract-layout`,
-                {
-                  visionResponse: ocrResult,
-                  imageWidth: pageSize.width,
-                  imageHeight: pageSize.height,
-                  recordType: recordType,
-                  confidenceThreshold: 0.60,
-                  entryAreas: finalEntryAreas.map(area => ({
-                    entryId: area.entryId,
-                    bbox: area.bbox, // Already in pixel coordinates
-                  })),
-                  debug: new URLSearchParams(window.location.search).get('debugLayout') === '1',
-                }
-              );
-              
-              const result = (response as any).data;
-              if (result.fields) {
-                // Reorganize fields by entryId (fields come back as "entryId_fieldKey")
-                for (const [fieldKeyWithEntry, fieldExtraction] of Object.entries(result.fields)) {
-                  const match = fieldKeyWithEntry.match(/^(.+?)_(.+)$/);
-                  if (match) {
-                    const [, entryId, fieldKey] = match;
-                    if (!extractResults[entryId]) {
-                      extractResults[entryId] = {};
-                    }
-                    extractResults[entryId][fieldKey] = fieldExtraction as FieldExtraction;
-                  }
-                }
-                
-                if (result.debug) {
-                  console.log('[FusionTab] Layout extraction result:', result.debug);
-                  if (result.debug.perEntry) {
-                    console.log('[FusionTab] Per-entry stats:', result.debug.perEntry);
-                  }
-                }
-              }
-            } catch (err) {
-              console.warn('[FusionTab] Layout extraction failed:', err);
-            }
-            
-            setFieldExtractions(extractResults);
-          }
-        } catch (err) {
-          console.warn('[FusionTab] Layout extraction error:', err);
-        }
-      }
-
-      // Persist entryAreas + field extractions to server
-      try {
-        // Store entryAreas and field extractions in the first entry's draft (or create a meta draft)
-        const firstEntryDraft = {
-          entry_index: 0,
-          record_type: initialRecordType,
-          payload_json: {},
-          bbox_json: {
-            entryAreas: finalEntryAreas, // Store all entryAreas array
-            entries: Object.keys(extractResults).length > 0 ? extractResults : undefined, // Store per-entry field extractions
-            selections: {}, // Initialize empty selections
-          },
-        };
-        
-        await apiClient.post(
-          `/api/church/${churchId}/ocr/jobs/${jobId}/fusion/drafts`,
-          {
-            entries: [firstEntryDraft],
-          }
-        );
-        
-        console.log('[FusionTab] Persisted entryAreas and field extractions');
-      } catch (err) {
-        console.warn('[Fusion] Could not persist entryAreas:', err);
-      }
-
-      // Initialize entry data storage
-      const newEntryData = new Map<number, any>();
-      detected.forEach((_, idx) => {
-        newEntryData.set(idx, {
-          labels: [],
-          fields: {},
-          recordType: initialRecordType,
-        });
-      });
-      setEntryData(newEntryData);
-
-      // Highlight all entry bboxes
-      if (onHighlightMultiple && hasVisionData) {
-        // Normalize to always pass an array
-        const boxes = Array.isArray(entriesWithRecordType) && entriesWithRecordType.length > 0
-          ? entriesWithRecordType.map((entry, idx) => ({
-              bbox: entry.bbox || { x: 0, y: 0, w: 0, h: 0 },
-              color: getEntryColor(idx),
-              label: entry.displayName || `Entry ${idx + 1}${entry.recordNumber ? ` (#${entry.recordNumber})` : ''}`,
-              completed: completionState.has(idx),
-              selected: selectedEntryIndex === idx,
-              entryIndex: idx,
-            }))
-          : [];
-        onHighlightMultiple(boxes);
-      }
-
-      // Stay on step 0 (Detect Entries) to allow user to review and edit entries
-      // User must manually click "Continue" to proceed
-    } catch (err: any) {
-      console.error('[Fusion] Entry detection error:', err);
-      setError(err.message || 'Failed to detect entries');
-    } finally {
-      setIsProcessing(false);
-    }
+    await handleDetectEntriesLogic(
+      { ocrResult, ocrText, recordType, initialRecordType, hasVisionData, churchId, jobId, completionState, selectedEntryIndex, normalizeDraftsResponse },
+      { setEntries, setSelectedEntryIndex, setEntryAreas, setOriginalBboxes, setFieldExtractions, setEntryData, setIsProcessing, setError, onHighlightMultiple },
+    );
   }, [ocrResult, ocrText, initialRecordType, hasVisionData, onHighlightMultiple, completionState, selectedEntryIndex]);
 
   // Handle manual entry count
@@ -1132,140 +556,30 @@ const FusionTab: React.FC<FusionTabProps> = ({
     }
   }, [selectedEntryIndex, completionState]);
 
-  // ============================================================================
   // Step 2: Anchor Labels
-  // ============================================================================
 
   const handleDetectLabels = useCallback(async () => {
-    if (selectedEntryIndex === null || !entries[selectedEntryIndex]) return;
-
-    setIsProcessing(true);
-    setError(null);
-
-    try {
-      await new Promise(resolve => setTimeout(resolve, 300));
-
-      const entry = entries[selectedEntryIndex];
-      const currentRecordType = entryData.get(selectedEntryIndex)?.recordType || recordType;
-      const labels = detectLabels(entry, currentRecordType);
-
-      setDetectedLabels(labels);
-
-      // Update entry data
-      setEntryData(prev => {
-        const newData = new Map(prev);
-        const existing = newData.get(selectedEntryIndex) || { labels: [], fields: {}, recordType };
-        newData.set(selectedEntryIndex, { ...existing, labels });
-        return newData;
-      });
-
-      // Highlight label bboxes
-      if (onHighlightMultiple && hasVisionData) {
-        // Normalize to always pass an array
-        const entryBox = entry && entry.bbox
-          ? [{ bbox: entry.bbox, color: alpha('#4CAF50', 0.3), label: `Entry ${selectedEntryIndex + 1}` }]
-          : [];
-        
-        const labelBoxes = Array.isArray(labels)
-          ? labels.map(l => ({
-              bbox: l.bbox || { x: 0, y: 0, w: 0, h: 0 },
-              color: '#2196F3',
-              label: l.label || l.text || '',
-            }))
-          : [];
-        
-        onHighlightMultiple([...entryBox, ...labelBoxes]);
-      }
-    } catch (err: any) {
-      console.error('[Fusion] Label detection error:', err);
-      setError(err.message || 'Failed to detect labels');
-    } finally {
-      setIsProcessing(false);
-    }
+    await handleDetectLabelsLogic({
+      selectedEntryIndex, entries, entryData, recordType, detectedLabels,
+      mappedFields, hasVisionData, stickyDefaults,
+      setIsProcessing, setError, setDetectedLabels, setMappedFields, setEntryData,
+      onHighlightMultiple, onHighlightBbox,
+    });
   }, [selectedEntryIndex, entries, entryData, recordType, hasVisionData, onHighlightMultiple]);
 
-  // ============================================================================
   // Step 3: Map Fields
-  // ============================================================================
 
   const handleAutoMap = useCallback(async () => {
-    if (selectedEntryIndex === null || !entries[selectedEntryIndex]) return;
-
-    setIsProcessing(true);
-    setError(null);
-
-    try {
-      await new Promise(resolve => setTimeout(resolve, 300));
-
-      const entry = entries[selectedEntryIndex];
-      const labels = entryData.get(selectedEntryIndex)?.labels || detectedLabels;
-      const mapped = autoMapFields(entry, labels, recordType, stickyDefaults);
-
-      // Convert to MappedField format
-      const fields: Record<string, MappedField> = {};
-      for (const [fieldName, data] of Object.entries(mapped)) {
-        fields[fieldName] = {
-          fieldName,
-          label: fieldName,
-          value: data.value,
-          confidence: data.confidence,
-          valueBbox: data.valueBbox,
-          labelBbox: data.labelBbox,
-        };
-      }
-
-      setMappedFields(fields);
-
-      // Update entry data
-      setEntryData(prev => {
-        const newData = new Map(prev);
-        const existing = newData.get(selectedEntryIndex) || { labels: [], fields: {}, recordType };
-        newData.set(selectedEntryIndex, { ...existing, fields });
-        return newData;
-      });
-    } catch (err: any) {
-      console.error('[Fusion] Auto-map error:', err);
-      setError(err.message || 'Failed to auto-map fields');
-    } finally {
-      setIsProcessing(false);
-    }
+    await handleAutoMapLogic({
+      selectedEntryIndex, entries, entryData, recordType, detectedLabels,
+      mappedFields, hasVisionData, stickyDefaults,
+      setIsProcessing, setError, setDetectedLabels, setMappedFields, setEntryData,
+      onHighlightMultiple, onHighlightBbox,
+    });
   }, [selectedEntryIndex, entries, entryData, detectedLabels]);
 
   const handleFieldChange = useCallback((fieldName: string, value: string) => {
-    const newField = {
-      fieldName,
-      label: fieldName,
-      confidence: 1,
-      isManual: true,
-      value,
-    };
-
-    setMappedFields(prev => ({
-      ...prev,
-      [fieldName]: {
-        ...(prev[fieldName] || newField),
-        value,
-        isManual: true,
-      },
-    }));
-
-    // Also update entryData for persistence
-    if (selectedEntryIndex !== null) {
-      setEntryData(prev => {
-        const newData = new Map(prev);
-        const existing = newData.get(selectedEntryIndex) || { labels: [], fields: {}, recordType };
-        const updatedFields = {
-          ...existing.fields,
-          [fieldName]: {
-            ...(existing.fields[fieldName] || newField),
-            value,
-            isManual: true,
-          },
-        };
-        newData.set(selectedEntryIndex, { ...existing, fields: updatedFields });
-        return newData;
-      });
-    }
+    handleFieldChangeLogic(fieldName, value, selectedEntryIndex, recordType, setMappedFields, setEntryData);
   }, [selectedEntryIndex, recordType]);
 
   const handleFieldFocus = useCallback((fieldName: string) => {
@@ -1275,9 +589,7 @@ const FusionTab: React.FC<FusionTabProps> = ({
     }
   }, [mappedFields, onHighlightBbox]);
 
-  // ============================================================================
   // Step 4: Save Drafts & Commit (handlers in useFusionDrafts hook)
-  // ============================================================================
 
   // Trigger auto-save when mappedFields or entryData changes (during Map Fields step)
   useEffect(() => {
@@ -1313,9 +625,7 @@ const FusionTab: React.FC<FusionTabProps> = ({
     }
   }, [handleSendToReviewDrafts]);
 
-  // ============================================================================
   // Navigation
-  // ============================================================================
 
   const handleNext = () => setActiveStep(prev => Math.min(prev + 1, 3));
   const handleBack = () => setActiveStep(prev => Math.max(prev - 1, 0));
@@ -1352,95 +662,10 @@ const FusionTab: React.FC<FusionTabProps> = ({
 
   // Load existing drafts and mappings on mount
   useEffect(() => {
-    const loadExistingData = async () => {
-      try {
-        const draftsResponse = await apiClient.get(
-          `/api/church/${churchId}/ocr/jobs/${jobId}/fusion/drafts`
-        );
-        
-        const loadedDrafts = normalizeDraftsResponse(draftsResponse);
-
-        console.log('[FusionTab] Loaded drafts on mount:', {
-          draftsCount: loadedDrafts.length,
-        });
-
-        setDrafts(loadedDrafts);
-        
-        // If we have drafts, populate entryData from them
-        if (loadedDrafts.length > 0) {
-          setEntryData(prev => {
-            const newData = new Map(prev);
-            for (const draft of loadedDrafts) {
-              const payload = typeof draft.payload_json === 'string' 
-                ? JSON.parse(draft.payload_json) 
-                : draft.payload_json || {};
-              
-              const fields: Record<string, MappedField> = {};
-              for (const [key, value] of Object.entries(payload)) {
-                if (value) {
-                  fields[key] = {
-                    value: String(value),
-                    confidence: 0.9,
-                  };
-                }
-              }
-              
-              newData.set(draft.entry_index, {
-                labels: [],
-                fields,
-                recordType: draft.record_type || initialRecordType,
-              });
-            }
-            return newData;
-          });
-        }
-        
-        // Also try to load from mapping endpoint (for backwards compatibility)
-        try {
-          const mappingResponse = await apiClient.get(
-            `/api/church/${churchId}/ocr/jobs/${jobId}/mapping`
-          );
-          const existingMapping = (mappingResponse as any).data;
-          
-          if (existingMapping?.mapping_json && Object.keys(existingMapping.mapping_json).length > 0) {
-            setEntryData(prev => {
-              if (prev.size === 0 || !prev.has(0)) {
-                const newData = new Map(prev);
-                const fields: Record<string, MappedField> = {};
-                
-                for (const [key, val] of Object.entries(existingMapping.mapping_json)) {
-                  const mappingVal = val as { value?: string; confidence?: number };
-                  if (mappingVal?.value) {
-                    fields[key] = {
-                      value: mappingVal.value,
-                      confidence: mappingVal.confidence || 0.8,
-                    };
-                  }
-                }
-                
-                newData.set(0, {
-                  labels: [],
-                  fields,
-                  recordType: existingMapping.record_type || initialRecordType,
-                });
-                return newData;
-              }
-              return prev;
-            });
-          }
-        } catch (mappingErr) {
-          console.debug('[Fusion] No existing mapping found');
-        }
-      } catch (err) {
-        console.warn('[Fusion] Could not load existing data:', err);
-      }
-    };
-    loadExistingData();
+    loadExistingData({ churchId, jobId, initialRecordType, normalizeDraftsResponse, setDrafts, setEntryData });
   }, [churchId, jobId, initialRecordType]);
 
-  // ============================================================================
   // Render Helpers
-  // ============================================================================
 
   const selectedEntry = selectedEntryIndex !== null ? entries[selectedEntryIndex] : null;
   
@@ -1473,9 +698,7 @@ const FusionTab: React.FC<FusionTabProps> = ({
     }
   }, [mappedFields, recordType]);
 
-  // ============================================================================
   // Render
-  // ============================================================================
 
   return (
     <Box sx={{ p: 2, height: '100%', display: 'flex', flexDirection: 'column' }}>

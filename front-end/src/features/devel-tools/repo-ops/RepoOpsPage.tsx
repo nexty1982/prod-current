@@ -52,8 +52,6 @@ import {
   IconGitFork,
   IconTrash,
   IconTerminal2,
-  IconServer,
-  IconBrowser,
   IconCalendar,
   IconUpload,
   IconCloud,
@@ -65,11 +63,13 @@ import { getBuildInfo } from '@/shared/lib/buildInfo';
 import { useServerVersion } from '@/hooks/useServerVersion';
 import apiClient from '@/api/utils/axiosInstance';
 import type { BranchAnalysis, BranchClassification, BranchSource, RemoteBranch } from './RepoOpsPage/types';
-import { CLASSIFICATION_COLORS, ACTION_ICONS, SOURCE_CONFIG } from './RepoOpsPage/constants';
+import { ACTION_ICONS, SOURCE_CONFIG } from './RepoOpsPage/constants';
 import DeleteBranchDialog from './RepoOpsPage/DeleteBranchDialog';
 import MergeBranchDialog from './RepoOpsPage/MergeBranchDialog';
 import BulkDeleteDialog from './RepoOpsPage/BulkDeleteDialog';
 import BranchDetailDrawer from './RepoOpsPage/BranchDetailDrawer';
+import BuildSummaryCards from './RepoOpsPage/BuildSummaryCards';
+import { FONT as f, getThemeColors, getClassChipSx, getSourceChipSx, getClassExplanation } from './RepoOpsPage/helpers';
 
 // ── Component ───────────────────────────────────────────────────
 
@@ -301,55 +301,11 @@ const RepoOpsPage: React.FC = () => {
     return true;
   });
 
-  // ── Styling shortcuts ────────────────────────────────────────
-
-  const f = "'Inter', sans-serif";
-  const cardBg = isDark ? 'rgba(255,255,255,0.02)' : '#fff';
-  const cardBorder = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.08)';
-  const labelColor = isDark ? '#9ca3af' : '#6b7280';
-  const textColor = isDark ? '#f3f4f6' : '#111827';
-  const subBg = isDark ? 'rgba(255,255,255,0.04)' : '#f9fafb';
-
-  const classChip = (cls: BranchClassification) => {
-    const c = CLASSIFICATION_COLORS[cls];
-    if (!c) return {};
-    return {
-      bgcolor: isDark ? c.bgDark : c.bg,
-      color: isDark ? c.colorDark : c.color,
-      border: `1px solid ${isDark ? c.borderDark : c.border}`,
-    };
-  };
-
-  const sourceChip = (source: BranchSource) => {
-    const colors: Record<BranchSource, { bg: string; color: string }> = {
-      remote: { bg: isDark ? 'rgba(96,165,250,0.12)' : '#dbeafe', color: isDark ? '#93c5fd' : '#2563eb' },
-      local: { bg: isDark ? 'rgba(251,191,36,0.12)' : '#fef3c7', color: isDark ? '#fbbf24' : '#d97706' },
-      both: { bg: isDark ? 'rgba(255,255,255,0.06)' : '#f3f4f6', color: labelColor },
-    };
-    return colors[source] || colors.both;
-  };
-
-  // Classification explanation text
-  const classExplanation = (branch: RemoteBranch): string => {
-    switch (branch.classification) {
-      case 'Already Merged':
-        return `All commits on this branch are reachable from origin/main (merged). No unique work remains. Safe to delete from remote.`;
-      case 'Safe To Delete':
-        return `This branch has no unique commits ahead of origin/main and is behind by ${branch.behind} commit(s). It can be safely deleted.`;
-      case 'Fast-Forward Safe':
-        return `This branch has ${branch.ahead} unique commit(s) and is not behind origin/main. It can be merged with a fast-forward merge — no conflicts possible.`;
-      case 'Needs Rebase':
-        return `This branch has ${branch.ahead} unique commit(s) and is ${branch.behind} commit(s) behind origin/main. It has recent activity and a small divergence — rebase onto origin/main before merging.`;
-      case 'Parked Work':
-        return `This is a substantial feature branch with ${branch.ahead} unique commit(s) and only ${branch.behind} commit(s) behind origin/main. The divergence is trivial relative to the amount of work. This branch is viable and can be rebased cleanly when ready.`;
-      case 'Stale / Diverged':
-        return `This branch has ${branch.ahead} unique commit(s) but is ${branch.behind} commit(s) behind origin/main. ${branch.commitAgeDays > 14 ? `Last commit was ${branch.commitAgeDays} days ago (stale). ` : ''}${branch.behind >= 20 ? `Significantly diverged from main. ` : ''}It is unlikely to merge cleanly and is recommended for deletion or manual review.`;
-      case 'Manual Review':
-        return `This branch is in an unusual state that requires manual investigation before any action.`;
-      default:
-        return '';
-    }
-  };
+  // ── Styling shortcuts (from helpers) ──────────────────────────
+  const { cardBg, cardBorder, labelColor, textColor, subBg } = getThemeColors(isDark);
+  const classChip = (cls: BranchClassification) => getClassChipSx(cls, isDark);
+  const sourceChip = (source: BranchSource) => getSourceChipSx(source, isDark);
+  const classExplanation = (branch: RemoteBranch) => getClassExplanation(branch);
 
   // ── Render ────────────────────────────────────────────────────
 
@@ -501,68 +457,12 @@ const RepoOpsPage: React.FC = () => {
       </Paper>
 
       {/* ── Build Summary Cards ───────────────────────────── */}
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2, mb: 3 }}>
-        {/* Frontend */}
-        <Paper variant="outlined" sx={{ p: 2.5, borderRadius: 2, borderColor: cardBorder, bgcolor: cardBg }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
-            <IconBrowser size={18} color={isDark ? '#93c5fd' : '#3b82f6'} />
-            <Typography sx={{ fontFamily: f, fontSize: '0.875rem', fontWeight: 600, color: textColor }}>Frontend Build</Typography>
-          </Box>
-          <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1.5 }}>
-            {[
-              { label: 'Version', value: buildInfo.version || 'N/A' },
-              { label: 'Environment', value: buildInfo.environment || 'development' },
-              { label: 'Git SHA', value: buildInfo.gitSha || 'unknown', mono: true },
-              { label: 'Build Time', value: buildInfo.buildTime ? new Date(buildInfo.buildTime).toLocaleString() : 'N/A' },
-            ].map(item => (
-              <Box key={item.label}>
-                <Typography sx={{ fontFamily: f, fontSize: '0.625rem', color: labelColor, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                  {item.label}
-                </Typography>
-                <Typography sx={{ fontFamily: item.mono ? 'monospace' : f, fontSize: '0.75rem', color: textColor, fontWeight: 500 }}>
-                  {item.value}
-                </Typography>
-              </Box>
-            ))}
-          </Box>
-        </Paper>
-
-        {/* Server */}
-        <Paper variant="outlined" sx={{ p: 2.5, borderRadius: 2, borderColor: cardBorder, bgcolor: cardBg }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
-            <IconServer size={18} color={isDark ? '#c4b5fd' : '#7c3aed'} />
-            <Typography sx={{ fontFamily: f, fontSize: '0.875rem', fontWeight: 600, color: textColor }}>Server Build</Typography>
-            <Box sx={{ ml: 'auto' }}>
-              <Tooltip title="Refresh server version">
-                <IconButton size="small" onClick={refetchServer} disabled={serverLoading}>
-                  {serverLoading ? <CircularProgress size={14} /> : <IconRefresh size={14} />}
-                </IconButton>
-              </Tooltip>
-            </Box>
-          </Box>
-          {serverLoading ? (
-            <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}><CircularProgress size={20} /></Box>
-          ) : (
-            <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1.5 }}>
-              {[
-                { label: 'Version', value: serverVersion?.version || 'N/A' },
-                { label: 'Node.js', value: serverVersion?.nodeVersion || 'N/A' },
-                { label: 'Git SHA', value: serverVersion?.gitSha || 'unknown', mono: true },
-                { label: 'Uptime', value: serverVersion?.uptime ? `${Math.floor(serverVersion.uptime / 3600)}h ${Math.floor((serverVersion.uptime % 3600) / 60)}m` : 'N/A' },
-              ].map(item => (
-                <Box key={item.label}>
-                  <Typography sx={{ fontFamily: f, fontSize: '0.625rem', color: labelColor, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                    {item.label}
-                  </Typography>
-                  <Typography sx={{ fontFamily: item.mono ? 'monospace' : f, fontSize: '0.75rem', color: textColor, fontWeight: 500 }}>
-                    {item.value}
-                  </Typography>
-                </Box>
-              ))}
-            </Box>
-          )}
-        </Paper>
-      </Box>
+      <BuildSummaryCards
+        isDark={isDark} cardBg={cardBg} cardBorder={cardBorder}
+        labelColor={labelColor} textColor={textColor}
+        buildInfo={buildInfo} serverVersion={serverVersion}
+        serverLoading={serverLoading} refetchServer={refetchServer}
+      />
 
       {/* ── Branch Cleanup Table (Remote-Authoritative) ────── */}
       <Box sx={{ mb: 3 }}>
