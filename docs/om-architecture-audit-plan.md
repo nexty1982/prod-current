@@ -15,7 +15,7 @@
 | 1. ROGUE_API_CLIENT batches | Windsurf | 139 | 0 | In progress (Batch 1) |
 | 2. HARDCODED_COLORS batches | Windsurf | 98 | 0 | Not started |
 | 3. STATE_EXPLOSION refactors | Claude + Windsurf | 48 | 0 | Not started |
-| 4. NO_API_CLIENT route pages | Claude | 69 | 28 ignored, 1 file deleted | In progress (Batches 4.1, 4.2 done) |
+| 4. NO_API_CLIENT route pages | Claude | 69 | 36 ignored, 1 file deleted | In progress (Batches 4.1, 4.2, 4.3 done) |
 | 5. PLACEHOLDER_STUB triage | Claude | 26 | 0 | Not started |
 | 6. CROSS_FEATURE_IMPORT | Claude | 3 | 0 | Not started |
 | **Deferred to God Component refactor** | — | 28 | — | Auto-resolves on rescan |
@@ -23,7 +23,12 @@
 | **Total real work** | | **383** | **28** | |
 
 After Phase 0, the dashboard collapsed from **1059 → 383 actionable items**.
-Phase 4.1 marked 26 NO_API_CLIENT items as `ignored`. Phase 4.2 deleted 1 orphan duplicate and ignored 2 more sub-component violations, leaving **41 NO_API_CLIENT items** to triage.
+
+NO_API_CLIENT triage progress:
+- Start: 69
+- After Batch 4.1 (marketing/Berry/wrapper sweep): 43
+- After Batch 4.2 (BigBookConsole dedupe): 41
+- After Batch 4.3 (wrapper-using false positives): **33 remaining (all real)**
 
 ---
 
@@ -479,14 +484,33 @@ This is **enhancement work**, not refactoring. Each item starts with "what shoul
 | Batch | Scope | Items | Type | Status |
 |-------|-------|-------|------|--------|
 | **4.1** | Ignore sweep — marketing/Berry/wrappers/sub-components | 26 | API-only | ✅ Done (OMD-773, PR #405) |
-| **4.2** | Dedupe `BigBookConsolePage` — delete orphan + ignore sub-component violations | 2 (1 deleted, 2 ignored) | chore | ✅ Done (OMD-774) |
-| 4.3 | Account pages — profile/sessions/notifications/prefs/password | 7 | enhancement | Pending |
-| 4.4 | Parish management settings pages | 6 | enhancement | Pending |
+| **4.2** | Dedupe `BigBookConsolePage` — delete orphan + ignore sub-component violations | 2 (1 deleted, 2 ignored) | chore | ✅ Done (OMD-774, PR #407) |
+| **4.3** | Ignore wrapper-using false positives (Account pages + ChurchOCRPage) | 8 | API-only | ✅ Done (OMD-776) |
+| 4.4 | Parish management settings pages — real fetch | 6 | enhancement | Pending |
 | 4.5 | Admin control-panel core (SDLC, SiteMap, SystemServer, etc.) | 7 | enhancement | Pending |
 | 4.6 | Admin control-panel sub-pages (system-server/*, schedule-guidelines/*) | 8 | enhancement | Pending |
 | 4.7 | Devel-tools + OM Daily board | 8 | enhancement | Pending |
-| 4.8 | OCR studio pages (ChurchOCRPage, OCRStudioPage) | 2 | enhancement | Pending |
+| 4.8 | OCRStudioPage real fetch + OcrReviewPage | 2 | enhancement | Pending |
 | 4.9 | Records + liturgical + portal | 3 | enhancement | Pending |
+
+**Audit rule refinement opportunity (follow-up, OMAI repo):** the auditor's `apiCount` heuristic only counts direct `apiClient`/`fetch` calls and misses wrapper services like `accountApi`, `ocrApi`. Refining the rule to detect imports from sibling/relative `*Api` files would prevent the false-positive class found in Batch 4.3 from re-emerging.
+
+### Phase 4.3 — completed (OMD-776)
+
+API-only sweep marking 8 wrapper-using false positives as `ignored`. All 8 files do fetch real data, but through wrapper services that the auditor's `apiCount` heuristic misses.
+
+| ID | File | Wrapper used |
+|----|------|--------------|
+| 43396 | `features/account/AccountNotificationsPage.tsx` | `./accountApi` |
+| 43397 | `features/account/AccountOcrPreferencesPage.tsx` | `./accountApi` |
+| 43398 | `features/account/AccountParishInfoPage.tsx` | `./accountApi` |
+| 43399 | `features/account/AccountPasswordPage.tsx` | `./accountApi` |
+| 43400 | `features/account/AccountPersonalInfoPage.tsx` | `./accountApi` |
+| 43401 | `features/account/AccountProfilePage.tsx` | `./accountApi` |
+| 43402 | `features/account/AccountSessionsPage.tsx` | `./accountApi` |
+| 43638 | `features/ocr/pages/ChurchOCRPage.tsx` | `../lib/ocrApi` |
+
+**Side note:** `accountApi.ts` itself uses raw `fetch()` (not `apiClient`) — that's a real `ROGUE_API_CLIENT` violation Windsurf will handle in Phase 1, but it doesn't affect Phase 4.
 
 ### Phase 4.2 — completed (OMD-774)
 
