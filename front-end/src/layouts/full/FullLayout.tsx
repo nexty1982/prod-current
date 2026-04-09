@@ -6,23 +6,24 @@ import Sidebar from './vertical/sidebar/Sidebar';
 import Customizer from './shared/customizer/Customizer';
 import Navigation from '../full/horizontal/navbar/Navigation';
 import HorizontalHeader from '../full/horizontal/header/Header';
-import ScrollToTop from '../../shared/ui/ScrollToTop';
-// import SuperadminSourcePathOverlay from '../../features/overlays'; // TEMPORARILY DISABLED
-// import { VersionSwitcher } from '../../features/overlays'; // TEMPORARILY DISABLED
-// import LoadingBar from '../../LoadingBar';
+import ScrollToTop from '@/shared/ui/ScrollToTop';
 import { CustomizerContext } from '@/context/CustomizerContext';
 import config from '@/context/config';
 import { useAuth } from '@/context/AuthContext';
-import AdminFloatingHUD from '../../components/AdminFloatingHUD';
-import ImpersonationBanner from '../../components/ImpersonationBanner';
-// TutorialViewer — migrated to OMAI
-import { getPageTitle } from '../../config/pageTitles';
-// import SiteEditorOverlay from '../../components/SiteEditorOverlay';
-// import GlobalOMAI from '../../components/global/GlobalOMAI';
-// import ErrorNotificationToast from '../../components/global/ErrorNotificationToast';
-import { OmAssistant } from '../../components/OmAssistant';
-import WorkSessionPrompt from '../../components/layout/WorkSessionPrompt';
+import AdminFloatingHUD from '@/components/AdminFloatingHUD';
+import ImpersonationBanner from '@/components/ImpersonationBanner';
+import { getPageTitle } from '@/config/pageTitles';
+import { OmAssistant } from '@/components/OmAssistant';
+import WorkSessionPrompt from '@/components/layout/WorkSessionPrompt';
 import ChurchContext from '@/context/ChurchContext';
+
+// Temporarily-disabled overlays preserved here for future re-enable.
+// SuperadminSourcePathOverlay, VersionSwitcher (path: features/overlays — currently missing)
+// LoadingBar (path: ./LoadingBar)
+// SiteEditorOverlay (path: @/components/SiteEditorOverlay)
+// GlobalOMAI (path: @/components/global/GlobalOMAI)
+// ErrorNotificationToast (path: @/components/global/ErrorNotificationToast)
+// TutorialViewer — migrated to OMAI
 
 const MainWrapper = styled('div')(({ theme }) => ({
   display: 'flex',
