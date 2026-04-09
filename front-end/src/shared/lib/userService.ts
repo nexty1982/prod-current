@@ -1,4 +1,6 @@
 // src/services/userService.ts
+import { apiClient } from '@/api/utils/axiosInstance';
+
 export interface User {
     id: number;
     email: string;
@@ -71,20 +73,12 @@ export interface ApiResponse<T = any> {
 }
 
 class UserService {
-    private baseUrl = '/api/admin';
+    private baseUrl = '/admin';
 
     // Get all users
     async getUsers(): Promise<ApiResponse<User[]>> {
         try {
-            const response = await fetch(`${this.baseUrl}/users`, {
-                credentials: 'include'
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const data = await response.json();
+            const data = await apiClient.get<any>(`${this.baseUrl}/users`);
             return {
                 success: data.success,
                 users: data.users || [],
@@ -103,23 +97,10 @@ class UserService {
     // Create new user
     async createUser(userData: NewUser): Promise<ApiResponse> {
         try {
-            const response = await fetch(`${this.baseUrl}/users`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'include',
-                body: JSON.stringify({
-                    ...userData,
-                    church_id: userData.church_id || null
-                })
+            const data = await apiClient.post<any>(`${this.baseUrl}/users`, {
+                ...userData,
+                church_id: userData.church_id || null
             });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.message || 'Failed to create user');
-            }
 
             return {
                 success: data.success,
@@ -138,23 +119,10 @@ class UserService {
     // Update user
     async updateUser(userId: number, userData: UpdateUser): Promise<ApiResponse> {
         try {
-            const response = await fetch(`${this.baseUrl}/users/${userId}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'include',
-                body: JSON.stringify({
-                    ...userData,
-                    church_id: userData.church_id || null
-                })
+            const data = await apiClient.put<any>(`${this.baseUrl}/users/${userId}`, {
+                ...userData,
+                church_id: userData.church_id || null
             });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.message || 'Failed to update user');
-            }
 
             return {
                 success: data.success,
@@ -172,16 +140,7 @@ class UserService {
     // Delete user
     async deleteUser(userId: number): Promise<ApiResponse> {
         try {
-            const response = await fetch(`${this.baseUrl}/users/${userId}`, {
-                method: 'DELETE',
-                credentials: 'include'
-            });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.message || 'Failed to delete user');
-            }
+            const data = await apiClient.delete<any>(`${this.baseUrl}/users/${userId}`);
 
             return {
                 success: data.success,
@@ -199,16 +158,7 @@ class UserService {
     // Toggle user status
     async toggleUserStatus(userId: number): Promise<ApiResponse> {
         try {
-            const response = await fetch(`${this.baseUrl}/users/${userId}/toggle-status`, {
-                method: 'PUT',
-                credentials: 'include'
-            });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.message || 'Failed to update user status');
-            }
+            const data = await apiClient.put<any>(`${this.baseUrl}/users/${userId}/toggle-status`);
 
             return {
                 success: data.success,
@@ -226,20 +176,7 @@ class UserService {
     // Reset user password
     async resetPassword(userId: number, passwordData?: ResetPasswordData): Promise<ApiResponse> {
         try {
-            const response = await fetch(`${this.baseUrl}/users/${userId}/reset-password`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'include',
-                body: JSON.stringify(passwordData || {})
-            });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.message || 'Failed to reset password');
-            }
+            const data = await apiClient.patch<any>(`${this.baseUrl}/users/${userId}/reset-password`, passwordData || {});
 
             return {
                 success: data.success,
@@ -258,18 +195,7 @@ class UserService {
     // Lock user account
     async lockUser(userId: number, reason: string): Promise<ApiResponse> {
         try {
-            const response = await fetch(`${this.baseUrl}/users/${userId}/lockout`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-                body: JSON.stringify({ reason })
-            });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.message || 'Failed to lock user');
-            }
+            const data = await apiClient.post<any>(`${this.baseUrl}/users/${userId}/lockout`, { reason });
 
             return { success: data.success, message: data.message };
         } catch (error) {
@@ -284,16 +210,7 @@ class UserService {
     // Unlock user account
     async unlockUser(userId: number): Promise<ApiResponse> {
         try {
-            const response = await fetch(`${this.baseUrl}/users/${userId}/unlock`, {
-                method: 'POST',
-                credentials: 'include'
-            });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.message || 'Failed to unlock user');
-            }
+            const data = await apiClient.post<any>(`${this.baseUrl}/users/${userId}/unlock`);
 
             return { success: data.success, message: data.message };
         } catch (error) {
@@ -308,15 +225,7 @@ class UserService {
     // Get all churches
     async getChurches(): Promise<ApiResponse<Church[]>> {
         try {
-            const response = await fetch('/api/admin/churches', {
-                credentials: 'include'
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const data = await response.json();
+            const data = await apiClient.get<any>('/admin/churches');
             return {
                 success: data.success,
                 churches: data.churches || [],
@@ -371,16 +280,9 @@ class UserService {
     }
 
     // Create an invite
-    async createInvite(data: { email: string; role: string; church_id: string | null; expiration_days: number }): Promise<ApiResponse> {
+    async createInvite(inviteData: { email: string; role: string; church_id: string | null; expiration_days: number }): Promise<ApiResponse> {
         try {
-            const response = await fetch(`${this.baseUrl}/invites`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-                body: JSON.stringify(data)
-            });
-            const result = await response.json();
-            if (!response.ok) throw new Error(result.message || 'Failed to create invite');
+            const result = await apiClient.post<any>(`${this.baseUrl}/invites`, inviteData);
             return { success: true, message: result.message, data: result };
         } catch (error) {
             return { success: false, message: error instanceof Error ? error.message : 'Failed to create invite' };
@@ -390,9 +292,7 @@ class UserService {
     // Get all invites
     async getInvites(): Promise<ApiResponse> {
         try {
-            const response = await fetch(`${this.baseUrl}/invites`, { credentials: 'include' });
-            const data = await response.json();
-            if (!response.ok) throw new Error(data.message || 'Failed to fetch invites');
+            const data = await apiClient.get<any>(`${this.baseUrl}/invites`);
             return { success: true, data: data.invites };
         } catch (error) {
             return { success: false, message: error instanceof Error ? error.message : 'Failed to fetch invites' };
@@ -402,11 +302,7 @@ class UserService {
     // Get invite user activity
     async getInviteActivity(userId: number, limit = 50, offset = 0): Promise<ApiResponse> {
         try {
-            const response = await fetch(`${this.baseUrl}/invites/${userId}/activity?limit=${limit}&offset=${offset}`, {
-                credentials: 'include'
-            });
-            const data = await response.json();
-            if (!response.ok) throw new Error(data.message || 'Failed to fetch activity');
+            const data = await apiClient.get<any>(`${this.baseUrl}/invites/${userId}/activity?limit=${limit}&offset=${offset}`);
             return { success: true, data: { activity: data.activity, total: data.total } };
         } catch (error) {
             return { success: false, message: error instanceof Error ? error.message : 'Failed to fetch activity' };
@@ -416,12 +312,7 @@ class UserService {
     // Revoke an invite
     async revokeInvite(inviteId: number): Promise<ApiResponse> {
         try {
-            const response = await fetch(`${this.baseUrl}/invites/${inviteId}`, {
-                method: 'DELETE',
-                credentials: 'include'
-            });
-            const data = await response.json();
-            if (!response.ok) throw new Error(data.message || 'Failed to revoke invite');
+            const data = await apiClient.delete<any>(`${this.baseUrl}/invites/${inviteId}`);
             return { success: true, message: data.message };
         } catch (error) {
             return { success: false, message: error instanceof Error ? error.message : 'Failed to revoke invite' };

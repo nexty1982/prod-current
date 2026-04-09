@@ -1,4 +1,5 @@
 // Orthodox Calendar API Service - Enhanced for GOarch-style functionality
+import { apiClient } from '@/api/utils/axiosInstance';
 import type {
     CalendarLanguage,
     CalendarType,
@@ -10,29 +11,11 @@ import type {
     Saint
 } from '@/types/orthodox-calendar.types';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
-
 class OrthodoxCalendarService {
-  private async apiRequest<T>(url: string, options: RequestInit = {}): Promise<T> {
-    const response = await fetch(`${API_BASE_URL}${url}`, {
-      ...options,
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-        ...options.headers,
-      },
-    });
-
-    if (!response.ok) {
-      if (response.status === 401) {
-        localStorage.removeItem('auth_user');
-        window.location.href = '/auth/login';
-        throw new Error('Authentication required');
-      }
-      throw new Error(`API request failed: ${response.status} ${response.statusText}`);
-    }
-
-    return response.json();
+  private async apiRequest<T>(url: string): Promise<T> {
+    // Strip /api prefix if present — apiClient adds it automatically
+    const cleanUrl = url.startsWith('/api') ? url.slice(4) : url;
+    return apiClient.get<T>(cleanUrl);
   }
 
   /**
