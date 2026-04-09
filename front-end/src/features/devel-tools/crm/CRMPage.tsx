@@ -7,6 +7,7 @@
  * Church detail opens as a drawer with Overview / Contacts / Activities sub-tabs.
  */
 
+import { apiClient } from '@/api/utils/axiosInstance';
 import Breadcrumb from '@/layouts/full/shared/breadcrumb/Breadcrumb';
 import PageContainer from '@/shared/ui/PageContainer';
 import {
@@ -129,15 +130,15 @@ const CRMPage: React.FC = () => {
 
   const fetchStages = useCallback(async () => {
     try {
-      const resp = await fetch('/api/crm/pipeline-stages', { credentials: 'include' });
-      if (resp.ok) { const data = await resp.json(); setStages(data.stages); }
+      const data = await apiClient.get<any>('/crm/pipeline-stages');
+      setStages(data.stages);
     } catch {}
   }, []);
 
   const fetchDashboard = useCallback(async () => {
     try {
-      const resp = await fetch('/api/crm/dashboard', { credentials: 'include' });
-      if (resp.ok) { const data = await resp.json(); setDashboard(data); }
+      const data = await apiClient.get<any>('/crm/dashboard');
+      setDashboard(data);
     } catch (err: any) { setError(err.message); }
   }, []);
 
@@ -150,33 +151,27 @@ const CRMPage: React.FC = () => {
       if (filterJurisdiction) params.set('jurisdiction', filterJurisdiction);
       if (filterPriority) params.set('priority', filterPriority);
 
-      const resp = await fetch(`/api/crm/churches?${params}`, { credentials: 'include' });
-      if (resp.ok) {
-        const data = await resp.json();
-        setChurches(data.churches);
-        setChurchesTotal(data.total);
-      }
+      const data = await apiClient.get<any>(`/crm/churches?${params}`);
+      setChurches(data.churches);
+      setChurchesTotal(data.total);
     } catch {}
   }, [searchTerm, filterStage, filterState, filterJurisdiction, filterPriority, churchSort, churchSortDir]);
 
   const fetchFollowUps = useCallback(async () => {
     try {
-      const resp = await fetch('/api/crm/follow-ups?status=pending&limit=100', { credentials: 'include' });
-      if (resp.ok) { const data = await resp.json(); setFollowUps(data.followUps); }
+      const data = await apiClient.get<any>('/crm/follow-ups?status=pending&limit=100');
+      setFollowUps(data.followUps);
     } catch {}
   }, []);
 
   const fetchChurchDetail = useCallback(async (id: number) => {
     setDetailLoading(true);
     try {
-      const resp = await fetch(`/api/crm/churches/${id}`, { credentials: 'include' });
-      if (resp.ok) {
-        const data = await resp.json();
-        setSelectedChurch(data.church);
-        setChurchContacts(data.contacts);
-        setChurchActivities(data.activities);
-        setChurchFollowUps(data.followUps);
-      }
+      const data = await apiClient.get<any>(`/crm/churches/${id}`);
+      setSelectedChurch(data.church);
+      setChurchContacts(data.contacts);
+      setChurchActivities(data.activities);
+      setChurchFollowUps(data.followUps);
     } catch {}
     setDetailLoading(false);
   }, []);
@@ -214,17 +209,11 @@ const CRMPage: React.FC = () => {
   const handleStageChange = async () => {
     if (!selectedChurch || !newStage) return;
     try {
-      const resp = await fetch(`/api/crm/churches/${selectedChurch.id}`, {
-        method: 'PUT', credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ pipeline_stage: newStage }),
-      });
-      if (resp.ok) {
-        showToast('Pipeline stage updated');
-        fetchChurchDetail(selectedChurch.id);
-        fetchDashboard();
-        fetchChurches(churchPage);
-      }
+      await apiClient.put<any>(`/crm/churches/${selectedChurch.id}`, { pipeline_stage: newStage });
+      showToast('Pipeline stage updated');
+      fetchChurchDetail(selectedChurch.id);
+      fetchDashboard();
+      fetchChurches(churchPage);
     } catch { showToast('Failed to update stage', 'error'); }
     setStageDialogOpen(false);
   };
@@ -232,11 +221,7 @@ const CRMPage: React.FC = () => {
   const handlePriorityChange = async (priority: string) => {
     if (!selectedChurch) return;
     try {
-      await fetch(`/api/crm/churches/${selectedChurch.id}`, {
-        method: 'PUT', credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ priority }),
-      });
+      await apiClient.put<any>(`/crm/churches/${selectedChurch.id}`, { priority });
       showToast('Priority updated');
       fetchChurchDetail(selectedChurch.id);
       fetchChurches(churchPage);
@@ -246,11 +231,7 @@ const CRMPage: React.FC = () => {
   const handleNotesChange = async (notes: string) => {
     if (!selectedChurch) return;
     try {
-      await fetch(`/api/crm/churches/${selectedChurch.id}`, {
-        method: 'PUT', credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ crm_notes: notes }),
-      });
+      await apiClient.put<any>(`/crm/churches/${selectedChurch.id}`, { crm_notes: notes });
     } catch {}
   };
 
@@ -259,17 +240,11 @@ const CRMPage: React.FC = () => {
   const handleAddActivity = async () => {
     if (!selectedChurch || !activityForm.subject) return;
     try {
-      const resp = await fetch(`/api/crm/churches/${selectedChurch.id}/activities`, {
-        method: 'POST', credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(activityForm),
-      });
-      if (resp.ok) {
-        showToast('Activity logged');
-        fetchChurchDetail(selectedChurch.id);
-        fetchDashboard();
-        setActivityForm({ activity_type: 'note', subject: '', body: '' });
-      }
+      await apiClient.post<any>(`/crm/churches/${selectedChurch.id}/activities`, activityForm);
+      showToast('Activity logged');
+      fetchChurchDetail(selectedChurch.id);
+      fetchDashboard();
+      setActivityForm({ activity_type: 'note', subject: '', body: '' });
     } catch { showToast('Failed to log activity', 'error'); }
     setActivityDialogOpen(false);
   };
@@ -279,28 +254,22 @@ const CRMPage: React.FC = () => {
   const handleSaveContact = async () => {
     if (!selectedChurch || !contactForm.first_name) return;
     try {
-      const url = editingContact
-        ? `/api/crm/contacts/${editingContact.id}`
-        : `/api/crm/churches/${selectedChurch.id}/contacts`;
-      const method = editingContact ? 'PUT' : 'POST';
-      const resp = await fetch(url, {
-        method, credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(contactForm),
-      });
-      if (resp.ok) {
-        showToast(editingContact ? 'Contact updated' : 'Contact added');
-        fetchChurchDetail(selectedChurch.id);
-        setContactForm({ first_name: '', last_name: '', role: '', email: '', phone: '', is_primary: false, notes: '' });
-        setEditingContact(null);
+      if (editingContact) {
+        await apiClient.put<any>(`/crm/contacts/${editingContact.id}`, contactForm);
+      } else {
+        await apiClient.post<any>(`/crm/churches/${selectedChurch.id}/contacts`, contactForm);
       }
+      showToast(editingContact ? 'Contact updated' : 'Contact added');
+      fetchChurchDetail(selectedChurch.id);
+      setContactForm({ first_name: '', last_name: '', role: '', email: '', phone: '', is_primary: false, notes: '' });
+      setEditingContact(null);
     } catch { showToast('Failed to save contact', 'error'); }
     setContactDialogOpen(false);
   };
 
   const handleDeleteContact = async (contactId: number) => {
     try {
-      await fetch(`/api/crm/contacts/${contactId}`, { method: 'DELETE', credentials: 'include' });
+      await apiClient.delete<any>(`/crm/contacts/${contactId}`);
       showToast('Contact deleted');
       if (selectedChurch) fetchChurchDetail(selectedChurch.id);
     } catch { showToast('Failed to delete contact', 'error'); }
@@ -311,29 +280,19 @@ const CRMPage: React.FC = () => {
   const handleAddFollowUp = async () => {
     if (!selectedChurch || !followUpForm.due_date || !followUpForm.subject) return;
     try {
-      const resp = await fetch(`/api/crm/churches/${selectedChurch.id}/follow-ups`, {
-        method: 'POST', credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(followUpForm),
-      });
-      if (resp.ok) {
-        showToast('Follow-up created');
-        fetchChurchDetail(selectedChurch.id);
-        fetchFollowUps();
-        fetchDashboard();
-        setFollowUpForm({ due_date: '', subject: '', description: '' });
-      }
+      await apiClient.post<any>(`/crm/churches/${selectedChurch.id}/follow-ups`, followUpForm);
+      showToast('Follow-up created');
+      fetchChurchDetail(selectedChurch.id);
+      fetchFollowUps();
+      fetchDashboard();
+      setFollowUpForm({ due_date: '', subject: '', description: '' });
     } catch { showToast('Failed to create follow-up', 'error'); }
     setFollowUpDialogOpen(false);
   };
 
   const handleCompleteFollowUp = async (fId: number) => {
     try {
-      await fetch(`/api/crm/follow-ups/${fId}`, {
-        method: 'PUT', credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: 'completed' }),
-      });
+      await apiClient.put<any>(`/crm/follow-ups/${fId}`, { status: 'completed' });
       showToast('Follow-up completed');
       if (selectedChurch) fetchChurchDetail(selectedChurch.id);
       fetchFollowUps();
@@ -346,19 +305,11 @@ const CRMPage: React.FC = () => {
   const handleProvision = async () => {
     if (!selectedChurch) return;
     try {
-      const resp = await fetch(`/api/crm/churches/${selectedChurch.id}/provision`, {
-        method: 'POST', credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-      });
-      const data = await resp.json();
-      if (resp.ok) {
-        showToast(data.message || 'Church provisioned!');
-        fetchChurchDetail(selectedChurch.id);
-        fetchDashboard();
-        fetchChurches(churchPage);
-      } else {
-        showToast(data.error || 'Provision failed', 'error');
-      }
+      const data = await apiClient.post<any>(`/crm/churches/${selectedChurch.id}/provision`);
+      showToast(data.message || 'Church provisioned!');
+      fetchChurchDetail(selectedChurch.id);
+      fetchDashboard();
+      fetchChurches(churchPage);
     } catch { showToast('Provision failed', 'error'); }
     setProvisionDialogOpen(false);
   };

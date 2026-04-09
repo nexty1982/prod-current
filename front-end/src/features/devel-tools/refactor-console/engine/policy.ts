@@ -4,6 +4,7 @@
  * Loads and parses YAML policy files from the backend.
  * Does NOT contain UI logic.
  */
+import { apiClient } from '@/api/utils/axiosInstance';
 import { PolicyFile, PolicyRule } from '@/types/refactorConsole';
 
 const DEFAULT_POLICY_PATH = '/var/www/orthodoxmetrics/prod/ops/refactor/refactor-policies.yml';
@@ -15,18 +16,7 @@ export async function fetchPolicyContent(policyPath?: string): Promise<string> {
   const path = policyPath || DEFAULT_POLICY_PATH;
   const params = new URLSearchParams({ path });
   
-  const response = await fetch(`/api/admin/refactor/policy?${params}`, {
-    method: 'GET',
-    headers: { 'Content-Type': 'application/json' },
-    credentials: 'include',
-  });
-
-  if (!response.ok) {
-    const text = await response.text();
-    throw new Error(`Failed to load policy file: ${response.status} — ${text.substring(0, 200)}`);
-  }
-
-  const data = await response.json();
+  const data = await apiClient.get<any>(`/admin/refactor/policy?${params}`);
   return data.content;
 }
 

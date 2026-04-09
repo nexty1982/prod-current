@@ -9,6 +9,7 @@
  * - Safe loading when librarian is offline
  */
 
+import { apiClient } from '@/api/utils/axiosInstance';
 import {
     Alert,
     Badge,
@@ -153,14 +154,8 @@ const OMLibrary: React.FC = () => {
   const loadLibrarianStatus = async () => {
     setStatusLoading(true);
     try {
-      const response = await fetch('/api/library/status', {
-        credentials: 'include'
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        setLibrarianStatus(data);
-      }
+      const data = await apiClient.get<any>('/library/status');
+      setLibrarianStatus(data);
     } catch (err) {
       console.warn('Could not load librarian status:', err);
       setLibrarianStatus({ running: false });
@@ -182,15 +177,7 @@ const OMLibrary: React.FC = () => {
         params.append('category', categoryFilter);
       }
       
-      const response = await fetch(`/api/library/files?${params.toString()}`, {
-        credentials: 'include'
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to load library files');
-      }
-      
-      const data = await response.json();
+      const data = await apiClient.get<any>(`/library/files?${params.toString()}`);
       setFiles(data.files || []);
       setFilteredFiles(data.files || []);
     } catch (err: any) {
@@ -224,15 +211,7 @@ const OMLibrary: React.FC = () => {
         params.append('category', categoryFilter);
       }
       
-      const response = await fetch(`/api/library/search?${params.toString()}`, {
-        credentials: 'include'
-      });
-      
-      if (!response.ok) {
-        throw new Error('Search failed');
-      }
-      
-      const data = await response.json();
+      const data = await apiClient.get<any>(`/library/search?${params.toString()}`);
       setSearchResults(data.results || []);
       setFilteredFiles(data.results || []);
     } catch (err) {
@@ -342,20 +321,7 @@ const OMLibrary: React.FC = () => {
   const handleCleanupDryRun = async () => {
     setCleanupLoading(true);
     try {
-      const response = await fetch('/api/library/cleanup/dry-run', {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ mode: 'documentation' }),
-      });
-      
-      if (!response.ok) {
-        throw new Error('Cleanup dry-run failed');
-      }
-      
-      const data = await response.json();
+      const data = await apiClient.post<any>('/library/cleanup/dry-run', { mode: 'documentation' });
       setCleanupPlan(data.plan);
       setCleanupDialogOpen(true);
     } catch (err: any) {
@@ -376,20 +342,7 @@ const OMLibrary: React.FC = () => {
     
     setCleanupLoading(true);
     try {
-      const response = await fetch('/api/library/cleanup/apply', {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ mode: 'documentation' }),
-      });
-      
-      if (!response.ok) {
-        throw new Error('Cleanup apply failed');
-      }
-      
-      const data = await response.json();
+      const data = await apiClient.post<any>('/library/cleanup/apply', { mode: 'documentation' });
       alert(`Cleanup complete! Moved ${data.summary.moved} files. Manifest: ${data.summary.manifest}`);
       setCleanupDialogOpen(false);
       setCleanupPlan(null);
@@ -414,16 +367,7 @@ const OMLibrary: React.FC = () => {
     
     setStatusLoading(true);
     try {
-      const response = await fetch('/api/library/reindex', {
-        method: 'POST',
-        credentials: 'include',
-      });
-      
-      if (!response.ok) {
-        throw new Error('Reindex failed');
-      }
-      
-      const data = await response.json();
+      const data = await apiClient.post<any>('/library/reindex');
       alert(data.message || 'Reindex triggered successfully');
       
       // Reload files after a delay

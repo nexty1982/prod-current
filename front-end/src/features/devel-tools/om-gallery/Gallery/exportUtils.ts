@@ -2,6 +2,7 @@
  * exportUtils.ts — Export functions for Gallery.
  */
 
+import { apiClient } from '@/api/utils/axiosInstance';
 import type { GalleryImage } from './types';
 
 export function exportCSV(images: GalleryImage[]): void {
@@ -52,26 +53,7 @@ export async function exportUsedImages(
     let limited = false;
 
     while (hasMore) {
-      const response = await fetch(`/api/gallery/used-images?format=json&offset=${offset}&limit=${limit}`, {
-        credentials: 'include',
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        let errorMessage = 'Failed to export used images list';
-        try {
-          const data = JSON.parse(errorText);
-          errorMessage = data.error || data.message || errorMessage;
-        } catch (e) {
-          errorMessage = errorText || errorMessage;
-        }
-        alert(`Error: ${errorMessage}`);
-        if (setUploadError) setUploadError(errorMessage);
-        setExportingUsedImages(false);
-        return;
-      }
-
-      const data = await response.json();
+      const data = await apiClient.get<any>(`/gallery/used-images?format=json&offset=${offset}&limit=${limit}`);
 
       if (data.success && data.used) {
         allUsedImages = [...allUsedImages, ...data.used];

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { apiClient } from '@/api/utils/axiosInstance';
 import {
   Box,
   Container,
@@ -61,21 +62,7 @@ const GitOperations: React.FC = () => {
     setUnauthorized(false);
 
     try {
-      const response = await fetch('/api/ops/git/status', {
-        credentials: 'include',
-      });
-
-      if (response.status === 401 || response.status === 403) {
-        setUnauthorized(true);
-        setLoading(false);
-        return;
-      }
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-
-      const data: GitStatusResponse = await response.json();
+      const data: GitStatusResponse = await apiClient.get<any>('/ops/git/status');
 
       if (data.success && data.output) {
         setGitStatus(data.output);
@@ -107,26 +94,7 @@ const GitOperations: React.FC = () => {
     setBranchResults(null);
 
     try {
-      const response = await fetch('/api/ops/git/branches/create-default', {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (response.status === 401 || response.status === 403) {
-        setUnauthorized(true);
-        setCreatingBranches(false);
-        return;
-      }
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || `HTTP ${response.status}`);
-      }
-
-      const data: CreateBranchesResponse = await response.json();
+      const data: CreateBranchesResponse = await apiClient.post<any>('/ops/git/branches/create-default');
       setBranchResults(data);
     } catch (err: any) {
       setError(err.message || 'Failed to create branches');

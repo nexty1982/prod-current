@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { apiClient } from '@/api/utils/axiosInstance';
 import {
   Box,
   Typography,
@@ -146,38 +147,25 @@ const Gallery: React.FC = () => {
     try {
       const urlParams = new URLSearchParams(window.location.search);
       const debug = urlParams.get('debug') === '1' ? '&debug=1' : '';
-      const response = await fetch(`/api/gallery/tree?depth=3${debug}`, {
-        credentials: 'include',
+      const data = await apiClient.get<any>(`/gallery/tree?depth=3${debug}`);
+      console.log('📁 Directory tree loaded:', {
+        directories: data.directories?.length || 0,
+        files: data.files?.length || 0,
+        path: data.path
       });
-      if (response.ok) {
-        const data = await response.json();
-        console.log('📁 Directory tree loaded:', {
-          directories: data.directories?.length || 0,
-          files: data.files?.length || 0,
-          path: data.path
-        });
-        setDirectoryTree(data);
-        
-        // Log debug info if available
-        if (data.debug) {
-          console.log('🔍 [DEBUG] Directory tree debug info:', data.debug);
-          if (data.debug.resolvedImagesRoot) {
-            console.log(`🔍 [DEBUG] Images root: ${data.debug.resolvedImagesRoot}`);
-            console.log(`🔍 [DEBUG] Root exists: ${data.debug.rootExists}`);
-            console.log(`🔍 [DEBUG] Root readable: ${data.debug.rootCanRead}`);
-            if (data.debug.firstEntries && data.debug.firstEntries.length > 0) {
-              console.log(`🔍 [DEBUG] First entries:`, data.debug.firstEntries);
-            }
+      setDirectoryTree(data);
+      
+      // Log debug info if available
+      if (data.debug) {
+        console.log('🔍 [DEBUG] Directory tree debug info:', data.debug);
+        if (data.debug.resolvedImagesRoot) {
+          console.log(`🔍 [DEBUG] Images root: ${data.debug.resolvedImagesRoot}`);
+          console.log(`🔍 [DEBUG] Root exists: ${data.debug.rootExists}`);
+          console.log(`🔍 [DEBUG] Root readable: ${data.debug.rootCanRead}`);
+          if (data.debug.firstEntries && data.debug.firstEntries.length > 0) {
+            console.log(`🔍 [DEBUG] First entries:`, data.debug.firstEntries);
           }
         }
-      } else {
-        const errorData = await response.json().catch(() => ({}));
-        console.error('❌ Error loading directory tree:', {
-          status: response.status,
-          error: errorData
-        });
-        // Don't wipe state - keep existing tree if available
-        // Just log the error
       }
     } catch (error) {
       console.error('❌ Error loading directory tree:', error);
@@ -192,10 +180,8 @@ const Gallery: React.FC = () => {
       const path = selectedDirectory === '' ? '' : selectedDirectory;
       const url = `/api/gallery/images?path=${encodeURIComponent(path)}&recursive=1`;
 
-      const response = await fetch(url, { credentials: 'include' });
-
-      if (response.ok) {
-        const data = await response.json();
+      const data = await apiClient.get<any>(url.replace('/api', ''));
+      {
         if (data.debug) console.log('🔍 [DEBUG] Images API:', data.debug);
 
         const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.tiff', '.webp', '.svg'];
@@ -246,9 +232,6 @@ const Gallery: React.FC = () => {
 
         setImages(transformedImages);
         setCurrentIndex(0);
-      } else {
-        console.error('Gallery API error:', response.status, response.statusText);
-        setImages([]);
       }
     } catch (error: any) {
       console.error('Gallery API request failed:', error.message);
@@ -290,36 +273,12 @@ const Gallery: React.FC = () => {
         selectedDirectory: selectedDirectory
       });
       
-      const response = await fetch('/api/gallery/file', {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({ path: relativePath })
-      });
-
-      console.log('🗑️ [Frontend] Delete response status:', response.status, response.statusText);
-
-      if (response.ok) {
-        const result = await response.json().catch(() => ({}));
-        console.log('🗑️ [Frontend] Delete successful:', result);
-        await loadImages();
-        await loadDirectoryTree();
-        setImageDialogOpen(false);
-        setSelectedImage(null);
-      } else {
-        let errorMessage = 'Unknown error';
-        try {
-          const errorData = await response.json();
-          console.error('🗑️ [Frontend] Delete error response:', errorData);
-          errorMessage = errorData.error || errorData.message || `HTTP ${response.status}: ${response.statusText}`;
-        } catch (e) {
-          console.error('🗑️ [Frontend] Failed to parse error response:', e);
-          errorMessage = `HTTP ${response.status}: ${response.statusText}`;
-        }
-        alert(`Failed to delete image: ${errorMessage}`);
-      }
+      await apiClient.delete<any>('/gallery/file', { data: { path: relativePath } });
+      console.log('🗑️ [Frontend] Delete successful');
+      await loadImages();
+      await loadDirectoryTree();
+      setImageDialogOpen(false);
+      setSelectedImage(null);
     } catch (error: any) {
       console.error('🗑️ [Frontend] Error deleting image:', error);
       alert(`Failed to delete image: ${error.message || 'Network error'}`);
@@ -333,22 +292,11 @@ const Gallery: React.FC = () => {
       const relativePath = image.path.replace(/^\/images\//, '');
       const targetPath = targetDir ? `${targetDir}/${image.name}` : image.name;
       
-      const response = await fetch('/api/gallery/move', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ from: relativePath, to: targetPath, overwrite: false })
-      });
-
-      if (response.ok) {
-        await loadImages();
-        await loadDirectoryTree();
-        setMoveDialogOpen(false);
-        setItemToMove(null);
-      } else {
-        const data = await response.json();
-        alert(data.error || 'Failed to move image');
-      }
+      await apiClient.post<any>('/gallery/move', { from: relativePath, to: targetPath, overwrite: false });
+      await loadImages();
+      await loadDirectoryTree();
+      setMoveDialogOpen(false);
+      setItemToMove(null);
     } catch (error) {
       console.error('Error moving image:', error);
       alert('Failed to move image');
@@ -358,23 +306,12 @@ const Gallery: React.FC = () => {
   const handleRenameImage = async (image: GalleryImage, newName: string) => {
     try {
       const relativePath = image.path.replace(/^\/images\//, '');
-      const response = await fetch('/api/gallery/rename', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ path: relativePath, newName })
-      });
-
-      if (response.ok) {
-        await loadImages();
-        await loadDirectoryTree();
-        setRenameDialogOpen(false);
-        setItemToMove(null);
-        setNewName('');
-      } else {
-        const data = await response.json();
-        alert(data.error || 'Failed to rename image');
-      }
+      await apiClient.post<any>('/gallery/rename', { path: relativePath, newName });
+      await loadImages();
+      await loadDirectoryTree();
+      setRenameDialogOpen(false);
+      setItemToMove(null);
+      setNewName('');
     } catch (error) {
       console.error('Error renaming image:', error);
       alert('Failed to rename image');
@@ -389,26 +326,9 @@ const Gallery: React.FC = () => {
     
     try {
       const targetPath = selectedDirectory ? `${selectedDirectory}/${dirName.trim()}` : dirName.trim();
-      const response = await fetch('/api/gallery/mkdir', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ path: targetPath })
-      });
-
-      if (response.ok) {
-        await loadDirectoryTree();
-        // Show success message
-        const data = await response.json();
-        console.log('Directory created:', data);
-      } else {
-        const data = await response.json();
-        // Show detailed error message
-        const errorMsg = data.error || 'Failed to create directory';
-        const code = data.code ? ` (${data.code})` : '';
-        const pathInfo = data.path ? `\nPath: ${data.path}` : '';
-        alert(`${errorMsg}${code}${pathInfo}`);
-      }
+      const data = await apiClient.post<any>('/gallery/mkdir', { path: targetPath });
+      await loadDirectoryTree();
+      console.log('Directory created:', data);
     } catch (error: any) {
       console.error('Error creating directory:', error);
       alert(`Failed to create directory: ${error.message || 'Unknown error'}`);
@@ -465,26 +385,7 @@ const Gallery: React.FC = () => {
           selectedDirectory: selectedDirectory
         });
         try {
-          const response = await fetch('/api/gallery/file', {
-            method: 'DELETE',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            credentials: 'include',
-            body: JSON.stringify({ path: relativePath })
-          });
-
-          if (!response.ok) {
-            let errorMessage = 'Unknown error';
-            try {
-              const errorData = await response.json();
-              errorMessage = errorData.error || errorData.message || `HTTP ${response.status}`;
-            } catch (e) {
-              errorMessage = `HTTP ${response.status}: ${response.statusText}`;
-            }
-            return { success: false, image: image.name, error: errorMessage, path: relativePath };
-          }
-
+          await apiClient.delete<any>('/gallery/file', { data: { path: relativePath } });
           return { success: true, image: image.name, path: relativePath };
         } catch (error: any) {
           console.error(`Error deleting ${image.name}:`, error);
@@ -541,19 +442,11 @@ const Gallery: React.FC = () => {
   // Clean up empty directories
   const cleanupEmptyDirectories = async () => {
     try {
-      const response = await fetch('/api/gallery/cleanup-empty-dirs', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        if (data.deleted && data.deleted.length > 0) {
-          console.log(`🗑️ Cleaned up ${data.deleted.length} empty directory(ies):`, data.deleted);
-          // Reload directory tree after cleanup
-          await loadDirectoryTree();
-        }
+      const data = await apiClient.post<any>('/gallery/cleanup-empty-dirs');
+      if (data.deleted && data.deleted.length > 0) {
+        console.log(`🗑️ Cleaned up ${data.deleted.length} empty directory(ies):`, data.deleted);
+        // Reload directory tree after cleanup
+        await loadDirectoryTree();
       }
     } catch (error) {
       console.error('Error cleaning up empty directories:', error);

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { apiClient } from '@/api/utils/axiosInstance';
 import {
   Box,
   Stepper,
@@ -157,33 +158,24 @@ const ChurchSetupWizard: React.FC = () => {
     const fetchTemplateChurches = async () => {
       try {
         setLoading(true);
-        const response = await fetch('/api/admin/churches?preferred_language=en', {
-          credentials: 'include'
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          const templatesWithTables = await Promise.all(
-            data.churches.map(async (church: any) => {
-              try {
-                const tablesResponse = await fetch(`/api/admin/churches/${church.id}/tables`, {
-                  credentials: 'include'
-                });
-                const tablesData = await tablesResponse.json();
-                return {
-                  ...church,
-                  available_tables: tablesData.tables || []
-                };
-              } catch {
-                return {
-                  ...church,
-                  available_tables: []
-                };
-              }
-            })
-          );
-          setTemplateChurches(templatesWithTables);
-        }
+        const data = await apiClient.get<any>('/admin/churches?preferred_language=en');
+        const templatesWithTables = await Promise.all(
+          data.churches.map(async (church: any) => {
+            try {
+              const tablesData = await apiClient.get<any>(`/admin/churches/${church.id}/tables`);
+              return {
+                ...church,
+                available_tables: tablesData.tables || []
+              };
+            } catch {
+              return {
+                ...church,
+                available_tables: []
+              };
+            }
+          })
+        );
+        setTemplateChurches(templatesWithTables);
       } catch (error) {
         console.error('Error fetching template churches:', error);
       } finally {
@@ -268,37 +260,15 @@ const ChurchSetupWizard: React.FC = () => {
     try {
       setIsSubmitting(true);
 
-      const response = await fetch('/api/admin/churches/wizard', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include',
-        body: JSON.stringify(values)
+      const result = await apiClient.post<any>('/admin/churches/wizard', values);
+      // Store result and advance to token step
+      setWizardResult({
+        church_id: result.church_id,
+        db_name: result.db_name,
+        registration_token: result.registration_token,
+        church_name: values.name,
       });
-
-      if (response.ok) {
-        const result = await response.json();
-        // Store result and advance to token step
-        setWizardResult({
-          church_id: result.church_id,
-          db_name: result.db_name,
-          registration_token: result.registration_token,
-          church_name: values.name,
-        });
-        setActiveStep(steps.length - 1); // Go to Registration Token step
-      } else {
-        const errorData = await response.json();
-
-        if (response.status === 400 && errorData.required) {
-          const missingFields = errorData.required.join(', ');
-          setToast({ message: `Please fill in all required fields: ${missingFields}`, severity: 'error' });
-        } else {
-          setToast({ message: errorData.message || 'Failed to create church', severity: 'error' });
-        }
-
-        throw new Error(errorData.message || 'Failed to create church');
-      }
+      setActiveStep(steps.length - 1); // Go to Registration Token step
     } catch (error: any) {
       console.error('Error creating church:', error);
       if (!error.message?.includes('required fields')) {

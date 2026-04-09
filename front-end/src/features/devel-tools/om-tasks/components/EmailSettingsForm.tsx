@@ -5,6 +5,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { apiClient } from '@/api/utils/axiosInstance';
 import {
   Card,
   CardContent,
@@ -128,21 +129,7 @@ const EmailSettingsForm: React.FC = () => {
   const fetchEmailConfig = async () => {
     try {
       setError(null);
-      const response = await fetch('/api/settings/email', {
-        credentials: 'include'
-      });
-      
-      if (response.status === 404) {
-        // No config found, use defaults
-        setLoading(false);
-        return;
-      }
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch email configuration');
-      }
-      
-      const data = await response.json();
+      const data = await apiClient.get<any>('/settings/email');
       if (data.success && data.data) {
         setConfig(prev => ({ ...prev, ...data.data })); // Keep existing password if not provided
       }
@@ -188,20 +175,7 @@ const EmailSettingsForm: React.FC = () => {
         delete requestBody.smtp_pass;
       }
 
-      const response = await fetch('/api/settings/email', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include',
-        body: JSON.stringify(requestBody)
-      });
-
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to save email configuration');
-      }
+      const data = await apiClient.post<any>('/settings/email', requestBody);
 
       if (data.success) {
         setSuccess('Email configuration saved successfully!');
@@ -227,20 +201,7 @@ const EmailSettingsForm: React.FC = () => {
     setTesting(true);
 
     try {
-      const response = await fetch('/api/settings/email/test', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include',
-        body: JSON.stringify({ test_email: testEmail })
-      });
-
-      const data: EmailTestResponse = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.error || 'Email test failed');
-      }
+      const data: EmailTestResponse = await apiClient.post<any>('/settings/email/test', { test_email: testEmail });
 
       if (data.success) {
         setSuccess(`Test email sent successfully to ${testEmail}!`);

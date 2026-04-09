@@ -3,6 +3,7 @@
  */
 
 import { useRef, useEffect } from 'react';
+import { apiClient } from '@/api/utils/axiosInstance';
 import type { GalleryImage } from './types';
 import { sortImages } from './galleryUtils';
 
@@ -39,23 +40,15 @@ export function useImageUsage({ images, setImages, selectedDirectory, usageFilte
       for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
         const batch = batches[batchIndex];
 
-        const response = await fetch('/api/gallery/check-usage', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({
+        try {
+          const data = await apiClient.post<any>('/gallery/check-usage', {
             images: batch.map(img => ({ name: img.name || '', path: img.path || '' }))
-          })
-        });
-
-        if (response.ok) {
-          const data = await response.json();
+          });
           if (data.success && data.usage) {
             allUsage = { ...allUsage, ...data.usage };
           }
-        } else {
-          const errorData = await response.json().catch(() => ({}));
-          console.error(`Usage check failed for batch ${batchIndex + 1}/${batches.length}:`, errorData);
+        } catch (batchErr) {
+          console.error(`Usage check failed for batch ${batchIndex + 1}/${batches.length}:`, batchErr);
         }
       }
 

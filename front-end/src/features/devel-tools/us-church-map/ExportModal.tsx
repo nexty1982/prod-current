@@ -5,6 +5,7 @@
  * Calls POST /api/crm/churches/export with current map filters.
  */
 
+import { apiClient } from '@/api/utils/axiosInstance';
 import {
   CheckBox as CheckBoxIcon,
   CheckBoxOutlineBlank as CheckBoxBlankIcon,
@@ -198,14 +199,7 @@ const ExportModal: React.FC<ExportModalProps> = ({
       if (exportMode === 'state' && selectedState) body.state = selectedState;
       if (exportMode === 'region' && activeRegion !== 'all') body.region = activeRegion;
 
-      const resp = await fetch('/api/crm/churches/export-count', {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      });
-      if (!resp.ok) throw new Error('Failed to get count');
-      const data = await resp.json();
+      const data = await apiClient.post<any>('/crm/churches/export-count', body);
       setPreviewCount(data.count);
     } catch {
       setPreviewCount(null);
@@ -243,23 +237,10 @@ const ExportModal: React.FC<ExportModalProps> = ({
       if (exportMode === 'state' && selectedState) body.state = selectedState;
       if (exportMode === 'region' && activeRegion !== 'all') body.region = activeRegion;
 
-      const resp = await fetch('/api/crm/churches/export', {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      });
-
-      if (!resp.ok) {
-        const errData = await resp.json().catch(() => ({}));
-        throw new Error(errData.error || `Export failed (${resp.status})`);
-      }
+      const blob = await apiClient.post<any>('/crm/churches/export', body, { responseType: 'blob' });
 
       // Download the file
-      const blob = await resp.blob();
-      const contentDisposition = resp.headers.get('Content-Disposition') || '';
-      const filenameMatch = contentDisposition.match(/filename="?([^"]+)"?/);
-      const filename = filenameMatch ? filenameMatch[1] : `church-export.${format}`;
+      const filename = `church-export.${format}`;
 
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
