@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { apiClient } from '@/api/utils/axiosInstance';
 
 export interface GlobalError {
   id: string;
@@ -383,14 +384,7 @@ const generateTags = (errorData: Partial<GlobalError>): string[] => {
 
 const logErrorToBackend = async (error: GlobalError) => {
   try {
-    await fetch('/api/errors/log', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-      body: JSON.stringify(error),
-    });
+    await apiClient.post('/errors/log', error);
   } catch (logError) {
     console.error('Failed to log error to backend:', logError);
   }
