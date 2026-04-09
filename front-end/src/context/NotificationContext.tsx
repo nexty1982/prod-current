@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useWebSocket } from './WebSocketContext';
+import { apiClient } from '@/api/utils/axiosInstance';
 
 // Types
 export interface NotificationType {
@@ -118,19 +119,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
             if (options.category) params.append('category', options.category);
             if (options.priority) params.append('priority', options.priority);
 
-            const response = await fetch(`/api/notifications?${params.toString()}`, {
-                method: 'GET',
-                credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to fetch notifications');
-            }
-
-            const data = await response.json();
+            const data = await apiClient.get<any>(`/notifications?${params.toString()}`);
             if (data.success) {
                 setNotifications(data.notifications);
             } else {
@@ -148,24 +137,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         if (!authenticated) return;
 
         try {
-            const response = await fetch('/api/notifications/counts', {
-                method: 'GET',
-                credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
-
-            // Handle 401 Unauthorized - stop polling
-            if (response.status === 401) {
-                return; // Silently return, don't log errors for unauthenticated requests
-            }
-
-            if (!response.ok) {
-                return; // Silently return for other errors
-            }
-
-            const data = await response.json();
+            const data = await apiClient.get<any>('/notifications/counts');
             if (data.success) {
                 setCounts(data.counts);
             }
@@ -181,24 +153,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         if (!authenticated || !user || !user.id) return;
 
         try {
-            const response = await fetch('/api/notifications/preferences', {
-                method: 'GET',
-                credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
-
-            // Handle 401 Unauthorized - stop polling
-            if (response.status === 401) {
-                return; // Silently return, don't log errors for unauthenticated requests
-            }
-
-            if (!response.ok) {
-                return; // Silently return for other errors
-            }
-
-            const data = await response.json();
+            const data = await apiClient.get<any>('/notifications/preferences');
             if (data.success) {
                 setPreferences(data.preferences);
             }
@@ -211,19 +166,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     // Mark notification as read
     const markAsRead = useCallback(async (id: number) => {
         try {
-            const response = await fetch(`/api/notifications/${id}/read`, {
-                method: 'PUT',
-                credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to mark notification as read');
-            }
-
-            const data = await response.json();
+            const data = await apiClient.put<any>(`/notifications/${id}/read`);
             if (data.success) {
                 setNotifications(prev =>
                     prev.map(notification =>
@@ -242,19 +185,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     // Mark all notifications as read
     const markAllAsRead = useCallback(async () => {
         try {
-            const response = await fetch('/api/notifications/read-all', {
-                method: 'PUT',
-                credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to mark all notifications as read');
-            }
-
-            const data = await response.json();
+            const data = await apiClient.put<any>('/notifications/read-all');
             if (data.success) {
                 setNotifications(prev =>
                     prev.map(notification => ({
@@ -273,19 +204,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     // Dismiss notification
     const dismissNotification = useCallback(async (id: number) => {
         try {
-            const response = await fetch(`/api/notifications/${id}`, {
-                method: 'DELETE',
-                credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to dismiss notification');
-            }
-
-            const data = await response.json();
+            const data = await apiClient.delete<any>(`/notifications/${id}`);
             if (data.success) {
                 setNotifications(prev => prev.filter(notification => notification.id !== id));
                 fetchCounts(); // Refresh counts
@@ -298,20 +217,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     // Update notification preferences
     const updatePreferences = useCallback(async (newPreferences: NotificationPreference[]) => {
         try {
-            const response = await fetch('/api/notifications/preferences', {
-                method: 'PUT',
-                credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ preferences: newPreferences }),
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to update notification preferences');
-            }
-
-            const data = await response.json();
+            const data = await apiClient.put<any>('/notifications/preferences', { preferences: newPreferences });
             if (data.success) {
                 setPreferences(newPreferences);
             }
@@ -440,28 +346,20 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
         const interval = setInterval(async () => {
             try {
-                const response = await fetch('/api/notifications/counts', {
-                    method: 'GET',
-                    credentials: 'include',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                });
-
-                if (response.status === 401) {
+                await fetchCounts();
+                consecutiveErrors = 0; // Reset on success
+            } catch (err: any) {
+                if (err.status === 401) {
                     consecutiveErrors++;
                     if (consecutiveErrors >= maxErrors) {
                         clearInterval(interval);
                         return;
                     }
                 } else {
-                    consecutiveErrors = 0; // Reset on success
-                    fetchCounts();
-                }
-            } catch (err) {
-                consecutiveErrors++;
-                if (consecutiveErrors >= maxErrors) {
-                    clearInterval(interval);
+                    consecutiveErrors++;
+                    if (consecutiveErrors >= maxErrors) {
+                        clearInterval(interval);
+                    }
                 }
             }
         }, 30000); // Check for new notifications every 30 seconds
