@@ -15,14 +15,15 @@
 | 1. ROGUE_API_CLIENT batches | Windsurf | 139 | 0 | In progress (Batch 1) |
 | 2. HARDCODED_COLORS batches | Windsurf | 98 | 0 | Not started |
 | 3. STATE_EXPLOSION refactors | Claude + Windsurf | 48 | 0 | Not started |
-| 4. NO_API_CLIENT route pages | Claude | 69 | 26 ignored | In progress (Batch 4.1 done) |
+| 4. NO_API_CLIENT route pages | Claude | 69 | 28 ignored, 1 file deleted | In progress (Batches 4.1, 4.2 done) |
 | 5. PLACEHOLDER_STUB triage | Claude | 26 | 0 | Not started |
 | 6. CROSS_FEATURE_IMPORT | Claude | 3 | 0 | Not started |
 | **Deferred to God Component refactor** | — | 28 | — | Auto-resolves on rescan |
-| **Total real work** | | **383** | **26** | |
+| **Follow-up: features/admin/admin/ orphan dir cleanup** | Claude | ~26 files | — | Discovered during Phase 4.2 — separate task |
+| **Total real work** | | **383** | **28** | |
 
 After Phase 0, the dashboard collapsed from **1059 → 383 actionable items**.
-Phase 4.1 marked 26 NO_API_CLIENT items as `ignored`, leaving **43 NO_API_CLIENT items** to triage.
+Phase 4.1 marked 26 NO_API_CLIENT items as `ignored`. Phase 4.2 deleted 1 orphan duplicate and ignored 2 more sub-component violations, leaving **41 NO_API_CLIENT items** to triage.
 
 ---
 
@@ -477,8 +478,8 @@ This is **enhancement work**, not refactoring. Each item starts with "what shoul
 
 | Batch | Scope | Items | Type | Status |
 |-------|-------|-------|------|--------|
-| **4.1** | Ignore sweep — marketing/Berry/wrappers/sub-components | 26 | API-only | ✅ Done (OMD-773, run #32) |
-| 4.2 | Dedupe `BigBookConsolePage` (admin/ + admin/admin/) | 2 → 1 | enhancement | Pending |
+| **4.1** | Ignore sweep — marketing/Berry/wrappers/sub-components | 26 | API-only | ✅ Done (OMD-773, PR #405) |
+| **4.2** | Dedupe `BigBookConsolePage` — delete orphan + ignore sub-component violations | 2 (1 deleted, 2 ignored) | chore | ✅ Done (OMD-774) |
 | 4.3 | Account pages — profile/sessions/notifications/prefs/password | 7 | enhancement | Pending |
 | 4.4 | Parish management settings pages | 6 | enhancement | Pending |
 | 4.5 | Admin control-panel core (SDLC, SiteMap, SystemServer, etc.) | 7 | enhancement | Pending |
@@ -486,6 +487,27 @@ This is **enhancement work**, not refactoring. Each item starts with "what shoul
 | 4.7 | Devel-tools + OM Daily board | 8 | enhancement | Pending |
 | 4.8 | OCR studio pages (ChurchOCRPage, OCRStudioPage) | 2 | enhancement | Pending |
 | 4.9 | Records + liturgical + portal | 3 | enhancement | Pending |
+
+### Phase 4.2 — completed (OMD-774)
+
+Investigation revealed both `BigBookConsolePage.tsx` files (`features/admin/` and `features/admin/admin/`) are byte-for-byte identical sub-components, not route pages. They receive all data via props from `features/admin/OMBigBook.tsx` (the actual route page).
+
+Actions taken:
+- **Deleted** orphan: `features/admin/admin/BigBookConsolePage.tsx` (no imports anywhere in `src/`)
+- **Marked ignored**: violations 43421 (canonical, sub-component) and 43445 (orphan, file deleted)
+
+**Discovered follow-up — `features/admin/admin/` orphan dir cleanup**
+
+The directory `features/admin/admin/` contains 26 files. Audit:
+
+| Status | Count |
+|--------|-------|
+| Identical dupes of `features/admin/` siblings, not imported anywhere | ~13 |
+| Identical dupes of `features/admin/` siblings, imported via `admin/admin/` path | ~10 |
+| Differ from `features/admin/` siblings (need careful merge) | 2 (`ActivityLogs.tsx`, `BigBookSettings.tsx`) |
+| Only exists in `admin/admin/`, imported | 1 (`AdminSettings.tsx`) |
+
+This needs its own dedicated cleanup OMD item — too large to fold into the audit plan.
 
 ### Phase 4.1 — completed (OMD-773)
 
