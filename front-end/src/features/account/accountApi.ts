@@ -9,13 +9,9 @@
  */
 
 import { extractChurchSettings, getChurchDisplayName } from './accountConstants';
+import { apiClient } from '@/api/utils/axiosInstance';
 
 // ── Shared Helpers ──────────────────────────────────────────────────────────
-
-/** Standard options for JSON requests. */
-function jsonHeaders(): HeadersInit {
-  return { 'Content-Type': 'application/json' };
-}
 
 /** Extract a user-safe error message from any API response body. */
 export function extractErrorMessage(data: any, fallback = 'An error occurred.'): string {
@@ -29,19 +25,28 @@ export function extractErrorMessage(data: any, fallback = 'An error occurred.'):
 }
 
 /**
- * Thin wrapper around fetch that returns parsed JSON and throws on non-ok
- * responses with a user-safe message extracted from the body.
+ * Thin wrapper around apiClient that maps legacy RequestInit-style calls
+ * to the appropriate apiClient method.
  */
 async function request<T>(url: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(url, { credentials: 'include', ...init });
-  const data = await res.json();
-  if (!res.ok) {
-    const err = new Error(extractErrorMessage(data));
-    (err as any).status = res.status;
-    (err as any).data = data;
-    throw err;
+  const apiUrl = url.startsWith('/api') ? url.slice(4) : url;
+  const method = (init?.method || 'GET').toUpperCase();
+
+  let body: any = undefined;
+  if (init?.body) {
+    if (init.body instanceof FormData) {
+      body = init.body;
+    } else if (typeof init.body === 'string') {
+      try { body = JSON.parse(init.body); } catch { body = init.body; }
+    }
   }
-  return data as T;
+
+  switch (method) {
+    case 'POST': return apiClient.post<T>(apiUrl, body);
+    case 'PUT':  return apiClient.put<T>(apiUrl, body);
+    case 'DELETE': return apiClient.delete<T>(apiUrl);
+    default:     return apiClient.get<T>(apiUrl);
+  }
 }
 
 // ── Response Types ──────────────────────────────────────────────────────────

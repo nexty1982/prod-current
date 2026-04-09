@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { apiClient } from '@/api/utils/axiosInstance';
 import {
   Dialog,
   DialogTitle,
@@ -124,31 +125,10 @@ const TSXComponentInstallWizard: React.FC<TSXComponentInstallWizardProps> = ({
     try {
       const content = await file.text();
       
-      const response = await fetch('/api/bigbook/parse-tsx-component', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          fileName: file.name,
-          content: content
-        })
+      const result = await apiClient.post<any>('/bigbook/parse-tsx-component', {
+        fileName: file.name,
+        content: content
       });
-
-      // Check for authentication errors first
-      if (response.status === 401 || response.status === 403) {
-        onConsoleMessage('error', `🔐 Authentication required: Please log in as super_admin or editor to use Big Book auto-install`);
-        return;
-      }
-
-      // Check for other HTTP errors
-      if (!response.ok) {
-        onConsoleMessage('error', `❌ Server error: HTTP ${response.status} - ${response.statusText}`);
-        return;
-      }
-
-      const result = await response.json();
       
       if (result.success) {
         setComponentInfo(result.componentInfo);
@@ -184,26 +164,17 @@ const TSXComponentInstallWizard: React.FC<TSXComponentInstallWizardProps> = ({
     try {
       // Choose installation endpoint based on Big Book auto-install option
       const endpoint = installOptions.bigBookAutoInstall 
-        ? '/api/bigbook/install-bigbook-component'
-        : '/api/bigbook/install-tsx-component';
+        ? '/bigbook/install-bigbook-component'
+        : '/bigbook/install-tsx-component';
       
       onConsoleMessage('info', installOptions.bigBookAutoInstall 
         ? '📚 Installing as Big Book custom component with auto-menu integration...'
         : '🧩 Installing as standard TSX component...');
 
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          componentInfo,
-          installOptions
-        })
+      const result = await apiClient.post<any>(endpoint, {
+        componentInfo,
+        installOptions
       });
-
-      const result = await response.json();
       
       if (result.success) {
         setInstallationResult(result);
@@ -246,21 +217,10 @@ const TSXComponentInstallWizard: React.FC<TSXComponentInstallWizardProps> = ({
     try {
       // Choose removal endpoint based on installation type
       const endpoint = installOptions.bigBookAutoInstall 
-        ? '/api/bigbook/remove-bigbook-component'
-        : '/api/bigbook/remove-tsx-component';
+        ? '/bigbook/remove-bigbook-component'
+        : '/bigbook/remove-tsx-component';
       
-      const response = await fetch(endpoint, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          installationResult
-        })
-      });
-
-      const result = await response.json();
+      const result = await apiClient.delete<any>(endpoint);
       
       if (result.success) {
         onConsoleMessage('success', `✅ Component removed successfully`);

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, Suspense } from 'react';
+import { apiClient } from '@/api/utils/axiosInstance';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -113,14 +114,7 @@ const BigBookDynamicRoute: React.FC = () => {
       console.log(`🔍 Loading Big Book component: ${compId}`);
       
       // Load the custom components registry
-      const response = await fetch('/api/bigbook/custom-components-registry', {
-        credentials: 'include'
-      });
-      if (!response.ok) {
-        throw new Error(`Failed to load registry: HTTP ${response.status}`);
-      }
-
-      const registry: CustomComponentRegistry = await response.json();
+      const registry = await apiClient.get<CustomComponentRegistry>('/bigbook/custom-components-registry');
       console.log('📋 Registry loaded:', registry);
 
       // Find the component in the registry

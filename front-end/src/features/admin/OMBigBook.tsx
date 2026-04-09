@@ -1,4 +1,5 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
+import { apiClient } from '@/api/utils/axiosInstance';
 import {
   Card,
   CardContent,
@@ -127,13 +128,7 @@ const OMBigBook: React.FC = () => {
     setRegistriesError(null);
 
     try {
-      const response = await fetch('/api/bigbook/registries', { credentials: 'include' });
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-
-      const result = await response.json();
+      const result = await apiClient.get<any>('/bigbook/registries');
 
       if (result.success) {
         setRegistries(result.registries);
@@ -153,15 +148,9 @@ const OMBigBook: React.FC = () => {
     setCustomComponentsLoading(true);
 
     try {
-      const response = await fetch('/api/bigbook/custom-components-registry', { credentials: 'include' });
-
-      if (response.ok) {
-        const data = await response.json();
-        setCustomComponents(data);
-        addConsoleMessage('success', `Loaded ${Object.keys(data.components || {}).length} custom components`);
-      } else {
-        throw new Error('Failed to load custom components');
-      }
+      const data = await apiClient.get<any>('/bigbook/custom-components-registry');
+      setCustomComponents(data);
+      addConsoleMessage('success', `Loaded ${Object.keys(data.components || {}).length} custom components`);
     } catch (error) {
       console.error('Error loading custom components:', error);
       addConsoleMessage('error', `Failed to load custom components: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -188,14 +177,7 @@ const OMBigBook: React.FC = () => {
         menuUpdated: true
       };
 
-      const response = await fetch('/api/bigbook/remove-bigbook-component', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ installationResult })
-      });
-
-      const result = await response.json();
+      const result = await apiClient.delete<any>('/bigbook/remove-bigbook-component');
 
       if (result.success) {
         addConsoleMessage('success', `✅ Component "${component.name}" removed successfully`);
@@ -217,18 +199,7 @@ const OMBigBook: React.FC = () => {
   // Toggle item status
   const toggleItemStatus = async (type: string, id: string, enabled: boolean) => {
     try {
-      const response = await fetch(`/api/bigbook/toggle-item/${type}/${id}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ enabled }),
-        credentials: 'include'
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-
-      const result = await response.json();
+      const result = await apiClient.post<any>(`/bigbook/toggle-item/${type}/${id}`, { enabled });
 
       if (result.success) {
         setRegistries((prev: any) => ({
@@ -288,8 +259,7 @@ const OMBigBook: React.FC = () => {
       let content = file.content;
       if (file.encryptedPath) {
         try {
-          const retrieveResponse = await fetch(`/api/bigbook/storage/file/${file.id}?encryptedPath=${encodeURIComponent(file.encryptedPath)}`);
-          const retrieveResult = await retrieveResponse.json();
+          const retrieveResult = await apiClient.get<any>(`/bigbook/storage/file/${file.id}?encryptedPath=${encodeURIComponent(file.encryptedPath)}`);
 
           if (retrieveResult.success) {
             content = retrieveResult.content;
@@ -303,13 +273,7 @@ const OMBigBook: React.FC = () => {
         }
       }
 
-      const response = await fetch('/api/bigbook/execute', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fileId: file.id, fileName: file.name, content, type: file.type, settings }),
-      });
-
-      const result = await response.json();
+      const result = await apiClient.post<any>('/bigbook/execute', { fileId: file.id, fileName: file.name, content, type: file.type, settings });
 
       if (result.success) {
         addConsoleMessage('success', `Execution completed: ${file.name}`, result.output);
@@ -328,8 +292,7 @@ const OMBigBook: React.FC = () => {
 
     if (file?.encryptedPath) {
       try {
-        const response = await fetch(`/api/bigbook/storage/file/${fileId}?encryptedPath=${encodeURIComponent(file.encryptedPath)}`, { method: 'DELETE' });
-        const result = await response.json();
+        const result = await apiClient.delete<any>(`/bigbook/storage/file/${fileId}?encryptedPath=${encodeURIComponent(file.encryptedPath)}`);
 
         if (result.success) {
           setUploadedFiles(prev => prev.filter(f => f.id !== fileId));
@@ -352,18 +315,9 @@ const OMBigBook: React.FC = () => {
 
   const saveSettings = async () => {
     try {
-      const response = await fetch('/api/bigbook/settings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(settings),
-      });
-
-      if (response.ok) {
-        addConsoleMessage('success', 'Settings saved successfully');
-        setShowSettings(false);
-      } else {
-        addConsoleMessage('error', 'Failed to save settings');
-      }
+      await apiClient.post<any>('/bigbook/settings', settings);
+      addConsoleMessage('success', 'Settings saved successfully');
+      setShowSettings(false);
     } catch (error) {
       addConsoleMessage('error', 'Error saving settings');
     }
@@ -383,13 +337,7 @@ const OMBigBook: React.FC = () => {
     try {
       addConsoleMessage('info', `Submitting questionnaire responses: ${submission.questionnaireTitle}`);
 
-      const response = await fetch('/api/bigbook/submit-response', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(submission),
-      });
-
-      const result = await response.json();
+      const result = await apiClient.post<any>('/bigbook/submit-response', submission);
 
       if (result.success) {
         addConsoleMessage('success', `Questionnaire submitted successfully (${result.action}): ${submission.questionnaireTitle}`,

@@ -3,6 +3,7 @@
 // Allows super_admin and admin users to execute pre-approved server scripts
 
 import React, { useState, useEffect } from 'react';
+import { apiClient } from '@/api/utils/axiosInstance';
 import {
   Paper,
   Typography,
@@ -84,19 +85,7 @@ const ScriptRunner: React.FC = () => {
     setError('');
     
     try {
-      const response = await fetch('/api/scripts', {
-        method: 'GET',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || `HTTP ${response.status}`);
-      }
+      const data = await apiClient.get<any>('/scripts');
 
       if (data.success) {
         setScripts(data.scripts || []);
@@ -119,17 +108,9 @@ const ScriptRunner: React.FC = () => {
     setIsLoadingLogs(true);
     
     try {
-      const response = await fetch('/api/script-logs?limit=20', {
-        method: 'GET',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      const data = await apiClient.get<any>('/script-logs?limit=20');
 
-      const data = await response.json();
-
-      if (response.ok && data.success) {
+      if (data.success) {
         setLogs(data.logs || []);
         console.log('📜 Loaded execution logs:', data.logs);
       }
@@ -153,23 +134,10 @@ const ScriptRunner: React.FC = () => {
     try {
       console.log(`🚀 Executing script: ${selectedScript}`);
       
-      const response = await fetch('/api/run-script', {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          scriptName: selectedScript,
-          args: []
-        }),
+      const data = await apiClient.post<any>('/run-script', {
+        scriptName: selectedScript,
+        args: []
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || `HTTP ${response.status}: ${data.message || 'Script execution failed'}`);
-      }
 
       setResult(data);
       console.log('✅ Script execution completed:', data);

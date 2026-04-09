@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { apiClient } from '@/api/utils/axiosInstance';
 import {
   Card,
   CardContent,
@@ -134,8 +135,7 @@ const OMAIDiscoveryPanel: React.FC = () => {
 
   const loadStatus = async () => {
     try {
-      const response = await fetch('/api/bigbook/omai/status');
-      const data = await response.json();
+      const data = await apiClient.get<any>('/bigbook/omai/status');
       if (data.success) {
         setStatus(data.status);
       }
@@ -146,8 +146,7 @@ const OMAIDiscoveryPanel: React.FC = () => {
 
   const loadSummary = async () => {
     try {
-      const response = await fetch('/api/bigbook/omai/summary');
-      const data = await response.json();
+      const data = await apiClient.get<any>('/bigbook/omai/summary');
       if (data.success && data.summary) {
         setSummary(data.summary);
       }
@@ -158,8 +157,7 @@ const OMAIDiscoveryPanel: React.FC = () => {
 
   const loadIndex = async () => {
     try {
-      const response = await fetch('/api/bigbook/omai/index');
-      const data = await response.json();
+      const data = await apiClient.get<any>('/bigbook/omai/index');
       if (data.success && data.index) {
         setIndex(data.index);
       }
@@ -171,10 +169,7 @@ const OMAIDiscoveryPanel: React.FC = () => {
   const initializeOMAI = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/bigbook/omai/initialize', {
-        method: 'POST'
-      });
-      const data = await response.json();
+      const data = await apiClient.post<any>('/bigbook/omai/initialize');
       if (data.success) {
         await loadStatus();
       }
@@ -188,10 +183,7 @@ const OMAIDiscoveryPanel: React.FC = () => {
   const startDiscovery = async () => {
     setDiscovering(true);
     try {
-      const response = await fetch('/api/bigbook/omai/discover', {
-        method: 'POST'
-      });
-      const data = await response.json();
+      const data = await apiClient.post<any>('/bigbook/omai/discover');
       if (data.success) {
         // Poll for completion
         const pollInterval = setInterval(async () => {
@@ -215,8 +207,7 @@ const OMAIDiscoveryPanel: React.FC = () => {
   const loadCategoryFiles = async (category: string) => {
     try {
       const encodedCategory = category.toLowerCase().replace(/[^a-z0-9]/g, '_');
-      const response = await fetch(`/api/bigbook/omai/category/${encodedCategory}`);
-      const data = await response.json();
+      const data = await apiClient.get<any>(`/bigbook/omai/category/${encodedCategory}`);
       if (data.success) {
         setCategoryFiles(data.files);
         setSelectedCategory(category);
@@ -228,13 +219,10 @@ const OMAIDiscoveryPanel: React.FC = () => {
 
   const loadFileDetails = async (fileId: string) => {
     try {
-      const [metadataResponse, contentResponse] = await Promise.all([
-        fetch(`/api/bigbook/omai/file/${fileId}`),
-        fetch(`/api/bigbook/omai/file/${fileId}/content`)
+      const [metadataData, contentData] = await Promise.all([
+        apiClient.get<any>(`/bigbook/omai/file/${fileId}`),
+        apiClient.get<any>(`/bigbook/omai/file/${fileId}/content`)
       ]);
-
-      const metadataData = await metadataResponse.json();
-      const contentData = await contentResponse.json();
 
       if (metadataData.success && contentData.success) {
         setSelectedFile(metadataData.file);
@@ -248,12 +236,7 @@ const OMAIDiscoveryPanel: React.FC = () => {
 
   const scheduleDiscovery = async () => {
     try {
-      const response = await fetch('/api/bigbook/omai/schedule', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ intervalHours: scheduleHours })
-      });
-      const data = await response.json();
+      const data = await apiClient.post<any>('/bigbook/omai/schedule', { intervalHours: scheduleHours });
       if (data.success) {
         setScheduleDialogOpen(false);
         await loadStatus();
@@ -265,8 +248,7 @@ const OMAIDiscoveryPanel: React.FC = () => {
 
   const loadLearningStatus = async () => {
     try {
-      const response = await fetch('/api/omai/learning-status');
-      const data = await response.json();
+      const data = await apiClient.get<any>('/omai/learning-status');
       if (data.success) {
         setLearningStatus(data);
       }
@@ -278,12 +260,7 @@ const OMAIDiscoveryPanel: React.FC = () => {
   const refreshLearning = async () => {
     setLearningLoading(true);
     try {
-      const response = await fetch('/api/omai/learn-now', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ forceRefresh: true })
-      });
-      const data = await response.json();
+      const data = await apiClient.post<any>('/omai/learn-now', { forceRefresh: true });
       
       if (data.success) {
         setLearningDialogOpen(true);
