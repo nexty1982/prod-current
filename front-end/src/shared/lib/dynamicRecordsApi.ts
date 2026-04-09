@@ -3,6 +3,8 @@
  * Service for interacting with the new ordinal-based abstract records API
  */
 
+import { apiClient } from '@/api/utils/axiosInstance';
+
 export interface ColumnMetadata {
   pos: number;
   name: string;
@@ -48,22 +50,8 @@ export interface DiscoverResponse {
  * Get list of all _records tables in a church database
  */
 export async function getRecordsTables(churchDb: string): Promise<string[]> {
-  const url = new URL('/api/records/tables', window.location.origin);
-  url.searchParams.set('db', churchDb);
-  
-  const response = await fetch(url.toString(), {
-    credentials: 'include',
-    headers: {
-      'Accept': 'application/json',
-    },
-  });
-  
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: 'Network error' }));
-    throw new Error(error.message || `HTTP ${response.status}: ${response.statusText}`);
-  }
-  
-  return response.json();
+  const params = new URLSearchParams({ db: churchDb });
+  return apiClient.get<string[]>(`/records/tables?${params}`);
 }
 
 /**
@@ -88,27 +76,16 @@ export async function getTableData(
     format = 'array'
   } = options;
   
-  const url = new URL(`/api/records/${table}`, window.location.origin);
-  url.searchParams.set('db', churchDb);
-  url.searchParams.set('limit', limit.toString());
-  url.searchParams.set('offset', offset.toString());
-  url.searchParams.set('orderByPos', orderByPos.toString());
-  url.searchParams.set('orderDir', orderDir);
-  url.searchParams.set('format', format);
-  
-  const response = await fetch(url.toString(), {
-    credentials: 'include',
-    headers: {
-      'Accept': 'application/json',
-    },
+  const params = new URLSearchParams({
+    db: churchDb,
+    limit: limit.toString(),
+    offset: offset.toString(),
+    orderByPos: orderByPos.toString(),
+    orderDir: orderDir,
+    format: format,
   });
   
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: 'Network error' }));
-    throw new Error(error.message || `HTTP ${response.status}: ${response.statusText}`);
-  }
-  
-  return response.json();
+  return apiClient.get<RecordTableData>(`/records/${table}?${params}`);
 }
 
 /**
@@ -118,23 +95,8 @@ export async function discoverTables(
   churchDb: string,
   limit: number = 50
 ): Promise<DiscoverResponse> {
-  const url = new URL('/api/records/discover', window.location.origin);
-  url.searchParams.set('db', churchDb);
-  url.searchParams.set('limit', limit.toString());
-  
-  const response = await fetch(url.toString(), {
-    credentials: 'include',
-    headers: {
-      'Accept': 'application/json',
-    },
-  });
-  
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: 'Network error' }));
-    throw new Error(error.message || `HTTP ${response.status}: ${response.statusText}`);
-  }
-  
-  return response.json();
+  const params = new URLSearchParams({ db: churchDb, limit: limit.toString() });
+  return apiClient.get<DiscoverResponse>(`/records/discover?${params}`);
 }
 
 /**
