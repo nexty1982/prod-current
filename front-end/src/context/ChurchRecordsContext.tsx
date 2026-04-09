@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useAuth } from './AuthContext';
+import { apiClient } from '@/api/utils/axiosInstance';
 
 export interface ChurchRecord {
   id: string;
@@ -127,15 +128,7 @@ export const ChurchRecordsProvider: React.FC<{ children: React.ReactNode }> = ({
       console.log('🔍 Loading records using Legacy Records approach...');
 
       // Get list of churches first (like Legacy Records does)
-      const churchesResponse = await fetch('/api/admin/churches?is_active=1', {
-        credentials: 'include'
-      });
-
-      if (!churchesResponse.ok) {
-        throw new Error('Failed to fetch churches');
-      }
-
-      const churchesData = await churchesResponse.json();
+      const churchesData = await apiClient.get<any>('/admin/churches?is_active=1');
       const churches = churchesData.churches || [];
       
       if (churches.length === 0) {
@@ -158,13 +151,13 @@ export const ChurchRecordsProvider: React.FC<{ children: React.ReactNode }> = ({
           let endpoint = '';
           switch (recordType) {
             case 'baptism':
-              endpoint = '/api/baptism-records';
+              endpoint = '/baptism-records';
               break;
             case 'marriage':
-              endpoint = '/api/marriage-records';
+              endpoint = '/marriage-records';
               break;
             case 'funeral':
-              endpoint = '/api/funeral-records';
+              endpoint = '/funeral-records';
               break;
             default:
               continue;
@@ -176,82 +169,76 @@ export const ChurchRecordsProvider: React.FC<{ children: React.ReactNode }> = ({
             params.append('search', filters.searchTerm);
           }
 
-          const recordsResponse = await fetch(`${endpoint}?${params.toString()}`, {
-            credentials: 'include'
+          const recordsData = await apiClient.get<any>(`${endpoint}?${params.toString()}`);
+          const records = recordsData.records || [];
+
+          // Transform records to unified format
+          const transformedRecords = records.map((record: any) => {
+            // Find church name
+            const church = churches.find((c: any) => c.id === record.church_id);
+            const churchName = church?.name || 'Unknown Church';
+
+            let fullName = '';
+            let date = '';
+            
+            if (recordType === 'baptism') {
+              fullName = `${record.first_name || ''} ${record.last_name || ''}`.trim();
+              date = record.reception_date || record.created_at;
+            } else if (recordType === 'marriage') {
+              const groom = `${record.fname_groom || ''} ${record.lname_groom || ''}`.trim();
+              const bride = `${record.fname_bride || ''} ${record.lname_bride || ''}`.trim();
+              fullName = `${groom} & ${bride}`;
+              date = record.mdate || record.created_at;
+            } else if (recordType === 'funeral') {
+              fullName = `${record.name || ''} ${record.lastname || ''}`.trim();
+              date = record.burial_date || record.deceased_date || record.created_at;
+            }
+
+            const transformedRecord: ChurchRecord = {
+              id: `${recordType}_${record.church_id || 0}_${record.id}`,
+              fullName: fullName || 'Unknown',
+              displayName: fullName || 'Unknown',
+              type: recordType as 'baptism' | 'marriage' | 'funeral',
+              date: date || new Date().toISOString(),
+              parish: churchName,
+              clergy: record.clergy || 'Unknown',
+              status: 'complete' as const,
+              recordNumber: `${recordType.charAt(0).toUpperCase()}-${record.church_id || 0}-${record.id}`,
+              language: 'english' as const,
+              createdAt: record.created_at || new Date().toISOString(),
+              updatedAt: record.updated_at || new Date().toISOString(),
+              createdBy: record.clergy || 'Unknown',
+              metadata: {
+                notes: record.notes || undefined,
+                // Add record type specific metadata
+                ...(recordType === 'baptism' && {
+                  birthDate: record.birth_date,
+                  birthPlace: record.birthplace,
+                  parents: record.parents ? [record.parents] : undefined,
+                  godparents: record.sponsors ? [record.sponsors] : undefined
+                }),
+                ...(recordType === 'marriage' && {
+                  groomName: `${record.fname_groom || ''} ${record.lname_groom || ''}`.trim() || undefined,
+                  brideName: `${record.fname_bride || ''} ${record.lname_bride || ''}`.trim() || undefined,
+                  witnesses: record.witness ? [record.witness] : undefined,
+                  marriagePlace: record.location || undefined
+                }),
+                ...(recordType === 'funeral' && {
+                  deceaseDate: record.deceased_date,
+                  burialDate: record.burial_date,
+                  cemetery: record.burial_location
+                })
+              }
+            };
+
+            // Collect filter options
+            availableParishes.add(churchName);
+            availableClergy.add(record.clergy || 'Unknown');
+
+            return transformedRecord;
           });
 
-          if (recordsResponse.ok) {
-            const recordsData = await recordsResponse.json();
-            const records = recordsData.records || [];
-
-            // Transform records to unified format
-            const transformedRecords = records.map((record: any) => {
-              // Find church name
-              const church = churches.find((c: any) => c.id === record.church_id);
-              const churchName = church?.name || 'Unknown Church';
-
-              let fullName = '';
-              let date = '';
-              
-              if (recordType === 'baptism') {
-                fullName = `${record.first_name || ''} ${record.last_name || ''}`.trim();
-                date = record.reception_date || record.created_at;
-              } else if (recordType === 'marriage') {
-                const groom = `${record.fname_groom || ''} ${record.lname_groom || ''}`.trim();
-                const bride = `${record.fname_bride || ''} ${record.lname_bride || ''}`.trim();
-                fullName = `${groom} & ${bride}`;
-                date = record.mdate || record.created_at;
-              } else if (recordType === 'funeral') {
-                fullName = `${record.name || ''} ${record.lastname || ''}`.trim();
-                date = record.burial_date || record.deceased_date || record.created_at;
-              }
-
-              const transformedRecord: ChurchRecord = {
-                id: `${recordType}_${record.church_id || 0}_${record.id}`,
-                fullName: fullName || 'Unknown',
-                displayName: fullName || 'Unknown',
-                type: recordType as 'baptism' | 'marriage' | 'funeral',
-                date: date || new Date().toISOString(),
-                parish: churchName,
-                clergy: record.clergy || 'Unknown',
-                status: 'complete' as const,
-                recordNumber: `${recordType.charAt(0).toUpperCase()}-${record.church_id || 0}-${record.id}`,
-                language: 'english' as const,
-                createdAt: record.created_at || new Date().toISOString(),
-                updatedAt: record.updated_at || new Date().toISOString(),
-                createdBy: record.clergy || 'Unknown',
-                metadata: {
-                  notes: record.notes || undefined,
-                  // Add record type specific metadata
-                  ...(recordType === 'baptism' && {
-                    birthDate: record.birth_date,
-                    birthPlace: record.birthplace,
-                    parents: record.parents ? [record.parents] : undefined,
-                    godparents: record.sponsors ? [record.sponsors] : undefined
-                  }),
-                  ...(recordType === 'marriage' && {
-                    groomName: `${record.fname_groom || ''} ${record.lname_groom || ''}`.trim() || undefined,
-                    brideName: `${record.fname_bride || ''} ${record.lname_bride || ''}`.trim() || undefined,
-                    witnesses: record.witness ? [record.witness] : undefined,
-                    marriagePlace: record.location || undefined
-                  }),
-                  ...(recordType === 'funeral' && {
-                    deceaseDate: record.deceased_date,
-                    burialDate: record.burial_date,
-                    cemetery: record.burial_location
-                  })
-                }
-              };
-
-              // Collect filter options
-              availableParishes.add(churchName);
-              availableClergy.add(record.clergy || 'Unknown');
-
-              return transformedRecord;
-            });
-
-            allRecords = allRecords.concat(transformedRecords);
-          }
+          allRecords = allRecords.concat(transformedRecords);
         } catch (recordError) {
           console.warn(`⚠️ Error fetching ${recordType} records:`, recordError);
           // Continue with other record types
@@ -428,31 +415,18 @@ export const ChurchRecordsProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const exportRecords = async (recordIds: string[], format: 'pdf' | 'excel' | 'csv') => {
     try {
-      const response = await fetch('/api/records/export', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          recordIds,
-          format
-        })
+      const blob = await apiClient.post<Blob>('/records/export', { recordIds, format }, {
+        responseType: 'blob'
       });
 
-      if (response.ok) {
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `church_records_${new Date().toISOString().split('T')[0]}.${format}`;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-      } else {
-        throw new Error('Export failed');
-      }
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `church_records_${new Date().toISOString().split('T')[0]}.${format}`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
     } catch (error) {
       console.error('Export error:', error);
       setError('Failed to export records');
@@ -461,27 +435,21 @@ export const ChurchRecordsProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const generateCertificate = async (recordId: string) => {
     try {
-      const response = await fetch(`/api/records/${recordId}/certificate`, {
-        method: 'POST',
-        credentials: 'include'
+      const blob = await apiClient.post<Blob>(`/records/${recordId}/certificate`, undefined, {
+        responseType: 'blob'
       });
 
-      if (response.ok) {
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `certificate_${recordId}.pdf`;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-        
-        // Refresh records to update certificate status
-        refreshRecords();
-      } else {
-        throw new Error('Certificate generation failed');
-      }
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `certificate_${recordId}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      
+      // Refresh records to update certificate status
+      refreshRecords();
     } catch (error) {
       console.error('Certificate generation error:', error);
       setError('Failed to generate certificate');

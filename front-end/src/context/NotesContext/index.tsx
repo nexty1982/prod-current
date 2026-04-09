@@ -3,6 +3,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { NotesType } from '../../types/apps/note';
 import { useAuth } from '../AuthContext';
 import { ensureArray } from '../../utils/arrayUtils';
+import { apiClient } from '@/api/utils/axiosInstance';
 
 interface NotesFilters {
     category: string;
@@ -84,19 +85,7 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             if (filters.archived) queryParams.append('archived', 'true');
             if (filters.pinned) queryParams.append('pinned', 'true');
 
-            const response = await fetch(`/api/notes?${queryParams.toString()}`, {
-                method: 'GET',
-                credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
-
-            if (!response.ok) {
-                throw new Error(`Failed to fetch notes: ${response.status}`);
-            }
-
-            const data = await response.json();
+            const data = await apiClient.get<any>(`/notes?${queryParams.toString()}`);
 
             if (data.success) {
                 // Transform notes to include backward compatibility fields
@@ -126,19 +115,9 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         if (!authenticated) return;
 
         try {
-            const response = await fetch('/api/notes/categories', {
-                method: 'GET',
-                credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                if (data.success) {
-                    setCategories(data.categories);
-                }
+            const data = await apiClient.get<any>('/notes/categories');
+            if (data.success) {
+                setCategories(data.categories);
             }
         } catch (err) {
             console.error('Error fetching categories:', err);
@@ -165,20 +144,7 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     // Add a new note
     const addNote = async (newNote: Partial<NotesType>) => {
         try {
-            const response = await fetch('/api/notes', {
-                method: 'POST',
-                credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(newNote),
-            });
-
-            if (!response.ok) {
-                throw new Error(`Failed to create note: ${response.status}`);
-            }
-
-            const data = await response.json();
+            const data = await apiClient.post<any>('/notes', newNote);
 
             if (data.success) {
                 const transformedNote = {
@@ -200,20 +166,7 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     // Update a note by its ID
     const updateNote = async (id: number, updates: Partial<NotesType>) => {
         try {
-            const response = await fetch(`/api/notes/${id}`, {
-                method: 'PUT',
-                credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(updates),
-            });
-
-            if (!response.ok) {
-                throw new Error(`Failed to update note: ${response.status}`);
-            }
-
-            const data = await response.json();
+            const data = await apiClient.put<any>(`/notes/${id}`, updates);
 
             if (data.success) {
                 const transformedNote = {
@@ -236,19 +189,7 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     // Delete a note by its ID
     const deleteNote = async (id: number) => {
         try {
-            const response = await fetch(`/api/notes/${id}`, {
-                method: 'DELETE',
-                credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
-
-            if (!response.ok) {
-                throw new Error(`Failed to delete note: ${response.status}`);
-            }
-
-            const data = await response.json();
+            const data = await apiClient.delete<any>(`/notes/${id}`);
 
             if (data.success) {
                 setNotes(prev => prev.filter(note => note.id !== id));
@@ -268,20 +209,7 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     // Bulk delete notes
     const bulkDeleteNotes = async (noteIds: number[]) => {
         try {
-            const response = await fetch('/api/notes/bulk-delete', {
-                method: 'POST',
-                credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ noteIds }),
-            });
-
-            if (!response.ok) {
-                throw new Error(`Failed to delete notes: ${response.status}`);
-            }
-
-            const data = await response.json();
+            const data = await apiClient.post<any>('/notes/bulk-delete', { noteIds });
 
             if (data.success) {
                 setNotes(prev => prev.filter(note => !noteIds.includes(note.id)));
@@ -330,23 +258,10 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     // Share note
     const shareNote = async (id: number, userId: number, permission: string) => {
         try {
-            const response = await fetch(`/api/notes/${id}/share`, {
-                method: 'POST',
-                credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    shared_with_user_id: userId,
-                    permission
-                }),
+            const data = await apiClient.post<any>(`/notes/${id}/share`, {
+                shared_with_user_id: userId,
+                permission
             });
-
-            if (!response.ok) {
-                throw new Error(`Failed to share note: ${response.status}`);
-            }
-
-            const data = await response.json();
 
             if (data.success) {
                 // Refresh notes to show updated sharing status

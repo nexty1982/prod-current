@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect, ReactNode } from 'react';
 import { useAuth } from '../AuthContext';
+import { apiClient } from '@/api/utils/axiosInstance';
 
 // Enhanced types to match backend structure
 export interface KanbanLabel {
@@ -154,21 +155,7 @@ export const KanbanDataContextProvider: React.FC<KanbanDataContextProps> = ({ ch
             setError(null);
             console.log('Fetching boards from API...');
 
-            const response = await fetch('/api/kanban/boards', {
-                method: 'GET',
-                credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
-
-            console.log('Boards API response status:', response.status);
-
-            if (!response.ok) {
-                throw new Error(`Failed to fetch boards: ${response.status} ${response.statusText}`);
-            }
-
-            const data = await response.json();
+            const data = await apiClient.get<any>('/kanban/boards');
             console.log('Boards API response data:', data);
             
             if (data.success) {
@@ -196,19 +183,7 @@ export const KanbanDataContextProvider: React.FC<KanbanDataContextProps> = ({ ch
             setLoading(true);
             setError(null);
 
-            const response = await fetch(`/api/kanban/boards/${boardId}`, {
-                method: 'GET',
-                credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
-
-            if (!response.ok) {
-                throw new Error(`Failed to fetch board: ${response.status}`);
-            }
-
-            const data = await response.json();
+            const data = await apiClient.get<any>(`/kanban/boards/${boardId}`);
             if (data.success) {
                 setCurrentBoard(data.board);
             } else {
@@ -224,20 +199,7 @@ export const KanbanDataContextProvider: React.FC<KanbanDataContextProps> = ({ ch
     // Create new board
     const createBoard = async (boardData: Partial<KanbanBoard>) => {
         try {
-            const response = await fetch('/api/kanban/boards', {
-                method: 'POST',
-                credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(boardData),
-            });
-
-            if (!response.ok) {
-                throw new Error(`Failed to create board: ${response.status}`);
-            }
-
-            const data = await response.json();
+            const data = await apiClient.post<any>('/kanban/boards', boardData);
             if (data.success) {
                 await fetchBoards(); // Refresh boards list
             } else {
@@ -252,20 +214,7 @@ export const KanbanDataContextProvider: React.FC<KanbanDataContextProps> = ({ ch
     // Update board
     const updateBoard = async (boardId: number, updates: Partial<KanbanBoard>) => {
         try {
-            const response = await fetch(`/api/kanban/boards/${boardId}`, {
-                method: 'PUT',
-                credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(updates),
-            });
-
-            if (!response.ok) {
-                throw new Error(`Failed to update board: ${response.status}`);
-            }
-
-            const data = await response.json();
+            const data = await apiClient.put<any>(`/kanban/boards/${boardId}`, updates);
             if (data.success) {
                 await fetchBoards(); // Refresh boards list
                 if (currentBoard?.id === boardId) {
@@ -283,19 +232,7 @@ export const KanbanDataContextProvider: React.FC<KanbanDataContextProps> = ({ ch
     // Delete board
     const deleteBoard = async (boardId: number) => {
         try {
-            const response = await fetch(`/api/kanban/boards/${boardId}`, {
-                method: 'DELETE',
-                credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
-
-            if (!response.ok) {
-                throw new Error(`Failed to delete board: ${response.status}`);
-            }
-
-            const data = await response.json();
+            const data = await apiClient.delete<any>(`/kanban/boards/${boardId}`);
             if (data.success) {
                 await fetchBoards(); // Refresh boards list
                 if (currentBoard?.id === boardId) {
@@ -313,20 +250,7 @@ export const KanbanDataContextProvider: React.FC<KanbanDataContextProps> = ({ ch
     // Create column
     const createColumn = async (boardId: number, columnData: Partial<KanbanColumn>) => {
         try {
-            const response = await fetch('/api/kanban/columns', {
-                method: 'POST',
-                credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ ...columnData, board_id: boardId }),
-            });
-
-            if (!response.ok) {
-                throw new Error(`Failed to create column: ${response.status}`);
-            }
-
-            const data = await response.json();
+            const data = await apiClient.post<any>('/kanban/columns', { ...columnData, board_id: boardId });
             if (data.success) {
                 if (currentBoard?.id === boardId) {
                     await fetchBoard(boardId); // Refresh current board
@@ -343,20 +267,7 @@ export const KanbanDataContextProvider: React.FC<KanbanDataContextProps> = ({ ch
     // Update column
     const updateColumn = async (columnId: number, updates: Partial<KanbanColumn>) => {
         try {
-            const response = await fetch(`/api/kanban/columns/${columnId}`, {
-                method: 'PUT',
-                credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(updates),
-            });
-
-            if (!response.ok) {
-                throw new Error(`Failed to update column: ${response.status}`);
-            }
-
-            const data = await response.json();
+            const data = await apiClient.put<any>(`/kanban/columns/${columnId}`, updates);
             if (data.success && currentBoard) {
                 await fetchBoard(currentBoard.id); // Refresh current board
             } else if (!data.success) {
@@ -371,19 +282,7 @@ export const KanbanDataContextProvider: React.FC<KanbanDataContextProps> = ({ ch
     // Delete column
     const deleteColumn = async (columnId: number) => {
         try {
-            const response = await fetch(`/api/kanban/columns/${columnId}`, {
-                method: 'DELETE',
-                credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
-
-            if (!response.ok) {
-                throw new Error(`Failed to delete column: ${response.status}`);
-            }
-
-            const data = await response.json();
+            const data = await apiClient.delete<any>(`/kanban/columns/${columnId}`);
             if (data.success && currentBoard) {
                 await fetchBoard(currentBoard.id); // Refresh current board
             } else if (!data.success) {
@@ -398,20 +297,7 @@ export const KanbanDataContextProvider: React.FC<KanbanDataContextProps> = ({ ch
     // Create task
     const createTask = async (taskData: Partial<KanbanTask>) => {
         try {
-            const response = await fetch('/api/kanban/tasks', {
-                method: 'POST',
-                credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(taskData),
-            });
-
-            if (!response.ok) {
-                throw new Error(`Failed to create task: ${response.status}`);
-            }
-
-            const data = await response.json();
+            const data = await apiClient.post<any>('/kanban/tasks', taskData);
             if (data.success && currentBoard) {
                 await fetchBoard(currentBoard.id); // Refresh current board
             } else if (!data.success) {
@@ -426,20 +312,7 @@ export const KanbanDataContextProvider: React.FC<KanbanDataContextProps> = ({ ch
     // Update task
     const updateTask = async (taskId: number, updates: Partial<KanbanTask>) => {
         try {
-            const response = await fetch(`/api/kanban/tasks/${taskId}`, {
-                method: 'PUT',
-                credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(updates),
-            });
-
-            if (!response.ok) {
-                throw new Error(`Failed to update task: ${response.status}`);
-            }
-
-            const data = await response.json();
+            const data = await apiClient.put<any>(`/kanban/tasks/${taskId}`, updates);
             if (data.success && currentBoard) {
                 await fetchBoard(currentBoard.id); // Refresh current board
             } else if (!data.success) {
@@ -454,19 +327,7 @@ export const KanbanDataContextProvider: React.FC<KanbanDataContextProps> = ({ ch
     // Delete task
     const deleteTask = async (taskId: number) => {
         try {
-            const response = await fetch(`/api/kanban/tasks/${taskId}`, {
-                method: 'DELETE',
-                credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
-
-            if (!response.ok) {
-                throw new Error(`Failed to delete task: ${response.status}`);
-            }
-
-            const data = await response.json();
+            const data = await apiClient.delete<any>(`/kanban/tasks/${taskId}`);
             if (data.success && currentBoard) {
                 await fetchBoard(currentBoard.id); // Refresh current board
             } else if (!data.success) {
@@ -481,20 +342,7 @@ export const KanbanDataContextProvider: React.FC<KanbanDataContextProps> = ({ ch
     // Move task to different column/position
     const moveTask = async (taskId: number, targetColumnId: number, position: number) => {
         try {
-            const response = await fetch(`/api/kanban/tasks/${taskId}/move`, {
-                method: 'PUT',
-                credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ column_id: targetColumnId, position }),
-            });
-
-            if (!response.ok) {
-                throw new Error(`Failed to move task: ${response.status}`);
-            }
-
-            const data = await response.json();
+            const data = await apiClient.put<any>(`/kanban/tasks/${taskId}/move`, { column_id: targetColumnId, position });
             if (data.success && currentBoard) {
                 await fetchBoard(currentBoard.id); // Refresh current board
             } else if (!data.success) {
