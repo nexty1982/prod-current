@@ -1,24 +1,31 @@
 /**
- * Utility function to add church context headers to fetch requests
+ * Utility function to add church context headers to API requests
  * This helps prevent "Record request without church context" warnings
  */
 
-interface FetchWithChurchContextOptions extends RequestInit {
+import { apiClient } from '@/api/utils/axiosInstance';
+import type { AxiosRequestConfig } from 'axios';
+
+interface FetchWithChurchContextOptions {
   churchId?: number | string | null;
   skipChurchContext?: boolean; // For routes that shouldn't have church context
+  method?: string;
+  body?: any;
+  headers?: Record<string, string>;
 }
 
 /**
- * Wraps fetch() to automatically add church context headers
- * @param url - The URL to fetch
- * @param options - Fetch options, including optional churchId
- * @returns Promise<Response>
+ * Makes an API request with automatic church context headers via apiClient.
+ * Strips the /api prefix if present (apiClient adds it automatically).
+ * @param url - The URL to fetch (with or without /api prefix)
+ * @param options - Request options, including optional churchId
+ * @returns Promise with parsed response data
  */
-export async function fetchWithChurchContext(
+export async function fetchWithChurchContext<T = any>(
   url: string,
   options: FetchWithChurchContextOptions = {}
-): Promise<Response> {
-  const { churchId, skipChurchContext, ...fetchOptions } = options;
+): Promise<T> {
+  const { churchId, skipChurchContext, method = 'GET', body, headers: extraHeaders } = options;
 
   // Get churchId from various sources if not provided
   let finalChurchId: number | string | null | undefined = churchId;
@@ -55,26 +62,34 @@ export async function fetchWithChurchContext(
     }
   }
 
-  // Prepare headers
-  const headers = new Headers(fetchOptions.headers);
-
-  // Add church context header if we have a churchId and shouldn't skip it
+  // Build headers with church context
+  const headers: Record<string, string> = { ...extraHeaders };
   if (!skipChurchContext && finalChurchId) {
     const churchIdStr = String(finalChurchId).trim();
-    // Only add if it's a valid church ID (not empty, 'none', 'undefined', etc.)
     if (churchIdStr && !['none', 'undefined', 'null', 'nan', ''].includes(churchIdStr.toLowerCase())) {
-      headers.set('X-Church-Id', churchIdStr);
+      headers['X-Church-Id'] = churchIdStr;
     }
   }
 
-  // Ensure credentials are included for session-based auth
-  const finalOptions: RequestInit = {
-    ...fetchOptions,
-    credentials: fetchOptions.credentials || 'include',
-    headers,
-  };
+  // Strip /api prefix if present — apiClient adds it automatically
+  const cleanUrl = url.startsWith('/api') ? url.slice(4) : url;
 
-  return fetch(url, finalOptions);
+  const config: AxiosRequestConfig = { headers };
+  const upperMethod = method.toUpperCase();
+
+  if (upperMethod === 'GET') {
+    return apiClient.get<T>(cleanUrl, config);
+  } else if (upperMethod === 'POST') {
+    return apiClient.post<T>(cleanUrl, body, config);
+  } else if (upperMethod === 'PUT') {
+    return apiClient.put<T>(cleanUrl, body, config);
+  } else if (upperMethod === 'PATCH') {
+    return apiClient.patch<T>(cleanUrl, body, config);
+  } else if (upperMethod === 'DELETE') {
+    return apiClient.delete<T>(cleanUrl, config);
+  }
+
+  return apiClient.request<T>({ url: cleanUrl, method: upperMethod, data: body, ...config });
 }
 
 /**
