@@ -8,6 +8,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useAuth } from './AuthContext';
 import { useChurchSwitch } from '../hooks/useChurchSwitch';
+import { apiClient } from '@/api/utils/axiosInstance';
 
 interface ChurchMetadata {
   church_id: number;
@@ -51,20 +52,12 @@ export const ChurchProvider: React.FC<ChurchProviderProps> = ({ children }) => {
     
     try {
       // Force fresh fetch with no cache
-      const response = await fetch(`/api/church-branding/header/${churchId}`, {
-        credentials: 'include',
+      const data = await apiClient.get<any>(`/church-branding/header/${churchId}`, {
         headers: {
-          'Content-Type': 'application/json',
           'Cache-Control': 'no-cache, no-store, must-revalidate',
           'Pragma': 'no-cache'
         }
       });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch church data');
-      }
-
-      const data = await response.json();
       
       if (data.success && data.data) {
         setChurchMetadata(data.data);
