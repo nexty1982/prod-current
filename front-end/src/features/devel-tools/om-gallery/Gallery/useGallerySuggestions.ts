@@ -4,6 +4,7 @@
  * Extracted from Gallery.tsx
  */
 import { useState } from 'react';
+import { apiClient } from '@/api/utils/axiosInstance';
 import type { GalleryImage, SuggestionStatus } from './types';
 import { normalizePath } from './galleryUtils';
 
@@ -47,22 +48,10 @@ export function useGallerySuggestions({
 
   const handleGetSuggestions = async () => {
     try {
-      const response = await fetch('/api/gallery/suggest-destination', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ images: images.map(img => ({ path: img.path, name: img.name })) })
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setSuggestions(data.suggestions || []);
-        setSuggestionStatuses({}); // Reset statuses
-        setSuggestionsDialogOpen(true);
-      } else {
-        const data = await response.json();
-        alert(data.error || 'Failed to get catalog suggestions');
-      }
+      const data = await apiClient.post<any>('/gallery/suggest-destination', { images: images.map(img => ({ path: img.path, name: img.name })) });
+      setSuggestions(data.suggestions || []);
+      setSuggestionStatuses({}); // Reset statuses
+      setSuggestionsDialogOpen(true);
     } catch (error) {
       console.error('Error getting suggestions:', error);
       alert('Failed to get catalog suggestions');
@@ -88,31 +77,19 @@ export function useGallerySuggestions({
         };
       });
 
-      const response = await fetch('/api/gallery/validate-actions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ actions })
+      const data = await apiClient.post<any>('/gallery/validate-actions', { actions });
+      const newStatuses: Record<number, any> = {};
+      
+      data.results.forEach((result: any, idx: number) => {
+        newStatuses[idx] = {
+          status: result.ok ? 'valid' : 'invalid',
+          message: result.message,
+          code: result.code
+        };
       });
-
-      if (response.ok) {
-        const data = await response.json();
-        const newStatuses: Record<number, any> = {};
-        
-        data.results.forEach((result: any, idx: number) => {
-          newStatuses[idx] = {
-            status: result.ok ? 'valid' : 'invalid',
-            message: result.message,
-            code: result.code
-          };
-        });
-        
-        setSuggestionStatuses(newStatuses);
-        setSummaryExpanded(true);
-      } else {
-        const data = await response.json();
-        alert(data.error || 'Failed to validate actions');
-      }
+      
+      setSuggestionStatuses(newStatuses);
+      setSummaryExpanded(true);
     } catch (error) {
       console.error('Error validating actions:', error);
       alert('Failed to validate actions');
@@ -138,41 +115,22 @@ export function useGallerySuggestions({
         to: targetPath
       }];
 
-      const response = await fetch('/api/gallery/apply-actions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ actions, continueOnError: false })
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        const result = data.results[0];
-        
-        setSuggestionStatuses(prev => ({
-          ...prev,
-          [idx]: {
-            status: result.ok ? 'applied' : 'failed',
-            message: result.message,
-            code: result.code
-          }
-        }));
-
-        if (result.ok) {
-          // Reload images and directory tree
-          await loadImages();
-          await loadDirectoryTree();
+      const data = await apiClient.post<any>('/gallery/apply-actions', { actions, continueOnError: false });
+      const result = data.results[0];
+      
+      setSuggestionStatuses(prev => ({
+        ...prev,
+        [idx]: {
+          status: result.ok ? 'applied' : 'failed',
+          message: result.message,
+          code: result.code
         }
-      } else {
-        const data = await response.json();
-        setSuggestionStatuses(prev => ({
-          ...prev,
-          [idx]: {
-            status: 'failed',
-            message: data.error || 'Failed to apply action',
-            code: 'APPLY_ERROR'
-          }
-        }));
+      }));
+
+      if (result.ok) {
+        // Reload images and directory tree
+        await loadImages();
+        await loadDirectoryTree();
       }
     } catch (error) {
       console.error('Error applying action:', error);
@@ -220,36 +178,24 @@ export function useGallerySuggestions({
         };
       });
 
-      const response = await fetch('/api/gallery/apply-actions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ actions, continueOnError: true })
+      const data = await apiClient.post<any>('/gallery/apply-actions', { actions, continueOnError: true });
+      const newStatuses: Record<number, any> = {};
+      
+      data.results.forEach((result: any, idx: number) => {
+        newStatuses[idx] = {
+          status: result.ok ? 'applied' : 'failed',
+          message: result.message,
+          code: result.code
+        };
       });
+      
+      setSuggestionStatuses(newStatuses);
+      setSummaryExpanded(true);
 
-      if (response.ok) {
-        const data = await response.json();
-        const newStatuses: Record<number, any> = {};
-        
-        data.results.forEach((result: any, idx: number) => {
-          newStatuses[idx] = {
-            status: result.ok ? 'applied' : 'failed',
-            message: result.message,
-            code: result.code
-          };
-        });
-        
-        setSuggestionStatuses(newStatuses);
-        setSummaryExpanded(true);
-
-        // Reload if any succeeded
-        if (data.summary.ok > 0) {
-          await loadImages();
-          await loadDirectoryTree();
-        }
-      } else {
-        const data = await response.json();
-        alert(data.error || 'Failed to apply actions');
+      // Reload if any succeeded
+      if (data.summary.ok > 0) {
+        await loadImages();
+        await loadDirectoryTree();
       }
     } catch (error) {
       console.error('Error applying actions:', error);

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { apiClient } from '@/api/utils/axiosInstance';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Alert, Button, Box, CircularProgress, Typography } from '@mui/material';
 import { Settings } from '@mui/icons-material';
@@ -27,14 +28,9 @@ export default function OcrSetupGate({ children }: OcrSetupGateProps) {
 
   const checkSetupStatus = async () => {
     try {
-      const response = await fetch(`/api/church/${churchId}/ocr/setup-state`);
-      if (response.ok) {
-        const data = await response.json();
-        setSetupComplete(data.isComplete);
-        setPercentComplete(data.percentComplete || 0);
-      } else {
-        setSetupComplete(false);
-      }
+      const data = await apiClient.get<any>(`/church/${churchId}/ocr/setup-state`);
+      setSetupComplete(data.isComplete);
+      setPercentComplete(data.percentComplete || 0);
     } catch (err) {
       console.error('Failed to check setup status:', err);
       setSetupComplete(false);

@@ -3,6 +3,7 @@
  * Uses POST /api/admin/seed-records (dry_run + insert + purge).
  */
 import React, { useCallback, useEffect, useState } from 'react';
+import { apiClient } from '@/api/utils/axiosInstance';
 import {
   Alert,
   alpha,
@@ -89,8 +90,13 @@ function getPreviewRow(record: any, type: string): string[] {
 }
 
 async function apiJson(url: string, options?: RequestInit) {
-  const res = await fetch(url, { credentials: 'include', ...options, headers: { 'Content-Type': 'application/json', ...options?.headers } });
-  return res.json();
+  const cleanUrl = url.replace(/^\/api/, '');
+  const method = (options?.method || 'GET').toLowerCase() as 'get' | 'post' | 'put' | 'delete';
+  const body = options?.body ? JSON.parse(options.body as string) : undefined;
+  if (method === 'get' || method === 'delete') {
+    return apiClient[method]<any>(cleanUrl);
+  }
+  return apiClient[method]<any>(cleanUrl, body);
 }
 
 export default function OMSeedlingsPage() {

@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { apiClient } from '@/api/utils/axiosInstance';
 import {
   Box,
   Card,
@@ -118,18 +119,7 @@ const MenuEditor: React.FC = () => {
     setError(null);
     
     try {
-      const response = await fetch('/api/admin/menus', {
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to load menu items');
-      }
-
-      const data = await response.json();
+      const data = await apiClient.get<any>('/admin/menus');
       setMenuItems(data.items || []);
     } catch (err: any) {
       setError(err.message || 'Failed to load menu items');
@@ -152,21 +142,7 @@ const MenuEditor: React.FC = () => {
     setSuccess(null);
 
     try {
-      const response = await fetch('/api/admin/menus', {
-        method: 'PUT',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ items: menuItems }),
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Failed to save menu items');
-      }
-
-      const data = await response.json();
+      const data = await apiClient.put<any>('/admin/menus', { items: menuItems });
       setSuccess(data.message || 'Menu items saved successfully');
       
       // Reload to get updated data
@@ -275,21 +251,7 @@ const MenuEditor: React.FC = () => {
       }
 
       // Send to backend
-      const response = await fetch('/api/admin/menus/seed', {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ items: transformedItems }),
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Failed to seed menu items');
-      }
-
-      const data = await response.json();
+      const data = await apiClient.post<any>('/admin/menus/seed', { items: transformedItems });
       setSuccess(data.message || 'Menu seeded successfully');
       setSeedDialogOpen(false);
       
@@ -315,20 +277,7 @@ const MenuEditor: React.FC = () => {
     setSuccess(null);
 
     try {
-      const response = await fetch('/api/admin/menus/reset', {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Failed to reset menu');
-      }
-
-      const data = await response.json();
+      const data = await apiClient.post<any>('/admin/menus/reset');
       setSuccess(data.message || 'Menu reset successfully');
       setResetDialogOpen(false);
       
@@ -380,19 +329,7 @@ const MenuEditor: React.FC = () => {
       );
       
       // Send to backend
-      const response = await fetch('/api/admin/menus/seed', {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-      
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Failed to seed from template');
-      }
-      
-      const data = await response.json();
+      const data = await apiClient.post<any>('/admin/menus/seed', payload);
       console.log('✅ Seed response:', data);
       
       setSuccess(`${data.message} (${data.stats.inserted} inserted, ${data.stats.updated} updated)`);
@@ -442,19 +379,7 @@ const MenuEditor: React.FC = () => {
       );
       
       // Send to backend
-      const response = await fetch('/api/admin/menus/reset-to-template', {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-      
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Failed to reset to template');
-      }
-      
-      const data = await response.json();
+      const data = await apiClient.post<any>('/admin/menus/reset-to-template', payload);
       console.log('✅ Reset response:', data);
       
       setSuccess(`${data.message} (${data.stats.deleted} deleted, ${data.stats.inserted} inserted)`);
@@ -483,16 +408,7 @@ const MenuEditor: React.FC = () => {
     setSuccess(null);
 
     try {
-      const response = await fetch(`/api/admin/menus/${itemToDelete.id}`, {
-        method: 'DELETE',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Failed to delete menu item');
-      }
+      await apiClient.delete<any>(`/admin/menus/${itemToDelete.id}`);
 
       setSuccess(`Deleted menu item "${itemToDelete.label}"`);
       setDeleteDialogOpen(false);

@@ -10,6 +10,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { apiClient } from '@/api/utils/axiosInstance';
 import {
   Box, Typography, Paper, Stepper, Step, StepLabel, Button, TextField,
   FormControl, InputLabel, Select, MenuItem, IconButton, Table, TableBody,
@@ -108,11 +109,8 @@ const TableWizard: React.FC = () => {
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await fetch('/api/admin/records-inspector/churches', { credentials: 'include' });
-        if (res.ok) {
-          const data = await res.json();
-          if (data.success) setChurches(data.data.churches || []);
-        }
+        const data = await apiClient.get<any>('/admin/records-inspector/churches');
+        if (data.success) setChurches(data.data.churches || []);
       } catch { /* non-fatal */ }
     };
     load();
@@ -179,21 +177,14 @@ const TableWizard: React.FC = () => {
     setError(null);
 
     try {
-      const res = await fetch('/api/admin/table-requests', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
-          church_id: churchId,
-          table_name: tableName,
-          display_name: displayName || tableName,
-          columns,
-        }),
+      const data = await apiClient.post<any>('/admin/table-requests', {
+        church_id: churchId,
+        table_name: tableName,
+        display_name: displayName || tableName,
+        columns,
       });
 
-      const data = await res.json();
-
-      if (res.ok && data.success) {
+      if (data.success) {
         setSubmitted(true);
         setSubmitResult(data.data);
       } else {

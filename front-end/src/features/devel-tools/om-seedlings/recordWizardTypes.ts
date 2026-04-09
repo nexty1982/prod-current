@@ -3,6 +3,8 @@
  * Extracted from RecordCreationWizard.tsx
  */
 
+import { apiClient } from '@/api/utils/axiosInstance';
+
 // ============================================================================
 // TYPES
 // ============================================================================
@@ -81,10 +83,11 @@ export const yearAgo = new Date(Date.now() - 365 * 86400000).toISOString().split
 // API HELPER
 // ============================================================================
 export async function apiJson(url: string, options?: RequestInit) {
-  const res = await fetch(url, {
-    credentials: 'include',
-    ...options,
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-  });
-  return res.json();
+  const cleanUrl = url.replace(/^\/api/, '');
+  const method = (options?.method || 'GET').toLowerCase() as 'get' | 'post' | 'put' | 'delete';
+  const body = options?.body ? JSON.parse(options.body as string) : undefined;
+  if (method === 'get' || method === 'delete') {
+    return apiClient[method]<any>(cleanUrl);
+  }
+  return apiClient[method]<any>(cleanUrl, body);
 }

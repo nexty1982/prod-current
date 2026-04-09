@@ -12,6 +12,8 @@
  *   GET /api/analytics/om-churches              — live platform church pins
  */
 
+import { apiClient } from '@/api/utils/axiosInstance';
+
 import Breadcrumb from '@/layouts/full/shared/breadcrumb/Breadcrumb';
 import PageContainer from '@/shared/ui/PageContainer';
 import {
@@ -140,11 +142,9 @@ const USChurchMapPage: React.FC = () => {
   const fetchStateChurches = useCallback(async (stateCode: string) => {
     setChurchesLoading(true);
     try {
-      const resp = await fetch(`/api/analytics/us-churches-enriched?state=${stateCode}`, { credentials: 'include' });
-      if (resp.ok) {
-        setStateChurches(await resp.json());
-        setJurisdictionFilter(null);
-      }
+      const data = await apiClient.get<any>(`/analytics/us-churches-enriched?state=${stateCode}`);
+      setStateChurches(data);
+      setJurisdictionFilter(null);
     } catch { /* non-critical */ }
     finally { setChurchesLoading(false); }
   }, []);
@@ -157,13 +157,10 @@ const USChurchMapPage: React.FC = () => {
   const fetchParishGeoData = useCallback(async (stateCode: string) => {
     setParishLoading(true);
     try {
-      const resp = await fetch(`/api/analytics/church-map/parishes?state=${stateCode}`, { credentials: 'include' });
-      if (resp.ok) {
-        const data: ParishGeoJSON = await resp.json();
-        setParishGeoData(data);
-        setAffiliationFilter(new Set());
-        setSelectedParishId(null);
-      }
+      const data: ParishGeoJSON = await apiClient.get<any>(`/analytics/church-map/parishes?state=${stateCode}`);
+      setParishGeoData(data);
+      setAffiliationFilter(new Set());
+      setSelectedParishId(null);
     } catch (err: any) {
       console.error('Parish geo fetch failed:', err);
     } finally {

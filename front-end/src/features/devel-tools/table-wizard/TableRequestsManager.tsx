@@ -7,6 +7,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { apiClient } from '@/api/utils/axiosInstance';
 import {
   Box, Typography, Paper, Table, TableBody, TableCell, TableContainer,
   TableHead, TableRow, Chip, Button, FormControl, InputLabel, Select,
@@ -73,10 +74,7 @@ const TableRequestsManager: React.FC = () => {
       const params = new URLSearchParams();
       if (statusFilter) params.set('status', statusFilter);
 
-      const res = await fetch(`/api/admin/table-requests?${params}`, { credentials: 'include' });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-      const data = await res.json();
+      const data = await apiClient.get<any>(`/admin/table-requests?${params}`);
       if (data.success) {
         setRequests(data.data.requests || []);
       } else {
@@ -112,16 +110,9 @@ const TableRequestsManager: React.FC = () => {
     setActionResult(null);
 
     try {
-      const res = await fetch(`/api/admin/table-requests/${dialogRequestId}/${dialogAction}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ notes: dialogNotes }),
-      });
+      const data = await apiClient.post<any>(`/admin/table-requests/${dialogRequestId}/${dialogAction}`, { notes: dialogNotes });
 
-      const data = await res.json();
-
-      if (res.ok && data.success) {
+      if (data.success) {
         setDialogOpen(false);
         setActionResult(null);
         fetchRequests();

@@ -1,3 +1,4 @@
+import { apiClient } from '@/api/utils/axiosInstance';
 import { CustomizerContext } from '@/context/CustomizerContext';
 import { ArrowForward, CheckCircle } from '@mui/icons-material';
 import {
@@ -102,25 +103,22 @@ export default function OcrSetupWizardPage() {
 
   const loadSetupState = async () => {
     try {
-      const response = await fetch(`/api/church/${churchId}/ocr/setup-state`);
-      if (response.ok) {
-        const data = await response.json();
-        setSetupState(data.state || {});
-        setPercentComplete(data.percentComplete || 0);
-        setIsComplete(data.isComplete || false);
-        
-        // Determine active step based on progress
-        if (data.percentComplete >= 100) {
-          setActiveStep(5);
-        } else if (data.percentComplete >= 80) {
-          setActiveStep(4);
-        } else if (data.percentComplete >= 60) {
-          setActiveStep(3);
-        } else if (data.percentComplete >= 40) {
-          setActiveStep(2);
-        } else if (data.percentComplete >= 20) {
-          setActiveStep(1);
-        }
+      const data = await apiClient.get<any>(`/church/${churchId}/ocr/setup-state`);
+      setSetupState(data.state || {});
+      setPercentComplete(data.percentComplete || 0);
+      setIsComplete(data.isComplete || false);
+      
+      // Determine active step based on progress
+      if (data.percentComplete >= 100) {
+        setActiveStep(5);
+      } else if (data.percentComplete >= 80) {
+        setActiveStep(4);
+      } else if (data.percentComplete >= 60) {
+        setActiveStep(3);
+      } else if (data.percentComplete >= 40) {
+        setActiveStep(2);
+      } else if (data.percentComplete >= 20) {
+        setActiveStep(1);
       }
     } catch (err: any) {
       setError(`Failed to load setup state: ${err.message}`);
@@ -131,13 +129,8 @@ export default function OcrSetupWizardPage() {
 
   const validateSetup = async () => {
     try {
-      const response = await fetch(`/api/church/${churchId}/ocr/setup-validate`, {
-        method: 'POST'
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setValidation(data);
-      }
+      const data = await apiClient.post<any>(`/church/${churchId}/ocr/setup-validate`);
+      setValidation(data);
     } catch (err) {
       console.error('Validation failed:', err);
     }
@@ -150,24 +143,16 @@ export default function OcrSetupWizardPage() {
       const totalPercent = Math.max(percentComplete, stepPercent);
       const complete = totalPercent >= 100;
 
-      const response = await fetch(`/api/church/${churchId}/ocr/setup-state`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          state: updatedState,
-          percentComplete: totalPercent,
-          isComplete: complete
-        })
+      await apiClient.put<any>(`/church/${churchId}/ocr/setup-state`, {
+        state: updatedState,
+        percentComplete: totalPercent,
+        isComplete: complete
       });
 
-      if (response.ok) {
-        setSetupState(updatedState);
-        setPercentComplete(totalPercent);
-        setIsComplete(complete);
-        await validateSetup();
-      } else {
-        throw new Error('Failed to save state');
-      }
+      setSetupState(updatedState);
+      setPercentComplete(totalPercent);
+      setIsComplete(complete);
+      await validateSetup();
     } catch (err: any) {
       setError(`Failed to save: ${err.message}`);
     } finally {

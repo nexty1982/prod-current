@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { apiClient } from '@/api/utils/axiosInstance';
 import {
   Box,
   Typography,
@@ -148,20 +149,7 @@ const InteractiveReportJobsPage: React.FC = () => {
       params.append('limit', '50');
       params.append('offset', '0');
 
-      const response = await fetch(`/api/records/interactive-reports/jobs?${params.toString()}`, {
-        signal: abortControllerRef.current.signal,
-      });
-
-      if (response.status === 401 || response.status === 403) {
-        setError('Unauthorized. Please log in.');
-        return;
-      }
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch jobs: ${response.statusText}`);
-      }
-
-      const data = await response.json();
+      const data = await apiClient.get<any>(`/records/interactive-reports/jobs?${params.toString()}`);
       setJobs(data.items || []);
       setTotal(data.total || 0);
       setError(null);
@@ -214,11 +202,7 @@ const InteractiveReportJobsPage: React.FC = () => {
   // Fetch job details
   const fetchJobDetails = async (jobId: number) => {
     try {
-      const response = await fetch(`/api/records/interactive-reports/jobs/${jobId}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch job details');
-      }
-      const job = await response.json();
+      const job = await apiClient.get<any>(`/records/interactive-reports/jobs/${jobId}`);
       setSelectedJob(job);
       setDrawerOpen(true);
     } catch (err: any) {
@@ -233,13 +217,7 @@ const InteractiveReportJobsPage: React.FC = () => {
     }
 
     try {
-      const response = await fetch(`/api/records/interactive-reports/jobs/${jobId}/cancel`, {
-        method: 'POST',
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to cancel job');
-      }
+      await apiClient.post<any>(`/records/interactive-reports/jobs/${jobId}/cancel`);
 
       setSnackbar({ message: 'Job cancelled successfully', severity: 'success' });
       fetchJobs(); // Refresh list
