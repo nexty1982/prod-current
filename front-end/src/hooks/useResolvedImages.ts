@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
+import { apiClient } from '@/api/utils/axiosInstance';
 
 interface ResolvedImagesResult {
   resolved: Record<string, string>;
@@ -50,21 +51,12 @@ export function useResolvedImages(pageKey: string, churchId?: number | null): Re
     setError(null);
 
     try {
-      let url = `/api/gallery/images/resolve?page_key=${encodeURIComponent(pageKey)}`;
+      let url = `/gallery/images/resolve?page_key=${encodeURIComponent(pageKey)}`;
       if (churchId) {
         url += `&church_id=${churchId}`;
       }
 
-      const response = await fetch(url, {
-        credentials: 'include',
-        signal: controller.signal,
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-
-      const data = await response.json();
+      const data = await apiClient.get<any>(url, { signal: controller.signal });
 
       if (data.success) {
         const r = data.resolved || {};

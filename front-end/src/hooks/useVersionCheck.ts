@@ -33,6 +33,8 @@ export function useVersionCheck(options: VersionCheckOptions = {}) {
   // Fetch build-info.json and compare hashes
   const checkForUpdate = useCallback(async () => {
     try {
+      // rogue-fetch: intentional — /build-info.json is a static file served by Nginx,
+      // not an API endpoint; apiClient would incorrectly prefix /api and add auth headers
       const res = await fetch('/build-info.json', { cache: 'no-store' });
       if (!res.ok) return;
       const info: BuildInfo = await res.json();

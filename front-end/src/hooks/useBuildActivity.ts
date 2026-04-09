@@ -5,6 +5,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
+import { apiClient } from '@/api/utils/axiosInstance';
 
 export interface BuildRun {
   runId: string;
@@ -42,16 +43,7 @@ export const useBuildActivity = (initialHours: number = 24): UseBuildActivityRet
     setError(null);
 
     try {
-      const response = await fetch(`/api/admin/build-runs/summary?hours=${hours}`, {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch build activity: ${response.status}`);
-      }
-
-      const data = await response.json();
+      const data = await apiClient.get<any>(`/admin/build-runs/summary?hours=${hours}`);
       
       if (data.success) {
         setSummary({

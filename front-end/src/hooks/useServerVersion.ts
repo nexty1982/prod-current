@@ -4,6 +4,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
+import { apiClient } from '@/api/utils/axiosInstance';
 
 export interface ServerVersion {
   version: string;
@@ -34,16 +35,7 @@ export const useServerVersion = (): UseServerVersionReturn => {
     setError(null);
 
     try {
-      const response = await fetch('/api/system/version', {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch server version: ${response.status}`);
-      }
-
-      const data = await response.json();
+      const data = await apiClient.get<any>('/system/version');
       
       if (data.success && data.server) {
         setServerVersion({
