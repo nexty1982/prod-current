@@ -17,7 +17,7 @@
 | 3. STATE_EXPLOSION refactors | Claude + Windsurf | 48 | 0 | Not started |
 | 4. NO_API_CLIENT route pages | Claude | 69 | 36 ignored, 1 file deleted | In progress (Batches 4.1, 4.2, 4.3 done) |
 | 5. PLACEHOLDER_STUB triage | Claude | 26 | 0 | Not started |
-| 6. CROSS_FEATURE_IMPORT | Claude | 3 | 0 | Not started |
+| 6. CROSS_FEATURE_IMPORT | Claude | 3 | 1 fixed + 1 deleted + 1 deferred (drained 0) | ✅ Done (OMD-780) |
 | **Deferred to God Component refactor** | — | 28 | — | Auto-resolves on rescan |
 | **Follow-up: features/admin/admin/ orphan dir cleanup** | Claude | ~26 files | — | Discovered during Phase 4.2 — separate task |
 | **Total real work** | | **383** | **28** | |
@@ -625,20 +625,15 @@ The `features/records-centralized/components/{baptism,death,marriage}/*RecordsPa
 ## Phase 6 — CROSS_FEATURE_IMPORT
 
 **Owner**: Claude
-**Items**: 3
+**Items**: 3 → **0 remaining** after Phase 6
+**Status**: ✅ Done (OMD-780)
 **Pattern**: Files with > 5 imports of the form `from '../../...'` — indicates tight coupling across feature directories.
 
-| ID | LOC | Imports | File |
-|----|----|----|----|
-| 42333 | — | 12 | `layouts/full/FullLayout` |
-| 42043 | — | 8 | `features/devel-tools/om-ocr/components/workbench/OcrWorkbench` |
-| 41552 | — | 6 | `components/dashboards/modern/TopCards` |
-
-### Approach
-
-1. **`layouts/full/FullLayout`** — likely importing context/theme/sidebar pieces from feature dirs. Move those imports to use `@/` alias paths or move shared bits into `shared/`. One PR.
-2. **`OcrWorkbench`** — already in active God Component refactor. Defer; likely auto-resolves.
-3. **`TopCards`** — small component pulling from multiple dashboards. Move shared dashboard data into a hook. One PR.
+| ID | LOC | Imports | File | Disposition |
+|----|----|----|----|----|
+| 43711 | 141 | 12 | `layouts/full/FullLayout` | **Fixed** — converted 6 active relative imports to `@/` alias and consolidated 6 disabled-overlay records into a single doc comment block (no `import` syntax). 12 → 0. |
+| 43586 | 834 | 8 | `features/devel-tools/om-ocr/components/workbench/OcrWorkbench` | **Deferred** — already in active God Component refactor. Marked `ignored`; auto-resolves when parent god component lands. |
+| 43361 | 89 | 6 | `components/dashboards/modern/TopCards` | **Deleted** — dead Berry-template demo component (mock data: 96 employees, $96k payroll). Verified zero references. |
 
 ---
 
