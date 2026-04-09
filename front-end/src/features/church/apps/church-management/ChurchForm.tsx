@@ -4,6 +4,7 @@
  */
 
 import { adminAPI } from '@/api/admin.api';
+import { apiClient } from '@/api/utils/axiosInstance';
 import { useAuth } from '@/context/AuthContext';
 import Breadcrumb from '@/layouts/full/shared/breadcrumb/Breadcrumb';
 import { fetchWithChurchContext } from '@/shared/lib/fetchWithChurchContext';
@@ -177,18 +178,13 @@ const ChurchForm: React.FC = () => {
   const loadFeatures = async (churchId: string) => {
     try {
       setLoadingFeatures(true);
-      const response = await fetch(`/api/churches/${churchId}/features`, {
-        credentials: 'include',
-      });
-      if (response.ok) {
-        const data = await response.json();
-        if (data.success && data.data) {
-          setFeatureData({
-            globalDefaults: data.data.globalDefaults,
-            overrides: data.data.overrides,
-            effective: data.data.effective
-          });
-        }
+      const data = await apiClient.get<any>(`/churches/${churchId}/features`);
+      if (data.success && data.data) {
+        setFeatureData({
+          globalDefaults: data.data.globalDefaults,
+          overrides: data.data.overrides,
+          effective: data.data.effective
+        });
       }
     } catch (err) {
       console.error('Error loading features:', err);
@@ -210,36 +206,27 @@ const ChurchForm: React.FC = () => {
         effective: { ...prev.effective, [featureKey]: value }
       }));
 
-      const response = await fetch(`/api/churches/${id}/features`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
-          features: { [featureKey]: value }
-        }),
+      const data = await apiClient.put<any>(`/churches/${id}/features`, {
+        features: { [featureKey]: value }
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        if (data.success && data.data) {
-          setFeatureData({
-            globalDefaults: data.data.globalDefaults,
-            overrides: data.data.overrides,
-            effective: data.data.effective
-          });
-          setSnackbar({ 
-            open: true, 
-            message: 'Feature override updated successfully', 
-            severity: 'success' 
-          });
-        }
+      if (data.success && data.data) {
+        setFeatureData({
+          globalDefaults: data.data.globalDefaults,
+          overrides: data.data.overrides,
+          effective: data.data.effective
+        });
+        setSnackbar({ 
+          open: true, 
+          message: 'Feature override updated successfully', 
+          severity: 'success' 
+        });
       } else {
         // Revert on failure
         setFeatureData(previousFeatureData);
-        const errorData = await response.json();
         setSnackbar({ 
           open: true, 
-          message: errorData.error?.message || 'Failed to update feature', 
+          message: data.error?.message || 'Failed to update feature', 
           severity: 'error' 
         });
       }
@@ -259,19 +246,12 @@ const ChurchForm: React.FC = () => {
   const testDatabaseConnection = async (churchId: string) => {
     try {
       setLoadingDatabase(true);
-      const response = await fetch(`/api/admin/churches/${churchId}/test-connection`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-      });
-      if (response.ok) {
-        const data = await response.json();
-        if (data.success && data.data?.connection) {
-          setSnackbar({ open: true, message: `Connection OK (${data.data.connection.connection_time_ms}ms)`, severity: 'success' });
-          await loadDatabaseInfo(churchId);
-        } else {
-          setSnackbar({ open: true, message: `Connection failed: ${data.error || 'Unknown'}`, severity: 'error' });
-        }
+      const data = await apiClient.post<any>(`/admin/churches/${churchId}/test-connection`);
+      if (data.success && data.data?.connection) {
+        setSnackbar({ open: true, message: `Connection OK (${data.data.connection.connection_time_ms}ms)`, severity: 'success' });
+        await loadDatabaseInfo(churchId);
+      } else {
+        setSnackbar({ open: true, message: `Connection failed: ${data.error || 'Unknown'}`, severity: 'error' });
       }
     } catch (err: any) {
       setSnackbar({ open: true, message: `Connection error: ${err.message}`, severity: 'error' });
@@ -286,22 +266,12 @@ const ChurchForm: React.FC = () => {
         ? `/api/admin/churches/${id}/users`
         : `/api/admin/churches/${id}/users/${selectedUser?.id}`;
 
-      const response = await fetch(endpoint, {
-        method: userDialogAction === 'add' ? 'POST' : 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(userData),
-      });
-
-      if (response.ok) {
-        setSnackbar({ open: true, message: `User ${userDialogAction === 'add' ? 'added' : 'updated'} successfully`, severity: 'success' });
-        setUserDialogOpen(false);
-        setSelectedUser(null);
-        if (id) loadChurchUsers(id);
-      } else {
-        const data = await response.json();
-        setSnackbar({ open: true, message: data.message || 'Failed to save user', severity: 'error' });
-      }
+      const method = userDialogAction === 'add' ? 'post' : 'put';
+      const data = await apiClient[method]<any>(endpoint.replace('/api', ''), userData);
+      setSnackbar({ open: true, message: `User ${userDialogAction === 'add' ? 'added' : 'updated'} successfully`, severity: 'success' });
+      setUserDialogOpen(false);
+      setSelectedUser(null);
+      if (id) loadChurchUsers(id);
     } catch (err: any) {
       setSnackbar({ open: true, message: err.message, severity: 'error' });
     }
@@ -309,15 +279,9 @@ const ChurchForm: React.FC = () => {
 
   const handleUserAction = async (userId: number, action: string) => {
     try {
-      const response = await fetch(`/api/admin/churches/${id}/users/${userId}/${action}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-      });
-      if (response.ok) {
-        setSnackbar({ open: true, message: `User ${action} successful`, severity: 'success' });
-        if (id) loadChurchUsers(id);
-      }
+      await apiClient.post<any>(`/admin/churches/${id}/users/${userId}/${action}`);
+      setSnackbar({ open: true, message: `User ${action} successful`, severity: 'success' });
+      if (id) loadChurchUsers(id);
     } catch (err: any) {
       setSnackbar({ open: true, message: err.message, severity: 'error' });
     }
@@ -325,15 +289,8 @@ const ChurchForm: React.FC = () => {
 
   const handlePasswordReset = async (userId: number, email: string) => {
     try {
-      const response = await fetch(`/api/admin/churches/${id}/users/${userId}/reset-password`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setSnackbar({ open: true, message: `Password reset for ${email}. New: ${data.newPassword}`, severity: 'success' });
-      }
+      const data = await apiClient.post<any>(`/admin/churches/${id}/users/${userId}/reset-password`);
+      setSnackbar({ open: true, message: `Password reset for ${email}. New: ${data.newPassword}`, severity: 'success' });
     } catch (err: any) {
       setSnackbar({ open: true, message: err.message, severity: 'error' });
     }
@@ -344,16 +301,10 @@ const ChurchForm: React.FC = () => {
     try {
       setUpdatingDatabase(true);
       setDatabaseUpdateResult(null);
-      const response = await fetch(`/api/admin/churches/${id}/update-database`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ template: selectedTemplate }),
-      });
-      const result = await response.json();
+      const result = await apiClient.post<any>(`/admin/churches/${id}/update-database`, { template: selectedTemplate });
       setDatabaseUpdateResult({
-        success: response.ok,
-        message: response.ok ? (result.message || 'Database updated') : (result.error || 'Update failed'),
+        success: true,
+        message: result.message || 'Database updated',
       });
     } catch (err: any) {
       setDatabaseUpdateResult({ success: false, message: err.message });

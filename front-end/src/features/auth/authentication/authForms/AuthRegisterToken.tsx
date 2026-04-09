@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { apiClient } from '@/api/utils/axiosInstance';
 import {
   Box, Typography, Button, Stack, Alert, LinearProgress,
   InputAdornment, IconButton, CircularProgress,
@@ -58,12 +59,8 @@ const AuthRegisterToken = () => {
     if (password !== confirmPassword) { setError('Passwords do not match.'); return; }
     setSubmitting(true);
     try {
-      const res = await fetch('/api/auth/church-register', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ church_name: churchName.trim(), registration_token: registrationToken.trim(), first_name: firstName.trim(), last_name: lastName.trim(), email: email.trim(), password }),
-      });
-      const data = await res.json();
-      if (!res.ok || !data.success) { setError(data.message || 'Registration failed.'); return; }
+      const data = await apiClient.post<any>('/auth/church-register', { church_name: churchName.trim(), registration_token: registrationToken.trim(), first_name: firstName.trim(), last_name: lastName.trim(), email: email.trim(), password });
+      if (!data.success) { setError(data.message || 'Registration failed.'); return; }
       setSuccess(true);
     } catch { setError('Network error.'); }
     finally { setSubmitting(false); }

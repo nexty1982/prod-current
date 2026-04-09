@@ -5,6 +5,7 @@
  * Extracted from CertificateGeneratorPage.tsx
  */
 import React, { useState } from 'react';
+import { apiClient } from '@/api/utils/axiosInstance';
 import JSZip from 'jszip';
 import {
   Box,
@@ -147,17 +148,11 @@ const GenerateReportWizard: React.FC<GenerateReportWizardProps> = ({
       const queryParams = new URLSearchParams();
       validCriteria.forEach(c => queryParams.append(c.field, c.value.trim()));
       
-      const response = await fetch(
-        `${API_BASE}/${churchId}/certificate/${recordType}/search?${queryParams.toString()}`
+      const data = await apiClient.get<any>(
+        `/church/${churchId}/certificate/${recordType}/search?${queryParams.toString()}`
       );
-      
-      if (response.ok) {
-        const data = await response.json();
-        setSearchResults(data.records || []);
-        setWizardStep(1);
-      } else {
-        throw new Error('Search failed');
-      }
+      setSearchResults(data.records || []);
+      setWizardStep(1);
     } catch (err) {
       onSnackbar('Search failed. Please try again.', 'error');
     } finally {
@@ -190,19 +185,12 @@ const GenerateReportWizard: React.FC<GenerateReportWizardProps> = ({
     setLoadingPreview(true);
     try {
       const positions = savedPositions || fieldPositions || {};
-      const response = await fetch(
-        `${API_BASE}/${churchId}/certificate/${recordType}/${recId}/preview`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ fieldOffsets: positions, hiddenFields: [] }),
-        }
+      const data = await apiClient.post<any>(
+        `/church/${churchId}/certificate/${recordType}/${recId}/preview`,
+        { fieldOffsets: positions, hiddenFields: [] }
       );
-      if (response.ok) {
-        const data = await response.json();
-        if (data.success && data.preview) {
-          setPreviewUrl(data.preview);
-        }
+      if (data.success && data.preview) {
+        setPreviewUrl(data.preview);
       }
     } catch (err) {
       console.error('Preview load error:', err);
@@ -251,26 +239,23 @@ const GenerateReportWizard: React.FC<GenerateReportWizardProps> = ({
     for (let i = 0; i < recordIds.length; i++) {
       const recId = recordIds[i];
       try {
-        const response = await fetch(
-          `${API_BASE}/${churchId}/certificate/${recordType}/${recId}/download?positions=${encodeURIComponent(JSON.stringify(positions))}&hidden=${encodeURIComponent(JSON.stringify(hiddenFields))}`
+        const blob = await apiClient.get<Blob>(
+          `/church/${churchId}/certificate/${recordType}/${recId}/download?positions=${encodeURIComponent(JSON.stringify(positions))}&hidden=${encodeURIComponent(JSON.stringify(hiddenFields))}`,
+          { responseType: 'blob' }
         );
-        
-        if (response.ok) {
-          const blob = await response.blob();
-          // Get record info for filename
-          const record = searchResults.find(r => r.id === recId);
-          let filename = `${recordType}_${recId}.pdf`;
-          if (record) {
-            const lastName = (record.last_name || record.lname_groom || '').replace(/[^a-zA-Z]/g, '');
-            const firstName = (record.first_name || record.fname_groom || '').replace(/[^a-zA-Z]/g, '');
-            if (lastName && firstName) {
-              filename = `${recordType}_${lastName}_${firstName}.pdf`;
-            }
+        // Get record info for filename
+        const record = searchResults.find(r => r.id === recId);
+        let filename = `${recordType}_${recId}.pdf`;
+        if (record) {
+          const lastName = (record.last_name || record.lname_groom || '').replace(/[^a-zA-Z]/g, '');
+          const firstName = (record.first_name || record.fname_groom || '').replace(/[^a-zA-Z]/g, '');
+          if (lastName && firstName) {
+            filename = `${recordType}_${lastName}_${firstName}.pdf`;
           }
-          zip.file(filename, blob);
-          successCount++;
-          setGeneratedCount(successCount);
         }
+        zip.file(filename, blob);
+        successCount++;
+        setGeneratedCount(successCount);
       } catch (err) {
         console.error(`Failed to generate certificate for record ${recId}:`, err);
       }

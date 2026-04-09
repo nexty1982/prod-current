@@ -1,4 +1,5 @@
 import adminAPI from '@/api/admin.api';
+import { apiClient } from '@/api/utils/axiosInstance';
 import { useAuth } from '@/context/AuthContext';
 import { fetchWithChurchContext } from '@/shared/lib/fetchWithChurchContext';
 import { enhancedTableStore, THEME_MAP, type LiturgicalThemeKey, type ThemeTokens } from '@/store/enhancedTableStore';
@@ -154,37 +155,19 @@ const FieldMapperPage: React.FC = () => {
         ? '/api/admin/churches/themes/global'
         : `/api/admin/churches/${churchId}/themes`;
 
-      const response = await fetch(endpoint, {
-        credentials: 'include',
-      });
+      const data = await apiClient.get<any>(endpoint.replace('/api', ''));
+      // Handle both ApiResponse-wrapped ({ data: { themes } }) and direct ({ themes }) formats
+      const themesPayload = data.data?.themes || data.themes;
+      if (themesPayload && typeof themesPayload === 'object' && Object.keys(themesPayload).length > 0) {
+        setThemeStudio(prev => ({
+          ...prev,
+          themes: themesPayload,
+          isGlobal: isGlobal,
+        }));
 
-      if (response.ok) {
-        const data = await response.json();
-        // Handle both ApiResponse-wrapped ({ data: { themes } }) and direct ({ themes }) formats
-        const themesPayload = data.data?.themes || data.themes;
-        if (themesPayload && typeof themesPayload === 'object' && Object.keys(themesPayload).length > 0) {
-          setThemeStudio(prev => ({
-            ...prev,
-            themes: themesPayload,
-            isGlobal: isGlobal,
-          }));
-
-          // Sync church-specific themes to enhancedTableStore so they appear in dropdown
-          if (!isGlobal) {
-            enhancedTableStore.setCustomThemes(themesPayload);
-          }
-        } else {
-          // Initialize with empty themes
-          setThemeStudio(prev => ({
-            ...prev,
-            themes: {},
-            isGlobal: isGlobal,
-          }));
-
-          // Clear custom themes if no themes found
-          if (!isGlobal) {
-            enhancedTableStore.setCustomThemes({});
-          }
+        // Sync church-specific themes to enhancedTableStore so they appear in dropdown
+        if (!isGlobal) {
+          enhancedTableStore.setCustomThemes(themesPayload);
         }
       } else {
         // Initialize with empty themes
@@ -194,7 +177,7 @@ const FieldMapperPage: React.FC = () => {
           isGlobal: isGlobal,
         }));
 
-        // Clear custom themes if request failed
+        // Clear custom themes if no themes found
         if (!isGlobal) {
           enhancedTableStore.setCustomThemes({});
         }
@@ -231,19 +214,9 @@ const FieldMapperPage: React.FC = () => {
         : `/api/admin/churches/${churchId}/themes`;
 
       // Send themes as object (Record<string, ThemeTokens>) to match what loadThemes() expects
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
-          themes: themeStudio.themes || {},
-        }),
+      await apiClient.post<any>(endpoint.replace('/api', ''), {
+        themes: themeStudio.themes || {},
       });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || 'Failed to save themes');
-      }
 
       setSuccess(`Themes saved successfully as ${themeStudio.isGlobal ? 'global' : 'church-specific'} themes!`);
 
@@ -286,26 +259,21 @@ const FieldMapperPage: React.FC = () => {
 
       try {
         // Load church information
-        const churchResponse = await fetch(`/api/admin/churches/${churchId}`, {
-          credentials: 'include',
-        });
-        let loadedChurchName = '';
-        if (churchResponse.ok) {
-          const churchData = await churchResponse.json();
-          loadedChurchName = churchData.church?.church_name || churchData.church?.name || churchData.data?.church_name || churchData.data?.name || churchData.church_name || churchData.name || '';
-          setChurchName(loadedChurchName);
-        }
+        const churchData = await apiClient.get<any>(`/admin/churches/${churchId}`);
+        let loadedChurchName = churchData.church?.church_name || churchData.church?.name || churchData.data?.church_name || churchData.data?.name || churchData.church_name || churchData.name || '';
+        setChurchName(loadedChurchName);
 
         // Check if logo exists - try multiple methods
         const logoUrl = `/images/records/${churchId}-logo.png`;
         let logoExists = false;
         try {
-          // Try HEAD request first
+          // rogue-fetch: static asset existence check (not an API call)
           const logoCheck = await fetch(logoUrl, { method: 'HEAD', cache: 'no-cache' });
           logoExists = logoCheck.ok;
         } catch {
           // If HEAD fails, try GET request
           try {
+            // rogue-fetch: static asset existence check (not an API call)
             const logoCheck = await fetch(logoUrl, { method: 'GET', cache: 'no-cache' });
             logoExists = logoCheck.ok;
           } catch {
@@ -315,12 +283,10 @@ const FieldMapperPage: React.FC = () => {
         }
 
         // Load dynamic records config
-        const configResponse = await fetch(`/api/admin/churches/${churchId}/dynamic-records-config`, {
-          credentials: 'include',
-        });
+        const configData = await apiClient.get<any>(`/admin/churches/${churchId}/dynamic-records-config`);
 
-        if (configResponse.ok) {
-          const data = await configResponse.json();
+        {
+          const data = configData;
           if (data.config) {
             // Merge with church info
             setDynamicConfig(prev => ({
@@ -344,18 +310,6 @@ const FieldMapperPage: React.FC = () => {
               fieldRules: storeState.fieldRules,
             });
           }
-        } else {
-          // Use defaults with church info
-          const storeState = enhancedTableStore.getState();
-          setDynamicConfig({
-            branding: {
-              ...storeState.branding,
-              churchName: loadedChurchName,
-              logoUrl: logoExists ? logoUrl : undefined,
-            },
-            liturgicalTheme: storeState.liturgicalTheme,
-            fieldRules: storeState.fieldRules,
-          });
         }
       } catch (err) {
         console.error('Error loading church info and dynamic records config:', err);
@@ -453,12 +407,9 @@ const FieldMapperPage: React.FC = () => {
 
       // Fetch row count for the table
       try {
-        const countRes = await fetch(`/api/admin/church-database/${churchId}/record-counts`, { credentials: 'include' });
-        if (countRes.ok) {
-          const countData = await countRes.json();
-          const counts = countData?.data?.record_counts || countData?.counts || countData;
-          setRowCount(counts[tableName] ?? null);
-        }
+        const countData = await apiClient.get<any>(`/admin/church-database/${churchId}/record-counts`);
+        const counts = countData?.data?.record_counts || countData?.counts || countData;
+        setRowCount(counts[tableName] ?? null);
       } catch { /* non-fatal */ }
     } catch (err: any) {
       console.error('Error loading columns:', err);

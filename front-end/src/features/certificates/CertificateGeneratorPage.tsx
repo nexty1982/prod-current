@@ -9,6 +9,7 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
+import { apiClient } from '@/api/utils/axiosInstance';
 import {
   Box,
   Paper,
@@ -183,17 +184,14 @@ const CertificateGeneratorPage: React.FC = () => {
   // Load saved positions for this church
   const loadSavedPositions = async (): Promise<Record<string, { x: number; y: number }> | null> => {
     try {
-      const response = await fetch(`${API_BASE}/${churchId}/certificate/positions/${recordType}`);
-      if (response.ok) {
-        const data = await response.json();
-        if (data.success && data.positions && !data.isDefault) {
-          setSavedPositions(data.positions);
-          setFieldPositions(data.positions);
-          setPlacedFields(new Set(Object.keys(data.positions)));
-          setSavedPositionsLoaded(true);
-          setShowCoordinates(true); // Show coordinates by default when saved positions exist
-          return data.positions;
-        }
+      const data = await apiClient.get<any>(`/church/${churchId}/certificate/positions/${recordType}`);
+      if (data.success && data.positions && !data.isDefault) {
+        setSavedPositions(data.positions);
+        setFieldPositions(data.positions);
+        setPlacedFields(new Set(Object.keys(data.positions)));
+        setSavedPositionsLoaded(true);
+        setShowCoordinates(true); // Show coordinates by default when saved positions exist
+        return data.positions;
       }
     } catch (err) {
       console.warn('Could not load saved positions:', err);
@@ -253,18 +251,9 @@ const CertificateGeneratorPage: React.FC = () => {
     
     try {
       setSaving(true);
-      const response = await fetch(`${API_BASE}/${churchId}/certificate/positions/${recordType}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ positions: fieldPositions }),
-      });
-      
-      if (response.ok) {
-        setSnackbar({ open: true, message: 'Positions saved! These will be used for all certificates of this type.', severity: 'success' });
-        setSavedPositionsLoaded(true);
-      } else {
-        throw new Error('Failed to save');
-      }
+      await apiClient.post<any>(`/church/${churchId}/certificate/positions/${recordType}`, { positions: fieldPositions });
+      setSnackbar({ open: true, message: 'Positions saved! These will be used for all certificates of this type.', severity: 'success' });
+      setSavedPositionsLoaded(true);
     } catch (err) {
       setSnackbar({ open: true, message: 'Failed to save positions', severity: 'error' });
     } finally {
@@ -284,38 +273,24 @@ const CertificateGeneratorPage: React.FC = () => {
       setLoading(true);
       setError(null);
 
-      const [templateRes, recordRes] = await Promise.all([
-        fetch(`${API_BASE}/${churchId}/certificate/${recordType}/template`),
-        fetch(`${API_BASE}/${churchId}/certificate/${recordType}/${recordId}/preview`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ fieldOffsets: {}, hiddenFields: Object.keys(fieldLabels) }),
-        }),
+      const [templateData, recordResData] = await Promise.all([
+        apiClient.get<any>(`/church/${churchId}/certificate/${recordType}/template`),
+        apiClient.post<any>(`/church/${churchId}/certificate/${recordType}/${recordId}/preview`, { fieldOffsets: {}, hiddenFields: Object.keys(fieldLabels) }),
       ]);
 
-      if (templateRes.ok) {
-        const templateData = await templateRes.json();
-        if (templateData.success && templateData.template) {
-          setTemplateUrl(templateData.template); setImageLoaded(false);
-        }
+      if (templateData.success && templateData.template) {
+        setTemplateUrl(templateData.template); setImageLoaded(false);
       }
 
-      if (recordRes.ok) {
-        const recordResData = await recordRes.json();
-        if (recordResData.success && recordResData.record) {
-          setRecordData(recordResData.record);
-        }
-        if (!templateUrl && recordResData.preview) {
-          setTemplateUrl(recordResData.preview);
-        }
+      if (recordResData.success && recordResData.record) {
+        setRecordData(recordResData.record);
+      }
+      if (!templateUrl && recordResData.preview) {
+        setTemplateUrl(recordResData.preview);
       }
 
       // Load saved positions
       await loadSavedPositions();
-
-      if (!templateRes.ok && !recordRes.ok) {
-        throw new Error('Failed to load certificate data');
-      }
 
     } catch (err) {
       console.error('Fetch error:', err);
@@ -415,13 +390,10 @@ const CertificateGeneratorPage: React.FC = () => {
         }
       });
       
-      const response = await fetch(
-        `${API_BASE}/${churchId}/certificate/${recordType}/${recordId}/download?positions=${encodeURIComponent(JSON.stringify(positions))}&hidden=${encodeURIComponent(JSON.stringify(hiddenFields))}`
+      const blob = await apiClient.get<Blob>(
+        `/church/${churchId}/certificate/${recordType}/${recordId}/download?positions=${encodeURIComponent(JSON.stringify(positions))}&hidden=${encodeURIComponent(JSON.stringify(hiddenFields))}`,
+        { responseType: 'blob' }
       );
-
-      if (!response.ok) throw new Error(`Preview failed: HTTP ${response.status}`);
-
-      const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       window.open(url, '_blank');
     } catch (err) {
@@ -447,13 +419,10 @@ const CertificateGeneratorPage: React.FC = () => {
         }
       });
       
-      const response = await fetch(
-        `${API_BASE}/${churchId}/certificate/${recordType}/${recordId}/download?positions=${encodeURIComponent(JSON.stringify(positions))}&hidden=${encodeURIComponent(JSON.stringify(hiddenFields))}`
+      const blob = await apiClient.get<Blob>(
+        `/church/${churchId}/certificate/${recordType}/${recordId}/download?positions=${encodeURIComponent(JSON.stringify(positions))}&hidden=${encodeURIComponent(JSON.stringify(hiddenFields))}`,
+        { responseType: 'blob' }
       );
-
-      if (!response.ok) throw new Error(`Download failed: HTTP ${response.status}`);
-
-      const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;

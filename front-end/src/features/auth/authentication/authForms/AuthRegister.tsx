@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { apiClient } from '@/api/utils/axiosInstance';
 import {
   Autocomplete,
   Box,
@@ -161,8 +162,7 @@ const AuthRegister = ({ title, subtitle, subtext }: AuthRegisterProps) => {
     try {
       const params = new URLSearchParams({ state });
       if (q.trim().length >= 2) params.set('q', q.trim());
-      const res = await fetch(`/api/auth/church-search?${params}`);
-      const data = await res.json();
+      const data = await apiClient.get<any>(`/auth/church-search?${params}`);
       if (data.success) setChurches(data.churches);
     } catch { /* ignore */ }
     finally { setSearching(false); }
@@ -187,8 +187,7 @@ const AuthRegister = ({ title, subtitle, subtext }: AuthRegisterProps) => {
   const loadAvailableDates = useCallback(async (month: string) => {
     setLoadingDates(true);
     try {
-      const res = await fetch(`/api/crm-public/available-dates?month=${month}`);
-      const data = await res.json();
+      const data = await apiClient.get<any>(`/crm-public/available-dates?month=${month}`);
       if (data.success) setAvailableDates(data.dates);
     } catch { /* ignore */ }
     finally { setLoadingDates(false); }
@@ -205,8 +204,7 @@ const AuthRegister = ({ title, subtitle, subtext }: AuthRegisterProps) => {
     if (!selectedDate) { setTimeSlots([]); return; }
     setLoadingSlots(true);
     setSelectedTime('');
-    fetch(`/api/crm-public/available-slots?date=${selectedDate}`)
-      .then(r => r.json())
+    apiClient.get<any>(`/crm-public/available-slots?date=${selectedDate}`)
       .then(data => { if (data.success) setTimeSlots(data.slots); })
       .catch(() => {})
       .finally(() => setLoadingSlots(false));
@@ -269,29 +267,24 @@ const AuthRegister = ({ title, subtitle, subtext }: AuthRegisterProps) => {
     setError('');
     setSubmitting(true);
     try {
-      const res = await fetch('/api/crm-public/inquiry', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          churchId: selectedChurch?.id || null,
-          churchName: churchName.trim(),
-          stateCode: selectedState || null,
-          firstName: firstName.trim(),
-          lastName: lastName.trim(),
-          email: email.trim(),
-          phone: phone.trim() || null,
-          role,
-          maintainsRecords,
-          heardAbout,
-          heardAboutDetail: heardAboutDetail.trim() || null,
-          interestedDigitalRecords: interestedDigital,
-          wantsMeeting: wantsMeeting === 'yes',
-          appointmentDate: selectedDate || null,
-          appointmentTime: selectedTime || null,
-        }),
+      const data = await apiClient.post<any>('/crm-public/inquiry', {
+        churchId: selectedChurch?.id || null,
+        churchName: churchName.trim(),
+        stateCode: selectedState || null,
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        email: email.trim(),
+        phone: phone.trim() || null,
+        role,
+        maintainsRecords,
+        heardAbout,
+        heardAboutDetail: heardAboutDetail.trim() || null,
+        interestedDigitalRecords: interestedDigital,
+        wantsMeeting: wantsMeeting === 'yes',
+        appointmentDate: selectedDate || null,
+        appointmentTime: selectedTime || null,
       });
-      const data = await res.json();
-      if (!res.ok || !data.success) {
+      if (!data.success) {
         setError(data.message || 'Submission failed. Please try again.');
         return;
       }

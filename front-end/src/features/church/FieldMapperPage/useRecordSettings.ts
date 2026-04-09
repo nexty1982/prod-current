@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { apiClient } from '@/api/utils/axiosInstance';
 import { fetchWithChurchContext } from '@/shared/lib/fetchWithChurchContext';
 import { DEFAULT_RECORD_SETTINGS } from './constants';
 
@@ -130,49 +131,7 @@ export function useRecordSettings(
     formData.append('image', file);
     formData.append('type', type);
 
-    const response = await fetch(`/api/admin/churches/${churchId}/record-images`, {
-      method: 'POST',
-      credentials: 'include',
-      body: formData,
-    });
-
-    if (!response.ok) {
-      let errorMessage = 'Failed to upload image';
-      const responseText = await response.text();
-
-      if (responseText.trim().startsWith('<html') || responseText.trim().startsWith('<!DOCTYPE')) {
-        const titleMatch = responseText.match(/<title>(.*?)<\/title>/i);
-        const title = titleMatch ? titleMatch[1] : 'Internal Server Error';
-        errorMessage = `Server error (${response.status}): ${title}. The server is experiencing issues.`;
-        console.error('Received HTML error page instead of JSON:', {
-          status: response.status,
-          statusText: response.statusText,
-          htmlTitle: title,
-          responsePreview: responseText.substring(0, 300),
-        });
-      } else {
-        try {
-          const errorDetails = JSON.parse(responseText);
-          errorMessage = errorDetails.message || errorDetails.error || errorDetails.error?.message || errorMessage;
-        } catch {
-          if (responseText && responseText.trim() && responseText.length < 500) {
-            errorMessage = responseText.trim();
-          } else {
-            errorMessage = `Server error: ${response.status} ${response.statusText}`;
-          }
-        }
-      }
-
-      console.error('Upload error details:', {
-        status: response.status,
-        statusText: response.statusText,
-        responsePreview: responseText.substring(0, 500),
-      });
-
-      throw new Error(errorMessage);
-    }
-
-    const result = await response.json();
+    const result = await apiClient.post<any>(`/admin/churches/${churchId}/record-images`, formData);
     const imageUrl = result.url || result.path || `/images/records/${churchId}-${type === 'logo' ? 'logo' : type === 'bg' ? 'bg' : type}.png`;
 
     setRecordSettings(prev => {
@@ -291,13 +250,8 @@ export function useRecordSettings(
 
       // Reload settings to ensure preview is updated
       try {
-        const reloadRes = await fetch(`/api/admin/churches/${churchId}/record-settings`, {
-          credentials: 'include',
-          cache: 'no-cache',
-        });
-        if (reloadRes.ok) {
-          const data = await reloadRes.json();
-          if (data.settings) {
+        const data = await apiClient.get<any>(`/admin/churches/${churchId}/record-settings`);
+        if (data.settings) {
             setRecordSettings(prev => ({
               ...prev,
               ...safeObj(data.settings),
@@ -351,7 +305,6 @@ export function useRecordSettings(
                 recordImage: data.settings.currentImageIndex?.recordImage ?? 0,
               },
             }));
-          }
         }
       } catch (err) {
         console.error('Error reloading record settings:', err);

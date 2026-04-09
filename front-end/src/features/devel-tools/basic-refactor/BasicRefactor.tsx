@@ -1,3 +1,4 @@
+import { apiClient } from '@/api/utils/axiosInstance';
 import { CustomizerContext } from '@/context/CustomizerContext';
 import {
     Box,
@@ -113,10 +114,7 @@ const BasicRefactor: React.FC = () => {
   const loadPolicyFiles = useCallback(async () => {
     setIsLoadingFiles(true);
     try {
-      const res = await fetch('/api/refactor-console/policy/list', {
-        credentials: 'include',
-      });
-      const data = await res.json();
+      const data = await apiClient.get<any>('/refactor-console/policy/list');
       if (data.ok) {
         setPolicyFiles(data.files);
         // Auto-select first if none selected
@@ -141,10 +139,7 @@ const BasicRefactor: React.FC = () => {
   const loadPolicyContent = useCallback(async (policyPath: string) => {
     if (!policyPath) return;
     try {
-      const res = await fetch(`/api/refactor-console/policy?path=${encodeURIComponent(policyPath)}`, {
-        credentials: 'include',
-      });
-      const data = await res.json();
+      const data = await apiClient.get<any>(`/refactor-console/policy?path=${encodeURIComponent(policyPath)}`);
       if (data.ok) {
         setEditorContent(data.content);
         setEditorDirty(false);
@@ -169,13 +164,7 @@ const BasicRefactor: React.FC = () => {
     if (!selectedPolicyPath) return;
     setIsSaving(true);
     try {
-      const res = await fetch('/api/refactor-console/policy', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ path: selectedPolicyPath, content: editorContent }),
-      });
-      const data = await res.json();
+      const data = await apiClient.put<any>('/refactor-console/policy', { path: selectedPolicyPath, content: editorContent });
       if (data.ok) {
         setEditorDirty(false);
         toast.success('Policy saved');
@@ -205,13 +194,7 @@ const BasicRefactor: React.FC = () => {
     const fullPath = `/var/www/orthodoxmetrics/prod/ops/refactor/${filename}`;
     setIsSaving(true);
     try {
-      const res = await fetch('/api/refactor-console/policy', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ path: fullPath, content: NEW_POLICY_TEMPLATE }),
-      });
-      const data = await res.json();
+      const data = await apiClient.put<any>('/refactor-console/policy', { path: fullPath, content: NEW_POLICY_TEMPLATE });
       if (data.ok) {
         toast.success(`Created: ${filename}`);
         setNewFileName('');
@@ -234,11 +217,7 @@ const BasicRefactor: React.FC = () => {
   const handleDelete = useCallback(async (filePath: string) => {
     if (!window.confirm(`Delete policy file?\n${filePath}`)) return;
     try {
-      const res = await fetch(`/api/refactor-console/policy?path=${encodeURIComponent(filePath)}`, {
-        method: 'DELETE',
-        credentials: 'include',
-      });
-      const data = await res.json();
+      const data = await apiClient.delete<any>(`/refactor-console/policy?path=${encodeURIComponent(filePath)}`);
       if (data.ok) {
         toast.success('Policy deleted');
         if (selectedPolicyPath === filePath) {
@@ -301,10 +280,7 @@ const BasicRefactor: React.FC = () => {
 
       // Use the existing scan endpoint for the first enabled scope
       const scope = enabledScopes[0];
-      const scanRes = await fetch(`/api/refactor-console/scan?sourcePath=${encodeURIComponent(scope.root)}&sourceType=local`, {
-        credentials: 'include',
-      });
-      const scanData = await scanRes.json();
+      const scanData = await apiClient.get<any>(`/refactor-console/scan?sourcePath=${encodeURIComponent(scope.root)}&sourceType=local`);
 
       if (!scanData.ok || !scanData.nodes || scanData.nodes.length === 0) {
         toast.warning('Scan returned no data. Run a scan in the Refactor Console first, or check the scope root path.');

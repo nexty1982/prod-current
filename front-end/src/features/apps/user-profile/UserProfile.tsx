@@ -1,6 +1,7 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import Grid2 from '@/components/compat/Grid2';
+import { apiClient } from '@/api/utils/axiosInstance';
 import { useAuth } from '@/context/AuthContext';
 import Breadcrumb from '@/layouts/full/shared/breadcrumb/Breadcrumb';
 import PageContainer from '@/shared/ui/PageContainer';
@@ -110,19 +111,16 @@ const UserProfile = () => {
       }
 
       try {
-        const response = await fetch('/api/user/profile', { credentials: 'include' });
-        if (response.ok) {
-          const data = await response.json();
-          if (data.success && data.profile) {
-            const p = data.profile;
-            setProfileData({
-              display_name: p.display_name || `${p.first_name || ''} ${p.last_name || ''}`.trim(),
-              company: p.company || '',
-              location: p.location || '',
-              email: p.email || user.email || '',
-              phone: p.phone || '',
-            });
-          }
+        const data = await apiClient.get<any>('/user/profile');
+        if (data.success && data.profile) {
+          const p = data.profile;
+          setProfileData({
+            display_name: p.display_name || `${p.first_name || ''} ${p.last_name || ''}`.trim(),
+            company: p.company || '',
+            location: p.location || '',
+            email: p.email || user.email || '',
+            phone: p.phone || '',
+          });
         }
       } catch (error) {
         console.error('Error fetching profile:', error);
@@ -162,15 +160,8 @@ const UserProfile = () => {
 
     setSaving(true);
     try {
-      const response = await fetch('/api/user/profile/password', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ currentPassword, newPassword, confirmPassword }),
-      });
-
-      const data = await response.json();
-      if (response.ok && data.success) {
+      const data = await apiClient.put<any>('/user/profile/password', { currentPassword, newPassword, confirmPassword });
+      if (data.success) {
         setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
         setSnackbar({ open: true, message: 'Password changed successfully', severity: 'success' });
       } else {
@@ -186,20 +177,13 @@ const UserProfile = () => {
   const handleSaveProfile = async () => {
     setSaving(true);
     try {
-      const response = await fetch('/api/user/profile', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
-          display_name: profileData.display_name,
-          company: profileData.company,
-          location: profileData.location,
-          phone: profileData.phone,
-        }),
+      const data = await apiClient.put<any>('/user/profile', {
+        display_name: profileData.display_name,
+        company: profileData.company,
+        location: profileData.location,
+        phone: profileData.phone,
       });
-
-      const data = await response.json();
-      if (response.ok && data.success) {
+      if (data.success) {
         setSnackbar({ open: true, message: 'Profile saved successfully', severity: 'success' });
       } else {
         throw new Error(data.message || 'Save failed');
