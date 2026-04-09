@@ -1,18 +1,6 @@
 /**
- * Repository Operations Hub
- *
- * Unified admin page: Build info, git context, remote-authoritative branch cleanup.
- *
- * Data sources:
- *   - GET /api/system/version         — server build info
- *   - GET /api/ops/git/status         — git status raw output
- *   - GET /api/ops/git/branch-analysis — remote-authoritative branch analysis
- *   - getBuildInfo()                   — frontend build info (Vite env)
- *
- * Architecture:
- *   - Remote branches (origin/*) are the source of truth for cleanup
- *   - Local branches are secondary context (current, tracking, local-only)
- *   - All comparisons are against origin/main, not local main
+ * Repository Operations Hub — Build info, git context, branch cleanup.
+ * Remote branches (origin/*) are source of truth; comparisons against origin/main.
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
