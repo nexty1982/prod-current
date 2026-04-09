@@ -238,6 +238,8 @@ class DebugLogger {
         ? '/api/logger/client'
         : 'http://localhost:3002/api/logger/client';
 
+      // rogue-fetch: intentional — this class overrides console.* methods; using apiClient
+      // would trigger console logging which re-enters sendToClientLogger → infinite recursion
       await fetch(apiUrl, {
         method: 'POST',
         headers: {
@@ -471,6 +473,8 @@ class DebugLogger {
         ? '/api/logger/batch'
         : 'http://localhost:3002/api/logger/batch';
 
+      // rogue-fetch: intentional — same recursion risk as sendToClientLogger; also needs
+      // fail-silent retry semantics that apiClient's auto-throw would break
       await fetch(apiUrl, {
         method: 'POST',
         headers: {
@@ -609,6 +613,7 @@ class DebugLogger {
     }
 
     try {
+      // rogue-fetch: intentional — test method inside debug logger, same recursion constraints
       const response = await fetch('/api/test-500-error');
       console.log('Test API response:', response.status);
     } catch (error) {
