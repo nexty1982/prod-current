@@ -1,3 +1,4 @@
+import { apiClient } from '@/api/utils/axiosInstance';
 import {
     Alert,
     Autocomplete,
@@ -152,11 +153,8 @@ const PageImageIndex: React.FC = () => {
 
   const fetchPages = async () => {
     try {
-      const response = await fetch('/api/gallery/admin/images/all-pages', { credentials: 'include' });
-      if (response.ok) {
-        const data = await response.json();
-        setPages(data.pages || []);
-      }
+      const data = await apiClient.get<any>('/gallery/admin/images/all-pages');
+      setPages(data.pages || []);
     } catch (error) {
       console.error('Error fetching pages:', error);
     }
@@ -165,14 +163,9 @@ const PageImageIndex: React.FC = () => {
   const fetchPageIndex = async (pageKey: string) => {
     setLoading(true);
     try {
-      const response = await fetch(`/api/gallery/admin/images/page-index?page_key=${encodeURIComponent(pageKey)}`, {
-        credentials: 'include',
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setBindings(data.all_bindings || []);
-        setBindingsByKey(data.bindings_by_key || {});
-      }
+      const data = await apiClient.get<any>(`/gallery/admin/images/page-index?page_key=${encodeURIComponent(pageKey)}`);
+      setBindings(data.all_bindings || []);
+      setBindingsByKey(data.bindings_by_key || {});
     } catch (error) {
       console.error('Error fetching page index:', error);
     } finally {
@@ -182,14 +175,11 @@ const PageImageIndex: React.FC = () => {
 
   const fetchChurches = async () => {
     try {
-      const response = await fetch('/api/admin/churches', { credentials: 'include' });
-      if (response.ok) {
-        const data = await response.json();
-        const list = (data.data || data.churches || data || [])
-          .filter((c: any) => c && c.id)
-          .map((c: any) => ({ id: c.id, name: c.name || c.church_name || `Church ${c.id}` }));
-        setChurches(list);
-      }
+      const data = await apiClient.get<any>('/admin/churches');
+      const list = (data.data || data.churches || data || [])
+        .filter((c: any) => c && c.id)
+        .map((c: any) => ({ id: c.id, name: c.name || c.church_name || `Church ${c.id}` }));
+      setChurches(list);
     } catch (error) {
       console.error('Error fetching churches:', error);
     }
@@ -197,11 +187,8 @@ const PageImageIndex: React.FC = () => {
 
   const fetchRegistry = async () => {
     try {
-      const response = await fetch('/api/gallery/admin/images/registry', { credentials: 'include' });
-      if (response.ok) {
-        const data = await response.json();
-        setRegistryImages(data.images || []);
-      }
+      const data = await apiClient.get<any>('/gallery/admin/images/registry');
+      setRegistryImages(data.images || []);
     } catch (error) {
       console.error('Error fetching registry:', error);
     }
@@ -210,17 +197,9 @@ const PageImageIndex: React.FC = () => {
   const handleSyncRegistry = async () => {
     setSyncStatus('Syncing...');
     try {
-      const response = await fetch('/api/gallery/admin/images/registry/sync', {
-        method: 'POST',
-        credentials: 'include',
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setSyncStatus(`Synced: ${data.discovered} discovered, ${data.inserted} new, ${data.skipped} existing`);
-        fetchRegistry();
-      } else {
-        setSyncStatus('Sync failed');
-      }
+      const data = await apiClient.post<any>('/gallery/admin/images/registry/sync');
+      setSyncStatus(`Synced: ${data.discovered} discovered, ${data.inserted} new, ${data.skipped} existing`);
+      fetchRegistry();
     } catch (error) {
       setSyncStatus('Sync error');
       console.error('Error syncing registry:', error);
@@ -247,27 +226,17 @@ const PageImageIndex: React.FC = () => {
     }
     setBindSaving(true);
     try {
-      const response = await fetch('/api/gallery/admin/images/bindings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
-          page_key: bindPageKey,
-          image_key: bindImageKey,
-          scope: bindScope,
-          church_id: bindScope === 'church' ? bindChurchId : null,
-          image_path: bindImagePath,
-          notes: bindNotes || null,
-        }),
+      await apiClient.post<any>('/gallery/admin/images/bindings', {
+        page_key: bindPageKey,
+        image_key: bindImageKey,
+        scope: bindScope,
+        church_id: bindScope === 'church' ? bindChurchId : null,
+        image_path: bindImagePath,
+        notes: bindNotes || null,
       });
-      if (response.ok) {
-        setBindDialogOpen(false);
-        fetchPages();
-        if (selectedPageKey) fetchPageIndex(selectedPageKey);
-      } else {
-        const err = await response.json();
-        alert(`Error: ${err.error || 'Failed to save binding'}`);
-      }
+      setBindDialogOpen(false);
+      fetchPages();
+      if (selectedPageKey) fetchPageIndex(selectedPageKey);
     } catch (error: any) {
       alert(`Error: ${error.message}`);
     } finally {
@@ -278,19 +247,9 @@ const PageImageIndex: React.FC = () => {
   const handleDeleteBinding = async (binding: Binding) => {
     if (!window.confirm(`Delete binding ${binding.page_key} → ${binding.image_key} (${binding.scope})?`)) return;
     try {
-      const response = await fetch('/api/gallery/admin/images/bindings', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ id: binding.id }),
-      });
-      if (response.ok) {
-        fetchPages();
-        if (selectedPageKey) fetchPageIndex(selectedPageKey);
-      } else {
-        const err = await response.json();
-        alert(`Error: ${err.error || 'Failed to delete'}`);
-      }
+      await apiClient.delete<any>('/gallery/admin/images/bindings', { data: { id: binding.id } });
+      fetchPages();
+      if (selectedPageKey) fetchPageIndex(selectedPageKey);
     } catch (error: any) {
       alert(`Error: ${error.message}`);
     }

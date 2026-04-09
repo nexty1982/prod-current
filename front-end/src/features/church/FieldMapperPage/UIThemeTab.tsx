@@ -1,3 +1,4 @@
+import { apiClient } from '@/api/utils/axiosInstance';
 import { enhancedTableStore } from '@/store/enhancedTableStore';
 import {
     Add as AddIcon,
@@ -281,23 +282,14 @@ const UIThemeTab: React.FC<UIThemeTabProps> = ({
                   setError(null);
                   setSuccess(null);
                   const storeState = enhancedTableStore.exportConfig();
-                  const response = await fetch(`/api/admin/churches/${churchId}/dynamic-records-config`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include',
-                    body: JSON.stringify({
-                      config: {
-                        branding: dynamicConfig.branding,
-                        liturgicalTheme: dynamicConfig.liturgicalTheme,
-                        fieldRules: dynamicConfig.fieldRules,
-                        actionButtonConfigs: storeState.actionButtonConfigs,
-                      },
-                    }),
+                  await apiClient.post<any>(`/admin/churches/${churchId}/dynamic-records-config`, {
+                    config: {
+                      branding: dynamicConfig.branding,
+                      liturgicalTheme: dynamicConfig.liturgicalTheme,
+                      fieldRules: dynamicConfig.fieldRules,
+                      actionButtonConfigs: storeState.actionButtonConfigs,
+                    },
                   });
-                  if (!response.ok) {
-                    const errorData = await response.json().catch(() => ({}));
-                    throw new Error(errorData.message || errorData.error || 'Failed to save UI theme');
-                  }
                   setSuccess('UI Theme saved successfully!');
                   setTimeout(() => setSuccess(null), 3000);
                 } catch (err: any) {

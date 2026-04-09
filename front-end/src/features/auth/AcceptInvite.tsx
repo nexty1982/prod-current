@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { apiClient } from '@/api/utils/axiosInstance';
 import {
     Box,
     Card,
@@ -63,10 +64,9 @@ const AcceptInvite: React.FC = () => {
     useEffect(() => {
         const fetchInvite = async () => {
             try {
-                const res = await fetch(`/api/invite/${token}`);
-                const data = await res.json();
+                const data = await apiClient.get<any>(`/invite/${token}`);
 
-                if (!res.ok || !data.success) {
+                if (!data.success) {
                     setError(data.message || 'Invalid invite link.');
                     return;
                 }
@@ -99,15 +99,9 @@ const AcceptInvite: React.FC = () => {
         setError('');
 
         try {
-            const res = await fetch(`/api/invite/${token}/register`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ first_name: firstName, last_name: lastName, password, phone: phone || undefined }),
-            });
+            const data = await apiClient.post<any>(`/invite/${token}/register`, { first_name: firstName, last_name: lastName, password, phone: phone || undefined });
 
-            const data = await res.json();
-
-            if (!res.ok || !data.success) {
+            if (!data.success) {
                 setError(data.message || 'Registration failed.');
                 return;
             }

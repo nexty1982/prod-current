@@ -6,6 +6,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
+import { apiClient } from '@/api/utils/axiosInstance';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import {
   Alert,
@@ -37,14 +38,8 @@ const VerifyEmailPage: React.FC = () => {
 
     const verify = async () => {
       try {
-        const res = await fetch('/api/user/profile/verify-email', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({ token }),
-        });
-        const data = await res.json();
-        if (res.ok && data.success) {
+        const data = await apiClient.post<any>('/user/profile/verify-email', { token });
+        if (data.success) {
           setStatus('success');
           setMessage(data.message || 'Your email has been verified successfully.');
         } else {

@@ -1,4 +1,5 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
+import { apiClient } from '@/api/utils/axiosInstance';
 import {
   Box,
   Button,
@@ -73,10 +74,6 @@ const BCrumb = [
   { title: 'Calendar' },
 ];
 
-async function apiJson(url: string, options?: RequestInit) {
-  const res = await fetch(url, { credentials: 'include', ...options });
-  return res.json();
-}
 
 export default function BerryCalendarPage() {
   const theme = useTheme();
@@ -107,8 +104,8 @@ export default function BerryCalendarPage() {
   const fetchEvents = useCallback(async (start: string, end: string) => {
     try {
       const [myEvents, appointments] = await Promise.all([
-        apiJson(`/api/admin/calendar/events?start=${start}&end=${end}`),
-        showAppointments ? apiJson(`/api/admin/calendar/appointments?start=${start}&end=${end}`) : { success: true, events: [] },
+        apiClient.get<any>(`/admin/calendar/events?start=${start}&end=${end}`),
+        showAppointments ? apiClient.get<any>(`/admin/calendar/appointments?start=${start}&end=${end}`) : { success: true, events: [] },
       ]);
 
       const combined: CalendarEvent[] = [];
@@ -203,11 +200,7 @@ export default function BerryCalendarPage() {
     const newEnd = dropInfo.event.endStr || newStart;
 
     try {
-      await apiJson(`/api/admin/calendar/events/${evt.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ start: newStart, end: newEnd }),
-      });
+      await apiClient.put<any>(`/admin/calendar/events/${evt.id}`, { start: newStart, end: newEnd });
       setEvents(prev => prev.map(e =>
         e.id === evt.id ? { ...e, start: newStart, end: newEnd } : e
       ));
@@ -221,24 +214,16 @@ export default function BerryCalendarPage() {
     setSaving(true);
     try {
       if (isEditing && selectedEvent && !selectedEvent.isAppointment) {
-        await apiJson(`/api/admin/calendar/events/${selectedEvent.id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            title: formTitle, description: formDescription,
-            start: formStart, end: formEnd, allDay: formAllDay,
-            color: formColor, eventType: formEventType, isAvailableSlot: formAvailableSlot,
-          }),
+        await apiClient.put<any>(`/admin/calendar/events/${selectedEvent.id}`, {
+          title: formTitle, description: formDescription,
+          start: formStart, end: formEnd, allDay: formAllDay,
+          color: formColor, eventType: formEventType, isAvailableSlot: formAvailableSlot,
         });
       } else if (!isEditing) {
-        await apiJson('/api/admin/calendar/events', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            title: formTitle, description: formDescription,
-            start: formStart, end: formEnd, allDay: formAllDay,
-            color: formColor, eventType: formEventType, isAvailableSlot: formAvailableSlot,
-          }),
+        await apiClient.post<any>('/admin/calendar/events', {
+          title: formTitle, description: formDescription,
+          start: formStart, end: formEnd, allDay: formAllDay,
+          color: formColor, eventType: formEventType, isAvailableSlot: formAvailableSlot,
         });
       }
       // Refresh
@@ -257,7 +242,7 @@ export default function BerryCalendarPage() {
     if (!selectedEvent || selectedEvent.isAppointment) return;
     setSaving(true);
     try {
-      await apiJson(`/api/admin/calendar/events/${selectedEvent.id}`, { method: 'DELETE' });
+      await apiClient.delete<any>(`/admin/calendar/events/${selectedEvent.id}`);
       if (dateRange.start && dateRange.end) {
         await fetchEvents(dateRange.start, dateRange.end);
       }

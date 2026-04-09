@@ -3,6 +3,8 @@
  * Frontend API client for Router/Menu Studio functionality
  */
 
+import { apiClient } from '@/api/utils/axiosInstance';
+
 // Types for the API responses
 export interface Route {
   id: number;
@@ -98,30 +100,23 @@ export interface RoutesQuery {
 export interface MenusQuery extends RoutesQuery {}
 
 class RouterMenuStudioAPI {
-  private baseURL = '/api/studio';
+  private basePath = '/studio';
 
   private async request<T = any>(
     endpoint: string,
     options: RequestInit = {}
   ): Promise<ApiResponse<T>> {
-    const url = `${this.baseURL}${endpoint}`;
-    
-    const config: RequestInit = {
-      headers: {
-        'Content-Type': 'application/json',
-        ...options.headers,
-      },
-      ...options,
-    };
+    const url = `${this.basePath}${endpoint}`;
+    const method = (options.method || 'GET').toLowerCase() as 'get' | 'post' | 'put' | 'delete' | 'patch';
 
     try {
-      const response = await fetch(url, config);
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.reason || `HTTP ${response.status}`);
+      const body = options.body ? JSON.parse(options.body as string) : undefined;
+      let data: any;
+      if (method === 'get' || method === 'delete') {
+        data = await apiClient[method]<any>(url);
+      } else {
+        data = await apiClient[method]<any>(url, body);
       }
-      
       return data;
     } catch (error) {
       console.error(`API request failed for ${endpoint}:`, error);
