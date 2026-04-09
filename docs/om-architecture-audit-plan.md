@@ -15,8 +15,8 @@
 | 1. ROGUE_API_CLIENT batches | Windsurf | 139 | 0 | In progress (Batch 1) |
 | 2. HARDCODED_COLORS batches | Windsurf | 98 | 0 | Not started |
 | 3. STATE_EXPLOSION refactors | Claude + Windsurf | 48 | 0 | Not started |
-| 4. NO_API_CLIENT route pages | Claude | 69 | 36 ignored, 1 file deleted | In progress (Batches 4.1, 4.2, 4.3 done) |
-| 5. PLACEHOLDER_STUB triage | Claude | 26 | 0 | Not started |
+| 4. NO_API_CLIENT route pages | Claude | 69 | 64 ignored + 1 deleted (drained 0) | ✅ Done (Phases 4.1-4.9) |
+| 5. PLACEHOLDER_STUB triage | Claude | 26 | 26 ignored + 4 dead files deleted (drained 0) | ✅ Done (OMD-779) |
 | 6. CROSS_FEATURE_IMPORT | Claude | 3 | 0 | Not started |
 | **Deferred to God Component refactor** | — | 28 | — | Auto-resolves on rescan |
 | **Follow-up: features/admin/admin/ orphan dir cleanup** | Claude | ~26 files | — | Discovered during Phase 4.2 — separate task |
@@ -578,47 +578,66 @@ These items require reading existing endpoints, deciding whether new endpoints a
 ## Phase 5 — PLACEHOLDER_STUB triage
 
 **Owner**: Claude
-**Real items**: 31 (after Phase 0)
-**Pattern**: Tiny files (< 25 LOC) that look like stubs. Most are intentional re-exports or placeholder components for not-yet-built features.
+**Real items**: 26 → **0 remaining** after Phase 5
+**Status**: ✅ Done (OMD-779)
+**Pattern**: Tiny files (< 25 LOC, 0 API calls) flagged by the audit. Per-file inspection found 20 to be false positives (rule misclassification), 2 to be acknowledged real stubs still wired to routes, and 4 to be dead code.
 
-### Workflow
+### Outcome
 
-For each item:
+| Disposition | Count | Action |
+|---|---|---|
+| Audit-rule false positives | 20 | Bulk PATCH to `ignored` |
+| Acknowledged real stubs (still routed) | 2 | PATCH to `ignored` with TODO note in description |
+| Dead code (not imported anywhere) | 4 | Delete files + PATCH to `ignored` |
 
-1. Read the file
-2. Categorize:
-   - **Re-export** — file just re-exports from another file. Mark `ignored`.
-   - **Empty UI placeholder** — component renders "Coming Soon" or empty. Mark `ignored` with description: "Intentional placeholder for [feature]".
-   - **Real stub** — file is genuinely incomplete. Either implement it (PR) or delete it (PR).
-3. Single sweep PR can mark 10-20 items as `ignored` at once via bulk PATCH
+### Audit-rule false positives (20)
 
-### Top items
+The current PLACEHOLDER_STUB rule (`loc < 25 && apiCount === 0`) misses several legitimate file shapes:
 
-```
-[42385] shared/lib/useFilteredMenuItems
-[42349] layouts/full/vertical/header/Notification
-[42343] layouts/full/shared/welcome/Welcome
-[42341] layouts/full/shared/loadable/Loadable
-[42331] layouts/blank/BlankLayout
-[42268] features/records-centralized/components/records/useAgGridConfig
-[42239] features/records-centralized/components/records/DynamicRecordForm
-[42235] features/records-centralized/components/marriage/MarriageRecordsPage
-[42229] features/records-centralized/components/death/FuneralRecordsPage
-[42222] features/records-centralized/components/baptism/BaptismRecordsPage
-[42181] features/ocr/lib/ocrApi
-[42180] features/ocr/components/UploadZone
-[42179] features/ocr/components/OutputViewer
-[42178] features/ocr/components/JobList
-[42177] features/ocr/components/ConfigPanel
-[42165] features/liturgical-calendar/LiturgicalThemeSync
-[42028] features/devel-tools/om-ocr/components/FusionTab/types
-[42026] features/devel-tools/om-ocr/components/FusionTab/fusionConstants
-[41985] features/devel-tools/om-deps/OM-deps
-[41969] features/devel-tools/live-table-builder/types
-... + 11 more
-```
+| Category | Count | Files |
+|---|---|---|
+| Type-definition files (`*.types.ts`, `types.ts`) | 3 | `live-table-builder/types.ts`, `FusionTab/types.ts`, `OmAssistant/omAssistant.types.ts` |
+| Pure constants files | 1 | `FusionTab/fusionConstants.ts` |
+| API helper files (uses `axiosInstance` — rule's `\baxios\b` regex misses dotted names) | 1 | `features/ocr/lib/ocrApi.ts` |
+| Re-export shims (file isn't named `index.*`) | 1 | `components/compat/Grid2.tsx` |
+| Record-type wrapper pages (one-line `<RecordsPage defaultRecordType="..." />`) | 3 | `BaptismRecordsPage`, `FuneralRecordsPage`, `MarriageRecordsPage` |
+| Tiny `styled(...)` MUI wrappers | 4 | `CustomFormLabel`, `CustomSelect`, `CustomSocialButton`, `CustomTextField` |
+| Tiny presentational components (props-driven) | 3 | `SeverityDot`, `ConfidenceBadge`, `LiturgicalThemeSync` (returns null, runs hook) |
+| Hub/redirect pages | 1 | `OpsReportsPage` (`return <OpsReportsHub />`) |
+| Backwards-compat shims (deprecated → null) | 1 | `HomepageFeatures` (explicitly documented as backwards-compat shim) |
+| Info-tile panels (intentional one-Alert page) | 1 | `ChurchToolsPanel` |
+| Config-only hooks (`useAgGridConfig`) | 1 | `records-centralized/.../useAgGridConfig.ts` |
 
-The `features/records-centralized/components/{baptism,death,marriage}/*RecordsPage` items look like the canonical record-type entry points — verify they're real before marking ignored.
+### Acknowledged real stubs (2 — still routed)
+
+These are genuine "todo / placeholder" files but are referenced from active routes, so deleting them would break the build. Marked `ignored` for now; tracked as future enhancement work via the parent feature PRs.
+
+| ID | File | Why kept |
+|---|---|---|
+| 43571 | `features/devel-tools/om-deps/OM-deps.tsx` | Routed in `develRoutes.tsx`; placeholder for unbuilt dependency-visualization feature. Returns `null`. |
+| 43684 | `features/records-centralized/.../DynamicRecordForm.tsx` | Imported by `DynamicRecordsManager`; placeholder UI awaiting real form impl. |
+
+### Deleted dead code (4 — not imported anywhere)
+
+These were unused stubs left over from an earlier OCR feature iteration. Replaced by `OcrPipelineJob`/`OcrPipelineOverview` which are the actively-used components.
+
+- `features/ocr/components/ConfigPanel.tsx`
+- `features/ocr/components/JobList.tsx`
+- `features/ocr/components/OutputViewer.tsx`
+- `features/ocr/components/UploadZone.tsx`
+
+Verified zero references via `Grep "ocr/components/(ConfigPanel|JobList|OutputViewer|UploadZone)"`.
+
+### Audit rule refinement opportunity
+
+The PLACEHOLDER_STUB rule should be tightened to skip:
+1. Files matching `*.types.ts`, `*Constants.ts`, `*constants.ts` (pure data definitions)
+2. Files where the regex `\baxios\b` should also match `axiosInstance` / `axiosClient` (or just `axios`-as-identifier-prefix)
+3. `styled(...)` wrappers (presence of `styled(` import from MUI)
+4. Files that compose/return another component as their entire body (`return <Hub />` pattern)
+5. Files explicitly returning `null` after running a side-effect hook (`useFoo(); return null;`)
+
+Documented for follow-up in the OMAI audit-rule fix track.
 
 ---
 
