@@ -3,6 +3,8 @@
  * Handles church data and multi-tenant record access
  */
 
+import { apiClient } from '@/api/utils/axiosInstance';
+
 export interface Church {
   id: number;
   name?: string;
@@ -48,23 +50,7 @@ const churchService = {
     try {
       const params = options?.includeRecordCounts ? '?include_record_counts=1' : '';
       console.log('🔍 Fetching churches from /api/my/churches...');
-      const response = await fetch(`/api/my/churches${params}`, {
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (response.status === 401) {
-        localStorage.removeItem('auth_user');
-        window.location.href = `/auth/login?redirect=${encodeURIComponent(window.location.pathname)}`;
-        throw new Error('Session expired');
-      }
-      if (!response.ok) {
-        throw new Error(`Failed to fetch churches: ${response.status} ${response.statusText}`);
-      }
-
-      const data = await response.json();
+      const data = await apiClient.get<any>(`/my/churches${params}`);
       
       // Handle various response formats:
       // - { success: true, data: { churches: [...] } } (ApiResponse format)
@@ -116,18 +102,7 @@ const churchService = {
         params.append('search', search);
       }
 
-      const response = await fetch(`/api/${recordType}-records?${params.toString()}`, {
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch records: ${response.status} ${response.statusText}`);
-      }
-
-      const data = await response.json();
+      const data = await apiClient.get<any>(`/${recordType}-records?${params.toString()}`);
       
       console.log(`✅ Fetched ${data.records?.length || 0} ${recordType} records`);
       
@@ -148,21 +123,10 @@ const churchService = {
    */
   getChurch: async (id: number): Promise<Church | null> => {
     try {
-      const response = await fetch(`/api/churches/${id}`, {
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        if (response.status === 404) return null;
-        throw new Error(`Failed to fetch church: ${response.status}`);
-      }
-
-      const data = await response.json();
+      const data = await apiClient.get<any>(`/churches/${id}`);
       return data.data || data;
-    } catch (error) {
+    } catch (error: any) {
+      if (error.status === 404) return null;
       console.error('Error fetching church:', error);
       throw error;
     }
@@ -179,20 +143,7 @@ const churchService = {
    * Create a new church
    */
   createChurch: async (church: Partial<Church>): Promise<Church> => {
-    const response = await fetch('/api/churches', {
-      method: 'POST',
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(church),
-    });
-
-    if (!response.ok) {
-      throw new Error(`Failed to create church: ${response.status}`);
-    }
-
-    const data = await response.json();
+    const data = await apiClient.post<any>('/churches', church);
     return data.data || data;
   },
 
@@ -200,20 +151,7 @@ const churchService = {
    * Update an existing church
    */
   updateChurch: async (id: number, church: Partial<Church>): Promise<Church> => {
-    const response = await fetch(`/api/churches/${id}`, {
-      method: 'PUT',
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(church),
-    });
-
-    if (!response.ok) {
-      throw new Error(`Failed to update church: ${response.status}`);
-    }
-
-    const data = await response.json();
+    const data = await apiClient.put<any>(`/churches/${id}`, church);
     return data.data || data;
   },
 
@@ -221,18 +159,7 @@ const churchService = {
    * Delete a church
    */
   deleteChurch: async (id: number): Promise<boolean> => {
-    const response = await fetch(`/api/churches/${id}`, {
-      method: 'DELETE',
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`Failed to delete church: ${response.status}`);
-    }
-
+    await apiClient.delete(`/churches/${id}`);
     return true;
   },
 };
