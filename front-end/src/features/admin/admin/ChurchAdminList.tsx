@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { apiClient } from '@/api/utils/axiosInstance';
 import { useNavigate } from 'react-router-dom';
 import {
     Box,
@@ -57,15 +58,7 @@ const ChurchAdminList: React.FC = () => {
             setLoading(true);
             setError(null);
             
-            const response = await fetch('/api/admin/churches', {
-                credentials: 'include'
-            });
-            
-            if (!response.ok) {
-                throw new Error('Failed to fetch churches');
-            }
-            
-            const result = await response.json();
+            const result = await apiClient.get<any>('/admin/churches');
             
             if (result.success) {
                 setChurches(result.churches || []);

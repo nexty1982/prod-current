@@ -1,4 +1,5 @@
 import React, { useState, useEffect, Suspense, Component } from 'react';
+import { apiClient } from '@/api/utils/axiosInstance';
 import {
   Box,
   Typography,
@@ -96,14 +97,7 @@ const BigBookCustomComponentViewer: React.FC<BigBookCustomComponentViewerProps> 
 
     try {
       // Load the custom component registry
-      const response = await fetch('/api/bigbook/custom-components-registry', {
-        credentials: 'include'
-      });
-      if (!response.ok) {
-        throw new Error('Failed to load custom components registry');
-      }
-
-      const registry: CustomComponentRegistry = await response.json();
+      const registry = await apiClient.get<CustomComponentRegistry>('/bigbook/custom-components-registry');
       const component = registry.components[componentName];
 
       if (!component) {

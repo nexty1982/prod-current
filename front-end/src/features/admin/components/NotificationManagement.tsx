@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { apiClient } from '@/api/utils/axiosInstance';
 import {
     Box,
     Typography,
@@ -140,13 +141,8 @@ const NotificationManagement: React.FC = () => {
 
     const fetchSystemRoles = async () => {
         try {
-            const response = await fetch('/api/admin/roles', {
-                credentials: 'include'
-            });
-            if (response.ok) {
-                const data = await response.json();
-                setSystemRoles(data.roles || []);
-            }
+            const data = await apiClient.get<any>('/admin/roles');
+            setSystemRoles(data.roles || []);
         } catch (err) {
             console.error('Failed to load system roles:', err);
         }
@@ -155,13 +151,8 @@ const NotificationManagement: React.FC = () => {
     const fetchNotificationTypes = async () => {
         try {
             setLoading(true);
-            const response = await fetch('/api/admin/notifications/types', {
-                credentials: 'include'
-            });
-            if (response.ok) {
-                const data = await response.json();
-                setNotificationTypes(data.types || []);
-            }
+            const data = await apiClient.get<any>('/admin/notifications/types');
+            setNotificationTypes(data.types || []);
         } catch (err) {
             setError('Failed to load notification types');
         } finally {
@@ -171,13 +162,8 @@ const NotificationManagement: React.FC = () => {
 
     const fetchNotificationQueue = async () => {
         try {
-            const response = await fetch('/api/admin/notifications/queue', {
-                credentials: 'include'
-            });
-            if (response.ok) {
-                const data = await response.json();
-                setCustomNotifications(data.queue || []);
-            }
+            const data = await apiClient.get<any>('/admin/notifications/queue');
+            setCustomNotifications(data.queue || []);
         } catch (err) {
             console.error('Failed to load notification queue:', err);
         }
@@ -185,23 +171,13 @@ const NotificationManagement: React.FC = () => {
 
     const handleToggleNotificationType = async (typeId: number, enabled: boolean) => {
         try {
-            const response = await fetch(`/api/admin/notifications/types/${typeId}/toggle`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-                body: JSON.stringify({ enabled })
-            });
-
-            if (response.ok) {
-                setNotificationTypes(prev =>
-                    prev.map(type =>
-                        type.id === typeId ? { ...type, default_enabled: enabled } : type
-                    )
-                );
-                setSuccess(`Notification type ${enabled ? 'enabled' : 'disabled'} system-wide`);
-            } else {
-                throw new Error('Failed to update notification type');
-            }
+            await apiClient.put<any>(`/admin/notifications/types/${typeId}/toggle`, { enabled });
+            setNotificationTypes(prev =>
+                prev.map(type =>
+                    type.id === typeId ? { ...type, default_enabled: enabled } : type
+                )
+            );
+            setSuccess(`Notification type ${enabled ? 'enabled' : 'disabled'} system-wide`);
         } catch (err) {
             setError('Failed to update notification type');
         }
@@ -210,32 +186,21 @@ const NotificationManagement: React.FC = () => {
     const handleCreateCustomNotification = async () => {
         try {
             setLoading(true);
-            const response = await fetch('/api/admin/notifications/custom', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-                body: JSON.stringify(newNotification)
+            const data = await apiClient.post<any>('/admin/notifications/custom', newNotification);
+            setSuccess(`Custom notification ${newNotification.is_draft ? 'saved as draft' : 'scheduled'} successfully`);
+            setCreateDialogOpen(false);
+            setNewNotification({
+                title: '',
+                message: '',
+                priority: 'normal',
+                scheduled_at: null,
+                target_audience: 'all',
+                icon: '📢',
+                action_url: '',
+                action_text: '',
+                is_draft: false
             });
-
-            if (response.ok) {
-                const data = await response.json();
-                setSuccess(`Custom notification ${newNotification.is_draft ? 'saved as draft' : 'scheduled'} successfully`);
-                setCreateDialogOpen(false);
-                setNewNotification({
-                    title: '',
-                    message: '',
-                    priority: 'normal',
-                    scheduled_at: null,
-                    target_audience: 'all',
-                    icon: '📢',
-                    action_url: '',
-                    action_text: '',
-                    is_draft: false
-                });
-                fetchNotificationQueue();
-            } else {
-                throw new Error('Failed to create notification');
-            }
+            fetchNotificationQueue();
         } catch (err) {
             setError('Failed to create custom notification');
         } finally {

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { apiClient } from '@/api/utils/axiosInstance';
 import {
   Card,
   CardContent,
@@ -65,8 +66,7 @@ const EncryptedStoragePanel: React.FC = () => {
     setError('');
     
     try {
-      const response = await fetch('/api/bigbook/storage/status');
-      const result = await response.json();
+      const result = await apiClient.get<any>('/bigbook/storage/status');
       
       if (result.success) {
         setStatus(result.status);
@@ -87,8 +87,7 @@ const EncryptedStoragePanel: React.FC = () => {
     setError('');
     
     try {
-      const response = await fetch('/api/bigbook/storage/files');
-      const result = await response.json();
+      const result = await apiClient.get<any>('/bigbook/storage/files');
       
       if (result.success) {
         setFiles(result.files);
@@ -107,8 +106,7 @@ const EncryptedStoragePanel: React.FC = () => {
     setError('');
     
     try {
-      const response = await fetch('/api/bigbook/storage/mount', { method: 'POST' });
-      const result = await response.json();
+      const result = await apiClient.post<any>('/bigbook/storage/mount');
       
       if (result.success) {
         await loadStatus();
@@ -128,8 +126,7 @@ const EncryptedStoragePanel: React.FC = () => {
     setError('');
     
     try {
-      const response = await fetch('/api/bigbook/storage/unmount', { method: 'POST' });
-      const result = await response.json();
+      const result = await apiClient.post<any>('/bigbook/storage/unmount');
       
       if (result.success) {
         await loadStatus();
@@ -153,8 +150,7 @@ const EncryptedStoragePanel: React.FC = () => {
     setError('');
     
     try {
-      const response = await fetch('/api/bigbook/storage/rotate-key', { method: 'POST' });
-      const result = await response.json();
+      const result = await apiClient.post<any>('/bigbook/storage/rotate-key');
       
       if (result.success) {
         await loadStatus();

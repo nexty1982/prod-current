@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { apiClient } from '@/api/utils/axiosInstance';
 import {
   Box,
   Typography,
@@ -132,24 +133,13 @@ const OMSiteSurvey: React.FC = () => {
         console.log(`🔄 Executing: ${step.name}`);
         
         try {
-          const response = await fetch(step.endpoint, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            credentials: 'include'
-          });
+          const result = await apiClient.post<any>(step.endpoint.replace('/api', ''));
           
-          if (response.ok) {
-            const result = await response.json();
-            if (result.success) {
-              step.setter(result);
-              console.log(`✅ ${step.name} completed`);
-            } else {
-              console.error(`❌ ${step.name} failed:`, result.error);
-            }
+          if (result.success) {
+            step.setter(result);
+            console.log(`✅ ${step.name} completed`);
           } else {
-            console.error(`❌ ${step.name} failed with status:`, response.status);
+            console.error(`❌ ${step.name} failed:`, result.error);
           }
         } catch (stepError) {
           console.error(`❌ ${step.name} error:`, stepError);

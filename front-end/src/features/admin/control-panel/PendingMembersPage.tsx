@@ -3,6 +3,7 @@
  * These users have is_locked=1 with lockout_reason "Pending admin review"
  */
 
+import { apiClient } from '@/api/utils/axiosInstance';
 import Breadcrumb from '@/layouts/full/shared/breadcrumb/Breadcrumb';
 import PageContainer from '@/shared/ui/PageContainer';
 import {
@@ -78,9 +79,7 @@ const PendingMembersPage: React.FC = () => {
     setLoading(true);
     setError('');
     try {
-      const res = await fetch('/api/admin/users?status=locked&limit=100', { credentials: 'include' });
-      if (!res.ok) throw new Error('Failed to fetch users');
-      const data = await res.json();
+      const data = await apiClient.get<any>('/admin/users?status=locked&limit=100');
       const pendingUsers = (data.users || []).filter(
         (u: PendingUser) => u.is_locked && u.lockout_reason?.toLowerCase().includes('pending')
       );
@@ -97,12 +96,7 @@ const PendingMembersPage: React.FC = () => {
   const handleApprove = async (userId: number, email: string) => {
     setActionLoading(userId);
     try {
-      const res = await fetch(`/api/admin/users/${userId}/unlock`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-      });
-      if (!res.ok) throw new Error('Failed to unlock user');
+      await apiClient.post<any>(`/admin/users/${userId}/unlock`);
       setSnack({ open: true, message: `${email} approved and unlocked`, severity: 'success' });
       setUsers(prev => prev.filter(u => u.id !== userId));
     } catch (err: any) {
@@ -117,13 +111,9 @@ const PendingMembersPage: React.FC = () => {
     setActionLoading(rejectDialog.userId);
     try {
       // Keep the user locked but update the reason to indicate rejection
-      const res = await fetch(`/api/admin/users/${rejectDialog.userId}/lockout`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reason: `Registration rejected: ${rejectReason || 'Not approved by admin'}` }),
-      });
-      if (!res.ok) {
+      try {
+        await apiClient.post<any>(`/admin/users/${rejectDialog.userId}/lockout`, { reason: `Registration rejected: ${rejectReason || 'Not approved by admin'}` });
+      } catch {
         // User is already locked, so manually update the reason
         // The lockout endpoint returns 400 for already-locked users, so just remove from list
       }
