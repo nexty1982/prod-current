@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { apiClient } from '@/api/utils/axiosInstance';
 import {
     Box,
     Card,
@@ -106,15 +107,7 @@ const MenuPermissionsManagement: React.FC = () => {
     const loadMenuPermissions = async () => {
         try {
             setLoading(true);
-            const response = await fetch('/api/menu-permissions', {
-                credentials: 'include'
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to load menu permissions');
-            }
-
-            const data = await response.json();
+            const data = await apiClient.get<any>('/menu-permissions');
             if (data.success) {
                 setMenuData({
                     menuItems: data.menuItems,
@@ -133,20 +126,7 @@ const MenuPermissionsManagement: React.FC = () => {
     // Update menu permissions for a specific menu item
     const updateMenuPermissions = async (menuId: number, allowedRoles: string[]) => {
         try {
-            const response = await fetch(`/api/menu-permissions/${menuId}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                credentials: 'include',
-                body: JSON.stringify({ allowedRoles })
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to update menu permissions');
-            }
-
-            const data = await response.json();
+            const data = await apiClient.put<any>(`/menu-permissions/${menuId}`, { allowedRoles });
             if (data.success) {
                 setSuccess('Menu permissions updated successfully');
                 loadMenuPermissions(); // Reload data
@@ -176,20 +156,7 @@ const MenuPermissionsManagement: React.FC = () => {
     // Create new menu item
     const handleCreateMenuItem = async () => {
         try {
-            const response = await fetch('/api/menu-permissions/menu-item', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                credentials: 'include',
-                body: JSON.stringify(newMenuItem)
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to create menu item');
-            }
-
-            const data = await response.json();
+            const data = await apiClient.post<any>('/menu-permissions/menu-item', newMenuItem);
             if (data.success) {
                 setSuccess('Menu item created successfully');
                 setCreateDialogOpen(false);

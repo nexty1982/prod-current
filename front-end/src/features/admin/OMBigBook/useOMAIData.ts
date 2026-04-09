@@ -3,6 +3,7 @@
  */
 
 import { useState, useEffect } from 'react';
+import { apiClient } from '@/api/utils/axiosInstance';
 import type {
   LearningProgress,
   TrainingSession,
@@ -26,8 +27,7 @@ export function useOMAIData() {
 
   const loadLearningProgress = async () => {
     try {
-      const response = await fetch('/api/omai/learning-progress');
-      const data = await response.json();
+      const data = await apiClient.get<any>('/omai/learning-progress');
       if (data.success) setLearningProgress(data.progress);
     } catch (error) {
       console.error('Failed to load learning progress:', error);
@@ -36,8 +36,7 @@ export function useOMAIData() {
 
   const loadTrainingSessions = async () => {
     try {
-      const response = await fetch('/api/omai/training-sessions');
-      const data = await response.json();
+      const data = await apiClient.get<any>('/omai/training-sessions');
       if (data.success) setTrainingSessions(data.sessions);
     } catch (error) {
       console.error('Failed to load training sessions:', error);
@@ -46,8 +45,7 @@ export function useOMAIData() {
 
   const loadKnowledgeMetrics = async () => {
     try {
-      const response = await fetch('/api/omai/knowledge-metrics');
-      const data = await response.json();
+      const data = await apiClient.get<any>('/omai/knowledge-metrics');
       if (data.success) setKnowledgeMetrics(data.metrics);
     } catch (error) {
       console.error('Failed to load knowledge metrics:', error);
@@ -57,12 +55,7 @@ export function useOMAIData() {
   const startTrainingSession = async (phase: string) => {
     setLearningLoading(true);
     try {
-      const response = await fetch('/api/omai/start-training', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phase }),
-      });
-      const data = await response.json();
+      const data = await apiClient.post<any>('/omai/start-training', { phase });
       if (data.success) {
         setActiveTrainingSession(data.session);
         const interval = setInterval(() => {
@@ -81,8 +74,7 @@ export function useOMAIData() {
   const stopTrainingSession = async () => {
     if (!activeTrainingSession) return;
     try {
-      const response = await fetch(`/api/omai/stop-training/${activeTrainingSession.id}`, { method: 'POST' });
-      const data = await response.json();
+      const data = await apiClient.post<any>(`/omai/stop-training/${activeTrainingSession.id}`);
       if (data.success) {
         setActiveTrainingSession(null);
         loadTrainingSessions();
@@ -94,8 +86,7 @@ export function useOMAIData() {
 
   const loadEthicsProgress = async () => {
     try {
-      const response = await fetch('/api/omai/ethics-progress');
-      const data = await response.json();
+      const data = await apiClient.get<any>('/omai/ethics-progress');
       if (data.success) setEthicsProgress(data.progress);
     } catch (error) {
       console.error('Failed to load ethics progress:', error);
@@ -104,8 +95,7 @@ export function useOMAIData() {
 
   const loadEthicalFoundations = async () => {
     try {
-      const response = await fetch('/api/omai/ethical-foundations');
-      const data = await response.json();
+      const data = await apiClient.get<any>('/omai/ethical-foundations');
       if (data.success) setEthicalFoundations(data.foundations);
     } catch (error) {
       console.error('Failed to load ethical foundations:', error);
@@ -114,8 +104,7 @@ export function useOMAIData() {
 
   const loadOMLearnSurveys = async () => {
     try {
-      const response = await fetch('/api/omai/omlearn-surveys');
-      const data = await response.json();
+      const data = await apiClient.get<any>('/omai/omlearn-surveys');
       if (data.success) setOmlearnSurveys(data.surveys);
     } catch (error) {
       console.error('Failed to load OMLearn surveys:', error);
@@ -125,12 +114,7 @@ export function useOMAIData() {
   const importOMLearnResponses = async (responses: any) => {
     setEthicsLoading(true);
     try {
-      const response = await fetch('/api/omai/import-omlearn', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(responses),
-      });
-      const data = await response.json();
+      const data = await apiClient.post<any>('/omai/import-omlearn', responses);
       if (data.success) {
         await loadEthicalFoundations();
         await loadEthicsProgress();

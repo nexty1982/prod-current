@@ -182,3 +182,4 @@ berry/
 
 # Deploy artifact (auto-generated)
 .last-deploy.json
+front-end/node_modules

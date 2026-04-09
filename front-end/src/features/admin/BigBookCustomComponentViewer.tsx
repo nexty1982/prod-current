@@ -15,6 +15,7 @@ import {
   Refresh as RefreshIcon,
   Error as ErrorIcon
 } from '@mui/icons-material';
+import { apiClient } from '@/api/utils/axiosInstance';
 
 // Simple Error Boundary component
 class ErrorBoundary extends Component<
@@ -96,14 +97,7 @@ const BigBookCustomComponentViewer: React.FC<BigBookCustomComponentViewerProps> 
 
     try {
       // Load the custom component registry
-      const response = await fetch('/api/bigbook/custom-components-registry', {
-        credentials: 'include'
-      });
-      if (!response.ok) {
-        throw new Error('Failed to load custom components registry');
-      }
-
-      const registry: CustomComponentRegistry = await response.json();
+      const registry = await apiClient.get<CustomComponentRegistry>('/bigbook/custom-components-registry');
       const component = registry.components[componentName];
 
       if (!component) {

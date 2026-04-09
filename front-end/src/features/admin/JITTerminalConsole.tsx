@@ -1,6 +1,7 @@
 // JIT Terminal Console - Admin Interface
 
 import React, { useState, useEffect } from 'react';
+import { apiClient } from '@/api/utils/axiosInstance';
 import {
   Box,
   Card,
@@ -73,11 +74,8 @@ const JITTerminalConsole: React.FC = () => {
   useEffect(() => {
     const checkUserRole = async () => {
       try {
-        const response = await fetch('/api/auth/profile');
-        if (response.ok) {
-          const profile = await response.json();
-          setUserRole(profile.role);
-        }
+        const profile = await apiClient.get<any>('/auth/profile');
+        setUserRole(profile.role);
       } catch (error) {
         console.error('Failed to get user profile:', error);
       }
@@ -89,11 +87,8 @@ const JITTerminalConsole: React.FC = () => {
 
   const fetchSessions = async () => {
     try {
-      const response = await fetch('/api/jit/sessions');
-      if (response.ok) {
-        const data = await response.json();
-        setSessions(data);
-      }
+      const data = await apiClient.get<any>('/jit/sessions');
+      setSessions(data);
     } catch (error) {
       console.error('Failed to fetch sessions:', error);
     }
@@ -109,31 +104,19 @@ const JITTerminalConsole: React.FC = () => {
     setError(null);
 
     try {
-      const response = await fetch('/api/jit-terminal/agent-access', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(agentRequest)
+      const data = await apiClient.post<any>('/jit-terminal/agent-access', agentRequest);
+
+      setSelectedSessionId(data.session.id);
+      setIsTerminalOpen(true);
+      setIsAgentRequestOpen(false);
+      fetchSessions();
+      
+      // Reset form
+      setAgentRequest({
+        agentId: '',
+        task: '',
+        timeoutMinutes: 15
       });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setSelectedSessionId(data.session.id);
-        setIsTerminalOpen(true);
-        setIsAgentRequestOpen(false);
-        fetchSessions();
-        
-        // Reset form
-        setAgentRequest({
-          agentId: '',
-          task: '',
-          timeoutMinutes: 15
-        });
-      } else {
-        setError(data.message || 'Failed to request agent access');
-      }
     } catch (error) {
       setError('Failed to connect to server');
       console.error('Agent access request failed:', error);
@@ -144,13 +127,8 @@ const JITTerminalConsole: React.FC = () => {
 
   const terminateSession = async (sessionId: string) => {
     try {
-      const response = await fetch(`/api/jit/sessions/${sessionId}`, {
-        method: 'DELETE'
-      });
-      
-      if (response.ok) {
-        fetchSessions();
-      }
+      await apiClient.delete<any>(`/jit/sessions/${sessionId}`);
+      fetchSessions();
     } catch (error) {
       console.error('Failed to terminate session:', error);
     }
@@ -162,37 +140,25 @@ const JITTerminalConsole: React.FC = () => {
     setTokenSuccess(null);
 
     try {
-      const response = await fetch('/api/jit/token', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          expiresInHours: 24 // Default 24 hour expiration
-        })
+      const data = await apiClient.post<any>('/jit/token', {
+        expiresInHours: 24 // Default 24 hour expiration
       });
 
-      const data = await response.json();
+      // Create and download the token file
+      const blob = new Blob([data.token], { type: 'text/plain' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = '.om-jit-token';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
 
-      if (response.ok) {
-        // Create and download the token file
-        const blob = new Blob([data.token], { type: 'text/plain' });
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = '.om-jit-token';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(url);
-
-        setTokenSuccess(`CLI token downloaded successfully! Expires in 24 hours.`);
-        
-        // Clear success message after 5 seconds
-        setTimeout(() => setTokenSuccess(null), 5000);
-      } else {
-        setError(data.message || 'Failed to generate CLI token');
-      }
+      setTokenSuccess(`CLI token downloaded successfully! Expires in 24 hours.`);
+      
+      // Clear success message after 5 seconds
+      setTimeout(() => setTokenSuccess(null), 5000);
     } catch (error) {
       setError('Failed to connect to server');
       console.error('CLI token download failed:', error);

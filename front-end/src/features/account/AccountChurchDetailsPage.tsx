@@ -11,6 +11,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { apiClient } from '@/api/utils/axiosInstance';
 import {
   Alert,
   Box,
@@ -123,8 +124,7 @@ const AccountChurchDetailsPage: React.FC = () => {
   // ── Load jurisdictions ──
 
   useEffect(() => {
-    fetch('/api/jurisdictions', { credentials: 'include' })
-      .then((r) => r.json())
+    apiClient.get<any>('/jurisdictions')
       .then((data) => {
         if (data?.items) setJurisdictions(data.items);
       })

@@ -3,6 +3,8 @@
  * Handles parish map zips, tsx components, centralized ingestion, and encrypted storage fallback.
  */
 
+import { apiClient } from '@/api/utils/axiosInstance';
+
 import type { FileUpload, ConsoleOutput } from './types';
 import { getFileTypeFromExtension } from './fileUtils';
 
@@ -34,25 +36,9 @@ async function processSingleFile(file: File, cb: FileProcessingCallbacks): Promi
 
       cb.addConsoleMessage('info', `🔄 Sending request to /api/bigbook/upload-parish-map...`);
 
-      const response = await fetch('/api/bigbook/upload-parish-map', {
-        method: 'POST',
-        body: formData,
-        credentials: 'include',
-      });
+      const result = await apiClient.post<any>('/bigbook/upload-parish-map', formData);
 
-      cb.addConsoleMessage('info', `📡 Response status: ${response.status} ${response.statusText}`);
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        cb.addConsoleMessage('error', `❌ HTTP Error ${response.status}: ${errorText}`);
-        if (response.status === 401) {
-          cb.addConsoleMessage('error', `🔐 Authentication failed. Please refresh page and try again.`);
-          cb.addConsoleMessage('info', `💡 Tip: Make sure you're logged in as super_admin`);
-        }
-        return;
-      }
-
-      const result = await response.json();
+      cb.addConsoleMessage('info', `📡 Response received`);
 
       if (result.success) {
         cb.addConsoleMessage('success', `🎉 Parish Map installed successfully!`);
@@ -107,13 +93,7 @@ async function processSingleFile(file: File, cb: FileProcessingCallbacks): Promi
       cb.addConsoleMessage('info', `Uploading to encrypted storage: ${file.name} (${fileType})`);
 
       try {
-        const response = await fetch('/api/bigbook/upload', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ fileName: file.name, content, fileType }),
-        });
-
-        const result = await response.json();
+        const result = await apiClient.post<any>('/bigbook/upload', { fileName: file.name, content, fileType });
 
         if (result.success) {
           cb.setUploadedFiles(prev => prev.map(f =>
@@ -163,25 +143,9 @@ async function processSingleFile(file: File, cb: FileProcessingCallbacks): Promi
 
     cb.addConsoleMessage('info', `🔄 Sending to centralized ingestion system...`);
 
-    const response = await fetch('/api/bigbook/ingest-file', {
-      method: 'POST',
-      body: formData,
-      credentials: 'include',
-    });
+    const result = await apiClient.post<any>('/bigbook/ingest-file', formData);
 
-    cb.addConsoleMessage('info', `📡 Response status: ${response.status} ${response.statusText}`);
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      cb.addConsoleMessage('error', `❌ HTTP Error ${response.status}: ${errorText}`);
-      if (response.status === 401) {
-        cb.addConsoleMessage('error', `🔐 Authentication failed. Please refresh page and try again.`);
-        cb.addConsoleMessage('info', `💡 Tip: Make sure you're logged in as super_admin`);
-      }
-      return;
-    }
-
-    const result = await response.json();
+    cb.addConsoleMessage('info', `📡 Response received`);
 
     if (result.success) {
       const { result: ingestionResult } = result;
