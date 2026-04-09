@@ -1,9 +1,9 @@
 # OM Architecture Audit Refactor Plan
 
 > **Generated**: 2026-04-09
-> **Audit Run**: #31 (score 71.76)
+> **Audit Run**: #32 (score 71.78) — last updated 2026-04-09
 > **Source**: `/control-panel/devops/architecture-audit` — OrthodoxMetrics tab
-> **Total items**: 1059 (open)
+> **Total items**: 383 open / 26 ignored (after Phase 0 + Phase 4.1)
 
 ---
 
@@ -11,17 +11,18 @@
 
 | Phase | Owner | Items Touched | Items Resolved | Status |
 |-------|-------|---------------|----------------|--------|
-| 0. Audit rule fix | Claude (OMAI) | — (one rule PR) | **671 false positives** | Not started |
-| 1. ROGUE_API_CLIENT batches | Windsurf | 127 | 0 | Not started |
-| 2. HARDCODED_COLORS batches | Windsurf | 90 | 0 | Not started |
-| 3. STATE_EXPLOSION refactors | Claude + Windsurf | 40 | 0 | Not started |
-| 4. NO_API_CLIENT route pages | Claude | 69 | 0 | Not started |
-| 5. PLACEHOLDER_STUB triage | Claude | 31 | 0 | Not started |
+| 0. Audit rule fix | Claude (OMAI) | — (one rule PR) | **676 false positives** (1059 → 383) | ✅ Done (omai PR #16, run #32) |
+| 1. ROGUE_API_CLIENT batches | Windsurf | 139 | 0 | In progress (Batch 1) |
+| 2. HARDCODED_COLORS batches | Windsurf | 98 | 0 | Not started |
+| 3. STATE_EXPLOSION refactors | Claude + Windsurf | 48 | 0 | Not started |
+| 4. NO_API_CLIENT route pages | Claude | 69 | 26 ignored | In progress (Batch 4.1 done) |
+| 5. PLACEHOLDER_STUB triage | Claude | 26 | 0 | Not started |
 | 6. CROSS_FEATURE_IMPORT | Claude | 3 | 0 | Not started |
 | **Deferred to God Component refactor** | — | 28 | — | Auto-resolves on rescan |
-| **Total real work** | | **388** | **0** | |
+| **Total real work** | | **383** | **26** | |
 
-After Phase 0, the dashboard collapses from **1059 → 388 actionable items**.
+After Phase 0, the dashboard collapsed from **1059 → 383 actionable items**.
+Phase 4.1 marked 26 NO_API_CLIENT items as `ignored`, leaving **43 NO_API_CLIENT items** to triage.
 
 ---
 
@@ -467,10 +468,36 @@ export function useChurchOnboardingPipeline(id: string) {
 ## Phase 4 — NO_API_CLIENT route pages
 
 **Owner**: Claude
-**Real items**: 69 (after Phase 0)
+**Real items**: 69 (after Phase 0) → **43 remaining** after Batch 4.1
 **Pattern**: These are route-mounted pages that should fetch data but don't. Each one needs a judgment call about *what* should be fetched.
 
 This is **enhancement work**, not refactoring. Each item starts with "what should this page actually display?" — most of these are pages that were stubbed out with template data and never wired to real APIs. Some may legitimately not need to fetch (e.g., static info pages) — those should be marked `ignored` with a justification.
+
+### Batch plan
+
+| Batch | Scope | Items | Type | Status |
+|-------|-------|-------|------|--------|
+| **4.1** | Ignore sweep — marketing/Berry/wrappers/sub-components | 26 | API-only | ✅ Done (OMD-773, run #32) |
+| 4.2 | Dedupe `BigBookConsolePage` (admin/ + admin/admin/) | 2 → 1 | enhancement | Pending |
+| 4.3 | Account pages — profile/sessions/notifications/prefs/password | 7 | enhancement | Pending |
+| 4.4 | Parish management settings pages | 6 | enhancement | Pending |
+| 4.5 | Admin control-panel core (SDLC, SiteMap, SystemServer, etc.) | 7 | enhancement | Pending |
+| 4.6 | Admin control-panel sub-pages (system-server/*, schedule-guidelines/*) | 8 | enhancement | Pending |
+| 4.7 | Devel-tools + OM Daily board | 8 | enhancement | Pending |
+| 4.8 | OCR studio pages (ChurchOCRPage, OCRStudioPage) | 2 | enhancement | Pending |
+| 4.9 | Records + liturgical + portal | 3 | enhancement | Pending |
+
+### Phase 4.1 — completed (OMD-773)
+
+26 items marked `ignored` via `PATCH /api/architecture-audit/violations/:id/status`. No code changes.
+
+| Bucket | Count | IDs |
+|--------|-------|-----|
+| Marketing/template pages (`features/pages/frontend-pages/*` + `landingpage/`) | 14 | 43640, 43642, 43645, 43648, 43650, 43652, 43654, 43655, 43656, 43658, 43660, 43661, 43663, 43664 |
+| Berry demo pages (`features/berry-*`) | 7 | 43523, 43524, 43525, 43526, 43527, 43528, 43529 |
+| Routing wrapper (`components/routing/EnvironmentAwarePage.tsx`) | 1 | 43386 |
+| OmOcrStudioPage co-located helpers/types | 2 | 43591, 43592 |
+| Records sub-views (`RecordsCardView`, `RecordsTimelineView`) | 2 | 43690, 43695 |
 
 ### Top items to investigate first
 
