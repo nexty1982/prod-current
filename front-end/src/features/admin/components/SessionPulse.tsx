@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { apiClient } from '@/api/utils/axiosInstance';
 import {
   Box,
   Paper,
@@ -66,23 +67,7 @@ const SessionPulse: React.FC<SessionPulseProps> = ({
 
   const fetchStats = useCallback(async () => {
     try {
-      const response = await fetch('/api/admin/session-stats', {
-        credentials: 'include'
-      });
-
-      if (response.status === 401) {
-        // Session expired - stop polling to prevent 401 spam
-        stopPolling();
-        setError('Session expired');
-        setLoading(false);
-        return;
-      }
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-
-      const data = await response.json();
+      const data = await apiClient.get<any>('/admin/session-stats');
       if (data.success) {
         setStats(data.stats);
         setError(null);

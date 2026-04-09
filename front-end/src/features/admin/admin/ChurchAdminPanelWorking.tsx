@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { apiClient } from '@/api/utils/axiosInstance';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
     Box,
@@ -35,28 +36,21 @@ const ChurchAdminPanelWorking: React.FC = () => {
             setLoading(true);
             setError(null);
             
-            const response = await fetch(`/api/admin/church/${churchId}/overview`, {
-                credentials: 'include'
-            });
+            const data = await apiClient.get<any>(`/admin/church/${churchId}/overview`);
             
-            if (response.ok) {
-                const data = await response.json();
-                if (data.metadata) {
-                    // Map the API response to our interface
-                    const churchInfo: ChurchData = {
-                        id: data.metadata.id,
-                        name: data.metadata.name,
-                        email: data.metadata.email || data.info?.email || '',
-                        databaseName: data.metadata.database_name,
-                        isActive: data.metadata.is_active,
-                        totalOcrJobs: (data.counts?.baptisms || 0) + (data.counts?.marriages || 0) + (data.counts?.funerals || 0)
-                    };
-                    setChurchData(churchInfo);
-                } else {
-                    throw new Error('Invalid response format');
-                }
+            if (data.metadata) {
+                // Map the API response to our interface
+                const churchInfo: ChurchData = {
+                    id: data.metadata.id,
+                    name: data.metadata.name,
+                    email: data.metadata.email || data.info?.email || '',
+                    databaseName: data.metadata.database_name,
+                    isActive: data.metadata.is_active,
+                    totalOcrJobs: (data.counts?.baptisms || 0) + (data.counts?.marriages || 0) + (data.counts?.funerals || 0)
+                };
+                setChurchData(churchInfo);
             } else {
-                throw new Error(`HTTP ${response.status}: Failed to load church data`);
+                throw new Error('Invalid response format');
             }
         } catch (err) {
             setError(err instanceof Error ? err.message : 'An error occurred');

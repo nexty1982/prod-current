@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { apiClient } from '@/api/utils/axiosInstance';
 import {
   Box, Paper, Typography, TextField, Button, Chip, Collapse,
   List, ListItemButton, ListItemText, Badge, CircularProgress,
@@ -40,41 +41,35 @@ const OMDailyChangelogPage: React.FC = () => {
   const [pushing, setPushing] = useState(false);
 
   // ─── API helpers ─────────────────────────────────────────────────
-  const apiFetch = useCallback(async (url: string, opts?: RequestInit) => {
-    const res = await fetch(url, { credentials: 'include', ...opts });
-    if (!res.ok) throw new Error(await res.text());
-    return res.json();
-  }, []);
-
   const fetchChangelog = useCallback(async () => {
     try {
-      const data = await apiFetch('/api/omai-daily/changelog?limit=30');
+      const data = await apiClient.get<any>('/omai-daily/changelog?limit=30');
       setChangelogEntries(Array.isArray(data) ? data : data.entries ?? []);
     } catch {
       /* silent */
     }
-  }, [apiFetch]);
+  }, []);
 
   const fetchChangelogDetail = useCallback(async (date: string) => {
     setChangelogLoading(true);
     try {
-      const data = await apiFetch(`/api/omai-daily/changelog/${date}`);
+      const data = await apiClient.get<any>(`/omai-daily/changelog/${date}`);
       setChangelogDetail(data);
     } catch {
       setChangelogDetail(null);
     } finally {
       setChangelogLoading(false);
     }
-  }, [apiFetch]);
+  }, []);
 
   const fetchBuildInfo = useCallback(async () => {
     try {
-      const data = await apiFetch('/api/omai-daily/build-info');
+      const data = await apiClient.get<any>('/omai-daily/build-info');
       setBuildInfo(data);
     } catch {
       /* silent */
     }
-  }, [apiFetch]);
+  }, []);
 
   // ─── Mount ───────────────────────────────────────────────────────
   useEffect(() => {
@@ -87,7 +82,7 @@ const OMDailyChangelogPage: React.FC = () => {
   const handleGenerate = async () => {
     setChangelogLoading(true);
     try {
-      await apiFetch('/api/omai-daily/changelog/generate', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+      await apiClient.post<any>('/omai-daily/changelog/generate');
       showToast('Changelog generated', 'success');
       await fetchChangelog();
       await fetchChangelogDetail(selectedChangelogDate);
@@ -100,7 +95,7 @@ const OMDailyChangelogPage: React.FC = () => {
 
   const handleSendEmail = async () => {
     try {
-      await apiFetch(`/api/omai-daily/changelog/email/${selectedChangelogDate}`, { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+      await apiClient.post<any>(`/omai-daily/changelog/email/${selectedChangelogDate}`);
       showToast('Email sent', 'success');
       await fetchChangelogDetail(selectedChangelogDate);
     } catch (err: any) {
@@ -111,7 +106,7 @@ const OMDailyChangelogPage: React.FC = () => {
   const handlePush = async () => {
     setPushing(true);
     try {
-      await apiFetch('/api/omai-daily/push-to-origin', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+      await apiClient.post<any>('/omai-daily/push-to-origin');
       showToast('Pushed to origin', 'success');
     } catch (err: any) {
       showToast(err.message || 'Push failed', 'error');

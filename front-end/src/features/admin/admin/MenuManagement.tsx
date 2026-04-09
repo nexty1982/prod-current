@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { apiClient } from '@/api/utils/axiosInstance';
 import {
     Box,
     Card,
@@ -80,15 +81,7 @@ const MenuManagement: React.FC = () => {
             setLoading(true);
             setError(null);
 
-            const response = await fetch('/api/menu-management/permissions', {
-                credentials: 'include'
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const data = await response.json();
+            const data = await apiClient.get<any>('/menu-management/permissions');
 
             if (data.success) {
                 setMenuItems(data.menuPermissions);
@@ -155,22 +148,9 @@ const MenuManagement: React.FC = () => {
             setError(null);
             setSuccess(null);
 
-            const response = await fetch('/api/menu-management/permissions', {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'include',
-                body: JSON.stringify({
-                    updates: pendingChanges
-                })
+            const data = await apiClient.put<any>('/menu-management/permissions', {
+                updates: pendingChanges
             });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const data = await response.json();
 
             if (data.success) {
                 setSuccess(`Successfully updated ${data.updatedCount} menu permissions`);

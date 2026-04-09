@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { apiClient } from '@/api/utils/axiosInstance';
 import {
   Box,
   Card,
@@ -106,16 +107,13 @@ const HeadlineSourcePicker: React.FC = () => {
       setLoading(true);
       
       // Load sources
-      const sourcesResponse = await fetch('/api/headlines/sources/manage');
-      const sourcesData = await sourcesResponse.json();
+      const sourcesData = await apiClient.get<any>('/headlines/sources/manage');
       
       // Load categories
-      const categoriesResponse = await fetch('/api/headlines/categories');
-      const categoriesData = await categoriesResponse.json();
+      const categoriesData = await apiClient.get<any>('/headlines/categories');
       
       // Load config
-      const configResponse = await fetch('/api/headlines/config');
-      const configData = await configResponse.json();
+      const configData = await apiClient.get<any>('/headlines/config');
       
       if (sourcesData.success) setSources(sourcesData.sources);
       if (categoriesData.success) setCategories(categoriesData.categories);
@@ -166,10 +164,7 @@ const HeadlineSourcePicker: React.FC = () => {
   const testSource = async (sourceId: string) => {
     try {
       setTesting(sourceId);
-      const response = await fetch(`/api/headlines/sources/${sourceId}/test`, {
-        method: 'POST'
-      });
-      const data = await response.json();
+      const data = await apiClient.post<any>(`/headlines/sources/${sourceId}/test`);
       
       if (data.success) {
         setMessage({ 
@@ -205,13 +200,7 @@ const HeadlineSourcePicker: React.FC = () => {
         return;
       }
 
-      const response = await fetch('/api/headlines/sources', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newSource)
-      });
-      
-      const data = await response.json();
+      const data = await apiClient.post<any>('/headlines/sources', newSource);
       
       if (data.success) {
         setSources(prev => [...prev, data.source]);
@@ -231,27 +220,13 @@ const HeadlineSourcePicker: React.FC = () => {
       setSaving(true);
       
       // Save sources
-      const sourcesResponse = await fetch('/api/headlines/sources/bulk-update', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sources })
-      });
+      await apiClient.put<any>('/headlines/sources/bulk-update', { sources });
       
       // Save categories
-      const categoriesResponse = await fetch('/api/headlines/categories/bulk-update', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ categories })
-      });
+      await apiClient.put<any>('/headlines/categories/bulk-update', { categories });
       
       // Save config
-      const configResponse = await fetch('/api/headlines/config', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ config })
-      });
-      
-      const configData = await configResponse.json();
+      const configData = await apiClient.put<any>('/headlines/config', { config });
       
       if (configData.success) {
         setMessage({ type: 'success', text: 'Configuration saved successfully' });

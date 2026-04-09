@@ -2,6 +2,7 @@
  * OMDailyDashboardPage — Overview/KPI dashboard for OM Daily.
  * Extracted from OMDailyPage Tab 0 (renderOverview).
  */
+import { apiClient } from '@/api/utils/axiosInstance';
 
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -72,39 +73,36 @@ const OMDailyDashboardPage: React.FC = () => {
   // ── Fetchers ──
   const fetchDashboard = useCallback(async () => {
     try {
-      const resp = await fetch('/api/omai-daily/dashboard', { credentials: 'include' });
-      if (resp.ok) setDashboard(await resp.json());
+      const data = await apiClient.get<any>('/omai-daily/dashboard');
+      setDashboard(data);
     } catch {}
   }, []);
 
   const fetchExtended = useCallback(async () => {
     try {
-      const resp = await fetch('/api/omai-daily/dashboard/extended', { credentials: 'include' });
-      if (resp.ok) setExtended(await resp.json());
+      const data = await apiClient.get<any>('/omai-daily/dashboard/extended');
+      setExtended(data);
     } catch {}
   }, []);
 
   const fetchGhStatus = useCallback(async () => {
     try {
-      const resp = await fetch('/api/omai-daily/github/status', { credentials: 'include' });
-      if (resp.ok) setGhStatus(await resp.json());
+      const data = await apiClient.get<any>('/omai-daily/github/status');
+      setGhStatus(data);
     } catch {}
   }, []);
 
   const fetchBuildInfo = useCallback(async () => {
     try {
-      const resp = await fetch('/api/omai-daily/build-info', { credentials: 'include' });
-      if (resp.ok) setBuildInfo(await resp.json());
+      const data = await apiClient.get<any>('/omai-daily/build-info');
+      setBuildInfo(data);
     } catch {}
   }, []);
 
   const fetchCsList = useCallback(async () => {
     try {
-      const resp = await fetch('/api/admin/change-sets?status=active', { credentials: 'include' });
-      if (resp.ok) {
-        const data = await resp.json();
-        setCsList(Array.isArray(data) ? data : data.changeSets || []);
-      }
+      const data = await apiClient.get<any>('/admin/change-sets?status=active');
+      setCsList(Array.isArray(data) ? data : data.changeSets || []);
     } catch {}
   }, []);
 
@@ -119,22 +117,19 @@ const OMDailyDashboardPage: React.FC = () => {
   const triggerGhSync = async () => {
     setGhSyncing(true);
     try {
-      await fetch('/api/omai-daily/github/sync', { method: 'POST', credentials: 'include' });
+      await apiClient.post<any>('/omai-daily/github/sync');
       showToast('GitHub sync started');
       pollRef.current = setInterval(async () => {
         try {
-          const resp = await fetch('/api/omai-daily/github/sync/progress', { credentials: 'include' });
-          if (resp.ok) {
-            const data = await resp.json();
-            setGhSyncProgress(data);
-            if (data.status === 'complete' || data.status === 'error') {
-              if (pollRef.current) clearInterval(pollRef.current);
-              pollRef.current = null;
-              setGhSyncing(false);
-              setGhSyncProgress(null);
-              fetchGhStatus();
-              showToast(data.status === 'complete' ? 'GitHub sync complete' : 'Sync error', data.status === 'complete' ? 'success' : 'error');
-            }
+          const data = await apiClient.get<any>('/omai-daily/github/sync/progress');
+          setGhSyncProgress(data);
+          if (data.status === 'complete' || data.status === 'error') {
+            if (pollRef.current) clearInterval(pollRef.current);
+            pollRef.current = null;
+            setGhSyncing(false);
+            setGhSyncProgress(null);
+            fetchGhStatus();
+            showToast(data.status === 'complete' ? 'GitHub sync complete' : 'Sync error', data.status === 'complete' ? 'success' : 'error');
           }
         } catch {}
       }, 2000);
@@ -147,7 +142,7 @@ const OMDailyDashboardPage: React.FC = () => {
   const pushToOrigin = async () => {
     setPushing(true);
     try {
-      await fetch('/api/omai-daily/push-to-origin', { method: 'POST', credentials: 'include' });
+      await apiClient.post<any>('/omai-daily/push-to-origin');
       showToast('Pushed to origin');
     } catch {
       showToast('Push failed', 'error');
@@ -160,20 +155,15 @@ const OMDailyDashboardPage: React.FC = () => {
   const handleSave = async () => {
     if (!form.title.trim()) return;
     try {
-      const resp = await fetch(editingItem ? `/api/omai-daily/items/${editingItem.id}` : '/api/omai-daily/items', {
-        method: editingItem ? 'PUT' : 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
-      });
-      if (resp.ok) {
-        showToast(editingItem ? 'Item updated' : 'Item created');
-        setDialogOpen(false);
-        fetchDashboard();
-        fetchExtended();
+      if (editingItem) {
+        await apiClient.put<any>(`/omai-daily/items/${editingItem.id}`, form);
       } else {
-        showToast('Failed to save', 'error');
+        await apiClient.post<any>('/omai-daily/items', form);
       }
+      showToast(editingItem ? 'Item updated' : 'Item created');
+      setDialogOpen(false);
+      fetchDashboard();
+      fetchExtended();
     } catch {
       showToast('Failed to save', 'error');
     }
@@ -184,18 +174,10 @@ const OMDailyDashboardPage: React.FC = () => {
     if (!promptForm.title.trim()) return;
     setPromptSubmitting(true);
     try {
-      const resp = await fetch('/api/prompt-plans', {
-        method: 'POST', credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(promptForm),
-      });
-      if (resp.ok) {
-        showToast('Prompt plan created');
-        setPromptDialogOpen(false);
-        setPromptForm({ title: '', description: '', agent_tool: 'claude_cli' });
-      } else {
-        showToast('Failed to create prompt plan', 'error');
-      }
+      await apiClient.post<any>('/prompt-plans', promptForm);
+      showToast('Prompt plan created');
+      setPromptDialogOpen(false);
+      setPromptForm({ title: '', description: '', agent_tool: 'claude_cli' });
     } catch {
       showToast('Failed to create prompt plan', 'error');
     } finally {

@@ -1,3 +1,4 @@
+import { apiClient } from '@/api/utils/axiosInstance';
 import React, { useState } from 'react';
 import {
   Box,
@@ -169,19 +170,10 @@ const BigBookSettings: React.FC<BigBookSettingsProps> = ({
     setProcessingResult(null);
 
     try {
-      const response = await fetch('/api/bigbook/process-all', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          useSecureStorage: settings.useSecureStorage,
-          retryOnFailure: settings.retryOnMountFailure,
-        }),
+      const result = await apiClient.post<any>('/bigbook/process-all', {
+        useSecureStorage: settings.useSecureStorage,
+        retryOnFailure: settings.retryOnMountFailure,
       });
-
-      const result = await response.json();
       setProcessingResult(result);
       setProcessingProgress(100);
 
@@ -204,15 +196,7 @@ const BigBookSettings: React.FC<BigBookSettingsProps> = ({
     setMountTestResult(null);
 
     try {
-      const response = await fetch('/api/bigbook/test-secure-mount', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-      });
-
-      const result = await response.json();
+      const result = await apiClient.post<any>('/bigbook/test-secure-mount');
       setMountTestResult(result.testResult);
 
     } catch (error) {

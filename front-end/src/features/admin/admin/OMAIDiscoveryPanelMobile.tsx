@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { apiClient } from '@/api/utils/axiosInstance';
 import {
   Box,
   Stack,
@@ -173,8 +174,7 @@ const OMAIDiscoveryPanelMobile: React.FC = () => {
   const loadLearningStatus = async () => {
     setStatusLoading(true);
     try {
-      const response = await fetch('/api/omai/learning-status');
-      const data = await response.json();
+      const data = await apiClient.get<any>('/omai/learning-status');
       setLearningStatus(data);
     } catch (error) {
       console.error('Failed to load learning status:', error);
@@ -186,11 +186,8 @@ const OMAIDiscoveryPanelMobile: React.FC = () => {
   const loadMemoryPreview = async () => {
     setMemoryLoading(true);
     try {
-      const response = await fetch('/api/omai/memory-preview');
-      if (response.ok) {
-        const data = await response.json();
-        setMemoryPreview(data);
-      }
+      const data = await apiClient.get<any>('/omai/memory-preview');
+      setMemoryPreview(data);
     } catch (error) {
       console.error('Failed to load memory preview:', error);
     } finally {
@@ -200,11 +197,8 @@ const OMAIDiscoveryPanelMobile: React.FC = () => {
 
   const loadAgents = async () => {
     try {
-      const response = await fetch('/api/omai/agents');
-      if (response.ok) {
-        const data = await response.json();
-        setAgents(data.agents || []);
-      }
+      const data = await apiClient.get<any>('/omai/agents');
+      setAgents(data.agents || []);
     } catch (error) {
       console.error('Failed to load agents:', error);
     }
@@ -223,13 +217,7 @@ const OMAIDiscoveryPanelMobile: React.FC = () => {
     }, 200);
 
     try {
-      const response = await fetch('/api/omai/learn-now', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ forceRefresh: true })
-      });
-      
-      const data = await response.json();
+      const data = await apiClient.post<any>('/omai/learn-now', { forceRefresh: true });
       clearInterval(progressInterval);
       setProgress(prev => ({ ...prev, learning: 100 }));
       
@@ -269,17 +257,11 @@ const OMAIDiscoveryPanelMobile: React.FC = () => {
     }, 300);
 
     try {
-      const response = await fetch('/api/omai/agents/run-command', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          agentId: selectedAgent,
-          command: autofixCommand,
-          context: 'mobile-interface'
-        })
+      const data = await apiClient.post<any>('/omai/agents/run-command', {
+        agentId: selectedAgent,
+        command: autofixCommand,
+        context: 'mobile-interface'
       });
-
-      const data = await response.json();
       clearInterval(progressInterval);
       setProgress(prev => ({ ...prev, autofix: 100 }));
 
@@ -314,12 +296,7 @@ const OMAIDiscoveryPanelMobile: React.FC = () => {
     formData.append('source', 'mobile-upload');
 
     try {
-      const response = await fetch('/api/omai/upload-knowledge', {
-        method: 'POST',
-        body: formData
-      });
-
-      const data = await response.json();
+      const data = await apiClient.post<any>('/omai/upload-knowledge', formData);
       if (data.success) {
         setUploadResult(`File uploaded successfully: ${data.processed} entries processed`);
         setUploadDialogOpen(true);
