@@ -5,6 +5,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { apiClient } from '@/api/utils/axiosInstance';
 
 interface ProfileData {
     profile_image_url?: string;
@@ -45,24 +46,18 @@ export const useProfileSync = (defaultImage?: string): ProfileSyncReturn => {
                 return null;
             }
             
-            const response = await fetch('/api/user/profile', {
-                credentials: 'include'
-            });
+            const data = await apiClient.get<any>('/user/profile');
+            if (data.success && data.profile) {
+                setProfileData(data.profile);
 
-            if (response.ok) {
-                const data = await response.json();
-                if (data.success && data.profile) {
-                    setProfileData(data.profile);
-
-                    // Update profile image
-                    if (data.profile.profile_image_url) {
-                        setProfileImage(data.profile.profile_image_url);
-                        localStorage.setItem('userProfileImage', data.profile.profile_image_url);
-                    }
-
-                    console.log('📸 Profile loaded from database:', data.profile);
-                    return data.profile;
+                // Update profile image
+                if (data.profile.profile_image_url) {
+                    setProfileImage(data.profile.profile_image_url);
+                    localStorage.setItem('userProfileImage', data.profile.profile_image_url);
                 }
+
+                console.log('📸 Profile loaded from database:', data.profile);
+                return data.profile;
             }
         } catch (error) {
             console.error('Failed to load profile:', error);
@@ -90,39 +85,28 @@ export const useProfileSync = (defaultImage?: string): ProfileSyncReturn => {
                 throw new Error('No user ID available');
             }
             
-            const response = await fetch('/api/user/profile', {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'include',
-                body: JSON.stringify({ profile_image_url: imageUrl })
-            });
+            await apiClient.put('/user/profile', { profile_image_url: imageUrl });
 
-            if (response.ok) {
-                // Update local state
-                setProfileImage(imageUrl);
+            // Update local state
+            setProfileImage(imageUrl);
 
-                // Update localStorage
-                localStorage.setItem('userProfileImage', imageUrl);
+            // Update localStorage
+            localStorage.setItem('userProfileImage', imageUrl);
 
-                // Update profile data
-                setProfileData(prev => prev ? { ...prev, profile_image_url: imageUrl } : { profile_image_url: imageUrl });
+            // Update profile data
+            setProfileData(prev => prev ? { ...prev, profile_image_url: imageUrl } : { profile_image_url: imageUrl });
 
-                // Notify other components
-                window.dispatchEvent(new CustomEvent('profileImageUpdated', {
-                    detail: { imageUrl }
-                }));
+            // Notify other components
+            window.dispatchEvent(new CustomEvent('profileImageUpdated', {
+                detail: { imageUrl }
+            }));
 
-                // Refresh auth context to sync user data
-                if (refreshAuth) {
-                    await refreshAuth();
-                }
-
-                console.log('📸 Profile image synchronized across app:', imageUrl);
-            } else {
-                throw new Error('Failed to save profile image to database');
+            // Refresh auth context to sync user data
+            if (refreshAuth) {
+                await refreshAuth();
             }
+
+            console.log('📸 Profile image synchronized across app:', imageUrl);
         } catch (error) {
             console.error('Failed to update profile image:', error);
             setError('Failed to update profile image');
@@ -143,40 +127,27 @@ export const useProfileSync = (defaultImage?: string): ProfileSyncReturn => {
                 throw new Error('No user ID available');
             }
             
-            const response = await fetch('/api/user/profile', {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'include',
-                body: JSON.stringify(updates)
-            });
+            const data = await apiClient.put<any>('/user/profile', updates);
+            if (data.success) {
+                // Update local state
+                setProfileData(prev => ({ ...prev, ...updates }));
 
-            if (response.ok) {
-                const data = await response.json();
-                if (data.success) {
-                    // Update local state
-                    setProfileData(prev => ({ ...prev, ...updates }));
+                // Update localStorage as backup
+                localStorage.setItem('userProfile', JSON.stringify({ ...profileData, ...updates }));
 
-                    // Update localStorage as backup
-                    localStorage.setItem('userProfile', JSON.stringify({ ...profileData, ...updates }));
+                // Notify other components
+                window.dispatchEvent(new CustomEvent('profileUpdated', {
+                    detail: { updates }
+                }));
 
-                    // Notify other components
-                    window.dispatchEvent(new CustomEvent('profileUpdated', {
-                        detail: { updates }
-                    }));
-
-                    // Refresh auth context if user data was updated
-                    if (refreshAuth && (updates.display_name || updates.first_name || updates.last_name)) {
-                        await refreshAuth();
-                    }
-
-                    console.log('📸 Profile data synchronized across app:', updates);
-                } else {
-                    throw new Error(data.message || 'Failed to update profile');
+                // Refresh auth context if user data was updated
+                if (refreshAuth && (updates.display_name || updates.first_name || updates.last_name)) {
+                    await refreshAuth();
                 }
+
+                console.log('📸 Profile data synchronized across app:', updates);
             } else {
-                throw new Error('Failed to save profile to database');
+                throw new Error(data.message || 'Failed to update profile');
             }
         } catch (error) {
             console.error('Failed to update profile:', error);
