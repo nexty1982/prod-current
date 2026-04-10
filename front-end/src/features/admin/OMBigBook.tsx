@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import { apiClient } from '@/api/utils/axiosInstance';
 import {
   Card,
@@ -22,7 +22,6 @@ import {
   ListItemIcon,
 } from '@mui/material';
 import BigBookConsolePage from './BigBookConsolePage';
-import { BigBookConsoleSettings, defaultSettings } from './BigBookSettings';
 import EncryptedStoragePanel from './EncryptedStoragePanel';
 import QuestionnairePreview from './QuestionnairePreview';
 import OMAIDiscoveryPanel from './OMAIDiscoveryPanel';
@@ -61,11 +60,17 @@ import TrainingDialog from './OMBigBook/TrainingDialog';
 import FoundationDetailsDialog from './OMBigBook/FoundationDetailsDialog';
 import ImportsScriptsTab from './OMBigBook/ImportsScriptsTab';
 import ConsoleOutputTab from './OMBigBook/ConsoleOutputTab';
+import { useRegistries } from './OMBigBook/useRegistries';
+import { useCustomComponents } from './OMBigBook/useCustomComponents';
+import {
+  bigBookDialogReducer,
+  initialBigBookDialogState,
+} from './OMBigBook/dialogs';
 
 const OMBigBook: React.FC = () => {
   const [activeTab, setActiveTab] = useState(0);
 
-  // Existing state
+  // File / console / execution state
   const [uploadedFiles, setUploadedFiles] = useState<FileUpload[]>([]);
   const [consoleOutput, setConsoleOutput] = useState<ConsoleOutput[]>([]);
   const [isExecuting, setIsExecuting] = useState(false);
@@ -80,23 +85,32 @@ const OMBigBook: React.FC = () => {
     scriptTimeout: 30000,
     maxFileSize: 10485760 // 10MB
   });
-  const [consoleSettings, setConsoleSettings] = useState<BigBookConsoleSettings>(defaultSettings);
-  const [questionnairePreviewOpen, setQuestionnairePreviewOpen] = useState(false);
-  const [previewFile, setPreviewFile] = useState<FileUpload | null>(null);
-  const [registries, setRegistries] = useState<any>(null);
-  const [registriesLoading, setRegistriesLoading] = useState(false);
-  const [registriesError, setRegistriesError] = useState<string | null>(null);
-  const [tsxWizardOpen, setTsxWizardOpen] = useState(false);
-  const [tsxFile, setTsxFile] = useState<File | null>(null);
-  const [customComponents, setCustomComponents] = useState<any>(null);
-  const [customComponentsLoading, setCustomComponentsLoading] = useState(false);
-  const [selectedCustomComponent, setSelectedCustomComponent] = useState<string | null>(null);
-  const [trainingDialogOpen, setTrainingDialogOpen] = useState(false);
-  const [selectedFoundation, setSelectedFoundation] = useState<any>(null);
-  const [foundationDialogOpen, setFoundationDialogOpen] = useState(false);
 
   // OMAI data hook
   const omai = useOMAIData();
+
+  // Stable logger for hooks below — defined before they consume it.
+  const addConsoleMessage = useCallback(
+    (type: ConsoleOutput['type'], message: string, _details?: string) => {
+      const newMessage: ConsoleOutput = {
+        id: Date.now().toString(),
+        timestamp: new Date(),
+        type,
+        content: message,
+        source: type === 'command' ? 'User' : 'System',
+      };
+      setConsoleOutput(prev => [...prev, newMessage]);
+    },
+    [],
+  );
+
+  // Extracted state hooks (drained from this component)
+  const registriesHook = useRegistries({ log: addConsoleMessage });
+  const customComponentsHook = useCustomComponents({ log: addConsoleMessage });
+
+  // Single dialog state machine for the 4 modal dialogs
+  const [dialog, dispatchDialog] = useReducer(bigBookDialogReducer, initialBigBookDialogState);
+  const closeDialog = () => dispatchDialog({ type: 'close' });
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const consoleRef = useRef<HTMLDivElement>(null);
@@ -112,130 +126,25 @@ const OMBigBook: React.FC = () => {
     scrollToBottom();
   }, [consoleOutput, scrollToBottom]);
 
-  // Load registries when tab is opened
+  // Load registries / custom components when their tabs are opened
   useEffect(() => {
-    if (activeTab === 5) {
-      loadRegistries();
-    }
-    if (activeTab === 6) {
-      loadCustomComponents();
-    }
-  }, [activeTab]);
+    if (activeTab === 5) registriesHook.load();
+    if (activeTab === 6) customComponentsHook.load();
+  }, [activeTab]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Load registries function
-  const loadRegistries = async () => {
-    setRegistriesLoading(true);
-    setRegistriesError(null);
-
-    try {
-      const result = await apiClient.get<any>('/bigbook/registries');
-
-      if (result.success) {
-        setRegistries(result.registries);
-      } else {
-        throw new Error(result.error || 'Failed to load registries');
-      }
-    } catch (error) {
-      setRegistriesError(error instanceof Error ? error.message : 'Unknown error');
-      addConsoleMessage('error', `Failed to load registries: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    } finally {
-      setRegistriesLoading(false);
-    }
-  };
-
-  // Load custom components function
-  const loadCustomComponents = async () => {
-    setCustomComponentsLoading(true);
-
-    try {
-      const data = await apiClient.get<any>('/bigbook/custom-components-registry');
-      setCustomComponents(data);
-      addConsoleMessage('success', `Loaded ${Object.keys(data.components || {}).length} custom components`);
-    } catch (error) {
-      console.error('Error loading custom components:', error);
-      addConsoleMessage('error', `Failed to load custom components: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    } finally {
-      setCustomComponentsLoading(false);
-    }
-  };
-
-  // Remove custom component function
-  const handleRemoveCustomComponent = async (component: any) => {
-    if (!window.confirm(`Are you sure you want to remove the component "${component.displayName || component.name}"? This action cannot be undone.`)) {
-      return;
-    }
-
-    addConsoleMessage('info', `🗑️ Removing custom component: ${component.name}`);
-
-    try {
-      const installationResult = {
-        componentName: component.name,
-        installedPath: component.path,
-        route: component.route,
-        displayName: component.displayName,
-        registryUpdated: true,
-        menuUpdated: true
-      };
-
-      const result = await apiClient.delete<any>('/bigbook/remove-bigbook-component');
-
-      if (result.success) {
-        addConsoleMessage('success', `✅ Component "${component.name}" removed successfully`);
-        if (result.menuUpdated) {
-          addConsoleMessage('success', `🧩 Component removed from Big Book sidebar menu`);
-        }
-        await loadCustomComponents();
-        if (selectedCustomComponent === component.name) {
-          setSelectedCustomComponent(null);
-        }
-      } else {
-        throw new Error(result.error || 'Failed to remove component');
-      }
-    } catch (error) {
-      addConsoleMessage('error', `❌ Failed to remove component: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
-  };
-
-  // Toggle item status
-  const toggleItemStatus = async (type: string, id: string, enabled: boolean) => {
-    try {
-      const result = await apiClient.post<any>(`/bigbook/toggle-item/${type}/${id}`, { enabled });
-
-      if (result.success) {
-        setRegistries((prev: any) => ({
-          ...prev,
-          [type]: {
-            ...prev[type],
-            items: { ...prev[type].items, [id]: result.item }
-          }
-        }));
-        addConsoleMessage('success', `Item ${enabled ? 'enabled' : 'disabled'}: ${result.item.name || result.item.displayName || id}`);
-      } else {
-        throw new Error(result.error || 'Failed to toggle item');
-      }
-    } catch (error) {
-      addConsoleMessage('error', `Failed to toggle item: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
-  };
-
-  // Add console message
-  const addConsoleMessage = (type: ConsoleOutput['type'], message: string, details?: string) => {
-    const newMessage: ConsoleOutput = {
-      id: Date.now().toString(),
-      timestamp: new Date(),
-      type,
-      content: message,
-      source: type === 'command' ? 'User' : 'System'
-    };
-    setConsoleOutput(prev => [...prev, newMessage]);
-  };
-
-  // File processing callbacks
+  // File processing callbacks — bridge old setter API to dialog reducer
   const fileCallbacks = {
     addConsoleMessage,
     setUploadedFiles,
-    setTsxFile,
-    setTsxWizardOpen,
+    setTsxFile: (file: File | null) => {
+      // Open the TSX wizard with the new file. Same dispatch handles both
+      // setTsxFile and setTsxWizardOpen from the previous setter pair.
+      dispatchDialog({ type: 'open', dialog: { kind: 'tsxWizard', file } });
+    },
+    setTsxWizardOpen: (_open: boolean) => {
+      // No-op: setTsxFile already opens the dialog. fileProcessing always
+      // calls setTsxFile(file) immediately followed by setTsxWizardOpen(true).
+    },
   };
 
   const handleFileDrop = useCallback(async (e: React.DragEvent) => {
@@ -328,8 +237,7 @@ const OMBigBook: React.FC = () => {
       addConsoleMessage('warning', 'File is not a questionnaire');
       return;
     }
-    setPreviewFile(file);
-    setQuestionnairePreviewOpen(true);
+    dispatchDialog({ type: 'open', dialog: { kind: 'questionnairePreview', file } });
     addConsoleMessage('info', `Opening questionnaire preview: ${file.questionnaireMetadata?.title || file.name}`);
   };
 
@@ -398,7 +306,7 @@ const OMBigBook: React.FC = () => {
               activeTrainingSession={omai.activeTrainingSession}
               learningLoading={omai.learningLoading}
               refreshOMAIData={omai.refreshOMAIData}
-              setTrainingDialogOpen={setTrainingDialogOpen}
+              setTrainingDialogOpen={(open: boolean) => open && dispatchDialog({ type: 'open', dialog: { kind: 'training' } })}
               stopTrainingSession={omai.stopTrainingSession}
             />
           )}
@@ -408,7 +316,7 @@ const OMBigBook: React.FC = () => {
               activeTrainingSession={omai.activeTrainingSession}
               learningLoading={omai.learningLoading}
               setSelectedTrainingPhase={omai.setSelectedTrainingPhase}
-              setTrainingDialogOpen={setTrainingDialogOpen}
+              setTrainingDialogOpen={(open: boolean) => open && dispatchDialog({ type: 'open', dialog: { kind: 'training' } })}
             />
           )}
           {activeTab === 2 && <MemoryManager />}
@@ -425,8 +333,12 @@ const OMBigBook: React.FC = () => {
               omlearnSurveys={omai.omlearnSurveys}
               ethicsLoading={omai.ethicsLoading}
               refreshOMAIData={omai.refreshOMAIData}
-              setSelectedFoundation={setSelectedFoundation}
-              setFoundationDialogOpen={setFoundationDialogOpen}
+              setSelectedFoundation={(foundation: any) => {
+                if (foundation) dispatchDialog({ type: 'open', dialog: { kind: 'foundationDetails', foundation } });
+              }}
+              setFoundationDialogOpen={(open: boolean) => {
+                if (!open) closeDialog();
+              }}
               importOMLearnResponses={omai.importOMLearnResponses}
             />
           )}
@@ -475,22 +387,22 @@ const OMBigBook: React.FC = () => {
 
           {activeTab === 10 && (
             <RegistryManagementPanel
-              registriesLoading={registriesLoading}
-              registriesError={registriesError}
-              registries={registries}
-              loadRegistries={loadRegistries}
-              toggleItemStatus={toggleItemStatus}
+              registriesLoading={registriesHook.loading}
+              registriesError={registriesHook.error}
+              registries={registriesHook.registries}
+              loadRegistries={registriesHook.load}
+              toggleItemStatus={registriesHook.toggleItemStatus}
             />
           )}
 
           {activeTab === 11 && (
             <CustomComponentsPanel
-              customComponentsLoading={customComponentsLoading}
-              customComponents={customComponents}
-              selectedCustomComponent={selectedCustomComponent}
-              setSelectedCustomComponent={setSelectedCustomComponent}
-              loadCustomComponents={loadCustomComponents}
-              handleRemoveCustomComponent={handleRemoveCustomComponent}
+              customComponentsLoading={customComponentsHook.loading}
+              customComponents={customComponentsHook.customComponents}
+              selectedCustomComponent={customComponentsHook.selected}
+              setSelectedCustomComponent={customComponentsHook.setSelected}
+              loadCustomComponents={customComponentsHook.load}
+              handleRemoveCustomComponent={customComponentsHook.remove}
               addConsoleMessage={addConsoleMessage}
             />
           )}
@@ -498,22 +410,16 @@ const OMBigBook: React.FC = () => {
       </Paper>
 
       <QuestionnairePreview
-        open={questionnairePreviewOpen}
-        onClose={() => {
-          setQuestionnairePreviewOpen(false);
-          setPreviewFile(null);
-        }}
-        file={previewFile}
+        open={dialog.kind === 'questionnairePreview'}
+        onClose={closeDialog}
+        file={dialog.kind === 'questionnairePreview' ? dialog.file : null}
         onSubmit={handleQuestionnaireSubmit}
       />
 
       <TSXComponentInstallWizard
-        open={tsxWizardOpen}
-        onClose={() => {
-          setTsxWizardOpen(false);
-          setTsxFile(null);
-        }}
-        file={tsxFile}
+        open={dialog.kind === 'tsxWizard'}
+        onClose={closeDialog}
+        file={dialog.kind === 'tsxWizard' ? dialog.file : null}
         onInstallComplete={(result) => {
           addConsoleMessage('success', `Component installation completed: ${result.componentName}`);
           if (result.previewUrl) {
@@ -524,8 +430,8 @@ const OMBigBook: React.FC = () => {
       />
 
       <TrainingDialog
-        open={trainingDialogOpen}
-        onClose={() => setTrainingDialogOpen(false)}
+        open={dialog.kind === 'training'}
+        onClose={closeDialog}
         selectedPhase={omai.selectedTrainingPhase}
         onPhaseSelect={omai.setSelectedTrainingPhase}
         onStart={omai.startTrainingSession}
@@ -533,9 +439,9 @@ const OMBigBook: React.FC = () => {
       />
 
       <FoundationDetailsDialog
-        open={foundationDialogOpen}
-        onClose={() => setFoundationDialogOpen(false)}
-        foundation={selectedFoundation}
+        open={dialog.kind === 'foundationDetails'}
+        onClose={closeDialog}
+        foundation={dialog.kind === 'foundationDetails' ? dialog.foundation : null}
       />
     </Box>
   );
