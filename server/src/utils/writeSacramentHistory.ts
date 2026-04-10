@@ -247,9 +247,19 @@ function generateRequestId(): string {
   return uuidv4();
 }
 
+// ── Test-only exports (private helpers exposed for unit tests) ────────────
+export const __test__ = {
+  normalizeValue,
+  valuesEqual,
+  computeDiff,
+  safeJsonStringify,
+  generateRequestId,
+};
+
 // CommonJS exports for compatibility with JavaScript require
 module.exports = {
   writeSacramentHistory,
-  generateRequestId
+  generateRequestId,
+  __test__,
 };
 
