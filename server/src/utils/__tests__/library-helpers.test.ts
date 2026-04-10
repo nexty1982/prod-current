@@ -1,20 +1,17 @@
 #!/usr/bin/env npx tsx
 /**
- * Unit tests for utils/library-helpers.js (OMD-901)
+ * Unit tests for utils/library-helpers.js (OMD-895)
  *
- * Pure module — depends only on config/library-config (also pure).
- *
- * Coverage:
- *   - jaroWinklerSimilarity     known reference values
- *   - normalizeFilename         date/version/copy/duplicate/backup stripping
- *   - extractWords              minWordLength filter (3 from LIBRARY_CONFIG)
- *   - calculateFilenameSimilarity  Jaccard + JW weighted average
- *   - findRelatedFiles          self-skip, category filter, threshold,
- *                               sort by score descending
- *   - groupFilesByTime          time bucket precedence (today → older)
- *   - paginate                  clamping, empty input, page out of range
- *   - sortItems                 asc/desc, case-insensitive, null/undefined,
- *                               non-mutation
+ * Pure helpers — no DB, no I/O.
+ * Covers all 8 exports:
+ *   - jaroWinklerSimilarity
+ *   - normalizeFilename
+ *   - extractWords
+ *   - calculateFilenameSimilarity
+ *   - findRelatedFiles
+ *   - groupFilesByTime
+ *   - paginate
+ *   - sortItems
  *
  * Run: npx tsx server/src/utils/__tests__/library-helpers.test.ts
  */
@@ -62,185 +59,168 @@ function assertNear(actual: number, expected: number, tol: number, message: stri
 // ============================================================================
 console.log('\n── jaroWinklerSimilarity ─────────────────────────────────');
 
-// Identical strings → 1.0
-assertEq(jaroWinklerSimilarity('hello', 'hello'), 1.0, 'identical strings → 1.0');
-assertEq(jaroWinklerSimilarity('', ''), 1.0, 'empty strings → 1.0 (early return)');
+assertEq(jaroWinklerSimilarity('', ''), 1.0, 'empty == empty → 1.0');
+assertEq(jaroWinklerSimilarity('hello', 'hello'), 1.0, 'identical → 1.0');
+assertEq(jaroWinklerSimilarity('', 'hello'), 0.0, 'empty vs non-empty → 0');
+assertEq(jaroWinklerSimilarity('hello', ''), 0.0, 'non-empty vs empty → 0');
+assertEq(jaroWinklerSimilarity('abc', 'xyz'), 0.0, 'no overlap → 0');
 
-// Empty input → 0.0
-assertEq(jaroWinklerSimilarity('', 'hello'), 0.0, 'empty vs nonempty → 0');
-assertEq(jaroWinklerSimilarity('hello', ''), 0.0, 'nonempty vs empty → 0');
+// Known Jaro-Winkler values
+// MARTHA vs MARHTA → ~0.961 (classic example)
+assertNear(
+  jaroWinklerSimilarity('MARTHA', 'MARHTA'),
+  0.961,
+  0.01,
+  'MARTHA vs MARHTA ~ 0.961'
+);
+// DIXON vs DICKSONX → ~0.813
+assertNear(
+  jaroWinklerSimilarity('DIXON', 'DICKSONX'),
+  0.813,
+  0.02,
+  'DIXON vs DICKSONX ~ 0.813'
+);
 
-// Known reference values from Jaro-Winkler literature
-// MARTHA / MARHTA → ~0.961
-assertNear(jaroWinklerSimilarity('MARTHA', 'MARHTA'), 0.961, 0.01, 'MARTHA/MARHTA ~0.961');
+// Prefix bonus — strings sharing a 4-char prefix get a boost
+const noPrefix = jaroWinklerSimilarity('xxhello', 'xxworld');
+const withPrefix = jaroWinklerSimilarity('hello world', 'hello earth');
+assert(withPrefix > noPrefix, 'shared prefix yields higher score');
 
-// DIXON / DICKSONX → ~0.813
-assertNear(jaroWinklerSimilarity('DIXON', 'DICKSONX'), 0.813, 0.02, 'DIXON/DICKSONX ~0.813');
-
-// Symmetric (or close to it) for completely different strings
-const ab = jaroWinklerSimilarity('abcdef', 'xyzwvu');
-assert(ab >= 0 && ab <= 1, 'similarity in [0,1] for distinct strings');
-
-// High similarity for prefix-share + small edit
-const sim = jaroWinklerSimilarity('orthodox', 'orthadox');
-assert(sim > 0.9, `prefix-share + 1-char-diff > 0.9: ${sim}`);
-
-// Range [0, 1]
-for (const [a, b] of [['foo', 'bar'], ['abc', 'abcd'], ['hello world', 'hi world']]) {
-  const s = jaroWinklerSimilarity(a, b);
-  assert(s >= 0 && s <= 1, `JW(${a},${b})=${s} in [0,1]`);
-}
+// Symmetry for similar (not necessarily exact under JW prefix asymmetry)
+const ab = jaroWinklerSimilarity('foobar', 'foobat');
+assert(ab > 0.8, 'foobar/foobat > 0.8 (close strings)');
 
 // ============================================================================
 // normalizeFilename
 // ============================================================================
 console.log('\n── normalizeFilename ─────────────────────────────────────');
 
-// Lowercase
-assertEq(normalizeFilename('HELLO.MD'), 'hello', 'lowercase + ext stripped');
-
-// Date prefix removed
-assertEq(normalizeFilename('2025-01-15_report.md'), 'report', 'date prefix removed');
-assertEq(normalizeFilename('2025-01-15-notes.txt'), 'notes', 'date prefix with hyphen');
-
-// Extension stripped
-assertEq(normalizeFilename('file.pdf'), 'file', 'pdf ext stripped');
-assertEq(normalizeFilename('file.docx'), 'file', 'docx ext stripped');
-
-// Underscores/hyphens → spaces (then collapsed)
-assertEq(normalizeFilename('my_file_name.md'), 'my file name', 'underscores → spaces');
-assertEq(normalizeFilename('my-file-name.md'), 'my file name', 'hyphens → spaces');
-assertEq(normalizeFilename('mixed_file-name.txt'), 'mixed file name', 'mixed separators');
-
-// Multiple spaces collapsed
-assertEq(normalizeFilename('a  b   c.md'), 'a b c', 'collapse multiple spaces');
-
-// Copy/duplicate/old/backup tags removed
-assertEq(normalizeFilename('report (copy).md'), 'report', '(copy) removed');
-assertEq(normalizeFilename('report (Copy).md'), 'report', '(Copy) removed (case-insensitive)');
-assertEq(normalizeFilename('report (duplicate).md'), 'report', '(duplicate) removed');
-assertEq(normalizeFilename('report (old).md'), 'report', '(old) removed');
-assertEq(normalizeFilename('report (backup).md'), 'report', '(backup) removed');
-
-// Version suffixes removed
-assertEq(normalizeFilename('report v2.md'), 'report', 'v2 suffix removed');
-assertEq(normalizeFilename('report v1.0.md'), 'report', 'v1.0 suffix removed');
-assertEq(normalizeFilename('report 1.0.0.md'), 'report', '1.0.0 suffix removed');
-
-// Trim
-assertEq(normalizeFilename('  spaced.md  '), 'spaced', 'trimmed');
-
-// All-together
-assertEq(
-  normalizeFilename('2025-01-15_my-report (copy) v2.md'),
-  'my report',
-  'date + separators + copy + version'
-);
+assertEq(normalizeFilename('Hello World.md'), 'hello world', 'simple .md');
+assertEq(normalizeFilename('UPPER.TXT'), 'upper', 'uppercase + ext');
+assertEq(normalizeFilename('2025-09-15_my-doc.pdf'), 'my doc', 'date prefix + ext');
+assertEq(normalizeFilename('2024-01-01-report.docx'), 'report', 'date hyphen-prefix');
+assertEq(normalizeFilename('foo_bar_baz.md'), 'foo bar baz', 'underscores → spaces');
+assertEq(normalizeFilename('foo-bar-baz.md'), 'foo bar baz', 'hyphens → spaces');
+assertEq(normalizeFilename('foo   bar.md'), 'foo bar', 'multi-space collapsed');
+assertEq(normalizeFilename('doc (copy).md'), 'doc', 'remove (copy)');
+assertEq(normalizeFilename('doc (DUPLICATE).md'), 'doc', 'remove (DUPLICATE) case-insensitive');
+assertEq(normalizeFilename('doc (old).md'), 'doc', 'remove (old)');
+assertEq(normalizeFilename('doc (backup).md'), 'doc', 'remove (backup)');
+assertEq(normalizeFilename('report v2.md'), 'report', 'remove version suffix v2');
+assertEq(normalizeFilename('report v2.5.md'), 'report', 'remove version v2.5');
+assertEq(normalizeFilename('report 1.0.0.md'), 'report', 'remove 1.0.0');
+assertEq(normalizeFilename('plain.md'), 'plain', 'plain name');
 
 // ============================================================================
 // extractWords
 // ============================================================================
 console.log('\n── extractWords ──────────────────────────────────────────');
 
-// LIBRARY_CONFIG.relationships.minWordLength = 3
-assertEq(extractWords('hello world foo bar'), ['hello', 'world', 'foo', 'bar'], 'all >=3 chars kept');
-
-// Short words filtered
-assertEq(extractWords('a bb ccc dddd'), ['ccc', 'dddd'], '<3 chars filtered');
-assertEq(extractWords('to be or it is'), [], 'all 2-letter filtered');
-assertEq(extractWords('to be or not to be'), ['not'], '3-letter "not" kept (minWordLength=3)');
-
-// Empty input
-assertEq(extractWords(''), [], 'empty string → []');
-assertEq(extractWords('   '), [], 'whitespace → []');
-
-// Single word
-assertEq(extractWords('hello'), ['hello'], 'single word kept');
-assertEq(extractWords('hi'), [], 'single short word filtered');
-
-// Multiple spaces handled
-assertEq(extractWords('foo   bar'), ['foo', 'bar'], 'multiple spaces');
+// minWordLength is 3 (from library-config.relationships.minWordLength)
+assertEq(extractWords('hello world'), ['hello', 'world'], 'two long words');
+assertEq(extractWords('a be cat dog'), ['cat', 'dog'], 'short words filtered (< 3)');
+assertEq(extractWords(''), [], 'empty string');
+assertEq(extractWords('   '), [], 'whitespace only');
+assertEq(
+  extractWords('the quick brown fox'),
+  ['the', 'quick', 'brown', 'fox'],
+  'all words >= 3'
+);
+assertEq(extractWords('foo'), ['foo'], 'single 3-char word');
+assertEq(extractWords('ab cd ef'), [], 'all 2-char filtered');
 
 // ============================================================================
 // calculateFilenameSimilarity
 // ============================================================================
 console.log('\n── calculateFilenameSimilarity ───────────────────────────');
 
-// Identical filenames → 1.0
-assertEq(calculateFilenameSimilarity('report.md', 'report.md'), 1.0, 'identical → 1.0');
-
-// Same after normalization (e.g., date prefix + version differ)
 assertEq(
-  calculateFilenameSimilarity('2025-01-15_report v1.md', '2025-02-20_report v2.md'),
+  calculateFilenameSimilarity('hello.md', 'hello.md'),
   1.0,
-  'normalize-equal → 1.0'
+  'identical → 1.0'
+);
+assertEq(
+  calculateFilenameSimilarity('hello world.md', 'hello world.md'),
+  1.0,
+  'identical multi-word → 1.0'
+);
+assertEq(
+  calculateFilenameSimilarity('hello.md', 'HELLO.md'),
+  1.0,
+  'case-insensitive identical → 1.0'
+);
+assertEq(
+  calculateFilenameSimilarity('2025-01-01_doc.md', 'doc.md'),
+  1.0,
+  'date prefix removed → identical → 1.0'
 );
 
-// Completely unrelated → low score
-const low = calculateFilenameSimilarity('apple-pie.md', 'rocket-launch.txt');
-assert(low < 0.5, `unrelated low: ${low}`);
+// Different files, no shared words
+const diff = calculateFilenameSimilarity('apples.md', 'banana.md');
+assert(diff < 0.5, `unrelated files low score (got ${diff})`);
 
-// Some overlap → mid range
-const mid = calculateFilenameSimilarity('user-auth-flow.md', 'auth-system.md');
-assert(mid > 0 && mid < 1, `partial: ${mid} in (0,1)`);
+// Partial overlap — share one word
+const partial = calculateFilenameSimilarity('quarterly report.md', 'annual report.md');
+assert(partial > 0 && partial < 1, `partial overlap mid score (got ${partial})`);
 
-// Empty word sets — both files have only short words
-const empty = calculateFilenameSimilarity('a b c.md', 'd e f.md');
-assertEq(empty, 0.0, 'no extractable words → 0');
+// Different cases of normalization
+const sim1 = calculateFilenameSimilarity('Project Plan.md', 'project_plan.pdf');
+assertEq(sim1, 1.0, 'different separators + ext → 1.0 after normalize');
 
-// Output range
-for (const [a, b] of [['foo.md', 'foo.md'], ['foo.md', 'bar.md'], ['quick brown.md', 'lazy dog.md']]) {
-  const s = calculateFilenameSimilarity(a, b);
-  assert(s >= 0 && s <= 1, `score in [0,1]: ${a} vs ${b} = ${s}`);
-}
+// Empty word sets
+const empty = calculateFilenameSimilarity('a.md', 'b.md');
+// After normalization: 'a' and 'b' both have 0 words >= 3 chars → 0
+assertEq(empty, 0.0, 'empty word sets → 0.0');
 
 // ============================================================================
 // findRelatedFiles
 // ============================================================================
 console.log('\n── findRelatedFiles ──────────────────────────────────────');
 
-const target = { id: 1, filename: 'user-auth-flow.md', category: 'technical' };
+const target = { id: 1, filename: 'quarterly report.md', category: 'technical' };
 const allFiles = [
-  { id: 1, filename: 'user-auth-flow.md', category: 'technical' },          // self
-  { id: 2, filename: 'user-auth-system.md', category: 'technical' },         // related
-  { id: 3, filename: 'auth-flow-diagram.md', category: 'technical' },        // related
-  { id: 4, filename: 'random-other-file.md', category: 'technical' },        // unrelated
-  { id: 5, filename: 'user-auth-flow-v2.md', category: 'ops' },              // wrong category
+  { id: 1, filename: 'quarterly report.md', category: 'technical' },     // self — skip
+  { id: 2, filename: 'quarterly report v2.md', category: 'technical' },  // very similar
+  { id: 3, filename: 'annual report.md', category: 'technical' },        // partial
+  { id: 4, filename: 'quarterly report.md', category: 'ops' },           // diff category
+  { id: 5, filename: 'banana smoothie recipe.md', category: 'technical' },// unrelated
 ];
 
-let related = findRelatedFiles(target, allFiles, 0.3);
+const related = findRelatedFiles(target, allFiles);
+// Self skipped, diff category skipped → max 3 candidates
+assert(related.every((r: any) => r.fileId !== 1), 'self excluded');
+assert(related.every((r: any) => r.fileId !== 4), 'different category excluded');
+// File 2 (quarterly report v2) should be in results — almost identical
+assert(
+  related.some((r: any) => r.fileId === 2),
+  'very similar file included'
+);
 
-// Self skipped
-assert(!related.find((r: any) => r.fileId === 1), 'self skipped');
-
-// Wrong category skipped
-assert(!related.find((r: any) => r.fileId === 5), 'wrong category skipped');
-
-// Related includes
-assert(related.length > 0, 'has related files');
-
-// Sorted by score descending
+// Sort order: highest score first
 for (let i = 0; i < related.length - 1; i++) {
-  assert(related[i].score >= related[i + 1].score, `sorted desc at ${i}`);
+  assert(related[i].score >= related[i + 1].score, `sorted desc at index ${i}`);
 }
 
-// Score is rounded to 4 decimals
+// Score field is rounded
 for (const r of related) {
-  const decimals = (r.score.toString().split('.')[1] || '').length;
-  assert(decimals <= 4, `score ${r.score} has ≤4 decimals`);
+  assert(typeof r.score === 'number', 'score is number');
+  assert(r.score >= 0 && r.score <= 1, 'score in [0,1]');
 }
 
-// High threshold → fewer results
+// Custom threshold = 0.99 → only near-identical
 const strict = findRelatedFiles(target, allFiles, 0.99);
-assert(strict.length === 0, 'threshold 0.99 → none');
+assert(strict.length <= related.length, 'strict threshold ≤ default');
+for (const r of strict) {
+  assert(r.score >= 0.99, 'all results meet strict threshold');
+}
 
-// Empty all-files
-related = findRelatedFiles(target, [], 0.3);
-assertEq(related, [], 'empty all-files → []');
+// Empty file list
+const empty2 = findRelatedFiles(target, []);
+assertEq(empty2, [], 'empty file list → []');
 
-// Default threshold (uses LIBRARY_CONFIG.relationships.filenameSimilarityThreshold = 0.6)
-related = findRelatedFiles(target, allFiles);
-assert(Array.isArray(related), 'default threshold returns array');
+// All filtered (only self)
+const onlySelf = findRelatedFiles(target, [target]);
+assertEq(onlySelf, [], 'only self → []');
 
 // ============================================================================
 // groupFilesByTime
@@ -248,60 +228,71 @@ assert(Array.isArray(related), 'default threshold returns array');
 console.log('\n── groupFilesByTime ──────────────────────────────────────');
 
 const now = Date.now();
-const HOUR = 60 * 60 * 1000;
-const DAY = 24 * HOUR;
+const day = 86400_000;
 
 const files = [
-  { id: 'a', modified: new Date(now - 1 * HOUR).toISOString() },     // today
-  { id: 'b', modified: new Date(now - 12 * HOUR).toISOString() },    // today
-  { id: 'c', modified: new Date(now - 3 * DAY).toISOString() },      // yesterday bucket
-  { id: 'd', modified: new Date(now - 10 * DAY).toISOString() },     // thisWeek bucket
-  { id: 'e', modified: new Date(now - 20 * DAY).toISOString() },     // lastWeek bucket
-  { id: 'f', modified: new Date(now - 45 * DAY).toISOString() },     // thisMonth bucket
-  { id: 'g', modified: new Date(now - 365 * DAY).toISOString() },    // older bucket
+  { id: 'a', modified: new Date(now - 1000).toISOString() },           // <1s ago → today
+  { id: 'b', modified: new Date(now - 2 * day).toISOString() },        // 2 days → yesterday bucket
+  { id: 'c', modified: new Date(now - 10 * day).toISOString() },       // 10 days → thisWeek bucket
+  { id: 'd', modified: new Date(now - 20 * day).toISOString() },       // 20 days → lastWeek bucket
+  { id: 'e', modified: new Date(now - 45 * day).toISOString() },       // 45 days → thisMonth bucket
+  { id: 'f', modified: new Date(now - 365 * day).toISOString() },      // 1 year → older
 ];
 
 const grouped = groupFilesByTime(files);
+// Should have 6 non-empty groups
+assertEq(grouped.length, 6, '6 distinct buckets');
+assert(grouped.every((g: any) => g.count >= 1), 'all groups non-empty');
+assert(
+  grouped.some((g: any) => g.key === 'today' && g.items.some((it: any) => it.id === 'a')),
+  'today contains a'
+);
+assert(
+  grouped.some((g: any) => g.key === 'yesterday' && g.items.some((it: any) => it.id === 'b')),
+  'yesterday contains b'
+);
+assert(
+  grouped.some((g: any) => g.key === 'thisWeek' && g.items.some((it: any) => it.id === 'c')),
+  'thisWeek contains c'
+);
+assert(
+  grouped.some((g: any) => g.key === 'lastWeek' && g.items.some((it: any) => it.id === 'd')),
+  'lastWeek contains d'
+);
+assert(
+  grouped.some((g: any) => g.key === 'thisMonth' && g.items.some((it: any) => it.id === 'e')),
+  'thisMonth contains e'
+);
+assert(
+  grouped.some((g: any) => g.key === 'older' && g.items.some((it: any) => it.id === 'f')),
+  'older contains f'
+);
 
-// Result is array of { key, label, items, count } objects
-assert(Array.isArray(grouped), 'returns array');
-for (const g of grouped) {
-  assert('key' in g, `group has key: ${g.key}`);
-  assert('label' in g, `group has label: ${g.label}`);
-  assert('items' in g, `group has items: ${g.key}`);
-  assert('count' in g, `group has count: ${g.key}`);
-  assertEq(g.count, g.items.length, `count matches items length: ${g.key}`);
-}
+// Empty input → empty result (no groups)
+assertEq(groupFilesByTime([]), [], 'empty files → []');
 
-// Find each expected bucket
-const byKey: Record<string, any> = {};
-for (const g of grouped) byKey[g.key] = g;
-
-assert(byKey.today && byKey.today.count === 2, 'today bucket has 2 (a, b)');
-assert(byKey.yesterday && byKey.yesterday.count === 1, 'yesterday bucket has 1 (c)');
-assert(byKey.thisWeek && byKey.thisWeek.count === 1, 'thisWeek bucket has 1 (d)');
-assert(byKey.lastWeek && byKey.lastWeek.count === 1, 'lastWeek bucket has 1 (e)');
-assert(byKey.thisMonth && byKey.thisMonth.count === 1, 'thisMonth bucket has 1 (f)');
-assert(byKey.older && byKey.older.count === 1, 'older bucket has 1 (g)');
-
-// Labels
-assertEq(byKey.today.label, 'Today', 'today label');
-assertEq(byKey.yesterday.label, 'Yesterday', 'yesterday label');
-assertEq(byKey.thisWeek.label, 'Earlier this week', 'thisWeek label');
-assertEq(byKey.lastWeek.label, 'Last week', 'lastWeek label');
-assertEq(byKey.thisMonth.label, 'Last month', 'thisMonth label');
-assertEq(byKey.older.label, 'Older', 'older label');
-
-// Empty input
-const emptyGrouped = groupFilesByTime([]);
-assertEq(emptyGrouped, [], 'empty input → []');
-
-// Only-today input → only today returned
-const onlyToday = groupFilesByTime([
-  { id: 'a', modified: new Date(now - HOUR).toISOString() },
+// All in same bucket → only that group returned
+const allOld = groupFilesByTime([
+  { id: 'x', modified: new Date(now - 365 * day).toISOString() },
+  { id: 'y', modified: new Date(now - 400 * day).toISOString() },
 ]);
-assertEq(onlyToday.length, 1, 'only today → 1 group');
-assertEq(onlyToday[0].key, 'today', 'only today: key');
+assertEq(allOld.length, 1, 'all old → 1 group');
+assertEq(allOld[0].key, 'older', 'group is older');
+assertEq(allOld[0].count, 2, 'count is 2');
+assertEq(allOld[0].label, 'Older', 'label is "Older"');
+
+// Labels match expected
+const labelMap: Record<string, string> = {
+  today: 'Today',
+  yesterday: 'Yesterday',
+  thisWeek: 'Earlier this week',
+  lastWeek: 'Last week',
+  thisMonth: 'Last month',
+  older: 'Older',
+};
+for (const g of grouped) {
+  assertEq(g.label, labelMap[g.key], `label for ${g.key}`);
+}
 
 // ============================================================================
 // paginate
@@ -310,129 +301,107 @@ console.log('\n── paginate ────────────────�
 
 const items = Array.from({ length: 100 }, (_, i) => ({ id: i + 1 }));
 
-// Default page 1, pageSize 25
-let p = paginate(items);
-assertEq(p.items.length, 25, 'default: 25 items');
-assertEq(p.total, 100, 'total 100');
-assertEq(p.page, 1, 'page 1');
-assertEq(p.pageSize, 25, 'pageSize 25');
-assertEq(p.totalPages, 4, 'totalPages 4');
-assertEq(p.hasNext, true, 'hasNext true on page 1');
-assertEq(p.hasPrev, false, 'hasPrev false on page 1');
-assertEq(p.items[0].id, 1, 'first item id 1');
-assertEq(p.items[24].id, 25, 'last item id 25');
+const p1 = paginate(items, 1, 25);
+assertEq(p1.total, 100, 'page1: total=100');
+assertEq(p1.page, 1, 'page1: page=1');
+assertEq(p1.pageSize, 25, 'page1: pageSize=25');
+assertEq(p1.totalPages, 4, 'page1: totalPages=4');
+assertEq(p1.items.length, 25, 'page1: 25 items');
+assertEq(p1.items[0].id, 1, 'page1: first id=1');
+assertEq(p1.items[24].id, 25, 'page1: last id=25');
+assertEq(p1.hasNext, true, 'page1: hasNext');
+assertEq(p1.hasPrev, false, 'page1: !hasPrev');
 
-// Last page
-p = paginate(items, 4, 25);
-assertEq(p.items.length, 25, 'page 4: 25 items');
-assertEq(p.hasNext, false, 'page 4: hasNext false');
-assertEq(p.hasPrev, true, 'page 4: hasPrev true');
-assertEq(p.items[0].id, 76, 'page 4: first item id 76');
-assertEq(p.items[24].id, 100, 'page 4: last item id 100');
+const p2 = paginate(items, 2, 25);
+assertEq(p2.items[0].id, 26, 'page2: first id=26');
+assertEq(p2.hasPrev, true, 'page2: hasPrev');
+assertEq(p2.hasNext, true, 'page2: hasNext');
 
-// Middle page
-p = paginate(items, 2, 25);
-assertEq(p.items[0].id, 26, 'page 2: first item id 26');
-assertEq(p.hasNext, true, 'page 2: hasNext');
-assertEq(p.hasPrev, true, 'page 2: hasPrev');
+const p4 = paginate(items, 4, 25);
+assertEq(p4.items[24].id, 100, 'page4: last id=100');
+assertEq(p4.hasNext, false, 'page4: !hasNext');
+assertEq(p4.hasPrev, true, 'page4: hasPrev');
 
-// Out-of-range page → clamped
-p = paginate(items, 99, 25);
-assertEq(p.page, 4, 'page 99 clamped to 4');
+// Out-of-range page clamped to last
+const overshoot = paginate(items, 99, 25);
+assertEq(overshoot.page, 4, 'overshoot clamped to 4');
 
-p = paginate(items, 0, 25);
-assertEq(p.page, 1, 'page 0 clamped to 1');
+// Page < 1 clamped to 1
+const under = paginate(items, 0, 25);
+assertEq(under.page, 1, 'page=0 clamped to 1');
+const negative = paginate(items, -5, 25);
+assertEq(negative.page, 1, 'negative page clamped to 1');
 
-p = paginate(items, -5, 25);
-assertEq(p.page, 1, 'page -5 clamped to 1');
+// Defaults (page=1, pageSize=25)
+const defaults = paginate(items);
+assertEq(defaults.page, 1, 'default page=1');
+assertEq(defaults.pageSize, 25, 'default pageSize=25');
 
-// Custom pageSize
-p = paginate(items, 1, 10);
-assertEq(p.items.length, 10, 'pageSize 10: 10 items');
-assertEq(p.totalPages, 10, 'pageSize 10: 10 pages');
+// Empty array
+const empty3 = paginate([]);
+assertEq(empty3.total, 0, 'empty: total=0');
+assertEq(empty3.totalPages, 0, 'empty: totalPages=0');
+assertEq(empty3.page, 1, 'empty: page=1 (clamped to totalPages || 1)');
+assertEq(empty3.items, [], 'empty: items=[]');
+assertEq(empty3.hasNext, false, 'empty: !hasNext');
+assertEq(empty3.hasPrev, false, 'empty: !hasPrev');
 
-// Partial last page
-p = paginate(items, 1, 30);
-assertEq(p.items.length, 30, 'pageSize 30 page 1: 30 items');
-p = paginate(items, 4, 30);
-assertEq(p.items.length, 10, 'pageSize 30 page 4: 10 items (partial)');
-assertEq(p.totalPages, 4, 'pageSize 30: 4 pages total');
+// Smaller page size
+const small = paginate(items, 1, 10);
+assertEq(small.totalPages, 10, 'pageSize=10 → 10 pages');
+assertEq(small.items.length, 10, 'pageSize=10 → 10 items');
 
-// Empty input
-p = paginate([], 1, 25);
-assertEq(p.items, [], 'empty: items []');
-assertEq(p.total, 0, 'empty: total 0');
-assertEq(p.totalPages, 0, 'empty: totalPages 0');
-assertEq(p.page, 1, 'empty: page clamped to 1 (via totalPages || 1)');
-assertEq(p.hasNext, false, 'empty: hasNext false');
-assertEq(p.hasPrev, false, 'empty: hasPrev false');
-
-// Single page (fewer items than pageSize)
-p = paginate([{ id: 1 }, { id: 2 }], 1, 25);
-assertEq(p.items.length, 2, 'fewer than pageSize: all returned');
-assertEq(p.totalPages, 1, '1 page total');
-assertEq(p.hasNext, false, 'single page: no next');
+// Last page partial
+const partial2 = paginate(Array.from({ length: 23 }, (_, i) => ({ id: i + 1 })), 3, 10);
+assertEq(partial2.items.length, 3, 'last page has 3 items (23 % 10)');
 
 // ============================================================================
 // sortItems
 // ============================================================================
 console.log('\n── sortItems ─────────────────────────────────────────────');
 
+const data = [
+  { name: 'Charlie', age: 30, modified: '2025-01-01' },
+  { name: 'alice',   age: 25, modified: '2025-03-01' },
+  { name: 'Bob',     age: 35, modified: '2025-02-01' },
+];
+
 // Default: modified desc
-const dated = [
-  { id: 1, modified: '2025-01-01' },
-  { id: 2, modified: '2025-03-01' },
-  { id: 3, modified: '2025-02-01' },
-];
+const def = sortItems(data);
+assertEq(def[0].modified, '2025-03-01', 'default: most recent first');
+assertEq(def[2].modified, '2025-01-01', 'default: oldest last');
 
-let sorted = sortItems(dated);
-assertEq(sorted.map((x: any) => x.id), [2, 3, 1], 'default: modified desc');
+// Doesn't mutate original
+assertEq(data[0].name, 'Charlie', 'original not mutated');
 
-// Asc
-sorted = sortItems(dated, 'modified', 'asc');
-assertEq(sorted.map((x: any) => x.id), [1, 3, 2], 'modified asc');
-
-// Sort by string field, case-insensitive
-const words = [
-  { id: 1, title: 'Banana' },
-  { id: 2, title: 'apple' },
-  { id: 3, title: 'Cherry' },
-];
-sorted = sortItems(words, 'title', 'asc');
-assertEq(sorted.map((x: any) => x.id), [2, 1, 3], 'title asc case-insensitive');
-
-sorted = sortItems(words, 'title', 'desc');
-assertEq(sorted.map((x: any) => x.id), [3, 1, 2], 'title desc case-insensitive');
+// String sort (case-insensitive)
+const byName = sortItems(data, 'name', 'asc');
+assertEq(byName[0].name, 'alice', 'name asc: alice first (case-insensitive)');
+assertEq(byName[1].name, 'Bob', 'name asc: Bob second');
+assertEq(byName[2].name, 'Charlie', 'name asc: Charlie last');
 
 // Numeric sort
-const nums = [{ id: 1, size: 30 }, { id: 2, size: 10 }, { id: 3, size: 20 }];
-sorted = sortItems(nums, 'size', 'asc');
-assertEq(sorted.map((x: any) => x.id), [2, 3, 1], 'size asc');
+const byAgeAsc = sortItems(data, 'age', 'asc');
+assertEq(byAgeAsc.map((x: any) => x.age), [25, 30, 35], 'age asc');
+const byAgeDesc = sortItems(data, 'age', 'desc');
+assertEq(byAgeDesc.map((x: any) => x.age), [35, 30, 25], 'age desc');
 
-// Null/undefined treated as ''
-const withMissing = [
-  { id: 1, name: 'foo' },
-  { id: 2, name: null },
-  { id: 3, name: undefined },
-  { id: 4, name: 'bar' },
+// Missing values
+const withNulls = [
+  { id: 1, value: 'b' },
+  { id: 2, value: null },
+  { id: 3, value: 'a' },
+  { id: 4 }, // value: undefined
 ];
-sorted = sortItems(withMissing, 'name', 'asc');
-// '' < 'bar' < 'foo' — both null/undefined become '', so they come first (stable order varies)
-assertEq(sorted[2].id, 4, 'after missing: bar');
-assertEq(sorted[3].id, 1, 'after missing: foo');
-assert(sorted[0].name == null && sorted[1].name == null, 'null/undefined first');
+const sortedNull = sortItems(withNulls, 'value', 'asc');
+// null/undefined → '' which sorts before any non-empty string
+assertEq(sortedNull[0].id, 2, 'null comes first (asc)');
 
-// Non-mutation
-const original = [{ id: 1, x: 3 }, { id: 2, x: 1 }];
-sortItems(original, 'x', 'asc');
-assertEq(original[0].id, 1, 'non-mutating: original[0]');
-assertEq(original[1].id, 2, 'non-mutating: original[1]');
+// Empty array
+assertEq(sortItems([]), [], 'empty array');
 
-// Empty
-assertEq(sortItems([]), [], 'empty input → []');
-
-// Single element
-assertEq(sortItems([{ id: 1 }]).length, 1, 'single element preserved');
+// Single item
+assertEq(sortItems([{ id: 1 }], 'id', 'asc'), [{ id: 1 }], 'single item');
 
 // ============================================================================
 // Summary

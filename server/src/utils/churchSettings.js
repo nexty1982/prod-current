@@ -4,7 +4,7 @@
  * Preserves unknown keys and handles NULL/invalid JSON gracefully
  */
 
-const { logger } = require('./logger');
+const logger = require('./logger');
 
 /**
  * Parse settings from database (LONGTEXT) to object
