@@ -20,7 +20,7 @@ import {
     Typography,
     useTheme,
 } from '@mui/material';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import DatabaseMappingTab from './FieldMapperPage/DatabaseMappingTab';
 import ExportTemplateDialog from './FieldMapperPage/ExportTemplateDialog';
@@ -66,22 +66,77 @@ const FieldMapperPage: React.FC = () => {
     const recordType = getRecordType(urlTableName);
     navigate(`/apps/records/${recordType}`);
   };
-  const [rows, setRows] = useState<Column[]>([]);
-  const [defaultSortField, setDefaultSortField] = useState<string>('');
-  const [defaultSortDirection, setDefaultSortDirection] = useState<'asc' | 'desc'>('asc');
-  const [saving, setSaving] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<number>(0);
-  // Church name state (for header display)
-  const [churchName, setChurchName] = useState<string>('');
+  // ──────────────────────────────────────────────────────────────────
+  // State buckets — grouped to keep this component under the
+  // STATE_EXPLOSION threshold. Each bucket exposes named wrapper setters
+  // so existing handlers and child component prop signatures stay intact.
+  // ──────────────────────────────────────────────────────────────────
 
-  // Export to Template state
-  const [exportLanguage, setExportLanguage] = useState<string>('en');
-  const [exportDialogOpen, setExportDialogOpen] = useState<boolean>(false);
-  const [exporting, setExporting] = useState<boolean>(false);
-  const [exportOverwrite, setExportOverwrite] = useState<boolean>(false);
+  // ── Standalone UI state ──
+  const [activeTab, setActiveTab] = useState<number>(0);
+
+  // ── Page status bucket (replaces 9 useStates) ──
+  const [page, setPage] = useState({
+    rows: [] as Column[],
+    saving: false,
+    loading: false,
+    error: null as string | null,
+    success: null as string | null,
+    churchName: '',
+    rowCount: null as number | null,
+    lastSync: null as Date | null,
+    columnsError: null as string | null,
+  });
+  const setPageField = useCallback(
+    <K extends keyof typeof page>(key: K, value: typeof page[K]) => {
+      setPage(prev => ({ ...prev, [key]: value }));
+    },
+    [],
+  );
+  const { rows, saving, loading, error, success, churchName, rowCount, lastSync, columnsError } = page;
+  const setRows: React.Dispatch<React.SetStateAction<Column[]>> = useCallback(
+    (action) => setPage(prev => ({
+      ...prev,
+      rows: typeof action === 'function' ? (action as (p: Column[]) => Column[])(prev.rows) : action,
+    })),
+    [],
+  );
+  const setSaving = useCallback((value: boolean) => setPageField('saving', value), [setPageField]);
+  const setLoading = useCallback((value: boolean) => setPageField('loading', value), [setPageField]);
+  const setError = useCallback((value: string | null) => setPageField('error', value), [setPageField]);
+  const setSuccess = useCallback((value: string | null) => setPageField('success', value), [setPageField]);
+  const setChurchName = useCallback((value: string) => setPageField('churchName', value), [setPageField]);
+  const setRowCount = useCallback((value: number | null) => setPageField('rowCount', value), [setPageField]);
+  const setLastSync = useCallback((value: Date | null) => setPageField('lastSync', value), [setPageField]);
+  const setColumnsError = useCallback((value: string | null) => setPageField('columnsError', value), [setPageField]);
+
+  // ── Sort bucket (replaces 2 useStates) ──
+  const [sort, setSort] = useState({
+    defaultSortField: '',
+    defaultSortDirection: 'asc' as 'asc' | 'desc',
+  });
+  const { defaultSortField, defaultSortDirection } = sort;
+  const setDefaultSortField = useCallback((value: string) => setSort(prev => ({ ...prev, defaultSortField: value })), []);
+  const setDefaultSortDirection = useCallback((value: 'asc' | 'desc') => setSort(prev => ({ ...prev, defaultSortDirection: value })), []);
+
+  // ── Export bucket (replaces 4 useStates) ──
+  const [exportState, setExportState] = useState({
+    exportLanguage: 'en',
+    exportDialogOpen: false,
+    exporting: false,
+    exportOverwrite: false,
+  });
+  const setExportField = useCallback(
+    <K extends keyof typeof exportState>(key: K, value: typeof exportState[K]) => {
+      setExportState(prev => ({ ...prev, [key]: value }));
+    },
+    [],
+  );
+  const { exportLanguage, exportDialogOpen, exporting, exportOverwrite } = exportState;
+  const setExportLanguage = useCallback((value: string) => setExportField('exportLanguage', value), [setExportField]);
+  const setExportDialogOpen = useCallback((value: boolean) => setExportField('exportDialogOpen', value), [setExportField]);
+  const setExporting = useCallback((value: boolean) => setExportField('exporting', value), [setExportField]);
+  const setExportOverwrite = useCallback((value: boolean) => setExportField('exportOverwrite', value), [setExportField]);
 
   // Record Settings (custom hook)
   const {
@@ -105,33 +160,64 @@ const FieldMapperPage: React.FC = () => {
     fieldRules: [],
   });
 
-  const [editingRule, setEditingRule] = useState<any>(null);
-  const [ruleDialogOpen, setRuleDialogOpen] = useState(false);
-
-  // Theme Studio State
-  const [themeStudio, setThemeStudio] = useState<ThemeStudioState>({
-    isGlobal: false,
-    themes: {},
-    selectedTheme: '',
+  // ── Rules bucket (replaces 2 useStates) ──
+  const [rules, setRules] = useState({
+    editingRule: null as any,
+    ruleDialogOpen: false,
   });
+  const { editingRule, ruleDialogOpen } = rules;
+  const setEditingRule = useCallback((value: any) => setRules(prev => ({ ...prev, editingRule: value })), []);
+  const setRuleDialogOpen = useCallback((value: boolean) => setRules(prev => ({ ...prev, ruleDialogOpen: value })), []);
 
-  const [editingTheme, setEditingTheme] = useState<EditingTheme | null>(null);
-  const [themeDialogOpen, setThemeDialogOpen] = useState(false);
-  const [saveAsDialogOpen, setSaveAsDialogOpen] = useState(false);
-  const [newThemeName, setNewThemeName] = useState('');
-  const [previewTheme, setPreviewTheme] = useState<ThemeTokens | null>(null);
-  const [colorConfigDialogOpen, setColorConfigDialogOpen] = useState(false);
-  const [configuringColorKey, setConfiguringColorKey] = useState<keyof ThemeTokens | null>(null);
+  // ── Theme Studio bucket (replaces 8 useStates) ──
+  const [themeBucket, setThemeBucket] = useState({
+    themeStudio: { isGlobal: false, themes: {}, selectedTheme: '' } as ThemeStudioState,
+    editingTheme: null as EditingTheme | null,
+    themeDialogOpen: false,
+    saveAsDialogOpen: false,
+    newThemeName: '',
+    previewTheme: null as ThemeTokens | null,
+    colorConfigDialogOpen: false,
+    configuringColorKey: null as keyof ThemeTokens | null,
+  });
+  const setThemeBucketField = useCallback(
+    <K extends keyof typeof themeBucket>(key: K, value: typeof themeBucket[K]) => {
+      setThemeBucket(prev => ({ ...prev, [key]: value }));
+    },
+    [],
+  );
+  const { themeStudio, editingTheme, themeDialogOpen, saveAsDialogOpen, newThemeName, previewTheme, colorConfigDialogOpen, configuringColorKey } = themeBucket;
+  const setThemeStudio: React.Dispatch<React.SetStateAction<ThemeStudioState>> = useCallback(
+    (action) => setThemeBucket(prev => ({
+      ...prev,
+      themeStudio: typeof action === 'function' ? (action as (p: ThemeStudioState) => ThemeStudioState)(prev.themeStudio) : action,
+    })),
+    [],
+  );
+  const setEditingTheme: React.Dispatch<React.SetStateAction<EditingTheme | null>> = useCallback(
+    (action) => setThemeBucket(prev => ({
+      ...prev,
+      editingTheme: typeof action === 'function' ? (action as (p: EditingTheme | null) => EditingTheme | null)(prev.editingTheme) : action,
+    })),
+    [],
+  );
+  const setThemeDialogOpen = useCallback((value: boolean) => setThemeBucketField('themeDialogOpen', value), [setThemeBucketField]);
+  const setSaveAsDialogOpen = useCallback((value: boolean) => setThemeBucketField('saveAsDialogOpen', value), [setThemeBucketField]);
+  const setNewThemeName = useCallback((value: string) => setThemeBucketField('newThemeName', value), [setThemeBucketField]);
+  const setPreviewTheme = useCallback((value: ThemeTokens | null) => setThemeBucketField('previewTheme', value), [setThemeBucketField]);
+  const setColorConfigDialogOpen = useCallback((value: boolean) => setThemeBucketField('colorConfigDialogOpen', value), [setThemeBucketField]);
+  const setConfiguringColorKey = useCallback((value: keyof ThemeTokens | null) => setThemeBucketField('configuringColorKey', value), [setThemeBucketField]);
 
-  // UI Theme State - for real-time preview updates
-  const [uiThemeState, setUiThemeState] = useState(enhancedTableStore.getState());
-  const [configuringButton, setConfiguringButton] = useState<string | null>('searchRecords');
-  const [configuringColumn, setConfiguringColumn] = useState<string | null>(null);
-
-  // Database Schema stats
-  const [rowCount, setRowCount] = useState<number | null>(null);
-  const [lastSync, setLastSync] = useState<Date | null>(null);
-  const [columnsError, setColumnsError] = useState<string | null>(null);
+  // ── UI Theme bucket (replaces 3 useStates) ──
+  const [uiBucket, setUiBucket] = useState({
+    uiThemeState: enhancedTableStore.getState(),
+    configuringButton: 'searchRecords' as string | null,
+    configuringColumn: null as string | null,
+  });
+  const { uiThemeState, configuringButton, configuringColumn } = uiBucket;
+  const setUiThemeState = useCallback((value: ReturnType<typeof enhancedTableStore.getState>) => setUiBucket(prev => ({ ...prev, uiThemeState: value })), []);
+  const setConfiguringButton = useCallback((value: string | null) => setUiBucket(prev => ({ ...prev, configuringButton: value })), []);
+  const setConfiguringColumn = useCallback((value: string | null) => setUiBucket(prev => ({ ...prev, configuringColumn: value })), []);
 
   // Subscribe to enhancedTableStore changes for real-time preview updates
   useEffect(() => {
