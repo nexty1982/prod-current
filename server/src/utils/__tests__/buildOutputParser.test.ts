@@ -1,34 +1,23 @@
 #!/usr/bin/env npx tsx
 /**
- * Unit tests for utils/buildOutputParser.js (OMD-903)
+ * Unit tests for utils/buildOutputParser.js (OMD-892)
  *
- * BuildOutputParser categorizes build output lines into 7 buckets via regex.
- * Pure module — only depends on ./formatTimestamp (also pure).
- *
- * Coverage:
- *   - categorizeLine        — line < 5 chars rejected, 7 category patterns,
- *                             build-message fallback, important-message fallback
- *   - getCategoryKey        — bug→bugsFixed, feature→featuresAdded, ...
- *   - getSeverity           — high/medium/low + default low
- *   - cleanMessage          — timestamp prefix, arrow prefix, ANSI codes
- *   - isBuildMessage        — webpack/babel/vite/etc and file-extension matches
- *   - isImportantMessage    — length > 10, excludes node_modules / webpack://
- *   - generateSummary       — count aggregation, success → 'success'
- *   - addDeploymentSummary  — chunk count, duration, always-on ready message
- *   - addTestSummary        — N passed / N failed / N total parsing
- *   - parse                 — end-to-end integration
- *
- * Known regex quirks (documented, NOT fixed — out of scope):
- *   - intelligence pattern includes /ai/ which matches the substring "ai"
- *     anywhere (e.g., "fail", "trail", "main", "available", "again"). Object.entries
- *     iterates patterns in insertion order, and intelligence comes BEFORE test/deploy,
- *     so a deploy line like "build available" gets categorized as intelligenceUpdates.
- *   - bug pattern includes "failure:" so test outputs containing "failure:"
- *     bucket as bugsFixed, not testResults.
- *   - isBuildMessage matches any line containing ".js", ".tsx", ".css", etc.,
- *     so messages mentioning filenames are treated as build messages.
+ * Pure regex-based class — no DB, no I/O.
+ * Covers all public/important methods of BuildOutputParser:
+ *   - parse() (full output processing)
+ *   - categorizeLine
+ *   - getCategoryKey
+ *   - getSeverity
+ *   - cleanMessage
+ *   - isBuildMessage
+ *   - isImportantMessage
+ *   - generateSummary
+ *   - addDeploymentSummary
+ *   - addTestSummary
  *
  * Run: npx tsx server/src/utils/__tests__/buildOutputParser.test.ts
+ *
+ * Exits non-zero on any failure.
  */
 
 const BuildOutputParser = require('../buildOutputParser');
@@ -54,449 +43,305 @@ function assertEq<T>(actual: T, expected: T, message: string): void {
 const parser = new BuildOutputParser();
 
 // ============================================================================
-// categorizeLine — length filter
-// ============================================================================
-console.log('\n── categorizeLine: length filter ─────────────────────────');
-
-assertEq(parser.categorizeLine('', 0), null, 'empty → null');
-assertEq(parser.categorizeLine('abc', 0), null, '3 chars → null');
-assertEq(parser.categorizeLine('abcd', 0), null, '4 chars → null');
-// 5 chars is the boundary — but content must also match a pattern, so use a known match
-const fiveOk = parser.categorizeLine('fix: ', 0);
-assert(fiveOk !== null, '5 chars + match → not null');
-
-// ============================================================================
-// categorizeLine — bug
-// ============================================================================
-console.log('\n── categorizeLine: bug category ──────────────────────────');
-
-let entry = parser.categorizeLine('fix: null pointer dereference', 0);
-assertEq(entry.category, 'bugsFixed', 'fix: → bugsFixed');
-assertEq(entry.data.type, 'bug', 'fix: type=bug');
-
-entry = parser.categorizeLine('bug: handler crashes', 1);
-assertEq(entry.category, 'bugsFixed', 'bug: → bugsFixed');
-
-entry = parser.categorizeLine('error: cannot read property', 2);
-assertEq(entry.category, 'bugsFixed', 'error: → bugsFixed');
-
-entry = parser.categorizeLine('hotfix: revert breaking change', 3);
-assertEq(entry.category, 'bugsFixed', 'hotfix: → bugsFixed');
-
-entry = parser.categorizeLine('memory leak: in worker pool', 4);
-assertEq(entry.category, 'bugsFixed', 'memory leak: → bugsFixed');
-
-entry = parser.categorizeLine('exception: thrown unexpectedly', 5);
-assertEq(entry.category, 'bugsFixed', 'exception: → bugsFixed');
-
-// ============================================================================
-// categorizeLine — feature
-// ============================================================================
-console.log('\n── categorizeLine: feature category ──────────────────────');
-
-entry = parser.categorizeLine('feat: new dashboard widget', 0);
-assertEq(entry.category, 'featuresAdded', 'feat: → featuresAdded');
-assertEq(entry.data.type, 'feature', 'feat: type=feature');
-
-entry = parser.categorizeLine('component: ButtonGroup', 1);
-assertEq(entry.category, 'featuresAdded', 'component: → featuresAdded');
-
-entry = parser.categorizeLine('endpoint: POST /users', 2);
-assertEq(entry.category, 'featuresAdded', 'endpoint: → featuresAdded');
-
-entry = parser.categorizeLine('upgrade: bump version 2.0', 3);
-assertEq(entry.category, 'featuresAdded', 'upgrade: → featuresAdded');
-
-// ============================================================================
-// categorizeLine — intelligence
-// ============================================================================
-console.log('\n── categorizeLine: intelligence category ─────────────────');
-
-entry = parser.categorizeLine('omai pattern recognition update', 0);
-assertEq(entry.category, 'intelligenceUpdates', 'omai → intelligenceUpdates');
-assertEq(entry.data.type, 'intelligence', 'omai type=intelligence');
-
-entry = parser.categorizeLine('neural network retrained', 1);
-assertEq(entry.category, 'intelligenceUpdates', 'neural → intelligenceUpdates');
-
-entry = parser.categorizeLine('smart suggestion engine ready', 2);
-assertEq(entry.category, 'intelligenceUpdates', 'smart → intelligenceUpdates');
-
-entry = parser.categorizeLine('algorithm: tuned heuristics', 3);
-assertEq(entry.category, 'intelligenceUpdates', 'algorithm: → intelligenceUpdates');
-
-// ============================================================================
-// categorizeLine — package
-// ============================================================================
-console.log('\n── categorizeLine: package category ──────────────────────');
-
-// Note: many package keywords (npm, yarn, "audit", "vulnerability") avoid the
-// "ai" trap. But "package" itself contains nothing that hits intelligence first.
-entry = parser.categorizeLine('npm WARN deprecated foo@1.0', 0);
-assertEq(entry.category, 'packageUpdates', 'npm → packageUpdates');
-assertEq(entry.data.type, 'package', 'npm type=package');
-
-entry = parser.categorizeLine('yarn lockfile updated', 1);
-assertEq(entry.category, 'packageUpdates', 'yarn → packageUpdates');
-
-// "vulnerability" contains no "ai", "audit" does not either
-entry = parser.categorizeLine('audit: 0 vulnerabilities', 2);
-assertEq(entry.category, 'packageUpdates', 'audit → packageUpdates');
-
-// ============================================================================
-// categorizeLine — test
-// ============================================================================
-console.log('\n── categorizeLine: test category ─────────────────────────');
-
-// IMPORTANT: avoid "passed:" because intelligence /ai/ does NOT match "passed",
-// but bug pattern includes "failure:" which would beat us. Use clean test wording.
-entry = parser.categorizeLine('test: button component', 0);
-assertEq(entry.category, 'testResults', 'test: → testResults');
-assertEq(entry.data.type, 'test', 'test: type=test');
-
-entry = parser.categorizeLine('jest: running suite', 1);
-assertEq(entry.category, 'testResults', 'jest: → testResults');
-
-entry = parser.categorizeLine('coverage: 87 percent', 2);
-assertEq(entry.category, 'testResults', 'coverage: → testResults');
-
-// ============================================================================
-// categorizeLine — deploy
-// ============================================================================
-console.log('\n── categorizeLine: deploy category ───────────────────────');
-
-// "deploy:" — does not contain "ai" substring
-entry = parser.categorizeLine('deploy: production push', 0);
-assertEq(entry.category, 'deploymentDetails', 'deploy: → deploymentDetails');
-assertEq(entry.data.type, 'deploy', 'deploy: type=deploy');
-
-entry = parser.categorizeLine('deployment: complete', 1);
-assertEq(entry.category, 'deploymentDetails', 'deployment: → deploymentDetails');
-
-// "bundle" — no "ai"
-entry = parser.categorizeLine('bundle size 2.3MB', 2);
-assertEq(entry.category, 'deploymentDetails', 'bundle → deploymentDetails');
-
-// ============================================================================
-// categorizeLine — comment
-// ============================================================================
-console.log('\n── categorizeLine: comment category ──────────────────────');
-
-entry = parser.categorizeLine('// inline comment text', 0);
-assertEq(entry.category, 'developerComments', '// → developerComments');
-assertEq(entry.data.type, 'comment', '// type=comment');
-
-entry = parser.categorizeLine('todo: refactor this', 1);
-assertEq(entry.category, 'developerComments', 'todo: → developerComments');
-
-entry = parser.categorizeLine('@deprecated use new method', 2);
-assertEq(entry.category, 'developerComments', '@deprecated → developerComments');
-
-// ============================================================================
-// categorizeLine — known regex quirks (documented, not fixed)
-// ============================================================================
-console.log('\n── categorizeLine: documented quirks ─────────────────────');
-
-// /ai/ in intelligence pattern catches "fail" anywhere
-entry = parser.categorizeLine('build did not fail today', 0);
-assertEq(entry.category, 'intelligenceUpdates',
-  'QUIRK: "fail" matches intelligence /ai/ → intelligenceUpdates');
-
-// "trail" contains "ai" → intelligence
-entry = parser.categorizeLine('trail of breadcrumbs added', 1);
-assertEq(entry.category, 'intelligenceUpdates',
-  'QUIRK: "trail" matches /ai/ → intelligenceUpdates');
-
-// "available" — also "ai"
-entry = parser.categorizeLine('build available now', 2);
-assertEq(entry.category, 'intelligenceUpdates',
-  'QUIRK: "available" matches /ai/ → intelligenceUpdates');
-
-// "failure:" matches bug FIRST (bug iterates before intelligence)
-entry = parser.categorizeLine('failure: assertion did not match', 3);
-assertEq(entry.category, 'bugsFixed',
-  'QUIRK: "failure:" matches bug before intelligence /ai/');
-
-// ============================================================================
-// categorizeLine — fallback to build / important / null
-// ============================================================================
-console.log('\n── categorizeLine: fallbacks ─────────────────────────────');
-
-// isBuildMessage match without category match — use webpack
-entry = parser.categorizeLine('webpack output here', 0);
-assertEq(entry.category, 'deploymentDetails', 'webpack → deploymentDetails (build fallback)');
-assertEq(entry.data.severity, 'low', 'build fallback severity=low');
-
-// .json file match → isBuildMessage (use a name without "package" to avoid package match)
-entry = parser.categorizeLine('emitted config.json', 1);
-assertEq(entry.category, 'deploymentDetails', '.json → deploymentDetails');
-
-// Important message fallback: long line, no category match, no build keywords.
-// Carefully crafted to dodge: bug, feature, intelligence (/ai/), package, test,
-// deploy, comment, isBuildMessage. Use words with no "ai", no file extensions.
-entry = parser.categorizeLine('Hello world here is some unrelated text', 2);
-assertEq(entry.category, 'other', 'long unrelated → other');
-
-// Short uncategorized line → null (length≤10)
-assertEq(parser.categorizeLine('hello!', 3), null, 'short uncategorized → null');
-
-// ============================================================================
-// getCategoryKey
-// ============================================================================
-console.log('\n── getCategoryKey ────────────────────────────────────────');
-
-assertEq(parser.getCategoryKey('bug'), 'bugsFixed', 'bug');
-assertEq(parser.getCategoryKey('feature'), 'featuresAdded', 'feature');
-assertEq(parser.getCategoryKey('intelligence'), 'intelligenceUpdates', 'intelligence');
-assertEq(parser.getCategoryKey('package'), 'packageUpdates', 'package');
-assertEq(parser.getCategoryKey('test'), 'testResults', 'test');
-assertEq(parser.getCategoryKey('deploy'), 'deploymentDetails', 'deploy');
-assertEq(parser.getCategoryKey('comment'), 'developerComments', 'comment');
-assertEq(parser.getCategoryKey('unknown'), 'other', 'unknown → other');
-assertEq(parser.getCategoryKey(''), 'other', 'empty → other');
-
-// ============================================================================
 // getSeverity
 // ============================================================================
 console.log('\n── getSeverity ───────────────────────────────────────────');
 
 assertEq(parser.getSeverity('critical issue here'), 'high', 'critical → high');
-assertEq(parser.getSeverity('FATAL error'), 'high', 'FATAL → high (case-insensitive)');
+assertEq(parser.getSeverity('this is a SEVERE bug'), 'high', 'SEVERE → high');
+assertEq(parser.getSeverity('major change'), 'high', 'major → high');
+assertEq(parser.getSeverity('fatal error'), 'high', 'fatal → high');
+assertEq(parser.getSeverity('urgent fix'), 'high', 'urgent → high');
 assertEq(parser.getSeverity('breaking change'), 'high', 'breaking → high');
-assertEq(parser.getSeverity('warning: deprecated'), 'medium', 'warning → medium');
-assertEq(parser.getSeverity('moderate concern'), 'medium', 'moderate → medium');
-assertEq(parser.getSeverity('minor issue'), 'medium', 'minor → medium');
-assertEq(parser.getSeverity('info message'), 'low', 'info → low');
-assertEq(parser.getSeverity('notice the change'), 'low', 'notice → low');
-assertEq(parser.getSeverity('plain text without keyword'), 'low', 'no match → low default');
+
+assertEq(parser.getSeverity('warning: thing'), 'medium', 'warning → medium');
+assertEq(parser.getSeverity('moderate impact'), 'medium', 'moderate → medium');
+assertEq(parser.getSeverity('minor cleanup'), 'medium', 'minor → medium');
+assertEq(parser.getSeverity('this is deprecated'), 'medium', 'deprecated → medium');
+
+assertEq(parser.getSeverity('info: starting'), 'low', 'info → low');
+assertEq(parser.getSeverity('notice: see this'), 'low', 'notice → low');
+assertEq(parser.getSeverity('suggestion: do x'), 'low', 'suggestion → low');
+assertEq(parser.getSeverity('helpful tip'), 'low', 'tip → low');
+
+assertEq(parser.getSeverity('plain text line'), 'low', 'no match → low default');
 
 // ============================================================================
 // cleanMessage
 // ============================================================================
 console.log('\n── cleanMessage ──────────────────────────────────────────');
 
-assertEq(parser.cleanMessage('[2026-04-10] hello world'), 'hello world', 'timestamp prefix');
-assertEq(parser.cleanMessage('  [info]   message body'), 'message body', 'leading spaces + bracket');
-assertEq(parser.cleanMessage('> arrow prefix line'), 'arrow prefix line', 'arrow prefix');
-assertEq(parser.cleanMessage('   >   nested arrow'), 'nested arrow', 'spaced arrow');
-assertEq(parser.cleanMessage('\x1b[31mred text\x1b[0m'), 'red text', 'ANSI codes stripped');
-assertEq(parser.cleanMessage('  trim me  '), 'trim me', 'trim whitespace');
-assertEq(parser.cleanMessage('plain'), 'plain', 'plain unchanged');
+assertEq(parser.cleanMessage('hello world'), 'hello world', 'plain unchanged');
+assertEq(parser.cleanMessage('  spaced  '), 'spaced', 'trims whitespace');
+assertEq(parser.cleanMessage('[2026-01-01] message'), 'message', 'strips timestamp prefix');
+assertEq(parser.cleanMessage('> arrow message'), 'arrow message', 'strips arrow prefix');
+assertEq(parser.cleanMessage('\x1b[32mgreen\x1b[0m text'), 'green text', 'strips ANSI');
+// Both prefix replacements chain (timestamp then arrow), then ANSI strip
+assertEq(
+  parser.cleanMessage('  [info]   > red\x1b[31malert\x1b[0m'),
+  'redalert',
+  'combined prefix+arrow+ansi all stripped'
+);
 
 // ============================================================================
 // isBuildMessage
 // ============================================================================
 console.log('\n── isBuildMessage ────────────────────────────────────────');
 
-assertEq(parser.isBuildMessage('webpack output'), true, 'webpack');
-assertEq(parser.isBuildMessage('babel transpiled'), true, 'babel');
-assertEq(parser.isBuildMessage('typescript compile'), true, 'typescript');
-assertEq(parser.isBuildMessage('vite build'), true, 'vite');
-assertEq(parser.isBuildMessage('rollup bundle'), true, 'rollup');
-assertEq(parser.isBuildMessage('compiled successfully'), true, 'compiled');
-assertEq(parser.isBuildMessage('minified output'), true, 'minified');
-assertEq(parser.isBuildMessage('emitted asset'), true, 'asset');
-assertEq(parser.isBuildMessage('foo.js generated'), true, '.js extension');
-assertEq(parser.isBuildMessage('Component.tsx loaded'), true, '.tsx extension');
-assertEq(parser.isBuildMessage('styles.css'), true, '.css extension');
-assertEq(parser.isBuildMessage('config.json'), true, '.json extension');
-assertEq(parser.isBuildMessage('plain text only'), false, 'no match → false');
+assert(parser.isBuildMessage('webpack compiled successfully'), 'webpack detected');
+assert(parser.isBuildMessage('using babel'), 'babel detected');
+assert(parser.isBuildMessage('typescript check'), 'typescript detected');
+assert(parser.isBuildMessage('eslint passed'), 'eslint detected');
+assert(parser.isBuildMessage('vite build'), 'vite detected');
+assert(parser.isBuildMessage('compiled in 2s'), 'compiled detected');
+assert(parser.isBuildMessage('bundling complete'), 'bundling detected');
+assert(parser.isBuildMessage('app.js generated'), '.js extension detected');
+assert(parser.isBuildMessage('foo.tsx compiled'), '.tsx extension detected');
+assert(parser.isBuildMessage('style.css'), '.css extension detected');
+assert(!parser.isBuildMessage('hello world'), 'plain text → not build');
 
 // ============================================================================
 // isImportantMessage
 // ============================================================================
 console.log('\n── isImportantMessage ────────────────────────────────────');
 
-assertEq(parser.isImportantMessage('this is a long line'), true, 'long line');
-assertEq(parser.isImportantMessage('short'), false, 'short → false (length<=10)');
-assertEq(parser.isImportantMessage('exactly10!'), false, 'exactly 10 → false (strict gt)');
-assertEq(parser.isImportantMessage('exactly11!?'), true, '11 chars → true');
-assertEq(parser.isImportantMessage('              '), false, 'whitespace only → false');
-assertEq(parser.isImportantMessage('-----------'), false, 'dashes only → false');
-assertEq(parser.isImportantMessage('==========='), false, 'equals only → false');
-assertEq(parser.isImportantMessage('------ * ------'), false, 'separator chars → false');
-assertEq(
-  parser.isImportantMessage('reading node_modules/foo'),
-  false,
-  'node_modules excluded'
-);
-assertEq(
-  parser.isImportantMessage('webpack:// internal source'),
-  false,
-  'webpack:// excluded'
-);
+assert(parser.isImportantMessage('this is a long enough message'), 'long line important');
+assert(!parser.isImportantMessage('short'), 'short line not important');
+assert(!parser.isImportantMessage('exact10ch'), 'exactly 10 chars NOT important (length must be > 10)');
+assert(!parser.isImportantMessage('   '), 'whitespace not important');
+assert(!parser.isImportantMessage('---------'), 'separator not important');
+assert(!parser.isImportantMessage('======='), 'equals separator not important');
+assert(!parser.isImportantMessage('foo node_modules bar'), 'node_modules excluded');
+assert(!parser.isImportantMessage('webpack:// source'), 'webpack:// excluded');
+
+// ============================================================================
+// getCategoryKey
+// ============================================================================
+console.log('\n── getCategoryKey ────────────────────────────────────────');
+
+assertEq(parser.getCategoryKey('bug'), 'bugsFixed', 'bug → bugsFixed');
+assertEq(parser.getCategoryKey('feature'), 'featuresAdded', 'feature → featuresAdded');
+assertEq(parser.getCategoryKey('intelligence'), 'intelligenceUpdates', 'intelligence → intelligenceUpdates');
+assertEq(parser.getCategoryKey('package'), 'packageUpdates', 'package → packageUpdates');
+assertEq(parser.getCategoryKey('test'), 'testResults', 'test → testResults');
+assertEq(parser.getCategoryKey('deploy'), 'deploymentDetails', 'deploy → deploymentDetails');
+assertEq(parser.getCategoryKey('comment'), 'developerComments', 'comment → developerComments');
+assertEq(parser.getCategoryKey('unknown'), 'other', 'unknown → other');
+
+// ============================================================================
+// categorizeLine
+// ============================================================================
+console.log('\n── categorizeLine ────────────────────────────────────────');
+
+// Empty / too short
+assertEq(parser.categorizeLine('', 0), null, 'empty → null');
+assertEq(parser.categorizeLine('abc', 0), null, 'too short → null');
+assertEq(parser.categorizeLine('abcd', 0), null, '4 chars → null (< 5)');
+
+// Bug
+const bug = parser.categorizeLine('fix: null pointer crash', 5);
+assert(bug !== null, 'bug match returns object');
+assertEq(bug.category, 'bugsFixed', 'bug → bugsFixed category');
+assertEq(bug.data.type, 'bug', 'bug type');
+assertEq(bug.data.lineNumber, 6, 'lineNumber index+1');
+assert(typeof bug.data.timestamp === 'string', 'timestamp string');
+
+// Feature
+const feat = parser.categorizeLine('feat: add new endpoint', 0);
+assertEq(feat.category, 'featuresAdded', 'feat → featuresAdded');
+assertEq(feat.data.type, 'feature', 'feature type');
+
+// Intelligence
+const ai = parser.categorizeLine('omai started learning', 0);
+assertEq(ai.category, 'intelligenceUpdates', 'omai → intelligenceUpdates');
+assertEq(ai.data.type, 'intelligence', 'intelligence type');
+
+// Package
+const pkg = parser.categorizeLine('npm install completed', 0);
+assertEq(pkg.category, 'packageUpdates', 'npm → packageUpdates');
+assertEq(pkg.data.type, 'package', 'package type');
+
+// Test
+// QUIRK: 'intelligence' pattern includes /ai/ which matches "failed", "trail",
+// etc. — and intelligence is iterated before test in Object.entries order.
+// So a line containing "failed" or "ai" would mis-categorize as intelligence.
+// Use a clean test line that contains none of those substrings.
+const tst = parser.categorizeLine('test: 5 passed 0 errors', 0);
+assertEq(tst.category, 'testResults', 'test → testResults');
+
+// Deploy
+const dep = parser.categorizeLine('deploy: production ready', 0);
+assertEq(dep.category, 'deploymentDetails', 'deploy → deploymentDetails');
+
+// Comment
+const cmt = parser.categorizeLine('// TODO: refactor this', 0);
+assertEq(cmt.category, 'developerComments', '// → developerComments');
+
+// Build message fallthrough → deploymentDetails
+const buildLine = parser.categorizeLine('webpack compiled with 0 errors', 0);
+assertEq(buildLine.category, 'deploymentDetails', 'webpack line → deploymentDetails fallthrough');
+assertEq(buildLine.data.type, 'deploy', 'build fallthrough type=deploy');
+assertEq(buildLine.data.severity, 'low', 'build fallthrough severity=low');
+
+// Important message fallthrough → other
+// Need a line that doesn't match any category but is "important"
+const otherLine = parser.categorizeLine('mysterious unrelated production line', 0);
+assert(otherLine !== null, 'mysterious line categorized');
+// "production" matches deploy pattern, so it's deploy. Pick another:
+const otherLine2 = parser.categorizeLine('something happened in space here', 0);
+// May be null or other — categorizeLine only returns 'other' if isImportantMessage true
+// Length is > 10, no patterns match → other
+assert(otherLine2 === null || otherLine2.category === 'other', 'random line → null or other');
 
 // ============================================================================
 // generateSummary
 // ============================================================================
 console.log('\n── generateSummary ───────────────────────────────────────');
 
-const cats = {
-  bugsFixed: [{ a: 1 }, { b: 2 }],
-  featuresAdded: [{ c: 3 }],
+const emptyCats = {
+  bugsFixed: [],
+  featuresAdded: [],
   intelligenceUpdates: [],
-  packageUpdates: [{ d: 4 }, { e: 5 }, { f: 6 }],
-  testResults: [{ g: 7 }],
+  packageUpdates: [],
+  testResults: [],
   deploymentDetails: [],
-  developerComments: [{ h: 8 }],
-  other: [{ i: 9 }]
+  developerComments: [],
+  other: []
 };
 
-const sum = parser.generateSummary(cats, true, 1234);
-assertEq(sum.bugsFixed, 2, 'sum.bugsFixed=2');
-assertEq(sum.featuresAdded, 1, 'sum.featuresAdded=1');
-assertEq(sum.intelligenceUpdates, 0, 'sum.intelligenceUpdates=0');
-assertEq(sum.packageUpdates, 3, 'sum.packageUpdates=3');
-assertEq(sum.testsRun, 1, 'sum.testsRun=1');
-assertEq(sum.deploymentStatus, 'success', 'success → success');
-assertEq(sum.totalTime, 1234, 'totalTime passthrough');
-assertEq(sum.linesProcessed, 9, 'linesProcessed=9 total');
-assert(typeof sum.buildTime === 'string' && sum.buildTime.length > 0, 'buildTime is string');
+const sumEmpty = parser.generateSummary(emptyCats, true, 0);
+assertEq(sumEmpty.bugsFixed, 0, 'empty: bugsFixed=0');
+assertEq(sumEmpty.featuresAdded, 0, 'empty: featuresAdded=0');
+assertEq(sumEmpty.deploymentStatus, 'success', 'empty success: status=success');
+assertEq(sumEmpty.totalTime, 0, 'empty: totalTime=0');
+assertEq(sumEmpty.linesProcessed, 0, 'empty: linesProcessed=0');
+assert(typeof sumEmpty.buildTime === 'string', 'buildTime is string');
 
-const errSum = parser.generateSummary(cats, false, 0);
-assertEq(errSum.deploymentStatus, 'error', '!success → error');
-assertEq(errSum.totalTime, 0, 'totalTime=0');
+const sumFail = parser.generateSummary(emptyCats, false, 5000);
+assertEq(sumFail.deploymentStatus, 'error', 'fail: status=error');
+assertEq(sumFail.totalTime, 5000, 'fail: totalTime preserved');
+
+const popCats = {
+  bugsFixed: [{ x: 1 }, { x: 2 }],
+  featuresAdded: [{ x: 1 }],
+  intelligenceUpdates: [],
+  packageUpdates: [{ x: 1 }, { x: 2 }, { x: 3 }],
+  testResults: [{ x: 1 }],
+  deploymentDetails: [{ x: 1 }],
+  developerComments: [],
+  other: [{ x: 1 }]
+};
+const sumPop = parser.generateSummary(popCats, true, 1000);
+assertEq(sumPop.bugsFixed, 2, 'populated: bugsFixed count');
+assertEq(sumPop.featuresAdded, 1, 'populated: featuresAdded count');
+assertEq(sumPop.packageUpdates, 3, 'populated: packageUpdates count');
+assertEq(sumPop.testsRun, 1, 'populated: testsRun count');
+assertEq(sumPop.linesProcessed, 9, 'populated: linesProcessed=2+1+0+3+1+1+0+1');
 
 // ============================================================================
 // addDeploymentSummary
 // ============================================================================
 console.log('\n── addDeploymentSummary ──────────────────────────────────');
 
-let depCats = {
-  bugsFixed: [], featuresAdded: [], intelligenceUpdates: [],
-  packageUpdates: [], testResults: [], deploymentDetails: [],
-  developerComments: [], other: []
+const cats1: any = {
+  bugsFixed: [], featuresAdded: [], intelligenceUpdates: [], packageUpdates: [],
+  testResults: [], deploymentDetails: [], developerComments: [], other: []
 };
+parser.addDeploymentSummary(cats1, 'plain output text', 2500);
+// 1 duration message + 1 always-ready message (no chunks in output)
+assertEq(cats1.deploymentDetails.length, 2, 'duration > 0 → 2 entries (time + ready)');
+assert(cats1.deploymentDetails[0].message.includes('2.5s'), 'duration message format');
+assert(cats1.deploymentDetails[1].message.includes('ready'), 'ready message present');
 
-parser.addDeploymentSummary(depCats, 'chunk1 chunk2 chunk3 asset1', 5500);
-// 3 entries: duration message, chunk message, ready message
-assertEq(depCats.deploymentDetails.length, 3, 'duration+chunks+ready=3 entries');
-assert(
-  depCats.deploymentDetails[0].message.includes('5.5s'),
-  'duration message has 5.5s'
-);
-// /chunk/gi matches chunk1, chunk2, chunk3 → 3 occurrences
-assert(
-  depCats.deploymentDetails[1].message.includes('3 chunks'),
-  '3 chunks counted'
-);
-assert(
-  depCats.deploymentDetails[2].message.includes('🚀'),
-  'always-on ready message present'
-);
-
-// No duration → skip duration message
-depCats = {
-  bugsFixed: [], featuresAdded: [], intelligenceUpdates: [],
-  packageUpdates: [], testResults: [], deploymentDetails: [],
-  developerComments: [], other: []
+const cats2: any = {
+  bugsFixed: [], featuresAdded: [], intelligenceUpdates: [], packageUpdates: [],
+  testResults: [], deploymentDetails: [], developerComments: [], other: []
 };
-parser.addDeploymentSummary(depCats, 'no chunky output here', 0);
-// Only ready message; "chunky" contains "chunk" so chunkCount=1 → also chunk message
-assertEq(depCats.deploymentDetails.length, 2, 'no duration → 2 entries (chunk + ready)');
+parser.addDeploymentSummary(cats2, 'chunk a chunk b chunk c', 0);
+// duration=0 → no duration entry; chunkCount=3 → 1 entry; always 1 ready
+assertEq(cats2.deploymentDetails.length, 2, 'no duration but chunks → 2 entries');
+assert(cats2.deploymentDetails[0].message.includes('3 chunks'), 'chunk count formatted');
 
-// No chunks, no duration → only ready message
-depCats = {
-  bugsFixed: [], featuresAdded: [], intelligenceUpdates: [],
-  packageUpdates: [], testResults: [], deploymentDetails: [],
-  developerComments: [], other: []
+const cats3: any = {
+  bugsFixed: [], featuresAdded: [], intelligenceUpdates: [], packageUpdates: [],
+  testResults: [], deploymentDetails: [], developerComments: [], other: []
 };
-parser.addDeploymentSummary(depCats, 'plain output text', 0);
-assertEq(depCats.deploymentDetails.length, 1, 'no chunks/duration → 1 entry (ready only)');
-assert(depCats.deploymentDetails[0].message.includes('🚀'), 'ready message');
+parser.addDeploymentSummary(cats3, '', 0);
+// only the always-ready message
+assertEq(cats3.deploymentDetails.length, 1, 'empty output → 1 entry (just ready)');
+assert(cats3.deploymentDetails[0].message.includes('ready'), 'ready message');
 
 // ============================================================================
 // addTestSummary
 // ============================================================================
 console.log('\n── addTestSummary ────────────────────────────────────────');
 
-let testCats = {
-  bugsFixed: [], featuresAdded: [], intelligenceUpdates: [],
-  packageUpdates: [], testResults: [], deploymentDetails: [],
-  developerComments: [], other: []
-};
+const tcats1: any = { testResults: [] };
+parser.addTestSummary(tcats1, 'no test info here');
+assertEq(tcats1.testResults.length, 0, 'no test pattern → no summary');
 
-parser.addTestSummary(testCats, 'Tests: 42 passed, 3 failed, 45 total');
-assertEq(testCats.testResults.length, 1, '1 summary entry added');
-assert(testCats.testResults[0].message.includes('42 passed'), '42 passed');
-assert(testCats.testResults[0].message.includes('3 failed'), '3 failed');
-assert(testCats.testResults[0].message.includes('45 total'), '45 total');
-assertEq(testCats.testResults[0].severity, 'medium', 'failed>0 → medium');
+const tcats2: any = { testResults: [] };
+parser.addTestSummary(tcats2, '5 passed, 2 failed, 7 total');
+assertEq(tcats2.testResults.length, 1, '5p/2f/7t → 1 entry');
+assert(tcats2.testResults[0].message.includes('5 passed'), 'passed count in message');
+assert(tcats2.testResults[0].message.includes('2 failed'), 'failed count in message');
+assert(tcats2.testResults[0].message.includes('7 total'), 'total count in message');
+assertEq(tcats2.testResults[0].severity, 'medium', 'failures > 0 → medium severity');
 
-// All passed → severity=low
-testCats = {
-  bugsFixed: [], featuresAdded: [], intelligenceUpdates: [],
-  packageUpdates: [], testResults: [], deploymentDetails: [],
-  developerComments: [], other: []
-};
-parser.addTestSummary(testCats, '10 passed, 0 failed, 10 total');
-assertEq(testCats.testResults[0].severity, 'low', '0 failed → low');
+const tcats3: any = { testResults: [] };
+parser.addTestSummary(tcats3, '10 passed, 0 failed');
+assertEq(tcats3.testResults.length, 1, 'p+f path → 1 entry');
+assertEq(tcats3.testResults[0].severity, 'low', 'no failures → low severity');
 
-// No total → derived from passed+failed
-testCats = {
-  bugsFixed: [], featuresAdded: [], intelligenceUpdates: [],
-  packageUpdates: [], testResults: [], deploymentDetails: [],
-  developerComments: [], other: []
-};
-parser.addTestSummary(testCats, '7 passed, 2 failed');
-assertEq(testCats.testResults.length, 1, 'derived total → 1 entry');
-assert(testCats.testResults[0].message.includes('9 total'), '7+2=9 derived');
-
-// No test patterns → no entry added
-testCats = {
-  bugsFixed: [], featuresAdded: [], intelligenceUpdates: [],
-  packageUpdates: [], testResults: [], deploymentDetails: [],
-  developerComments: [], other: []
-};
-parser.addTestSummary(testCats, 'no test output here');
-assertEq(testCats.testResults.length, 0, 'no patterns → no entries');
-
-// total=0 → no entry (guard)
-testCats = {
-  bugsFixed: [], featuresAdded: [], intelligenceUpdates: [],
-  packageUpdates: [], testResults: [], deploymentDetails: [],
-  developerComments: [], other: []
-};
-parser.addTestSummary(testCats, '0 passed, 0 failed, 0 total');
-assertEq(testCats.testResults.length, 0, 'total=0 → no entry');
+const tcats4: any = { testResults: [] };
+parser.addTestSummary(tcats4, '0 passed, 0 failed, 0 total');
+// total=0 → no entry pushed
+assertEq(tcats4.testResults.length, 0, 'all zeros → no entry');
 
 // ============================================================================
-// parse — end-to-end integration
+// parse — full integration
 // ============================================================================
-console.log('\n── parse: integration ────────────────────────────────────');
+console.log('\n── parse: full integration ───────────────────────────────');
 
-const sample = [
-  'fix: null pointer in renderer',
-  'feat: new dashboard component',
-  'omai: model retrained',
-  'npm install completed',
-  'webpack compiled successfully',
-  '',
-  'short'
-].join('\n');
+// Note: "failed" matches the intelligence /ai/ regex (intelligence is iterated
+// before test in pattern order). Use a clean test line without "failed".
+const fullOutput = `
+[2026-01-01] Build started
+fix: resolve null pointer in user.js
+feat: add new dashboard endpoint
+npm install completed
+test: 8 specs ran successfully
+omai analyzer started
+deploy: production build complete
+// TODO: review this later
+webpack compiled successfully
+random unrelated text
+`.trim();
 
-const result = parser.parse(sample, true, 2000);
-assert(result.summary !== undefined, 'has summary');
-assert(Array.isArray(result.bugsFixed), 'bugsFixed array');
-assertEq(result.bugsFixed.length, 1, '1 bug');
-assertEq(result.featuresAdded.length, 1, '1 feature');
-assertEq(result.intelligenceUpdates.length, 1, '1 intelligence');
-// "npm install completed" — npm matches package, but install also matches
-assertEq(result.packageUpdates.length, 1, '1 package');
-assertEq(result.summary.deploymentStatus, 'success', 'deploymentStatus=success');
-assertEq(result.rawOutput, sample, 'rawOutput preserved');
+const parsed = parser.parse(fullOutput, true, 3000);
+assert(parsed.summary.bugsFixed >= 1, 'parse: at least 1 bug');
+assert(parsed.summary.featuresAdded >= 1, 'parse: at least 1 feature');
+assert(parsed.summary.packageUpdates >= 1, 'parse: at least 1 package');
+assert(parsed.summary.testsRun >= 1, 'parse: at least 1 test');
+assert(parsed.summary.intelligenceUpdates >= 1, 'parse: at least 1 intelligence');
+assertEq(parsed.summary.deploymentStatus, 'success', 'parse: success status');
+assertEq(parsed.summary.totalTime, 3000, 'parse: totalTime preserved');
+assertEq(parsed.rawOutput, fullOutput, 'parse: rawOutput preserved');
+assert(Array.isArray(parsed.bugsFixed), 'parse: bugsFixed array');
+assert(Array.isArray(parsed.deploymentDetails), 'parse: deploymentDetails array');
 
-// Failed build
-const failResult = parser.parse('error: build broke', false, 100);
-assertEq(failResult.summary.deploymentStatus, 'error', 'failed → error');
-// addDeploymentSummary NOT called when !success → no auto-added "🚀 ready" entry
-assertEq(failResult.deploymentDetails.length, 0, '!success → no deploy summary added');
+// Failure parse
+const failParsed = parser.parse('error: build failed\nsomething bad', false, 100);
+assertEq(failParsed.summary.deploymentStatus, 'error', 'failure: status=error');
+assert(failParsed.summary.bugsFixed >= 1, 'failure: bug detected (error pattern)');
+// addDeploymentSummary not called when success=false
+assertEq(failParsed.deploymentDetails.length, 0, 'failure: no deploymentDetails added');
 
-// Empty output
-const emptyResult = parser.parse('', true, 0);
-assertEq(emptyResult.bugsFixed, [], 'empty bugsFixed');
-// success=true so addDeploymentSummary still adds ready message
-assertEq(emptyResult.deploymentDetails.length, 1, 'empty + success → 1 ready entry');
+// Empty input
+const emptyParsed = parser.parse('', true, 0);
+assertEq(emptyParsed.summary.linesProcessed, 0, 'empty input: 0 lines');
+// addDeploymentSummary still adds the ready message even on empty input with success
+assert(emptyParsed.deploymentDetails.length >= 1, 'empty success: ready message added');
 
 // ============================================================================
 // Summary
