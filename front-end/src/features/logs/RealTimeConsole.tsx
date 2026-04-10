@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { apiClient } from '@/api/utils/axiosInstance';
 import ConsoleCard from '../system/logs/ConsoleCard';
 import LogCard from '../system/logs/LogCard';
 
@@ -99,12 +100,7 @@ export const RealTimeConsole: React.FC<RealTimeConsoleProps> = ({ isLive, logFil
   useEffect(() => {
     const fetchLogs = async () => {
       try {
-        const apiUrl = process.env.NODE_ENV === 'production' 
-          ? '/api/admin/logs/database?limit=100&sort=desc'
-          : 'http://localhost:3002/api/admin/logs/database?limit=100&sort=desc';
-        
-        const response = await fetch(apiUrl);
-        const data = await response.json();
+        const data = await apiClient.get<any>('/admin/logs/database?limit=100&sort=desc');
         
         if (data.logs && Array.isArray(data.logs)) {
           const formattedLogs: LogEntry[] = data.logs.map((log: any, index: number) => ({

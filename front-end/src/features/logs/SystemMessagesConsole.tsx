@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { apiClient } from '@/api/utils/axiosInstance';
 import ConsoleCard from '../system/logs/ConsoleCard';
 import SystemMessageCard from '../system/logs/SystemMessageCard';
 
@@ -65,13 +66,8 @@ export const SystemMessagesConsole: React.FC<SystemMessagesConsoleProps> = ({ is
     const fetchSystemMessages = async () => {
       setLoading(true);
       try {
-        const apiUrl = process.env.NODE_ENV === 'production' 
-          ? '/api/admin/logs/database?level=INFO,SUCCESS&source=system&limit=15&sort=desc'
-          : 'http://localhost:3002/api/admin/logs/database?level=INFO,SUCCESS&source=system&limit=15&sort=desc';
-        
-        console.log('SystemMessagesConsole: Fetching from', apiUrl);
-        const response = await fetch(apiUrl);
-        const data = await response.json();
+        console.log('SystemMessagesConsole: Fetching from apiClient');
+        const data = await apiClient.get<any>('/admin/logs/database?level=INFO,SUCCESS&source=system&limit=15&sort=desc');
         console.log('SystemMessagesConsole: Received data', data);
         
         if (data.logs && Array.isArray(data.logs)) {

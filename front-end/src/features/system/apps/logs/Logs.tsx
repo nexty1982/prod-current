@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { apiClient } from '@/api/utils/axiosInstance';
 import {
   Box,
   Card,
@@ -246,21 +247,12 @@ const Logs: React.FC = () => {
                 level: selectedLevel
             });
 
-            const response = await fetch(`/api/logs?${params}`, {
-                method: 'GET',
-                credentials: 'include',
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                setLogs(data.logs);
-                
-                // Update available components from server
-                if (data.components) {
-                    setAvailableComponents(data.components);
-                }
-            } else {
-                console.error('Failed to load logs');
+            const data = await apiClient.get<any>(`/logs?${params}`);
+            setLogs(data.logs);
+            
+            // Update available components from server
+            if (data.components) {
+                setAvailableComponents(data.components);
             }
         } catch (error) {
             console.error('Error loading logs:', error);
@@ -318,21 +310,14 @@ const Logs: React.FC = () => {
                 source: selectedSource
             });
 
-            const response = await fetch(`/api/logs?${params}`, {
-                method: 'GET',
-                credentials: 'include',
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                if (data.logs.length > 0) {
-                    setLogs(prev => {
-                        const newLogs = data.logs.filter((newLog: LogEntry) =>
-                            !prev.some(existingLog => existingLog.id === newLog.id)
-                        );
-                        return [...prev, ...newLogs].slice(-1000);
-                    });
-                }
+            const data = await apiClient.get<any>(`/logs?${params}`);
+            if (data.logs.length > 0) {
+                setLogs(prev => {
+                    const newLogs = data.logs.filter((newLog: LogEntry) =>
+                        !prev.some(existingLog => existingLog.id === newLog.id)
+                    );
+                    return [...prev, ...newLogs].slice(-1000);
+                });
             }
         } catch (error) {
             console.error('Error fetching new logs:', error);
@@ -362,25 +347,13 @@ const Logs: React.FC = () => {
 
     const updateLogLevel = async (component: string, level: string) => {
         try {
-            const response = await fetch(`/api/logs/shared/ui/legacy/${component}/level`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'include',
-                body: JSON.stringify({ level }),
-            });
+            await apiClient.put<any>(`/logs/shared/ui/legacy/${component}/level`, { level });
+            setLogLevels(prev => prev.map(item =>
+                item.component === component ? { ...item, level: level as any } : item
+            ));
 
-            if (response.ok) {
-                setLogLevels(prev => prev.map(item =>
-                    item.component === component ? { ...item, level: level as any } : item
-                ));
-
-                setSnackbarMessage(`Log level updated for ${component}`);
-                setSnackbarOpen(true);
-            } else {
-                throw new Error('Failed to update log level');
-            }
+            setSnackbarMessage(`Log level updated for ${component}`);
+            setSnackbarOpen(true);
         } catch (error) {
             console.error('Error updating log level:', error);
             setSnackbarMessage('Failed to update log level');
@@ -390,25 +363,14 @@ const Logs: React.FC = () => {
 
     const toggleComponent = async (component: string) => {
         try {
-            const response = await fetch(`/api/logs/shared/ui/legacy/${component}/toggle`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'include',
-            });
+            await apiClient.put<any>(`/logs/shared/ui/legacy/${component}/toggle`);
+            setLogLevels(prev => prev.map(item =>
+                item.component === component ? { ...item, enabled: !item.enabled } : item
+            ));
 
-            if (response.ok) {
-                setLogLevels(prev => prev.map(item =>
-                    item.component === component ? { ...item, enabled: !item.enabled } : item
-                ));
-
-                const currentState = logLevels.find(l => l.component === component);
-                setSnackbarMessage(`Logging ${currentState?.enabled ? 'disabled' : 'enabled'} for ${component}`);
-                setSnackbarOpen(true);
-            } else {
-                throw new Error('Failed to toggle component logging');
-            }
+            const currentState = logLevels.find(l => l.component === component);
+            setSnackbarMessage(`Logging ${currentState?.enabled ? 'disabled' : 'enabled'} for ${component}`);
+            setSnackbarOpen(true);
         } catch (error) {
             console.error('Error toggling component:', error);
             setSnackbarMessage('Failed to toggle component logging');
@@ -418,18 +380,10 @@ const Logs: React.FC = () => {
 
     const clearLogs = async () => {
         try {
-            const response = await fetch('/api/logs', {
-                method: 'DELETE',
-                credentials: 'include',
-            });
-
-            if (response.ok) {
-                setLogs([]);
-                setSnackbarMessage('Logs cleared');
-                setSnackbarOpen(true);
-            } else {
-                throw new Error('Failed to clear logs');
-            }
+            await apiClient.delete<any>('/logs');
+            setLogs([]);
+            setSnackbarMessage('Logs cleared');
+            setSnackbarOpen(true);
         } catch (error) {
             console.error('Error clearing logs:', error);
             setSnackbarMessage('Failed to clear logs');
@@ -453,23 +407,11 @@ const Logs: React.FC = () => {
 
     const generateTestLogs = async () => {
         try {
-            const response = await fetch('/api/logs/test', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'include',
-                body: JSON.stringify({ count: 10, component: 'API Server' }),
-            });
-
-            if (response.ok) {
-                setSnackbarMessage('Test logs generated successfully');
-                setSnackbarOpen(true);
-                // Refresh logs to see the new entries
-                loadInitialLogs();
-            } else {
-                throw new Error('Failed to generate test logs');
-            }
+            await apiClient.post<any>('/logs/test', { count: 10, component: 'API Server' });
+            setSnackbarMessage('Test logs generated successfully');
+            setSnackbarOpen(true);
+            // Refresh logs to see the new entries
+            loadInitialLogs();
         } catch (error) {
             console.error('Error generating test logs:', error);
             setSnackbarMessage('Failed to generate test logs');

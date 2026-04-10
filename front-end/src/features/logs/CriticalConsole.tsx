@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { apiClient } from '@/api/utils/axiosInstance';
 import ConsoleCard from '../system/logs/ConsoleCard';
 import CriticalAlert from '../system/logs/CriticalAlert';
 import { GitHubIssueModal } from '../system/logs/GitHubIssueModal';
@@ -56,12 +57,7 @@ export const CriticalConsole: React.FC<CriticalConsoleProps> = ({ isLive, logFil
     const fetchCriticalEvents = async () => {
       setLoading(true);
       try {
-        const apiUrl = process.env.NODE_ENV === 'production' 
-          ? '/api/admin/logs/database/critical?limit=20'
-          : 'http://localhost:3002/api/admin/logs/database/critical?limit=20';
-        
-        const response = await fetch(apiUrl);
-        const data = await response.json();
+        const data = await apiClient.get<any>('/admin/logs/database/critical?limit=20');
         
         if (data.events && Array.isArray(data.events) && data.events.length > 0) {
           const formattedEvents: CriticalEvent[] = data.events.map((event: any, index: number) => ({
