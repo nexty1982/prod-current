@@ -88,65 +88,148 @@ const OMDailyPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const initialHorizon = searchParams.get('horizon') || '';
 
-  // State
+  // ──────────────────────────────────────────────────────────────────
+  // State buckets — grouped to keep this component under the
+  // STATE_EXPLOSION threshold. Each bucket exposes named wrapper setters
+  // (declared further down) so child components keep their existing prop
+  // signatures.
+  // ──────────────────────────────────────────────────────────────────
+
+  // Free-standing UI / URL state
   const [activeTab, setActiveTab] = useState(0);
   const [selectedHorizon, setSelectedHorizon] = useState('');
-  const [dashboard, setDashboard] = useState<DashboardData | null>(null);
-  const [extended, setExtended] = useState<ExtendedDashboard | null>(null);
-  const [items, setItems] = useState<DailyItem[]>([]);
-  const [categories, setCategories] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
   const [expandedPhase, setExpandedPhase] = useState<string | null>(null);
   const [expandedItem, setExpandedItem] = useState<number | null>(null);
-
-  // Filters
-  const [filterStatus, setFilterStatus] = useState('');
-  const [filterPriority, setFilterPriority] = useState('');
-  const [filterCategory, setFilterCategory] = useState('');
-  const [filterDue, setFilterDue] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
-  const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  // Dialog
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [editingItem, setEditingItem] = useState<DailyItem | null>(null);
-  const [form, setForm] = useState({ title: '', description: '', horizon: '7', status: 'backlog', priority: 'medium', category: '', due_date: '', agent_tool: '', branch_type: '' });
-
-  // Toast
+  const [expandedCommit, setExpandedCommit] = useState<string | null>(null);
+  const [selectedChangelogDate, setSelectedChangelogDate] = useState(new Date().toISOString().split('T')[0]);
   const [toast, setToast] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' });
   const showToast = (message: string, severity: 'success' | 'error' = 'success') => setToast({ open: true, message, severity });
 
-  // Changelog state
-  const [changelogEntries, setChangelogEntries] = useState<ChangelogEntry[]>([]);
-  const [changelogDetail, setChangelogDetail] = useState<ChangelogEntry | null>(null);
-  const [changelogLoading, setChangelogLoading] = useState(false);
-  const [selectedChangelogDate, setSelectedChangelogDate] = useState(new Date().toISOString().split('T')[0]);
-  const [expandedCommit, setExpandedCommit] = useState<string | null>(null);
+  // ── Data bucket (replaces 15 useStates) ──
+  const [data, setData] = useState({
+    dashboard: null as DashboardData | null,
+    extended: null as ExtendedDashboard | null,
+    items: [] as DailyItem[],
+    categories: [] as string[],
+    loading: true,
+    changelogEntries: [] as ChangelogEntry[],
+    changelogDetail: null as ChangelogEntry | null,
+    changelogLoading: false,
+    ghStatus: null as GitHubSyncStatus | null,
+    ghSyncing: false,
+    ghSyncProgress: null as { phase: string; current: number; total: number; summary: any; error: string | null } | null,
+    buildInfo: null as BuildInfo | null,
+    pushing: false,
+    csList: [] as { change_set_id: number; code: string; title: string; status: string }[],
+    csExistingList: [] as { id: number; code: string; title: string; status: string }[],
+  });
+  const setDataField = useCallback(
+    <K extends keyof typeof data>(key: K, value: typeof data[K]) => {
+      setData(prev => ({ ...prev, [key]: value }));
+    },
+    [],
+  );
+  const {
+    dashboard, extended, items, categories, loading,
+    changelogEntries, changelogDetail, changelogLoading,
+    ghStatus, ghSyncing, ghSyncProgress, buildInfo, pushing,
+    csList, csExistingList,
+  } = data;
 
-  // GitHub sync state
-  const [ghStatus, setGhStatus] = useState<GitHubSyncStatus | null>(null);
-  const [ghSyncing, setGhSyncing] = useState(false);
-  const [ghSyncProgress, setGhSyncProgress] = useState<{ phase: string; current: number; total: number; summary: any; error: string | null } | null>(null);
+  // ── Filters bucket (replaces 5 useStates) ──
+  const [filters, setFilters] = useState({
+    filterStatus: '',
+    filterPriority: '',
+    filterCategory: '',
+    filterDue: '',
+    searchTerm: '',
+  });
+  const { filterStatus, filterPriority, filterCategory, filterDue, searchTerm } = filters;
+  const setFilterStatus = useCallback((value: string) => setFilters(prev => ({ ...prev, filterStatus: value })), []);
+  const setFilterPriority = useCallback((value: string) => setFilters(prev => ({ ...prev, filterPriority: value })), []);
+  const setFilterCategory = useCallback((value: string) => setFilters(prev => ({ ...prev, filterCategory: value })), []);
+  const setFilterDue = useCallback((value: string) => setFilters(prev => ({ ...prev, filterDue: value })), []);
+  const setSearchTerm = useCallback((value: string) => setFilters(prev => ({ ...prev, searchTerm: value })), []);
+  const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // ── Item dialog bucket (replaces 3 useStates) ──
+  const emptyItemForm = { title: '', description: '', horizon: '7', status: 'backlog', priority: 'medium', category: '', due_date: '', agent_tool: '', branch_type: '' };
+  const [itemDialog, setItemDialog] = useState({
+    dialogOpen: false,
+    editingItem: null as DailyItem | null,
+    form: { ...emptyItemForm },
+  });
+  const { dialogOpen, editingItem, form } = itemDialog;
+  const setDialogOpen = useCallback((value: boolean) => setItemDialog(prev => ({ ...prev, dialogOpen: value })), []);
+  const setEditingItem = useCallback((value: DailyItem | null) => setItemDialog(prev => ({ ...prev, editingItem: value })), []);
+  type ItemForm = typeof emptyItemForm;
+  const setForm: React.Dispatch<React.SetStateAction<ItemForm>> = useCallback(
+    (action) => setItemDialog(prev => ({
+      ...prev,
+      form: typeof action === 'function' ? (action as (p: ItemForm) => ItemForm)(prev.form) : action,
+    })),
+    [],
+  );
+
+  // ── Sync polling ref (not a useState) ──
   const syncPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Build info state
-  const [buildInfo, setBuildInfo] = useState<BuildInfo | null>(null);
-  const [pushing, setPushing] = useState(false);
-
-  // Multi-select & change set state
+  // Multi-select state
   const navigate = useNavigate();
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
-  const [csDialogOpen, setCsDialogOpen] = useState(false);
-  const [csDialogMode, setCsDialogMode] = useState<'create' | 'add'>('create');
-  const [csNewTitle, setCsNewTitle] = useState('');
-  const [csNewBranch, setCsNewBranch] = useState('');
-  const [csNewPriority, setCsNewPriority] = useState('medium');
-  const [csNewType, setCsNewType] = useState('feature');
-  const [csNewStrategy, setCsNewStrategy] = useState('stage_then_promote');
-  const [csExistingList, setCsExistingList] = useState<{ id: number; code: string; title: string; status: string }[]>([]);
-  const [csList, setCsList] = useState<{ change_set_id: number; code: string; title: string; status: string }[]>([]);
-  const [csSelectedId, setCsSelectedId] = useState<number | null>(null);
-  const [csCreating, setCsCreating] = useState(false);
+
+  // ── Change set dialog bucket (replaces 9 useStates) ──
+  const [csDialog, setCsDialog] = useState({
+    csDialogOpen: false,
+    csDialogMode: 'create' as 'create' | 'add',
+    csNewTitle: '',
+    csNewBranch: '',
+    csNewPriority: 'medium',
+    csNewType: 'feature',
+    csNewStrategy: 'stage_then_promote',
+    csSelectedId: null as number | null,
+    csCreating: false,
+  });
+  const {
+    csDialogOpen, csDialogMode, csNewTitle, csNewBranch, csNewPriority,
+    csNewType, csNewStrategy, csSelectedId, csCreating,
+  } = csDialog;
+  const setCsField = useCallback(
+    <K extends keyof typeof csDialog>(key: K, value: typeof csDialog[K]) => {
+      setCsDialog(prev => ({ ...prev, [key]: value }));
+    },
+    [],
+  );
+  const setCsDialogOpen = useCallback((value: boolean) => setCsField('csDialogOpen', value), [setCsField]);
+  const setCsDialogMode = useCallback((value: 'create' | 'add') => setCsField('csDialogMode', value), [setCsField]);
+  const setCsNewTitle = useCallback((value: string) => setCsField('csNewTitle', value), [setCsField]);
+  const setCsNewBranch = useCallback((value: string) => setCsField('csNewBranch', value), [setCsField]);
+  const setCsNewPriority = useCallback((value: string) => setCsField('csNewPriority', value), [setCsField]);
+  const setCsNewType = useCallback((value: string) => setCsField('csNewType', value), [setCsField]);
+  const setCsNewStrategy = useCallback((value: string) => setCsField('csNewStrategy', value), [setCsField]);
+  const setCsSelectedId = useCallback((value: number | null) => setCsField('csSelectedId', value), [setCsField]);
+  const setCsCreating = useCallback((value: boolean) => setCsField('csCreating', value), [setCsField]);
+
+  // ── Prompt plan dialog bucket (replaces 5 useStates) ──
+  const [ppDialog, setPpDialog] = useState({
+    ppDialogOpen: false,
+    ppTitle: '',
+    ppDesc: '',
+    ppAgent: '',
+    ppCreating: false,
+  });
+  const { ppDialogOpen, ppTitle, ppDesc, ppAgent, ppCreating } = ppDialog;
+  const setPpField = useCallback(
+    <K extends keyof typeof ppDialog>(key: K, value: typeof ppDialog[K]) => {
+      setPpDialog(prev => ({ ...prev, [key]: value }));
+    },
+    [],
+  );
+  const setPpDialogOpen = useCallback((value: boolean) => setPpField('ppDialogOpen', value), [setPpField]);
+  const setPpTitle = useCallback((value: string) => setPpField('ppTitle', value), [setPpField]);
+  const setPpDesc = useCallback((value: string) => setPpField('ppDesc', value), [setPpField]);
+  const setPpAgent = useCallback((value: string) => setPpField('ppAgent', value), [setPpField]);
+  const setPpCreating = useCallback((value: boolean) => setPpField('ppCreating', value), [setPpField]);
 
   const toggleSelect = (id: number) => {
     setSelectedIds(prev => {
@@ -164,13 +247,6 @@ const OMDailyPage: React.FC = () => {
     }
   };
   const clearSelection = () => setSelectedIds(new Set());
-
-  // Prompt Plan dialog state
-  const [ppDialogOpen, setPpDialogOpen] = useState(false);
-  const [ppTitle, setPpTitle] = useState('');
-  const [ppDesc, setPpDesc] = useState('');
-  const [ppAgent, setPpAgent] = useState('');
-  const [ppCreating, setPpCreating] = useState(false);
 
   const handleCreatePromptPlan = async () => {
     if (!ppTitle.trim()) return;
@@ -208,8 +284,8 @@ const OMDailyPage: React.FC = () => {
     setCsSelectedId(null);
     try {
       const res = await apiClient.get('/admin/change-sets', { params: { status: 'draft,active' } });
-      setCsExistingList(res.data.items || []);
-    } catch { setCsExistingList([]); }
+      setDataField('csExistingList', res.data.items || []);
+    } catch { setDataField('csExistingList', []); }
     setCsDialogOpen(true);
   };
 
@@ -270,16 +346,16 @@ const OMDailyPage: React.FC = () => {
   const fetchDashboard = useCallback(async () => {
     try {
       const data = await axiosApiClient.get<any>('/omai-daily/dashboard');
-      setDashboard(data);
+      setDataField('dashboard', data);
     } catch {}
-  }, []);
+  }, [setDataField]);
 
   const fetchExtended = useCallback(async () => {
     try {
       const data = await axiosApiClient.get<any>('/omai-daily/dashboard/extended');
-      setExtended(data);
+      setDataField('extended', data);
     } catch {}
-  }, []);
+  }, [setDataField]);
 
   const fetchItems = useCallback(async (horizon?: string) => {
     try {
@@ -293,44 +369,44 @@ const OMDailyPage: React.FC = () => {
       params.set('sort', 'priority');
 
       const data = await axiosApiClient.get<any>(`/omai-daily/items?${params}`);
-      setItems(data.items);
+      setDataField('items', data.items);
     } catch {}
-  }, [filterStatus, filterPriority, filterCategory, filterDue, searchTerm]);
+  }, [filterStatus, filterPriority, filterCategory, filterDue, searchTerm, setDataField]);
 
   const fetchCategories = useCallback(async () => {
     try {
       const data = await axiosApiClient.get<any>('/omai-daily/categories');
-      setCategories(data.categories);
+      setDataField('categories', data.categories);
     } catch {}
-  }, []);
+  }, [setDataField]);
 
   // Changelog API calls
   const fetchChangelog = useCallback(async () => {
     try {
       const data = await axiosApiClient.get<any>('/omai-daily/changelog?limit=30');
-      setChangelogEntries(data.entries || []);
+      setDataField('changelogEntries', data.entries || []);
     } catch {}
-  }, []);
+  }, [setDataField]);
 
   const fetchChangelogDetail = useCallback(async (date: string) => {
     try {
-      setChangelogLoading(true);
+      setDataField('changelogLoading', true);
       const data = await axiosApiClient.get<any>(`/omai-daily/changelog/${date}`);
-      setChangelogDetail(data.entry || null);
-    } catch { setChangelogDetail(null); }
-    finally { setChangelogLoading(false); }
-  }, []);
+      setDataField('changelogDetail', data.entry || null);
+    } catch { setDataField('changelogDetail', null); }
+    finally { setDataField('changelogLoading', false); }
+  }, [setDataField]);
 
   const triggerGenerate = useCallback(async (date: string) => {
     try {
-      setChangelogLoading(true);
+      setDataField('changelogLoading', true);
       await axiosApiClient.post<any>('/omai-daily/changelog/generate', { date });
       showToast('Changelog generated');
       fetchChangelog();
       fetchChangelogDetail(date);
     } catch { showToast('Failed to generate', 'error'); }
-    finally { setChangelogLoading(false); }
-  }, []);
+    finally { setDataField('changelogLoading', false); }
+  }, [setDataField, fetchChangelog, fetchChangelogDetail]);
 
   const triggerEmail = useCallback(async (date: string) => {
     try {
@@ -345,9 +421,9 @@ const OMDailyPage: React.FC = () => {
   const fetchGhStatus = useCallback(async () => {
     try {
       const data = await axiosApiClient.get<any>('/omai-daily/github/status');
-      setGhStatus(data);
+      setDataField('ghStatus', data);
     } catch {}
-  }, []);
+  }, [setDataField]);
 
   const stopSyncPolling = useCallback(() => {
     if (syncPollRef.current) {
@@ -361,10 +437,10 @@ const OMDailyPage: React.FC = () => {
     syncPollRef.current = setInterval(async () => {
       try {
         const data = await axiosApiClient.get<any>('/omai-daily/github/sync/progress');
-        setGhSyncProgress({ phase: data.phase, current: data.current, total: data.total, summary: data.summary, error: data.error });
+        setDataField('ghSyncProgress', { phase: data.phase, current: data.current, total: data.total, summary: data.summary, error: data.error });
         if (!data.running) {
           stopSyncPolling();
-          setGhSyncing(false);
+          setDataField('ghSyncing', false);
           if (data.error) {
             showToast(`Sync error: ${data.error}`, 'error');
           } else {
@@ -376,11 +452,11 @@ const OMDailyPage: React.FC = () => {
         }
       } catch {}
     }, 2000);
-  }, [activeTab, stopSyncPolling]);
+  }, [stopSyncPolling, setDataField, fetchGhStatus, fetchItems, selectedHorizon, fetchDashboard]);
 
   const triggerGhSync = useCallback(async () => {
-    setGhSyncing(true);
-    setGhSyncProgress(null);
+    setDataField('ghSyncing', true);
+    setDataField('ghSyncProgress', null);
     try {
       const data = await axiosApiClient.post<any>('/omai-daily/github/sync');
       if (data.already_running) {
@@ -389,19 +465,19 @@ const OMDailyPage: React.FC = () => {
         showToast('GitHub sync started...');
       }
       pollSyncProgress();
-    } catch { showToast('Failed to start sync', 'error'); setGhSyncing(false); }
-  }, [pollSyncProgress]);
+    } catch { showToast('Failed to start sync', 'error'); setDataField('ghSyncing', false); }
+  }, [pollSyncProgress, setDataField]);
 
   // Build info API calls
   const fetchBuildInfo = useCallback(async () => {
     try {
       const data = await axiosApiClient.get<any>('/omai-daily/build-info');
-      setBuildInfo(data);
+      setDataField('buildInfo', data);
     } catch {}
-  }, []);
+  }, [setDataField]);
 
   const pushToOrigin = useCallback(async () => {
-    setPushing(true);
+    setDataField('pushing', true);
     try {
       const data = await axiosApiClient.post<any>('/omai-daily/push-to-origin');
       if (data.success) {
@@ -411,8 +487,8 @@ const OMDailyPage: React.FC = () => {
         showToast(data.error || 'Push failed', 'error');
       }
     } catch { showToast('Push failed', 'error'); }
-    finally { setPushing(false); }
-  }, [fetchBuildInfo]);
+    finally { setDataField('pushing', false); }
+  }, [fetchBuildInfo, setDataField]);
 
   // Cleanup polling on unmount
   useEffect(() => () => stopSyncPolling(), [stopSyncPolling]);
@@ -422,14 +498,14 @@ const OMDailyPage: React.FC = () => {
     try {
       const res = await apiClient.get('/admin/change-sets');
       const items = (res.data.items || []).filter((cs: any) => !['promoted', 'rolled_back', 'rejected'].includes(cs.status));
-      setCsList(items.map((cs: any) => ({ change_set_id: cs.id, code: cs.code, title: cs.title, status: cs.status })));
-    } catch { setCsList([]); }
-  }, []);
+      setDataField('csList', items.map((cs: any) => ({ change_set_id: cs.id, code: cs.code, title: cs.title, status: cs.status })));
+    } catch { setDataField('csList', []); }
+  }, [setDataField]);
 
   // Initial load
   useEffect(() => {
-    setLoading(true);
-    Promise.all([fetchDashboard(), fetchExtended(), fetchCategories(), fetchGhStatus(), fetchBuildInfo(), fetchCsList()]).finally(() => setLoading(false));
+    setDataField('loading', true);
+    Promise.all([fetchDashboard(), fetchExtended(), fetchCategories(), fetchGhStatus(), fetchBuildInfo(), fetchCsList()]).finally(() => setDataField('loading', false));
   }, []);
 
   // Auto-sync today's commits when items tab is first opened
