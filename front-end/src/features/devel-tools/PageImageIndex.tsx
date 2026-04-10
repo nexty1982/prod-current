@@ -40,7 +40,9 @@ import {
     IconTrash,
     IconX,
 } from '@tabler/icons-react';
-import React, { useEffect, useState } from 'react';
+import React, { useReducer, useState } from 'react';
+import { usePageImageData, type Binding } from './page-image-index/usePageImageData';
+import { bindFormReducer, initialBindFormState } from './page-image-index/bindForm';
 
 // Known pages/components for quick selection
 const KNOWN_PAGES = [
@@ -77,166 +79,51 @@ const KNOWN_IMAGE_KEYS = [
   'favicon',
 ];
 
-interface Binding {
-  id: number;
-  page_key: string;
-  image_key: string;
-  scope: 'global' | 'church';
-  church_id: number | null;
-  church_name?: string;
-  image_path: string;
-  priority: number;
-  enabled: number;
-  notes: string | null;
-  created_at: string;
-  updated_at: string;
-}
-
-interface PageSummary {
-  page_key: string;
-  binding_count: number;
-  image_key_count: number;
-  global_count: number;
-  church_count: number;
-}
-
-interface ChurchOption {
-  id: number;
-  name: string;
-}
-
-interface RegistryImage {
-  id: number;
-  image_path: string;
-  category: string | null;
-  label: string | null;
-}
-
 const PageImageIndex: React.FC = () => {
   const theme = useTheme();
 
-  // State
-  const [pages, setPages] = useState<PageSummary[]>([]);
-  const [selectedPageKey, setSelectedPageKey] = useState<string>('');
-  const [bindings, setBindings] = useState<Binding[]>([]);
-  const [bindingsByKey, setBindingsByKey] = useState<Record<string, { global: Binding | null; churches: Binding[] }>>({});
-  const [loading, setLoading] = useState(false);
-  const [churches, setChurches] = useState<ChurchOption[]>([]);
-  const [registryImages, setRegistryImages] = useState<RegistryImage[]>([]);
-  const [syncStatus, setSyncStatus] = useState<string>('');
+  const data = usePageImageData();
+  const {
+    pages,
+    churches,
+    registryImages,
+    selectedPageKey,
+    setSelectedPageKey,
+    bindingsByKey,
+    loading,
+    syncStatus,
+    refreshPages,
+    refreshSelectedPageBindings,
+    ensureRegistryLoaded,
+    syncRegistry,
+  } = data;
 
-  // Bind dialog state
-  const [bindDialogOpen, setBindDialogOpen] = useState(false);
-  const [bindPageKey, setBindPageKey] = useState('');
-  const [bindImageKey, setBindImageKey] = useState('');
-  const [bindScope, setBindScope] = useState<'global' | 'church'>('global');
-  const [bindChurchId, setBindChurchId] = useState<number | null>(null);
-  const [bindImagePath, setBindImagePath] = useState('');
-  const [bindNotes, setBindNotes] = useState('');
+  const [form, dispatchForm] = useReducer(bindFormReducer, initialBindFormState);
   const [bindSaving, setBindSaving] = useState(false);
 
-  // Load all pages on mount
-  useEffect(() => {
-    fetchPages();
-    fetchChurches();
-  }, []);
-
-  // Load bindings when page selected
-  useEffect(() => {
-    if (selectedPageKey) {
-      fetchPageIndex(selectedPageKey);
-    } else {
-      setBindings([]);
-      setBindingsByKey({});
-    }
-  }, [selectedPageKey]);
-
-  const fetchPages = async () => {
-    try {
-      const data = await apiClient.get<any>('/gallery/admin/images/all-pages');
-      setPages(data.pages || []);
-    } catch (error) {
-      console.error('Error fetching pages:', error);
-    }
-  };
-
-  const fetchPageIndex = async (pageKey: string) => {
-    setLoading(true);
-    try {
-      const data = await apiClient.get<any>(`/gallery/admin/images/page-index?page_key=${encodeURIComponent(pageKey)}`);
-      setBindings(data.all_bindings || []);
-      setBindingsByKey(data.bindings_by_key || {});
-    } catch (error) {
-      console.error('Error fetching page index:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchChurches = async () => {
-    try {
-      const data = await apiClient.get<any>('/admin/churches');
-      const list = (data.data || data.churches || data || [])
-        .filter((c: any) => c && c.id)
-        .map((c: any) => ({ id: c.id, name: c.name || c.church_name || `Church ${c.id}` }));
-      setChurches(list);
-    } catch (error) {
-      console.error('Error fetching churches:', error);
-    }
-  };
-
-  const fetchRegistry = async () => {
-    try {
-      const data = await apiClient.get<any>('/gallery/admin/images/registry');
-      setRegistryImages(data.images || []);
-    } catch (error) {
-      console.error('Error fetching registry:', error);
-    }
-  };
-
-  const handleSyncRegistry = async () => {
-    setSyncStatus('Syncing...');
-    try {
-      const data = await apiClient.post<any>('/gallery/admin/images/registry/sync');
-      setSyncStatus(`Synced: ${data.discovered} discovered, ${data.inserted} new, ${data.skipped} existing`);
-      fetchRegistry();
-    } catch (error) {
-      setSyncStatus('Sync error');
-      console.error('Error syncing registry:', error);
-    }
-  };
-
   const handleOpenBindDialog = (pageKey?: string) => {
-    setBindPageKey(pageKey || selectedPageKey || '');
-    setBindImageKey('');
-    setBindScope('global');
-    setBindChurchId(null);
-    setBindImagePath('');
-    setBindNotes('');
-    setBindDialogOpen(true);
-    if (registryImages.length === 0) {
-      fetchRegistry();
-    }
+    dispatchForm({ type: 'open', pageKey: pageKey || selectedPageKey || '' });
+    ensureRegistryLoaded();
   };
 
   const handleSaveBinding = async () => {
-    if (!bindPageKey || !bindImageKey || !bindImagePath) {
+    if (!form.pageKey || !form.imageKey || !form.imagePath) {
       alert('page_key, image_key, and image_path are all required');
       return;
     }
     setBindSaving(true);
     try {
       await apiClient.post<any>('/gallery/admin/images/bindings', {
-        page_key: bindPageKey,
-        image_key: bindImageKey,
-        scope: bindScope,
-        church_id: bindScope === 'church' ? bindChurchId : null,
-        image_path: bindImagePath,
-        notes: bindNotes || null,
+        page_key: form.pageKey,
+        image_key: form.imageKey,
+        scope: form.scope,
+        church_id: form.scope === 'church' ? form.churchId : null,
+        image_path: form.imagePath,
+        notes: form.notes || null,
       });
-      setBindDialogOpen(false);
-      fetchPages();
-      if (selectedPageKey) fetchPageIndex(selectedPageKey);
+      dispatchForm({ type: 'close' });
+      refreshPages();
+      refreshSelectedPageBindings();
     } catch (error: any) {
       alert(`Error: ${error.message}`);
     } finally {
@@ -248,8 +135,8 @@ const PageImageIndex: React.FC = () => {
     if (!window.confirm(`Delete binding ${binding.page_key} → ${binding.image_key} (${binding.scope})?`)) return;
     try {
       await apiClient.delete<any>('/gallery/admin/images/bindings', { data: { id: binding.id } });
-      fetchPages();
-      if (selectedPageKey) fetchPageIndex(selectedPageKey);
+      refreshPages();
+      refreshSelectedPageBindings();
     } catch (error: any) {
       alert(`Error: ${error.message}`);
     }
@@ -280,7 +167,7 @@ const PageImageIndex: React.FC = () => {
         >
           New Binding
         </Button>
-        <Button variant="outlined" startIcon={<IconRefresh size={18} />} onClick={handleSyncRegistry}>
+        <Button variant="outlined" startIcon={<IconRefresh size={18} />} onClick={syncRegistry}>
           Sync Registry
         </Button>
         {syncStatus && (
@@ -448,11 +335,11 @@ const PageImageIndex: React.FC = () => {
       </Stack>
 
       {/* Bind Image Dialog */}
-      <Dialog open={bindDialogOpen} onClose={() => setBindDialogOpen(false)} maxWidth="sm" fullWidth>
+      <Dialog open={form.open} onClose={() => dispatchForm({ type: 'close' })} maxWidth="sm" fullWidth>
         <DialogTitle>
           Create Image Binding
           <IconButton
-            onClick={() => setBindDialogOpen(false)}
+            onClick={() => dispatchForm({ type: 'close' })}
             sx={{ position: 'absolute', right: 8, top: 8 }}
           >
             <IconX size={20} />
@@ -464,8 +351,8 @@ const PageImageIndex: React.FC = () => {
             <Autocomplete
               freeSolo
               options={KNOWN_PAGES.map(p => p.key)}
-              value={bindPageKey}
-              onInputChange={(_, value) => setBindPageKey(value)}
+              value={form.pageKey}
+              onInputChange={(_, value) => dispatchForm({ type: 'setPageKey', value })}
               renderInput={(params) => (
                 <TextField {...params} label="Page Key" placeholder="e.g. component:Header or route:/apps/gallery" fullWidth />
               )}
@@ -476,8 +363,8 @@ const PageImageIndex: React.FC = () => {
             <Autocomplete
               freeSolo
               options={KNOWN_IMAGE_KEYS}
-              value={bindImageKey}
-              onInputChange={(_, value) => setBindImageKey(value)}
+              value={form.imageKey}
+              onInputChange={(_, value) => dispatchForm({ type: 'setImageKey', value })}
               renderInput={(params) => (
                 <TextField {...params} label="Image Key" placeholder="e.g. nav.logo, header.main" fullWidth />
               )}
@@ -488,8 +375,8 @@ const PageImageIndex: React.FC = () => {
             <Autocomplete
               freeSolo
               options={registryImages.map(img => img.image_path)}
-              value={bindImagePath}
-              onInputChange={(_, value) => setBindImagePath(value)}
+              value={form.imagePath}
+              onInputChange={(_, value) => dispatchForm({ type: 'setImagePath', value })}
               renderInput={(params) => (
                 <TextField {...params} label="Image Path" placeholder="/images/logos/om-logo.png" fullWidth />
               )}
@@ -501,8 +388,8 @@ const PageImageIndex: React.FC = () => {
               <FormLabel component="legend">Scope</FormLabel>
               <RadioGroup
                 row
-                value={bindScope}
-                onChange={(e) => setBindScope(e.target.value as 'global' | 'church')}
+                value={form.scope}
+                onChange={(e) => dispatchForm({ type: 'setScope', value: e.target.value as 'global' | 'church' })}
               >
                 <FormControlLabel value="global" control={<Radio />} label="Global (all churches)" />
                 <FormControlLabel value="church" control={<Radio />} label="Specific church" />
@@ -510,13 +397,13 @@ const PageImageIndex: React.FC = () => {
             </FormControl>
 
             {/* Church selector */}
-            {bindScope === 'church' && (
+            {form.scope === 'church' && (
               <FormControl fullWidth sx={{ mb: 2 }}>
                 <InputLabel>Church</InputLabel>
                 <Select
-                  value={bindChurchId || ''}
+                  value={form.churchId || ''}
                   label="Church"
-                  onChange={(e) => setBindChurchId(e.target.value ? parseInt(String(e.target.value)) : null)}
+                  onChange={(e) => dispatchForm({ type: 'setChurchId', value: e.target.value ? parseInt(String(e.target.value)) : null })}
                 >
                   {churches.map((c) => (
                     <MenuItem key={c.id} value={c.id}>{c.name} (ID: {c.id})</MenuItem>
@@ -529,8 +416,8 @@ const PageImageIndex: React.FC = () => {
             <TextField
               fullWidth
               label="Notes (optional)"
-              value={bindNotes}
-              onChange={(e) => setBindNotes(e.target.value)}
+              value={form.notes}
+              onChange={(e) => dispatchForm({ type: 'setNotes', value: e.target.value })}
               multiline
               rows={2}
               sx={{ mb: 1 }}
@@ -538,13 +425,13 @@ const PageImageIndex: React.FC = () => {
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setBindDialogOpen(false)} disabled={bindSaving}>
+          <Button onClick={() => dispatchForm({ type: 'close' })} disabled={bindSaving}>
             Cancel
           </Button>
           <Button
             onClick={handleSaveBinding}
             variant="contained"
-            disabled={bindSaving || !bindPageKey || !bindImageKey || !bindImagePath || (bindScope === 'church' && !bindChurchId)}
+            disabled={bindSaving || !form.pageKey || !form.imageKey || !form.imagePath || (form.scope === 'church' && !form.churchId)}
             sx={{ backgroundColor: '#C8A24B', color: '#1a1a1a', '&:hover': { backgroundColor: '#B8923A' } }}
           >
             {bindSaving ? 'Saving...' : 'Save Binding'}
