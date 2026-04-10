@@ -2,6 +2,7 @@
  * Frontend Logger Utility
  * Provides easy interface for sending SUCCESS/DEBUG logs to backend
  */
+import { apiClient } from '@/api/utils/axiosInstance';
 
 interface LogEntry {
   log_level: 'INFO' | 'WARN' | 'ERROR' | 'DEBUG' | 'SUCCESS';
@@ -20,9 +21,7 @@ class Logger {
   private defaultOrigin: string;
 
   constructor() {
-    this.apiUrl = process.env.NODE_ENV === 'production' 
-      ? '/api/logger' 
-      : 'http://localhost:3002/api/logger';
+    this.apiUrl = '/logger';
     this.defaultSource = 'frontend';
     this.defaultOrigin = 'browser';
   }
@@ -40,18 +39,7 @@ class Logger {
         user_agent: navigator.userAgent
       };
 
-      const response = await fetch(this.apiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify(logData)
-      });
-
-      if (!response.ok) {
-        console.warn('Logger API error:', response.status);
-      }
+      await apiClient.post<any>(this.apiUrl, logData);
     } catch (error) {
       // Fail silently to avoid breaking app
       console.warn('Logger send failed:', error);
