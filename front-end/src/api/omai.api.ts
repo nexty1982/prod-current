@@ -1,3 +1,5 @@
+import { apiClient } from '@/api/utils/axiosInstance';
+
 // OMAI API - Task Assignment and Management
 export const omaiAPI = {
   // Validate email format
@@ -9,15 +11,7 @@ export const omaiAPI = {
   // Get task logs (recent activity)
   getTaskLogs: async (limit: number = 50) => {
     try {
-      const response = await fetch(`/api/omai/task-logs?limit=${limit}`, {
-        credentials: 'include'
-      });
-      
-      if (!response.ok) {
-        throw new Error(`Failed to fetch task logs: ${response.statusText}`);
-      }
-      
-      const data = await response.json();
+      const data = await apiClient.get<any>(`/omai/task-logs?limit=${limit}`);
       return data;
     } catch (error: any) {
       console.error('Error fetching task logs:', error);
@@ -53,15 +47,7 @@ export const omaiAPI = {
       if (filters.dateFrom) params.append('dateFrom', filters.dateFrom);
       if (filters.dateTo) params.append('dateTo', filters.dateTo);
 
-      const response = await fetch(`/api/omai/task-history?${params.toString()}`, {
-        credentials: 'include'
-      });
-      
-      if (!response.ok) {
-        throw new Error(`Failed to fetch task history: ${response.statusText}`);
-      }
-      
-      const data = await response.json();
+      const data = await apiClient.get<any>(`/omai/task-history?${params.toString()}`);
       return data;
     } catch (error: any) {
       console.error('Error fetching task history:', error);
@@ -85,29 +71,15 @@ export const omaiAPI = {
     try {
       // Admin endpoint: POST /api/omai/task-link with email tracking
       // Public endpoint (from docs): POST /api/omai/task-link without email
-      const response = await fetch('/api/omai/task-link', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          email, // Admin-specific: track which admin generated the link
-          expiresInMinutes: options.expiresInMinutes || 1440,
-          meta: {
-            notes: options.notes || '',
-            source: 'admin-panel',
-            purpose: 'task-assignment'
-          }
-        })
+      const data = await apiClient.post<any>('/omai/task-link', {
+        email, // Admin-specific: track which admin generated the link
+        expiresInMinutes: options.expiresInMinutes || 1440,
+        meta: {
+          notes: options.notes || '',
+          source: 'admin-panel',
+          purpose: 'task-assignment'
+        }
       });
-      
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || `Failed to generate task link: ${response.statusText}`);
-      }
-      
-      const data = await response.json();
       return data;
     } catch (error: any) {
       console.error('Error generating task link:', error);
@@ -121,15 +93,7 @@ export const omaiAPI = {
   // Validate token (from PUBLIC_TASK_ASSIGNMENT_API.md)
   validateToken: async (token: string) => {
     try {
-      const response = await fetch(`/api/omai/validate-token?t=${token}`, {
-        credentials: 'include'
-      });
-      
-      if (!response.ok) {
-        throw new Error(`Failed to validate token: ${response.statusText}`);
-      }
-      
-      const data = await response.json();
+      const data = await apiClient.get<any>(`/omai/validate-token?t=${token}`);
       return data;
     } catch (error: any) {
       console.error('Error validating token:', error);
@@ -148,24 +112,10 @@ export const omaiAPI = {
     priority?: string;
   }>) => {
     try {
-      const response = await fetch('/api/omai/submit-task', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          token,
-          tasks
-        })
+      const data = await apiClient.post<any>('/omai/submit-task', {
+        token,
+        tasks
       });
-      
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || `Failed to submit tasks: ${response.statusText}`);
-      }
-      
-      const data = await response.json();
       return data;
     } catch (error: any) {
       console.error('Error submitting tasks:', error);
@@ -179,15 +129,7 @@ export const omaiAPI = {
   // Get public token statistics (from PUBLIC_TASK_ASSIGNMENT_API.md - Admin endpoint)
   getPublicTokenStatistics: async () => {
     try {
-      const response = await fetch('/api/omai/public-tokens', {
-        credentials: 'include'
-      });
-      
-      if (!response.ok) {
-        throw new Error(`Failed to fetch public token statistics: ${response.statusText}`);
-      }
-      
-      const data = await response.json();
+      const data = await apiClient.get<any>('/omai/public-tokens');
       return data;
     } catch (error: any) {
       console.error('Error fetching public token statistics:', error);
@@ -211,17 +153,7 @@ export const omaiAPI = {
   // Delete public token (from PUBLIC_TASK_ASSIGNMENT_API.md - Admin endpoint)
   deletePublicToken: async (token: string) => {
     try {
-      const response = await fetch(`/api/omai/public-token/${token}`, {
-        method: 'DELETE',
-        credentials: 'include'
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || `Failed to delete public token: ${response.statusText}`);
-      }
-      
-      const data = await response.json();
+      const data = await apiClient.delete<any>(`/omai/public-token/${token}`);
       return data;
     } catch (error: any) {
       console.error('Error deleting public token:', error);
@@ -235,17 +167,7 @@ export const omaiAPI = {
   // Delete task link
   deleteTaskLink: async (linkId: number) => {
     try {
-      const response = await fetch(`/api/omai/task-link/${linkId}`, {
-        method: 'DELETE',
-        credentials: 'include'
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || `Failed to delete task link: ${response.statusText}`);
-      }
-      
-      const data = await response.json();
+      const data = await apiClient.delete<any>(`/omai/task-link/${linkId}`);
       return data;
     } catch (error: any) {
       console.error('Error deleting task link:', error);
@@ -259,17 +181,7 @@ export const omaiAPI = {
   // Delete task submission
   deleteSubmission: async (submissionId: number) => {
     try {
-      const response = await fetch(`/api/omai/task-submission/${submissionId}`, {
-        method: 'DELETE',
-        credentials: 'include'
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || `Failed to delete submission: ${response.statusText}`);
-      }
-      
-      const data = await response.json();
+      const data = await apiClient.delete<any>(`/omai/task-submission/${submissionId}`);
       return data;
     } catch (error: any) {
       console.error('Error deleting submission:', error);
@@ -283,21 +195,11 @@ export const omaiAPI = {
   // Delete multiple submissions (batch)
   deleteSubmissionsBatch: async (submissionIds: number[]) => {
     try {
-      const response = await fetch('/api/omai/task-submissions/batch', {
+      const data = await apiClient.request<any>({
         method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include',
-        body: JSON.stringify({ ids: submissionIds })
+        url: '/omai/task-submissions/batch',
+        data: { ids: submissionIds }
       });
-      
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || `Failed to delete submissions: ${response.statusText}`);
-      }
-      
-      const data = await response.json();
       return data;
     } catch (error: any) {
       console.error('Error deleting submissions batch:', error);
@@ -328,42 +230,7 @@ export const omaiAPI = {
     revisions?: any[];
   }) => {
     try {
-      const response = await fetch('/api/omai/tasks', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include',
-        body: JSON.stringify(taskData)
-      });
-      
-      if (!response.ok) {
-        let errorMessage = `Failed to create task: ${response.statusText}`;
-        let errorDetails: any = null;
-        
-        if (response.status === 404) {
-          errorMessage = 'Backend endpoint not found. The task creation API endpoint needs to be implemented on the server.';
-        } else {
-          try {
-            const errorData = await response.json();
-            errorMessage = errorData.error || errorMessage;
-            errorDetails = errorData.details || null;
-            
-            // Include SQL error details if available (for debugging)
-            if (errorDetails && errorDetails.sqlMessage) {
-              errorMessage += ` (${errorDetails.sqlMessage})`;
-            }
-          } catch {
-            // If response is not JSON, use status text
-          }
-        }
-        
-        const error = new Error(errorMessage) as any;
-        error.details = errorDetails;
-        throw error;
-      }
-      
-      const data = await response.json();
+      const data = await apiClient.post<any>('/omai/tasks', taskData);
       return {
         success: true,
         data
@@ -392,15 +259,7 @@ export const omaiAPI = {
       if (filters?.page) params.append('page', filters.page.toString());
       if (filters?.limit) params.append('limit', filters.limit.toString());
 
-      const response = await fetch(`/api/omai/tasks?${params.toString()}`, {
-        credentials: 'include'
-      });
-      
-      if (!response.ok) {
-        throw new Error(`Failed to fetch tasks: ${response.statusText}`);
-      }
-      
-      const data = await response.json();
+      const data = await apiClient.get<any>(`/omai/tasks?${params.toString()}`);
       return data;
     } catch (error: any) {
       console.error('Error fetching tasks:', error);
@@ -431,13 +290,7 @@ export const omaiAPI = {
       if (filters?.page) params.append('page', filters.page.toString());
       if (filters?.limit) params.append('limit', filters.limit.toString());
 
-      const response = await fetch(`/api/public/tasks?${params.toString()}`);
-      
-      if (!response.ok) {
-        throw new Error(`Failed to fetch public tasks: ${response.statusText}`);
-      }
-      
-      const data = await response.json();
+      const data = await apiClient.get<any>(`/public/tasks?${params.toString()}`);
       return data;
     } catch (error: any) {
       console.error('Error fetching public tasks:', error);
@@ -455,13 +308,7 @@ export const omaiAPI = {
   // Get public task by ID (Public endpoint)
   getPublicTask: async (taskId: string | number) => {
     try {
-      const response = await fetch(`/api/public/tasks/${taskId}`);
-      
-      if (!response.ok) {
-        throw new Error(`Failed to fetch task: ${response.statusText}`);
-      }
-      
-      const data = await response.json();
+      const data = await apiClient.get<any>(`/public/tasks/${taskId}`);
       return data;
     } catch (error: any) {
       console.error('Error fetching public task:', error);

@@ -5,6 +5,7 @@ import React from "react";
 import useSWR from 'swr';
 import { getFetcher, postFetcher } from '@/api/globalFetcher';
 import { useAuth } from '../AuthContext';
+import { apiClient } from '@/api/utils/axiosInstance';
 
 /**
  * Validates if a profile should be persisted to localStorage.
@@ -325,22 +326,7 @@ function UserDataProvider({ children }: { children: React.ReactNode }) {
         
         // Call backend API to persist changes
         try {
-            const response = await fetch(`/api/om/profile/${userId}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'include',
-                body: JSON.stringify(data),
-            });
-            
-            if (!response.ok) {
-                const errorData = await response.json();
-                console.error('Failed to save profile to backend:', errorData);
-                throw new Error(errorData.error || 'Failed to save profile');
-            }
-            
-            const result = await response.json();
+            const result = await apiClient.put<any>(`/om/profile/${userId}`, data);
             console.log('Profile saved to backend:', result);
             return result;
         } catch (error) {

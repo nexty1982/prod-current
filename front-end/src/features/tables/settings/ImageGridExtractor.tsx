@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useRef } from 'react';
+import { apiClient } from '@/api/utils/axiosInstance';
 import {
     Box,
     Typography,
@@ -197,35 +198,15 @@ const ImageGridExtractor: React.FC<ImageGridExtractorProps> = ({
             }
             
             // Send to server to save as individual files
-            const response = await fetch('/api/admin/global-images/save-extracted', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    images: imagesToUpload,
-                    type: type
-                }),
+            const result = await apiClient.post<any>('/admin/global-images/save-extracted', {
+                images: imagesToUpload,
+                type: type
             });
+            console.log('✅ Extracted images saved successfully:', result);
             
-            if (response.ok) {
-                const result = await response.json();
-                console.log('✅ Extracted images saved successfully:', result);
-                
-                // Call the callback with the saved images
-                onImagesExtracted(extractedImages, type);
-                onClose();
-            } else {
-                let errorMessage = 'Failed to save extracted images';
-                try {
-                    const errorData = await response.json();
-                    errorMessage = errorData.error || errorMessage;
-                } catch (e) {
-                    // If response is not JSON, use status text
-                    errorMessage = response.statusText || errorMessage;
-                }
-                throw new Error(errorMessage);
-            }
+            // Call the callback with the saved images
+            onImagesExtracted(extractedImages, type);
+            onClose();
         } catch (error) {
             console.error('Error saving extracted images:', error);
             setError(error instanceof Error ? error.message : 'Failed to save extracted images');
