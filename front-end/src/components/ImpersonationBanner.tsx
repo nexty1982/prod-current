@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { apiClient } from '@/api/utils/axiosInstance';
 import { Box, Button, Typography } from '@mui/material';
 import { IconArrowBack } from '@tabler/icons-react';
 
@@ -24,11 +25,7 @@ const ImpersonationBanner = () => {
   const handleReturn = async () => {
     setReturning(true);
     try {
-      const res = await fetch('/api/admin/impersonate/return', {
-        method: 'POST',
-        credentials: 'include'
-      });
-      const data = await res.json();
+      const data = await apiClient.post<any>('/admin/impersonate/return');
       if (data.success) {
         localStorage.setItem('auth_user', JSON.stringify(data.user));
         window.location.href = '/dashboards/modern';

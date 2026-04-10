@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { apiClient } from '@/api/utils/axiosInstance';
 import {
     Box,
     Typography,
@@ -76,25 +77,17 @@ const SocialPermissionsToggle: React.FC<SocialPermissionsToggleProps> = ({
             setLoading(true);
             setError('');
             
-            const response = await fetch(`/api/admin/social-permissions/user/${userId}`, {
-                credentials: 'include'
-            });
-            
-            if (response.ok) {
-                const data = await response.json();
-                if (data.success) {
-                    setPermissions(data.socialPermissions || []);
-                    
-                    // Check if any social features are enabled
-                    const hasEnabledFeatures = data.socialPermissions?.some((p: SocialPermission) => p.enabled) || false;
-                    setSocialEnabled(hasEnabledFeatures);
-                    
-                    console.log('📱 Loaded social permissions:', data);
-                } else {
-                    setError(data.message || 'Failed to load social permissions');
-                }
+            const data = await apiClient.get<any>(`/admin/social-permissions/user/${userId}`);
+            if (data.success) {
+                setPermissions(data.socialPermissions || []);
+                
+                // Check if any social features are enabled
+                const hasEnabledFeatures = data.socialPermissions?.some((p: SocialPermission) => p.enabled) || false;
+                setSocialEnabled(hasEnabledFeatures);
+                
+                console.log('📱 Loaded social permissions:', data);
             } else {
-                setError('Failed to load social permissions');
+                setError(data.message || 'Failed to load social permissions');
             }
         } catch (err) {
             console.error('Error loading social permissions:', err);
@@ -116,38 +109,25 @@ const SocialPermissionsToggle: React.FC<SocialPermissionsToggleProps> = ({
             setError('');
             setSuccess('');
             
-            const response = await fetch(`/api/admin/social-permissions/user/${userId}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                credentials: 'include',
-                body: JSON.stringify({
-                    enabled,
-                    socialItems: permissions.map(p => p.id)
-                })
+            const data = await apiClient.put<any>(`/admin/social-permissions/user/${userId}`, {
+                enabled,
+                socialItems: permissions.map(p => p.id)
             });
-            
-            if (response.ok) {
-                const data = await response.json();
-                if (data.success) {
-                    setSocialEnabled(enabled);
-                    setSuccess(data.message || `Social features ${enabled ? 'enabled' : 'disabled'} successfully`);
-                    
-                    // Reload permissions to reflect changes
-                    await loadPermissions();
-                    
-                    // Notify parent component
-                    if (onPermissionsChanged) {
-                        onPermissionsChanged();
-                    }
-                    
-                    console.log('📱 Updated social permissions:', data);
-                } else {
-                    setError(data.message || 'Failed to update social permissions');
+            if (data.success) {
+                setSocialEnabled(enabled);
+                setSuccess(data.message || `Social features ${enabled ? 'enabled' : 'disabled'} successfully`);
+                
+                // Reload permissions to reflect changes
+                await loadPermissions();
+                
+                // Notify parent component
+                if (onPermissionsChanged) {
+                    onPermissionsChanged();
                 }
+                
+                console.log('📱 Updated social permissions:', data);
             } else {
-                setError('Failed to update social permissions');
+                setError(data.message || 'Failed to update social permissions');
             }
         } catch (err) {
             console.error('Error updating social permissions:', err);
@@ -169,27 +149,18 @@ const SocialPermissionsToggle: React.FC<SocialPermissionsToggleProps> = ({
             setError('');
             setSuccess('');
             
-            const response = await fetch(`/api/admin/social-permissions/user/${userId}/enable`, {
-                method: 'POST',
-                credentials: 'include'
-            });
-            
-            if (response.ok) {
-                const data = await response.json();
-                if (data.success) {
-                    setSuccess(`Social features enabled for ${userEmail}`);
-                    await loadPermissions();
-                    
-                    if (onPermissionsChanged) {
-                        onPermissionsChanged();
-                    }
-                    
-                    console.log('📱 Quick enabled social features:', data);
-                } else {
-                    setError(data.message || 'Failed to enable social features');
+            const data = await apiClient.post<any>(`/admin/social-permissions/user/${userId}/enable`);
+            if (data.success) {
+                setSuccess(`Social features enabled for ${userEmail}`);
+                await loadPermissions();
+                
+                if (onPermissionsChanged) {
+                    onPermissionsChanged();
                 }
+                
+                console.log('📱 Quick enabled social features:', data);
             } else {
-                setError('Failed to enable social features');
+                setError(data.message || 'Failed to enable social features');
             }
         } catch (err) {
             console.error('Error enabling social features:', err);

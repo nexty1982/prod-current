@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback, useContext } from 'react';
+import { apiClient } from '@/api/utils/axiosInstance';
 import {
   Box,
   Paper,
@@ -216,13 +217,8 @@ const GlobalOMAI: React.FC = () => {
 
   const loadCommandHistory = async () => {
     try {
-      const response = await fetch('/api/omai/command-history', {
-        credentials: 'include'
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setCommandHistory(data.history || []);
-      }
+      const data = await apiClient.get<any>('/omai/command-history');
+      setCommandHistory(data.history || []);
     } catch (error) {
       console.error('Failed to load command history:', error);
     }
@@ -230,13 +226,8 @@ const GlobalOMAI: React.FC = () => {
 
   const loadAvailableCommands = async () => {
     try {
-      const response = await fetch('/api/omai/available-commands', {
-        credentials: 'include'
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setAvailableCommands(data.commands || []);
-      }
+      const data = await apiClient.get<any>('/omai/available-commands');
+      setAvailableCommands(data.commands || []);
     } catch (error) {
       console.error('Failed to load available commands:', error);
     }
@@ -283,21 +274,12 @@ const GlobalOMAI: React.FC = () => {
     setCommand('');
 
     try {
-             const response = await fetch('/api/omai/execute-command', {
-         method: 'POST',
-         headers: {
-           'Content-Type': 'application/json'
-         },
-         credentials: 'include',
-         body: JSON.stringify({
-           command: commandText,
-           context: pageContext,
-           handsOnMode: settings.handsOnModeEnabled,
-           settings: settings
-         })
-       });
-
-      const result = await response.json();
+      const result = await apiClient.post<any>('/omai/execute-command', {
+        command: commandText,
+        context: pageContext,
+        handsOnMode: settings.handsOnModeEnabled,
+        settings: settings
+      });
       
       const updatedCommand: OMAICommand = {
         ...newCommand,
@@ -393,19 +375,10 @@ const GlobalOMAI: React.FC = () => {
       
       // Also try to directly test the API
       try {
-        const response = await fetch('/api/kanban/boards', {
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-        console.log('Direct API response status:', response.status);
-        console.log('Direct API response headers:', Object.fromEntries(response.headers.entries()));
+        const data = await apiClient.get<any>('/kanban/boards');
+        console.log('Direct API response data:', data);
         
-        if (response.ok) {
-          const data = await response.json();
-          console.log('Direct API response data:', data);
-          
+        {
           // If we found boards in the direct API call, try to manually load them
           if (data.success && data.boards && data.boards.length > 0) {
             console.log(`Found ${data.boards.length} boards via direct API call:`);
@@ -447,10 +420,6 @@ const GlobalOMAI: React.FC = () => {
             console.log('Direct API returned success but no boards found');
             alert('❌ API worked but returned no boards. Check user permissions.');
           }
-        } else {
-          const errorText = await response.text();
-          console.error('Direct API error:', errorText);
-          alert(`❌ Direct API error: ${response.status} - ${errorText}`);
         }
       } catch (apiError) {
         console.error('Direct API call failed:', apiError);

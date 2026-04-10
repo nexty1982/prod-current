@@ -2,6 +2,7 @@
 // Web-based terminal with xterm.js for super_admin JIT sessions
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { apiClient } from '@/api/utils/axiosInstance';
 import { 
   Box, 
   Typography, 
@@ -312,13 +313,7 @@ export const JITTerminal: React.FC<JITTerminalProps> = ({
   // End session
   const endSession = useCallback(async () => {
     try {
-      await fetch('/api/jit/end-session', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ sessionId })
-      });
+      await apiClient.post<any>('/jit/end-session', { sessionId });
     } catch (error) {
       console.error('[JIT Terminal] Failed to end session:', error);
     }

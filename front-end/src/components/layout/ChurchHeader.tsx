@@ -1,3 +1,4 @@
+import { apiClient } from '@/api/utils/axiosInstance';
 import {
     Box,
     Chip,
@@ -70,25 +71,7 @@ const ChurchHeader: React.FC<ChurchHeaderProps> = ({ onChurchChange, currentChur
       }
 
       try {
-        const response = await fetch('/api/admin/churches', {
-          credentials: 'include',
-          headers: { 
-            'Content-Type': 'application/json',
-            'Cache-Control': 'no-cache'
-          }
-        });
-
-        if (response.status === 401) {
-          // Session expired — clear auth and redirect to login
-          localStorage.removeItem('auth_user');
-          window.location.href = `/auth/login?redirect=${encodeURIComponent(window.location.pathname)}`;
-          return;
-        }
-        if (!response.ok) {
-          throw new Error('Failed to fetch churches');
-        }
-
-        const data = await response.json();
+        const data = await apiClient.get<any>('/admin/churches');
         const churchList = data.churches || data.data?.churches || [];
         setChurches(churchList.filter((c: ChurchData) => c.is_active !== false));
 

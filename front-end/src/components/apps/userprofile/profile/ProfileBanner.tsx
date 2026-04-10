@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { apiClient } from '@/api/utils/axiosInstance';
 import {
   Grid,
   Box,
@@ -92,18 +93,11 @@ const ProfileBanner = () => {
   const fetchOrthodoxAvatars = async () => {
     try {
       console.log('📸 Fetching orthodox avatars...');
-      const response = await fetch('/api/images/list?directory=orthodox/avatars');
-      if (response.ok) {
-        const data = await response.json();
-        if (data.files && Array.isArray(data.files)) {
-          const avatarPaths = data.files.map((file: string) => `/images/orthodox/avatars/${file}`);
-          setOrthodoxAvatars(avatarPaths);
-          console.log('📸 Loaded orthodox avatars:', avatarPaths.length);
-        }
-      } else {
-        // Fallback: try to fetch from a manifest or use common image extensions
-        console.log('📸 API not available, trying alternative method...');
-        // We'll handle this in the dialog by trying common filenames
+      const data = await apiClient.get<any>('/images/list?directory=orthodox/avatars');
+      if (data.files && Array.isArray(data.files)) {
+        const avatarPaths = data.files.map((file: string) => `/images/orthodox/avatars/${file}`);
+        setOrthodoxAvatars(avatarPaths);
+        console.log('📸 Loaded orthodox avatars:', avatarPaths.length);
       }
     } catch (error) {
       console.error('Failed to fetch orthodox avatars:', error);
@@ -185,29 +179,19 @@ const ProfileBanner = () => {
         formData.append('fileName', fileName);
 
         // Send to server to save in shared directory
-        const response = await fetch('/api/upload/profile', {
-          method: 'POST',
-          body: formData,
-          credentials: 'include',
-        });
+        const result = await apiClient.post<any>('/upload/profile', formData);
+        // Use the URL from server response (includes correct path)
+        const imageUrl = result.imageUrl || result.profile_image_url;
 
-        if (response.ok) {
-          const result = await response.json();
-          // Use the URL from server response (includes correct path)
-          const imageUrl = result.imageUrl || result.profile_image_url;
+        // Use the sync hook to update profile image
+        await updateProfileImage(imageUrl);
 
-          // Use the sync hook to update profile image
-          await updateProfileImage(imageUrl);
+        setSelectedAvatarId(null); // Reset Orthodox avatar selection
+        setAvatarUploadOpen(false);
 
-          setSelectedAvatarId(null); // Reset Orthodox avatar selection
-          setAvatarUploadOpen(false);
-
-          setSnackbarMessage('Profile picture updated and saved!');
-          setSnackbarOpen(true);
-          console.log('📸 Profile image saved using sync hook:', imageUrl);
-        } else {
-          throw new Error('Failed to upload profile image');
-        }
+        setSnackbarMessage('Profile picture updated and saved!');
+        setSnackbarOpen(true);
+        console.log('📸 Profile image saved using sync hook:', imageUrl);
       } catch (error) {
         console.error('Error uploading profile:', error);
         setSnackbarMessage('Failed to upload profile picture. Please try again.');

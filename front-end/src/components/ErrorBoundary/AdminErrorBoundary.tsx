@@ -1,6 +1,7 @@
 import Grid2 from '@/components/compat/Grid2';
 // AdminErrorBoundary.tsx - Specialized error boundary for admin pages
 import React, { Component, ErrorInfo, ReactNode } from 'react';
+import { apiClient } from '@/api/utils/axiosInstance';
 import {
     Box,
     Card,
@@ -105,24 +106,11 @@ class AdminErrorBoundary extends Component<Props, State> {
 
     logAdminError = async (errorDetails: any) => {
         try {
-            const response = await fetch('/api/logs/admin-errors', {
-                method: 'POST',
-                credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    ...errorDetails,
-                    priority: 'high', // Admin errors get high priority
-                    category: 'admin_ui_error'
-                })
+            await apiClient.post<any>('/logs/admin-errors', {
+                ...errorDetails,
+                priority: 'high', // Admin errors get high priority
+                category: 'admin_ui_error'
             });
-
-            // Handle CORS and other errors silently
-            if (!response.ok && response.status !== 500) {
-                // Don't log CORS errors or other expected failures
-                return;
-            }
         } catch (logError: any) {
             // Silently handle CORS errors and network failures
             // Don't spam console with CORS errors
