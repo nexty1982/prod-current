@@ -42,71 +42,123 @@ const OcrWorkbench: React.FC<OcrWorkbenchProps> = ({
   
   // Server normalization hook
   const { normalize, normalizing } = useServerNormalization();
-  const [normalizedText, setNormalizedText] = useState<string | null>(null);
-  
+
+  // ── Workbench top-level bucket (job + tabs + feeder + normalization) ────
+  type ToastState = { open: boolean; message: string; severity: 'success' | 'warning' | 'error' | 'info' };
+  const [wbTop, setWbTop] = useState<{
+    normalizedText: string | null;
+    toast: ToastState;
+    selectedJobId: number | null;
+    rightTab: number;
+    feederPageId: number | null;
+    feederArtifactId: number | null;
+    rerunning: boolean;
+    autoExtracting: boolean;
+    showLayoutWizard: boolean;
+  }>({
+    normalizedText: null,
+    toast: { open: false, message: '', severity: 'info' },
+    selectedJobId: initialJobId || null,
+    rightTab: 0,
+    feederPageId: null,
+    feederArtifactId: null,
+    rerunning: false,
+    autoExtracting: false,
+    showLayoutWizard: false,
+  });
+  const setWbTopField = useCallback(<K extends keyof typeof wbTop>(key: K, value: typeof wbTop[K]) => {
+    setWbTop(prev => ({ ...prev, [key]: value }));
+  }, []);
+  const setNormalizedText = useCallback((v: string | null) => setWbTopField('normalizedText', v), [setWbTopField]);
+  const setToast = useCallback((v: ToastState) => setWbTopField('toast', v), [setWbTopField]);
+  const setSelectedJobId = useCallback((v: number | null) => setWbTopField('selectedJobId', v), [setWbTopField]);
+  const setRightTab = useCallback((v: number) => setWbTopField('rightTab', v), [setWbTopField]);
+  const setFeederPageId = useCallback((v: number | null) => setWbTopField('feederPageId', v), [setWbTopField]);
+  const setFeederArtifactId = useCallback((v: number | null) => setWbTopField('feederArtifactId', v), [setWbTopField]);
+  const setRerunning = useCallback((v: boolean) => setWbTopField('rerunning', v), [setWbTopField]);
+  const setAutoExtracting = useCallback((v: boolean) => setWbTopField('autoExtracting', v), [setWbTopField]);
+  const setShowLayoutWizard = useCallback((v: boolean) => setWbTopField('showLayoutWizard', v), [setWbTopField]);
+  const { normalizedText, toast, selectedJobId, rightTab, feederPageId, feederArtifactId, rerunning, autoExtracting, showLayoutWizard } = wbTop;
+
   // Check flag dynamically - check on each render to react to localStorage changes
-  // This will update when localStorage changes (after page reload)
   const serverNormalizationEnabled = useMemo(() => {
     if (typeof window === 'undefined') return false;
     const flag = localStorage.getItem('OCR_NORMALIZE_SERVER');
     return flag === '1' || flag === 'true';
-  }, [normalizedText]); // Re-check when normalizedText changes (triggers after normalization)
-  
-  // Toast notifications
-  const [toast, setToast] = useState<{
-    open: boolean;
-    message: string;
-    severity: 'success' | 'warning' | 'error' | 'info';
-  }>({ open: false, message: '', severity: 'info' });
+  }, [normalizedText]);
 
   const showToast = useCallback((message: string, severity: 'success' | 'warning' | 'error' | 'info' = 'info') => {
     setToast({ open: true, message, severity });
+  }, [setToast]);
+
+  // ── Job data bucket (FieldMappingPanel inputs) ──────────────────────────
+  const [jobData, setJobData] = useState<{
+    tableExtraction: any;
+    tableExtractionJson: any;
+    recordCandidates: any;
+    scoringV2: any;
+    jobOcrResult: any;
+    currentFeederPage: any;
+    jobIsFinalized: boolean;
+    jobFinalizedMeta: { finalizedAt: string; createdRecordId: number } | null;
+    fieldSuggestions: SuggestionResult | null;
+  }>({
+    tableExtraction: null,
+    tableExtractionJson: null,
+    recordCandidates: null,
+    scoringV2: null,
+    jobOcrResult: null,
+    currentFeederPage: null,
+    jobIsFinalized: false,
+    jobFinalizedMeta: null,
+    fieldSuggestions: null,
+  });
+  const setJobDataField = useCallback(<K extends keyof typeof jobData>(key: K, value: typeof jobData[K]) => {
+    setJobData(prev => ({ ...prev, [key]: value }));
   }, []);
-  
-  // Track selected job ID locally (workbench state will be updated when job data loads)
-  const [selectedJobId, setSelectedJobId] = useState<number | null>(initialJobId || null);
+  const setTableExtraction = useCallback((v: any) => setJobDataField('tableExtraction', v), [setJobDataField]);
+  const setTableExtractionJson = useCallback((v: any) => setJobDataField('tableExtractionJson', v), [setJobDataField]);
+  const setRecordCandidates = useCallback((v: any) => setJobDataField('recordCandidates', v), [setJobDataField]);
+  const setScoringV2 = useCallback((v: any) => setJobDataField('scoringV2', v), [setJobDataField]);
+  const setJobOcrResult = useCallback((v: any) => setJobDataField('jobOcrResult', v), [setJobDataField]);
+  const setCurrentFeederPage = useCallback((v: any) => setJobDataField('currentFeederPage', v), [setJobDataField]);
+  const setJobIsFinalized = useCallback((v: boolean) => setJobDataField('jobIsFinalized', v), [setJobDataField]);
+  const setJobFinalizedMeta = useCallback((v: { finalizedAt: string; createdRecordId: number } | null) => setJobDataField('jobFinalizedMeta', v), [setJobDataField]);
+  const setFieldSuggestions = useCallback((v: SuggestionResult | null) => setJobDataField('fieldSuggestions', v), [setJobDataField]);
+  const { tableExtraction, tableExtractionJson, recordCandidates, scoringV2, jobOcrResult, currentFeederPage, jobIsFinalized, jobFinalizedMeta, fieldSuggestions } = jobData;
 
-  // Right panel tab state
-  const [rightTab, setRightTab] = useState(0);
-
-  // Feeder artifact state for download/rerun buttons
-  const [feederPageId, setFeederPageId] = useState<number | null>(null);
-  const [feederArtifactId, setFeederArtifactId] = useState<number | null>(null);
-  const [rerunning, setRerunning] = useState(false);
-
-  // Job detail data for FieldMappingPanel
-  const [tableExtraction, setTableExtraction] = useState<any>(null);
-  const [tableExtractionJson, setTableExtractionJson] = useState<any>(null);
-  const [recordCandidates, setRecordCandidates] = useState<any>(null);
-  const [scoringV2, setScoringV2] = useState<any>(null);
-  const [jobOcrResult, setJobOcrResult] = useState<any>(null);
-  const [currentFeederPage, setCurrentFeederPage] = useState<any>(null);
-  const [jobIsFinalized, setJobIsFinalized] = useState(false);
-  const [jobFinalizedMeta, setJobFinalizedMeta] = useState<{ finalizedAt: string; createdRecordId: number } | null>(null);
-
-  // Artifact inspector overlay boxes (for highlighting bboxes on image)
-  const [artifactOverlayBoxes, setArtifactOverlayBoxes] = useState<OverlayBox[]>([]);
-
-  // Record highlighting & interaction state
-  const [selectedRecordIndex, setSelectedRecordIndex] = useState<number | null>(null);
-  const [focusedField, setFocusedField] = useState<string | null>(null);
-  const [editMode, setEditMode] = useState<'highlight' | 'click-select' | 'drag-select' | 'draw-record'>('highlight');
-  const [cropReOcrResult, setCropReOcrResult] = useState<{ text: string; fields: Record<string, string>; bbox: any; tokenCount: number } | null>(null);
-  const [cropReOcrLoading, setCropReOcrLoading] = useState(false);
-  const [externalFieldUpdate, setExternalFieldUpdate] = useState<{
-    fieldKey: string;
-    text: string;
-    mode: 'append' | 'replace';
-  } | null>(null);
-
-  // Auto-extract state
-  const [autoExtracting, setAutoExtracting] = useState(false);
-
-  // Field suggestions state (intelligent entity detection)
-  const [fieldSuggestions, setFieldSuggestions] = useState<SuggestionResult | null>(null);
-
-  // Layout wizard state
-  const [showLayoutWizard, setShowLayoutWizard] = useState(false);
+  // ── Interaction bucket (overlay + selection + edit modes) ────────────────
+  type EditMode = 'highlight' | 'click-select' | 'drag-select' | 'draw-record';
+  type CropReOcrResult = { text: string; fields: Record<string, string>; bbox: any; tokenCount: number } | null;
+  type ExternalFieldUpdate = { fieldKey: string; text: string; mode: 'append' | 'replace' } | null;
+  const [interaction, setInteraction] = useState<{
+    artifactOverlayBoxes: OverlayBox[];
+    selectedRecordIndex: number | null;
+    focusedField: string | null;
+    editMode: EditMode;
+    cropReOcrResult: CropReOcrResult;
+    cropReOcrLoading: boolean;
+    externalFieldUpdate: ExternalFieldUpdate;
+  }>({
+    artifactOverlayBoxes: [],
+    selectedRecordIndex: null,
+    focusedField: null,
+    editMode: 'highlight',
+    cropReOcrResult: null,
+    cropReOcrLoading: false,
+    externalFieldUpdate: null,
+  });
+  const setInteractionField = useCallback(<K extends keyof typeof interaction>(key: K, value: typeof interaction[K]) => {
+    setInteraction(prev => ({ ...prev, [key]: value }));
+  }, []);
+  const setArtifactOverlayBoxes = useCallback((v: OverlayBox[]) => setInteractionField('artifactOverlayBoxes', v), [setInteractionField]);
+  const setSelectedRecordIndex = useCallback((v: number | null) => setInteractionField('selectedRecordIndex', v), [setInteractionField]);
+  const setFocusedField = useCallback((v: string | null) => setInteractionField('focusedField', v), [setInteractionField]);
+  const setEditMode = useCallback((v: EditMode) => setInteractionField('editMode', v), [setInteractionField]);
+  const setCropReOcrResult = useCallback((v: CropReOcrResult) => setInteractionField('cropReOcrResult', v), [setInteractionField]);
+  const setCropReOcrLoading = useCallback((v: boolean) => setInteractionField('cropReOcrLoading', v), [setInteractionField]);
+  const setExternalFieldUpdate = useCallback((v: ExternalFieldUpdate) => setInteractionField('externalFieldUpdate', v), [setInteractionField]);
+  const { artifactOverlayBoxes, selectedRecordIndex, focusedField, editMode, cropReOcrResult, cropReOcrLoading, externalFieldUpdate } = interaction;
 
   const handleOpenLayoutWizard = useCallback(() => {
     setShowLayoutWizard(true);
