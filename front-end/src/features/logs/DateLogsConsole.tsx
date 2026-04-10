@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { apiClient } from '@/api/utils/axiosInstance';
 import ConsoleCard from '../system/logs/ConsoleCard';
 import HistoricalLogItem from '../system/logs/HistoricalLogItem';
 
@@ -96,12 +97,7 @@ export const DateLogsConsole: React.FC<DateLogsConsoleProps> = ({ logFilter = 'A
         const startDate = start.toISOString();
         const endDate = end.toISOString();
         
-        const apiUrl = process.env.NODE_ENV === 'production' 
-          ? `/api/admin/logs/database?start_date=${startDate}&end_date=${endDate}&limit=50&sort=desc&group_similar=true`
-          : `http://localhost:3002/api/admin/logs/database?start_date=${startDate}&end_date=${endDate}&limit=50&sort=desc&group_similar=true`;
-        
-        const response = await fetch(apiUrl);
-        const data = await response.json();
+        const data = await apiClient.get<any>(`/admin/logs/database?start_date=${startDate}&end_date=${endDate}&limit=50&sort=desc&group_similar=true`);
         
         if (data.logs && Array.isArray(data.logs) && data.logs.length > 0) {
           const formattedLogs: HistoricalLog[] = data.logs.map((log: any, index: number) => ({

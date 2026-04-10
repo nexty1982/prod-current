@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { apiClient } from '@/api/utils/axiosInstance';
 import { Dialog, DialogContent, DialogTitle, DialogActions } from '@mui/material';
 import { Button, TextField, Typography, Box, Alert, CircularProgress, Chip } from '@mui/material';
 import { IconBrandGithub, IconX, IconCheck } from '@tabler/icons-react';
@@ -50,24 +51,7 @@ export const GitHubIssueModal: React.FC<GitHubIssueModalProps> = ({
         custom_description: customDescription.trim()
       };
 
-      const apiUrl = process.env.NODE_ENV === 'production' 
-        ? '/api/errors/report-to-github'
-        : 'http://localhost:3002/api/errors/report-to-github';
-
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify(payload)
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to create GitHub issue');
-      }
+      const data = await apiClient.post<any>('/errors/report-to-github', payload);
 
       setSuccess({
         url: data.github_url,
