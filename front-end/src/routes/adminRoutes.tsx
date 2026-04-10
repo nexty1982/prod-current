@@ -12,17 +12,17 @@ import Loadable from '../layouts/full/shared/loadable/Loadable';
 
 /* ── Lazy imports ── */
 const OmaiBridge = Loadable(lazy(() => import('../features/admin/OmaiBridge')));
-const MenuPermissions = Loadable(lazy(() => import('../features/admin/admin/MenuPermissions')));
-const MenuManagement = Loadable(lazy(() => import('../features/admin/admin/MenuManagement')));
-const AdminSettings = Loadable(lazy(() => import('../features/admin/admin/AdminSettings')));
+const MenuPermissions = Loadable(lazy(() => import('../features/admin/MenuPermissions')));
+const MenuManagement = Loadable(lazy(() => import('../features/admin/MenuManagement')));
+const AdminSettings = Loadable(lazy(() => import('../features/admin/AdminSettings')));
 const ChurchPublishingGuide = Loadable(lazy(() => import('../features/admin/components/ChurchPublishingGuide')));
-const OMSiteSurvey = Loadable(lazy(() => import('../features/admin/admin/tools/OMSiteSurvey')));
-const BlogAdmin = Loadable(lazy(() => import('../features/admin/admin/BlogAdmin')));
+const OMSiteSurvey = Loadable(lazy(() => import('../features/admin/tools/OMSiteSurvey')));
+const BlogAdmin = Loadable(lazy(() => import('../features/admin/BlogAdmin')));
 const SessionManagement = Loadable(lazy(() => import('../features/auth/admin/SessionManagement')));
-const ActivityLogs = Loadable(lazy(() => import('../features/admin/admin/ActivityLogs')));
-const ScriptRunner = Loadable(lazy(() => import('../features/admin/admin/ScriptRunner')));
+const ActivityLogs = Loadable(lazy(() => import('../features/admin/ActivityLogs')));
+const ScriptRunner = Loadable(lazy(() => import('../features/admin/ScriptRunner')));
 const AIAdminPanel = Loadable(lazy(() => import('../features/admin/ai/AIAdminPanel')));
-const AdminPageFallback = Loadable(lazy(() => import('../features/admin/admin/AdminPageFallback')));
+const AdminPageFallback = Loadable(lazy(() => import('../features/admin/AdminPageFallback')));
 const AdminControlPanel = Loadable(lazy(() => import('../features/admin/control-panel/AdminControlPanel')));
 const ChurchManagementPage = Loadable(lazy(() => import('../features/admin/control-panel/ChurchManagementPage')));
 const OrthodoxScheduleGuidelinesPage = Loadable(lazy(() => import('../features/admin/control-panel/OrthodoxScheduleGuidelinesPage')));
@@ -50,10 +50,10 @@ const SSLCertificatePage = Loadable(lazy(() => import('../features/admin/control
 const OpsReportsPage = Loadable(lazy(() => import('../features/admin/ops/OpsReportsPage')));
 const OrthodoxMetricsDash = Loadable(lazy(() => import('../features/admin/dashboard/OrthodoxMetrics')));
 const OMBigBook = Loadable(lazy(() => import('../features/admin/OMBigBook')));
-const OMAIDiscoveryPanelMobile = Loadable(lazy(() => import('../features/admin/admin/OMAIDiscoveryPanelMobile')));
+const OMAIDiscoveryPanelMobile = Loadable(lazy(() => import('../features/admin/OMAIDiscoveryPanelMobile')));
 const LogSearch = Loadable(lazy(() => import('../features/admin/dashboard/LogSearch')));
-const ChurchAdminList = Loadable(lazy(() => import('../features/admin/admin/ChurchAdminList')));
-const ChurchAdminPanel = Loadable(lazy(() => import('../features/admin/admin/ChurchAdminPanelWorking')));
+const ChurchAdminList = Loadable(lazy(() => import('../features/admin/ChurchAdminList')));
+const ChurchAdminPanel = Loadable(lazy(() => import('../features/admin/ChurchAdminPanelWorking')));
 
 /**
  * All /admin/* route definitions.

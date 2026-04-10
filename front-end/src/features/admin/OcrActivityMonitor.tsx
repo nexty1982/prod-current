@@ -2,7 +2,7 @@
  * OCR Operations Console — Super Admin OCR Ops Dashboard
  *
  * Route:        /devel/ocr-activity-monitor
- * Component:    front-end/src/features/admin/admin/OcrActivityMonitor.tsx
+ * Component:    front-end/src/features/admin/OcrActivityMonitor.tsx
  *
  * Backend API (all super_admin protected):
  *   GET  /api/ocr/monitor/jobs?status=&church_id=&q=&stale=1&page=&pageSize=&sort=&sortDir=&hideArchived=
