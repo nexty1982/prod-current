@@ -221,6 +221,13 @@ export async function checkMultipleDependencies(
   return results;
 }
 
+// ── Test-only exports (private helpers exposed for unit tests) ────────────
+export const __test__ = {
+  extractImports,
+  getImportType,
+  resolveImportPath,
+};
+
 /**
  * Get summary of dependency issues across multiple files
  */
