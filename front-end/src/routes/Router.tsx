@@ -99,7 +99,7 @@ const UploadRecordsPage = Loadable(lazy(() => import('../features/records-centra
 
 // Big Book System
 const OMLearn = Loadable(lazy(() => import('../features/omlearn/OMLearn')));
-const BigBookDynamicRoute = Loadable(lazy(() => import('../features/admin/admin/BigBookDynamicRoute')));
+const BigBookDynamicRoute = Loadable(lazy(() => import('../features/admin/BigBookDynamicRoute')));
 
 const Gallery = Loadable(lazy(() => import('../features/devel-tools/om-gallery/Gallery')));
 const PageImageIndex = Loadable(lazy(() => import('../features/devel-tools/PageImageIndex')));
