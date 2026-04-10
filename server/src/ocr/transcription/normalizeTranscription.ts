@@ -359,6 +359,20 @@ function reconstructParagraphs(lines: OcrLine[]): string[][] {
   return paragraphs;
 }
 
+// ── Test-only exports (private helpers exposed for unit tests) ────────────
+export const __test__ = {
+  detectScript,
+  isOcrGarbage,
+  shouldDropToken,
+  normalizeTokenText,
+  getTokenYCenter,
+  getTokenHeight,
+  getTokenX,
+  reconstructLines,
+  joinHyphenatedLines,
+  reconstructParagraphs,
+};
+
 /**
  * Main normalization function
  */
