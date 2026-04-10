@@ -1148,6 +1148,9 @@ async function executeBuild(config, buildId) {
         ? '\n✅ Build completed successfully!' 
         : `\n❌ Build failed with exit code: ${code}`;
       
+      // Safety net: always remove maintenance file after build completes
+      try { require('fs').unlinkSync('/var/www/orthodoxmetrics/maintenance.on'); } catch { /* already removed */ }
+      
       resolve({
         success: success,
         output: output,
@@ -1156,6 +1159,9 @@ async function executeBuild(config, buildId) {
     });
     
     buildProcess.on('error', (error) => {
+      // Safety net: always remove maintenance file on spawn error
+      try { require('fs').unlinkSync('/var/www/orthodoxmetrics/maintenance.on'); } catch { /* already removed */ }
+      
       resolve({
         success: false,
         output: output + `\n❌ Failed to start build process: ${error.message}`,
@@ -1256,6 +1262,9 @@ async function executeBuildWithStreaming(config, buildId, onData) {
         ? '\n✅ Build completed successfully!' 
         : `\n❌ Build failed with exit code: ${code}`;
       
+      // Safety net: always remove maintenance file after build completes
+      try { require('fs').unlinkSync('/var/www/orthodoxmetrics/maintenance.on'); } catch { /* already removed */ }
+      
       onData(message);
       
       resolve({
@@ -1265,6 +1274,9 @@ async function executeBuildWithStreaming(config, buildId, onData) {
     });
     
     buildProcess.on('error', (error) => {
+      // Safety net: always remove maintenance file on spawn error
+      try { require('fs').unlinkSync('/var/www/orthodoxmetrics/maintenance.on'); } catch { /* already removed */ }
+      
       onData(`\n❌ Failed to start build process: ${error.message}`);
       resolve({
         success: false,
