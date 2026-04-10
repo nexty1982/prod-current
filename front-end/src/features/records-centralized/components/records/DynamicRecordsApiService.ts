@@ -4,6 +4,7 @@
  * Uses column positions instead of field names for display
  */
 
+import { apiClient } from '@/api/utils/axiosInstance';
 import { apiJson, FieldMapperApiError } from '@/sandbox/field-mapper/api/client';
 
 // Types
@@ -401,18 +402,12 @@ class DynamicRecordsApiService {
         });
       }
 
-      const url = `${ENDPOINTS.export(this.churchId, tableName)}?${params.toString()}`;
-      const response = await fetch(url, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-        }
+      const exportUrl = ENDPOINTS.export(this.churchId, tableName).replace(/^\/api/, '');
+      const blob = await apiClient.request<Blob>({
+        method: 'GET',
+        url: `${exportUrl}?${params.toString()}`,
+        responseType: 'blob',
       });
-      
-      if (!response.ok) {
-        throw new Error(`Export failed: ${response.statusText}`);
-      }
-      
-      const blob = await response.blob();
       
       return {
         success: true,

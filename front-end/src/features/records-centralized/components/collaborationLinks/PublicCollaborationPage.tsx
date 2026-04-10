@@ -1,3 +1,4 @@
+import { apiClient } from '@/api/utils/axiosInstance';
 /**
  * PublicCollaborationPage
  *
@@ -130,16 +131,7 @@ const PublicCollaborationPage: React.FC = () => {
     try {
       setSubmitting(true);
       setError(null);
-      const res = await fetch(`/api/collaboration-links/public/${token}/submit`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ records: [currentRecord] }),
-      });
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || 'Submit failed');
-      }
-      const data = await res.json();
+      const data = await apiClient.post<any>(`/collaboration-links/public/${token}/submit`, { records: [currentRecord] });
       setRecordsSubmitted(data.recordsSubmitted);
       setCurrentRecord({});
       if (data.completed) {
@@ -172,15 +164,7 @@ const PublicCollaborationPage: React.FC = () => {
         return;
       }
 
-      const res = await fetch(`/api/collaboration-links/public/${token}/submit`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ updates }),
-      });
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || 'Submit failed');
-      }
+      await apiClient.post<any>(`/collaboration-links/public/${token}/submit`, { updates });
       setCompleted(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to submit');

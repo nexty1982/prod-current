@@ -1,3 +1,4 @@
+import { apiClient } from '@/api/utils/axiosInstance';
 /**
  * CollaborationWizardDialog
  *
@@ -125,11 +126,7 @@ const CollaborationWizardDialog: React.FC<CollaborationWizardDialogProps> = ({
         limit: '50',
         page: '1',
       });
-      const res = await fetch(`/api/churches/${churchId}/records/${recordType}?${params}`, {
-        credentials: 'include',
-      });
-      if (!res.ok) throw new Error('Failed to search records');
-      const data = await res.json();
+      const data = await apiClient.get<any>(`/churches/${churchId}/records/${recordType}?${params}`);
       setSearchResults(data.data?.records || data.records || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Search failed');
@@ -197,19 +194,7 @@ const CollaborationWizardDialog: React.FC<CollaborationWizardDialogProps> = ({
         body.targetRecordIds = selectedRecordIds;
       }
 
-      const res = await fetch('/api/collaboration-links', {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      });
-
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || 'Failed to create link');
-      }
-
-      const data = await res.json();
+      const data = await apiClient.post<any>('/collaboration-links', body);
       setGeneratedUrl(data.url);
       setActiveStep(2);
     } catch (err) {

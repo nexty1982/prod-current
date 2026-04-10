@@ -1,7 +1,7 @@
 /**
  * useRecordsFetch.ts — Data fetching functions for RecordsPage.
  */
-
+import { apiClient } from '@/api/utils/axiosInstance';
 import churchService, { Church } from '@/shared/lib/churchService';
 import LookupService from '@/shared/lib/lookupService';
 import { RECORD_TYPE_CONFIGS, DEFAULT_DATE_SORT_FIELD } from './utils';
@@ -92,8 +92,7 @@ export async function fetchRecords(
         sortDirection: activeSortDir,
       });
     } else {
-      const response = await fetch(`/api/${selectedType.apiEndpoint}-records?page=${requestPage}&limit=${requestLimit}&search=${encodeURIComponent(querySearch || '')}&sortField=${encodeURIComponent(activeSortField)}&sortDirection=${encodeURIComponent(activeSortDir)}`);
-      const data = await response.json();
+      const data = await apiClient.get<any>(`/${selectedType.apiEndpoint}-records?page=${requestPage}&limit=${requestLimit}&search=${encodeURIComponent(querySearch || '')}&sortField=${encodeURIComponent(activeSortField)}&sortDirection=${encodeURIComponent(activeSortDir)}`);
 
       if (data && data.records) {
         recordData = {

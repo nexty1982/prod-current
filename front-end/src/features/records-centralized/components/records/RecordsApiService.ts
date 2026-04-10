@@ -3,6 +3,7 @@
  * Consolidates all record-related API calls with consistent error handling and loading states
  */
 
+import { apiClient } from '@/api/utils/axiosInstance';
 import { apiJson, FieldMapperApiError } from '../client';
 
 // Types
@@ -311,18 +312,12 @@ class RecordsApiService {
         });
       }
 
-      const url = `${ENDPOINTS.export(this.churchId, recordType)}?${params.toString()}`;
-      const response = await fetch(url, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-        }
+      const exportUrl = ENDPOINTS.export(this.churchId, recordType).replace(/^\/api/, '');
+      const blob = await apiClient.request<Blob>({
+        method: 'GET',
+        url: `${exportUrl}?${params.toString()}`,
+        responseType: 'blob',
       });
-      
-      if (!response.ok) {
-        throw new Error(`Export failed: ${response.statusText}`);
-      }
-      
-      const blob = await response.blob();
       
       return {
         success: true,
