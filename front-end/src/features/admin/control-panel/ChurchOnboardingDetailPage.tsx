@@ -4,6 +4,7 @@
  * onboarding status, members, tokens, and admin actions.
  */
 
+import { apiClient } from '@/api/utils/axiosInstance';
 import Breadcrumb from '@/layouts/full/shared/breadcrumb/Breadcrumb';
 import PageContainer from '@/shared/ui/PageContainer';
 import {
@@ -296,12 +297,7 @@ const ChurchOnboardingDetailPage: React.FC = () => {
   const handleApprove = async (userId: number, email: string) => {
     setActionLoading(userId);
     try {
-      const res = await fetch(`/api/admin/users/${userId}/unlock`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-      });
-      if (!res.ok) throw new Error('Failed to unlock user');
+      await apiClient.post<any>(`/admin/users/${userId}/unlock`);
       setSnack({ open: true, message: `${email} approved and unlocked`, severity: 'success' });
       fetchDetail();
     } catch (err: any) {
@@ -315,15 +311,7 @@ const ChurchOnboardingDetailPage: React.FC = () => {
     if (!rejectDialog.userId) return;
     setActionLoading(rejectDialog.userId);
     try {
-      const res = await fetch(`/api/admin/users/${rejectDialog.userId}/lockout`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reason: `Registration rejected: ${rejectReason || 'Not approved by admin'}` }),
-      });
-      if (!res.ok) {
-        // User is already locked — still treat as success for UI
-      }
+      await apiClient.post<any>(`/admin/users/${rejectDialog.userId}/lockout`, { reason: `Registration rejected: ${rejectReason || 'Not approved by admin'}` });
       setSnack({ open: true, message: `${rejectDialog.email} registration rejected`, severity: 'success' });
       setRejectDialog({ open: false, userId: null, email: '' });
       setRejectReason('');

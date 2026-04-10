@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { apiClient } from '@/api/utils/axiosInstance';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Box,
@@ -125,11 +126,7 @@ const OMDailyItemsPage: React.FC = () => {
       if (selectedHorizon) params.set('horizon', selectedHorizon);
 
       const qs = params.toString();
-      const res = await fetch(`/api/omai-daily/items${qs ? `?${qs}` : ''}`, {
-        credentials: 'include',
-      });
-      if (!res.ok) throw new Error('Failed to fetch items');
-      const data = await res.json();
+      const data = await apiClient.get<any>(`/omai-daily/items${qs ? `?${qs}` : ''}`);
       setItems(Array.isArray(data) ? data : data.items || []);
     } catch (err: any) {
       showToast(err.message || 'Failed to fetch items', 'error');
@@ -141,11 +138,8 @@ const OMDailyItemsPage: React.FC = () => {
   // Fetch categories
   const fetchCategories = useCallback(async () => {
     try {
-      const res = await fetch('/api/omai-daily/categories', { credentials: 'include' });
-      if (res.ok) {
-        const data = await res.json();
-        setCategories(Array.isArray(data) ? data : data.categories || []);
-      }
+      const data = await apiClient.get<any>('/omai-daily/categories');
+      setCategories(Array.isArray(data) ? data : data.categories || []);
     } catch {
       // silently fail
     }
@@ -154,10 +148,7 @@ const OMDailyItemsPage: React.FC = () => {
   // Auto-sync commits on first load
   useEffect(() => {
     if (!synced) {
-      fetch('/api/omai-daily/sync-commits', {
-        method: 'POST',
-        credentials: 'include',
-      }).catch(() => {});
+      apiClient.post<any>('/omai-daily/sync-commits').catch(() => {});
       setSynced(true);
     }
   }, [synced]);
@@ -175,29 +166,15 @@ const OMDailyItemsPage: React.FC = () => {
   const saveItem = async () => {
     try {
       const isNew = !editingItem;
-      const method = isNew ? 'POST' : 'PUT';
-      const url = isNew
-        ? '/api/omai-daily/items'
-        : `/api/omai-daily/items/${editingItem.id}`;
-      const res = await fetch(url, {
-        method,
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
-      });
-      if (!res.ok) throw new Error('Failed to save item');
-      const result = await res.json();
+      const result = isNew
+        ? await apiClient.post<any>('/omai-daily/items', form)
+        : await apiClient.put<any>(`/omai-daily/items/${editingItem.id}`, form);
       const itemId = result?.item?.id || result?.id;
 
       // Auto-create branch if agent_tool + branch_type are set on new items
       if (isNew && (form as any).agent_tool && (form as any).branch_type && itemId) {
         try {
-          const workRes = await fetch(`/api/omai-daily/items/${itemId}/start-work`, {
-            method: 'POST', credentials: 'include',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ branch_type: (form as any).branch_type, agent_tool: (form as any).agent_tool }),
-          });
-          const workData = await workRes.json();
+          const workData = await apiClient.post<any>(`/omai-daily/items/${itemId}/start-work`, { branch_type: (form as any).branch_type, agent_tool: (form as any).agent_tool });
           const branch = workData?.branch || workData?.item?.github_branch;
           showToast(`Item created — branch ${branch || 'created'}`, 'success');
         } catch {
@@ -219,11 +196,7 @@ const OMDailyItemsPage: React.FC = () => {
   // Delete item
   const deleteItem = async (id: number) => {
     try {
-      const res = await fetch(`/api/omai-daily/items/${id}`, {
-        method: 'DELETE',
-        credentials: 'include',
-      });
-      if (!res.ok) throw new Error('Failed to delete item');
+      await apiClient.delete<any>(`/omai-daily/items/${id}`);
       showToast('Item deleted', 'success');
       fetchItems();
     } catch (err: any) {
@@ -234,16 +207,11 @@ const OMDailyItemsPage: React.FC = () => {
   // Quick status change (uses SDLC-enforced PATCH endpoint)
   const updateStatus = async (item: DailyItem, status: string) => {
     try {
-      const res = await fetch(`/api/omai-daily/items/${item.id}/status`, {
+      await apiClient.request<any>({
         method: 'PATCH',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status }),
+        url: `/omai-daily/items/${item.id}/status`,
+        data: { status },
       });
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.reasons?.join(' ') || data.error || 'Transition blocked');
-      }
       showToast(`Marked as ${STATUS_LABELS[status] || status}`, 'success');
       fetchItems();
     } catch (err: any) {

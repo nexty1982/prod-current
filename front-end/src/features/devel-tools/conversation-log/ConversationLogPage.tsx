@@ -1,3 +1,4 @@
+import { apiClient } from '@/api/utils/axiosInstance';
 import {
     Alert,
     alpha,
@@ -262,19 +263,7 @@ const ConversationLogPage: React.FC = () => {
         return;
       }
 
-      const response = await fetch('/api/conversation-log/combine-export', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(body),
-      });
-
-      if (!response.ok) {
-        const err = await response.json();
-        throw new Error(err.error || 'Export failed');
-      }
-
-      const blob = await response.blob();
+      const blob = await apiClient.post<any>('/conversation-log/combine-export', body, { responseType: 'blob' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -294,11 +283,7 @@ const ConversationLogPage: React.FC = () => {
 
   const handleExportSingle = useCallback(async (filename: string) => {
     try {
-      const response = await fetch(`/api/conversation-log/export/${encodeURIComponent(filename)}`, {
-        credentials: 'include',
-      });
-      if (!response.ok) throw new Error('Export failed');
-      const blob = await response.blob();
+      const blob = await apiClient.get<any>(`/conversation-log/export/${encodeURIComponent(filename)}`, { responseType: 'blob' } as any);
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -322,14 +307,7 @@ const ConversationLogPage: React.FC = () => {
     setReviewLoading(true);
     setActiveTab(2);
     try {
-      const response = await fetch('/api/conversation-log/review/batch', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ filenames: [...selectedConvs] }),
-      });
-      if (!response.ok) throw new Error('Review failed');
-      const data = await response.json();
+      const data = await apiClient.post<any>('/conversation-log/review/batch', { filenames: [...selectedConvs] });
       if (data.success) {
         setReviewResults(data.results || []);
         // Auto-generate pipeline items from insights
@@ -386,11 +364,7 @@ const ConversationLogPage: React.FC = () => {
     setReviewLoading(true);
     setActiveTab(2);
     try {
-      const response = await fetch(`/api/conversation-log/review/${encodeURIComponent(filename)}`, {
-        credentials: 'include',
-      });
-      if (!response.ok) throw new Error('Review failed');
-      const data = await response.json();
+      const data = await apiClient.get<any>(`/conversation-log/review/${encodeURIComponent(filename)}`);
       if (data.success) {
         setReviewResults([data]);
         const ins = data.insights as ConversationInsights;
@@ -439,18 +413,11 @@ const ConversationLogPage: React.FC = () => {
       const convRef = reviewResults.length === 1
         ? reviewResults[0].filename
         : `batch-${reviewResults.length}-convs`;
-      const response = await fetch('/api/conversation-log/export-to-pipeline', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
-          items: enabledItems,
-          conversation_ref: convRef,
-          agent_tool: pipelineAgentTool || null,
-        }),
+      const data = await apiClient.post<any>('/conversation-log/export-to-pipeline', {
+        items: enabledItems,
+        conversation_ref: convRef,
+        agent_tool: pipelineAgentTool || null,
       });
-      if (!response.ok) throw new Error('Export failed');
-      const data = await response.json();
       if (data.success) {
         setSnackbar({ open: true, message: `${data.count} item(s) exported to OM Daily pipeline`, severity: 'success' });
         setPipelineItems(prev => prev.map(i => i.enabled ? { ...i, enabled: false } : i));
@@ -467,14 +434,7 @@ const ConversationLogPage: React.FC = () => {
     setBulkExportPreview(null);
     setBulkExportResult(null);
     try {
-      const response = await fetch('/api/conversation-log/tasks/export-completed-to-pipeline', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ agent_tool: pipelineAgentTool || null, horizon: pipelineHorizon, auto_branch: true, dry_run: true }),
-      });
-      if (!response.ok) throw new Error('Preview failed');
-      const data = await response.json();
+      const data = await apiClient.post<any>('/conversation-log/tasks/export-completed-to-pipeline', { agent_tool: pipelineAgentTool || null, horizon: pipelineHorizon, auto_branch: true, dry_run: true });
       if (data.success) {
         setBulkExportPreview(data.items || []);
         if (data.skipped > 0) {
@@ -491,14 +451,7 @@ const ConversationLogPage: React.FC = () => {
   const handleBulkExportConfirm = useCallback(async () => {
     setBulkExportLoading(true);
     try {
-      const response = await fetch('/api/conversation-log/tasks/export-completed-to-pipeline', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ agent_tool: pipelineAgentTool || null, horizon: pipelineHorizon, auto_branch: true, dry_run: false }),
-      });
-      if (!response.ok) throw new Error('Export failed');
-      const data = await response.json();
+      const data = await apiClient.post<any>('/conversation-log/tasks/export-completed-to-pipeline', { agent_tool: pipelineAgentTool || null, horizon: pipelineHorizon, auto_branch: true, dry_run: false });
       if (data.success) {
         setBulkExportResult({ count: data.count, skipped: data.skipped });
         setBulkExportPreview(null);
