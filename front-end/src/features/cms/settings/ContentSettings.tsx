@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import {
     Box,
     Typography,
@@ -71,29 +71,79 @@ interface ContentDirectory {
 
 const ContentSettings: React.FC = () => {
     const { isSuperAdmin } = useAuth();
+    // Standalone: globalImages uses updater-fn callsites
     const [globalImages, setGlobalImages] = useState<GlobalImage[]>([]);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
-    const [uploadType, setUploadType] = useState<ContentType>('avatar');
-    const [uploading, setUploading] = useState(false);
-    const [selectedFile, setSelectedFile] = useState<File | null>(null);
-    const [imageName, setImageName] = useState('');
-    const [gridExtractorOpen, setGridExtractorOpen] = useState(false);
-    const [gridExtractorType, setGridExtractorType] = useState<'profile' | 'banner'>('profile');
-    const [snackbarOpen, setSnackbarOpen] = useState(false);
-    const [snackbarMessage, setSnackbarMessage] = useState('');
-    const [activeTab, setActiveTab] = useState<'content' | 'directories'>('content');
-    const [selectedContentType, setSelectedContentType] = useState<ContentType>('all');
-    const [directories, setDirectories] = useState<ContentDirectory[]>([]);
-    const [directoryDialogOpen, setDirectoryDialogOpen] = useState(false);
-    const [newDirectory, setNewDirectory] = useState<ContentDirectory>({
-        path: '',
-        contentType: 'avatar',
-        enabled: true,
-        description: ''
+
+    // Bucketed state: upload/snack (9 fields)
+    interface UploadState {
+        loading: boolean;
+        error: string | null;
+        uploadDialogOpen: boolean;
+        uploadType: ContentType;
+        uploading: boolean;
+        selectedFile: File | null;
+        imageName: string;
+        snackbarOpen: boolean;
+        snackbarMessage: string;
+    }
+    const [uploadState, setUploadState] = useState<UploadState>({
+        loading: false,
+        error: null,
+        uploadDialogOpen: false,
+        uploadType: 'avatar',
+        uploading: false,
+        selectedFile: null,
+        imageName: '',
+        snackbarOpen: false,
+        snackbarMessage: '',
     });
-    const [scanningDirectory, setScanningDirectory] = useState<string | null>(null);
+    const setUploadField = useCallback(<K extends keyof UploadState>(key: K, value: UploadState[K]) => {
+        setUploadState(prev => ({ ...prev, [key]: value }));
+    }, []);
+    const { loading, error, uploadDialogOpen, uploadType, uploading, selectedFile, imageName, snackbarOpen, snackbarMessage } = uploadState;
+    const setLoading = useCallback((v: boolean) => setUploadField('loading', v), [setUploadField]);
+    const setError = useCallback((v: string | null) => setUploadField('error', v), [setUploadField]);
+    const setUploadDialogOpen = useCallback((v: boolean) => setUploadField('uploadDialogOpen', v), [setUploadField]);
+    const setUploadType = useCallback((v: ContentType) => setUploadField('uploadType', v), [setUploadField]);
+    const setUploading = useCallback((v: boolean) => setUploadField('uploading', v), [setUploadField]);
+    const setSelectedFile = useCallback((v: File | null) => setUploadField('selectedFile', v), [setUploadField]);
+    const setImageName = useCallback((v: string) => setUploadField('imageName', v), [setUploadField]);
+    const setSnackbarOpen = useCallback((v: boolean) => setUploadField('snackbarOpen', v), [setUploadField]);
+    const setSnackbarMessage = useCallback((v: string) => setUploadField('snackbarMessage', v), [setUploadField]);
+
+    // Bucketed state: directories/tabs (8 fields)
+    interface DirectoryState {
+        gridExtractorOpen: boolean;
+        gridExtractorType: 'profile' | 'banner';
+        activeTab: 'content' | 'directories';
+        selectedContentType: ContentType;
+        directories: ContentDirectory[];
+        directoryDialogOpen: boolean;
+        newDirectory: ContentDirectory;
+        scanningDirectory: string | null;
+    }
+    const [directoryState, setDirectoryState] = useState<DirectoryState>({
+        gridExtractorOpen: false,
+        gridExtractorType: 'profile',
+        activeTab: 'content',
+        selectedContentType: 'all',
+        directories: [],
+        directoryDialogOpen: false,
+        newDirectory: { path: '', contentType: 'avatar', enabled: true, description: '' },
+        scanningDirectory: null,
+    });
+    const setDirectoryField = useCallback(<K extends keyof DirectoryState>(key: K, value: DirectoryState[K]) => {
+        setDirectoryState(prev => ({ ...prev, [key]: value }));
+    }, []);
+    const { gridExtractorOpen, gridExtractorType, activeTab, selectedContentType, directories, directoryDialogOpen, newDirectory, scanningDirectory } = directoryState;
+    const setGridExtractorOpen = useCallback((v: boolean) => setDirectoryField('gridExtractorOpen', v), [setDirectoryField]);
+    const setGridExtractorType = useCallback((v: 'profile' | 'banner') => setDirectoryField('gridExtractorType', v), [setDirectoryField]);
+    const setActiveTab = useCallback((v: 'content' | 'directories') => setDirectoryField('activeTab', v), [setDirectoryField]);
+    const setSelectedContentType = useCallback((v: ContentType) => setDirectoryField('selectedContentType', v), [setDirectoryField]);
+    const setDirectories = useCallback((v: ContentDirectory[]) => setDirectoryField('directories', v), [setDirectoryField]);
+    const setDirectoryDialogOpen = useCallback((v: boolean) => setDirectoryField('directoryDialogOpen', v), [setDirectoryField]);
+    const setNewDirectory = useCallback((v: ContentDirectory) => setDirectoryField('newDirectory', v), [setDirectoryField]);
+    const setScanningDirectory = useCallback((v: string | null) => setDirectoryField('scanningDirectory', v), [setDirectoryField]);
 
     useEffect(() => {
         if (isSuperAdmin()) {
