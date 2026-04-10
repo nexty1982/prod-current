@@ -94,48 +94,118 @@ const AuthRegister = ({ title, subtitle, subtext }: AuthRegisterProps) => {
   const theme = useTheme();
   const [searchParams] = useSearchParams();
 
-  // Wizard step
+  // Wizard step (kept standalone — uses updater fn pattern)
   const [activeStep, setActiveStep] = useState(0);
 
-  // Step 0: Locate parish
-  const [states, setStates] = useState<string[]>([]);
-  const [selectedState, setSelectedState] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [churches, setChurches] = useState<CrmChurch[]>([]);
-  const [selectedChurch, setSelectedChurch] = useState<CrmChurch | null>(null);
-  const [searching, setSearching] = useState(false);
-  const [churchNotListed, setChurchNotListed] = useState(false);
-  const [manualChurchName, setManualChurchName] = useState('');
-
-  // Step 1: About you
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
-  const [role, setRole] = useState('');
-  const [maintainsRecords, setMaintainsRecords] = useState('');
-  const [heardAbout, setHeardAbout] = useState('');
-  const [heardAboutDetail, setHeardAboutDetail] = useState('');
-  const [interestedDigital, setInterestedDigital] = useState('');
-  const [wantsMeeting, setWantsMeeting] = useState('');
-
-  // Step 2: Schedule
-  const [availableDates, setAvailableDates] = useState<AvailableDate[]>([]);
-  const [selectedDate, setSelectedDate] = useState('');
-  const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
-  const [selectedTime, setSelectedTime] = useState('');
-  const [loadingDates, setLoadingDates] = useState(false);
-  const [loadingSlots, setLoadingSlots] = useState(false);
-  const [calendarMonth, setCalendarMonth] = useState(() => {
-    const now = new Date();
-    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  // Step 0: Locate parish bucket
+  const [parish, setParish] = useState<{
+    states: string[];
+    selectedState: string;
+    searchQuery: string;
+    churches: CrmChurch[];
+    selectedChurch: CrmChurch | null;
+    searching: boolean;
+    churchNotListed: boolean;
+    manualChurchName: string;
+  }>({
+    states: [],
+    selectedState: '',
+    searchQuery: '',
+    churches: [],
+    selectedChurch: null,
+    searching: false,
+    churchNotListed: false,
+    manualChurchName: '',
   });
+  const setParishField = useCallback(<K extends keyof typeof parish>(key: K, value: typeof parish[K]) => {
+    setParish(prev => ({ ...prev, [key]: value }));
+  }, []);
+  const setStates = useCallback((v: string[]) => setParishField('states', v), [setParishField]);
+  const setSelectedState = useCallback((v: string) => setParishField('selectedState', v), [setParishField]);
+  const setSearchQuery = useCallback((v: string) => setParishField('searchQuery', v), [setParishField]);
+  const setChurches = useCallback((v: CrmChurch[]) => setParishField('churches', v), [setParishField]);
+  const setSelectedChurch = useCallback((v: CrmChurch | null) => setParishField('selectedChurch', v), [setParishField]);
+  const setSearching = useCallback((v: boolean) => setParishField('searching', v), [setParishField]);
+  const setChurchNotListed = useCallback((v: boolean) => setParishField('churchNotListed', v), [setParishField]);
+  const setManualChurchName = useCallback((v: string) => setParishField('manualChurchName', v), [setParishField]);
+  const { states, selectedState, searchQuery, churches, selectedChurch, searching, churchNotListed, manualChurchName } = parish;
 
-  // Shared
-  const [error, setError] = useState('');
-  const [submitting, setSubmitting] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [resultMessage, setResultMessage] = useState('');
+  // Step 1: About you bucket
+  const [aboutYou, setAboutYou] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    role: '',
+    maintainsRecords: '',
+    heardAbout: '',
+    heardAboutDetail: '',
+    interestedDigital: '',
+    wantsMeeting: '',
+  });
+  const setAboutYouField = useCallback(<K extends keyof typeof aboutYou>(key: K, value: typeof aboutYou[K]) => {
+    setAboutYou(prev => ({ ...prev, [key]: value }));
+  }, []);
+  const setFirstName = useCallback((v: string) => setAboutYouField('firstName', v), [setAboutYouField]);
+  const setLastName = useCallback((v: string) => setAboutYouField('lastName', v), [setAboutYouField]);
+  const setEmail = useCallback((v: string) => setAboutYouField('email', v), [setAboutYouField]);
+  const setPhone = useCallback((v: string) => setAboutYouField('phone', v), [setAboutYouField]);
+  const setRole = useCallback((v: string) => setAboutYouField('role', v), [setAboutYouField]);
+  const setMaintainsRecords = useCallback((v: string) => setAboutYouField('maintainsRecords', v), [setAboutYouField]);
+  const setHeardAbout = useCallback((v: string) => setAboutYouField('heardAbout', v), [setAboutYouField]);
+  const setHeardAboutDetail = useCallback((v: string) => setAboutYouField('heardAboutDetail', v), [setAboutYouField]);
+  const setInterestedDigital = useCallback((v: string) => setAboutYouField('interestedDigital', v), [setAboutYouField]);
+  const setWantsMeeting = useCallback((v: string) => setAboutYouField('wantsMeeting', v), [setAboutYouField]);
+  const { firstName, lastName, email, phone, role, maintainsRecords, heardAbout, heardAboutDetail, interestedDigital, wantsMeeting } = aboutYou;
+
+  // Step 2: Schedule bucket
+  const [schedule, setSchedule] = useState<{
+    availableDates: AvailableDate[];
+    selectedDate: string;
+    timeSlots: TimeSlot[];
+    selectedTime: string;
+    loadingDates: boolean;
+    loadingSlots: boolean;
+    calendarMonth: string;
+  }>(() => {
+    const now = new Date();
+    return {
+      availableDates: [],
+      selectedDate: '',
+      timeSlots: [],
+      selectedTime: '',
+      loadingDates: false,
+      loadingSlots: false,
+      calendarMonth: `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`,
+    };
+  });
+  const setScheduleField = useCallback(<K extends keyof typeof schedule>(key: K, value: typeof schedule[K]) => {
+    setSchedule(prev => ({ ...prev, [key]: value }));
+  }, []);
+  const setAvailableDates = useCallback((v: AvailableDate[]) => setScheduleField('availableDates', v), [setScheduleField]);
+  const setSelectedDate = useCallback((v: string) => setScheduleField('selectedDate', v), [setScheduleField]);
+  const setTimeSlots = useCallback((v: TimeSlot[]) => setScheduleField('timeSlots', v), [setScheduleField]);
+  const setSelectedTime = useCallback((v: string) => setScheduleField('selectedTime', v), [setScheduleField]);
+  const setLoadingDates = useCallback((v: boolean) => setScheduleField('loadingDates', v), [setScheduleField]);
+  const setLoadingSlots = useCallback((v: boolean) => setScheduleField('loadingSlots', v), [setScheduleField]);
+  const setCalendarMonth = useCallback((v: string) => setScheduleField('calendarMonth', v), [setScheduleField]);
+  const { availableDates, selectedDate, timeSlots, selectedTime, loadingDates, loadingSlots, calendarMonth } = schedule;
+
+  // Shared submission bucket
+  const [submission, setSubmission] = useState({
+    error: '',
+    submitting: false,
+    success: false,
+    resultMessage: '',
+  });
+  const setSubmissionField = useCallback(<K extends keyof typeof submission>(key: K, value: typeof submission[K]) => {
+    setSubmission(prev => ({ ...prev, [key]: value }));
+  }, []);
+  const setError = useCallback((v: string) => setSubmissionField('error', v), [setSubmissionField]);
+  const setSubmitting = useCallback((v: boolean) => setSubmissionField('submitting', v), [setSubmissionField]);
+  const setSuccess = useCallback((v: boolean) => setSubmissionField('success', v), [setSubmissionField]);
+  const setResultMessage = useCallback((v: string) => setSubmissionField('resultMessage', v), [setSubmissionField]);
+  const { error, submitting, success, resultMessage } = submission;
 
   // Auto-fill from URL params
   useEffect(() => {
