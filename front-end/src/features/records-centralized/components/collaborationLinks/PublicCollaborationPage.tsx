@@ -78,12 +78,7 @@ const PublicCollaborationPage: React.FC = () => {
       try {
         setLoading(true);
         setError(null);
-        const res = await fetch(`/api/collaboration-links/public/${token}`);
-        if (!res.ok) {
-          const data = await res.json();
-          throw new Error(data.error || 'Failed to load');
-        }
-        const data: CollabConfig = await res.json();
+        const data: CollabConfig = await apiClient.get<any>(`/collaboration-links/public/${token}`);
         setConfig(data);
         setRecordsSubmitted(data.recordsSubmitted || 0);
 

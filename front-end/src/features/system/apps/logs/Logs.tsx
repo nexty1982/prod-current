@@ -203,28 +203,13 @@ const Logs: React.FC = () => {
 
     const initializeLogLevels = async () => {
         try {
-            const response = await fetch('/api/logs/components', {
-                method: 'GET',
-                credentials: 'include',
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                const levels: LogLevel[] = data.components.map((comp: any) => ({
-                    component: comp.name,
-                    level: comp.level,
-                    enabled: comp.enabled,
-                }));
-                setLogLevels(levels);
-            } else {
-                // Fallback to initial levels
-                const initialLevels: LogLevel[] = components.map(component => ({
-                    component: component.name,
-                    level: 'info',
-                    enabled: true,
-                }));
-                setLogLevels(initialLevels);
-            }
+            const data = await apiClient.get<any>('/logs/components');
+            const levels: LogLevel[] = data.components.map((comp: any) => ({
+                component: comp.name,
+                level: comp.level,
+                enabled: comp.enabled,
+            }));
+            setLogLevels(levels);
         } catch (error) {
             console.error('Error initializing log levels:', error);
             // Fallback to initial levels
