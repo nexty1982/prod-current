@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import {
   Box,
   Card,
@@ -78,23 +78,74 @@ interface ActivityLogStats {
 
 const ActivityLogs: React.FC = () => {
   const { hasRole } = useAuth();
-  const [activities, setActivities] = useState<ActivityLogData[]>([]);
-  const [stats, setStats] = useState<ActivityLogStats | null>(null);
-  const [topActions, setTopActions] = useState<Array<{ action: string; count: number }>>([]);
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
-  const [actionFilter, setActionFilter] = useState('');
-  const [userFilter, setUserFilter] = useState('');
-  const [dateFrom, setDateFrom] = useState('');
-  const [dateTo, setDateTo] = useState('');
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [selectedActivity, setSelectedActivity] = useState<ActivityLogData | null>(null);
-  const [viewDialog, setViewDialog] = useState(false);
-  const [cleanupDialog, setCleanupDialog] = useState(false);
-  const [cleanupDays, setCleanupDays] = useState(90);
-  const [successMessage, setSuccessMessage] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
+  type ListBucket = {
+    activities: ActivityLogData[];
+    stats: ActivityLogStats | null;
+    topActions: Array<{ action: string; count: number }>;
+    loading: boolean;
+    search: string;
+    actionFilter: string;
+    userFilter: string;
+    dateFrom: string;
+    dateTo: string;
+    page: number;
+    totalPages: number;
+    successMessage: string;
+    errorMessage: string;
+  };
+  const [list, setList] = useState<ListBucket>({
+    activities: [],
+    stats: null,
+    topActions: [],
+    loading: true,
+    search: '',
+    actionFilter: '',
+    userFilter: '',
+    dateFrom: '',
+    dateTo: '',
+    page: 1,
+    totalPages: 1,
+    successMessage: '',
+    errorMessage: '',
+  });
+  const setListField = useCallback(<K extends keyof ListBucket>(key: K, value: ListBucket[K]) => {
+    setList(prev => ({ ...prev, [key]: value }));
+  }, []);
+  const { activities, stats, topActions, loading, search, actionFilter, userFilter, dateFrom, dateTo, page, totalPages, successMessage, errorMessage } = list;
+  const setActivities = useCallback((v: ActivityLogData[]) => setListField('activities', v), [setListField]);
+  const setStats = useCallback((v: ActivityLogStats | null) => setListField('stats', v), [setListField]);
+  const setTopActions = useCallback((v: Array<{ action: string; count: number }>) => setListField('topActions', v), [setListField]);
+  const setLoading = useCallback((v: boolean) => setListField('loading', v), [setListField]);
+  const setSearch = useCallback((v: string) => setListField('search', v), [setListField]);
+  const setActionFilter = useCallback((v: string) => setListField('actionFilter', v), [setListField]);
+  const setUserFilter = useCallback((v: string) => setListField('userFilter', v), [setListField]);
+  const setDateFrom = useCallback((v: string) => setListField('dateFrom', v), [setListField]);
+  const setDateTo = useCallback((v: string) => setListField('dateTo', v), [setListField]);
+  const setPage = useCallback((v: number) => setListField('page', v), [setListField]);
+  const setTotalPages = useCallback((v: number) => setListField('totalPages', v), [setListField]);
+  const setSuccessMessage = useCallback((v: string) => setListField('successMessage', v), [setListField]);
+  const setErrorMessage = useCallback((v: string) => setListField('errorMessage', v), [setListField]);
+
+  type DialogsBucket = {
+    selectedActivity: ActivityLogData | null;
+    viewDialog: boolean;
+    cleanupDialog: boolean;
+    cleanupDays: number;
+  };
+  const [dialogs, setDialogs] = useState<DialogsBucket>({
+    selectedActivity: null,
+    viewDialog: false,
+    cleanupDialog: false,
+    cleanupDays: 90,
+  });
+  const setDialogsField = useCallback(<K extends keyof DialogsBucket>(key: K, value: DialogsBucket[K]) => {
+    setDialogs(prev => ({ ...prev, [key]: value }));
+  }, []);
+  const { selectedActivity, viewDialog, cleanupDialog, cleanupDays } = dialogs;
+  const setSelectedActivity = useCallback((v: ActivityLogData | null) => setDialogsField('selectedActivity', v), [setDialogsField]);
+  const setViewDialog = useCallback((v: boolean) => setDialogsField('viewDialog', v), [setDialogsField]);
+  const setCleanupDialog = useCallback((v: boolean) => setDialogsField('cleanupDialog', v), [setDialogsField]);
+  const setCleanupDays = useCallback((v: number) => setDialogsField('cleanupDays', v), [setDialogsField]);
 
   const ITEMS_PER_PAGE = 25;
 
