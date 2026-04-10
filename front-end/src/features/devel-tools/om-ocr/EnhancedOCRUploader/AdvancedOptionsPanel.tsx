@@ -11,14 +11,29 @@ import {
   Divider,
   Paper,
   Stack,
+  Tooltip,
 } from '@mui/material';
 import {
   IconChevronDown,
   IconChevronUp,
+  IconInfoCircle,
   IconSettings,
 } from '@tabler/icons-react';
 import RecordSchemaInfoPopover from '../components/RecordSchemaInfoPopover';
 import type { AdvancedOptionsPanelProps } from './types';
+
+/** Small inline info icon with a tooltip — used beside setting labels. */
+const InfoTip: React.FC<{ tip: string; ariaLabel: string }> = ({ tip, ariaLabel }) => (
+  <Tooltip title={tip} arrow placement="right">
+    <Box
+      component="span"
+      sx={{ display: 'inline-flex', color: 'text.secondary', cursor: 'help', ml: 0.5 }}
+      aria-label={ariaLabel}
+    >
+      <IconInfoCircle size={16} />
+    </Box>
+  </Tooltip>
+);
 
 const AdvancedOptionsPanel: React.FC<AdvancedOptionsPanelProps> = ({
   showAdvanced,
@@ -62,7 +77,13 @@ const AdvancedOptionsPanel: React.FC<AdvancedOptionsPanelProps> = ({
             }
             label={
               <Box>
-                <Typography variant="body2" fontWeight={500}>Auto-detect Language</Typography>
+                <Stack direction="row" alignItems="center">
+                  <Typography variant="body2" fontWeight={500}>Auto-detect Language</Typography>
+                  <InfoTip
+                    ariaLabel="Auto-detect language info"
+                    tip="Lets the engine identify the script and language per page. Recommended when uploading mixed-language ledgers. If all pages share one language, turning this OFF and setting 'OCR Language' explicitly improves accuracy and speed."
+                  />
+                </Stack>
                 <Typography variant="caption" color="text.secondary">
                   Automatically detect the language in record images
                 </Typography>
@@ -79,7 +100,13 @@ const AdvancedOptionsPanel: React.FC<AdvancedOptionsPanelProps> = ({
             }
             label={
               <Box>
-                <Typography variant="body2" fontWeight={500}>Force Grayscale Preprocessing</Typography>
+                <Stack direction="row" alignItems="center">
+                  <Typography variant="body2" fontWeight={500}>Force Grayscale Preprocessing</Typography>
+                  <InfoTip
+                    ariaLabel="Force grayscale info"
+                    tip="Drops color information before OCR. Improves accuracy for faded ink, yellowed paper, and low-contrast handwriting. Disable if your source has color-coded annotations you want preserved in the image preview."
+                  />
+                </Stack>
                 <Typography variant="caption" color="text.secondary">
                   Convert images to grayscale before OCR processing
                 </Typography>
@@ -96,7 +123,13 @@ const AdvancedOptionsPanel: React.FC<AdvancedOptionsPanelProps> = ({
             }
             label={
               <Box>
-                <Typography variant="body2" fontWeight={500}>Deskew Images Before OCR</Typography>
+                <Stack direction="row" alignItems="center">
+                  <Typography variant="body2" fontWeight={500}>Deskew Images Before OCR</Typography>
+                  <InfoTip
+                    ariaLabel="Deskew info"
+                    tip="Auto-rotates pages that were scanned at a slight angle. Strongly recommended — even a 2-3° tilt can reduce line detection accuracy significantly. Adds minor processing time per page."
+                  />
+                </Stack>
                 <Typography variant="caption" color="text.secondary">
                   Automatically correct skewed or rotated images
                 </Typography>
@@ -105,7 +138,13 @@ const AdvancedOptionsPanel: React.FC<AdvancedOptionsPanelProps> = ({
           />
 
           <Box>
-            <Typography variant="body2" fontWeight={500} sx={{ mb: 1 }}>OCR Language</Typography>
+            <Stack direction="row" alignItems="center" sx={{ mb: 1 }}>
+              <Typography variant="body2" fontWeight={500}>OCR Language</Typography>
+              <InfoTip
+                ariaLabel="OCR language info"
+                tip="Explicit language hint for the OCR engine. Overrides auto-detect when that toggle is off. Pick the primary language of the document — using the wrong language can cut accuracy in half on Cyrillic, Greek, or Romanian scripts."
+              />
+            </Stack>
             <FormControl sx={{ minWidth: 200 }}>
               <Select
                 value={settings.language}
@@ -147,9 +186,15 @@ const AdvancedOptionsPanel: React.FC<AdvancedOptionsPanelProps> = ({
 
           {/* Sticky Defaults Section */}
           <Box>
-            <Typography variant="body2" fontWeight={600} sx={{ mb: 2 }}>
-              Sticky Default Fields
-            </Typography>
+            <Stack direction="row" alignItems="center" sx={{ mb: 0.5 }}>
+              <Typography variant="body2" fontWeight={600}>
+                Sticky Default Fields
+              </Typography>
+              <InfoTip
+                ariaLabel="Sticky defaults info"
+                tip="When enabled for a record type, the field mapper is locked to that table's canonical columns and will not invent new fields. Leave ON for most users — turning OFF is only useful when experimenting with custom column schemas."
+              />
+            </Stack>
             <Typography variant="caption" color="text.secondary" sx={{ mb: 2, display: 'block' }}>
               Restrict field mapping to default database columns for each record type
             </Typography>
