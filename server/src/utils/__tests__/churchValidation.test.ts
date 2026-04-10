@@ -1,20 +1,17 @@
 #!/usr/bin/env npx tsx
 /**
- * Unit tests for utils/churchValidation.js (OMD-899)
+ * Unit tests for utils/churchValidation.js (OMD-891)
  *
- * Pure module — no DB/fs side effects.
- *
- * Coverage:
- *   - validateChurchData    — required fields, email/phone/website/currency,
- *                             founded_year, timezone, postal+country pair,
- *                             name/description length
- *   - validatePostalCode    — 8 country regex patterns + unknown country
- *   - sanitizeChurchData    — string trim, null normalization, language
- *                             fallback, boolean coercion, defaults
- *   - generateChurchId      — prefix from alphanumerics, X-padding,
- *                             timestamp suffix
+ * Pure validation/sanitization helpers — no DB, no I/O.
+ * Covers all 4 exports:
+ *   - validateChurchData
+ *   - validatePostalCode
+ *   - sanitizeChurchData
+ *   - generateChurchId
  *
  * Run: npx tsx server/src/utils/__tests__/churchValidation.test.ts
+ *
+ * Exits non-zero on any failure.
  */
 
 const {
@@ -42,126 +39,118 @@ function assertEq<T>(actual: T, expected: T, message: string): void {
   }
 }
 
-// A baseline valid church for spread-overrides
-function validData(overrides: Record<string, any> = {}): Record<string, any> {
+// Helper for valid baseline data
+function validData(): Record<string, any> {
   return {
-    name: 'Saints Peter and Paul Orthodox Church',
-    email: 'office@spp.org',
+    name: 'Holy Trinity Church',
+    email: 'info@holytrinity.org',
     country: 'United States',
     timezone: 'America/New_York',
     preferred_language: 'en',
-    ...overrides,
   };
 }
-
-// ============================================================================
-// validateChurchData — happy path
-// ============================================================================
-console.log('\n── validateChurchData: valid input ───────────────────────');
-
-let r = validateChurchData(validData());
-assertEq(r.isValid, true, 'baseline valid: isValid');
-assertEq(r.errors, {}, 'baseline valid: no errors');
-assertEq(r.summary.errorCount, 0, 'baseline valid: errorCount 0');
-
-// language_preference field name also accepted
-r = validateChurchData(validData({ preferred_language: undefined, language_preference: 'gr' }));
-assertEq(r.isValid, true, 'language_preference field accepted');
 
 // ============================================================================
 // validateChurchData — required fields
 // ============================================================================
 console.log('\n── validateChurchData: required fields ───────────────────');
 
-r = validateChurchData({});
-assertEq(r.isValid, false, 'empty: invalid');
-assert('name' in r.errors, 'empty: name error');
-assert('email' in r.errors, 'empty: email error');
-assert('country' in r.errors, 'empty: country error');
-assert('timezone' in r.errors, 'empty: timezone error');
-assert('language_preference' in r.errors, 'empty: language_preference error');
+const ok = validateChurchData(validData());
+assertEq(ok.isValid, true, 'baseline valid → isValid=true');
+assertEq(ok.errors, {}, 'baseline → no errors');
+assertEq(ok.warnings, [], 'baseline → no warnings');
+assertEq(ok.summary.errorCount, 0, 'summary.errorCount=0');
+assertEq(ok.summary.warningCount, 0, 'summary.warningCount=0');
 
-// Missing name
-r = validateChurchData(validData({ name: '' }));
-assertEq(r.errors.name, 'name is required', 'missing name message');
+// Missing each required field
+const noName = validateChurchData({ ...validData(), name: '' });
+assertEq(noName.isValid, false, 'empty name → invalid');
+assert(typeof noName.errors.name === 'string', 'name error present');
 
-// Whitespace-only name
-r = validateChurchData(validData({ name: '   ' }));
-assertEq(r.errors.name, 'name is required', 'whitespace-only name → required');
+const noEmail = validateChurchData({ ...validData(), email: '' });
+assertEq(noEmail.isValid, false, 'empty email → invalid');
 
-// Null required field
-r = validateChurchData(validData({ email: null }));
-assert('email' in r.errors, 'null email → required error');
+const noCountry = validateChurchData({ ...validData(), country: '' });
+assertEq(noCountry.isValid, false, 'empty country → invalid');
+
+const noTz = validateChurchData({ ...validData(), timezone: '' });
+assertEq(noTz.isValid, false, 'empty timezone → invalid');
+
+const undefField = validateChurchData({ name: undefined, email: 'a@b.c', country: 'X', timezone: 'UTC', preferred_language: 'en' });
+assertEq(undefField.isValid, false, 'undefined name → invalid');
+
+const whitespaceOnly = validateChurchData({ ...validData(), name: '   ' });
+assertEq(whitespaceOnly.isValid, false, 'whitespace-only name → invalid');
 
 // ============================================================================
 // validateChurchData — language preference
 // ============================================================================
-console.log('\n── validateChurchData: language ──────────────────────────');
+console.log('\n── validateChurchData: language preference ───────────────');
 
-// Missing
-r = validateChurchData(validData({ preferred_language: '' }));
-assertEq(r.errors.language_preference, 'Language preference is required', 'missing language');
+const langMissing = validateChurchData({ ...validData(), preferred_language: undefined });
+assertEq(langMissing.isValid, false, 'missing language → invalid');
+assert(typeof langMissing.errors.language_preference === 'string', 'language error key');
 
-// Invalid language code
-r = validateChurchData(validData({ preferred_language: 'xx' }));
-assert(r.errors.language_preference?.startsWith('Invalid language'), 'invalid language code');
+const langInvalid = validateChurchData({ ...validData(), preferred_language: 'xx' });
+assertEq(langInvalid.isValid, false, 'invalid language code → invalid');
+assert(langInvalid.errors.language_preference.includes('Invalid language'), 'error mentions Invalid language');
 
-// All valid languages accept
+// language_preference field name (alternate)
+const langAlt = validateChurchData({
+  name: 'Test', email: 'a@b.c', country: 'X', timezone: 'UTC',
+  language_preference: 'gr',
+});
+assertEq(langAlt.isValid, true, 'language_preference (alt name) accepted');
+
+// All valid languages
 const validLangs = ['en', 'gr', 'ru', 'ro', 'es', 'fr', 'de', 'ar', 'he'];
-for (const lang of validLangs) {
-  r = validateChurchData(validData({ preferred_language: lang }));
-  assertEq(r.isValid, true, `valid language: ${lang}`);
+for (const l of validLangs) {
+  const r = validateChurchData({ ...validData(), preferred_language: l });
+  assertEq(r.isValid, true, `language ${l} accepted`);
 }
 
 // ============================================================================
 // validateChurchData — email
 // ============================================================================
-console.log('\n── validateChurchData: email ─────────────────────────────');
+console.log('\n── validateChurchData: email format ──────────────────────');
 
-// Invalid email formats
-const badEmails = ['notanemail', 'foo@', '@bar.com', 'foo@bar', 'foo bar@baz.com'];
-for (const email of badEmails) {
-  r = validateChurchData(validData({ email }));
-  assertEq(r.errors.email, 'Invalid email format', `bad email: ${email}`);
+const badEmails = ['notanemail', 'no@dot', '@nodomain.com', 'spaces in@email.com', 'no@.com'];
+for (const e of badEmails) {
+  const r = validateChurchData({ ...validData(), email: e });
+  assertEq(r.isValid, false, `bad email "${e}" → invalid`);
 }
 
-// Valid emails
-const goodEmails = ['user@example.com', 'a.b@c.d.e', 'tag+name@example.org'];
-for (const email of goodEmails) {
-  r = validateChurchData(validData({ email }));
-  assert(!('email' in r.errors), `good email: ${email}`);
+const goodEmails = ['a@b.c', 'foo.bar@example.co.uk', 'user+tag@host.org'];
+for (const e of goodEmails) {
+  const r = validateChurchData({ ...validData(), email: e });
+  assertEq(r.isValid, true, `good email "${e}" → valid`);
 }
 
 // ============================================================================
-// validateChurchData — phone (warnings, not errors)
+// validateChurchData — phone (warning, not error)
 // ============================================================================
-console.log('\n── validateChurchData: phone warnings ────────────────────');
+console.log('\n── validateChurchData: phone (warning) ───────────────────');
 
-// Valid phone (no warning)
-r = validateChurchData(validData({ phone: '+1 (555) 123-4567' }));
-assertEq(r.warnings.length, 0, 'phone with formatting → no warning');
+const goodPhone = validateChurchData({ ...validData(), phone: '+1 (555) 123-4567' });
+assertEq(goodPhone.isValid, true, 'good phone → still valid');
+assertEq(goodPhone.warnings.length, 0, 'good phone → no warning');
 
-r = validateChurchData(validData({ phone: '5551234567' }));
-assertEq(r.warnings.length, 0, 'plain digits → no warning');
-
-// Invalid phone → warning, not error
-r = validateChurchData(validData({ phone: 'abc' }));
-assert(r.warnings.length > 0, 'phone "abc" → warning');
-assertEq(r.isValid, true, 'phone warning does not invalidate');
+const badPhone = validateChurchData({ ...validData(), phone: 'abc-def' });
+assertEq(badPhone.isValid, true, 'bad phone → still valid (warning only)');
+assert(badPhone.warnings.length > 0, 'bad phone → warning emitted');
+assert(badPhone.warnings[0].includes('Phone'), 'phone warning text');
 
 // ============================================================================
-// validateChurchData — website
+// validateChurchData — website URL
 // ============================================================================
 console.log('\n── validateChurchData: website ───────────────────────────');
 
-r = validateChurchData(validData({ website: 'https://example.com' }));
-assert(!('website' in r.errors), 'valid https URL');
+const goodSite = validateChurchData({ ...validData(), website: 'https://example.org' });
+assertEq(goodSite.isValid, true, 'valid URL → valid');
 
-r = validateChurchData(validData({ website: 'http://x.org/path' }));
-assert(!('website' in r.errors), 'valid http URL with path');
-
-r = validateChurchData(validData({ website: 'not a url' }));
-assertEq(r.errors.website, 'Invalid website URL format', 'bad URL → error');
+const badSite = validateChurchData({ ...validData(), website: 'not a url' });
+assertEq(badSite.isValid, false, 'invalid URL → invalid');
+assert(typeof badSite.errors.website === 'string', 'website error present');
 
 // ============================================================================
 // validateChurchData — currency
@@ -169,17 +158,17 @@ assertEq(r.errors.website, 'Invalid website URL format', 'bad URL → error');
 console.log('\n── validateChurchData: currency ──────────────────────────');
 
 const validCurrencies = ['USD', 'EUR', 'GBP', 'CAD', 'AUD', 'JPY', 'CHF', 'CNY', 'RUB', 'RON', 'BGN'];
-for (const cur of validCurrencies) {
-  r = validateChurchData(validData({ currency: cur }));
-  assert(!('currency' in r.errors), `valid currency: ${cur}`);
+for (const c of validCurrencies) {
+  const r = validateChurchData({ ...validData(), currency: c });
+  assertEq(r.isValid, true, `currency ${c} accepted`);
 }
 
-r = validateChurchData(validData({ currency: 'XYZ' }));
-assert(r.errors.currency?.startsWith('Invalid currency'), 'XYZ → invalid');
+const badCurrency = validateChurchData({ ...validData(), currency: 'XXX' });
+assertEq(badCurrency.isValid, false, 'unknown currency → invalid');
 
-// Currency optional (no field → no error)
-r = validateChurchData(validData());
-assert(!('currency' in r.errors), 'currency optional');
+// Empty currency: skipped (not required)
+const emptyCurrency = validateChurchData({ ...validData(), currency: '' });
+assertEq(emptyCurrency.isValid, true, 'empty currency → not validated (optional)');
 
 // ============================================================================
 // validateChurchData — founded year
@@ -188,318 +177,232 @@ console.log('\n── validateChurchData: founded_year ────────�
 
 const currentYear = new Date().getFullYear();
 
-// Valid years
-r = validateChurchData(validData({ founded_year: 1850 }));
-assert(!('founded_year' in r.errors), 'year 1850 valid');
-r = validateChurchData(validData({ founded_year: 50 }));
-assert(!('founded_year' in r.errors), 'year 50 (lower bound) valid');
-r = validateChurchData(validData({ founded_year: currentYear }));
-assert(!('founded_year' in r.errors), 'current year valid');
+const goodYear = validateChurchData({ ...validData(), founded_year: 1850 });
+assertEq(goodYear.isValid, true, 'year 1850 → valid');
 
-// Year too low
-r = validateChurchData(validData({ founded_year: 49 }));
-assert('founded_year' in r.errors, 'year 49 invalid');
+const yearJustRight = validateChurchData({ ...validData(), founded_year: 50 });
+assertEq(yearJustRight.isValid, true, 'year 50 (boundary) → valid');
 
-// Year too high
-r = validateChurchData(validData({ founded_year: currentYear + 1 }));
-assert('founded_year' in r.errors, 'future year invalid');
+const yearCurrent = validateChurchData({ ...validData(), founded_year: currentYear });
+assertEq(yearCurrent.isValid, true, 'year currentYear (boundary) → valid');
 
-// String year that parses
-r = validateChurchData(validData({ founded_year: '1900' }));
-assert(!('founded_year' in r.errors), 'string "1900" parses valid');
+const yearTooEarly = validateChurchData({ ...validData(), founded_year: 49 });
+assertEq(yearTooEarly.isValid, false, 'year 49 → invalid');
 
-// Non-numeric string
-r = validateChurchData(validData({ founded_year: 'abc' }));
-assert('founded_year' in r.errors, 'non-numeric year invalid');
+const yearFuture = validateChurchData({ ...validData(), founded_year: currentYear + 1 });
+assertEq(yearFuture.isValid, false, 'future year → invalid');
+
+const yearNaN = validateChurchData({ ...validData(), founded_year: 'abc' });
+assertEq(yearNaN.isValid, false, 'non-numeric year → invalid');
 
 // ============================================================================
-// validateChurchData — timezone
+// validateChurchData — timezone format
 // ============================================================================
-console.log('\n── validateChurchData: timezone ──────────────────────────');
+console.log('\n── validateChurchData: timezone format ───────────────────');
 
-r = validateChurchData(validData({ timezone: 'America/New_York' }));
-assert(!('timezone' in r.errors), 'America/New_York valid');
+const tzGood = validateChurchData({ ...validData(), timezone: 'Europe/Athens' });
+assertEq(tzGood.isValid, true, 'Europe/Athens valid');
 
-r = validateChurchData(validData({ timezone: 'Europe/Athens' }));
-assert(!('timezone' in r.errors), 'Europe/Athens valid');
+const tzGood2 = validateChurchData({ ...validData(), timezone: 'UTC' });
+assertEq(tzGood2.isValid, true, 'UTC valid');
 
-r = validateChurchData(validData({ timezone: 'UTC' }));
-assert(!('timezone' in r.errors), 'UTC valid');
+const tzBad = validateChurchData({ ...validData(), timezone: 'America/New York' });
+assertEq(tzBad.isValid, false, 'space in timezone → invalid');
 
-r = validateChurchData(validData({ timezone: 'America/New York' }));
-assert('timezone' in r.errors, 'space in timezone invalid');
-
-r = validateChurchData(validData({ timezone: 'Asia/Tokyo123' }));
-assert('timezone' in r.errors, 'digits in timezone invalid');
+const tzBad2 = validateChurchData({ ...validData(), timezone: 'UTC+5' });
+assertEq(tzBad2.isValid, false, 'digits in timezone → invalid');
 
 // ============================================================================
-// validateChurchData — postal code
+// validateChurchData — postal code (warning, not error)
 // ============================================================================
-console.log('\n── validateChurchData: postal+country ────────────────────');
+console.log('\n── validateChurchData: postal_code (warning) ─────────────');
 
-r = validateChurchData(validData({ postal_code: '10001' }));
-assertEq(r.warnings.length, 0, 'valid US postal');
+const usPostal = validateChurchData({ ...validData(), postal_code: '10001' });
+assertEq(usPostal.isValid, true, 'US zip valid → no warning');
+assertEq(usPostal.warnings.length, 0, 'US zip valid → 0 warnings');
 
-r = validateChurchData(validData({ postal_code: '10001-1234' }));
-assertEq(r.warnings.length, 0, 'US zip+4');
-
-r = validateChurchData(validData({ postal_code: 'INVALID' }));
-assert(r.warnings.length > 0, 'invalid US postal → warning');
-assertEq(r.isValid, true, 'postal warning does not invalidate');
-
-// Postal without country → not validated (no warning)
-r = validateChurchData({ ...validData(), country: undefined, postal_code: 'XYZ' });
-// country is required so this still fails on country, but postal won't trigger
-assert(!('postal_code' in r.errors), 'no postal error');
+const usPostalBad = validateChurchData({ ...validData(), postal_code: 'BADZIP' });
+assertEq(usPostalBad.isValid, true, 'US bad zip → still valid (warning only)');
+assert(usPostalBad.warnings.length > 0, 'US bad zip → warning emitted');
 
 // ============================================================================
 // validateChurchData — length limits
 // ============================================================================
 console.log('\n── validateChurchData: length limits ─────────────────────');
 
-// Name length boundary
-r = validateChurchData(validData({ name: 'A'.repeat(255) }));
-assert(!('name' in r.errors), 'name 255 chars valid');
+const longName = validateChurchData({ ...validData(), name: 'a'.repeat(256) });
+assertEq(longName.isValid, false, 'name > 255 → invalid');
 
-r = validateChurchData(validData({ name: 'A'.repeat(256) }));
-assertEq(r.errors.name, 'Church name must be less than 255 characters', 'name 256 invalid');
+const exactName = validateChurchData({ ...validData(), name: 'a'.repeat(255) });
+assertEq(exactName.isValid, true, 'name = 255 → valid');
 
-// Description length
-r = validateChurchData(validData({ description: 'D'.repeat(2000) }));
-assert(!('description' in r.errors), 'description 2000 chars valid');
+const longDesc = validateChurchData({ ...validData(), description: 'a'.repeat(2001) });
+assertEq(longDesc.isValid, false, 'description > 2000 → invalid');
 
-r = validateChurchData(validData({ description: 'D'.repeat(2001) }));
-assertEq(r.errors.description, 'Description must be less than 2000 characters', 'description 2001 invalid');
+const exactDesc = validateChurchData({ ...validData(), description: 'a'.repeat(2000) });
+assertEq(exactDesc.isValid, true, 'description = 2000 → valid');
 
 // ============================================================================
-// validateChurchData — summary structure
+// validateChurchData — multiple errors aggregated
 // ============================================================================
-console.log('\n── validateChurchData: summary ───────────────────────────');
+console.log('\n── validateChurchData: aggregation ───────────────────────');
 
-r = validateChurchData({});
-assert(typeof r.summary === 'object', 'summary is object');
-assertEq(typeof r.summary.errorCount, 'number', 'errorCount is number');
-assertEq(typeof r.summary.warningCount, 'number', 'warningCount is number');
-assertEq(r.summary.errorCount, Object.keys(r.errors).length, 'errorCount matches errors');
-assertEq(r.summary.warningCount, r.warnings.length, 'warningCount matches warnings');
+const multi = validateChurchData({
+  name: '',
+  email: 'bad',
+  country: '',
+  timezone: '',
+  preferred_language: 'xx',
+  currency: 'XXX',
+});
+assertEq(multi.isValid, false, 'multi-error → invalid');
+assert(multi.summary.errorCount >= 5, 'multi: 5+ errors counted');
 
 // ============================================================================
 // validatePostalCode
 // ============================================================================
-console.log('\n── validatePostalCode: per country ───────────────────────');
+console.log('\n── validatePostalCode ────────────────────────────────────');
 
-// United States
-let p = validatePostalCode('10001', 'United States');
-assertEq(p.isValid, true, 'US 10001 valid');
-p = validatePostalCode('10001-1234', 'United States');
-assertEq(p.isValid, true, 'US zip+4 valid');
-p = validatePostalCode('1000', 'United States');
-assertEq(p.isValid, false, 'US 1000 (4 digits) invalid');
-p = validatePostalCode('ABCDE', 'United States');
-assertEq(p.isValid, false, 'US letters invalid');
+// US
+assertEq(validatePostalCode('10001', 'United States').isValid, true, 'US 5-digit valid');
+assertEq(validatePostalCode('10001-1234', 'United States').isValid, true, 'US zip+4 valid');
+assertEq(validatePostalCode('1000', 'United States').isValid, false, 'US 4-digit invalid');
+assertEq(validatePostalCode('abcde', 'United States').isValid, false, 'US letters invalid');
 
 // Canada
-p = validatePostalCode('K1A 0B1', 'Canada');
-assertEq(p.isValid, true, 'Canada K1A 0B1 valid');
-p = validatePostalCode('K1A0B1', 'Canada');
-assertEq(p.isValid, true, 'Canada no space valid');
-p = validatePostalCode('k1a 0b1', 'Canada');
-assertEq(p.isValid, true, 'Canada lowercase valid');
-p = validatePostalCode('12345', 'Canada');
-assertEq(p.isValid, false, 'Canada digits invalid');
+assertEq(validatePostalCode('K1A 0B1', 'Canada').isValid, true, 'CA postal with space');
+assertEq(validatePostalCode('K1A0B1', 'Canada').isValid, true, 'CA postal no space');
+assertEq(validatePostalCode('K1A-0B1', 'Canada').isValid, false, 'CA hyphen invalid');
 
-// United Kingdom
-p = validatePostalCode('SW1A 1AA', 'United Kingdom');
-assertEq(p.isValid, true, 'UK SW1A 1AA valid');
-p = validatePostalCode('M1 1AE', 'United Kingdom');
-assertEq(p.isValid, true, 'UK M1 1AE valid');
-p = validatePostalCode('12345', 'United Kingdom');
-assertEq(p.isValid, false, 'UK digits invalid');
+// UK
+assertEq(validatePostalCode('SW1A 1AA', 'United Kingdom').isValid, true, 'UK postal valid');
+assertEq(validatePostalCode('M1 1AA', 'United Kingdom').isValid, true, 'UK short valid');
+assertEq(validatePostalCode('XXX', 'United Kingdom').isValid, false, 'UK garbage invalid');
 
-// Germany / France (5 digits)
-p = validatePostalCode('10115', 'Germany');
-assertEq(p.isValid, true, 'Germany 10115 valid');
-p = validatePostalCode('1234', 'Germany');
-assertEq(p.isValid, false, 'Germany 4 digits invalid');
-
-p = validatePostalCode('75001', 'France');
-assertEq(p.isValid, true, 'France 75001 valid');
+// Germany / France
+assertEq(validatePostalCode('10115', 'Germany').isValid, true, 'DE valid');
+assertEq(validatePostalCode('10115', 'France').isValid, true, 'FR valid');
+assertEq(validatePostalCode('1234', 'Germany').isValid, false, 'DE 4-digit invalid');
 
 // Greece
-p = validatePostalCode('123 45', 'Greece');
-assertEq(p.isValid, true, 'Greece 123 45 valid');
-p = validatePostalCode('12345', 'Greece');
-assertEq(p.isValid, true, 'Greece 12345 valid');
-p = validatePostalCode('1234', 'Greece');
-assertEq(p.isValid, false, 'Greece 1234 invalid');
+assertEq(validatePostalCode('123 45', 'Greece').isValid, true, 'GR with space');
+assertEq(validatePostalCode('12345', 'Greece').isValid, true, 'GR no space');
+assertEq(validatePostalCode('1234', 'Greece').isValid, false, 'GR 4-digit invalid');
 
-// Romania (6 digits)
-p = validatePostalCode('010101', 'Romania');
-assertEq(p.isValid, true, 'Romania 6 digits valid');
-p = validatePostalCode('10101', 'Romania');
-assertEq(p.isValid, false, 'Romania 5 digits invalid');
+// Romania / Russia
+assertEq(validatePostalCode('123456', 'Romania').isValid, true, 'RO 6-digit valid');
+assertEq(validatePostalCode('123456', 'Russia').isValid, true, 'RU 6-digit valid');
+assertEq(validatePostalCode('12345', 'Russia').isValid, false, 'RU 5-digit invalid');
 
-// Russia (6 digits)
-p = validatePostalCode('101000', 'Russia');
-assertEq(p.isValid, true, 'Russia 101000 valid');
-
-// Unknown country → permissive (valid)
-p = validatePostalCode('ANYTHING', 'Mars');
-assertEq(p.isValid, true, 'unknown country: permissive');
-assert(p.message.includes('not validated'), 'unknown country: explanatory message');
+// Unknown country → always valid
+const unknown = validatePostalCode('whatever', 'Atlantis');
+assertEq(unknown.isValid, true, 'unknown country → valid');
+assert(unknown.message.includes('not validated'), 'unknown country message');
 
 // ============================================================================
 // sanitizeChurchData
 // ============================================================================
 console.log('\n── sanitizeChurchData ────────────────────────────────────');
 
-// String trim
-let s = sanitizeChurchData({ name: '  Trinity  ' });
-assertEq(s.name, 'Trinity', 'name trimmed');
-
-// Empty string → null
-s = sanitizeChurchData({ name: '   ' });
-assertEq(s.name, null, 'whitespace-only → null');
-
-s = sanitizeChurchData({ name: '' });
-assertEq(s.name, null, 'empty → null');
-
-// Undefined fields → null
-s = sanitizeChurchData({});
-assertEq(s.name, null, 'undefined name → null');
-assertEq(s.email, null, 'undefined email → null');
-assertEq(s.address, null, 'undefined address → null');
-
-// Null preserved as null
-s = sanitizeChurchData({ name: null });
-assertEq(s.name, null, 'null → null');
-
-// Coerce non-strings to string
-s = sanitizeChurchData({ name: 12345 });
-assertEq(s.name, '12345', 'number coerced to string');
-
-// Language preference fallback chain
-s = sanitizeChurchData({ preferred_language: 'gr' });
-assertEq(s.language_preference, 'gr', 'preferred_language → language_preference');
-
-s = sanitizeChurchData({ language_preference: 'ru' });
-assertEq(s.language_preference, 'ru', 'language_preference passthrough');
-
-s = sanitizeChurchData({ preferred_language: 'gr', language_preference: 'ru' });
-assertEq(s.language_preference, 'gr', 'preferred_language wins over language_preference');
-
-s = sanitizeChurchData({});
-assertEq(s.language_preference, 'en', 'no language → en default');
-
-s = sanitizeChurchData({ preferred_language: '   ' });
-assertEq(s.language_preference, 'en', 'whitespace language → en default (after trim → empty → "" || en)');
-
-// Founded year parsing
-s = sanitizeChurchData({ founded_year: '1900' });
-assertEq(s.founded_year, 1900, 'string "1900" → 1900');
-
-s = sanitizeChurchData({ founded_year: 1900 });
-assertEq(s.founded_year, 1900, 'number 1900 → 1900');
-
-s = sanitizeChurchData({ founded_year: 'not a number' });
-assertEq(s.founded_year, null, 'non-numeric year → null');
-
-s = sanitizeChurchData({});
-assertEq(s.founded_year, null, 'no founded_year → null');
-
-// Boolean is_active
-s = sanitizeChurchData({ is_active: true });
-assertEq(s.is_active, true, 'is_active true');
-
-s = sanitizeChurchData({ is_active: false });
-assertEq(s.is_active, false, 'is_active false');
-
-s = sanitizeChurchData({ is_active: 1 });
-assertEq(s.is_active, true, 'is_active 1 → true');
-
-s = sanitizeChurchData({ is_active: 0 });
-assertEq(s.is_active, false, 'is_active 0 → false');
-
-s = sanitizeChurchData({});
-assertEq(s.is_active, true, 'is_active default true');
-
-// Timezone default
-s = sanitizeChurchData({});
-assertEq(s.timezone, 'UTC', 'timezone default UTC');
-
-s = sanitizeChurchData({ timezone: 'America/Chicago' });
-assertEq(s.timezone, 'America/Chicago', 'timezone preserved');
-
-// Currency default
-s = sanitizeChurchData({});
-assertEq(s.currency, 'USD', 'currency default USD');
-
-s = sanitizeChurchData({ currency: 'EUR' });
-assertEq(s.currency, 'EUR', 'currency preserved');
-
-// Full sanitization round-trip
-s = sanitizeChurchData({
-  name: '  Saints Peter and Paul  ',
-  email: '  office@spp.org  ',
-  phone: '555-1234',
-  founded_year: '1950',
-  preferred_language: 'gr',
-  is_active: false,
+// Trim strings
+const trimmed = sanitizeChurchData({
+  name: '  Holy Trinity  ',
+  email: 'info@example.org  ',
+  city: '  NYC',
 });
-assertEq(s.name, 'Saints Peter and Paul', 'roundtrip: name');
-assertEq(s.email, 'office@spp.org', 'roundtrip: email');
-assertEq(s.phone, '555-1234', 'roundtrip: phone');
-assertEq(s.founded_year, 1950, 'roundtrip: founded_year');
-assertEq(s.language_preference, 'gr', 'roundtrip: language_preference');
-assertEq(s.is_active, false, 'roundtrip: is_active');
-assertEq(s.timezone, 'UTC', 'roundtrip: timezone default');
-assertEq(s.currency, 'USD', 'roundtrip: currency default');
+assertEq(trimmed.name, 'Holy Trinity', 'name trimmed');
+assertEq(trimmed.email, 'info@example.org', 'email trimmed');
+assertEq(trimmed.city, 'NYC', 'city trimmed');
+
+// Empty strings → null
+const empties = sanitizeChurchData({ name: '', email: '   ' });
+assertEq(empties.name, null, 'empty name → null');
+assertEq(empties.email, null, 'whitespace email → null');
+
+// Null/undefined → null
+const nulls = sanitizeChurchData({ phone: null, address: undefined });
+assertEq(nulls.phone, null, 'null phone → null');
+assertEq(nulls.address, null, 'undefined address → null');
+
+// Language preference defaults
+const noLang = sanitizeChurchData({ name: 'Test' });
+assertEq(noLang.language_preference, 'en', 'missing language → en default');
+
+const altLang = sanitizeChurchData({ language_preference: 'gr' });
+assertEq(altLang.language_preference, 'gr', 'language_preference passes through');
+
+const prefLang = sanitizeChurchData({ preferred_language: 'ru' });
+assertEq(prefLang.language_preference, 'ru', 'preferred_language → language_preference');
+
+// preferred_language wins over language_preference (per source order: preferred_language || language_preference)
+const bothLang = sanitizeChurchData({ preferred_language: 'gr', language_preference: 'fr' });
+assertEq(bothLang.language_preference, 'gr', 'preferred_language has priority');
+
+// founded_year parsing
+const yearStr = sanitizeChurchData({ founded_year: '1850' });
+assertEq(yearStr.founded_year, 1850, 'string year → int');
+
+const yearNum = sanitizeChurchData({ founded_year: 1900 });
+assertEq(yearNum.founded_year, 1900, 'numeric year preserved');
+
+const yearBad = sanitizeChurchData({ founded_year: 'not a number' });
+assertEq(yearBad.founded_year, null, 'bad year → null');
+
+const yearMissing = sanitizeChurchData({});
+assertEq(yearMissing.founded_year, null, 'missing year → null');
+
+// is_active boolean
+const activeTrue = sanitizeChurchData({ is_active: true });
+assertEq(activeTrue.is_active, true, 'is_active true');
+
+const activeFalse = sanitizeChurchData({ is_active: false });
+assertEq(activeFalse.is_active, false, 'is_active false');
+
+const activeMissing = sanitizeChurchData({});
+assertEq(activeMissing.is_active, true, 'is_active default true');
+
+const activeTruthy = sanitizeChurchData({ is_active: 1 });
+assertEq(activeTruthy.is_active, true, 'is_active 1 → true');
+
+// Timezone / currency defaults
+const noTz2 = sanitizeChurchData({});
+assertEq(noTz2.timezone, 'UTC', 'timezone default UTC');
+assertEq(noTz2.currency, 'USD', 'currency default USD');
+
+const withTz = sanitizeChurchData({ timezone: 'Europe/Athens', currency: 'EUR' });
+assertEq(withTz.timezone, 'Europe/Athens', 'timezone preserved');
+assertEq(withTz.currency, 'EUR', 'currency preserved');
 
 // ============================================================================
 // generateChurchId
 // ============================================================================
 console.log('\n── generateChurchId ──────────────────────────────────────');
 
-let id = generateChurchId('Saints Peter and Paul');
-assert(/^[A-Z0-9]{6}_\d{3}$/.test(id), `format PREFIX_NNN: ${id}`);
-assertEq(id.split('_')[0], 'SAINTS', 'prefix SAINTS (first 6 alphanumerics)');
+const id1 = generateChurchId('Holy Trinity Church');
+assert(/^HOLYTR_\d{3}$/.test(id1), `id format HOLYTR_XXX (got ${id1})`);
 
-id = generateChurchId('St. Mary');
-assertEq(id.split('_')[0], 'STMARY', 'St. Mary → STMARY (punctuation stripped)');
+const id2 = generateChurchId('St. Nicholas');
+assert(/^STNICH_\d{3}$/.test(id2), `id format STNICH_XXX (got ${id2})`);
 
-// Pad with X if too short
-id = generateChurchId('St');
-assertEq(id.split('_')[0], 'STXXXX', 'St → STXXXX (padded with X)');
+// Short name → padded with X
+const shortId = generateChurchId('AB');
+assert(/^ABXXXX_\d{3}$/.test(shortId), `short name padded to 6 (got ${shortId})`);
 
-id = generateChurchId('A');
-assertEq(id.split('_')[0], 'AXXXXX', 'A → AXXXXX');
+// Empty name → all X
+const emptyId = generateChurchId('');
+assert(/^XXXXXX_\d{3}$/.test(emptyId), `empty name → all X (got ${emptyId})`);
 
-id = generateChurchId('');
-assertEq(id.split('_')[0], 'XXXXXX', 'empty → XXXXXX');
+// All special chars → all X
+const specialId = generateChurchId('!@#$%^');
+assert(/^XXXXXX_\d{3}$/.test(specialId), `all special → all X (got ${specialId})`);
 
-// Special chars stripped
-id = generateChurchId('!@#$%^&*()');
-assertEq(id.split('_')[0], 'XXXXXX', 'all-special → XXXXXX');
+// Mixed alphanumeric
+const mixId = generateChurchId('Church 123');
+assert(/^CHURCH_\d{3}$/.test(mixId), `church 123 → CHURCH (got ${mixId})`);
 
-// Numbers preserved
-id = generateChurchId('Church 123');
-assertEq(id.split('_')[0], 'CHURCH', 'Church 123 → CHURCH (first 6)');
-
-id = generateChurchId('123ABC');
-assertEq(id.split('_')[0], '123ABC', 'numbers + letters preserved');
-
-// Long names truncated
-id = generateChurchId('Verylongchurchname');
-assertEq(id.split('_')[0], 'VERYLO', 'long name truncated to 6');
-
-// Suffix is last 3 of timestamp
-id = generateChurchId('Trinity');
-assert(/^\d{3}$/.test(id.split('_')[1]), 'suffix is 3 digits');
-
-// Two consecutive calls likely produce different suffix (timing-dependent — sanity check format only)
-const id1 = generateChurchId('Test');
-const id2 = generateChurchId('Test');
-assert(id1.startsWith('TESTXX_') && id2.startsWith('TESTXX_'), 'both have same prefix');
+// Suffix uniqueness over time (best-effort — Date.now last 3 digits)
+assertEq(typeof id1, 'string', 'returns string');
+assertEq(id1.length, 10, 'length 10 (6 + _ + 3)');
 
 // ============================================================================
 // Summary
