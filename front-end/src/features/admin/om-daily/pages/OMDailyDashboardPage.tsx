@@ -46,27 +46,74 @@ const OMDailyDashboardPage: React.FC = () => {
   const navigate = useNavigate();
   const { toast, showToast, closeToast } = useToast();
 
-  // State
-  const [dashboard, setDashboard] = useState<DashboardData | null>(null);
-  const [extended, setExtended] = useState<ExtendedDashboard | null>(null);
-  const [ghStatus, setGhStatus] = useState<GitHubSyncStatus | null>(null);
-  const [ghSyncing, setGhSyncing] = useState(false);
-  const [ghSyncProgress, setGhSyncProgress] = useState<{ phase: string; current: number; total: number; summary: any; error: string | null } | null>(null);
-  const [buildInfo, setBuildInfo] = useState<any>(null);
-  const [csList, setCsList] = useState<any[]>([]);
-  const [expandedPhase, setExpandedPhase] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [pushing, setPushing] = useState(false);
+  // Bucketed state: overview (10 fields)
+  type GhSyncProgress = { phase: string; current: number; total: number; summary: any; error: string | null } | null;
+  interface OverviewState {
+    dashboard: DashboardData | null;
+    extended: ExtendedDashboard | null;
+    ghStatus: GitHubSyncStatus | null;
+    ghSyncing: boolean;
+    ghSyncProgress: GhSyncProgress;
+    buildInfo: any;
+    csList: any[];
+    expandedPhase: string | null;
+    loading: boolean;
+    pushing: boolean;
+  }
+  const [overviewState, setOverviewState] = useState<OverviewState>({
+    dashboard: null,
+    extended: null,
+    ghStatus: null,
+    ghSyncing: false,
+    ghSyncProgress: null,
+    buildInfo: null,
+    csList: [],
+    expandedPhase: null,
+    loading: true,
+    pushing: false,
+  });
+  const setOverviewField = useCallback(<K extends keyof OverviewState>(key: K, value: OverviewState[K]) => {
+    setOverviewState(prev => ({ ...prev, [key]: value }));
+  }, []);
+  const { dashboard, extended, ghStatus, ghSyncing, ghSyncProgress, buildInfo, csList, expandedPhase, loading, pushing } = overviewState;
+  const setDashboard = useCallback((v: DashboardData | null) => setOverviewField('dashboard', v), [setOverviewField]);
+  const setExtended = useCallback((v: ExtendedDashboard | null) => setOverviewField('extended', v), [setOverviewField]);
+  const setGhStatus = useCallback((v: GitHubSyncStatus | null) => setOverviewField('ghStatus', v), [setOverviewField]);
+  const setGhSyncing = useCallback((v: boolean) => setOverviewField('ghSyncing', v), [setOverviewField]);
+  const setGhSyncProgress = useCallback((v: GhSyncProgress) => setOverviewField('ghSyncProgress', v), [setOverviewField]);
+  const setBuildInfo = useCallback((v: any) => setOverviewField('buildInfo', v), [setOverviewField]);
+  const setCsList = useCallback((v: any[]) => setOverviewField('csList', v), [setOverviewField]);
+  const setExpandedPhase = useCallback((v: string | null) => setOverviewField('expandedPhase', v), [setOverviewField]);
+  const setLoading = useCallback((v: boolean) => setOverviewField('loading', v), [setOverviewField]);
+  const setPushing = useCallback((v: boolean) => setOverviewField('pushing', v), [setOverviewField]);
 
-  // Item dialog
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [editingItem, setEditingItem] = useState<DailyItem | null>(null);
-  const [form, setForm] = useState<ItemFormData>(DEFAULT_FORM);
-
-  // Prompt plan dialog
-  const [promptDialogOpen, setPromptDialogOpen] = useState(false);
-  const [promptForm, setPromptForm] = useState({ title: '', description: '', agent_tool: 'claude_cli' });
-  const [promptSubmitting, setPromptSubmitting] = useState(false);
+  // Bucketed state: dialogs (6 fields)
+  interface DialogsState {
+    dialogOpen: boolean;
+    editingItem: DailyItem | null;
+    form: ItemFormData;
+    promptDialogOpen: boolean;
+    promptForm: { title: string; description: string; agent_tool: string };
+    promptSubmitting: boolean;
+  }
+  const [dialogsState, setDialogsState] = useState<DialogsState>({
+    dialogOpen: false,
+    editingItem: null,
+    form: DEFAULT_FORM,
+    promptDialogOpen: false,
+    promptForm: { title: '', description: '', agent_tool: 'claude_cli' },
+    promptSubmitting: false,
+  });
+  const setDialogsField = useCallback(<K extends keyof DialogsState>(key: K, value: DialogsState[K]) => {
+    setDialogsState(prev => ({ ...prev, [key]: value }));
+  }, []);
+  const { dialogOpen, editingItem, form, promptDialogOpen, promptForm, promptSubmitting } = dialogsState;
+  const setDialogOpen = useCallback((v: boolean) => setDialogsField('dialogOpen', v), [setDialogsField]);
+  const setEditingItem = useCallback((v: DailyItem | null) => setDialogsField('editingItem', v), [setDialogsField]);
+  const setForm = useCallback((v: ItemFormData) => setDialogsField('form', v), [setDialogsField]);
+  const setPromptDialogOpen = useCallback((v: boolean) => setDialogsField('promptDialogOpen', v), [setDialogsField]);
+  const setPromptForm = useCallback((v: DialogsState['promptForm']) => setDialogsField('promptForm', v), [setDialogsField]);
+  const setPromptSubmitting = useCallback((v: boolean) => setDialogsField('promptSubmitting', v), [setDialogsField]);
 
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
