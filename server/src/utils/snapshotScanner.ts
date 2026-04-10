@@ -71,6 +71,13 @@ function createDate(month: number, year: number): Date {
   return new Date(year, month - 1, 1);
 }
 
+// ── Test-only exports (private helpers exposed for unit tests) ────────────
+export const __test__ = {
+  parseSnapshotId,
+  generateLabel,
+  createDate,
+};
+
 /**
  * Scan a directory for MM-YYYY snapshot folders
  * @param sourcePath - Base directory to scan
