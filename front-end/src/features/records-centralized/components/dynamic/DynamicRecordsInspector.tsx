@@ -72,43 +72,103 @@ const RECORD_TYPES = [
 // ─── Component ────────────────────────────────────────────────────────────────
 
 const DynamicRecordsInspector: React.FC = () => {
-  // ── Church state ──
-  const [churches, setChurches] = useState<Church[]>([]);
-  const [churchId, setChurchId] = useState<string>('');
-  const [loadingChurches, setLoadingChurches] = useState(true);
-
-  // ── Create church dialog ──
-  const [createDialogOpen, setCreateDialogOpen] = useState(false);
-  const [newChurchName, setNewChurchName] = useState('');
-  const [newChurchEmail, setNewChurchEmail] = useState('');
-  const [creating, setCreating] = useState(false);
-
-  // ── Stats ──
-  const [stats, setStats] = useState<Stats | null>(null);
-  const [loadingStats, setLoadingStats] = useState(false);
-
-  // ── Seeding ──
+  // setSeedCounts uses updater fn pattern — keep standalone
   const [seedCounts, setSeedCounts] = useState({ baptism: 100, marriage: 50, funeral: 50 });
-  const [yearRange, setYearRange] = useState<[number, number]>([1940, 2024]);
-  const [seeding, setSeeding] = useState(false);
-  const [seedProgress, setSeedProgress] = useState<{ current: number; total: number; type: string } | null>(null);
-
-  // ── Records browser ──
-  const [records, setRecords] = useState<any[]>([]);
-  const [recordsTotal, setRecordsTotal] = useState(0);
-  const [recordsPage, setRecordsPage] = useState(0);
-  const [recordsPerPage, setRecordsPerPage] = useState(50);
-  const [recordsFilter, setRecordsFilter] = useState('all');
-  const [recordsSearch, setRecordsSearch] = useState('');
-  const [loadingRecords, setLoadingRecords] = useState(false);
-  const [showRecords, setShowRecords] = useState(false);
-
-  // ── Purge ──
-  const [purgeDialogOpen, setPurgeDialogOpen] = useState(false);
-  const [purging, setPurging] = useState(false);
-
-  // ── Toast ──
+  // toast kept standalone for clarity
   const [toast, setToast] = useState<{ msg: string; sev: 'success' | 'error' | 'warning' | 'info' } | null>(null);
+
+  // ── Church + create dialog bucket ───────────────────────────────────────
+  const [church, setChurch] = useState<{
+    churches: Church[];
+    churchId: string;
+    loadingChurches: boolean;
+    createDialogOpen: boolean;
+    newChurchName: string;
+    newChurchEmail: string;
+    creating: boolean;
+  }>({
+    churches: [],
+    churchId: '',
+    loadingChurches: true,
+    createDialogOpen: false,
+    newChurchName: '',
+    newChurchEmail: '',
+    creating: false,
+  });
+  const setChurchField = useCallback(<K extends keyof typeof church>(key: K, value: typeof church[K]) => {
+    setChurch(prev => ({ ...prev, [key]: value }));
+  }, []);
+  const setChurches = useCallback((v: Church[]) => setChurchField('churches', v), [setChurchField]);
+  const setChurchId = useCallback((v: string) => setChurchField('churchId', v), [setChurchField]);
+  const setLoadingChurches = useCallback((v: boolean) => setChurchField('loadingChurches', v), [setChurchField]);
+  const setCreateDialogOpen = useCallback((v: boolean) => setChurchField('createDialogOpen', v), [setChurchField]);
+  const setNewChurchName = useCallback((v: string) => setChurchField('newChurchName', v), [setChurchField]);
+  const setNewChurchEmail = useCallback((v: string) => setChurchField('newChurchEmail', v), [setChurchField]);
+  const setCreating = useCallback((v: boolean) => setChurchField('creating', v), [setChurchField]);
+  const { churches, churchId, loadingChurches, createDialogOpen, newChurchName, newChurchEmail, creating } = church;
+
+  // ── Stats + seeding bucket ──────────────────────────────────────────────
+  const [statsSeed, setStatsSeed] = useState<{
+    stats: Stats | null;
+    loadingStats: boolean;
+    yearRange: [number, number];
+    seeding: boolean;
+    seedProgress: { current: number; total: number; type: string } | null;
+    purgeDialogOpen: boolean;
+    purging: boolean;
+  }>({
+    stats: null,
+    loadingStats: false,
+    yearRange: [1940, 2024],
+    seeding: false,
+    seedProgress: null,
+    purgeDialogOpen: false,
+    purging: false,
+  });
+  const setStatsSeedField = useCallback(<K extends keyof typeof statsSeed>(key: K, value: typeof statsSeed[K]) => {
+    setStatsSeed(prev => ({ ...prev, [key]: value }));
+  }, []);
+  const setStats = useCallback((v: Stats | null) => setStatsSeedField('stats', v), [setStatsSeedField]);
+  const setLoadingStats = useCallback((v: boolean) => setStatsSeedField('loadingStats', v), [setStatsSeedField]);
+  const setYearRange = useCallback((v: [number, number]) => setStatsSeedField('yearRange', v), [setStatsSeedField]);
+  const setSeeding = useCallback((v: boolean) => setStatsSeedField('seeding', v), [setStatsSeedField]);
+  const setSeedProgress = useCallback((v: { current: number; total: number; type: string } | null) => setStatsSeedField('seedProgress', v), [setStatsSeedField]);
+  const setPurgeDialogOpen = useCallback((v: boolean) => setStatsSeedField('purgeDialogOpen', v), [setStatsSeedField]);
+  const setPurging = useCallback((v: boolean) => setStatsSeedField('purging', v), [setStatsSeedField]);
+  const { stats, loadingStats, yearRange, seeding, seedProgress, purgeDialogOpen, purging } = statsSeed;
+
+  // ── Records browser bucket ──────────────────────────────────────────────
+  const [recordsState, setRecordsState] = useState<{
+    records: any[];
+    recordsTotal: number;
+    recordsPage: number;
+    recordsPerPage: number;
+    recordsFilter: string;
+    recordsSearch: string;
+    loadingRecords: boolean;
+    showRecords: boolean;
+  }>({
+    records: [],
+    recordsTotal: 0,
+    recordsPage: 0,
+    recordsPerPage: 50,
+    recordsFilter: 'all',
+    recordsSearch: '',
+    loadingRecords: false,
+    showRecords: false,
+  });
+  const setRecordsField = useCallback(<K extends keyof typeof recordsState>(key: K, value: typeof recordsState[K]) => {
+    setRecordsState(prev => ({ ...prev, [key]: value }));
+  }, []);
+  const setRecords = useCallback((v: any[]) => setRecordsField('records', v), [setRecordsField]);
+  const setRecordsTotal = useCallback((v: number) => setRecordsField('recordsTotal', v), [setRecordsField]);
+  const setRecordsPage = useCallback((v: number) => setRecordsField('recordsPage', v), [setRecordsField]);
+  const setRecordsPerPage = useCallback((v: number) => setRecordsField('recordsPerPage', v), [setRecordsField]);
+  const setRecordsFilter = useCallback((v: string) => setRecordsField('recordsFilter', v), [setRecordsField]);
+  const setRecordsSearch = useCallback((v: string) => setRecordsField('recordsSearch', v), [setRecordsField]);
+  const setLoadingRecords = useCallback((v: boolean) => setRecordsField('loadingRecords', v), [setRecordsField]);
+  const setShowRecords = useCallback((v: boolean) => setRecordsField('showRecords', v), [setRecordsField]);
+  const { records, recordsTotal, recordsPage, recordsPerPage, recordsFilter, recordsSearch, loadingRecords, showRecords } = recordsState;
 
   const searchDebounce = useRef<ReturnType<typeof setTimeout>>();
 
