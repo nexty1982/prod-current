@@ -117,38 +117,85 @@ const EXTRACTION_MODES: Array<{ value: ExtractionMode; label: string; desc: stri
 const LayoutTemplateEditorPage: React.FC = () => {
   const theme = useTheme();
 
-  // Template list
-  const [templates, setTemplates] = useState<LayoutTemplate[]>([]);
-  const [selectedId, setSelectedId] = useState<number | null>(null);
-  const [loading, setLoading] = useState(false);
-
-  // Editor state
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
-  const [recordType, setRecordType] = useState('marriage');
-  const [extractionMode, setExtractionMode] = useState<ExtractionMode>('tabular');
-  const [columnBands, setColumnBands] = useState<ColumnBand[]>([]);
-  const [headerY, setHeaderY] = useState(0.15);
-  const [isDefault, setIsDefault] = useState(false);
+  // setFields uses updater fn pattern — keep standalone
   const [fields, setFields] = useState<TemplateField[]>([]);
-  const [recordRegions, setRecordRegions] = useState<FractionalBBox[]>([]);
-
-  // Reference job
-  const [refJobId, setRefJobId] = useState<number | null>(null);
-  const [refJobs, setRefJobs] = useState<JobOption[]>([]);
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
-
-  // Preview
-  const [previewRows, setPreviewRows] = useState<PreviewRow[]>([]);
-  const [previewHeaders, setPreviewHeaders] = useState<Array<{ column_key: string; text: string }>>([]);
-  const [previewing, setPreviewing] = useState(false);
-
-  // Saving
-  const [saving, setSaving] = useState(false);
-  const [dirty, setDirty] = useState(false);
-
-  // Toast
+  // toast kept standalone for clarity
   const [toast, setToast] = useState<{ msg: string; severity: 'success' | 'error' | 'info' } | null>(null);
+
+  // ── Editor bucket (template list + form fields) ──────────────────────────
+  const [editor, setEditor] = useState<{
+    templates: LayoutTemplate[];
+    selectedId: number | null;
+    loading: boolean;
+    name: string;
+    description: string;
+    recordType: string;
+    extractionMode: ExtractionMode;
+    columnBands: ColumnBand[];
+    headerY: number;
+    isDefault: boolean;
+    recordRegions: FractionalBBox[];
+  }>({
+    templates: [],
+    selectedId: null,
+    loading: false,
+    name: '',
+    description: '',
+    recordType: 'marriage',
+    extractionMode: 'tabular',
+    columnBands: [],
+    headerY: 0.15,
+    isDefault: false,
+    recordRegions: [],
+  });
+  const setEditorField = useCallback(<K extends keyof typeof editor>(key: K, value: typeof editor[K]) => {
+    setEditor(prev => ({ ...prev, [key]: value }));
+  }, []);
+  const setTemplates = useCallback((v: LayoutTemplate[]) => setEditorField('templates', v), [setEditorField]);
+  const setSelectedId = useCallback((v: number | null) => setEditorField('selectedId', v), [setEditorField]);
+  const setLoading = useCallback((v: boolean) => setEditorField('loading', v), [setEditorField]);
+  const setName = useCallback((v: string) => setEditorField('name', v), [setEditorField]);
+  const setDescription = useCallback((v: string) => setEditorField('description', v), [setEditorField]);
+  const setRecordType = useCallback((v: string) => setEditorField('recordType', v), [setEditorField]);
+  const setExtractionMode = useCallback((v: ExtractionMode) => setEditorField('extractionMode', v), [setEditorField]);
+  const setColumnBands = useCallback((v: ColumnBand[]) => setEditorField('columnBands', v), [setEditorField]);
+  const setHeaderY = useCallback((v: number) => setEditorField('headerY', v), [setEditorField]);
+  const setIsDefault = useCallback((v: boolean) => setEditorField('isDefault', v), [setEditorField]);
+  const setRecordRegions = useCallback((v: FractionalBBox[]) => setEditorField('recordRegions', v), [setEditorField]);
+  const { templates, selectedId, loading, name, description, recordType, extractionMode, columnBands, headerY, isDefault, recordRegions } = editor;
+
+  // ── Reference + preview + save bucket ────────────────────────────────────
+  const [aux, setAux] = useState<{
+    refJobId: number | null;
+    refJobs: JobOption[];
+    imageUrl: string | null;
+    previewRows: PreviewRow[];
+    previewHeaders: Array<{ column_key: string; text: string }>;
+    previewing: boolean;
+    saving: boolean;
+    dirty: boolean;
+  }>({
+    refJobId: null,
+    refJobs: [],
+    imageUrl: null,
+    previewRows: [],
+    previewHeaders: [],
+    previewing: false,
+    saving: false,
+    dirty: false,
+  });
+  const setAuxField = useCallback(<K extends keyof typeof aux>(key: K, value: typeof aux[K]) => {
+    setAux(prev => ({ ...prev, [key]: value }));
+  }, []);
+  const setRefJobId = useCallback((v: number | null) => setAuxField('refJobId', v), [setAuxField]);
+  const setRefJobs = useCallback((v: JobOption[]) => setAuxField('refJobs', v), [setAuxField]);
+  const setImageUrl = useCallback((v: string | null) => setAuxField('imageUrl', v), [setAuxField]);
+  const setPreviewRows = useCallback((v: PreviewRow[]) => setAuxField('previewRows', v), [setAuxField]);
+  const setPreviewHeaders = useCallback((v: Array<{ column_key: string; text: string }>) => setAuxField('previewHeaders', v), [setAuxField]);
+  const setPreviewing = useCallback((v: boolean) => setAuxField('previewing', v), [setAuxField]);
+  const setSaving = useCallback((v: boolean) => setAuxField('saving', v), [setAuxField]);
+  const setDirty = useCallback((v: boolean) => setAuxField('dirty', v), [setAuxField]);
+  const { refJobId, refJobs, imageUrl, previewRows, previewHeaders, previewing, saving, dirty } = aux;
 
   const isFormMode = extractionMode === 'form' || extractionMode === 'multi_form' || extractionMode === 'auto';
 
