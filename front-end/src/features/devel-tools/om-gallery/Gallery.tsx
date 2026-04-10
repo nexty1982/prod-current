@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { apiClient } from '@/api/utils/axiosInstance';
 import {
   Box,
@@ -47,24 +47,78 @@ import { exportCSV, exportUsedImages } from './Gallery/exportUtils';
 
 const Gallery: React.FC = () => {
   const theme = useTheme();
-  const [images, setImages] = useState<GalleryImage[]>([]);
-  const [imageDialogOpen, setImageDialogOpen] = useState(false);
-  const [selectedImage, setSelectedImage] = useState<GalleryImage | null>(null);
-  const [deleting, setDeleting] = useState(false);
-  const [selectedRows, setSelectedRows] = useState<GridRowSelectionModel>([]);
+  type GalleryBucket = {
+    images: GalleryImage[];
+    imageDialogOpen: boolean;
+    selectedImage: GalleryImage | null;
+    deleting: boolean;
+    selectedRows: GridRowSelectionModel;
+    sortBy: SortBy;
+    sortOrder: SortOrder;
+    usageFilter: UsageFilter;
+  };
+  const [gallery, setGallery] = useState<GalleryBucket>({
+    images: [],
+    imageDialogOpen: false,
+    selectedImage: null,
+    deleting: false,
+    selectedRows: [],
+    sortBy: 'date',
+    sortOrder: 'desc',
+    usageFilter: 'all',
+  });
+  const setGalleryField = useCallback(<K extends keyof GalleryBucket>(key: K, value: GalleryBucket[K]) => {
+    setGallery(prev => ({ ...prev, [key]: value }));
+  }, []);
+  const { images, imageDialogOpen, selectedImage, deleting, selectedRows, sortBy, sortOrder, usageFilter } = gallery;
+  const setImages: React.Dispatch<React.SetStateAction<GalleryImage[]>> = useCallback((action) => {
+    setGallery(prev => ({ ...prev, images: typeof action === 'function' ? (action as (p: GalleryImage[]) => GalleryImage[])(prev.images) : action }));
+  }, []);
+  const setImageDialogOpen = useCallback((v: boolean) => setGalleryField('imageDialogOpen', v), [setGalleryField]);
+  const setSelectedImage = useCallback((v: GalleryImage | null) => setGalleryField('selectedImage', v), [setGalleryField]);
+  const setDeleting = useCallback((v: boolean) => setGalleryField('deleting', v), [setGalleryField]);
+  const setSelectedRows = useCallback((v: GridRowSelectionModel) => setGalleryField('selectedRows', v), [setGalleryField]);
+  const setSortBy = useCallback((v: SortBy) => setGalleryField('sortBy', v), [setGalleryField]);
+  const setSortOrder = useCallback((v: SortOrder) => setGalleryField('sortOrder', v), [setGalleryField]);
+  const setUsageFilter = useCallback((v: UsageFilter) => setGalleryField('usageFilter', v), [setGalleryField]);
+
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [sortBy, setSortBy] = useState<SortBy>('date');
-  const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
-  const [usageFilter, setUsageFilter] = useState<UsageFilter>('all');
-  const [exportingUsedImages, setExportingUsedImages] = useState(false);
-  const [selectedDirectory, setSelectedDirectory] = useState<string>(''); // Default to root (empty = all images)
-  const [directoryTree, setDirectoryTree] = useState<any>({ directories: [], files: [] });
-  const [loadingTree, setLoadingTree] = useState(false);
-  const [moveDialogOpen, setMoveDialogOpen] = useState(false);
-  const [renameDialogOpen, setRenameDialogOpen] = useState(false);
-  const [itemToMove, setItemToMove] = useState<GalleryImage | null>(null);
-  const [newName, setNewName] = useState('');
-  const [targetDir, setTargetDir] = useState('review-required');
+
+  type DirBucket = {
+    exportingUsedImages: boolean;
+    selectedDirectory: string;
+    directoryTree: any;
+    loadingTree: boolean;
+    moveDialogOpen: boolean;
+    renameDialogOpen: boolean;
+    itemToMove: GalleryImage | null;
+    newName: string;
+    targetDir: string;
+  };
+  const [dir, setDir] = useState<DirBucket>({
+    exportingUsedImages: false,
+    selectedDirectory: '',
+    directoryTree: { directories: [], files: [] },
+    loadingTree: false,
+    moveDialogOpen: false,
+    renameDialogOpen: false,
+    itemToMove: null,
+    newName: '',
+    targetDir: 'review-required',
+  });
+  const setDirField = useCallback(<K extends keyof DirBucket>(key: K, value: DirBucket[K]) => {
+    setDir(prev => ({ ...prev, [key]: value }));
+  }, []);
+  const { exportingUsedImages, selectedDirectory, directoryTree, loadingTree, moveDialogOpen, renameDialogOpen, itemToMove, newName, targetDir } = dir;
+  const setExportingUsedImages = useCallback((v: boolean) => setDirField('exportingUsedImages', v), [setDirField]);
+  const setSelectedDirectory = useCallback((v: string) => setDirField('selectedDirectory', v), [setDirField]);
+  const setDirectoryTree = useCallback((v: any) => setDirField('directoryTree', v), [setDirField]);
+  const setLoadingTree = useCallback((v: boolean) => setDirField('loadingTree', v), [setDirField]);
+  const setMoveDialogOpen = useCallback((v: boolean) => setDirField('moveDialogOpen', v), [setDirField]);
+  const setRenameDialogOpen = useCallback((v: boolean) => setDirField('renameDialogOpen', v), [setDirField]);
+  const setItemToMove = useCallback((v: GalleryImage | null) => setDirField('itemToMove', v), [setDirField]);
+  const setNewName = useCallback((v: string) => setDirField('newName', v), [setDirField]);
+  const setTargetDir = useCallback((v: string) => setDirField('targetDir', v), [setDirField]);
 
   // Upload hook
   const {
