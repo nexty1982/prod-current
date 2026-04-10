@@ -74,29 +74,87 @@ const CertificateGeneratorPage: React.FC = () => {
   const churchIdParam = searchParams.get('churchId');
   const churchId = (!churchIdParam || churchIdParam === '0') ? '46' : churchIdParam;
 
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [templateUrl, setTemplateUrl] = useState<string | null>(null);
-  const [recordData, setRecordData] = useState<RecordData | null>(null);
-  const [zoom, setZoom] = useState(90);
-  const [downloading, setDownloading] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({ open: false, message: '', severity: 'success' });
-  
+  type SnackbarState = { open: boolean; message: string; severity: 'success' | 'error' };
+  type PageBucket = {
+    loading: boolean;
+    error: string | null;
+    templateUrl: string | null;
+    recordData: RecordData | null;
+    zoom: number;
+    downloading: boolean;
+    saving: boolean;
+    snackbar: SnackbarState;
+  };
+  const [page, setPage] = useState<PageBucket>({
+    loading: true,
+    error: null,
+    templateUrl: null,
+    recordData: null,
+    zoom: 90,
+    downloading: false,
+    saving: false,
+    snackbar: { open: false, message: '', severity: 'success' },
+  });
+  const setPageField = useCallback(<K extends keyof PageBucket>(key: K, value: PageBucket[K]) => {
+    setPage(prev => ({ ...prev, [key]: value }));
+  }, []);
+  const { loading, error, templateUrl, recordData, zoom, downloading, saving, snackbar } = page;
+  const setLoading = useCallback((v: boolean) => setPageField('loading', v), [setPageField]);
+  const setError = useCallback((v: string | null) => setPageField('error', v), [setPageField]);
+  const setTemplateUrl = useCallback((v: string | null) => setPageField('templateUrl', v), [setPageField]);
+  const setRecordData = useCallback((v: RecordData | null) => setPageField('recordData', v), [setPageField]);
+  const setZoom = useCallback((v: number) => setPageField('zoom', v), [setPageField]);
+  const setDownloading = useCallback((v: boolean) => setPageField('downloading', v), [setPageField]);
+  const setSaving = useCallback((v: boolean) => setPageField('saving', v), [setPageField]);
+  const setSnackbar: React.Dispatch<React.SetStateAction<SnackbarState>> = useCallback((action) => {
+    setPage(prev => ({ ...prev, snackbar: typeof action === 'function' ? (action as (p: SnackbarState) => SnackbarState)(prev.snackbar) : action }));
+  }, []);
+
   // Field positioning state
   const defaultPositions = recordType === 'marriage' ? MARRIAGE_DEFAULT_POSITIONS : BAPTISM_DEFAULT_POSITIONS;
   const fieldLabels = recordType === 'marriage' ? MARRIAGE_FIELD_LABELS : BAPTISM_FIELD_LABELS;
-  
-  const [fieldPositions, setFieldPositions] = useState<Record<string, { x: number; y: number }>>({});
-  const [placedFields, setPlacedFields] = useState<Set<string>>(new Set());
-  const [draggingField, setDraggingField] = useState<string | null>(null);
-  const [showCoordinates, setShowCoordinates] = useState(false);
-  const [imageLoaded, setImageLoaded] = useState(false);
-  const [savedPositionsLoaded, setSavedPositionsLoaded] = useState(false);
-  const [savedPositions, setSavedPositions] = useState<Record<string, { x: number; y: number }> | null>(null);
-  const [driftWarnings, setDriftWarnings] = useState<Array<{ field: string; label: string; distance: number }>>([]);
-  const [showDriftDialog, setShowDriftDialog] = useState(false);
-  
+
+  type FieldPositions = Record<string, { x: number; y: number }>;
+  type PlacementBucket = {
+    fieldPositions: FieldPositions;
+    placedFields: Set<string>;
+    draggingField: string | null;
+    showCoordinates: boolean;
+    imageLoaded: boolean;
+    savedPositionsLoaded: boolean;
+    savedPositions: FieldPositions | null;
+    driftWarnings: Array<{ field: string; label: string; distance: number }>;
+    showDriftDialog: boolean;
+  };
+  const [placement, setPlacement] = useState<PlacementBucket>({
+    fieldPositions: {},
+    placedFields: new Set<string>(),
+    draggingField: null,
+    showCoordinates: false,
+    imageLoaded: false,
+    savedPositionsLoaded: false,
+    savedPositions: null,
+    driftWarnings: [],
+    showDriftDialog: false,
+  });
+  const setPlacementField = useCallback(<K extends keyof PlacementBucket>(key: K, value: PlacementBucket[K]) => {
+    setPlacement(prev => ({ ...prev, [key]: value }));
+  }, []);
+  const { fieldPositions, placedFields, draggingField, showCoordinates, imageLoaded, savedPositionsLoaded, savedPositions, driftWarnings, showDriftDialog } = placement;
+  const setFieldPositions: React.Dispatch<React.SetStateAction<FieldPositions>> = useCallback((action) => {
+    setPlacement(prev => ({ ...prev, fieldPositions: typeof action === 'function' ? (action as (p: FieldPositions) => FieldPositions)(prev.fieldPositions) : action }));
+  }, []);
+  const setPlacedFields: React.Dispatch<React.SetStateAction<Set<string>>> = useCallback((action) => {
+    setPlacement(prev => ({ ...prev, placedFields: typeof action === 'function' ? (action as (p: Set<string>) => Set<string>)(prev.placedFields) : action }));
+  }, []);
+  const setDraggingField = useCallback((v: string | null) => setPlacementField('draggingField', v), [setPlacementField]);
+  const setShowCoordinates = useCallback((v: boolean) => setPlacementField('showCoordinates', v), [setPlacementField]);
+  const setImageLoaded = useCallback((v: boolean) => setPlacementField('imageLoaded', v), [setPlacementField]);
+  const setSavedPositionsLoaded = useCallback((v: boolean) => setPlacementField('savedPositionsLoaded', v), [setPlacementField]);
+  const setSavedPositions = useCallback((v: FieldPositions | null) => setPlacementField('savedPositions', v), [setPlacementField]);
+  const setDriftWarnings = useCallback((v: Array<{ field: string; label: string; distance: number }>) => setPlacementField('driftWarnings', v), [setPlacementField]);
+  const setShowDriftDialog = useCallback((v: boolean) => setPlacementField('showDriftDialog', v), [setPlacementField]);
+
   // Wizard state
   const [wizardOpen, setWizardOpen] = useState(false);
   
