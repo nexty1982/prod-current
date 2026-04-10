@@ -69,54 +69,148 @@ const CRMPage: React.FC = () => {
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
 
-  // Top-level tab
+  // ──────────────────────────────────────────────────────────────────
+  // State buckets — grouped to keep this component under the
+  // STATE_EXPLOSION threshold. Each bucket exposes named wrapper setters
+  // so existing handlers and child component prop signatures stay intact.
+  // ──────────────────────────────────────────────────────────────────
+
+  // ── Standalone UI state ──
   const [mainTab, setMainTab] = useState(0);
+  const [toast, setToast] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' });
 
-  // Data
-  const [stages, setStages] = useState<PipelineStage[]>([]);
-  const [dashboard, setDashboard] = useState<DashboardData | null>(null);
-  const [churches, setChurches] = useState<CRMChurch[]>([]);
-  const [churchesTotal, setChurchesTotal] = useState(0);
-  const [followUps, setFollowUps] = useState<CRMFollowUp[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  // ── Data bucket (replaces 8 useStates) ──
+  const [data, setData] = useState({
+    stages: [] as PipelineStage[],
+    dashboard: null as DashboardData | null,
+    churches: [] as CRMChurch[],
+    churchesTotal: 0,
+    followUps: [] as CRMFollowUp[],
+    loading: true,
+    error: null as string | null,
+    detailLoading: false,
+  });
+  const setDataField = useCallback(
+    <K extends keyof typeof data>(key: K, value: typeof data[K]) => {
+      setData(prev => ({ ...prev, [key]: value }));
+    },
+    [],
+  );
+  const { stages, dashboard, churches, churchesTotal, followUps, loading, error, detailLoading } = data;
+  const setStages = useCallback((value: PipelineStage[]) => setDataField('stages', value), [setDataField]);
+  const setDashboard = useCallback((value: DashboardData | null) => setDataField('dashboard', value), [setDataField]);
+  const setChurches = useCallback((value: CRMChurch[]) => setDataField('churches', value), [setDataField]);
+  const setChurchesTotal = useCallback((value: number) => setDataField('churchesTotal', value), [setDataField]);
+  const setFollowUps = useCallback((value: CRMFollowUp[]) => setDataField('followUps', value), [setDataField]);
+  const setLoading = useCallback((value: boolean) => setDataField('loading', value), [setDataField]);
+  const setError = useCallback((value: string | null) => setDataField('error', value), [setDataField]);
+  const setDetailLoading = useCallback((value: boolean) => setDataField('detailLoading', value), [setDataField]);
 
-  // Church list filters
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterStage, setFilterStage] = useState('');
-  const [filterState, setFilterState] = useState('');
-  const [filterJurisdiction, setFilterJurisdiction] = useState('');
-  const [filterPriority, setFilterPriority] = useState('');
-  const [churchPage, setChurchPage] = useState(1);
-  const [churchSort, setChurchSort] = useState('name');
-  const [churchSortDir, setChurchSortDir] = useState('asc');
+  // ── Filters bucket (replaces 8 useStates) ──
+  const [filters, setFilters] = useState({
+    searchTerm: '',
+    filterStage: '',
+    filterState: '',
+    filterJurisdiction: '',
+    filterPriority: '',
+    churchPage: 1,
+    churchSort: 'name',
+    churchSortDir: 'asc',
+  });
+  const setFilterField = useCallback(
+    <K extends keyof typeof filters>(key: K, value: typeof filters[K]) => {
+      setFilters(prev => ({ ...prev, [key]: value }));
+    },
+    [],
+  );
+  const { searchTerm, filterStage, filterState, filterJurisdiction, filterPriority, churchPage, churchSort, churchSortDir } = filters;
+  const setSearchTerm = useCallback((value: string) => setFilterField('searchTerm', value), [setFilterField]);
+  const setFilterStage = useCallback((value: string) => setFilterField('filterStage', value), [setFilterField]);
+  const setFilterState = useCallback((value: string) => setFilterField('filterState', value), [setFilterField]);
+  const setFilterJurisdiction = useCallback((value: string) => setFilterField('filterJurisdiction', value), [setFilterField]);
+  const setFilterPriority = useCallback((value: string) => setFilterField('filterPriority', value), [setFilterField]);
+  const setChurchPage: React.Dispatch<React.SetStateAction<number>> = useCallback(
+    (action) => setFilters(prev => ({
+      ...prev,
+      churchPage: typeof action === 'function' ? (action as (p: number) => number)(prev.churchPage) : action,
+    })),
+    [],
+  );
+  const setChurchSort = useCallback((value: string) => setFilterField('churchSort', value), [setFilterField]);
+  const setChurchSortDir = useCallback((value: string) => setFilterField('churchSortDir', value), [setFilterField]);
   const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Church detail drawer
-  const [selectedChurch, setSelectedChurch] = useState<CRMChurch | null>(null);
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const [drawerTab, setDrawerTab] = useState(0);
-  const [churchContacts, setChurchContacts] = useState<CRMContact[]>([]);
-  const [churchActivities, setChurchActivities] = useState<CRMActivity[]>([]);
-  const [churchFollowUps, setChurchFollowUps] = useState<CRMFollowUp[]>([]);
-  const [detailLoading, setDetailLoading] = useState(false);
+  // ── Drawer bucket (replaces 6 useStates) ──
+  const [drawer, setDrawer] = useState({
+    selectedChurch: null as CRMChurch | null,
+    drawerOpen: false,
+    drawerTab: 0,
+    churchContacts: [] as CRMContact[],
+    churchActivities: [] as CRMActivity[],
+    churchFollowUps: [] as CRMFollowUp[],
+  });
+  const setDrawerField = useCallback(
+    <K extends keyof typeof drawer>(key: K, value: typeof drawer[K]) => {
+      setDrawer(prev => ({ ...prev, [key]: value }));
+    },
+    [],
+  );
+  const { selectedChurch, drawerOpen, drawerTab, churchContacts, churchActivities, churchFollowUps } = drawer;
+  const setSelectedChurch = useCallback((value: CRMChurch | null) => setDrawerField('selectedChurch', value), [setDrawerField]);
+  const setDrawerOpen = useCallback((value: boolean) => setDrawerField('drawerOpen', value), [setDrawerField]);
+  const setDrawerTab = useCallback((value: number) => setDrawerField('drawerTab', value), [setDrawerField]);
+  const setChurchContacts = useCallback((value: CRMContact[]) => setDrawerField('churchContacts', value), [setDrawerField]);
+  const setChurchActivities = useCallback((value: CRMActivity[]) => setDrawerField('churchActivities', value), [setDrawerField]);
+  const setChurchFollowUps = useCallback((value: CRMFollowUp[]) => setDrawerField('churchFollowUps', value), [setDrawerField]);
 
-  // Dialogs
-  const [activityDialogOpen, setActivityDialogOpen] = useState(false);
-  const [contactDialogOpen, setContactDialogOpen] = useState(false);
-  const [followUpDialogOpen, setFollowUpDialogOpen] = useState(false);
-  const [stageDialogOpen, setStageDialogOpen] = useState(false);
-  const [provisionDialogOpen, setProvisionDialogOpen] = useState(false);
+  // ── Dialog open bucket (replaces 5 useStates) ──
+  const [dialogs, setDialogs] = useState({
+    activityDialogOpen: false,
+    contactDialogOpen: false,
+    followUpDialogOpen: false,
+    stageDialogOpen: false,
+    provisionDialogOpen: false,
+  });
+  const setDialogField = useCallback(
+    <K extends keyof typeof dialogs>(key: K, value: typeof dialogs[K]) => {
+      setDialogs(prev => ({ ...prev, [key]: value }));
+    },
+    [],
+  );
+  const { activityDialogOpen, contactDialogOpen, followUpDialogOpen, stageDialogOpen, provisionDialogOpen } = dialogs;
+  const setActivityDialogOpen = useCallback((value: boolean) => setDialogField('activityDialogOpen', value), [setDialogField]);
+  const setContactDialogOpen = useCallback((value: boolean) => setDialogField('contactDialogOpen', value), [setDialogField]);
+  const setFollowUpDialogOpen = useCallback((value: boolean) => setDialogField('followUpDialogOpen', value), [setDialogField]);
+  const setStageDialogOpen = useCallback((value: boolean) => setDialogField('stageDialogOpen', value), [setDialogField]);
+  const setProvisionDialogOpen = useCallback((value: boolean) => setDialogField('provisionDialogOpen', value), [setDialogField]);
 
-  // Form state
-  const [activityForm, setActivityForm] = useState({ activity_type: 'note', subject: '', body: '' });
-  const [contactForm, setContactForm] = useState({ first_name: '', last_name: '', role: '', email: '', phone: '', is_primary: false, notes: '' });
-  const [followUpForm, setFollowUpForm] = useState({ due_date: '', subject: '', description: '' });
-  const [editingContact, setEditingContact] = useState<CRMContact | null>(null);
-  const [newStage, setNewStage] = useState('');
+  // ── Form bucket (replaces 5 useStates) ──
+  type ActivityForm = { activity_type: string; subject: string; body: string };
+  type ContactForm = { first_name: string; last_name: string; role: string; email: string; phone: string; is_primary: boolean; notes: string };
+  type FollowUpForm = { due_date: string; subject: string; description: string };
+  const emptyActivityForm: ActivityForm = { activity_type: 'note', subject: '', body: '' };
+  const emptyContactForm: ContactForm = { first_name: '', last_name: '', role: '', email: '', phone: '', is_primary: false, notes: '' };
+  const emptyFollowUpForm: FollowUpForm = { due_date: '', subject: '', description: '' };
+  const [forms, setForms] = useState({
+    activityForm: emptyActivityForm,
+    contactForm: emptyContactForm,
+    followUpForm: emptyFollowUpForm,
+    editingContact: null as CRMContact | null,
+    newStage: '',
+  });
+  const setFormField = useCallback(
+    <K extends keyof typeof forms>(key: K, value: typeof forms[K]) => {
+      setForms(prev => ({ ...prev, [key]: value }));
+    },
+    [],
+  );
+  const { activityForm, contactForm, followUpForm, editingContact, newStage } = forms;
+  const setActivityForm = useCallback((value: ActivityForm) => setFormField('activityForm', value), [setFormField]);
+  const setContactForm = useCallback((value: ContactForm) => setFormField('contactForm', value), [setFormField]);
+  const setFollowUpForm = useCallback((value: FollowUpForm) => setFormField('followUpForm', value), [setFormField]);
+  const setEditingContact = useCallback((value: CRMContact | null) => setFormField('editingContact', value), [setFormField]);
+  const setNewStage = useCallback((value: string) => setFormField('newStage', value), [setFormField]);
 
-  // Toast
-  const [toast, setToast] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' });
   const showToast = (message: string, severity: 'success' | 'error' = 'success') => setToast({ open: true, message, severity });
 
   // Breadcrumbs
