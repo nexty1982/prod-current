@@ -56,49 +56,171 @@ import ReviewPipelineTab from './ConversationLogPage/ReviewPipelineTab';
 
 const ConversationLogPage: React.FC = () => {
   const theme = useTheme();
-  const [conversations, setConversations] = useState<ConversationSummary[]>([]);
-  const [byDate, setByDate] = useState<Record<string, ConversationSummary[]>>({});
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+
+  // ──────────────────────────────────────────────────────────────────
+  // State buckets — grouped to keep this component under the
+  // STATE_EXPLOSION threshold. Each bucket exposes named wrapper setters
+  // so existing handler code and child components keep their signatures.
+  // ──────────────────────────────────────────────────────────────────
+
+  // ── Standalone UI state ──
+  const [activeTab, setActiveTab] = useState(0);
+  const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({ open: false, message: '', severity: 'success' });
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<SearchResult[] | null>(null);
   const [searching, setSearching] = useState(false);
-  const [expandedDates, setExpandedDates] = useState<Set<string>>(new Set());
-  const [expandedConversation, setExpandedConversation] = useState<string | null>(null);
-  const [conversationDetail, setConversationDetail] = useState<ConversationDetail | null>(null);
-  const [loadingDetail, setLoadingDetail] = useState(false);
-  const [stats, setStats] = useState<Stats | null>(null);
-  const [showStats, setShowStats] = useState(false);
-  const [filterType, setFilterType] = useState<'all' | 'agent' | 'direct' | 'cascade'>('all');
-  const [activeTab, setActiveTab] = useState(0);
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [tasksLoading, setTasksLoading] = useState(false);
-  const [taskFilter, setTaskFilter] = useState<'all' | 'pending' | 'completed'>('all');
-  const [newTaskText, setNewTaskText] = useState('');
-  const [newTaskCategory, setNewTaskCategory] = useState('');
-  const [expandedTaskId, setExpandedTaskId] = useState<string | null>(null);
-  const [sortField, setSortField] = useState<'date' | 'size' | 'messages'>('date');
-  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
-  const [selectedConvs, setSelectedConvs] = useState<Set<string>>(new Set());
-  const [exporting, setExporting] = useState(false);
-  const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({ open: false, message: '', severity: 'success' });
-  const [taskCategoryFilter, setTaskCategoryFilter] = useState<string>('all');
+
+  // ── Conversations data bucket (replaces 15 useStates) ──
+  type ConvFilter = 'all' | 'agent' | 'direct' | 'cascade';
+  type SortField = 'date' | 'size' | 'messages';
+  type SortDir = 'asc' | 'desc';
+  const [conv, setConv] = useState({
+    conversations: [] as ConversationSummary[],
+    byDate: {} as Record<string, ConversationSummary[]>,
+    loading: true,
+    error: '',
+    expandedDates: new Set<string>(),
+    expandedConversation: null as string | null,
+    conversationDetail: null as ConversationDetail | null,
+    loadingDetail: false,
+    stats: null as Stats | null,
+    showStats: false,
+    filterType: 'all' as ConvFilter,
+    sortField: 'date' as SortField,
+    sortDir: 'desc' as SortDir,
+    selectedConvs: new Set<string>(),
+    exporting: false,
+  });
+  const setConvField = useCallback(
+    <K extends keyof typeof conv>(key: K, value: typeof conv[K] | ((prev: typeof conv[K]) => typeof conv[K])) => {
+      setConv(prev => ({
+        ...prev,
+        [key]: typeof value === 'function' ? (value as (p: typeof conv[K]) => typeof conv[K])(prev[key]) : value,
+      }));
+    },
+    [],
+  );
+  const {
+    conversations, byDate, loading, error, expandedDates, expandedConversation,
+    conversationDetail, loadingDetail, stats, showStats, filterType,
+    sortField, sortDir, selectedConvs, exporting,
+  } = conv;
+  const setConversations = useCallback((value: ConversationSummary[]) => setConvField('conversations', value), [setConvField]);
+  const setByDate = useCallback((value: Record<string, ConversationSummary[]>) => setConvField('byDate', value), [setConvField]);
+  const setLoading = useCallback((value: boolean) => setConvField('loading', value), [setConvField]);
+  const setError = useCallback((value: string) => setConvField('error', value), [setConvField]);
+  const setExpandedDates: React.Dispatch<React.SetStateAction<Set<string>>> = useCallback(
+    (action) => setConvField('expandedDates', action as any),
+    [setConvField],
+  );
+  const setExpandedConversation = useCallback((value: string | null) => setConvField('expandedConversation', value), [setConvField]);
+  const setConversationDetail = useCallback((value: ConversationDetail | null) => setConvField('conversationDetail', value), [setConvField]);
+  const setLoadingDetail = useCallback((value: boolean) => setConvField('loadingDetail', value), [setConvField]);
+  const setStats = useCallback((value: Stats | null) => setConvField('stats', value), [setConvField]);
+  const setShowStats = useCallback((value: boolean) => setConvField('showStats', value), [setConvField]);
+  const setFilterType = useCallback((value: ConvFilter) => setConvField('filterType', value), [setConvField]);
+  const setSortField = useCallback((value: SortField) => setConvField('sortField', value), [setConvField]);
+  const setSortDir: React.Dispatch<React.SetStateAction<SortDir>> = useCallback(
+    (action) => setConvField('sortDir', action as any),
+    [setConvField],
+  );
+  const setSelectedConvs: React.Dispatch<React.SetStateAction<Set<string>>> = useCallback(
+    (action) => setConvField('selectedConvs', action as any),
+    [setConvField],
+  );
+  const setExporting = useCallback((value: boolean) => setConvField('exporting', value), [setConvField]);
+
+  // ── Tasks bucket (replaces 7 useStates) ──
+  type TaskFilter = 'all' | 'pending' | 'completed';
+  const [taskState, setTaskState] = useState({
+    tasks: [] as Task[],
+    tasksLoading: false,
+    taskFilter: 'all' as TaskFilter,
+    taskCategoryFilter: 'all',
+    newTaskText: '',
+    newTaskCategory: '',
+    expandedTaskId: null as string | null,
+  });
+  const setTaskField = useCallback(
+    <K extends keyof typeof taskState>(key: K, value: typeof taskState[K] | ((prev: typeof taskState[K]) => typeof taskState[K])) => {
+      setTaskState(prev => ({
+        ...prev,
+        [key]: typeof value === 'function' ? (value as (p: typeof taskState[K]) => typeof taskState[K])(prev[key]) : value,
+      }));
+    },
+    [],
+  );
+  const { tasks, tasksLoading, taskFilter, taskCategoryFilter, newTaskText, newTaskCategory, expandedTaskId } = taskState;
+  const setTasks: React.Dispatch<React.SetStateAction<Task[]>> = useCallback(
+    (action) => setTaskField('tasks', action as any),
+    [setTaskField],
+  );
+  const setTasksLoading = useCallback((value: boolean) => setTaskField('tasksLoading', value), [setTaskField]);
+  const setTaskFilter = useCallback((value: TaskFilter) => setTaskField('taskFilter', value), [setTaskField]);
+  const setTaskCategoryFilter = useCallback((value: string) => setTaskField('taskCategoryFilter', value), [setTaskField]);
+  const setNewTaskText = useCallback((value: string) => setTaskField('newTaskText', value), [setTaskField]);
+  const setNewTaskCategory = useCallback((value: string) => setTaskField('newTaskCategory', value), [setTaskField]);
+  const setExpandedTaskId = useCallback((value: string | null) => setTaskField('expandedTaskId', value), [setTaskField]);
+
+  // ── Review & Pipeline bucket (replaces 7 useStates) ──
+  const [review, setReview] = useState({
+    reviewResults: [] as ReviewResult[],
+    reviewLoading: false,
+    reviewExpanded: null as string | null,
+    pipelineItems: [] as PipelineExportItem[],
+    pipelineAgentTool: '',
+    pipelineHorizon: '7',
+    pipelineExporting: false,
+  });
+  const setReviewField = useCallback(
+    <K extends keyof typeof review>(key: K, value: typeof review[K] | ((prev: typeof review[K]) => typeof review[K])) => {
+      setReview(prev => ({
+        ...prev,
+        [key]: typeof value === 'function' ? (value as (p: typeof review[K]) => typeof review[K])(prev[key]) : value,
+      }));
+    },
+    [],
+  );
+  const { reviewResults, reviewLoading, reviewExpanded, pipelineItems, pipelineAgentTool, pipelineHorizon, pipelineExporting } = review;
+  const setReviewResults = useCallback((value: ReviewResult[]) => setReviewField('reviewResults', value), [setReviewField]);
+  const setReviewLoading = useCallback((value: boolean) => setReviewField('reviewLoading', value), [setReviewField]);
+  const setReviewExpanded: React.Dispatch<React.SetStateAction<string | null>> = useCallback(
+    (action) => setReviewField('reviewExpanded', action as any),
+    [setReviewField],
+  );
+  const setPipelineItems: React.Dispatch<React.SetStateAction<PipelineExportItem[]>> = useCallback(
+    (action) => setReviewField('pipelineItems', action as any),
+    [setReviewField],
+  );
+  const setPipelineAgentTool: React.Dispatch<React.SetStateAction<string>> = useCallback(
+    (action) => setReviewField('pipelineAgentTool', action as any),
+    [setReviewField],
+  );
+  const setPipelineHorizon: React.Dispatch<React.SetStateAction<string>> = useCallback(
+    (action) => setReviewField('pipelineHorizon', action as any),
+    [setReviewField],
+  );
+  const setPipelineExporting = useCallback((value: boolean) => setReviewField('pipelineExporting', value), [setReviewField]);
+
+  // ── Bulk export bucket (replaces 3 useStates) ──
+  const [bulkExport, setBulkExport] = useState({
+    bulkExportPreview: null as any[] | null,
+    bulkExportLoading: false,
+    bulkExportResult: null as { count: number; skipped: number } | null,
+  });
+  const setBulkExportField = useCallback(
+    <K extends keyof typeof bulkExport>(key: K, value: typeof bulkExport[K]) => {
+      setBulkExport(prev => ({ ...prev, [key]: value }));
+    },
+    [],
+  );
+  const { bulkExportPreview, bulkExportLoading, bulkExportResult } = bulkExport;
+  const setBulkExportPreview = useCallback((value: any[] | null) => setBulkExportField('bulkExportPreview', value), [setBulkExportField]);
+  const setBulkExportLoading = useCallback((value: boolean) => setBulkExportField('bulkExportLoading', value), [setBulkExportField]);
+  const setBulkExportResult = useCallback((value: { count: number; skipped: number } | null) => setBulkExportField('bulkExportResult', value), [setBulkExportField]);
+
   const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const topRef = useRef<HTMLDivElement>(null);
-
-  // Review & Pipeline tab state
-  const [reviewResults, setReviewResults] = useState<ReviewResult[]>([]);
-  const [reviewLoading, setReviewLoading] = useState(false);
-  const [reviewExpanded, setReviewExpanded] = useState<string | null>(null);
-  const [pipelineItems, setPipelineItems] = useState<PipelineExportItem[]>([]);
-  const [pipelineAgentTool, setPipelineAgentTool] = useState('');
-  const [pipelineHorizon, setPipelineHorizon] = useState('7');
-  const [pipelineExporting, setPipelineExporting] = useState(false);
-
-  // Bulk export completed tasks state
-  const [bulkExportPreview, setBulkExportPreview] = useState<any[] | null>(null);
-  const [bulkExportLoading, setBulkExportLoading] = useState(false);
-  const [bulkExportResult, setBulkExportResult] = useState<{ count: number; skipped: number } | null>(null);
 
   const fetchConversations = useCallback(async () => {
     setLoading(true);
