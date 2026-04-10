@@ -80,32 +80,80 @@ interface Church {
 
 // ─── Component ───────────────────────────────────────────────
 const SettingsConsole: React.FC = () => {
-    // Data
-    const [rows, setRows] = useState<SettingRow[]>([]);
-    const [categories, setCategories] = useState<string[]>([]);
-    const [churches, setChurches] = useState<Church[]>([]);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-
-    // Filters
-    const [search, setSearch] = useState('');
-    const [categoryFilter, setCategoryFilter] = useState('');
-    const [scopeFilter, setScopeFilter] = useState<'global' | 'church'>('global');
-    const [churchId, setChurchId] = useState<number | ''>('');
+    // Data + filters
+    type DataBucket = {
+        rows: SettingRow[];
+        categories: string[];
+        churches: Church[];
+        loading: boolean;
+        error: string | null;
+        search: string;
+        categoryFilter: string;
+        scopeFilter: 'global' | 'church';
+        churchId: number | '';
+    };
+    const [data, setData] = useState<DataBucket>({
+        rows: [],
+        categories: [],
+        churches: [],
+        loading: false,
+        error: null,
+        search: '',
+        categoryFilter: '',
+        scopeFilter: 'global',
+        churchId: '',
+    });
+    const setDataField = useCallback(<K extends keyof DataBucket>(key: K, value: DataBucket[K]) => {
+        setData(prev => ({ ...prev, [key]: value }));
+    }, []);
+    const { rows, categories, churches, loading, error, search, categoryFilter, scopeFilter, churchId } = data;
+    const setRows = useCallback((v: SettingRow[]) => setDataField('rows', v), [setDataField]);
+    const setCategories = useCallback((v: string[]) => setDataField('categories', v), [setDataField]);
+    const setChurches = useCallback((v: Church[]) => setDataField('churches', v), [setDataField]);
+    const setLoading = useCallback((v: boolean) => setDataField('loading', v), [setDataField]);
+    const setError = useCallback((v: string | null) => setDataField('error', v), [setDataField]);
+    const setSearch = useCallback((v: string) => setDataField('search', v), [setDataField]);
+    const setCategoryFilter = useCallback((v: string) => setDataField('categoryFilter', v), [setDataField]);
+    const setScopeFilter = useCallback((v: 'global' | 'church') => setDataField('scopeFilter', v), [setDataField]);
+    const setChurchId = useCallback((v: number | '') => setDataField('churchId', v), [setDataField]);
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-    // Editor dialog
-    const [editorOpen, setEditorOpen] = useState(false);
-    const [editRow, setEditRow] = useState<SettingRow | null>(null);
-    const [editValue, setEditValue] = useState('');
-    const [editReason, setEditReason] = useState('');
-    const [saving, setSaving] = useState(false);
-
-    // Audit dialog
-    const [auditOpen, setAuditOpen] = useState(false);
-    const [auditKey, setAuditKey] = useState('');
-    const [auditRows, setAuditRows] = useState<AuditRow[]>([]);
-    const [auditLoading, setAuditLoading] = useState(false);
+    // Editor + audit dialogs
+    type DialogBucket = {
+        editorOpen: boolean;
+        editRow: SettingRow | null;
+        editValue: string;
+        editReason: string;
+        saving: boolean;
+        auditOpen: boolean;
+        auditKey: string;
+        auditRows: AuditRow[];
+        auditLoading: boolean;
+    };
+    const [dialogs, setDialogs] = useState<DialogBucket>({
+        editorOpen: false,
+        editRow: null,
+        editValue: '',
+        editReason: '',
+        saving: false,
+        auditOpen: false,
+        auditKey: '',
+        auditRows: [],
+        auditLoading: false,
+    });
+    const setDialogField = useCallback(<K extends keyof DialogBucket>(key: K, value: DialogBucket[K]) => {
+        setDialogs(prev => ({ ...prev, [key]: value }));
+    }, []);
+    const { editorOpen, editRow, editValue, editReason, saving, auditOpen, auditKey, auditRows, auditLoading } = dialogs;
+    const setEditorOpen = useCallback((v: boolean) => setDialogField('editorOpen', v), [setDialogField]);
+    const setEditRow = useCallback((v: SettingRow | null) => setDialogField('editRow', v), [setDialogField]);
+    const setEditValue = useCallback((v: string) => setDialogField('editValue', v), [setDialogField]);
+    const setEditReason = useCallback((v: string) => setDialogField('editReason', v), [setDialogField]);
+    const setSaving = useCallback((v: boolean) => setDialogField('saving', v), [setDialogField]);
+    const setAuditOpen = useCallback((v: boolean) => setDialogField('auditOpen', v), [setDialogField]);
+    const setAuditKey = useCallback((v: string) => setDialogField('auditKey', v), [setDialogField]);
+    const setAuditRows = useCallback((v: AuditRow[]) => setDialogField('auditRows', v), [setDialogField]);
+    const setAuditLoading = useCallback((v: boolean) => setDialogField('auditLoading', v), [setDialogField]);
 
     // ─── Fetch data ──────────────────────────────────────────
     const fetchSettings = useCallback(async (q?: string) => {
