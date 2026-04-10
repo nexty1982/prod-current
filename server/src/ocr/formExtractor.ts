@@ -264,6 +264,14 @@ function layoutResultToTableFormat(
 
 // ── Main Extraction Functions ──────────────────────────────────────────────
 
+// ── Test-only exports (private helpers exposed for unit tests) ────────────
+export const __test__ = {
+  getImageDimensions,
+  unwrapVisionResponse,
+  applyLearnedParams,
+  layoutResultToTableFormat,
+};
+
 /**
  * extractFormPage — Single form/record per page.
  * Uses anchor detection via layoutExtractor.ts.
