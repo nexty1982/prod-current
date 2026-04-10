@@ -61,10 +61,8 @@ export default function RecordCreationWizard() {
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
 
-  // Wizard step
+  // Standalone (updater-fn callsites / complex state)
   const [activeStep, setActiveStep] = useState(0);
-
-  // Wizard state
   const [state, setState] = useState<WizardState>({
     recordType: '',
     church: null,
@@ -78,24 +76,66 @@ export default function RecordCreationWizard() {
     records: [],
     validationIssues: [],
   });
-
-  // Data
-  const [churches, setChurches] = useState<Church[]>([]);
-  const [loadingChurches, setLoadingChurches] = useState(true);
-  const [fieldConfigs, setFieldConfigs] = useState<FieldConfig[]>([]);
-  const [clergyOptions, setClergyOptions] = useState<string[]>([]);
   const [presets, setPresets] = useState<Preset[]>([]);
 
-  // UI state
-  const [loading, setLoading] = useState(false);
-  const [creating, setCreating] = useState(false);
-  const [createResult, setCreateResult] = useState<any>(null);
-  const [toast, setToast] = useState<{ msg: string; severity: 'success' | 'error' | 'warning' | 'info' } | null>(null);
-  const [editingRow, setEditingRow] = useState<number | null>(null);
-  const [outputFormat, setOutputFormat] = useState<'database' | 'csv' | 'xlsx'>('database');
-  const [editRowData, setEditRowData] = useState<Record<string, any>>({});
-  const [presetDialogOpen, setPresetDialogOpen] = useState(false);
-  const [presetName, setPresetName] = useState('');
+  // Bucketed state: remote data (4 fields)
+  interface DataState {
+    churches: Church[];
+    loadingChurches: boolean;
+    fieldConfigs: FieldConfig[];
+    clergyOptions: string[];
+  }
+  const [dataState, setDataState] = useState<DataState>({
+    churches: [],
+    loadingChurches: true,
+    fieldConfigs: [],
+    clergyOptions: [],
+  });
+  const setDataField = useCallback(<K extends keyof DataState>(key: K, value: DataState[K]) => {
+    setDataState(prev => ({ ...prev, [key]: value }));
+  }, []);
+  const { churches, loadingChurches, fieldConfigs, clergyOptions } = dataState;
+  const setChurches = useCallback((v: Church[]) => setDataField('churches', v), [setDataField]);
+  const setLoadingChurches = useCallback((v: boolean) => setDataField('loadingChurches', v), [setDataField]);
+  const setFieldConfigs = useCallback((v: FieldConfig[]) => setDataField('fieldConfigs', v), [setDataField]);
+  const setClergyOptions = useCallback((v: string[]) => setDataField('clergyOptions', v), [setDataField]);
+
+  // Bucketed state: UI (9 fields)
+  interface UiState {
+    loading: boolean;
+    creating: boolean;
+    createResult: any;
+    toast: { msg: string; severity: 'success' | 'error' | 'warning' | 'info' } | null;
+    editingRow: number | null;
+    outputFormat: 'database' | 'csv' | 'xlsx';
+    editRowData: Record<string, any>;
+    presetDialogOpen: boolean;
+    presetName: string;
+  }
+  const [uiState, setUiState] = useState<UiState>({
+    loading: false,
+    creating: false,
+    createResult: null,
+    toast: null,
+    editingRow: null,
+    outputFormat: 'database',
+    editRowData: {},
+    presetDialogOpen: false,
+    presetName: '',
+  });
+  const setUiField = useCallback(<K extends keyof UiState>(key: K, value: UiState[K]) => {
+    setUiState(prev => ({ ...prev, [key]: value }));
+  }, []);
+  const { loading, creating, createResult, toast, editingRow, outputFormat, editRowData, presetDialogOpen, presetName } = uiState;
+  const setLoading = useCallback((v: boolean) => setUiField('loading', v), [setUiField]);
+  const setCreating = useCallback((v: boolean) => setUiField('creating', v), [setUiField]);
+  const setCreateResult = useCallback((v: any) => setUiField('createResult', v), [setUiField]);
+  const setToast = useCallback((v: UiState['toast']) => setUiField('toast', v), [setUiField]);
+  const setEditingRow = useCallback((v: number | null) => setUiField('editingRow', v), [setUiField]);
+  const setOutputFormat = useCallback((v: 'database' | 'csv' | 'xlsx') => setUiField('outputFormat', v), [setUiField]);
+  const setEditRowData = useCallback((v: Record<string, any>) => setUiField('editRowData', v), [setUiField]);
+  const setPresetDialogOpen = useCallback((v: boolean) => setUiField('presetDialogOpen', v), [setUiField]);
+  const setPresetName = useCallback((v: string) => setUiField('presetName', v), [setUiField]);
 
   // Load churches on mount
   useEffect(() => {
