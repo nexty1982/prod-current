@@ -14,13 +14,34 @@ import {
   RadioGroup,
   Select,
   FormLabel,
+  Tooltip,
 } from '@mui/material';
 import {
   IconChevronDown,
   IconChevronUp,
+  IconInfoCircle,
   IconSettings,
 } from '@tabler/icons-react';
 import type { SettingsPanelProps, ExtractionAction } from './types';
+
+/**
+ * Inline label with an info tooltip icon. Keeps FormLabel styling and
+ * attaches an explanation accessible via hover/tap.
+ */
+const LabelWithInfo: React.FC<{ label: string; tip: string }> = ({ label, tip }) => (
+  <FormLabel sx={{ mb: 1, fontWeight: 500, display: 'inline-flex', alignItems: 'center', gap: 0.75 }}>
+    {label}
+    <Tooltip title={tip} arrow placement="right">
+      <Box
+        component="span"
+        sx={{ display: 'inline-flex', color: 'text.secondary', cursor: 'help' }}
+        aria-label={`${label} info`}
+      >
+        <IconInfoCircle size={16} />
+      </Box>
+    </Tooltip>
+  </FormLabel>
+);
 
 const SettingsPanel: React.FC<SettingsPanelProps> = ({
   showAdvanced,
@@ -75,7 +96,10 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
 
           <Stack spacing={2.5}>
             <FormControl fullWidth>
-              <FormLabel sx={{ mb: 1, fontWeight: 500 }}>Transcription mode</FormLabel>
+              <LabelWithInfo
+                label="Transcription mode"
+                tip="Choose 'Exactly as written' to preserve original spelling — recommended for historical accuracy and archival transcription. Choose 'Fix spelling' when you want cleaner output for search and export, at the cost of losing the source's original wording."
+              />
               <Select
                 value={docSettings.transcriptionMode}
                 onChange={(e) => {
@@ -90,7 +114,10 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
             </FormControl>
 
             <FormControl fullWidth>
-              <FormLabel sx={{ mb: 1, fontWeight: 500 }}>Text extraction scope</FormLabel>
+              <LabelWithInfo
+                label="Text extraction scope"
+                tip="'Extract all text' captures both printed and handwritten content (recommended). 'Handwritten only' attempts to skip printed header/footer text — note this mode is experimental and not yet supported by the current engine."
+              />
               <Select
                 value={docSettings.textExtractionScope}
                 onChange={(e) => {
@@ -109,7 +136,10 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
             </FormControl>
 
             <FormControl fullWidth>
-              <FormLabel sx={{ mb: 1, fontWeight: 500 }}>Formatting mode</FormLabel>
+              <LabelWithInfo
+                label="Formatting mode"
+                tip="Applies light post-processing to line breaks, spacing, and paragraph structure for better human readability. Does not change the words themselves."
+              />
               <Select
                 value={docSettings.formattingMode}
                 onChange={(e) => {
@@ -128,9 +158,20 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
 
         {/* Action Selector */}
         <Box>
-          <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 2 }}>
-            Choose an action
-          </Typography>
+          <Stack direction="row" spacing={0.75} alignItems="center" sx={{ mb: 2 }}>
+            <Typography variant="subtitle2" fontWeight={600}>
+              Choose an action
+            </Typography>
+            <Tooltip
+              title="Controls how OCR output is structured. 'Full Text' is the default and works for most ledger pages. Table and Custom Data extraction are experimental and currently disabled."
+              arrow
+              placement="right"
+            >
+              <Box component="span" sx={{ display: 'inline-flex', color: 'text.secondary', cursor: 'help' }} aria-label="Action info">
+                <IconInfoCircle size={16} />
+              </Box>
+            </Tooltip>
+          </Stack>
           <RadioGroup
             value={extractionAction}
             onChange={(e) => setExtractionAction(e.target.value as ExtractionAction)}
