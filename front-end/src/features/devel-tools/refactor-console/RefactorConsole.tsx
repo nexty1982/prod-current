@@ -92,11 +92,34 @@ const RefactorConsole: React.FC = () => {
   // MUI uses theme.palette.mode, Tailwind uses the 'dark' class on documentElement
   // Both should be managed at the app level (CustomizerContext/ThemeProvider)
 
-  const [showModal, setShowModal] = useState<{ 
-    type: 'reasons' | 'duplicates' | 'requirementPreview'; 
-    data: any 
-  } | null>(null);
-  
+  type ModalState = { type: 'reasons' | 'duplicates' | 'requirementPreview'; data: any } | null;
+  type PathValidation = {
+    sourcePath?: { isValid: boolean; exists: boolean; error?: string };
+    destinationPath?: { isValid: boolean; exists: boolean; error?: string };
+    backupPath?: { isValid: boolean; exists: boolean; error?: string };
+  };
+
+  type DialogsBucket = {
+    showModal: ModalState;
+    showPathConfig: boolean;
+    showDiffModal: boolean;
+    showHistoryViewer: boolean;
+  };
+  const [dialogs, setDialogs] = useState<DialogsBucket>({
+    showModal: null,
+    showPathConfig: false,
+    showDiffModal: false,
+    showHistoryViewer: false,
+  });
+  const setDialogsField = useCallback(<K extends keyof DialogsBucket>(key: K, value: DialogsBucket[K]) => {
+    setDialogs(prev => ({ ...prev, [key]: value }));
+  }, []);
+  const { showModal, showPathConfig, showDiffModal, showHistoryViewer } = dialogs;
+  const setShowModal = useCallback((v: ModalState) => setDialogsField('showModal', v), [setDialogsField]);
+  const setShowPathConfig = useCallback((v: boolean) => setDialogsField('showPathConfig', v), [setDialogsField]);
+  const setShowDiffModal = useCallback((v: boolean) => setDialogsField('showDiffModal', v), [setDialogsField]);
+  const setShowHistoryViewer = useCallback((v: boolean) => setDialogsField('showHistoryViewer', v), [setDialogsField]);
+
   // Phase 1 analysis (state, health check, polling)
   const {
     phase1State,
@@ -108,41 +131,57 @@ const RefactorConsole: React.FC = () => {
     healthError,
     handlePhase1Analysis,
   } = usePhase1Analysis(hookPhase1Report);
-  
+
   // ========================================================================
-  // Path Configuration State
+  // Path Configuration State (pathConfig kept standalone — children call
+  // setPathConfig with updater fn)
   // ========================================================================
-  const [showPathConfig, setShowPathConfig] = useState(false);
   const [pathConfig, setPathConfig] = useState<PathConfig>(() => refactorConsoleClient.getSavedPaths());
-  const [pathValidation, setPathValidation] = useState<{
-    sourcePath?: { isValid: boolean; exists: boolean; error?: string };
-    destinationPath?: { isValid: boolean; exists: boolean; error?: string };
-    backupPath?: { isValid: boolean; exists: boolean; error?: string };
-  }>({});
-  const [isValidatingPaths, setIsValidatingPaths] = useState(false);
-  
+
   // ========================================================================
-  // Multi-Source & Snapshot State
+  // Operation state: path validation + multi-source + diff preview/restore
   // ========================================================================
-  const [sourceType, setSourceType] = useState<'local' | 'remote'>('local');
-  const [selectedSnapshot, setSelectedSnapshot] = useState<string | null>(null);
-  const [availableSnapshots, setAvailableSnapshots] = useState<any[]>([]);
-  const [isLoadingSnapshots, setIsLoadingSnapshots] = useState(false);
-  const [snapshotError, setSnapshotError] = useState<string | null>(null);
-  
-  // ========================================================================
-  // Diff Preview & Restore State
-  // ========================================================================
-  const [showDiffModal, setShowDiffModal] = useState(false);
-  const [previewData, setPreviewData] = useState<PreviewRestoreResponse | null>(null);
-  const [isLoadingPreview, setIsLoadingPreview] = useState(false);
-  const [isRestoring, setIsRestoring] = useState(false);
-  const [pendingRestorePath, setPendingRestorePath] = useState<string | null>(null);
-  
-  // ========================================================================
-  // Restore History State
-  // ========================================================================
-  const [showHistoryViewer, setShowHistoryViewer] = useState(false);
+  type OperationBucket = {
+    pathValidation: PathValidation;
+    isValidatingPaths: boolean;
+    sourceType: 'local' | 'remote';
+    selectedSnapshot: string | null;
+    availableSnapshots: any[];
+    isLoadingSnapshots: boolean;
+    snapshotError: string | null;
+    previewData: PreviewRestoreResponse | null;
+    isLoadingPreview: boolean;
+    isRestoring: boolean;
+    pendingRestorePath: string | null;
+  };
+  const [op, setOp] = useState<OperationBucket>({
+    pathValidation: {},
+    isValidatingPaths: false,
+    sourceType: 'local',
+    selectedSnapshot: null,
+    availableSnapshots: [],
+    isLoadingSnapshots: false,
+    snapshotError: null,
+    previewData: null,
+    isLoadingPreview: false,
+    isRestoring: false,
+    pendingRestorePath: null,
+  });
+  const setOpField = useCallback(<K extends keyof OperationBucket>(key: K, value: OperationBucket[K]) => {
+    setOp(prev => ({ ...prev, [key]: value }));
+  }, []);
+  const { pathValidation, isValidatingPaths, sourceType, selectedSnapshot, availableSnapshots, isLoadingSnapshots, snapshotError, previewData, isLoadingPreview, isRestoring, pendingRestorePath } = op;
+  const setPathValidation = useCallback((v: PathValidation) => setOpField('pathValidation', v), [setOpField]);
+  const setIsValidatingPaths = useCallback((v: boolean) => setOpField('isValidatingPaths', v), [setOpField]);
+  const setSourceType = useCallback((v: 'local' | 'remote') => setOpField('sourceType', v), [setOpField]);
+  const setSelectedSnapshot = useCallback((v: string | null) => setOpField('selectedSnapshot', v), [setOpField]);
+  const setAvailableSnapshots = useCallback((v: any[]) => setOpField('availableSnapshots', v), [setOpField]);
+  const setIsLoadingSnapshots = useCallback((v: boolean) => setOpField('isLoadingSnapshots', v), [setOpField]);
+  const setSnapshotError = useCallback((v: string | null) => setOpField('snapshotError', v), [setOpField]);
+  const setPreviewData = useCallback((v: PreviewRestoreResponse | null) => setOpField('previewData', v), [setOpField]);
+  const setIsLoadingPreview = useCallback((v: boolean) => setOpField('isLoadingPreview', v), [setOpField]);
+  const setIsRestoring = useCallback((v: boolean) => setOpField('isRestoring', v), [setOpField]);
+  const setPendingRestorePath = useCallback((v: string | null) => setOpField('pendingRestorePath', v), [setOpField]);
   
   // Validate paths on the server
   const validatePaths = useCallback(async (config: PathConfig) => {
