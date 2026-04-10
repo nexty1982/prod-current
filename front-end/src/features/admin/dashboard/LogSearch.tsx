@@ -62,50 +62,128 @@ const LogSearch: React.FC = () => {
   const theme = useTheme();
   const { isLayout } = useContext(CustomizerContext);
   const [activeTab, setActiveTab] = useState(0);
-  const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({ open: false, message: '', severity: 'success' });
-
-  // ── Log Search state ──────────────────────────────────────────────────────
-  const [logStats, setLogStats] = useState<LogStats | null>(null);
-  const [logResults, setLogResults] = useState<SearchResult | null>(null);
-  const [logLoading, setLogLoading] = useState(false);
-  const [logStatsLoading, setLogStatsLoading] = useState(true);
-  const [expandedRow, setExpandedRow] = useState<number | null>(null);
-  const [contextDialog, setContextDialog] = useState<{ open: boolean; rows: LogEntry[]; targetId: number | null }>({ open: false, rows: [], targetId: null });
-  const [contextLoading, setContextLoading] = useState(false);
-  const [logQuery, setLogQuery] = useState('');
-  const [logLevel, setLogLevel] = useState('');
-  const [logSource, setLogSource] = useState('');
-  const [logService, setLogService] = useState('');
-  const [logUserEmail, setLogUserEmail] = useState('');
-  const [logDateFrom, setLogDateFrom] = useState('');
-  const [logDateTo, setLogDateTo] = useState('');
-  const [logPage, setLogPage] = useState(1);
-  const [logLimit] = useState(50);
-
-  // ── Filter dropdown options ───────────────────────────────────────────────
-  const [filterOptions, setFilterOptions] = useState<FilterOptions>({ sources: [], services: [], recentUsers: [] });
-
-  // ── Server log files ──────────────────────────────────────────────────────
-  const [serverLogFiles, setServerLogFiles] = useState<ServerLogFile[]>([]);
-  const [activeLogSource, setActiveLogSource] = useState<string>('system');
-  const [serverLogLines, setServerLogLines] = useState<string[]>([]);
-  const [serverLogLoading, setServerLogLoading] = useState(false);
-  const [serverLogSearch, setServerLogSearch] = useState('');
-  const [serverLogLineCount, setServerLogLineCount] = useState(200);
-
-  // ── Auto-refresh ──────────────────────────────────────────────────────────
-  const [autoRefresh, setAutoRefresh] = useState(false);
-  const [refreshInterval] = useState(10);
-  const [countdown, setCountdown] = useState(10);
+  const refreshInterval = 10;
+  const logLimit = 50;
   const autoRefreshRef = useRef<NodeJS.Timeout | null>(null);
   const countdownRef = useRef<NodeJS.Timeout | null>(null);
 
-  // ── Level exclude toggles ────────────────────────────────────────────────
-  const [excludedLevels, setExcludedLevels] = useState<string[]>([]);
+  // ── Snackbar ──────────────────────────────────────────────────────────────
+  type SnackbarState = { open: boolean; message: string; severity: 'success' | 'error' };
+  const [snackbar, setSnackbar] = useState<SnackbarState>({ open: false, message: '', severity: 'success' });
 
-  // ── Sorting ───────────────────────────────────────────────────────────────
-  const [sortField, setSortField] = useState<string>('timestamp');
-  const [sortDir, setSortDir] = useState<'ASC' | 'DESC'>('DESC');
+  // ── Log search bucket ─────────────────────────────────────────────────────
+  type ContextDialogState = { open: boolean; rows: LogEntry[]; targetId: number | null };
+  const [logSearch, setLogSearch] = useState<{
+    logStats: LogStats | null;
+    logResults: SearchResult | null;
+    logLoading: boolean;
+    logStatsLoading: boolean;
+    expandedRow: number | null;
+    contextDialog: ContextDialogState;
+    contextLoading: boolean;
+    logQuery: string;
+    logLevel: string;
+    logSource: string;
+    logService: string;
+    logUserEmail: string;
+    logDateFrom: string;
+    logDateTo: string;
+    logPage: number;
+    filterOptions: FilterOptions;
+  }>({
+    logStats: null,
+    logResults: null,
+    logLoading: false,
+    logStatsLoading: true,
+    expandedRow: null,
+    contextDialog: { open: false, rows: [], targetId: null },
+    contextLoading: false,
+    logQuery: '',
+    logLevel: '',
+    logSource: '',
+    logService: '',
+    logUserEmail: '',
+    logDateFrom: '',
+    logDateTo: '',
+    logPage: 1,
+    filterOptions: { sources: [], services: [], recentUsers: [] },
+  });
+  const setLogSearchField = useCallback(<K extends keyof typeof logSearch>(key: K, value: typeof logSearch[K]) => {
+    setLogSearch(prev => ({ ...prev, [key]: value }));
+  }, []);
+  const setLogStats = useCallback((v: LogStats | null) => setLogSearchField('logStats', v), [setLogSearchField]);
+  const setLogResults = useCallback((v: SearchResult | null) => setLogSearchField('logResults', v), [setLogSearchField]);
+  const setLogLoading = useCallback((v: boolean) => setLogSearchField('logLoading', v), [setLogSearchField]);
+  const setLogStatsLoading = useCallback((v: boolean) => setLogSearchField('logStatsLoading', v), [setLogSearchField]);
+  const setExpandedRow = useCallback((v: number | null) => setLogSearchField('expandedRow', v), [setLogSearchField]);
+  const setContextDialog = useCallback((v: ContextDialogState) => setLogSearchField('contextDialog', v), [setLogSearchField]);
+  const setContextLoading = useCallback((v: boolean) => setLogSearchField('contextLoading', v), [setLogSearchField]);
+  const setLogQuery = useCallback((v: string) => setLogSearchField('logQuery', v), [setLogSearchField]);
+  const setLogLevel = useCallback((v: string) => setLogSearchField('logLevel', v), [setLogSearchField]);
+  const setLogSource = useCallback((v: string) => setLogSearchField('logSource', v), [setLogSearchField]);
+  const setLogService = useCallback((v: string) => setLogSearchField('logService', v), [setLogSearchField]);
+  const setLogUserEmail = useCallback((v: string) => setLogSearchField('logUserEmail', v), [setLogSearchField]);
+  const setLogDateFrom = useCallback((v: string) => setLogSearchField('logDateFrom', v), [setLogSearchField]);
+  const setLogDateTo = useCallback((v: string) => setLogSearchField('logDateTo', v), [setLogSearchField]);
+  const setLogPage = useCallback((v: number) => setLogSearchField('logPage', v), [setLogSearchField]);
+  const setFilterOptions = useCallback((v: FilterOptions) => setLogSearchField('filterOptions', v), [setLogSearchField]);
+  const { logStats, logResults, logLoading, logStatsLoading, expandedRow, contextDialog, contextLoading, logQuery, logLevel, logSource, logService, logUserEmail, logDateFrom, logDateTo, logPage, filterOptions } = logSearch;
+
+  // ── Server logs bucket ────────────────────────────────────────────────────
+  const [serverLog, setServerLog] = useState<{
+    serverLogFiles: ServerLogFile[];
+    activeLogSource: string;
+    serverLogLines: string[];
+    serverLogLoading: boolean;
+    serverLogSearch: string;
+    serverLogLineCount: number;
+  }>({
+    serverLogFiles: [],
+    activeLogSource: 'system',
+    serverLogLines: [],
+    serverLogLoading: false,
+    serverLogSearch: '',
+    serverLogLineCount: 200,
+  });
+  const setServerLogField = useCallback(<K extends keyof typeof serverLog>(key: K, value: typeof serverLog[K]) => {
+    setServerLog(prev => ({ ...prev, [key]: value }));
+  }, []);
+  const setServerLogFiles = useCallback((v: ServerLogFile[]) => setServerLogField('serverLogFiles', v), [setServerLogField]);
+  const setActiveLogSource = useCallback((v: string) => setServerLogField('activeLogSource', v), [setServerLogField]);
+  const setServerLogLines = useCallback((v: string[]) => setServerLogField('serverLogLines', v), [setServerLogField]);
+  const setServerLogLoading = useCallback((v: boolean) => setServerLogField('serverLogLoading', v), [setServerLogField]);
+  const setServerLogSearch = useCallback((v: string) => setServerLogField('serverLogSearch', v), [setServerLogField]);
+  const setServerLogLineCount = useCallback((v: number) => setServerLogField('serverLogLineCount', v), [setServerLogField]);
+  const { serverLogFiles, activeLogSource, serverLogLines, serverLogLoading, serverLogSearch, serverLogLineCount } = serverLog;
+
+  // ── Auto-refresh + sorting bucket ─────────────────────────────────────────
+  const [refreshSort, setRefreshSort] = useState<{
+    autoRefresh: boolean;
+    countdown: number;
+    excludedLevels: string[];
+    sortField: string;
+    sortDir: 'ASC' | 'DESC';
+  }>({
+    autoRefresh: false,
+    countdown: 10,
+    excludedLevels: [],
+    sortField: 'timestamp',
+    sortDir: 'DESC',
+  });
+  const setAutoRefresh: React.Dispatch<React.SetStateAction<boolean>> = useCallback((action) => {
+    setRefreshSort(prev => ({ ...prev, autoRefresh: typeof action === 'function' ? (action as (p: boolean) => boolean)(prev.autoRefresh) : action }));
+  }, []);
+  const setCountdown: React.Dispatch<React.SetStateAction<number>> = useCallback((action) => {
+    setRefreshSort(prev => ({ ...prev, countdown: typeof action === 'function' ? (action as (p: number) => number)(prev.countdown) : action }));
+  }, []);
+  const setExcludedLevels: React.Dispatch<React.SetStateAction<string[]>> = useCallback((action) => {
+    setRefreshSort(prev => ({ ...prev, excludedLevels: typeof action === 'function' ? (action as (p: string[]) => string[])(prev.excludedLevels) : action }));
+  }, []);
+  const setSortField = useCallback((v: string) => setRefreshSort(prev => ({ ...prev, sortField: v })), []);
+  const setSortDir: React.Dispatch<React.SetStateAction<'ASC' | 'DESC'>> = useCallback((action) => {
+    setRefreshSort(prev => ({ ...prev, sortDir: typeof action === 'function' ? (action as (p: 'ASC' | 'DESC') => 'ASC' | 'DESC')(prev.sortDir) : action }));
+  }, []);
+  const { autoRefresh, countdown, excludedLevels, sortField, sortDir } = refreshSort;
 
   // ═══════════════════════════════════════════════════════════════════════════
   // LOG SEARCH HANDLERS
