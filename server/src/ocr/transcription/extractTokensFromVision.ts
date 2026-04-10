@@ -256,3 +256,12 @@ export function extractTokensFromVision(
   return { tokens, lines };
 }
 
+// ============================================================================
+// Test-only exports
+// ============================================================================
+export const __test__ = {
+  normalizeBBox,
+  extractBBox,
+  detectScript,
+  extractWordText,
+};
