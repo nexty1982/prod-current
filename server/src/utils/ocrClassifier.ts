@@ -10,68 +10,78 @@ interface ClassifierResult {
   keyword_hits: Record<string, string[]>;
 }
 
+// Unicode-aware "word boundary" — JS \b is ASCII-only, so it silently fails
+// for Greek/Cyrillic patterns. We use Unicode property lookarounds instead so
+// the same pattern style works across English, Greek, Russian, etc.
+const UB_START = '(?<![\\p{L}\\p{N}])';
+const UB_END = '(?![\\p{L}\\p{N}])';
+
+function ub(pattern: string): RegExp {
+  return new RegExp(`${UB_START}${pattern}${UB_END}`, 'iu');
+}
+
 const KEYWORD_PATTERNS: Record<string, RegExp[]> = {
   baptism: [
-    /\bbaptis[me]/i,
-    /\bbaptiz/i,
-    /\bchristening/i,
-    /\bgodparent/i,
-    /\bgodmother/i,
-    /\bgodfather/i,
-    /\bsponsor/i,
-    /\bchrismat/i,
-    /\bbaptism/i,
-    /\bβάπτισ/i,
-    /\bβαπτιστ/i,
-    /\bνονό[ςσ]/i,
-    /\bνονά/i,
-    /\bкрещен/i,
-    /\bкрёстн/i,
-    /\bchild.?name/i,
-    /\bdate.?of.?birth/i,
-    /\bplace.?of.?birth/i,
-    /\binfant/i,
+    ub('baptis[me]'),
+    ub('baptiz[\\p{L}\\p{N}]*'),
+    ub('christening'),
+    ub('godparent'),
+    ub('godmother'),
+    ub('godfather'),
+    ub('sponsor[\\p{L}\\p{N}]*'),
+    ub('chrismat[\\p{L}\\p{N}]*'),
+    ub('baptism'),
+    ub('βάπτισ[\\p{L}\\p{N}]*'),
+    ub('βαπτιστ[\\p{L}\\p{N}]*'),
+    ub('νονό[ςσ]'),
+    ub('νονά'),
+    ub('крещен[\\p{L}\\p{N}]*'),
+    ub('крёстн[\\p{L}\\p{N}]*'),
+    ub('child.?name'),
+    ub('date.?of.?birth'),
+    ub('place.?of.?birth'),
+    ub('infant'),
   ],
   marriage: [
-    /\bmarriag/i,
-    /\bwedding/i,
-    /\bmatrimon/i,
-    /\bbride/i,
-    /\bgroom/i,
-    /\bcrowning/i,
-    /\bστεφάνωση/i,
-    /\bστέφαν/i,
-    /\bγάμο[υς]/i,
-    /\bνυμφίο/i,
-    /\bνύφη/i,
-    /\bбракосочетан/i,
-    /\bвенчан/i,
-    /\bженатый/i,
-    /\bwitness/i,
-    /\bdate.?of.?marriage/i,
-    /\bbest.?man/i,
-    /\bmaid.?of.?honor/i,
-    /\bnuptial/i,
+    ub('marriag[\\p{L}\\p{N}]*'),
+    ub('wedding'),
+    ub('matrimon[\\p{L}\\p{N}]*'),
+    ub('bride'),
+    ub('groom'),
+    ub('crowning'),
+    ub('στεφάνωση'),
+    ub('στέφαν[\\p{L}\\p{N}]*'),
+    ub('γάμο[υς]'),
+    ub('νυμφίο[\\p{L}\\p{N}]*'),
+    ub('νύφη'),
+    ub('бракосочетан[\\p{L}\\p{N}]*'),
+    ub('венчан[\\p{L}\\p{N}]*'),
+    ub('женатый'),
+    ub('witness'),
+    ub('date.?of.?marriage'),
+    ub('best.?man'),
+    ub('maid.?of.?honor'),
+    ub('nuptial'),
   ],
   funeral: [
-    /\bfuneral/i,
-    /\bdeath/i,
-    /\bburial/i,
-    /\bdeceased/i,
-    /\brepose/i,
-    /\bκηδεία/i,
-    /\bθάνατο/i,
-    /\bταφ[ήη]/i,
-    /\bотпеван/i,
-    /\bпохорон/i,
-    /\bсмерт/i,
-    /\bdate.?of.?death/i,
-    /\bdate.?of.?burial/i,
-    /\bcause.?of.?death/i,
-    /\bage.?at.?death/i,
-    /\bnext.?of.?kin/i,
-    /\binterment/i,
-    /\bobitu/i,
+    ub('funeral'),
+    ub('death'),
+    ub('burial'),
+    ub('deceased'),
+    ub('repose'),
+    ub('κηδεία'),
+    ub('θάνατο[\\p{L}\\p{N}]*'),
+    ub('ταφ[ήη]'),
+    ub('отпеван[\\p{L}\\p{N}]*'),
+    ub('похорон[\\p{L}\\p{N}]*'),
+    ub('смерт[\\p{L}\\p{N}]*'),
+    ub('date.?of.?death'),
+    ub('date.?of.?burial'),
+    ub('cause.?of.?death'),
+    ub('age.?at.?death'),
+    ub('next.?of.?kin'),
+    ub('interment'),
+    ub('obitu[\\p{L}\\p{N}]*'),
   ],
 };
 
@@ -88,10 +98,19 @@ export function classifyRecordType(ocrText: string): ClassifierResult {
 
   for (const [type, patterns] of Object.entries(KEYWORD_PATTERNS)) {
     for (const pattern of patterns) {
-      const matches = text.match(new RegExp(pattern.source, 'gi'));
+      // Preserve original pattern flags but force global so we can count hits.
+      // Patterns are built with iu (Unicode-aware boundaries), so we need 'u'
+      // to correctly evaluate the \p{L} lookarounds for non-ASCII text.
+      const globalPattern = new RegExp(pattern.source, 'giu');
+      const matches = text.match(globalPattern);
       if (matches) {
         scores[type] += matches.length;
-        hits[type].push(pattern.source.replace(/\\b/g, '').replace(/\[.*?\]/g, '?'));
+        hits[type].push(
+          pattern.source
+            .replace(/\(\?<!\[\\p\{L\}\\p\{N\}\]\)/g, '')
+            .replace(/\(\?!\[\\p\{L\}\\p\{N\}\]\)/g, '')
+            .replace(/\[.*?\]/g, '?')
+        );
       }
     }
   }
