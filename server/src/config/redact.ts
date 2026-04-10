@@ -83,8 +83,17 @@ export function formatConfigForLog(config: any): string {
   return JSON.stringify(redacted, null, 2);
 }
 
+// ── Test-only exports (private helpers exposed for unit tests) ────────────
+export const __test__ = {
+  shouldRedact,
+  redactValue,
+  redactObject,
+  SECRET_FIELDS,
+};
+
 // Also export as CommonJS for compatibility
 module.exports = {
   redactConfig,
   formatConfigForLog,
+  __test__,
 };
