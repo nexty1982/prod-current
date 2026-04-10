@@ -143,39 +143,105 @@ const isReprocessable = (s: string) => ['failed','error','queued','pending'].inc
 const OcrActivityMonitor: React.FC = () => {
   const theme = useTheme();
 
-  // Data
-  const [jobs, setJobs] = useState<OcrJob[]>([]);
-  const [counts, setCounts] = useState<Counts>({ queued:0, processing:0, completed:0, failed:0, stale:0 });
-  const [total, setTotal] = useState(0);
-  const [churches, setChurches] = useState<ChurchOption[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [fetchError, setFetchError] = useState<string|null>(null);
-  const [lastRefresh, setLastRefresh] = useState<Date|null>(null);
-
-  // Filters
-  const [statusFilter, setStatusFilter] = useState('');
-  const [churchFilter, setChurchFilter] = useState<ChurchOption|null>(null);
-  const [searchQ, setSearchQ] = useState('');
-  const [staleOnly, setStaleOnly] = useState(false);
-  const [autoRefresh, setAutoRefresh] = useState(true);
-  const [page, setPage] = useState(1);
   const pageSize = 50;
 
-  // Selection
+  // ── Data bucket ──────────────────────────────────────────────────────────
+  const [data, setData] = useState<{
+    jobs: OcrJob[];
+    counts: Counts;
+    total: number;
+    churches: ChurchOption[];
+    loading: boolean;
+    fetchError: string | null;
+    lastRefresh: Date | null;
+  }>({
+    jobs: [],
+    counts: { queued:0, processing:0, completed:0, failed:0, stale:0 },
+    total: 0,
+    churches: [],
+    loading: false,
+    fetchError: null,
+    lastRefresh: null,
+  });
+  const setDataField = useCallback(<K extends keyof typeof data>(key: K, value: typeof data[K]) => {
+    setData(prev => ({ ...prev, [key]: value }));
+  }, []);
+  const setJobs = useCallback((v: OcrJob[]) => setDataField('jobs', v), [setDataField]);
+  const setCounts = useCallback((v: Counts) => setDataField('counts', v), [setDataField]);
+  const setTotal = useCallback((v: number) => setDataField('total', v), [setDataField]);
+  const setChurches = useCallback((v: ChurchOption[]) => setDataField('churches', v), [setDataField]);
+  const setLoading = useCallback((v: boolean) => setDataField('loading', v), [setDataField]);
+  const setFetchError = useCallback((v: string | null) => setDataField('fetchError', v), [setDataField]);
+  const setLastRefresh = useCallback((v: Date | null) => setDataField('lastRefresh', v), [setDataField]);
+  const { jobs, counts, total, churches, loading, fetchError, lastRefresh } = data;
+
+  // ── Filters bucket ───────────────────────────────────────────────────────
+  const [filters, setFilters] = useState<{
+    statusFilter: string;
+    churchFilter: ChurchOption | null;
+    searchQ: string;
+    staleOnly: boolean;
+    autoRefresh: boolean;
+    page: number;
+  }>({
+    statusFilter: '',
+    churchFilter: null,
+    searchQ: '',
+    staleOnly: false,
+    autoRefresh: true,
+    page: 1,
+  });
+  const setFiltersField = useCallback(<K extends keyof typeof filters>(key: K, value: typeof filters[K]) => {
+    setFilters(prev => ({ ...prev, [key]: value }));
+  }, []);
+  const setStatusFilter = useCallback((v: string) => setFiltersField('statusFilter', v), [setFiltersField]);
+  const setChurchFilter = useCallback((v: ChurchOption | null) => setFiltersField('churchFilter', v), [setFiltersField]);
+  const setSearchQ = useCallback((v: string) => setFiltersField('searchQ', v), [setFiltersField]);
+  const setStaleOnly = useCallback((v: boolean) => setFiltersField('staleOnly', v), [setFiltersField]);
+  const setAutoRefresh = useCallback((v: boolean) => setFiltersField('autoRefresh', v), [setFiltersField]);
+  const setPage = useCallback((v: number) => setFiltersField('page', v), [setFiltersField]);
+  const { statusFilter, churchFilter, searchQ, staleOnly, autoRefresh, page } = filters;
+
+  // ── Selection (SetStateAction wrapper for toggleSelect prev pattern) ─────
   const [selected, setSelected] = useState<Set<string>>(new Set());
 
-  // Dialogs
-  const [killTarget, setKillTarget] = useState<OcrJob|null>(null);
-  const [killReason, setKillReason] = useState('');
-  const [killing, setKilling] = useState(false);
-  const [bulkDialog, setBulkDialog] = useState<{action:'kill'|'reprocess'|'clear', count:number}|null>(null);
-  const [bulkReason, setBulkReason] = useState('');
-  const [bulkRunning, setBulkRunning] = useState(false);
-  const [detailJob, setDetailJob] = useState<OcrJob|null>(null);
-  const [detailLoading, setDetailLoading] = useState(false);
-  const [detailTab, setDetailTab] = useState(0);
+  // ── Dialogs bucket ───────────────────────────────────────────────────────
+  const [dialogs, setDialogs] = useState<{
+    killTarget: OcrJob | null;
+    killReason: string;
+    killing: boolean;
+    bulkDialog: {action:'kill'|'reprocess'|'clear', count:number} | null;
+    bulkReason: string;
+    bulkRunning: boolean;
+    detailJob: OcrJob | null;
+    detailLoading: boolean;
+    detailTab: number;
+  }>({
+    killTarget: null,
+    killReason: '',
+    killing: false,
+    bulkDialog: null,
+    bulkReason: '',
+    bulkRunning: false,
+    detailJob: null,
+    detailLoading: false,
+    detailTab: 0,
+  });
+  const setDialogsField = useCallback(<K extends keyof typeof dialogs>(key: K, value: typeof dialogs[K]) => {
+    setDialogs(prev => ({ ...prev, [key]: value }));
+  }, []);
+  const setKillTarget = useCallback((v: OcrJob | null) => setDialogsField('killTarget', v), [setDialogsField]);
+  const setKillReason = useCallback((v: string) => setDialogsField('killReason', v), [setDialogsField]);
+  const setKilling = useCallback((v: boolean) => setDialogsField('killing', v), [setDialogsField]);
+  const setBulkDialog = useCallback((v: {action:'kill'|'reprocess'|'clear', count:number} | null) => setDialogsField('bulkDialog', v), [setDialogsField]);
+  const setBulkReason = useCallback((v: string) => setDialogsField('bulkReason', v), [setDialogsField]);
+  const setBulkRunning = useCallback((v: boolean) => setDialogsField('bulkRunning', v), [setDialogsField]);
+  const setDetailJob = useCallback((v: OcrJob | null) => setDialogsField('detailJob', v), [setDialogsField]);
+  const setDetailLoading = useCallback((v: boolean) => setDialogsField('detailLoading', v), [setDialogsField]);
+  const setDetailTab = useCallback((v: number) => setDialogsField('detailTab', v), [setDialogsField]);
+  const { killTarget, killReason, killing, bulkDialog, bulkReason, bulkRunning, detailJob, detailLoading, detailTab } = dialogs;
 
-  // Toast
+  // ── Toast ────────────────────────────────────────────────────────────────
   const [toast, setToast] = useState<{msg:string; severity:'success'|'error'|'info'}|null>(null);
 
   // Polling
@@ -334,18 +400,33 @@ const OcrActivityMonitor: React.FC = () => {
     setToast({ msg: `Exported ${jobs.length} rows`, severity: 'info' });
   };
 
-  // ── Copy helper ────────────────────────────────────────────────────────
+  // ── Copy helper + Clear Processed bucket ─────────────────────────────────
+  const [misc, setMisc] = useState<{
+    copied: boolean;
+    clearProcOpen: boolean;
+    clearProcScope: 'selected'|'all';
+    clearProcFiles: 'db'|'db+files';
+    clearProcRunning: boolean;
+  }>({
+    copied: false,
+    clearProcOpen: false,
+    clearProcScope: 'all',
+    clearProcFiles: 'db',
+    clearProcRunning: false,
+  });
+  const setMiscField = useCallback(<K extends keyof typeof misc>(key: K, value: typeof misc[K]) => {
+    setMisc(prev => ({ ...prev, [key]: value }));
+  }, []);
+  const setCopied = useCallback((v: boolean) => setMiscField('copied', v), [setMiscField]);
+  const setClearProcOpen = useCallback((v: boolean) => setMiscField('clearProcOpen', v), [setMiscField]);
+  const setClearProcScope = useCallback((v: 'selected'|'all') => setMiscField('clearProcScope', v), [setMiscField]);
+  const setClearProcFiles = useCallback((v: 'db'|'db+files') => setMiscField('clearProcFiles', v), [setMiscField]);
+  const setClearProcRunning = useCallback((v: boolean) => setMiscField('clearProcRunning', v), [setMiscField]);
+  const { copied, clearProcOpen, clearProcScope, clearProcFiles, clearProcRunning } = misc;
 
-  const [copied, setCopied] = useState(false);
   const copyText = (text: string) => {
     navigator.clipboard.writeText(text).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1500); });
   };
-
-  // ── Clear Processed ───────────────────────────────────────────────────
-  const [clearProcOpen, setClearProcOpen] = useState(false);
-  const [clearProcScope, setClearProcScope] = useState<'selected'|'all'>('all');
-  const [clearProcFiles, setClearProcFiles] = useState<'db'|'db+files'>('db');
-  const [clearProcRunning, setClearProcRunning] = useState(false);
 
   const selectedCompleted = selectedJobs.filter(j => ['completed','complete'].includes(j.status));
 
