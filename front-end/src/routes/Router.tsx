@@ -35,7 +35,6 @@ const EcommerceDash = Loadable(lazy(() => import('../features/dashboard/Ecommerc
 const Contacts = Loadable(lazy(() => import('../features/apps/contacts/Contacts')));
 const Notes = Loadable(lazy(() => import('../features/apps/notes/Notes')));
 const Tickets = Loadable(lazy(() => import('../features/apps/tickets/Tickets')));
-const ImageAI = Loadable(lazy(() => import('../features/apps/image-ai/ImageAI')));
 const Kanban = Loadable(lazy(() => import('../features/apps/kanban/Kanban')));
 const InvoiceList = Loadable(lazy(() => import('../features/apps/invoice/List')));
 const InvoiceCreate = Loadable(lazy(() => import('../features/apps/invoice/Create')));
@@ -305,14 +304,6 @@ const Router = [
         element: (
           <ProtectedRoute>
             <Tickets />
-          </ProtectedRoute>
-        )
-      },
-      {
-        path: '/apps/image-ai',
-        element: (
-          <ProtectedRoute>
-            <ImageAI />
           </ProtectedRoute>
         )
       },

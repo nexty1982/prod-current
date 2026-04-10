@@ -10,7 +10,6 @@ import {
     Article as BlogIcon,
     Settings as ContentSettingsIcon,
     Image as GalleryIcon,
-    PhotoCamera as ImageAIIcon,
     Launch as LaunchIcon,
     Photo as MediaIcon,
     Notes as NotesIcon,
@@ -29,7 +28,6 @@ import { useNavigate } from 'react-router-dom';
 
 const TOOLS = [
   { title: 'Gallery', description: 'Image gallery management, organization, and church image paths', href: '/apps/gallery', icon: <GalleryIcon /> },
-  { title: 'Image AI', description: 'AI-powered image processing and analysis tools', href: '/apps/image-ai', icon: <ImageAIIcon /> },
   { title: 'Blog Management', description: 'Create and manage blog posts and articles', href: '/admin/blog-admin', icon: <BlogIcon /> },
   { title: 'Notes', description: 'Personal and shared notes workspace', href: '/apps/notes', icon: <NotesIcon /> },
   { title: 'Welcome Message', description: 'Configure the platform welcome message for users', href: '/frontend-pages/welcome-message', icon: <WelcomeIcon /> },

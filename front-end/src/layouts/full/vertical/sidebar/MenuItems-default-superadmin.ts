@@ -273,12 +273,6 @@ export const SuperAdminMenuTemplate: MenuTemplateItem[] = [
     ],
   },
   {
-    id: 'church.image-ai',
-    title: 'Image AI',
-    icon: IconPalette,
-    href: '/apps/image-ai',
-  },
-  {
     id: 'church.gallery',
     title: 'Gallery',
     icon: IconPalette,

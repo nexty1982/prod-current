@@ -127,13 +127,6 @@ const Menuitems: MenuitemsType[] = [
   },
   {
     id: uniqueId(),
-    title: 'Image AI',
-    icon: IconPalette,
-    href: '/apps/image-ai',
-    badgeKey: 'image-ai',
-  },
-  {
-    id: uniqueId(),
     title: 'OM-Spec',
     icon: IconFileDescription,
     href: '/church/om-spec',
