@@ -76,20 +76,58 @@ const EnhancedOCRUploader: React.FC = () => {
 
   // State
   const [files, setFiles] = useState<UploadFile[]>([]);
-  const [isUploading, setIsUploading] = useState(false);
-  const [isPaused, setIsPaused] = useState(false);
-  const [showAdvanced, setShowAdvanced] = useState(false);
-  const [dragActive, setDragActive] = useState(false);
-  // Simulation mode state
-  const [simulationMode, setSimulationMode] = useState<boolean>(urlOcrMode === 'simulate');
+  type UploadBucket = {
+    isUploading: boolean;
+    isPaused: boolean;
+    showAdvanced: boolean;
+    dragActive: boolean;
+    simulationMode: boolean;
+  };
+  const [upload, setUpload] = useState<UploadBucket>({
+    isUploading: false,
+    isPaused: false,
+    showAdvanced: false,
+    dragActive: false,
+    simulationMode: urlOcrMode === 'simulate',
+  });
+  const setUploadField = useCallback(<K extends keyof UploadBucket>(key: K, value: UploadBucket[K]) => {
+    setUpload(prev => ({ ...prev, [key]: value }));
+  }, []);
+  const { isUploading, isPaused, showAdvanced, dragActive, simulationMode } = upload;
+  const setIsUploading = useCallback((v: boolean) => setUploadField('isUploading', v), [setUploadField]);
+  const setIsPaused = useCallback((v: boolean) => setUploadField('isPaused', v), [setUploadField]);
+  const setShowAdvanced = useCallback((v: boolean) => setUploadField('showAdvanced', v), [setUploadField]);
+  const setDragActive = useCallback((v: boolean) => setUploadField('dragActive', v), [setUploadField]);
+  const setSimulationMode = useCallback((v: boolean) => setUploadField('simulationMode', v), [setUploadField]);
   const isSimulationModeAvailable = selectedChurchId === 46;
+
   // @deprecated - Replaced by Workbench (but still used for backward compatibility)
-  const [showInspectionPanel, setShowInspectionPanel] = useState(false);
-  const [selectedFileId, setSelectedFileId] = useState<string | null>(null);
-  const [selectedJobDetail, setSelectedJobDetail] = useState<JobDetail | null>(null);
-  const [loadingJobDetail, setLoadingJobDetail] = useState(false);
-  const [showMappingTab, setShowMappingTab] = useState(false);
-  const [inspectionPanelInitialTab, setInspectionPanelInitialTab] = useState<number | undefined>(undefined);
+  type InspectionBucket = {
+    showInspectionPanel: boolean;
+    selectedFileId: string | null;
+    selectedJobDetail: JobDetail | null;
+    loadingJobDetail: boolean;
+    showMappingTab: boolean;
+    inspectionPanelInitialTab: number | undefined;
+  };
+  const [inspection, setInspection] = useState<InspectionBucket>({
+    showInspectionPanel: false,
+    selectedFileId: null,
+    selectedJobDetail: null,
+    loadingJobDetail: false,
+    showMappingTab: false,
+    inspectionPanelInitialTab: undefined,
+  });
+  const setInspectionField = useCallback(<K extends keyof InspectionBucket>(key: K, value: InspectionBucket[K]) => {
+    setInspection(prev => ({ ...prev, [key]: value }));
+  }, []);
+  const { showInspectionPanel, selectedFileId, selectedJobDetail, loadingJobDetail, showMappingTab, inspectionPanelInitialTab } = inspection;
+  const setShowInspectionPanel = useCallback((v: boolean) => setInspectionField('showInspectionPanel', v), [setInspectionField]);
+  const setSelectedFileId = useCallback((v: string | null) => setInspectionField('selectedFileId', v), [setInspectionField]);
+  const setSelectedJobDetail = useCallback((v: JobDetail | null) => setInspectionField('selectedJobDetail', v), [setInspectionField]);
+  const setLoadingJobDetail = useCallback((v: boolean) => setInspectionField('loadingJobDetail', v), [setInspectionField]);
+  const setShowMappingTab = useCallback((v: boolean) => setInspectionField('showMappingTab', v), [setInspectionField]);
+  const setInspectionPanelInitialTab = useCallback((v: number | undefined) => setInspectionField('inspectionPanelInitialTab', v), [setInspectionField]);
   // Use the OCR jobs hook for processed images table
   const {
     jobs: ocrJobs,
