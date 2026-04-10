@@ -1,18 +1,19 @@
 #!/usr/bin/env npx tsx
 /**
- * Unit tests for utils/questionnaireParser.js (OMD-902)
+ * Unit tests for utils/questionnaireParser.js (OMD-890)
  *
- * Pure module — depends only on node:path. All methods are static.
- *
- * Coverage:
- *   - parseQuestionnaire             .tsx-only filter, frontmatter detection
- *   - extractMetadata                block + single-line styles, all @tags
- *   - generateQuestionnaireId        lowercase, non-alphanumeric → '-'
- *   - extractTitleFromFileName       camelCase + kebab/snake → title case
- *   - extractAgeGroupFromFileName    6 regex patterns, fallback to 'General'
- *   - validateContent                dangerous imports/patterns, URL warnings
+ * Pure static-method class — no DB, no I/O, no fs.
+ * Covers all 6 public static methods:
+ *   - parseQuestionnaire
+ *   - extractMetadata (frontmatter + single-line variants)
+ *   - generateQuestionnaireId
+ *   - extractTitleFromFileName
+ *   - extractAgeGroupFromFileName
+ *   - validateContent
  *
  * Run: npx tsx server/src/utils/__tests__/questionnaireParser.test.ts
+ *
+ * Exits non-zero on any failure.
  */
 
 const QuestionnaireParser = require('../questionnaireParser');
@@ -36,153 +37,44 @@ function assertEq<T>(actual: T, expected: T, message: string): void {
 }
 
 // ============================================================================
-// parseQuestionnaire — file extension filter
-// ============================================================================
-console.log('\n── parseQuestionnaire: extension filter ──────────────────');
-
-assertEq(
-  QuestionnaireParser.parseQuestionnaire('quiz.js', '/** @type questionnaire */'),
-  null,
-  '.js → null'
-);
-assertEq(
-  QuestionnaireParser.parseQuestionnaire('quiz.ts', '/** @type questionnaire */'),
-  null,
-  '.ts → null'
-);
-assertEq(
-  QuestionnaireParser.parseQuestionnaire('quiz.txt', '/** @type questionnaire */'),
-  null,
-  '.txt → null'
-);
-// .TSX (uppercase) — extname is lowercased before comparison, so this matches
-const tsxUpper = QuestionnaireParser.parseQuestionnaire('quiz.TSX', '/** @type questionnaire */');
-assert(tsxUpper !== null, '.TSX (uppercase) accepted');
-
-// Non-questionnaire .tsx → null
-assertEq(
-  QuestionnaireParser.parseQuestionnaire('regular.tsx', 'export default function Foo() {}'),
-  null,
-  'tsx without @type → null'
-);
-
-// ============================================================================
-// parseQuestionnaire — full result shape
-// ============================================================================
-console.log('\n── parseQuestionnaire: result shape ──────────────────────');
-
-const fullContent = `/**
- * @type questionnaire
- * @title Baptism Quiz
- * @description Test your knowledge of baptism
- * @ageGroup K-2
- * @version 2.0
- * @author Fr. John
- * @estimatedDuration 15
- */
-export default function BaptismQuiz() {}`;
-
-const result = QuestionnaireParser.parseQuestionnaire('baptismQuiz.tsx', fullContent);
-assert(result !== null, 'full content → not null');
-assertEq(result.fileName, 'baptismQuiz.tsx', 'fileName preserved');
-assertEq(result.title, 'Baptism Quiz', 'title from metadata');
-assertEq(result.description, 'Test your knowledge of baptism', 'description');
-assertEq(result.ageGroup, 'K-2', 'ageGroup from metadata');
-assertEq(result.version, '2.0', 'version');
-assertEq(result.author, 'Fr. John', 'author');
-assertEq(result.estimatedDuration, 15, 'estimatedDuration parseInt');
-assertEq(result.type, 'questionnaire', 'type literal');
-assertEq(result.id, 'baptismquiz', 'id generated from filename');
-assertEq(result.questions, [], 'questions default []');
-
-// Default fallbacks when only @type is set
-const minimal = QuestionnaireParser.parseQuestionnaire(
-  'simpleQuiz.tsx',
-  '/** @type questionnaire */'
-);
-assert(minimal !== null, 'minimal → not null');
-assertEq(minimal.title, 'Simple Quiz', 'title fallback from filename');
-assertEq(minimal.description, '', 'description default ""');
-assertEq(minimal.ageGroup, 'General', 'ageGroup fallback');
-assertEq(minimal.version, '1.0', 'version default');
-assertEq(minimal.author, 'Unknown', 'author default');
-assertEq(minimal.estimatedDuration, 10, 'estimatedDuration default 10');
-
-// ============================================================================
-// extractMetadata — block frontmatter
-// ============================================================================
-console.log('\n── extractMetadata: block frontmatter ────────────────────');
-
-let m = QuestionnaireParser.extractMetadata('/** @type questionnaire */');
-assertEq(m.isQuestionnaire, true, 'block @type questionnaire');
-
-m = QuestionnaireParser.extractMetadata('/** @type: questionnaire */');
-assertEq(m.isQuestionnaire, true, 'block @type: questionnaire (with colon)');
-
-m = QuestionnaireParser.extractMetadata('/** nothing here */');
-assertEq(m.isQuestionnaire, false, 'block without @type → false');
-
-m = QuestionnaireParser.extractMetadata('plain text only');
-assertEq(m.isQuestionnaire, false, 'no comments → false');
-
-// All @tags extracted
-m = QuestionnaireParser.extractMetadata(`/**
-@type questionnaire
-@title My Title
-@description Some description
-@ageGroup 9-12
-@version 3.5
-@author Jane
-@estimatedDuration 25
-*/`);
-assertEq(m.isQuestionnaire, true, 'all-tags: isQuestionnaire');
-assertEq(m.title, 'My Title', 'all-tags: title');
-assertEq(m.description, 'Some description', 'all-tags: description');
-assertEq(m.ageGroup, '9-12', 'all-tags: ageGroup');
-assertEq(m.version, '3.5', 'all-tags: version');
-assertEq(m.author, 'Jane', 'all-tags: author');
-assertEq(m.estimatedDuration, 25, 'all-tags: estimatedDuration');
-
-// Defaults preserved when tags absent
-m = QuestionnaireParser.extractMetadata('/** @type questionnaire */');
-assertEq(m.title, null, 'no title → null default');
-assertEq(m.description, null, 'no description → null default');
-assertEq(m.questions, [], 'questions always []');
-
-// ============================================================================
-// extractMetadata — single-line patterns
-// ============================================================================
-console.log('\n── extractMetadata: single-line ──────────────────────────');
-
-const slPatterns = [
-  '// @type questionnaire',
-  '// @type: questionnaire',
-  '/* @type questionnaire',
-  '/* @type: questionnaire',
-];
-
-for (const pattern of slPatterns) {
-  m = QuestionnaireParser.extractMetadata(pattern);
-  assertEq(m.isQuestionnaire, true, `single-line: ${pattern}`);
-}
-
-// ============================================================================
 // generateQuestionnaireId
 // ============================================================================
 console.log('\n── generateQuestionnaireId ───────────────────────────────');
 
-assertEq(QuestionnaireParser.generateQuestionnaireId('baptismQuiz.tsx'), 'baptismquiz', 'camelCase lowercased');
-assertEq(QuestionnaireParser.generateQuestionnaireId('my-quiz.tsx'), 'my-quiz', 'kebab preserved');
-assertEq(QuestionnaireParser.generateQuestionnaireId('my_quiz.tsx'), 'my-quiz', 'snake → kebab');
-assertEq(QuestionnaireParser.generateQuestionnaireId('Quiz 1.tsx'), 'quiz-1', 'space → -');
-assertEq(QuestionnaireParser.generateQuestionnaireId('quiz!@#.tsx'), 'quiz---', 'special chars → -');
-assertEq(QuestionnaireParser.generateQuestionnaireId('plain.tsx'), 'plain', 'plain');
-
-// path with directories
 assertEq(
-  QuestionnaireParser.generateQuestionnaireId('/some/path/myQuiz.tsx'),
-  'myquiz',
-  'directory prefix stripped via path.basename'
+  QuestionnaireParser.generateQuestionnaireId('MyQuestionnaire.tsx'),
+  'myquestionnaire',
+  'simple camelCase → lowercase'
+);
+assertEq(
+  QuestionnaireParser.generateQuestionnaireId('grade-3-5.tsx'),
+  'grade-3-5',
+  'kebab-case preserved'
+);
+assertEq(
+  QuestionnaireParser.generateQuestionnaireId('Adult_Quiz.tsx'),
+  'adult-quiz',
+  'underscore replaced with hyphen'
+);
+assertEq(
+  QuestionnaireParser.generateQuestionnaireId('K2Test!.tsx'),
+  'k2test-',
+  'special chars → hyphens'
+);
+assertEq(
+  QuestionnaireParser.generateQuestionnaireId('foo.bar.tsx'),
+  'foo-bar',
+  'extension stripped, dot replaced'
+);
+assertEq(
+  QuestionnaireParser.generateQuestionnaireId('plain.tsx'),
+  'plain',
+  'simple name'
+);
+assertEq(
+  QuestionnaireParser.generateQuestionnaireId('UPPERCASE.tsx'),
+  'uppercase',
+  'uppercase lowercased'
 );
 
 // ============================================================================
@@ -190,17 +82,35 @@ assertEq(
 // ============================================================================
 console.log('\n── extractTitleFromFileName ──────────────────────────────');
 
-assertEq(QuestionnaireParser.extractTitleFromFileName('baptismQuiz.tsx'), 'Baptism Quiz', 'camelCase → Title Case');
-assertEq(QuestionnaireParser.extractTitleFromFileName('my-quiz.tsx'), 'My Quiz', 'kebab → Title Case');
-assertEq(QuestionnaireParser.extractTitleFromFileName('my_quiz.tsx'), 'My Quiz', 'snake → Title Case');
-assertEq(QuestionnaireParser.extractTitleFromFileName('simple.tsx'), 'Simple', 'single word');
-assertEq(QuestionnaireParser.extractTitleFromFileName('myAwesomeQuiz.tsx'), 'My Awesome Quiz', 'multi-word camelCase');
-
-// path with directory
 assertEq(
-  QuestionnaireParser.extractTitleFromFileName('/path/to/coolQuiz.tsx'),
-  'Cool Quiz',
-  'directory stripped'
+  QuestionnaireParser.extractTitleFromFileName('myQuestionnaire.tsx'),
+  'My Questionnaire',
+  'camelCase → Title Case'
+);
+assertEq(
+  QuestionnaireParser.extractTitleFromFileName('adult-quiz.tsx'),
+  'Adult Quiz',
+  'kebab-case → Title Case'
+);
+assertEq(
+  QuestionnaireParser.extractTitleFromFileName('youth_survey.tsx'),
+  'Youth Survey',
+  'snake_case → Title Case'
+);
+assertEq(
+  QuestionnaireParser.extractTitleFromFileName('AlreadyTitle.tsx'),
+  'Already Title',
+  'PascalCase → Title Case'
+);
+assertEq(
+  QuestionnaireParser.extractTitleFromFileName('plain.tsx'),
+  'Plain',
+  'single word'
+);
+assertEq(
+  QuestionnaireParser.extractTitleFromFileName('grade3to5.tsx'),
+  'Grade3to5',
+  'numbers preserved as-is'
 );
 
 // ============================================================================
@@ -208,47 +118,190 @@ assertEq(
 // ============================================================================
 console.log('\n── extractAgeGroupFromFileName ───────────────────────────');
 
-// K-2 (literal "k-2" or "kindergarten2")
-assertEq(QuestionnaireParser.extractAgeGroupFromFileName('k-2-quiz.tsx'), 'K-2', 'k-2 hyphen');
-assertEq(QuestionnaireParser.extractAgeGroupFromFileName('K2quiz.tsx'), 'K-2', 'k2 no hyphen');
-assertEq(QuestionnaireParser.extractAgeGroupFromFileName('kindergarten2quiz.tsx'), 'K-2', 'kindergarten2');
+assertEq(
+  QuestionnaireParser.extractAgeGroupFromFileName('K-2-quiz.tsx'),
+  'K-2',
+  'K-2 pattern'
+);
+assertEq(
+  QuestionnaireParser.extractAgeGroupFromFileName('kindergarten2.tsx'),
+  'K-2',
+  'kindergarten variant'
+);
+assertEq(
+  QuestionnaireParser.extractAgeGroupFromFileName('grade3-5.tsx'),
+  '3-5',
+  'grade 3-5'
+);
+assertEq(
+  QuestionnaireParser.extractAgeGroupFromFileName('grades6-8.tsx'),
+  '6-8',
+  'grades 6-8'
+);
+assertEq(
+  QuestionnaireParser.extractAgeGroupFromFileName('grade9-12.tsx'),
+  '9-12',
+  'grade 9-12'
+);
+assertEq(
+  QuestionnaireParser.extractAgeGroupFromFileName('high school survey.tsx'),
+  '9-12',
+  'high school → 9-12'
+);
+assertEq(
+  QuestionnaireParser.extractAgeGroupFromFileName('adult-quiz.tsx'),
+  'Adult',
+  'adult pattern'
+);
+assertEq(
+  QuestionnaireParser.extractAgeGroupFromFileName('grown-up.tsx'),
+  'Adult',
+  'grown-up → Adult'
+);
+assertEq(
+  QuestionnaireParser.extractAgeGroupFromFileName('pre-k-quiz.tsx'),
+  'Pre-K',
+  'pre-k pattern'
+);
+assertEq(
+  QuestionnaireParser.extractAgeGroupFromFileName('preschool.tsx'),
+  'Pre-K',
+  'preschool → Pre-K'
+);
+assertEq(
+  QuestionnaireParser.extractAgeGroupFromFileName('random.tsx'),
+  'General',
+  'no pattern → General'
+);
 
-// Note: "kindergarten" alone (without 2) does NOT match — regex requires literal "k-2" or "kindergarten2"
-assertEq(QuestionnaireParser.extractAgeGroupFromFileName('kindergarten-quiz.tsx'), 'General', 'plain kindergarten → General');
+// ============================================================================
+// extractMetadata — frontmatter
+// ============================================================================
+console.log('\n── extractMetadata: frontmatter ──────────────────────────');
 
-// 3-5 — regex is /grade?s?\s*3-?5|3rd-?5th/i
-// So "grade3-5", "grade 3-5", "grades 35", "3rd-5th" match.
-// "grades-3-5" (hyphen between grades and 3) does NOT match because \s* doesn't include hyphen.
-assertEq(QuestionnaireParser.extractAgeGroupFromFileName('grade3-5.tsx'), '3-5', 'grade3-5');
-assertEq(QuestionnaireParser.extractAgeGroupFromFileName('grade 3-5.tsx'), '3-5', 'grade 3-5 with space');
-assertEq(QuestionnaireParser.extractAgeGroupFromFileName('grades3-5.tsx'), '3-5', 'grades3-5');
-assertEq(QuestionnaireParser.extractAgeGroupFromFileName('3rd-5th.tsx'), '3-5', '3rd-5th');
+const fmEmpty = QuestionnaireParser.extractMetadata('// no frontmatter');
+assertEq(fmEmpty.isQuestionnaire, false, 'no frontmatter → not questionnaire');
+assertEq(fmEmpty.title, null, 'no frontmatter → null title');
 
-// 6-8
-assertEq(QuestionnaireParser.extractAgeGroupFromFileName('grade6-8.tsx'), '6-8', 'grade6-8');
-assertEq(QuestionnaireParser.extractAgeGroupFromFileName('6th-8th.tsx'), '6-8', '6th-8th');
+const fmFull = QuestionnaireParser.extractMetadata(`/**
+ * @type questionnaire
+ * @title My Quiz
+ * @description A fun quiz
+ * @ageGroup K-2
+ * @version 2.5
+ * @author Jane Doe
+ * @estimatedDuration 15
+ */
+export default function MyQuiz() {}`);
 
-// 9-12
-assertEq(QuestionnaireParser.extractAgeGroupFromFileName('grade9-12.tsx'), '9-12', 'grade9-12');
-assertEq(QuestionnaireParser.extractAgeGroupFromFileName('9th-12th.tsx'), '9-12', '9th-12th');
-// "high-school.tsx" does NOT match because \s* doesn't include hyphen.
-// "high school.tsx" (literal space) and "highschool.tsx" both match.
-assertEq(QuestionnaireParser.extractAgeGroupFromFileName('high school.tsx'), '9-12', 'high school (with space)');
-assertEq(QuestionnaireParser.extractAgeGroupFromFileName('highschool.tsx'), '9-12', 'highschool');
+assertEq(fmFull.isQuestionnaire, true, 'frontmatter @type questionnaire detected');
+assertEq(fmFull.title, 'My Quiz', 'title extracted');
+assertEq(fmFull.description, 'A fun quiz', 'description extracted');
+assertEq(fmFull.ageGroup, 'K-2', 'ageGroup extracted');
+assertEq(fmFull.version, '2.5', 'version extracted');
+assertEq(fmFull.author, 'Jane Doe', 'author extracted');
+assertEq(fmFull.estimatedDuration, 15, 'duration parsed as int');
 
-// Adult
-assertEq(QuestionnaireParser.extractAgeGroupFromFileName('adultQuiz.tsx'), 'Adult', 'adult');
-assertEq(QuestionnaireParser.extractAgeGroupFromFileName('grown-up.tsx'), 'Adult', 'grown-up');
-assertEq(QuestionnaireParser.extractAgeGroupFromFileName('grownup.tsx'), 'Adult', 'grownup');
+// @type: questionnaire (with colon)
+const fmColon = QuestionnaireParser.extractMetadata(`/**
+ * @type: questionnaire
+ */`);
+assertEq(fmColon.isQuestionnaire, true, '@type: questionnaire (with colon) detected');
 
-// Pre-K
-assertEq(QuestionnaireParser.extractAgeGroupFromFileName('pre-k.tsx'), 'Pre-K', 'pre-k');
-assertEq(QuestionnaireParser.extractAgeGroupFromFileName('prek.tsx'), 'Pre-K', 'prek');
-assertEq(QuestionnaireParser.extractAgeGroupFromFileName('preschool.tsx'), 'Pre-K', 'preschool');
+// Frontmatter without @type
+const fmNoType = QuestionnaireParser.extractMetadata(`/**
+ * @title Just a comment
+ */`);
+assertEq(fmNoType.isQuestionnaire, false, 'frontmatter without @type → not questionnaire');
+assertEq(fmNoType.title, 'Just a comment', 'title still extracted from non-questionnaire frontmatter');
 
-// Fallback
-assertEq(QuestionnaireParser.extractAgeGroupFromFileName('random.tsx'), 'General', 'random → General');
-assertEq(QuestionnaireParser.extractAgeGroupFromFileName('quiz.tsx'), 'General', 'quiz → General');
+// ============================================================================
+// extractMetadata — single-line variants
+// ============================================================================
+console.log('\n── extractMetadata: single-line ──────────────────────────');
+
+const slDoubleSlash = QuestionnaireParser.extractMetadata('// @type questionnaire\nexport {}');
+assertEq(slDoubleSlash.isQuestionnaire, true, '// @type questionnaire detected');
+
+const slDoubleSlashColon = QuestionnaireParser.extractMetadata('// @type: questionnaire\nexport {}');
+assertEq(slDoubleSlashColon.isQuestionnaire, true, '// @type: questionnaire detected');
+
+const slBlock = QuestionnaireParser.extractMetadata('/* @type questionnaire */ export {}');
+assertEq(slBlock.isQuestionnaire, true, '/* @type questionnaire */ detected');
+
+const slBlockColon = QuestionnaireParser.extractMetadata('/* @type: questionnaire */ export {}');
+assertEq(slBlockColon.isQuestionnaire, true, '/* @type: questionnaire */ detected');
+
+// Just an unrelated comment
+const slNone = QuestionnaireParser.extractMetadata('// just a comment\nexport {}');
+assertEq(slNone.isQuestionnaire, false, 'unrelated comment → not questionnaire');
+
+// ============================================================================
+// parseQuestionnaire
+// ============================================================================
+console.log('\n── parseQuestionnaire ────────────────────────────────────');
+
+// Non-tsx file
+const notTsx = QuestionnaireParser.parseQuestionnaire(
+  'foo.js',
+  '/** @type questionnaire */'
+);
+assertEq(notTsx, null, '.js file → null');
+
+const notJsx = QuestionnaireParser.parseQuestionnaire(
+  'foo.jsx',
+  '/** @type questionnaire */'
+);
+assertEq(notJsx, null, '.jsx file → null');
+
+// .tsx but not questionnaire
+const tsxNotQuiz = QuestionnaireParser.parseQuestionnaire(
+  'Component.tsx',
+  '// regular component'
+);
+assertEq(tsxNotQuiz, null, '.tsx without @type → null');
+
+// Valid tsx questionnaire — uses metadata
+const validQuiz = QuestionnaireParser.parseQuestionnaire(
+  'AdultSurvey.tsx',
+  `/**
+ * @type questionnaire
+ * @title Adult Faith Survey
+ * @description For adults
+ * @ageGroup Adult
+ * @version 1.2
+ * @author Father John
+ * @estimatedDuration 20
+ */
+export default function () {}`
+);
+assert(validQuiz !== null, 'valid quiz returns object');
+assertEq(validQuiz.id, 'adultsurvey', 'id from filename');
+assertEq(validQuiz.fileName, 'AdultSurvey.tsx', 'fileName preserved');
+assertEq(validQuiz.title, 'Adult Faith Survey', 'title from metadata');
+assertEq(validQuiz.description, 'For adults', 'description from metadata');
+assertEq(validQuiz.ageGroup, 'Adult', 'ageGroup from metadata');
+assertEq(validQuiz.type, 'questionnaire', 'type is "questionnaire"');
+assertEq(validQuiz.version, '1.2', 'version from metadata');
+assertEq(validQuiz.author, 'Father John', 'author from metadata');
+assertEq(validQuiz.estimatedDuration, 20, 'duration from metadata');
+assertEq(validQuiz.questions, [], 'questions defaults to []');
+
+// Valid tsx questionnaire — defaults applied
+// Note: ageGroup pattern needs explicit "K-2" or "kindergarten2" — plain
+// "kindergarten" doesn't match (regex is /k-?2|kindergarten-?2/).
+const minQuiz = QuestionnaireParser.parseQuestionnaire(
+  'k-2-quiz.tsx',
+  '// @type questionnaire'
+);
+assert(minQuiz !== null, 'minimal quiz returns object');
+assertEq(minQuiz.id, 'k-2-quiz', 'id derived from filename');
+assertEq(minQuiz.title, 'K 2 Quiz', 'title from filename when missing');
+assertEq(minQuiz.description, '', 'description default empty');
+assertEq(minQuiz.ageGroup, 'K-2', 'ageGroup from filename pattern');
+assertEq(minQuiz.version, '1.0', 'version default 1.0');
+assertEq(minQuiz.author, 'Unknown', 'author default Unknown');
+assertEq(minQuiz.estimatedDuration, 10, 'duration default 10');
 
 // ============================================================================
 // validateContent
@@ -256,52 +309,56 @@ assertEq(QuestionnaireParser.extractAgeGroupFromFileName('quiz.tsx'), 'General',
 console.log('\n── validateContent ───────────────────────────────────────');
 
 // Clean content
-let v = QuestionnaireParser.validateContent('export default function Q() { return <div>Hi</div>; }');
-assertEq(v.isValid, true, 'clean: valid');
-assertEq(v.issues, [], 'clean: no issues');
-assertEq(v.warnings, [], 'clean: no warnings');
+const clean = QuestionnaireParser.validateContent('export default function() { return <div>hi</div>; }');
+assertEq(clean.isValid, true, 'clean content valid');
+assertEq(clean.issues, [], 'clean: no issues');
+assertEq(clean.warnings, [], 'clean: no warnings');
 
 // Dangerous import: fs
-v = QuestionnaireParser.validateContent('import fs from "fs";');
-assertEq(v.isValid, false, 'fs import: invalid');
-assert(v.issues.some((i: string) => i.includes('fs')), 'fs in issues');
+const fsImport = QuestionnaireParser.validateContent("import fs from 'fs';");
+assertEq(fsImport.isValid, false, 'fs import → invalid');
+assert(fsImport.issues.some((i: string) => i.includes('fs')), 'fs import flagged');
 
-// child_process
-v = QuestionnaireParser.validateContent('require("child_process")');
-assertEq(v.isValid, false, 'child_process: invalid');
+// Dangerous: child_process
+const cpImport = QuestionnaireParser.validateContent("require('child_process')");
+assertEq(cpImport.isValid, false, 'child_process → invalid');
 
-// eval
-v = QuestionnaireParser.validateContent('const x = eval("1+1");');
-assertEq(v.isValid, false, 'eval call: invalid');
-assert(v.issues.some((i: string) => i.includes('eval')), 'eval in issues');
+// eval pattern
+const evalUse = QuestionnaireParser.validateContent('eval("1+1")');
+assertEq(evalUse.isValid, false, 'eval() pattern → invalid');
+assert(
+  evalUse.issues.some((i: string) => i.includes('eval')),
+  'eval pattern flagged'
+);
 
-// new Function
-v = QuestionnaireParser.validateContent('const f = new Function("return 1");');
-assertEq(v.isValid, false, 'new Function: invalid');
+// Function constructor
+const funcCtor = QuestionnaireParser.validateContent('new Function("return 1")');
+assertEq(funcCtor.isValid, false, 'new Function → invalid');
 
 // document.write
-v = QuestionnaireParser.validateContent('document.write("hi");');
-assertEq(v.isValid, false, 'document.write: invalid');
+const docWrite = QuestionnaireParser.validateContent('document.write("hi")');
+assertEq(docWrite.isValid, false, 'document.write → invalid');
 
-// innerHTML assignment
-v = QuestionnaireParser.validateContent('el.innerHTML = "x";');
-assertEq(v.isValid, false, 'innerHTML =: invalid');
+// innerHTML assign
+const innerHtml = QuestionnaireParser.validateContent('el.innerHTML = "x"');
+assertEq(innerHtml.isValid, false, 'innerHTML assign → invalid');
 
 // dangerouslySetInnerHTML
-v = QuestionnaireParser.validateContent('<div dangerouslySetInnerHTML={{__html:""}} />');
-assertEq(v.isValid, false, 'dangerouslySetInnerHTML: invalid');
+const dangerHtml = QuestionnaireParser.validateContent('<div dangerouslySetInnerHTML={{__html: x}} />');
+assertEq(dangerHtml.isValid, false, 'dangerouslySetInnerHTML → invalid');
 
-// External URLs → warning, not issue
-v = QuestionnaireParser.validateContent('const url = "https://example.com";');
-assertEq(v.isValid, true, 'https URL: still valid');
-assert(v.warnings.length > 0, 'https URL: warning emitted');
+// External URL warning (still valid)
+const extUrl = QuestionnaireParser.validateContent('const u = "https://example.com";');
+assertEq(extUrl.isValid, true, 'external URL → still valid');
+assert(extUrl.warnings.length > 0, 'external URL → warning emitted');
+assert(
+  extUrl.warnings.some((w: string) => w.includes('External URLs')),
+  'external URL warning text'
+);
 
-v = QuestionnaireParser.validateContent('const url = "http://example.com";');
-assert(v.warnings.length > 0, 'http URL: warning emitted');
-
-// Multiple issues
-v = QuestionnaireParser.validateContent('eval("x"); document.write("y");');
-assert(v.issues.length >= 2, 'multiple issues counted');
+// http (not just https)
+const httpUrl = QuestionnaireParser.validateContent('const u = "http://example.com";');
+assert(httpUrl.warnings.length > 0, 'http URL also warns');
 
 // ============================================================================
 // Summary

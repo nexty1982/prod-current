@@ -1,6 +1,6 @@
 #!/usr/bin/env npx tsx
 /**
- * Unit tests for utils/translationCostMonitor.js calculateCost (OMD-902)
+ * Unit tests for utils/translationCostMonitor.js calculateCost (OMD-896)
  *
  * Tests the pure calculateCost method of TranslationCostMonitor.
  * The fs-dependent methods (logCost, checkLimits, getUsageStats) are out
