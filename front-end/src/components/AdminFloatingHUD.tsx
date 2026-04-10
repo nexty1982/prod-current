@@ -19,33 +19,94 @@ import HudOmaiPanel from './HudOmaiPanel';
 import HudStatusBody from './HudStatusBody';
 
 const AdminFloatingHUD: React.FC = () => {
-  const [status, setStatus] = useState<SystemStatus | null>(null);
-  const [sessionStats, setSessionStats] = useState<SessionStats | null>(null);
-  const [isInMaintenance, setIsInMaintenance] = useState(false);
-  const [isToggling, setIsToggling] = useState(false);
-  const [isDragging, setIsDragging] = useState(false);
-  const [position, setPosition] = useState({ x: 0, y: 0 });
-  const [offset, setOffset] = useState({ x: 0, y: 0 });
-  const [isHidden, setIsHidden] = useState(false);
-  const [logStats, setLogStats] = useState<LogStats>({ total: 0, errors: 0, warnings: 0, isMonitoring: false });
+  // setLogIssues uses updater fn pattern — keep standalone
   const [logIssues, setLogIssues] = useState<LogEntry[]>([]);
-  const [isArchiving, setIsArchiving] = useState(false);
   const hudRef = useRef<HTMLDivElement>(null);
   const socketRef = useRef<Socket | null>(null);
 
-  // OMAI state
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [omaiTab, setOmaiTab] = useState(0);
-  const [omaiConnected, setOmaiConnected] = useState(false);
-  const [omaiHealth, setOmaiHealth] = useState<OmaiHealth | null>(null);
-  const [omaiBriefing, setOmaiBriefing] = useState<OmaiBriefing | null>(null);
-  const [omaiTasks, setOmaiTasks] = useState<OmaiTaskItem[]>([]);
-  const [omaiTaskStats, setOmaiTaskStats] = useState<OmaiTaskStats | null>(null);
-  const [omaiLogsSummary, setOmaiLogsSummary] = useState<OmaiLogsSummary | null>(null);
-  const [omaiLogPatterns, setOmaiLogPatterns] = useState<OmaiLogPattern[]>([]);
-  const [commandInput, setCommandInput] = useState('');
-  const [commandResult, setCommandResult] = useState('');
-  const [isCommandRunning, setIsCommandRunning] = useState(false);
+  // ── HUD bucket (system status, drag, position, log stats) ───────────────
+  const [hud, setHud] = useState<{
+    status: SystemStatus | null;
+    sessionStats: SessionStats | null;
+    isInMaintenance: boolean;
+    isToggling: boolean;
+    isDragging: boolean;
+    position: { x: number; y: number };
+    offset: { x: number; y: number };
+    isHidden: boolean;
+    logStats: LogStats;
+    isArchiving: boolean;
+  }>({
+    status: null,
+    sessionStats: null,
+    isInMaintenance: false,
+    isToggling: false,
+    isDragging: false,
+    position: { x: 0, y: 0 },
+    offset: { x: 0, y: 0 },
+    isHidden: false,
+    logStats: { total: 0, errors: 0, warnings: 0, isMonitoring: false },
+    isArchiving: false,
+  });
+  const setHudField = useCallback(<K extends keyof typeof hud>(key: K, value: typeof hud[K]) => {
+    setHud(prev => ({ ...prev, [key]: value }));
+  }, []);
+  const setStatus = useCallback((v: SystemStatus | null) => setHudField('status', v), [setHudField]);
+  const setSessionStats = useCallback((v: SessionStats | null) => setHudField('sessionStats', v), [setHudField]);
+  const setIsInMaintenance = useCallback((v: boolean) => setHudField('isInMaintenance', v), [setHudField]);
+  const setIsToggling = useCallback((v: boolean) => setHudField('isToggling', v), [setHudField]);
+  const setIsDragging = useCallback((v: boolean) => setHudField('isDragging', v), [setHudField]);
+  const setPosition = useCallback((v: { x: number; y: number }) => setHudField('position', v), [setHudField]);
+  const setOffset = useCallback((v: { x: number; y: number }) => setHudField('offset', v), [setHudField]);
+  const setIsHidden = useCallback((v: boolean) => setHudField('isHidden', v), [setHudField]);
+  const setLogStats = useCallback((v: LogStats) => setHudField('logStats', v), [setHudField]);
+  const setIsArchiving = useCallback((v: boolean) => setHudField('isArchiving', v), [setHudField]);
+  const { status, sessionStats, isInMaintenance, isToggling, isDragging, position, offset, isHidden, logStats, isArchiving } = hud;
+
+  // ── OMAI bucket ──────────────────────────────────────────────────────────
+  const [omai, setOmai] = useState<{
+    isExpanded: boolean;
+    omaiTab: number;
+    omaiConnected: boolean;
+    omaiHealth: OmaiHealth | null;
+    omaiBriefing: OmaiBriefing | null;
+    omaiTasks: OmaiTaskItem[];
+    omaiTaskStats: OmaiTaskStats | null;
+    omaiLogsSummary: OmaiLogsSummary | null;
+    omaiLogPatterns: OmaiLogPattern[];
+    commandInput: string;
+    commandResult: string;
+    isCommandRunning: boolean;
+  }>({
+    isExpanded: false,
+    omaiTab: 0,
+    omaiConnected: false,
+    omaiHealth: null,
+    omaiBriefing: null,
+    omaiTasks: [],
+    omaiTaskStats: null,
+    omaiLogsSummary: null,
+    omaiLogPatterns: [],
+    commandInput: '',
+    commandResult: '',
+    isCommandRunning: false,
+  });
+  const setOmaiField = useCallback(<K extends keyof typeof omai>(key: K, value: typeof omai[K]) => {
+    setOmai(prev => ({ ...prev, [key]: value }));
+  }, []);
+  const setIsExpanded = useCallback((v: boolean) => setOmaiField('isExpanded', v), [setOmaiField]);
+  const setOmaiTab = useCallback((v: number) => setOmaiField('omaiTab', v), [setOmaiField]);
+  const setOmaiConnected = useCallback((v: boolean) => setOmaiField('omaiConnected', v), [setOmaiField]);
+  const setOmaiHealth = useCallback((v: OmaiHealth | null) => setOmaiField('omaiHealth', v), [setOmaiField]);
+  const setOmaiBriefing = useCallback((v: OmaiBriefing | null) => setOmaiField('omaiBriefing', v), [setOmaiField]);
+  const setOmaiTasks = useCallback((v: OmaiTaskItem[]) => setOmaiField('omaiTasks', v), [setOmaiField]);
+  const setOmaiTaskStats = useCallback((v: OmaiTaskStats | null) => setOmaiField('omaiTaskStats', v), [setOmaiField]);
+  const setOmaiLogsSummary = useCallback((v: OmaiLogsSummary | null) => setOmaiField('omaiLogsSummary', v), [setOmaiField]);
+  const setOmaiLogPatterns = useCallback((v: OmaiLogPattern[]) => setOmaiField('omaiLogPatterns', v), [setOmaiField]);
+  const setCommandInput = useCallback((v: string) => setOmaiField('commandInput', v), [setOmaiField]);
+  const setCommandResult = useCallback((v: string) => setOmaiField('commandResult', v), [setOmaiField]);
+  const setIsCommandRunning = useCallback((v: boolean) => setOmaiField('isCommandRunning', v), [setOmaiField]);
+  const { isExpanded, omaiTab, omaiConnected, omaiHealth, omaiBriefing, omaiTasks, omaiTaskStats, omaiLogsSummary, omaiLogPatterns, commandInput, commandResult, isCommandRunning } = omai;
 
   // Existing status polling
   useEffect(() => {
