@@ -1,9 +1,13 @@
 /**
  * RecordSeeder — UI panel to generate and insert fake church records
  * for testing. Calls POST /api/admin/seed-records on the backend.
+ *
+ * State is split across helpers to keep this file focused on rendering:
+ *   - useChurchSeederData → church list/selection + per-church record counts
+ *   - recordSeederForm    → form fields (expand, type, count, year range)
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useReducer, useState } from 'react';
 import {
   Alert,
   Box,
@@ -43,15 +47,24 @@ import {
   Storage as SeedIcon,
 } from '@mui/icons-material';
 import { apiClient } from '@/shared/lib/axiosInstance';
-
-interface Church {
-  id: number;
-  name: string;
-  database_name?: string;
-}
+import { useChurchSeederData } from './useChurchSeederData';
+import {
+  initialSeederFormState,
+  seederFormReducer,
+} from './recordSeederForm';
 
 interface PreviewRecord {
   [key: string]: any;
+}
+
+interface PreviewState {
+  rows: PreviewRecord[];
+  total: number;
+}
+
+interface PurgeDialogState {
+  open: boolean;
+  type: string;
 }
 
 interface RecordSeederProps {
@@ -106,65 +119,33 @@ function getPreviewRow(record: PreviewRecord, type: string): string[] {
 }
 
 export const RecordSeeder: React.FC<RecordSeederProps> = ({ onToast }) => {
-  const [expanded, setExpanded] = useState(false);
-  const [churches, setChurches] = useState<Church[]>([]);
-  const [churchId, setChurchId] = useState<number | ''>('');
-  const [recordType, setRecordType] = useState<string>('baptism');
-  const [count, setCount] = useState<number>(25);
-  const [yearStart, setYearStart] = useState<number>(1960);
-  const [yearEnd, setYearEnd] = useState<number>(2024);
+  const [form, dispatchForm] = useReducer(seederFormReducer, initialSeederFormState);
+  const { expanded, recordType, count, yearStart, yearEnd } = form;
+
+  const data = useChurchSeederData();
+  const {
+    churches,
+    loadingChurches,
+    ensureLoaded,
+    churchId,
+    setChurchId,
+    selectedChurch,
+    counts,
+    countsLoading,
+    refreshCounts,
+    resetCounts,
+  } = data;
+
+  const [preview, setPreview] = useState<PreviewState | null>(null);
   const [loading, setLoading] = useState(false);
-  const [preview, setPreview] = useState<PreviewRecord[] | null>(null);
-  const [previewTotal, setPreviewTotal] = useState(0);
   const [seeding, setSeeding] = useState(false);
-  const [loadingChurches, setLoadingChurches] = useState(false);
-  const [counts, setCounts] = useState<Record<string, number> | null>(null);
-  const [countsLoading, setCountsLoading] = useState(false);
-  const [purgeDialogOpen, setPurgeDialogOpen] = useState(false);
-  const [purgeType, setPurgeType] = useState<string>('');
+  const [purgeDialog, setPurgeDialog] = useState<PurgeDialogState>({ open: false, type: '' });
   const [purging, setPurging] = useState(false);
 
-  // Load churches
-  const loadChurches = useCallback(async () => {
-    setLoadingChurches(true);
-    try {
-      const res: any = await apiClient.get('/api/churches');
-      const list = res?.data?.churches || res?.churches || res?.data || [];
-      setChurches(Array.isArray(list) ? list : []);
-    } catch {
-      setChurches([]);
-    }
-    setLoadingChurches(false);
-  }, []);
-
+  // Lazy-load churches when the panel is first expanded.
   useEffect(() => {
-    if (expanded && churches.length === 0) loadChurches();
-  }, [expanded, churches.length, loadChurches]);
-
-  // Load record counts for selected church
-  const loadCounts = useCallback(async () => {
-    if (!churchId) return;
-    setCountsLoading(true);
-    try {
-      const results: Record<string, number> = {};
-      for (const t of ['baptism', 'marriage', 'funeral']) {
-        try {
-          const res: any = await apiClient.get(`/api/churches/${churchId}/records?type=${t}&limit=0`);
-          results[t] = res?.data?.total ?? res?.total ?? 0;
-        } catch {
-          results[t] = -1; // table doesn't exist
-        }
-      }
-      setCounts(results);
-    } catch {
-      setCounts(null);
-    }
-    setCountsLoading(false);
-  }, [churchId]);
-
-  useEffect(() => {
-    if (churchId) loadCounts();
-  }, [churchId, loadCounts]);
+    if (expanded) ensureLoaded();
+  }, [expanded, ensureLoaded]);
 
   // Preview
   const handlePreview = async () => {
@@ -181,8 +162,7 @@ export const RecordSeeder: React.FC<RecordSeederProps> = ({ onToast }) => {
         dry_run: true,
       });
       const data = res?.data || res;
-      setPreview(data.preview || []);
-      setPreviewTotal(data.total || 0);
+      setPreview({ rows: data.preview || [], total: data.total || 0 });
     } catch (err: any) {
       onToast(err?.response?.data?.error || 'Preview failed', 'error');
     }
@@ -204,7 +184,7 @@ export const RecordSeeder: React.FC<RecordSeederProps> = ({ onToast }) => {
       const data = res?.data || res;
       onToast(`Inserted ${data.inserted} ${recordType} records into ${data.database}`, 'success');
       setPreview(null);
-      loadCounts();
+      refreshCounts();
     } catch (err: any) {
       onToast(err?.response?.data?.error || err?.response?.data?.message || 'Seed failed', 'error');
     }
@@ -213,34 +193,31 @@ export const RecordSeeder: React.FC<RecordSeederProps> = ({ onToast }) => {
 
   // Purge
   const handlePurge = async () => {
-    if (!churchId || !purgeType) return;
+    if (!churchId || !purgeDialog.type) return;
     setPurging(true);
     try {
-      const res: any = await apiClient.post('/api/admin/seed-records', {
+      await apiClient.post('/api/admin/seed-records', {
         church_id: churchId,
-        record_type: purgeType,
+        record_type: purgeDialog.type,
         count: 0,
         purge: true,
       });
-      const data = res?.data || res;
-      onToast(`Purged ${purgeType} records from church ${churchId}`, 'success');
-      setPurgeDialogOpen(false);
-      loadCounts();
+      onToast(`Purged ${purgeDialog.type} records from church ${churchId}`, 'success');
+      setPurgeDialog({ open: false, type: '' });
+      refreshCounts();
     } catch (err: any) {
       // Purge endpoint may not exist yet - fallback message
       onToast('Purge not available via API. Use the CLI tool: node server/src/tools/seed-records.js', 'warning');
-      setPurgeDialogOpen(false);
+      setPurgeDialog({ open: false, type: '' });
     }
     setPurging(false);
   };
-
-  const selectedChurch = churches.find(c => c.id === churchId);
 
   return (
     <Box sx={{ mb: 2, border: 1, borderColor: 'divider', borderRadius: 1, bgcolor: 'background.paper' }}>
       {/* Header (clickable to expand/collapse) */}
       <Box
-        onClick={() => setExpanded(!expanded)}
+        onClick={() => dispatchForm({ type: 'toggleExpanded' })}
         sx={{
           p: 2,
           display: 'flex',
@@ -258,7 +235,7 @@ export const RecordSeeder: React.FC<RecordSeederProps> = ({ onToast }) => {
           </Typography>
           <Chip label="Dev Tool" size="small" color="warning" variant="outlined" sx={{ height: 20, fontSize: '0.65rem' }} />
         </Box>
-        <IconButton size="small" onClick={(e) => { e.stopPropagation(); setExpanded(!expanded); }}>
+        <IconButton size="small" onClick={(e) => { e.stopPropagation(); dispatchForm({ type: 'toggleExpanded' }); }}>
           {expanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
         </IconButton>
       </Box>
@@ -281,7 +258,7 @@ export const RecordSeeder: React.FC<RecordSeederProps> = ({ onToast }) => {
                 onChange={(e) => {
                   setChurchId(e.target.value as number);
                   setPreview(null);
-                  setCounts(null);
+                  resetCounts();
                 }}
                 disabled={loadingChurches}
               >
@@ -304,7 +281,7 @@ export const RecordSeeder: React.FC<RecordSeederProps> = ({ onToast }) => {
               <Select
                 value={recordType}
                 label="Record Type"
-                onChange={(e) => { setRecordType(e.target.value); setPreview(null); }}
+                onChange={(e) => { dispatchForm({ type: 'setRecordType', value: e.target.value }); setPreview(null); }}
               >
                 {RECORD_TYPES.map(rt => (
                   <MenuItem key={rt.value} value={rt.value}>{rt.label}</MenuItem>
@@ -317,7 +294,7 @@ export const RecordSeeder: React.FC<RecordSeederProps> = ({ onToast }) => {
               type="number"
               size="small"
               value={count}
-              onChange={(e) => setCount(Math.min(5000, Math.max(1, parseInt(e.target.value) || 1)))}
+              onChange={(e) => dispatchForm({ type: 'setCount', value: Math.min(5000, Math.max(1, parseInt(e.target.value) || 1)) })}
               inputProps={{ min: 1, max: 5000 }}
               sx={{ width: 100 }}
             />
@@ -332,8 +309,7 @@ export const RecordSeeder: React.FC<RecordSeederProps> = ({ onToast }) => {
               value={[yearStart, yearEnd]}
               onChange={(_, v) => {
                 const [s, e] = v as number[];
-                setYearStart(s);
-                setYearEnd(e);
+                dispatchForm({ type: 'setYearRange', start: s, end: e });
               }}
               min={1800}
               max={2026}
@@ -364,7 +340,7 @@ export const RecordSeeder: React.FC<RecordSeederProps> = ({ onToast }) => {
                       />
                     ))}
                     <Tooltip title="Refresh counts">
-                      <IconButton size="small" onClick={loadCounts}><RefreshIcon fontSize="small" /></IconButton>
+                      <IconButton size="small" onClick={refreshCounts}><RefreshIcon fontSize="small" /></IconButton>
                     </Tooltip>
                   </>
                 ) : null}
@@ -400,18 +376,18 @@ export const RecordSeeder: React.FC<RecordSeederProps> = ({ onToast }) => {
               color="error"
               startIcon={<DeleteIcon />}
               disabled={!churchId}
-              onClick={() => { setPurgeType(recordType); setPurgeDialogOpen(true); }}
+              onClick={() => setPurgeDialog({ open: true, type: recordType })}
             >
               Purge {RECORD_TYPES.find(r => r.value === recordType)?.label}
             </Button>
           </Stack>
 
           {/* Preview Table */}
-          {preview && preview.length > 0 && (
+          {preview && preview.rows.length > 0 && (
             <Paper variant="outlined" sx={{ borderRadius: 1, overflow: 'hidden' }}>
               <Box sx={{ px: 1.5, py: 0.75, bgcolor: 'action.hover', borderBottom: '1px solid', borderColor: 'divider' }}>
                 <Typography variant="caption" fontWeight={700}>
-                  Preview — {previewTotal} {recordType} records (showing first {preview.length})
+                  Preview — {preview.total} {recordType} records (showing first {preview.rows.length})
                 </Typography>
               </Box>
               <TableContainer sx={{ maxHeight: 300 }}>
@@ -426,7 +402,7 @@ export const RecordSeeder: React.FC<RecordSeederProps> = ({ onToast }) => {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {preview.map((rec, ri) => (
+                    {preview.rows.map((rec, ri) => (
                       <TableRow key={ri}>
                         {getPreviewRow(rec, recordType).map((val, ci) => (
                           <TableCell key={ci} sx={{ fontSize: '0.7rem', maxWidth: 200 }}>
@@ -448,11 +424,11 @@ export const RecordSeeder: React.FC<RecordSeederProps> = ({ onToast }) => {
       </Collapse>
 
       {/* Purge Confirmation Dialog */}
-      <Dialog open={purgeDialogOpen} onClose={() => setPurgeDialogOpen(false)}>
+      <Dialog open={purgeDialog.open} onClose={() => setPurgeDialog({ open: false, type: '' })}>
         <DialogTitle>Purge Records?</DialogTitle>
         <DialogContent>
           <Alert severity="error" sx={{ mb: 2 }}>
-            This will permanently delete all {purgeType} records from{' '}
+            This will permanently delete all {purgeDialog.type} records from{' '}
             <strong>{selectedChurch?.name || `church ${churchId}`}</strong>.
           </Alert>
           <Typography variant="body2" color="text.secondary">
@@ -463,7 +439,7 @@ export const RecordSeeder: React.FC<RecordSeederProps> = ({ onToast }) => {
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setPurgeDialogOpen(false)}>Cancel</Button>
+          <Button onClick={() => setPurgeDialog({ open: false, type: '' })}>Cancel</Button>
           <Button onClick={handlePurge} variant="contained" color="error" disabled={purging}>
             {purging ? 'Purging...' : 'Purge All'}
           </Button>
