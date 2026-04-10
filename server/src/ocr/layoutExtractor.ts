@@ -870,3 +870,22 @@ export function extractLayoutFields(
     } : undefined,
   };
 }
+
+// ============================================================================
+// Test-only exports
+// ============================================================================
+// These pure helpers are exposed solely so the unit-test suite can exercise
+// them in isolation. They are NOT part of the public API — production callers
+// should use `extractLayoutFields` only.
+export const __test__ = {
+  verticesToPixelBBox,
+  pixelToNormalized,
+  normalizedToPixel,
+  bboxOverlap,
+  normalizeText,
+  clusterTokensIntoLines,
+  matchPhraseInLine,
+  computeSearchZone,
+  joinTokensInReadingOrder,
+  computeUnionBBox,
+};
