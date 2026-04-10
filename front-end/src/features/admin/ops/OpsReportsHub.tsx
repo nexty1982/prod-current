@@ -5,6 +5,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { apiClient as axiosApiClient } from '@/api/utils/axiosInstance';
 import {
   Box,
   Card,
@@ -126,22 +127,19 @@ export default function OpsReportsHub() {
     setViewerContent('');
 
     try {
-      const fileUrl = `/api/admin/ops/artifacts/${artifact.id}/file/${filename}`;
-      const response = await fetch(fileUrl, {
-        credentials: 'include',
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to load file: ${response.statusText}`);
-      }
+      const fileUrl = `/admin/ops/artifacts/${artifact.id}/file/${filename}`;
+      const text = await axiosApiClient.request<string>({ method: 'GET', url: fileUrl, responseType: 'text' });
 
       const ext = filename.split('.').pop()?.toLowerCase();
       if (ext === 'json') {
-        const json = await response.json();
-        setViewerContent(JSON.stringify(json, null, 2));
+        try {
+          const json = JSON.parse(text);
+          setViewerContent(JSON.stringify(json, null, 2));
+        } catch {
+          setViewerContent(text);
+        }
         setViewerTab(1); // Code view
       } else {
-        const text = await response.text();
         setViewerContent(text);
         if (ext === 'html') {
           setViewerTab(0); // HTML view

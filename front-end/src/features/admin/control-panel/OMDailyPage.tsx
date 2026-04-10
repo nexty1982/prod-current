@@ -8,6 +8,7 @@
 import OMDailyKanban from '@/components/apps/kanban/OMDailyKanban';
 import Breadcrumb from '@/layouts/full/shared/breadcrumb/Breadcrumb';
 import { apiClient } from '@/shared/lib/apiClient';
+import { apiClient as axiosApiClient } from '@/api/utils/axiosInstance';
 import PageContainer from '@/shared/ui/PageContainer';
 import {
     Add as AddIcon,
@@ -268,15 +269,15 @@ const OMDailyPage: React.FC = () => {
 
   const fetchDashboard = useCallback(async () => {
     try {
-      const resp = await fetch('/api/omai-daily/dashboard', { credentials: 'include' });
-      if (resp.ok) { setDashboard(await resp.json()); }
+      const data = await axiosApiClient.get<any>('/omai-daily/dashboard');
+      setDashboard(data);
     } catch {}
   }, []);
 
   const fetchExtended = useCallback(async () => {
     try {
-      const resp = await fetch('/api/omai-daily/dashboard/extended', { credentials: 'include' });
-      if (resp.ok) { setExtended(await resp.json()); }
+      const data = await axiosApiClient.get<any>('/omai-daily/dashboard/extended');
+      setExtended(data);
     } catch {}
   }, []);
 
@@ -291,32 +292,31 @@ const OMDailyPage: React.FC = () => {
       if (searchTerm) params.set('search', searchTerm);
       params.set('sort', 'priority');
 
-      const resp = await fetch(`/api/omai-daily/items?${params}`, { credentials: 'include' });
-      if (resp.ok) { const data = await resp.json(); setItems(data.items); }
+      const data = await axiosApiClient.get<any>(`/omai-daily/items?${params}`);
+      setItems(data.items);
     } catch {}
   }, [filterStatus, filterPriority, filterCategory, filterDue, searchTerm]);
 
   const fetchCategories = useCallback(async () => {
     try {
-      const resp = await fetch('/api/omai-daily/categories', { credentials: 'include' });
-      if (resp.ok) { const data = await resp.json(); setCategories(data.categories); }
+      const data = await axiosApiClient.get<any>('/omai-daily/categories');
+      setCategories(data.categories);
     } catch {}
   }, []);
 
   // Changelog API calls
   const fetchChangelog = useCallback(async () => {
     try {
-      const resp = await fetch('/api/omai-daily/changelog?limit=30', { credentials: 'include' });
-      if (resp.ok) { const data = await resp.json(); setChangelogEntries(data.entries || []); }
+      const data = await axiosApiClient.get<any>('/omai-daily/changelog?limit=30');
+      setChangelogEntries(data.entries || []);
     } catch {}
   }, []);
 
   const fetchChangelogDetail = useCallback(async (date: string) => {
     try {
       setChangelogLoading(true);
-      const resp = await fetch(`/api/omai-daily/changelog/${date}`, { credentials: 'include' });
-      if (resp.ok) { const data = await resp.json(); setChangelogDetail(data.entry || null); }
-      else { setChangelogDetail(null); }
+      const data = await axiosApiClient.get<any>(`/omai-daily/changelog/${date}`);
+      setChangelogDetail(data.entry || null);
     } catch { setChangelogDetail(null); }
     finally { setChangelogLoading(false); }
   }, []);
@@ -324,41 +324,28 @@ const OMDailyPage: React.FC = () => {
   const triggerGenerate = useCallback(async (date: string) => {
     try {
       setChangelogLoading(true);
-      const resp = await fetch('/api/omai-daily/changelog/generate', {
-        method: 'POST', credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ date }),
-      });
-      if (resp.ok) {
-        showToast('Changelog generated');
-        fetchChangelog();
-        fetchChangelogDetail(date);
-      } else { showToast('Failed to generate', 'error'); }
+      await axiosApiClient.post<any>('/omai-daily/changelog/generate', { date });
+      showToast('Changelog generated');
+      fetchChangelog();
+      fetchChangelogDetail(date);
     } catch { showToast('Failed to generate', 'error'); }
     finally { setChangelogLoading(false); }
   }, []);
 
   const triggerEmail = useCallback(async (date: string) => {
     try {
-      const resp = await fetch(`/api/omai-daily/changelog/email/${date}`, {
-        method: 'POST', credentials: 'include',
-      });
-      if (resp.ok) {
-        showToast('Email sent');
-        fetchChangelog();
-        fetchChangelogDetail(date);
-      } else {
-        const data = await resp.json().catch(() => ({}));
-        showToast(data.error || 'Failed to send email', 'error');
-      }
+      await axiosApiClient.post<any>(`/omai-daily/changelog/email/${date}`);
+      showToast('Email sent');
+      fetchChangelog();
+      fetchChangelogDetail(date);
     } catch { showToast('Failed to send email', 'error'); }
   }, []);
 
   // GitHub sync API calls
   const fetchGhStatus = useCallback(async () => {
     try {
-      const resp = await fetch('/api/omai-daily/github/status', { credentials: 'include' });
-      if (resp.ok) setGhStatus(await resp.json());
+      const data = await axiosApiClient.get<any>('/omai-daily/github/status');
+      setGhStatus(data);
     } catch {}
   }, []);
 
@@ -373,9 +360,7 @@ const OMDailyPage: React.FC = () => {
     stopSyncPolling();
     syncPollRef.current = setInterval(async () => {
       try {
-        const resp = await fetch('/api/omai-daily/github/sync/progress', { credentials: 'include' });
-        if (!resp.ok) return;
-        const data = await resp.json();
+        const data = await axiosApiClient.get<any>('/omai-daily/github/sync/progress');
         setGhSyncProgress({ phase: data.phase, current: data.current, total: data.total, summary: data.summary, error: data.error });
         if (!data.running) {
           stopSyncPolling();
@@ -397,33 +382,29 @@ const OMDailyPage: React.FC = () => {
     setGhSyncing(true);
     setGhSyncProgress(null);
     try {
-      const resp = await fetch('/api/omai-daily/github/sync', { method: 'POST', credentials: 'include' });
-      if (resp.ok) {
-        const data = await resp.json();
-        if (data.already_running) {
-          showToast('Sync already in progress');
-        } else {
-          showToast('GitHub sync started...');
-        }
-        pollSyncProgress();
-      } else { showToast('Failed to start sync', 'error'); setGhSyncing(false); }
+      const data = await axiosApiClient.post<any>('/omai-daily/github/sync');
+      if (data.already_running) {
+        showToast('Sync already in progress');
+      } else {
+        showToast('GitHub sync started...');
+      }
+      pollSyncProgress();
     } catch { showToast('Failed to start sync', 'error'); setGhSyncing(false); }
   }, [pollSyncProgress]);
 
   // Build info API calls
   const fetchBuildInfo = useCallback(async () => {
     try {
-      const resp = await fetch('/api/omai-daily/build-info', { credentials: 'include' });
-      if (resp.ok) setBuildInfo(await resp.json());
+      const data = await axiosApiClient.get<any>('/omai-daily/build-info');
+      setBuildInfo(data);
     } catch {}
   }, []);
 
   const pushToOrigin = useCallback(async () => {
     setPushing(true);
     try {
-      const resp = await fetch('/api/omai-daily/push-to-origin', { method: 'POST', credentials: 'include' });
-      const data = await resp.json();
-      if (resp.ok && data.success) {
+      const data = await axiosApiClient.post<any>('/omai-daily/push-to-origin');
+      if (data.success) {
         showToast(`Pushed to origin/${data.branch}`);
         fetchBuildInfo();
       } else {
@@ -456,13 +437,8 @@ const OMDailyPage: React.FC = () => {
   useEffect(() => {
     if (activeTab === 1 && !commitsSyncedRef.current) {
       commitsSyncedRef.current = true;
-      fetch('/api/omai-daily/sync-commits', {
-        method: 'POST', credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ date: new Date().toISOString().split('T')[0] }),
-      })
-        .then(r => r.json())
-        .then(data => {
+      axiosApiClient.post<any>('/omai-daily/sync-commits', { date: new Date().toISOString().split('T')[0] })
+        .then((data: any) => {
           if (data.synced > 0) {
             fetchItems(selectedHorizon || undefined);
             fetchDashboard();
@@ -503,14 +479,12 @@ const OMDailyPage: React.FC = () => {
   const handleSave = async () => {
     if (!form.title) return;
     try {
-      const url = editingItem ? `/api/omai-daily/items/${editingItem.id}` : '/api/omai-daily/items';
-      const method = editingItem ? 'PUT' : 'POST';
-      const resp = await fetch(url, {
-        method, credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
-      });
-      if (resp.ok) {
+      if (editingItem) {
+        await axiosApiClient.put<any>(`/omai-daily/items/${editingItem.id}`, form);
+      } else {
+        await axiosApiClient.post<any>('/omai-daily/items', form);
+      }
+      {
         showToast(editingItem ? 'Item updated' : 'Item created');
         fetchItems(selectedHorizon || undefined);
         fetchDashboard();
@@ -524,7 +498,7 @@ const OMDailyPage: React.FC = () => {
 
   const handleDelete = async (id: number) => {
     try {
-      await fetch(`/api/omai-daily/items/${id}`, { method: 'DELETE', credentials: 'include' });
+      await axiosApiClient.delete<any>(`/omai-daily/items/${id}`);
       showToast('Item deleted');
       fetchItems(selectedHorizon || undefined);
       fetchDashboard();
@@ -534,11 +508,7 @@ const OMDailyPage: React.FC = () => {
 
   const handleStatusChange = async (item: DailyItem, newStatus: string) => {
     try {
-      await fetch(`/api/omai-daily/items/${item.id}`, {
-        method: 'PUT', credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus }),
-      });
+      await axiosApiClient.put<any>(`/omai-daily/items/${item.id}`, { status: newStatus });
       fetchItems(selectedHorizon || undefined);
       fetchDashboard();
       fetchExtended();
@@ -547,11 +517,7 @@ const OMDailyPage: React.FC = () => {
 
   const handleKanbanStatusChange = async (itemId: number, newStatus: string) => {
     try {
-      await fetch(`/api/omai-daily/items/${itemId}`, {
-        method: 'PUT', credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus, ...(newStatus === 'done' ? { progress: 100 } : {}) }),
-      });
+      await axiosApiClient.put<any>(`/omai-daily/items/${itemId}`, { status: newStatus, ...(newStatus === 'done' ? { progress: 100 } : {}) });
       fetchItems(selectedHorizon || undefined);
       fetchDashboard();
       fetchExtended();
@@ -560,11 +526,7 @@ const OMDailyPage: React.FC = () => {
 
   const handleQuickDone = async (itemId: number) => {
     try {
-      await fetch(`/api/omai-daily/items/${itemId}`, {
-        method: 'PUT', credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: 'done', progress: 100 }),
-      });
+      await axiosApiClient.put<any>(`/omai-daily/items/${itemId}`, { status: 'done', progress: 100 });
       showToast('Item marked done');
       fetchItems(selectedHorizon || undefined);
       fetchDashboard();
