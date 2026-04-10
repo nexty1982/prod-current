@@ -64,7 +64,7 @@ import {
     IconSearch,
     IconTable
 } from '@tabler/icons-react';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 const LibraryContainer = styled(Container)(({ theme }) => ({
   paddingTop: theme.spacing(4),
@@ -120,33 +120,73 @@ interface SearchResult extends LibraryFile {
 const OMLibrary: React.FC = () => {
   const theme = useTheme();
   
-  // State
-  const [files, setFiles] = useState<LibraryFile[]>([]);
-  const [filteredFiles, setFilteredFiles] = useState<LibraryFile[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  
-  // Search
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchMode, setSearchMode] = useState<'filename' | 'content'>('filename');
-  const [searching, setSearching] = useState(false);
-  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
-  
-  // Filters
-  const [categoryFilter, setCategoryFilter] = useState<'all' | 'technical' | 'ops' | 'recovery'>('all');
-  const [relatedGroupFilter, setRelatedGroupFilter] = useState<string | null>(null);
-  
-  // View
-  const [viewMode, setViewMode] = useState<'grid' | 'table'>('table');
-  
-  // Librarian status
-  const [librarianStatus, setLibrarianStatus] = useState<LibrarianStatus>({ running: false });
-  const [statusLoading, setStatusLoading] = useState(false);
-  
-  // Cleanup state
-  const [cleanupLoading, setCleanupLoading] = useState(false);
-  const [cleanupPlan, setCleanupPlan] = useState<any>(null);
-  const [cleanupDialogOpen, setCleanupDialogOpen] = useState(false);
+  // Bucketed state: list/search/filters (10 fields)
+  interface ListState {
+    files: LibraryFile[];
+    filteredFiles: LibraryFile[];
+    loading: boolean;
+    error: string | null;
+    searchQuery: string;
+    searchMode: 'filename' | 'content';
+    searching: boolean;
+    searchResults: SearchResult[];
+    categoryFilter: 'all' | 'technical' | 'ops' | 'recovery';
+    relatedGroupFilter: string | null;
+  }
+  const [listState, setListState] = useState<ListState>({
+    files: [],
+    filteredFiles: [],
+    loading: true,
+    error: null,
+    searchQuery: '',
+    searchMode: 'filename',
+    searching: false,
+    searchResults: [],
+    categoryFilter: 'all',
+    relatedGroupFilter: null,
+  });
+  const setListField = useCallback(<K extends keyof ListState>(key: K, value: ListState[K]) => {
+    setListState(prev => ({ ...prev, [key]: value }));
+  }, []);
+  const { files, filteredFiles, loading, error, searchQuery, searchMode, searching, searchResults, categoryFilter, relatedGroupFilter } = listState;
+  const setFiles = useCallback((v: LibraryFile[]) => setListField('files', v), [setListField]);
+  const setFilteredFiles = useCallback((v: LibraryFile[]) => setListField('filteredFiles', v), [setListField]);
+  const setLoading = useCallback((v: boolean) => setListField('loading', v), [setListField]);
+  const setError = useCallback((v: string | null) => setListField('error', v), [setListField]);
+  const setSearchQuery = useCallback((v: string) => setListField('searchQuery', v), [setListField]);
+  const setSearchMode = useCallback((v: 'filename' | 'content') => setListField('searchMode', v), [setListField]);
+  const setSearching = useCallback((v: boolean) => setListField('searching', v), [setListField]);
+  const setSearchResults = useCallback((v: SearchResult[]) => setListField('searchResults', v), [setListField]);
+  const setCategoryFilter = useCallback((v: 'all' | 'technical' | 'ops' | 'recovery') => setListField('categoryFilter', v), [setListField]);
+  const setRelatedGroupFilter = useCallback((v: string | null) => setListField('relatedGroupFilter', v), [setListField]);
+
+  // Bucketed state: view/librarian/cleanup (6 fields)
+  interface LibrarianState {
+    viewMode: 'grid' | 'table';
+    librarianStatus: LibrarianStatus;
+    statusLoading: boolean;
+    cleanupLoading: boolean;
+    cleanupPlan: any;
+    cleanupDialogOpen: boolean;
+  }
+  const [librarianState, setLibrarianState] = useState<LibrarianState>({
+    viewMode: 'table',
+    librarianStatus: { running: false },
+    statusLoading: false,
+    cleanupLoading: false,
+    cleanupPlan: null,
+    cleanupDialogOpen: false,
+  });
+  const setLibrarianField = useCallback(<K extends keyof LibrarianState>(key: K, value: LibrarianState[K]) => {
+    setLibrarianState(prev => ({ ...prev, [key]: value }));
+  }, []);
+  const { viewMode, librarianStatus, statusLoading, cleanupLoading, cleanupPlan, cleanupDialogOpen } = librarianState;
+  const setViewMode = useCallback((v: 'grid' | 'table') => setLibrarianField('viewMode', v), [setLibrarianField]);
+  const setLibrarianStatus = useCallback((v: LibrarianStatus) => setLibrarianField('librarianStatus', v), [setLibrarianField]);
+  const setStatusLoading = useCallback((v: boolean) => setLibrarianField('statusLoading', v), [setLibrarianField]);
+  const setCleanupLoading = useCallback((v: boolean) => setLibrarianField('cleanupLoading', v), [setLibrarianField]);
+  const setCleanupPlan = useCallback((v: any) => setLibrarianField('cleanupPlan', v), [setLibrarianField]);
+  const setCleanupDialogOpen = useCallback((v: boolean) => setLibrarianField('cleanupDialogOpen', v), [setLibrarianField]);
 
   /**
    * Load librarian status
