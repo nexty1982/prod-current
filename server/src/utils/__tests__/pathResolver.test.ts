@@ -1,21 +1,17 @@
 #!/usr/bin/env npx tsx
 /**
- * Unit tests for utils/pathResolver.ts (OMD-904) — sync exports only
+ * Unit tests for utils/pathResolver.ts pure helpers (OMD-894)
  *
- * Covers the pure synchronous exports that don't depend on exec/fs:
- *   - isSambaPath           — host substring + mount point prefix
- *   - getMountPoint         — constant
- *   - getBaseSourcePath     — local vs remote branch
- *   - buildSnapshotPath     — path.join
- *   - CONFIG                — exported constants object
+ * Covers the synchronous, side-effect-free exports:
+ *   - isSambaPath
+ *   - getMountPoint
+ *   - getBaseSourcePath
+ *   - buildSnapshotPath
+ *   - CONFIG (constant export)
  *
- * Out of scope (require exec/fs mocking):
- *   - isMounted, verifySambaMount, resolvePath, getMountInfo
- *
- * Constants under test (matched by source):
- *   REMOTE_SAMBA_HOST = '192.168.1.221'
- *   REMOTE_SAMBA_PATH = '/var/refactor-src'
- *   MOUNT_POINT       = '/mnt/refactor-remote'
+ * The fs/exec-dependent helpers (isMounted, verifySambaMount, resolvePath,
+ * getMountInfo) are out of scope for this test backfill — they require real
+ * mount points or shell mocking.
  *
  * Run: npx tsx server/src/utils/__tests__/pathResolver.test.ts
  */
@@ -25,7 +21,7 @@ import {
   getMountPoint,
   getBaseSourcePath,
   buildSnapshotPath,
-  CONFIG
+  CONFIG,
 } from '../pathResolver';
 
 let passed = 0;
@@ -51,63 +47,67 @@ function assertEq<T>(actual: T, expected: T, message: string): void {
 // ============================================================================
 console.log('\n── CONFIG ────────────────────────────────────────────────');
 
-assertEq(CONFIG.REMOTE_SAMBA_HOST, '192.168.1.221', 'REMOTE_SAMBA_HOST');
-assertEq(CONFIG.REMOTE_SAMBA_PATH, '/var/refactor-src', 'REMOTE_SAMBA_PATH');
-assertEq(CONFIG.REMOTE_SAMBA_FULL, '192.168.1.221:/var/refactor-src', 'REMOTE_SAMBA_FULL');
-assertEq(CONFIG.MOUNT_POINT, '/mnt/refactor-remote', 'MOUNT_POINT');
+assertEq(CONFIG.REMOTE_SAMBA_HOST, '192.168.1.221', 'host constant');
+assertEq(CONFIG.REMOTE_SAMBA_PATH, '/var/refactor-src', 'path constant');
+assertEq(CONFIG.REMOTE_SAMBA_FULL, '192.168.1.221:/var/refactor-src', 'full constant');
+assertEq(CONFIG.MOUNT_POINT, '/mnt/refactor-remote', 'mount point constant');
 
 // ============================================================================
 // isSambaPath
 // ============================================================================
 console.log('\n── isSambaPath ───────────────────────────────────────────');
 
-// Empty/falsy → false
-assertEq(isSambaPath(''), false, 'empty → false');
+// Empty / null inputs
+assertEq(isSambaPath(''), false, 'empty string → false');
 assertEq(isSambaPath(null as any), false, 'null → false');
 assertEq(isSambaPath(undefined as any), false, 'undefined → false');
 
-// Path containing the host substring → true
-assertEq(isSambaPath('192.168.1.221:/some/share'), true, 'host:path → true');
-assertEq(
-  isSambaPath('//192.168.1.221/share/folder'),
-  true,
-  'UNC-style with host → true'
-);
+// Paths containing host
+assert(isSambaPath('192.168.1.221:/some/path'), 'host-prefixed path → true');
+assert(isSambaPath('//192.168.1.221/share'), 'host as UNC-style → true');
+assert(isSambaPath('foo 192.168.1.221 bar'), 'host substring anywhere → true');
 
-// Path under mount point → true
-assertEq(isSambaPath('/mnt/refactor-remote'), true, 'exact mount point');
-assertEq(isSambaPath('/mnt/refactor-remote/sub/dir'), true, 'subdir of mount');
-assertEq(
-  isSambaPath('/mnt/refactor-remote/09-2025/prod'),
-  true,
-  'snapshot path under mount'
-);
+// Paths under the mount point
+assert(isSambaPath('/mnt/refactor-remote'), 'mount point itself → true');
+assert(isSambaPath('/mnt/refactor-remote/sub/dir'), 'subpath of mount → true');
+assert(isSambaPath('/mnt/refactor-remote/file.txt'), 'file under mount → true');
 
-// Local paths → false
-assertEq(isSambaPath('/var/www/orthodoxmetrics/prod'), false, 'local /var path');
-assertEq(isSambaPath('/tmp/test'), false, '/tmp');
-assertEq(isSambaPath('relative/path'), false, 'relative path');
-assertEq(isSambaPath('/mnt/other-mount'), false, 'different mount → false');
+// Paths NOT under the mount and not containing host
+assertEq(isSambaPath('/var/www/foo'), false, 'unrelated absolute → false');
+assertEq(isSambaPath('/mnt/other'), false, 'sibling mount → false');
+assertEq(isSambaPath('relative/path'), false, 'relative path → false');
+assertEq(isSambaPath('/home/user'), false, 'home dir → false');
+
+// Edge case — similar but distinct mount name
+assertEq(
+  isSambaPath('/mnt/refactor-remotex/file'),
+  true,
+  '/mnt/refactor-remotex starts with /mnt/refactor-remote → true (substring match)'
+);
 
 // ============================================================================
 // getMountPoint
 // ============================================================================
 console.log('\n── getMountPoint ─────────────────────────────────────────');
 
-assertEq(getMountPoint(), '/mnt/refactor-remote', 'no arg');
-assertEq(getMountPoint('whatever'), '/mnt/refactor-remote', 'arg ignored (constant)');
-assertEq(getMountPoint(''), '/mnt/refactor-remote', 'empty arg');
+assertEq(getMountPoint(), '/mnt/refactor-remote', 'no arg → mount point');
+assertEq(getMountPoint('anything'), '/mnt/refactor-remote', 'arg ignored → mount point');
+assertEq(getMountPoint('/some/other/path'), '/mnt/refactor-remote', 'unused path arg');
 
 // ============================================================================
 // getBaseSourcePath
 // ============================================================================
 console.log('\n── getBaseSourcePath ─────────────────────────────────────');
 
-assertEq(getBaseSourcePath('remote'), '/mnt/refactor-remote', 'remote → mount point');
+assertEq(
+  getBaseSourcePath('remote'),
+  '/mnt/refactor-remote',
+  'remote → mount point'
+);
 assertEq(
   getBaseSourcePath('local'),
   '/var/www/orthodoxmetrics/prod/refactor-src',
-  'local → hardcoded local path'
+  'local → prod refactor-src'
 );
 
 // ============================================================================
@@ -116,21 +116,29 @@ assertEq(
 console.log('\n── buildSnapshotPath ─────────────────────────────────────');
 
 assertEq(
-  buildSnapshotPath('/mnt/refactor-remote', '09-2025'),
-  '/mnt/refactor-remote/09-2025/prod',
-  'remote base + snapshot'
+  buildSnapshotPath('/var/www/snapshots', '09-2025'),
+  '/var/www/snapshots/09-2025/prod',
+  'simple base + id'
 );
 assertEq(
-  buildSnapshotPath('/var/www/orthodoxmetrics/prod/refactor-src', '01-2024'),
-  '/var/www/orthodoxmetrics/prod/refactor-src/01-2024/prod',
-  'local base + snapshot'
+  buildSnapshotPath('/mnt/refactor-remote', '01-2024'),
+  '/mnt/refactor-remote/01-2024/prod',
+  'remote base + id'
 );
-
-// path.join normalizes — trailing slash handled
 assertEq(
-  buildSnapshotPath('/base/', '12-2025'),
-  '/base/12-2025/prod',
-  'trailing slash normalized'
+  buildSnapshotPath('relative/base', '12-2023'),
+  'relative/base/12-2023/prod',
+  'relative base preserved (path.join)'
+);
+assertEq(
+  buildSnapshotPath('/base/', '06-2025'),
+  '/base/06-2025/prod',
+  'trailing slash on base normalized'
+);
+assertEq(
+  buildSnapshotPath('', '01-2026'),
+  '01-2026/prod',
+  'empty base → just id/prod'
 );
 
 // ============================================================================
