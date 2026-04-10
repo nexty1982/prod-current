@@ -119,3 +119,8 @@ export function buildInsertQuery(table: string, churchId: number, mapped: Record
 }
 
 export { promisePool };
+
+// ── Test-only exports (private helpers exposed for unit tests) ────────────
+export const __test__ = {
+  splitName,
+};
