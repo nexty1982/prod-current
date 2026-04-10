@@ -31,26 +31,10 @@ import {
   Typography,
   useTheme,
 } from '@mui/material';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useReducer, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { COLOR } from './ChurchLifecycleDetailPage/constants';
-import type {
-  CRMChurch,
-  CRMContact,
-  CRMActivity,
-  CRMFollowUp,
-  ChurchMember,
-  ChurchToken,
-  OnboardedChurch,
-  OnboardingChecklist,
-  OnboardingEmail,
-  PipelineActivity,
-  PipelineStage,
-  ProvisioningChecklist,
-  RecordRequirement,
-  SampleTemplate,
-  SnackState,
-} from './ChurchLifecycleDetailPage/types';
+import type { CRMContact, SnackState } from './ChurchLifecycleDetailPage/types';
 import OverviewPanel from './ChurchLifecycleDetailPage/OverviewPanel';
 import ContactsPanel from './ChurchLifecycleDetailPage/ContactsPanel';
 import ActivityPanel from './ChurchLifecycleDetailPage/ActivityPanel';
@@ -60,6 +44,25 @@ import EmailWorkflowPanel from './ChurchLifecycleDetailPage/EmailWorkflowPanel';
 import OnboardingPanel from './ChurchLifecycleDetailPage/OnboardingPanel';
 import TimelinePanel from './ChurchLifecycleDetailPage/TimelinePanel';
 import ChurchLifecycleDialogs from './ChurchLifecycleDetailPage/ChurchLifecycleDialogs';
+import { useChurchLifecycleData } from './ChurchLifecycleDetailPage/useChurchLifecycleData';
+import {
+  dialogReducer,
+  initialDialogState,
+  emptyContactForm,
+  emptyActivityForm,
+  emptyFollowUpForm,
+  emptyReqForm,
+  type ContactForm,
+  type ActivityForm,
+  type FollowUpForm,
+  type ReqForm,
+  type EmailForm,
+  type RejectDialog,
+} from './ChurchLifecycleDetailPage/dialogState';
+import {
+  inlineEditingReducer,
+  initialInlineEditingState,
+} from './ChurchLifecycleDetailPage/inlineEditing';
 
 
 
@@ -73,92 +76,95 @@ const ChurchLifecycleDetailPage: React.FC = () => {
   const navigate = useNavigate();
   const { churchId } = useParams<{ churchId: string }>();
 
-  /* --- state: data ------------------------------------------------- */
-  const [source, setSource] = useState<'crm' | 'onboarded' | 'both'>('crm');
-  const [unifiedStage, setUnifiedStage] = useState('');
-  const [crm, setCrm] = useState<CRMChurch | null>(null);
-  const [onboarded, setOnboarded] = useState<OnboardedChurch | null>(null);
-  const [contacts, setContacts] = useState<CRMContact[]>([]);
-  const [activities, setActivities] = useState<CRMActivity[]>([]);
-  const [followUps, setFollowUps] = useState<CRMFollowUp[]>([]);
-  const [members, setMembers] = useState<ChurchMember[]>([]);
-  const [tokens, setTokens] = useState<ChurchToken[]>([]);
-  const [checklist, setChecklist] = useState<OnboardingChecklist | null>(null);
-  const [stages, setStages] = useState<PipelineStage[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  /* --- data hook --------------------------------------------------- */
+  const data = useChurchLifecycleData(churchId);
+  const {
+    source, unifiedStage, crm, onboarded, contacts, activities, followUps,
+    members, tokens, checklist, stages, loading, error,
+    pipelineRequirements, pipelineEmails, pipelineActivities, provisionChecklist,
+    sampleTemplates, emailTemplates, initialNotes, fetchDetail,
+  } = data;
 
-  /* --- state: tab -------------------------------------------------- */
+  /* --- tab --------------------------------------------------------- */
   const [tab, setTab] = useState(0);
 
-  /* --- state: notes ------------------------------------------------ */
+  /* --- notes ------------------------------------------------------- */
   const [notes, setNotes] = useState('');
   const [notesOriginal, setNotesOriginal] = useState('');
-  const [notesSaving, setNotesSaving] = useState(false);
 
-  /* --- state: dialogs ---------------------------------------------- */
+  // Sync local notes drafts when the data hook reloads
+  useEffect(() => {
+    setNotes(initialNotes);
+    setNotesOriginal(initialNotes);
+  }, [initialNotes]);
+
+  /* --- snack + action loading flags -------------------------------- */
   const [snack, setSnack] = useState<SnackState>({ open: false, message: '', severity: 'success' });
-
-  // Contact dialog
-  const [contactDialogOpen, setContactDialogOpen] = useState(false);
-  const [editingContact, setEditingContact] = useState<CRMContact | null>(null);
-  const [contactForm, setContactForm] = useState({ first_name: '', last_name: '', role: '', email: '', phone: '', is_primary: false, notes: '' });
-
-  // Activity dialog
-  const [activityDialogOpen, setActivityDialogOpen] = useState(false);
-  const [activityForm, setActivityForm] = useState({ activity_type: 'note', subject: '', body: '' });
-
-  // Follow-up dialog
-  const [followUpDialogOpen, setFollowUpDialogOpen] = useState(false);
-  const [followUpForm, setFollowUpForm] = useState({ due_date: '', subject: '', description: '' });
-
-  // Stage dialog
-  const [stageDialogOpen, setStageDialogOpen] = useState(false);
-  const [newStage, setNewStage] = useState('');
-
-  // Onboarding actions
-  const [togglingSetup, setTogglingSetup] = useState(false);
-  const [generatingToken, setGeneratingToken] = useState(false);
-  const [deactivatingToken, setDeactivatingToken] = useState<number | null>(null);
-  const [actionLoading, setActionLoading] = useState<number | null>(null);
-
-  // Reject dialog
-  const [rejectDialog, setRejectDialog] = useState<{ open: boolean; userId: number | null; email: string }>({ open: false, userId: null, email: '' });
-  const [rejectReason, setRejectReason] = useState('');
-
-  // Pipeline extended data
-  const [pipelineRequirements, setPipelineRequirements] = useState<RecordRequirement[]>([]);
-  const [pipelineEmails, setPipelineEmails] = useState<OnboardingEmail[]>([]);
-  const [pipelineActivities, setPipelineActivities] = useState<PipelineActivity[]>([]);
-  const [provisionChecklist, setProvisionChecklist] = useState<ProvisioningChecklist | null>(null);
-
-  // Templates (for record requirements + email workflow)
-  const [sampleTemplates, setSampleTemplates] = useState<SampleTemplate[]>([]);
-  const [emailTemplates, setEmailTemplates] = useState<{ type: string; subject: string; body: string }[]>([]);
-
-  // Record requirement dialog
-  const [reqDialogOpen, setReqDialogOpen] = useState(false);
-  const [reqForm, setReqForm] = useState({
-    record_type: 'baptism' as string,
-    uses_sample: false,
-    sample_template_id: null as number | null,
-    custom_required: false,
-    custom_notes: '',
-    review_required: false,
+  const [actionFlags, setActionFlags] = useState({
+    notesSaving: false,
+    togglingSetup: false,
+    generatingToken: false,
+    deactivatingToken: null as number | null,
+    actionLoading: null as number | null,
+    pipelineSaving: false,
   });
+  const setFlag = useCallback(
+    <K extends keyof typeof actionFlags>(key: K, value: typeof actionFlags[K]) => {
+      setActionFlags(prev => ({ ...prev, [key]: value }));
+    },
+    [],
+  );
+  const { notesSaving, togglingSetup, generatingToken, deactivatingToken, actionLoading, pipelineSaving } = actionFlags;
 
-  // Email composer dialog
-  const [emailDialogOpen, setEmailDialogOpen] = useState(false);
-  const [emailForm, setEmailForm] = useState({ email_type: 'welcome', subject: '', recipients: '', cc: '', body: '', notes: '' });
+  /* --- dialog reducer (covers 14 useStates) ------------------------ */
+  const [dialog, dispatchDialog] = useReducer(dialogReducer, initialDialogState);
 
-  // Pipeline saving state
-  const [pipelineSaving, setPipelineSaving] = useState(false);
+  // SetStateAction-compatible wrappers so ChurchLifecycleDialogs keeps its
+  // existing prop interface and inline updaters (`setForm(f => ...)`).
+  const setContactDialogOpen = useCallback((value: boolean) => dispatchDialog({ type: 'setContactDialogOpen', value }), []);
+  const setEditingContact = useCallback((value: CRMContact | null) => dispatchDialog({ type: 'setEditingContact', value }), []);
+  const setContactForm: React.Dispatch<React.SetStateAction<ContactForm>> = useCallback(
+    (value) => dispatchDialog({ type: 'setContactForm', value }), [],
+  );
+  const setActivityDialogOpen = useCallback((value: boolean) => dispatchDialog({ type: 'setActivityDialogOpen', value }), []);
+  const setActivityForm: React.Dispatch<React.SetStateAction<ActivityForm>> = useCallback(
+    (value) => dispatchDialog({ type: 'setActivityForm', value }), [],
+  );
+  const setFollowUpDialogOpen = useCallback((value: boolean) => dispatchDialog({ type: 'setFollowUpDialogOpen', value }), []);
+  const setFollowUpForm: React.Dispatch<React.SetStateAction<FollowUpForm>> = useCallback(
+    (value) => dispatchDialog({ type: 'setFollowUpForm', value }), [],
+  );
+  const setStageDialogOpen = useCallback((value: boolean) => dispatchDialog({ type: 'setStageDialogOpen', value }), []);
+  const setNewStage = useCallback((value: string) => dispatchDialog({ type: 'setNewStage', value }), []);
+  const setRejectDialog = useCallback((value: RejectDialog) => dispatchDialog({ type: 'setRejectDialog', value }), []);
+  const setRejectReason = useCallback((value: string) => dispatchDialog({ type: 'setRejectReason', value }), []);
+  const setReqDialogOpen = useCallback((value: boolean) => dispatchDialog({ type: 'setReqDialogOpen', value }), []);
+  const setReqForm: React.Dispatch<React.SetStateAction<ReqForm>> = useCallback(
+    (value) => dispatchDialog({ type: 'setReqForm', value }), [],
+  );
+  const setEmailDialogOpen = useCallback((value: boolean) => dispatchDialog({ type: 'setEmailDialogOpen', value }), []);
+  const setEmailForm: React.Dispatch<React.SetStateAction<EmailForm>> = useCallback(
+    (value) => dispatchDialog({ type: 'setEmailForm', value }), [],
+  );
 
-  // Inline editing for discovery notes / blockers
-  const [editingDiscovery, setEditingDiscovery] = useState(false);
-  const [discoveryDraft, setDiscoveryDraft] = useState('');
-  const [editingBlockers, setEditingBlockers] = useState(false);
-  const [blockersDraft, setBlockersDraft] = useState('');
+  // Destructure for read-side ergonomics
+  const {
+    contactDialogOpen, editingContact, contactForm,
+    activityDialogOpen, activityForm,
+    followUpDialogOpen, followUpForm,
+    stageDialogOpen, newStage,
+    rejectDialog, rejectReason,
+    reqDialogOpen, reqForm,
+    emailDialogOpen, emailForm,
+  } = dialog;
+
+  /* --- inline editing reducer -------------------------------------- */
+  const [inlineEditing, dispatchInlineEditing] = useReducer(inlineEditingReducer, initialInlineEditingState);
+  const { editingDiscovery, discoveryDraft, editingBlockers, blockersDraft } = inlineEditing;
+  const setEditingDiscovery = useCallback((value: boolean) => dispatchInlineEditing({ type: 'setEditingDiscovery', value }), []);
+  const setDiscoveryDraft = useCallback((value: string) => dispatchInlineEditing({ type: 'setDiscoveryDraft', value }), []);
+  const setEditingBlockers = useCallback((value: boolean) => dispatchInlineEditing({ type: 'setEditingBlockers', value }), []);
+  const setBlockersDraft = useCallback((value: string) => dispatchInlineEditing({ type: 'setBlockersDraft', value }), []);
 
   const churchName = crm?.name || onboarded?.name || 'Church Detail';
 
@@ -168,66 +174,6 @@ const ChurchLifecycleDetailPage: React.FC = () => {
     { to: '/admin/control-panel/church-lifecycle', title: 'Church Lifecycle' },
     { title: churchName },
   ];
-
-  /* ------------------------------------------------------------------ */
-  /*  Data fetching                                                      */
-  /* ------------------------------------------------------------------ */
-
-  const fetchDetail = useCallback(async () => {
-    if (!churchId) return;
-    setLoading(true);
-    setError('');
-    try {
-      const data = await apiClient.get<any>(`/api/admin/church-lifecycle/${churchId}`);
-
-      setSource(data.source || 'crm');
-      setUnifiedStage(data.unified_stage || '');
-      setCrm(data.crm || null);
-      setOnboarded(data.onboarded || null);
-      setContacts(data.contacts || []);
-      setActivities(data.activities || []);
-      setFollowUps(data.followUps || []);
-      setMembers(data.members || []);
-      setTokens(data.tokens || []);
-      setChecklist(data.checklist || null);
-
-      const n = data.crm?.crm_notes || data.onboarded?.notes || '';
-      setNotes(n);
-      setNotesOriginal(n);
-
-      // Fetch extended pipeline data for CRM churches
-      if (data.crm?.id) {
-        try {
-          const [pipeData, tmplData, eTmplData] = await Promise.all([
-            apiClient.get<any>(`/api/admin/onboarding-pipeline/${data.crm.id}/detail`),
-            apiClient.get<any>('/api/admin/onboarding-pipeline/templates'),
-            apiClient.get<any>('/api/admin/onboarding-pipeline/email-templates'),
-          ]);
-          if (pipeData?.success) {
-            setPipelineRequirements(pipeData.requirements || []);
-            setPipelineEmails(pipeData.emails || []);
-            setPipelineActivities(pipeData.activities || []);
-            setProvisionChecklist(pipeData.checklist || null);
-          }
-          setSampleTemplates(tmplData?.templates || []);
-          setEmailTemplates(eTmplData?.templates || []);
-        } catch { /* non-critical — pipeline data is supplementary */ }
-      }
-    } catch (err: any) {
-      setError(err.message || 'Failed to load church detail');
-    } finally {
-      setLoading(false);
-    }
-  }, [churchId]);
-
-  const fetchStages = useCallback(async () => {
-    try {
-      const data = await apiClient.get<any>('/api/admin/church-lifecycle/stages');
-      setStages(data.stages || []);
-    } catch { /* non-critical */ }
-  }, []);
-
-  useEffect(() => { fetchDetail(); fetchStages(); }, [fetchDetail, fetchStages]);
 
   /* ------------------------------------------------------------------ */
   /*  Helpers                                                            */
@@ -292,7 +238,7 @@ const ChurchLifecycleDetailPage: React.FC = () => {
 
   const handleSaveNotes = async () => {
     if (!crmId && !onboardedId) return;
-    setNotesSaving(true);
+    setFlag('notesSaving', true);
     try {
       if (crmId) {
         await apiClient.put(`/api/crm/churches/${crmId}`, { crm_notes: notes });
@@ -304,7 +250,7 @@ const ChurchLifecycleDetailPage: React.FC = () => {
     } catch (err: any) {
       showToast(err.message, 'error');
     } finally {
-      setNotesSaving(false);
+      setFlag('notesSaving', false);
     }
   };
 
@@ -320,7 +266,7 @@ const ChurchLifecycleDetailPage: React.FC = () => {
       showToast(editingContact ? 'Contact updated' : 'Contact added');
       setContactDialogOpen(false);
       setEditingContact(null);
-      setContactForm({ first_name: '', last_name: '', role: '', email: '', phone: '', is_primary: false, notes: '' });
+      setContactForm(emptyContactForm);
       fetchDetail();
     } catch (err: any) {
       showToast(err.message, 'error');
@@ -343,7 +289,7 @@ const ChurchLifecycleDetailPage: React.FC = () => {
       await apiClient.post(`/api/crm/churches/${crmId}/activities`, activityForm);
       showToast('Activity logged');
       setActivityDialogOpen(false);
-      setActivityForm({ activity_type: 'note', subject: '', body: '' });
+      setActivityForm(emptyActivityForm);
       fetchDetail();
     } catch (err: any) {
       showToast(err.message, 'error');
@@ -356,7 +302,7 @@ const ChurchLifecycleDetailPage: React.FC = () => {
       await apiClient.post(`/api/crm/churches/${crmId}/follow-ups`, followUpForm);
       showToast('Follow-up scheduled');
       setFollowUpDialogOpen(false);
-      setFollowUpForm({ due_date: '', subject: '', description: '' });
+      setFollowUpForm(emptyFollowUpForm);
       fetchDetail();
     } catch (err: any) {
       showToast(err.message, 'error');
@@ -392,7 +338,7 @@ const ChurchLifecycleDetailPage: React.FC = () => {
 
   const handleToggleSetup = async () => {
     if (!onboardedId) return;
-    setTogglingSetup(true);
+    setFlag('togglingSetup', true);
     try {
       await apiClient.post(`/api/admin/church-onboarding/${onboardedId}/toggle-setup`);
       showToast('Setup status toggled');
@@ -400,13 +346,13 @@ const ChurchLifecycleDetailPage: React.FC = () => {
     } catch (err: any) {
       showToast(err.message, 'error');
     } finally {
-      setTogglingSetup(false);
+      setFlag('togglingSetup', false);
     }
   };
 
   const handleGenerateToken = async () => {
     if (!onboardedId) return;
-    setGeneratingToken(true);
+    setFlag('generatingToken', true);
     try {
       await apiClient.post(`/api/admin/church-onboarding/${onboardedId}/send-token`);
       showToast('Token generated');
@@ -414,13 +360,13 @@ const ChurchLifecycleDetailPage: React.FC = () => {
     } catch (err: any) {
       showToast(err.message, 'error');
     } finally {
-      setGeneratingToken(false);
+      setFlag('generatingToken', false);
     }
   };
 
   const handleDeactivateToken = async (tokenId: number) => {
     if (!onboardedId) return;
-    setDeactivatingToken(tokenId);
+    setFlag('deactivatingToken', tokenId);
     try {
       await apiClient.delete(`/api/admin/churches/${onboardedId}/registration-token`);
       showToast('Token deactivated');
@@ -428,12 +374,12 @@ const ChurchLifecycleDetailPage: React.FC = () => {
     } catch (err: any) {
       showToast(err.message, 'error');
     } finally {
-      setDeactivatingToken(null);
+      setFlag('deactivatingToken', null);
     }
   };
 
   const handleApproveMember = async (userId: number, email: string) => {
-    setActionLoading(userId);
+    setFlag('actionLoading', userId);
     try {
       await apiClient.post(`/api/admin/users/${userId}/unlock`);
       showToast(`${email} approved`);
@@ -441,13 +387,13 @@ const ChurchLifecycleDetailPage: React.FC = () => {
     } catch (err: any) {
       showToast(err.message, 'error');
     } finally {
-      setActionLoading(null);
+      setFlag('actionLoading', null);
     }
   };
 
   const handleRejectMember = async () => {
     if (!rejectDialog.userId) return;
-    setActionLoading(rejectDialog.userId);
+    setFlag('actionLoading', rejectDialog.userId);
     try {
       await apiClient.post(`/api/admin/users/${rejectDialog.userId}/lockout`, {
         reason: `Registration rejected: ${rejectReason || 'Not approved by admin'}`,
@@ -459,7 +405,7 @@ const ChurchLifecycleDetailPage: React.FC = () => {
     } catch (err: any) {
       showToast(err.message, 'error');
     } finally {
-      setActionLoading(null);
+      setFlag('actionLoading', null);
     }
   };
 
@@ -471,17 +417,17 @@ const ChurchLifecycleDetailPage: React.FC = () => {
 
   const handleSaveRequirement = async () => {
     if (!crmId) return;
-    setPipelineSaving(true);
+    setFlag('pipelineSaving', true);
     try {
       await apiClient.post(`/api/admin/onboarding-pipeline/${crmId}/requirements`, reqForm);
       showToast('Requirement added');
       setReqDialogOpen(false);
-      setReqForm({ record_type: 'baptism', uses_sample: false, sample_template_id: null, custom_required: false, custom_notes: '', review_required: false });
+      setReqForm(emptyReqForm);
       fetchDetail();
     } catch (err: any) {
       showToast(err.message, 'error');
     } finally {
-      setPipelineSaving(false);
+      setFlag('pipelineSaving', false);
     }
   };
 
@@ -511,7 +457,7 @@ const ChurchLifecycleDetailPage: React.FC = () => {
 
   const handleSaveEmail = async (status: string = 'draft') => {
     if (!crmId) return;
-    setPipelineSaving(true);
+    setFlag('pipelineSaving', true);
     try {
       await apiClient.post(`/api/admin/onboarding-pipeline/${crmId}/emails`, { ...emailForm, status });
       showToast(status === 'sent' ? 'Email marked as sent' : 'Draft saved');
@@ -520,7 +466,7 @@ const ChurchLifecycleDetailPage: React.FC = () => {
     } catch (err: any) {
       showToast(err.message, 'error');
     } finally {
-      setPipelineSaving(false);
+      setFlag('pipelineSaving', false);
     }
   };
 
@@ -540,7 +486,7 @@ const ChurchLifecycleDetailPage: React.FC = () => {
 
   const handleSaveInlineField = async (field: string, value: string) => {
     if (!crmId) return;
-    setPipelineSaving(true);
+    setFlag('pipelineSaving', true);
     try {
       await apiClient.put(`/api/admin/onboarding-pipeline/${crmId}`, { [field]: value });
       showToast('Updated successfully');
@@ -550,13 +496,13 @@ const ChurchLifecycleDetailPage: React.FC = () => {
     } catch (err: any) {
       showToast(err.message, 'error');
     } finally {
-      setPipelineSaving(false);
+      setFlag('pipelineSaving', false);
     }
   };
 
   const handleMarkProvisioning = async (field: string, value: any) => {
     if (!crmId) return;
-    setPipelineSaving(true);
+    setFlag('pipelineSaving', true);
     try {
       const body: Record<string, any> = { [field]: value };
       if (field === 'provisioning_completed') {
@@ -568,7 +514,7 @@ const ChurchLifecycleDetailPage: React.FC = () => {
     } catch (err: any) {
       showToast(err.message, 'error');
     } finally {
-      setPipelineSaving(false);
+      setFlag('pipelineSaving', false);
     }
   };
 
