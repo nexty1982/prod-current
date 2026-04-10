@@ -3,6 +3,7 @@
  * field mapping, fetch logic, and cache management for record form fields.
  * Extracted from RecordsPage.tsx
  */
+import { apiClient } from '@/api/utils/axiosInstance';
 import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 
 interface AutocompleteMapping {
@@ -77,11 +78,8 @@ export function useRecordsAutocomplete({
           prefix: inputValue,
           ...(selectedChurch && selectedChurch !== 0 ? { church_id: selectedChurch.toString() } : {}),
         });
-        const resp = await fetch(`/api/${mapping.apiEndpoint}-records/autocomplete?${params}`);
-        if (resp.ok) {
-          const data = await resp.json();
-          setAcSuggestions(prev => ({ ...prev, [cacheKey]: data.suggestions || [] }));
-        }
+        const data = await apiClient.get<any>(`/${mapping.apiEndpoint}-records/autocomplete?${params}`);
+        setAcSuggestions(prev => ({ ...prev, [cacheKey]: data.suggestions || [] }));
       } catch (err) {
         console.warn('Autocomplete fetch failed:', err);
       } finally {

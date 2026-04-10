@@ -11,6 +11,7 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { apiClient } from '@/api/utils/axiosInstance';
 import Breadcrumb from '@/layouts/full/shared/breadcrumb/Breadcrumb';
 import PageContainer from '@/shared/ui/PageContainer';
 import { useChurch } from '@/context/ChurchContext';
@@ -118,18 +119,7 @@ const InteractiveReportsPage: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch('/api/records/interactive-reports/list', {
-        credentials: 'include',
-        headers: authHeaders(),
-      });
-
-      if (response.status === 401 || response.status === 403) {
-        setError('Unauthorized. Please log in with an admin or priest account.');
-        return;
-      }
-      if (!response.ok) throw new Error(`Failed to fetch: ${response.statusText}`);
-
-      const data = await response.json();
+      const data = await apiClient.get<any>('/records/interactive-reports/list');
       setReports(data.reports || []);
     } catch (err: any) {
       setError(err.message || 'Failed to load reports');
@@ -155,16 +145,13 @@ const InteractiveReportsPage: React.FC = () => {
       }
 
       // Fetch records to assign — get first 10 records for this type
-      const recsRes = await fetch(`/api/church-records/${createForm.recordType}?limit=10`, {
-        credentials: 'include',
-        headers: authHeaders(),
-      });
-
       let recordIds: number[] = [];
-      if (recsRes.ok) {
-        const recsData = await recsRes.json();
+      try {
+        const recsData = await apiClient.get<any>(`/church-records/${createForm.recordType}?limit=10`);
         const records = recsData.data?.records || recsData.records || recsData.data || [];
         recordIds = Array.isArray(records) ? records.slice(0, 10).map((r: any) => r.id) : [];
+      } catch {
+        // If records fetch fails, recordIds stays empty
       }
 
       if (recordIds.length === 0) {
@@ -180,30 +167,20 @@ const InteractiveReportsPage: React.FC = () => {
         funeral: ['first_name', 'last_name', 'death_date', 'burial_date', 'cemetery'],
       };
 
-      const res = await fetch('/api/records/interactive-reports', {
-        method: 'POST',
-        credentials: 'include',
-        headers: authHeaders(),
-        body: JSON.stringify({
-          churchId,
-          recordType: createForm.recordType,
-          title: createForm.title.trim(),
-          filters: {},
-          allowedFields: defaultFields[createForm.recordType] || ['first_name', 'last_name'],
-          recipients: [
-            {
-              email: createForm.recipientEmail.trim(),
-              recordIds,
-            },
-          ],
-          expiresDays: createForm.expiresDays,
-        }),
+      await apiClient.post<any>('/records/interactive-reports', {
+        churchId,
+        recordType: createForm.recordType,
+        title: createForm.title.trim(),
+        filters: {},
+        allowedFields: defaultFields[createForm.recordType] || ['first_name', 'last_name'],
+        recipients: [
+          {
+            email: createForm.recipientEmail.trim(),
+            recordIds,
+          },
+        ],
+        expiresDays: createForm.expiresDays,
       });
-
-      if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.error || `Failed to create report (${res.status})`);
-      }
 
       setCreateOpen(false);
       setCreateForm({ title: '', recordType: 'baptism', recipientEmail: '', expiresDays: 30 });
@@ -221,12 +198,7 @@ const InteractiveReportsPage: React.FC = () => {
     if (!deleteTarget) return;
     setDeleting(true);
     try {
-      const res = await fetch(`/api/records/interactive-reports/${deleteTarget.id}`, {
-        method: 'DELETE',
-        credentials: 'include',
-        headers: authHeaders(),
-      });
-      if (!res.ok) throw new Error('Failed to delete report');
+      await apiClient.delete<any>(`/records/interactive-reports/${deleteTarget.id}`);
       setDeleteTarget(null);
       fetchReports();
     } catch (err: any) {

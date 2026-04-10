@@ -19,6 +19,7 @@
  */
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { apiClient } from '@/api/utils/axiosInstance';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import { Users } from '@/ui/icons';
 import { useAuth } from '../../../context/AuthContext';
@@ -115,12 +116,7 @@ const BaptismRecordEntryPage: React.FC = () => {
           setLoading(true);
           setError(null);
           const params = new URLSearchParams({ church_id: churchId });
-          const response = await fetch(`/api/baptism-records/${id}?${params.toString()}`, {
-            credentials: 'include',
-            headers: { 'Content-Type': 'application/json' },
-          });
-          if (!response.ok) throw new Error('Failed to load record');
-          const data = await response.json();
+          const data = await apiClient.get<any>(`/baptism-records/${id}?${params.toString()}`);
           if (data.success && data.record) {
             const r = data.record;
             setFormData({
@@ -195,19 +191,10 @@ const BaptismRecordEntryPage: React.FC = () => {
       const method = isEditMode ? 'PUT' : 'POST';
       const params = new URLSearchParams({ church_id: churchId });
 
-      const response = await fetch(`${url}?${params.toString()}`, {
-        method,
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...formData, church_id: parseInt(churchId) }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || 'Failed to save record');
-      }
-
-      const data = await response.json();
+      const apiUrl = url.replace(/^\/api/, '');
+      const data = isEditMode
+        ? await apiClient.put<any>(`${apiUrl}?${params.toString()}`, { ...formData, church_id: parseInt(churchId) })
+        : await apiClient.post<any>(`${apiUrl}?${params.toString()}`, { ...formData, church_id: parseInt(churchId) });
       if (data.success) {
         setSuccess(true);
         if (createAnotherRef.current) {
