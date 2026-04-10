@@ -48,29 +48,21 @@ assertEq(parseDate(true), null, 'boolean → null (non-string)');
 // ============================================================================
 // ISO YYYY-MM-DD
 //
-// BUG (documented, see follow-up): the parser tries the (\d{1,2})-(\d{1,2})-
-// (\d{2,4}) pattern BEFORE the (\d{4})-(\d{1,2})-(\d{1,2}) pattern. For ISO
-// dates like "2020-05-12" the first pattern incorrectly matches "20-05-12"
-// → DD=20, MM=05, YY=12 → 2012-05-20. Only ISO dates whose first two YYYY
-// digits are >12 (so DD=>12 fails validation) reach the YYYY pattern. This
-// affects all dates in years 1300-2099 with leading two digits 13-20...
+// Fixed in OMD-874: parser now tries YYYY-MM-DD before DD/MM/YY, so ISO
+// dates in 2000-2099 parse correctly (previously the YY-pattern would
+// greedily match the suffix and produce wrong dates).
 // ============================================================================
-console.log('\n── ISO YYYY-MM-DD (parser order quirk) ───────────────────');
+console.log('\n── ISO YYYY-MM-DD ────────────────────────────────────────');
 
-// Years where first two digits > 12 (1300-1999, 21xx) successfully match
-// the YYYY pattern after the DD/MM/YY pattern fails validation.
-assertEq(parseDate('1985-01-01'), '1985-01-01', '1985 → first 2 digits >12 → YYYY pattern wins');
-assertEq(parseDate('1999-12-31'), '1999-12-31', '1999 NYE → YYYY pattern wins');
-assertEq(parseDate('1800-01-01'), '1800-01-01', '1800 → YYYY pattern wins');
-assertEq(parseDate('2100-12-31'), '2100-12-31', '2100 → YYYY pattern wins');
-
-// BUG: dates in 2000-2099 are misinterpreted because "20" is a valid day.
-// "2020-05-12" is parsed as DD=20/MM=05/YY=12 → 2012-05-20
-assertEq(parseDate('2020-05-12'), '2012-05-20', 'BUG: 2020-05-12 misparsed as 20/05/12 → 2012-05-20');
-assertEq(parseDate('2024-02-29'), '2029-02-24', 'BUG: 2024-02-29 misparsed as 24/02/29');
-
-// "1850-06-15" → first=18 >12, day=18, mm=50 → invalid → tries pattern 2 → ✓
-assertEq(parseDate('1850-06-15'), '1850-06-15', '1850 → first pattern fails, YYYY wins');
+assertEq(parseDate('2020-05-12'), '2020-05-12', 'YYYY-MM-DD straight (2020s)');
+assertEq(parseDate('2024-02-29'), '2024-02-29', 'leap year 2024');
+assertEq(parseDate('1985-01-01'), '1985-01-01', 'New Year ISO');
+assertEq(parseDate('1999-12-31'), '1999-12-31', 'NYE ISO');
+assertEq(parseDate('1800-01-01'), '1800-01-01', '1800 ISO (lower bound)');
+assertEq(parseDate('2100-12-31'), '2100-12-31', '2100 ISO (upper bound)');
+assertEq(parseDate('1850-06-15'), '1850-06-15', '1850 ISO');
+assertEq(parseDate('2020/05/12'), '2020-05-12', 'YYYY/MM/DD with slashes');
+assertEq(parseDate('  2020-05-12  '), '2020-05-12', 'leading/trailing whitespace trimmed');
 
 // ============================================================================
 // Unambiguous US format (MM/DD/YYYY where DD > 12)
@@ -129,9 +121,8 @@ assertEq(parseDate('5-25-2020'), '2020-05-25', 'MM-DD-YYYY with dashes (DD>12)')
 // ============================================================================
 console.log('\n── Embedded in surrounding text ──────────────────────────');
 
-// BUG: same ISO order quirk applies even with surrounding label text
-assertEq(parseDate('Date: 2020-05-12'), '2012-05-20', 'BUG: ISO embedded after label hits same order bug');
-assertEq(parseDate('Date: 1985-06-15'), '1985-06-15', 'pre-2000 ISO embedded works');
+assertEq(parseDate('Date: 2020-05-12'), '2020-05-12', 'ISO embedded after label (2020s)');
+assertEq(parseDate('Date: 1985-06-15'), '1985-06-15', 'pre-2000 ISO embedded');
 assertEq(parseDate('Born 25/12/1985 in Boston'), '1985-12-25', 'EU embedded in sentence');
 assertEq(parseDate('  on 5/25/2020.'), '2020-05-25', 'US embedded with whitespace');
 
@@ -178,13 +169,17 @@ assertEq(parseDate('05-12'), null, 'M-D without year → null (gap)');
 // ============================================================================
 console.log('\n── Range round-trip ──────────────────────────────────────');
 
-// Round-trip only works for years where the first two digits exceed 12
-// (so the buggy DD/MM/YY pattern fails validation and the YYYY pattern
-// is reached). Limited to pre-2000 / post-2099 inputs.
+// Round-trip across the full supported range now that OMD-874 reordered
+// the regex patterns so YYYY-MM-DD is tried before DD/MM/YY.
 const samples: Array<[string, string]> = [
   ['1800-01-01', '1800-01-01'],
-  ['2100-12-31', '2100-12-31'],
+  ['1850-06-15', '1850-06-15'],
+  ['1920-11-03', '1920-11-03'],
   ['1992-04-15', '1992-04-15'],
+  ['2000-01-01', '2000-01-01'],
+  ['2020-05-12', '2020-05-12'],
+  ['2099-12-31', '2099-12-31'],
+  ['2100-12-31', '2100-12-31'],
   ['1700-06-15', null as any], // year < 1800 → null
 ];
 for (const [input, expected] of samples) {

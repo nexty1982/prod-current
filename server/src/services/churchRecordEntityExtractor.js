@@ -755,10 +755,13 @@ class ChurchRecordEntityExtractor {
         
         const cleaned = dateText.trim();
         
-        // Try various date formats common in Orthodox registries
+        // Try various date formats common in Orthodox registries.
+        // ORDER MATTERS: YYYY-MM-DD must come first, otherwise the second
+        // pattern would greedily match "20-05-12" inside "2020-05-12" and
+        // misinterpret it as DD/MM/YY (see OMD-874).
         const patterns = [
-            /(\d{1,2})[-\/](\d{1,2})[-\/](\d{2,4})/,  // MM/DD/YY or DD/MM/YY
-            /(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})/     // YYYY/MM/DD
+            /(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})/,    // YYYY/MM/DD (ISO)
+            /(\d{1,2})[-\/](\d{1,2})[-\/](\d{2,4})/   // MM/DD/YY or DD/MM/YY
         ];
         
         for (const pattern of patterns) {
