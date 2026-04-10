@@ -48,7 +48,7 @@ import {
     IconUsers,
 } from '@tabler/icons-react';
 import { useFormik } from 'formik';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import * as Yup from 'yup';
 import ChurchInfoTab from './ChurchForm/ChurchInfoTab';
@@ -88,31 +88,86 @@ const ChurchForm: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, hasRole } = useAuth();
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState(0);
+  type PageBucket = {
+    loading: boolean;
+    error: string | null;
+    success: string | null;
+    activeTab: number;
+  };
+  const [page, setPage] = useState<PageBucket>({
+    loading: false,
+    error: null,
+    success: null,
+    activeTab: 0,
+  });
+  const setPageField = useCallback(<K extends keyof PageBucket>(key: K, value: PageBucket[K]) => {
+    setPage(prev => ({ ...prev, [key]: value }));
+  }, []);
+  const { loading, error, success, activeTab } = page;
+  const setLoading = useCallback((v: boolean) => setPageField('loading', v), [setPageField]);
+  const setError = useCallback((v: string | null) => setPageField('error', v), [setPageField]);
+  const setSuccess = useCallback((v: string | null) => setPageField('success', v), [setPageField]);
+  const setActiveTab = useCallback((v: number) => setPageField('activeTab', v), [setPageField]);
 
   // User management
-  const [churchUsers, setChurchUsers] = useState<any[]>([]);
-  const [loadingUsers, setLoadingUsers] = useState(false);
-  const [userDialogOpen, setUserDialogOpen] = useState(false);
-  const [userDialogAction, setUserDialogAction] = useState<'add' | 'edit'>('add');
-  const [selectedUser, setSelectedUser] = useState<any>(null);
+  type UsersBucket = {
+    churchUsers: any[];
+    loadingUsers: boolean;
+    userDialogOpen: boolean;
+    userDialogAction: 'add' | 'edit';
+    selectedUser: any;
+  };
+  const [usersState, setUsersState] = useState<UsersBucket>({
+    churchUsers: [],
+    loadingUsers: false,
+    userDialogOpen: false,
+    userDialogAction: 'add',
+    selectedUser: null,
+  });
+  const setUsersField = useCallback(<K extends keyof UsersBucket>(key: K, value: UsersBucket[K]) => {
+    setUsersState(prev => ({ ...prev, [key]: value }));
+  }, []);
+  const { churchUsers, loadingUsers, userDialogOpen, userDialogAction, selectedUser } = usersState;
+  const setChurchUsers = useCallback((v: any[]) => setUsersField('churchUsers', v), [setUsersField]);
+  const setLoadingUsers = useCallback((v: boolean) => setUsersField('loadingUsers', v), [setUsersField]);
+  const setUserDialogOpen = useCallback((v: boolean) => setUsersField('userDialogOpen', v), [setUsersField]);
+  const setUserDialogAction = useCallback((v: 'add' | 'edit') => setUsersField('userDialogAction', v), [setUsersField]);
+  const setSelectedUser = useCallback((v: any) => setUsersField('selectedUser', v), [setUsersField]);
 
-  // Database management
-  const [databaseInfo, setDatabaseInfo] = useState<any>(null);
-  const [loadingDatabase, setLoadingDatabase] = useState(false);
-  const [selectedTemplate, setSelectedTemplate] = useState('');
-  const [updatingDatabase, setUpdatingDatabase] = useState(false);
-  const [databaseUpdateResult, setDatabaseUpdateResult] = useState<{ success: boolean; message: string } | null>(null);
+  // Database + feature flag tooling
+  type DbBucket = {
+    databaseInfo: any;
+    loadingDatabase: boolean;
+    selectedTemplate: string;
+    updatingDatabase: boolean;
+    databaseUpdateResult: { success: boolean; message: string } | null;
+    loadingFeatures: boolean;
+    updatingFeatures: boolean;
+  };
+  const [dbState, setDbState] = useState<DbBucket>({
+    databaseInfo: null,
+    loadingDatabase: false,
+    selectedTemplate: '',
+    updatingDatabase: false,
+    databaseUpdateResult: null,
+    loadingFeatures: false,
+    updatingFeatures: false,
+  });
+  const setDbField = useCallback(<K extends keyof DbBucket>(key: K, value: DbBucket[K]) => {
+    setDbState(prev => ({ ...prev, [key]: value }));
+  }, []);
+  const { databaseInfo, loadingDatabase, selectedTemplate, updatingDatabase, databaseUpdateResult, loadingFeatures, updatingFeatures } = dbState;
+  const setDatabaseInfo = useCallback((v: any) => setDbField('databaseInfo', v), [setDbField]);
+  const setLoadingDatabase = useCallback((v: boolean) => setDbField('loadingDatabase', v), [setDbField]);
+  const setSelectedTemplate = useCallback((v: string) => setDbField('selectedTemplate', v), [setDbField]);
+  const setUpdatingDatabase = useCallback((v: boolean) => setDbField('updatingDatabase', v), [setDbField]);
+  const setDatabaseUpdateResult = useCallback((v: { success: boolean; message: string } | null) => setDbField('databaseUpdateResult', v), [setDbField]);
+  const setLoadingFeatures = useCallback((v: boolean) => setDbField('loadingFeatures', v), [setDbField]);
+  const setUpdatingFeatures = useCallback((v: boolean) => setDbField('updatingFeatures', v), [setDbField]);
 
-  // Feature flags management (global + overrides + effective)
-  const [featureData, setFeatureData] = useState<{
-    globalDefaults?: any;
-    overrides?: any;
-    effective: any;
-  }>({
+  // Feature flags data — kept standalone because callsites use updater fn
+  type FeatureData = { globalDefaults?: any; overrides?: any; effective: any };
+  const [featureData, setFeatureData] = useState<FeatureData>({
     effective: {
       ag_grid_enabled: false,
       power_search_enabled: false,
@@ -120,8 +175,6 @@ const ChurchForm: React.FC = () => {
       om_charts_enabled: true
     }
   });
-  const [loadingFeatures, setLoadingFeatures] = useState(false);
-  const [updatingFeatures, setUpdatingFeatures] = useState(false);
 
   // Snackbar
   const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' | 'info' }>({ open: false, message: '', severity: 'info' });
