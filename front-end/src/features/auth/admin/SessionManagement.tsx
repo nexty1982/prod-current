@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import {
   Box,
   Card,
@@ -81,35 +81,75 @@ interface SessionStats {
 const SessionManagement: React.FC = () => {
   const theme = useTheme();
   const { user, authenticated, loading: authLoading, hasRole } = useAuth();
-  const [sessions, setSessions] = useState<SessionData[]>([]);
-  const [stats, setStats] = useState<SessionStats | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'expired'>('all');
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [terminateDialog, setTerminateDialog] = useState<{ open: boolean; session: SessionData | null }>({
-    open: false,
-    session: null,
+  type DialogState = { open: boolean; session: SessionData | null };
+  type ListBucket = {
+    sessions: SessionData[];
+    stats: SessionStats | null;
+    loading: boolean;
+    search: string;
+    statusFilter: 'all' | 'active' | 'expired';
+    page: number;
+    totalPages: number;
+    successMessage: string;
+    errorMessage: string;
+  };
+  const [list, setList] = useState<ListBucket>({
+    sessions: [],
+    stats: null,
+    loading: true,
+    search: '',
+    statusFilter: 'all',
+    page: 1,
+    totalPages: 1,
+    successMessage: '',
+    errorMessage: '',
   });
-  const [lockoutDialog, setLockoutDialog] = useState<{ open: boolean; session: SessionData | null }>({
-    open: false,
-    session: null,
+  const setListField = useCallback(<K extends keyof ListBucket>(key: K, value: ListBucket[K]) => {
+    setList(prev => ({ ...prev, [key]: value }));
+  }, []);
+  const { sessions, stats, loading, search, statusFilter, page, totalPages, successMessage, errorMessage } = list;
+  const setSessions = useCallback((v: SessionData[]) => setListField('sessions', v), [setListField]);
+  const setStats = useCallback((v: SessionStats | null) => setListField('stats', v), [setListField]);
+  const setLoading = useCallback((v: boolean) => setListField('loading', v), [setListField]);
+  const setSearch = useCallback((v: string) => setListField('search', v), [setListField]);
+  const setStatusFilter = useCallback((v: 'all' | 'active' | 'expired') => setListField('statusFilter', v), [setListField]);
+  const setPage = useCallback((v: number) => setListField('page', v), [setListField]);
+  const setTotalPages = useCallback((v: number) => setListField('totalPages', v), [setListField]);
+  const setSuccessMessage = useCallback((v: string) => setListField('successMessage', v), [setListField]);
+  const setErrorMessage = useCallback((v: string) => setListField('errorMessage', v), [setListField]);
+
+  type DialogsBucket = {
+    terminateDialog: DialogState;
+    lockoutDialog: DialogState;
+    terminateAllDialog: DialogState;
+    cleanupDialog: boolean;
+    killAllDialog: boolean;
+    messageDialog: DialogState;
+    messageText: string;
+    sendingMessage: boolean;
+  };
+  const [dialogs, setDialogs] = useState<DialogsBucket>({
+    terminateDialog: { open: false, session: null },
+    lockoutDialog: { open: false, session: null },
+    terminateAllDialog: { open: false, session: null },
+    cleanupDialog: false,
+    killAllDialog: false,
+    messageDialog: { open: false, session: null },
+    messageText: '',
+    sendingMessage: false,
   });
-  const [terminateAllDialog, setTerminateAllDialog] = useState<{ open: boolean; session: SessionData | null }>({
-    open: false,
-    session: null,
-  });
-  const [cleanupDialog, setCleanupDialog] = useState(false);
-  const [killAllDialog, setKillAllDialog] = useState(false);
-  const [messageDialog, setMessageDialog] = useState<{ open: boolean; session: SessionData | null }>({
-    open: false,
-    session: null,
-  });
-  const [messageText, setMessageText] = useState('');
-  const [sendingMessage, setSendingMessage] = useState(false);
-  const [successMessage, setSuccessMessage] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
+  const setDialogsField = useCallback(<K extends keyof DialogsBucket>(key: K, value: DialogsBucket[K]) => {
+    setDialogs(prev => ({ ...prev, [key]: value }));
+  }, []);
+  const { terminateDialog, lockoutDialog, terminateAllDialog, cleanupDialog, killAllDialog, messageDialog, messageText, sendingMessage } = dialogs;
+  const setTerminateDialog = useCallback((v: DialogState) => setDialogsField('terminateDialog', v), [setDialogsField]);
+  const setLockoutDialog = useCallback((v: DialogState) => setDialogsField('lockoutDialog', v), [setDialogsField]);
+  const setTerminateAllDialog = useCallback((v: DialogState) => setDialogsField('terminateAllDialog', v), [setDialogsField]);
+  const setCleanupDialog = useCallback((v: boolean) => setDialogsField('cleanupDialog', v), [setDialogsField]);
+  const setKillAllDialog = useCallback((v: boolean) => setDialogsField('killAllDialog', v), [setDialogsField]);
+  const setMessageDialog = useCallback((v: DialogState) => setDialogsField('messageDialog', v), [setDialogsField]);
+  const setMessageText = useCallback((v: string) => setDialogsField('messageText', v), [setDialogsField]);
+  const setSendingMessage = useCallback((v: boolean) => setDialogsField('sendingMessage', v), [setDialogsField]);
 
   const ITEMS_PER_PAGE = 20;
 
