@@ -76,7 +76,13 @@ export function mountOcrRoutes(app: any, upload: any) {
   const reviewRouter = require('./review');
   app.use('/api/church/:churchId/ocr', reviewRouter);
 
-  console.log('✅ [OCR] All OCR routes mounted (admin + 6 church-scoped modules)');
+  // -------------------------------------------------------------------------
+  // 8. Church OCR statistics (dashboard widget)
+  // -------------------------------------------------------------------------
+  const statsRouter = require('./stats');
+  app.use('/api/church/:churchId/ocr', statsRouter);
+
+  console.log('✅ [OCR] All OCR routes mounted (admin + 7 church-scoped modules)');
 }
 
 // Re-export processOcrJobAsync from legacy module for feeder worker compatibility

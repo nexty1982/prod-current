@@ -11,6 +11,7 @@ import TypeDistributionChart from './widgets/TypeDistributionChart';
 import RecentActivityList from './widgets/RecentActivityList';
 import YearOverYearCard from './widgets/YearOverYearCard';
 import CompletenessGauge from './widgets/CompletenessGauge';
+import OcrStatsCard from './widgets/OcrStatsCard';
 
 interface DashboardData {
   counts: { baptisms: number; marriages: number; funerals: number; total: number };
@@ -107,6 +108,11 @@ const Modern = () => {
           {/* Top row: 4 count cards */}
           <Grid2 size={12}>
             <SacramentCountCards counts={data.counts} yearOverYear={data.yearOverYear} />
+          </Grid2>
+
+          {/* OCR digitization widget */}
+          <Grid2 size={12}>
+            <OcrStatsCard churchId={activeChurchId} />
           </Grid2>
 
           {/* Middle row: bar chart + donut */}
