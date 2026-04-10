@@ -135,12 +135,12 @@ const SystemBehaviorPage = Loadable(lazy(() => import('../features/account/paris
 const UserGuide = Loadable(lazy(() => import('../features/help/UserGuide')));
 
 // tables
-const BasicTable = Loadable(lazy(() => import('../features/tables/tables/BasicTable')));
-const EnhanceTable = Loadable(lazy(() => import('../features/tables/tables/EnhanceTable')));
-const PaginationTable = Loadable(lazy(() => import('../features/tables/tables/PaginationTable')));
-const FixedHeaderTable = Loadable(lazy(() => import('../features/tables/tables/FixedHeaderTable')));
-const CollapsibleTable = Loadable(lazy(() => import('../features/tables/tables/CollapsibleTable')));
-const SearchTable = Loadable(lazy(() => import('../features/tables/tables/SearchTable')));
+const BasicTable = Loadable(lazy(() => import('../features/tables/BasicTable')));
+const EnhanceTable = Loadable(lazy(() => import('../features/tables/EnhanceTable')));
+const PaginationTable = Loadable(lazy(() => import('../features/tables/PaginationTable')));
+const FixedHeaderTable = Loadable(lazy(() => import('../features/tables/FixedHeaderTable')));
+const CollapsibleTable = Loadable(lazy(() => import('../features/tables/CollapsibleTable')));
+const SearchTable = Loadable(lazy(() => import('../features/tables/SearchTable')));
 
 // react tables
 const ReactBasicTable = Loadable(lazy(() => import('../features/tables/react-tables/basic/page')));
