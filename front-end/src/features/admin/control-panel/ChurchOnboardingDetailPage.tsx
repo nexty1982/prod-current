@@ -136,29 +136,73 @@ const ChurchOnboardingDetailPage: React.FC = () => {
   const navigate = useNavigate();
   const { churchId } = useParams<{ churchId: string }>();
 
-  /* --- state: main data ---------------------------------------------- */
-  const [church, setChurch] = useState<ChurchDetail | null>(null);
-  const [members, setMembers] = useState<ChurchMember[]>([]);
-  const [tokens, setTokens] = useState<ChurchToken[]>([]);
-  const [checklist, setChecklist] = useState<OnboardingChecklist | null>(null);
-  const [stage, setStage] = useState<string>('new');
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  /* --- state: main data + notes -------------------------------------- */
+  type DataBucket = {
+    church: ChurchDetail | null;
+    members: ChurchMember[];
+    tokens: ChurchToken[];
+    checklist: OnboardingChecklist | null;
+    stage: string;
+    loading: boolean;
+    error: string;
+    notes: string;
+    notesOriginal: string;
+    notesSaving: boolean;
+  };
+  const [data, setData] = useState<DataBucket>({
+    church: null,
+    members: [],
+    tokens: [],
+    checklist: null,
+    stage: 'new',
+    loading: true,
+    error: '',
+    notes: '',
+    notesOriginal: '',
+    notesSaving: false,
+  });
+  const setDataField = useCallback(<K extends keyof DataBucket>(key: K, value: DataBucket[K]) => {
+    setData(prev => ({ ...prev, [key]: value }));
+  }, []);
+  const { church, members, tokens, checklist, stage, loading, error, notes, notesOriginal, notesSaving } = data;
+  const setChurch = useCallback((v: ChurchDetail | null) => setDataField('church', v), [setDataField]);
+  const setMembers = useCallback((v: ChurchMember[]) => setDataField('members', v), [setDataField]);
+  const setTokens = useCallback((v: ChurchToken[]) => setDataField('tokens', v), [setDataField]);
+  const setChecklist = useCallback((v: OnboardingChecklist | null) => setDataField('checklist', v), [setDataField]);
+  const setStage = useCallback((v: string) => setDataField('stage', v), [setDataField]);
+  const setLoading = useCallback((v: boolean) => setDataField('loading', v), [setDataField]);
+  const setError = useCallback((v: string) => setDataField('error', v), [setDataField]);
+  const setNotes = useCallback((v: string) => setDataField('notes', v), [setDataField]);
+  const setNotesOriginal = useCallback((v: string) => setDataField('notesOriginal', v), [setDataField]);
+  const setNotesSaving = useCallback((v: boolean) => setDataField('notesSaving', v), [setDataField]);
 
-  /* --- state: notes -------------------------------------------------- */
-  const [notes, setNotes] = useState('');
-  const [notesOriginal, setNotesOriginal] = useState('');
-  const [notesSaving, setNotesSaving] = useState(false);
-
-  /* --- state: actions ------------------------------------------------ */
-  const [togglingSetup, setTogglingSetup] = useState(false);
-  const [generatingToken, setGeneratingToken] = useState(false);
-  const [deactivatingToken, setDeactivatingToken] = useState<number | null>(null);
-  const [actionLoading, setActionLoading] = useState<number | null>(null);
-
-  /* --- state: reject dialog ------------------------------------------ */
-  const [rejectDialog, setRejectDialog] = useState<{ open: boolean; userId: number | null; email: string }>({ open: false, userId: null, email: '' });
-  const [rejectReason, setRejectReason] = useState('');
+  /* --- state: actions + reject dialog -------------------------------- */
+  type ActionsBucket = {
+    togglingSetup: boolean;
+    generatingToken: boolean;
+    deactivatingToken: number | null;
+    actionLoading: number | null;
+    rejectDialog: { open: boolean; userId: number | null; email: string };
+    rejectReason: string;
+  };
+  const [actions, setActions] = useState<ActionsBucket>({
+    togglingSetup: false,
+    generatingToken: false,
+    deactivatingToken: null,
+    actionLoading: null,
+    rejectDialog: { open: false, userId: null, email: '' },
+    rejectReason: '',
+  });
+  const setActionsField = useCallback(<K extends keyof ActionsBucket>(key: K, value: ActionsBucket[K]) => {
+    setActions(prev => ({ ...prev, [key]: value }));
+  }, []);
+  const { togglingSetup, generatingToken, deactivatingToken, actionLoading, rejectDialog, rejectReason } = actions;
+  const setTogglingSetup = useCallback((v: boolean) => setActionsField('togglingSetup', v), [setActionsField]);
+  const setGeneratingToken = useCallback((v: boolean) => setActionsField('generatingToken', v), [setActionsField]);
+  const setDeactivatingToken = useCallback((v: number | null) => setActionsField('deactivatingToken', v), [setActionsField]);
+  const setActionLoading = useCallback((v: number | null) => setActionsField('actionLoading', v), [setActionsField]);
+  const setRejectDialog = useCallback((v: { open: boolean; userId: number | null; email: string }) => setActionsField('rejectDialog', v), [setActionsField]);
+  const setRejectReason = useCallback((v: string) => setActionsField('rejectReason', v), [setActionsField]);
 
   /* --- state: snackbar ----------------------------------------------- */
   const [snack, setSnack] = useState<SnackState>({ open: false, message: '', severity: 'success' });
