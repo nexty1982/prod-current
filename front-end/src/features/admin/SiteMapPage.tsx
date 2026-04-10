@@ -319,7 +319,6 @@ const USER_MAP: SiteNode[] = [
       { label: 'Notes', path: '/apps/notes', icon: <RecordIcon /> },
       { label: 'Tickets', path: '/apps/tickets', icon: <TaskIcon /> },
       { label: 'Kanban Board', path: '/apps/kanban', icon: <KanbanIcon /> },
-      { label: 'Image AI', path: '/apps/image-ai', icon: <ImageIcon /> },
       { label: 'Gallery', path: '/apps/gallery', icon: <ImageIcon /> },
     ],
   },

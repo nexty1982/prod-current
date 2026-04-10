@@ -76,7 +76,6 @@ interface KnownItem {
 }
 
 const KNOWN_BADGE_ITEMS: KnownItem[] = [
-  { badgeKey: 'image-ai', label: 'Image AI', menuPath: 'AI Tools > Image AI' },
   { badgeKey: 'om-charts', label: 'OM Charts', menuPath: 'Dashboards > OM Charts' },
   { badgeKey: 'us-church-map', label: 'US Church Map', menuPath: 'Church Operations > US Church Map' },
   { badgeKey: 'baptism-records-v2', label: 'Baptism Records v2', menuPath: 'Records > Baptism Records v2' },
