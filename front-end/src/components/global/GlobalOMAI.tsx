@@ -76,63 +76,102 @@ const GlobalOMAI: React.FC = () => {
   const kanbanContext = useContext(KanbanDataContext);
   const { createTask, boards = [], currentBoard, fetchBoard, fetchBoards } = kanbanContext || {};
   
-  // UI State
-  const [isOpen, setIsOpen] = useState(false);
-  const [isMinimized, setIsMinimized] = useState(false);
-  const [isDragging, setIsDragging] = useState(false);
-  const [isResizing, setIsResizing] = useState(false);
-  const [position, setPosition] = useState({ x: window.innerWidth - 600, y: window.innerHeight / 2 - 500 });
-  const [size, setSize] = useState({ width: 600, height: 800 });
-  const [command, setCommand] = useState('');
-  const [isExecuting, setIsExecuting] = useState(false);
-  const [handsOnMode, setHandsOnMode] = useState(false);
-  const [historyMenuAnchor, setHistoryMenuAnchor] = useState<null | HTMLElement>(null);
-  const [showSettings, setShowSettings] = useState(false);
-  
-  // Tab state for new Errors panel
-  const [activeTab, setActiveTab] = useState(0);
-  const [selectedError, setSelectedError] = useState<GlobalError | null>(null);
-  const [taskCreationDialog, setTaskCreationDialog] = useState(false);
+  // Standalone: passed as React.Dispatch to children OR used with updater fns
+  const [commandHistory, setCommandHistory] = useState<OMAICommand[]>([]);
   const [taskForm, setTaskForm] = useState({
     title: '',
     description: '',
     priority: 'medium' as 'low' | 'medium' | 'high' | 'urgent'
   });
-  
-  // Error filtering state
-  
-  // Data State
-  const [commandHistory, setCommandHistory] = useState<OMAICommand[]>([]);
-  const [pageContext, setPageContext] = useState<PageContext | null>(null);
-  const [availableCommands, setAvailableCommands] = useState<string[]>([]);
-  const [suggestions, setSuggestions] = useState<string[]>([]);
-  
-  // Settings State (keeping existing settings)
   const [settings, setSettings] = useState<OMAISettings>({
-    // Core Assistant Settings
     handsOnModeEnabled: false,
     destructiveCommandsWarning: true,
     defaultAIMode: 'assistive',
     defaultLanguage: 'en-US',
     uiTheme: 'orthodox-blue',
-    
-    // OMAI Behavior Settings
     autonomousActions: false,
     errorRecoveryMode: 'report',
     verbosityLevel: 'normal',
     agentPersonality: 'classic',
-    
-    // Backend Integration
     databaseContextOverride: 'auto',
     serviceEnvironment: 'prod',
-    
-    // Logs & Analytics
     showMetrics: true,
     exportLogsFormat: 'json',
     trackExecutionTime: true,
     trackQueryCount: true,
     trackSuccessRate: true,
   });
+
+  // Bucketed state: overlay UI (11 fields)
+  interface OverlayState {
+    isOpen: boolean;
+    isMinimized: boolean;
+    isDragging: boolean;
+    isResizing: boolean;
+    position: { x: number; y: number };
+    size: { width: number; height: number };
+    command: string;
+    isExecuting: boolean;
+    handsOnMode: boolean;
+    historyMenuAnchor: null | HTMLElement;
+    showSettings: boolean;
+  }
+  const [overlayState, setOverlayState] = useState<OverlayState>({
+    isOpen: false,
+    isMinimized: false,
+    isDragging: false,
+    isResizing: false,
+    position: { x: window.innerWidth - 600, y: window.innerHeight / 2 - 500 },
+    size: { width: 600, height: 800 },
+    command: '',
+    isExecuting: false,
+    handsOnMode: false,
+    historyMenuAnchor: null,
+    showSettings: false,
+  });
+  const setOverlayField = useCallback(<K extends keyof OverlayState>(key: K, value: OverlayState[K]) => {
+    setOverlayState(prev => ({ ...prev, [key]: value }));
+  }, []);
+  const { isOpen, isMinimized, isDragging, isResizing, position, size, command, isExecuting, handsOnMode, historyMenuAnchor, showSettings } = overlayState;
+  const setIsOpen = useCallback((v: boolean) => setOverlayField('isOpen', v), [setOverlayField]);
+  const setIsMinimized = useCallback((v: boolean) => setOverlayField('isMinimized', v), [setOverlayField]);
+  const setIsDragging = useCallback((v: boolean) => setOverlayField('isDragging', v), [setOverlayField]);
+  const setIsResizing = useCallback((v: boolean) => setOverlayField('isResizing', v), [setOverlayField]);
+  const setPosition = useCallback((v: { x: number; y: number }) => setOverlayField('position', v), [setOverlayField]);
+  const setSize = useCallback((v: { width: number; height: number }) => setOverlayField('size', v), [setOverlayField]);
+  const setCommand = useCallback((v: string) => setOverlayField('command', v), [setOverlayField]);
+  const setIsExecuting = useCallback((v: boolean) => setOverlayField('isExecuting', v), [setOverlayField]);
+  const setHandsOnMode = useCallback((v: boolean) => setOverlayField('handsOnMode', v), [setOverlayField]);
+  const setHistoryMenuAnchor = useCallback((v: null | HTMLElement) => setOverlayField('historyMenuAnchor', v), [setOverlayField]);
+  const setShowSettings = useCallback((v: boolean) => setOverlayField('showSettings', v), [setOverlayField]);
+
+  // Bucketed state: tabs + data (6 fields)
+  interface TabDataState {
+    activeTab: number;
+    selectedError: GlobalError | null;
+    taskCreationDialog: boolean;
+    pageContext: PageContext | null;
+    availableCommands: string[];
+    suggestions: string[];
+  }
+  const [tabDataState, setTabDataState] = useState<TabDataState>({
+    activeTab: 0,
+    selectedError: null,
+    taskCreationDialog: false,
+    pageContext: null,
+    availableCommands: [],
+    suggestions: [],
+  });
+  const setTabDataField = useCallback(<K extends keyof TabDataState>(key: K, value: TabDataState[K]) => {
+    setTabDataState(prev => ({ ...prev, [key]: value }));
+  }, []);
+  const { activeTab, selectedError, taskCreationDialog, pageContext, availableCommands, suggestions } = tabDataState;
+  const setActiveTab = useCallback((v: number) => setTabDataField('activeTab', v), [setTabDataField]);
+  const setSelectedError = useCallback((v: GlobalError | null) => setTabDataField('selectedError', v), [setTabDataField]);
+  const setTaskCreationDialog = useCallback((v: boolean) => setTabDataField('taskCreationDialog', v), [setTabDataField]);
+  const setPageContext = useCallback((v: PageContext | null) => setTabDataField('pageContext', v), [setTabDataField]);
+  const setAvailableCommands = useCallback((v: string[]) => setTabDataField('availableCommands', v), [setTabDataField]);
+  const setSuggestions = useCallback((v: string[]) => setTabDataField('suggestions', v), [setTabDataField]);
 
   // Refs
   const dragRef = useRef<HTMLDivElement>(null);
