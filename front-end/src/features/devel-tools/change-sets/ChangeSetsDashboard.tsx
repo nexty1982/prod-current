@@ -147,26 +147,76 @@ const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const ChangeSetsDashboard: React.FC = () => {
   const theme = useTheme();
   const navigate = useNavigate();
-  const [changeSets, setChangeSets] = useState<ChangeSet[]>([]);
-  const [total, setTotal] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [statusFilter, setStatusFilter] = useState<string>('');
-  const [typeFilter, setTypeFilter] = useState<string>('');
-  const [priorityFilter, setPriorityFilter] = useState<string>('');
-  const [createOpen, setCreateOpen] = useState(false);
-  const [creating, setCreating] = useState(false);
-  const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list');
-  const [calMode, setCalMode] = useState<'month' | 'week'>('month');
-  const [calDate, setCalDate] = useState(() => new Date());
+  type ListBucket = {
+    changeSets: ChangeSet[];
+    total: number;
+    loading: boolean;
+    statusFilter: string;
+    typeFilter: string;
+    priorityFilter: string;
+    viewMode: 'list' | 'calendar';
+    calMode: 'month' | 'week';
+  };
+  const [list, setList] = useState<ListBucket>({
+    changeSets: [],
+    total: 0,
+    loading: true,
+    statusFilter: '',
+    typeFilter: '',
+    priorityFilter: '',
+    viewMode: 'list',
+    calMode: 'month',
+  });
+  const setListField = useCallback(<K extends keyof ListBucket>(key: K, value: ListBucket[K]) => {
+    setList(prev => ({ ...prev, [key]: value }));
+  }, []);
+  const { changeSets, total, loading, statusFilter, typeFilter, priorityFilter, viewMode, calMode } = list;
+  const setChangeSets = useCallback((v: ChangeSet[]) => setListField('changeSets', v), [setListField]);
+  const setTotal = useCallback((v: number) => setListField('total', v), [setListField]);
+  const setLoading = useCallback((v: boolean) => setListField('loading', v), [setListField]);
+  const setStatusFilter = useCallback((v: string) => setListField('statusFilter', v), [setListField]);
+  const setTypeFilter = useCallback((v: string) => setListField('typeFilter', v), [setListField]);
+  const setPriorityFilter = useCallback((v: string) => setListField('priorityFilter', v), [setListField]);
+  const setViewMode = useCallback((v: 'list' | 'calendar') => setListField('viewMode', v), [setListField]);
+  const setCalMode = useCallback((v: 'month' | 'week') => setListField('calMode', v), [setListField]);
 
-  // Create form
-  const [newTitle, setNewTitle] = useState('');
-  const [newType, setNewType] = useState('feature');
-  const [newPriority, setNewPriority] = useState('medium');
-  const [newBranch, setNewBranch] = useState('');
-  const [newStrategy, setNewStrategy] = useState('stage_then_promote');
-  const [newStartDate, setNewStartDate] = useState('');
-  const [newEndDate, setNewEndDate] = useState('');
+  type CreateBucket = {
+    createOpen: boolean;
+    creating: boolean;
+    newTitle: string;
+    newType: string;
+    newPriority: string;
+    newBranch: string;
+    newStrategy: string;
+    newStartDate: string;
+    newEndDate: string;
+  };
+  const [createForm, setCreateForm] = useState<CreateBucket>({
+    createOpen: false,
+    creating: false,
+    newTitle: '',
+    newType: 'feature',
+    newPriority: 'medium',
+    newBranch: '',
+    newStrategy: 'stage_then_promote',
+    newStartDate: '',
+    newEndDate: '',
+  });
+  const setCreateField = useCallback(<K extends keyof CreateBucket>(key: K, value: CreateBucket[K]) => {
+    setCreateForm(prev => ({ ...prev, [key]: value }));
+  }, []);
+  const { createOpen, creating, newTitle, newType, newPriority, newBranch, newStrategy, newStartDate, newEndDate } = createForm;
+  const setCreateOpen = useCallback((v: boolean) => setCreateField('createOpen', v), [setCreateField]);
+  const setCreating = useCallback((v: boolean) => setCreateField('creating', v), [setCreateField]);
+  const setNewTitle = useCallback((v: string) => setCreateField('newTitle', v), [setCreateField]);
+  const setNewType = useCallback((v: string) => setCreateField('newType', v), [setCreateField]);
+  const setNewPriority = useCallback((v: string) => setCreateField('newPriority', v), [setCreateField]);
+  const setNewBranch = useCallback((v: string) => setCreateField('newBranch', v), [setCreateField]);
+  const setNewStrategy = useCallback((v: string) => setCreateField('newStrategy', v), [setCreateField]);
+  const setNewStartDate = useCallback((v: string) => setCreateField('newStartDate', v), [setCreateField]);
+  const setNewEndDate = useCallback((v: string) => setCreateField('newEndDate', v), [setCreateField]);
+
+  const [calDate, setCalDate] = useState(() => new Date());
 
   const BCrumb = [
     { to: '/', title: 'Home' },
