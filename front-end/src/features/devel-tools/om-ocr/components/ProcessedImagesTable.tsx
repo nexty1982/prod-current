@@ -47,8 +47,10 @@ import {
   IconAlertCircle,
   IconEyeOff,
   IconTrash,
-  IconPlayerPlay
+  IconPlayerPlay,
+  IconFileText,
 } from '@tabler/icons-react';
+import EmptyState from '@/shared/ui/EmptyState';
 import type { OCRJobRow, OCRJobDetail, RecordType } from '../types/ocrJob';
 
 interface ProcessedImagesTableProps {
@@ -418,10 +420,12 @@ export const ProcessedImagesTable: React.FC<ProcessedImagesTableProps> = ({
               <TableBody>
                 {jobs.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} align="center" sx={{ py: 4 }}>
-                      <Typography color="text.secondary">
-                        No processed images yet
-                      </Typography>
+                    <TableCell colSpan={7} sx={{ border: 0, p: 0 }}>
+                      <EmptyState
+                        illustration={<IconFileText size={56} stroke={1.5} />}
+                        title="No processed images yet"
+                        description="Upload a scanned ledger image to start OCR. Completed jobs will appear here with a preview and the extracted text."
+                      />
                     </TableCell>
                   </TableRow>
                 ) : (

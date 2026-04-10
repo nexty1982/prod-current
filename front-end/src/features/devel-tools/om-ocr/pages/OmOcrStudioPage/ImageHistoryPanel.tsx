@@ -29,6 +29,7 @@ import {
   IconSortAscending,
 } from '@tabler/icons-react';
 import { apiClient } from '@/shared/lib/axiosInstance';
+import EmptyState from '@/shared/ui/EmptyState';
 import type { OcrJob } from './types';
 
 // ─── Constants ──────────────────────────────────────────────────────────────────
@@ -183,9 +184,11 @@ const ImageHistoryPanel: React.FC<ImageHistoryPanelProps> = ({ churchId, refresh
 
   if (jobs.length === 0) {
     return (
-      <Typography variant="body2" color="text.secondary" sx={{ py: 4, textAlign: 'center' }}>
-        No OCR jobs found. Upload images to get started.
-      </Typography>
+      <EmptyState
+        illustration={<IconPhoto size={56} stroke={1.5} />}
+        title="No OCR history yet"
+        description="This church has no processed records. Upload baptism, marriage, or funeral ledger images to see their history here."
+      />
     );
   }
 

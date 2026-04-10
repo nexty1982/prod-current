@@ -45,7 +45,10 @@ import {
   IconEye,
   IconArchive,
   IconAlertTriangle,
+  IconFileText,
+  IconSearch,
 } from '@tabler/icons-react';
+import EmptyState from '@/shared/ui/EmptyState';
 import type { OCRJobRow } from '../../types/ocrJob';
 
 interface UnifiedJobsListProps {
@@ -359,10 +362,26 @@ const UnifiedJobsList: React.FC<UnifiedJobsListProps> = ({
               </TableRow>
             ) : sortedJobs.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={colCount} align="center" sx={{ py: 4 }}>
-                  <Typography variant="body2" color="text.secondary">
-                    {jobs.length === 0 ? 'No processed images yet' : 'No jobs to display'}
-                  </Typography>
+                <TableCell colSpan={colCount} sx={{ border: 0, p: 0 }}>
+                  {jobs.length === 0 ? (
+                    <EmptyState
+                      illustration={<IconFileText size={56} stroke={1.5} />}
+                      title="No OCR jobs yet"
+                      description="Upload a scanned record image to begin extraction. Processed jobs will appear here with their status, score, and actions."
+                      actionLabel="Upload records"
+                      onAction={() => {
+                        const base = window.location.pathname.replace(/\/workbench.*$/, '');
+                        window.location.href = `${base}/upload`;
+                      }}
+                    />
+                  ) : (
+                    <EmptyState
+                      size="compact"
+                      illustration={<IconSearch size={40} stroke={1.5} />}
+                      title="No jobs match your filters"
+                      description="Try clearing filters or changing the hide-by-status toggle to see more jobs."
+                    />
+                  )}
                 </TableCell>
               </TableRow>
             ) : (
