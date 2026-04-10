@@ -136,11 +136,22 @@ const statusColors: Record<string, string> = {
 // ============================================================================
 
 function SessionsTab() {
-  const [sessions, setSessions] = useState<Session[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState(1);
-  const [total, setTotal] = useState(0);
-  const [statusFilter, setStatusFilter] = useState('');
+  const [s, setS] = useState<{
+    sessions: Session[];
+    loading: boolean;
+    page: number;
+    total: number;
+    statusFilter: string;
+  }>({ sessions: [], loading: true, page: 1, total: 0, statusFilter: '' });
+  const setSField = useCallback(<K extends keyof typeof s>(key: K, value: typeof s[K]) => {
+    setS(prev => ({ ...prev, [key]: value }));
+  }, []);
+  const setSessions = useCallback((v: Session[]) => setSField('sessions', v), [setSField]);
+  const setLoading = useCallback((v: boolean) => setSField('loading', v), [setSField]);
+  const setPage = useCallback((v: number) => setSField('page', v), [setSField]);
+  const setTotal = useCallback((v: number) => setSField('total', v), [setSField]);
+  const setStatusFilter = useCallback((v: string) => setSField('statusFilter', v), [setSField]);
+  const { sessions, loading, page, total, statusFilter } = s;
 
   const fetchSessions = useCallback(async () => {
     setLoading(true);
@@ -228,18 +239,46 @@ function SessionsTab() {
 // ============================================================================
 
 function ReportConfigTab() {
-  const [config, setConfig] = useState<any>(null);
-  const [sections, setSections] = useState<ReportSection[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
-
-  const [enabled, setEnabled] = useState(true);
-  const [scheduleDay, setScheduleDay] = useState(1);
-  const [scheduleHour, setScheduleHour] = useState(8);
-  const [timezone, setTimezone] = useState('America/New_York');
-  const [recipients, setRecipients] = useState('');
-  const [enabledSections, setEnabledSections] = useState<string[]>([]);
+  const [cfg, setCfg] = useState<{
+    config: any;
+    sections: ReportSection[];
+    loading: boolean;
+    saving: boolean;
+    saved: boolean;
+    enabled: boolean;
+    scheduleDay: number;
+    scheduleHour: number;
+    timezone: string;
+    recipients: string;
+    enabledSections: string[];
+  }>({
+    config: null,
+    sections: [],
+    loading: true,
+    saving: false,
+    saved: false,
+    enabled: true,
+    scheduleDay: 1,
+    scheduleHour: 8,
+    timezone: 'America/New_York',
+    recipients: '',
+    enabledSections: [],
+  });
+  const setCfgField = useCallback(<K extends keyof typeof cfg>(key: K, value: typeof cfg[K]) => {
+    setCfg(prev => ({ ...prev, [key]: value }));
+  }, []);
+  const setConfig = useCallback((v: any) => setCfgField('config', v), [setCfgField]);
+  const setSections = useCallback((v: ReportSection[]) => setCfgField('sections', v), [setCfgField]);
+  const setLoading = useCallback((v: boolean) => setCfgField('loading', v), [setCfgField]);
+  const setSaving = useCallback((v: boolean) => setCfgField('saving', v), [setCfgField]);
+  const setSaved = useCallback((v: boolean) => setCfgField('saved', v), [setCfgField]);
+  const setEnabled = useCallback((v: boolean) => setCfgField('enabled', v), [setCfgField]);
+  const setScheduleDay = useCallback((v: number) => setCfgField('scheduleDay', v), [setCfgField]);
+  const setScheduleHour = useCallback((v: number) => setCfgField('scheduleHour', v), [setCfgField]);
+  const setTimezone = useCallback((v: string) => setCfgField('timezone', v), [setCfgField]);
+  const setRecipients = useCallback((v: string) => setCfgField('recipients', v), [setCfgField]);
+  const setEnabledSections = useCallback((v: string[]) => setCfgField('enabledSections', v), [setCfgField]);
+  const { config, sections, loading, saving, saved, enabled, scheduleDay, scheduleHour, timezone, recipients, enabledSections } = cfg;
 
   useEffect(() => {
     const load = async () => {
@@ -379,10 +418,20 @@ function ReportConfigTab() {
 // ============================================================================
 
 function ReportHistoryTab() {
-  const [runs, setRuns] = useState<ReportRun[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [previewHtml, setPreviewHtml] = useState<string | null>(null);
-  const [previewOpen, setPreviewOpen] = useState(false);
+  const [h, setH] = useState<{
+    runs: ReportRun[];
+    loading: boolean;
+    previewHtml: string | null;
+    previewOpen: boolean;
+  }>({ runs: [], loading: true, previewHtml: null, previewOpen: false });
+  const setHField = useCallback(<K extends keyof typeof h>(key: K, value: typeof h[K]) => {
+    setH(prev => ({ ...prev, [key]: value }));
+  }, []);
+  const setRuns = useCallback((v: ReportRun[]) => setHField('runs', v), [setHField]);
+  const setLoading = useCallback((v: boolean) => setHField('loading', v), [setHField]);
+  const setPreviewHtml = useCallback((v: string | null) => setHField('previewHtml', v), [setHField]);
+  const setPreviewOpen = useCallback((v: boolean) => setHField('previewOpen', v), [setHField]);
+  const { runs, loading, previewHtml, previewOpen } = h;
 
   const fetchRuns = useCallback(async () => {
     setLoading(true);
@@ -477,14 +526,31 @@ function ReportHistoryTab() {
 // ============================================================================
 
 function GenerateTab() {
-  const [periodStart, setPeriodStart] = useState(() => {
+  const [g, setG] = useState<{
+    periodStart: string;
+    periodEnd: string;
+    generating: boolean;
+    result: any;
+    previewHtml: string | null;
+  }>(() => {
     const d = new Date(); d.setDate(d.getDate() - 7);
-    return d.toISOString().split('T')[0];
+    return {
+      periodStart: d.toISOString().split('T')[0],
+      periodEnd: new Date().toISOString().split('T')[0],
+      generating: false,
+      result: null,
+      previewHtml: null,
+    };
   });
-  const [periodEnd, setPeriodEnd] = useState(() => new Date().toISOString().split('T')[0]);
-  const [generating, setGenerating] = useState(false);
-  const [result, setResult] = useState<any>(null);
-  const [previewHtml, setPreviewHtml] = useState<string | null>(null);
+  const setGField = useCallback(<K extends keyof typeof g>(key: K, value: typeof g[K]) => {
+    setG(prev => ({ ...prev, [key]: value }));
+  }, []);
+  const setPeriodStart = useCallback((v: string) => setGField('periodStart', v), [setGField]);
+  const setPeriodEnd = useCallback((v: string) => setGField('periodEnd', v), [setGField]);
+  const setGenerating = useCallback((v: boolean) => setGField('generating', v), [setGField]);
+  const setResult = useCallback((v: any) => setGField('result', v), [setGField]);
+  const setPreviewHtml = useCallback((v: string | null) => setGField('previewHtml', v), [setGField]);
+  const { periodStart, periodEnd, generating, result, previewHtml } = g;
 
   const handleGenerate = async () => {
     setGenerating(true);
