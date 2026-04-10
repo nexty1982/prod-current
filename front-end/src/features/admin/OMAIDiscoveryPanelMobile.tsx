@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { apiClient } from '@/api/utils/axiosInstance';
 import {
   Box,
@@ -119,45 +119,87 @@ const OMAIDiscoveryPanelMobile: React.FC = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const isFold = useMediaQuery('(max-width: 768px)');
 
-  // Core state
-  const [learningStatus, setLearningStatus] = useState<LearningStatus | null>(null);
-  const [memoryPreview, setMemoryPreview] = useState<MemoryPreview | null>(null);
-  const [agents, setAgents] = useState<Agent[]>([]);
-  
-  // Loading states
-  const [learningLoading, setLearningLoading] = useState(false);
-  const [statusLoading, setStatusLoading] = useState(false);
-  const [memoryLoading, setMemoryLoading] = useState(false);
-  const [autofixLoading, setAutofixLoading] = useState(false);
-  const [uploadLoading, setUploadLoading] = useState(false);
-
-  // Dialog states
-  const [statusDialogOpen, setStatusDialogOpen] = useState(false);
-  const [memoryDialogOpen, setMemoryDialogOpen] = useState(false);
-  const [autofixDialogOpen, setAutofixDialogOpen] = useState(false);
-  const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
-  const [logsDrawerOpen, setLogsDrawerOpen] = useState(false);
-
-  // UI states
-  const [speedDialOpen, setSpeedDialOpen] = useState(false);
+  // Standalone — use updater fn pattern
+  const [progress, setProgress] = useState({ learning: 0, memory: 0, autofix: 0 });
   const [expandedSections, setExpandedSections] = useState<string[]>(['overview']);
-  const [lastRefreshTime, setLastRefreshTime] = useState<Date | null>(null);
 
-  // Progress tracking
-  const [progress, setProgress] = useState({
-    learning: 0,
-    memory: 0,
-    autofix: 0
+  // ── Data + loading bucket ────────────────────────────────────────────────
+  const [data, setData] = useState<{
+    learningStatus: LearningStatus | null;
+    memoryPreview: MemoryPreview | null;
+    agents: Agent[];
+    learningLoading: boolean;
+    statusLoading: boolean;
+    memoryLoading: boolean;
+    autofixLoading: boolean;
+    uploadLoading: boolean;
+    lastRefreshTime: Date | null;
+  }>({
+    learningStatus: null,
+    memoryPreview: null,
+    agents: [],
+    learningLoading: false,
+    statusLoading: false,
+    memoryLoading: false,
+    autofixLoading: false,
+    uploadLoading: false,
+    lastRefreshTime: null,
   });
+  const setDataField = useCallback(<K extends keyof typeof data>(key: K, value: typeof data[K]) => {
+    setData(prev => ({ ...prev, [key]: value }));
+  }, []);
+  const setLearningStatus = useCallback((v: LearningStatus | null) => setDataField('learningStatus', v), [setDataField]);
+  const setMemoryPreview = useCallback((v: MemoryPreview | null) => setDataField('memoryPreview', v), [setDataField]);
+  const setAgents = useCallback((v: Agent[]) => setDataField('agents', v), [setDataField]);
+  const setLearningLoading = useCallback((v: boolean) => setDataField('learningLoading', v), [setDataField]);
+  const setStatusLoading = useCallback((v: boolean) => setDataField('statusLoading', v), [setDataField]);
+  const setMemoryLoading = useCallback((v: boolean) => setDataField('memoryLoading', v), [setDataField]);
+  const setAutofixLoading = useCallback((v: boolean) => setDataField('autofixLoading', v), [setDataField]);
+  const setUploadLoading = useCallback((v: boolean) => setDataField('uploadLoading', v), [setDataField]);
+  const setLastRefreshTime = useCallback((v: Date | null) => setDataField('lastRefreshTime', v), [setDataField]);
+  const { learningStatus, memoryPreview, agents, learningLoading, statusLoading, memoryLoading, autofixLoading, uploadLoading, lastRefreshTime } = data;
 
-  // Upload state
-  const [uploadFile, setUploadFile] = useState<File | null>(null);
-  const [uploadResult, setUploadResult] = useState<string>('');
-
-  // Autofix state
-  const [selectedAgent, setSelectedAgent] = useState<string>('');
-  const [autofixCommand, setAutofixCommand] = useState<string>('');
-  const [autofixResult, setAutofixResult] = useState<string>('');
+  // ── Dialogs + UI bucket ──────────────────────────────────────────────────
+  const [ui, setUi] = useState<{
+    statusDialogOpen: boolean;
+    memoryDialogOpen: boolean;
+    autofixDialogOpen: boolean;
+    uploadDialogOpen: boolean;
+    logsDrawerOpen: boolean;
+    speedDialOpen: boolean;
+    uploadFile: File | null;
+    uploadResult: string;
+    selectedAgent: string;
+    autofixCommand: string;
+    autofixResult: string;
+  }>({
+    statusDialogOpen: false,
+    memoryDialogOpen: false,
+    autofixDialogOpen: false,
+    uploadDialogOpen: false,
+    logsDrawerOpen: false,
+    speedDialOpen: false,
+    uploadFile: null,
+    uploadResult: '',
+    selectedAgent: '',
+    autofixCommand: '',
+    autofixResult: '',
+  });
+  const setUiField = useCallback(<K extends keyof typeof ui>(key: K, value: typeof ui[K]) => {
+    setUi(prev => ({ ...prev, [key]: value }));
+  }, []);
+  const setStatusDialogOpen = useCallback((v: boolean) => setUiField('statusDialogOpen', v), [setUiField]);
+  const setMemoryDialogOpen = useCallback((v: boolean) => setUiField('memoryDialogOpen', v), [setUiField]);
+  const setAutofixDialogOpen = useCallback((v: boolean) => setUiField('autofixDialogOpen', v), [setUiField]);
+  const setUploadDialogOpen = useCallback((v: boolean) => setUiField('uploadDialogOpen', v), [setUiField]);
+  const setLogsDrawerOpen = useCallback((v: boolean) => setUiField('logsDrawerOpen', v), [setUiField]);
+  const setSpeedDialOpen = useCallback((v: boolean) => setUiField('speedDialOpen', v), [setUiField]);
+  const setUploadFile = useCallback((v: File | null) => setUiField('uploadFile', v), [setUiField]);
+  const setUploadResult = useCallback((v: string) => setUiField('uploadResult', v), [setUiField]);
+  const setSelectedAgent = useCallback((v: string) => setUiField('selectedAgent', v), [setUiField]);
+  const setAutofixCommand = useCallback((v: string) => setUiField('autofixCommand', v), [setUiField]);
+  const setAutofixResult = useCallback((v: string) => setUiField('autofixResult', v), [setUiField]);
+  const { statusDialogOpen, memoryDialogOpen, autofixDialogOpen, uploadDialogOpen, logsDrawerOpen, speedDialOpen, uploadFile, uploadResult, selectedAgent, autofixCommand, autofixResult } = ui;
 
   useEffect(() => {
     loadInitialData();
