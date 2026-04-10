@@ -118,29 +118,74 @@ const PromptPlanDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const theme = useTheme();
   const navigate = useNavigate();
-  const [plan, setPlan] = useState<Plan | null>(null);
-  const [steps, setSteps] = useState<Step[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  type PageBucket = {
+    plan: Plan | null;
+    steps: Step[];
+    loading: boolean;
+    error: string | null;
+  };
+  const [page, setPage] = useState<PageBucket>({
+    plan: null,
+    steps: [],
+    loading: true,
+    error: null,
+  });
+  const setPageField = useCallback(<K extends keyof PageBucket>(key: K, value: PageBucket[K]) => {
+    setPage(prev => ({ ...prev, [key]: value }));
+  }, []);
+  const { plan, steps, loading, error } = page;
+  const setPlan = useCallback((v: Plan | null) => setPageField('plan', v), [setPageField]);
+  const setSteps = useCallback((v: Step[]) => setPageField('steps', v), [setPageField]);
+  const setLoading = useCallback((v: boolean) => setPageField('loading', v), [setPageField]);
+  const setError = useCallback((v: string | null) => setPageField('error', v), [setPageField]);
 
-  // Step add/edit state
-  const [addOpen, setAddOpen] = useState(false);
-  const [editingStep, setEditingStep] = useState<Step | null>(null);
-  const [stepTitle, setStepTitle] = useState('');
-  const [stepPrompt, setStepPrompt] = useState('');
-  const [stepNotes, setStepNotes] = useState('');
-  const [stepRequired, setStepRequired] = useState(true);
-  const [saving, setSaving] = useState(false);
-
-  // Plan edit state
-  const [editingPlan, setEditingPlan] = useState(false);
-  const [planTitle, setPlanTitle] = useState('');
-  const [planDesc, setPlanDesc] = useState('');
-  const [planAgent, setPlanAgent] = useState('');
-
-  // Launch state
-  const [launching, setLaunching] = useState<number | null>(null);
-  const [launchResult, setLaunchResult] = useState<{ stepId: number; response: string; workItemId: number } | null>(null);
+  type FormsBucket = {
+    addOpen: boolean;
+    editingStep: Step | null;
+    stepTitle: string;
+    stepPrompt: string;
+    stepNotes: string;
+    stepRequired: boolean;
+    saving: boolean;
+    editingPlan: boolean;
+    planTitle: string;
+    planDesc: string;
+    planAgent: string;
+    launching: number | null;
+    launchResult: { stepId: number; response: string; workItemId: number } | null;
+  };
+  const [forms, setForms] = useState<FormsBucket>({
+    addOpen: false,
+    editingStep: null,
+    stepTitle: '',
+    stepPrompt: '',
+    stepNotes: '',
+    stepRequired: true,
+    saving: false,
+    editingPlan: false,
+    planTitle: '',
+    planDesc: '',
+    planAgent: '',
+    launching: null,
+    launchResult: null,
+  });
+  const setFormsField = useCallback(<K extends keyof FormsBucket>(key: K, value: FormsBucket[K]) => {
+    setForms(prev => ({ ...prev, [key]: value }));
+  }, []);
+  const { addOpen, editingStep, stepTitle, stepPrompt, stepNotes, stepRequired, saving, editingPlan, planTitle, planDesc, planAgent, launching, launchResult } = forms;
+  const setAddOpen = useCallback((v: boolean) => setFormsField('addOpen', v), [setFormsField]);
+  const setEditingStep = useCallback((v: Step | null) => setFormsField('editingStep', v), [setFormsField]);
+  const setStepTitle = useCallback((v: string) => setFormsField('stepTitle', v), [setFormsField]);
+  const setStepPrompt = useCallback((v: string) => setFormsField('stepPrompt', v), [setFormsField]);
+  const setStepNotes = useCallback((v: string) => setFormsField('stepNotes', v), [setFormsField]);
+  const setStepRequired = useCallback((v: boolean) => setFormsField('stepRequired', v), [setFormsField]);
+  const setSaving = useCallback((v: boolean) => setFormsField('saving', v), [setFormsField]);
+  const setEditingPlan = useCallback((v: boolean) => setFormsField('editingPlan', v), [setFormsField]);
+  const setPlanTitle = useCallback((v: string) => setFormsField('planTitle', v), [setFormsField]);
+  const setPlanDesc = useCallback((v: string) => setFormsField('planDesc', v), [setFormsField]);
+  const setPlanAgent = useCallback((v: string) => setFormsField('planAgent', v), [setFormsField]);
+  const setLaunching = useCallback((v: number | null) => setFormsField('launching', v), [setFormsField]);
+  const setLaunchResult = useCallback((v: { stepId: number; response: string; workItemId: number } | null) => setFormsField('launchResult', v), [setFormsField]);
 
   const fetchPlan = useCallback(async () => {
     if (!id) return;
