@@ -287,12 +287,31 @@ const STATUS_COLORS: Record<string, 'success' | 'error' | 'warning' | 'info' | '
 };
 
 const EmailRecordsTab: React.FC<{ churchId?: number }> = ({ churchId }) => {
-  const [enabled, setEnabled] = useState<boolean | null>(null);
-  const [saving, setSaving] = useState(false);
-  const [authorizedSenders, setAuthorizedSenders] = useState<AuthorizedSender[]>([]);
-  const [submissions, setSubmissions] = useState<EmailSubmission[]>([]);
-  const [loadingSenders, setLoadingSenders] = useState(true);
-  const [loadingSubmissions, setLoadingSubmissions] = useState(true);
+  const [s, setS] = useState<{
+    enabled: boolean | null;
+    saving: boolean;
+    authorizedSenders: AuthorizedSender[];
+    submissions: EmailSubmission[];
+    loadingSenders: boolean;
+    loadingSubmissions: boolean;
+  }>({
+    enabled: null,
+    saving: false,
+    authorizedSenders: [],
+    submissions: [],
+    loadingSenders: true,
+    loadingSubmissions: true,
+  });
+  const setSField = useCallback(<K extends keyof typeof s>(key: K, value: typeof s[K]) => {
+    setS(prev => ({ ...prev, [key]: value }));
+  }, []);
+  const setEnabled = useCallback((v: boolean | null) => setSField('enabled', v), [setSField]);
+  const setSaving = useCallback((v: boolean) => setSField('saving', v), [setSField]);
+  const setAuthorizedSenders = useCallback((v: AuthorizedSender[]) => setSField('authorizedSenders', v), [setSField]);
+  const setSubmissions = useCallback((v: EmailSubmission[]) => setSField('submissions', v), [setSField]);
+  const setLoadingSenders = useCallback((v: boolean) => setSField('loadingSenders', v), [setSField]);
+  const setLoadingSubmissions = useCallback((v: boolean) => setSField('loadingSubmissions', v), [setSField]);
+  const { enabled, saving, authorizedSenders, submissions, loadingSenders, loadingSubmissions } = s;
 
   useEffect(() => {
     if (!churchId) return;
@@ -488,12 +507,31 @@ const EMPTY_CMD: Partial<OmaiCommand> = {
 };
 
 const CommandBuilderTab: React.FC<{ notify: (msg: string, sev?: 'success' | 'error' | 'info') => void }> = ({ notify }) => {
-  const [commands, setCommands] = useState<OmaiCommand[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [editing, setEditing] = useState<Partial<OmaiCommand> | null>(null);
-  const [saving, setSaving] = useState(false);
-  const [patternsText, setPatternsText] = useState('');
+  const [s, setS] = useState<{
+    commands: OmaiCommand[];
+    loading: boolean;
+    dialogOpen: boolean;
+    editing: Partial<OmaiCommand> | null;
+    saving: boolean;
+    patternsText: string;
+  }>({
+    commands: [],
+    loading: true,
+    dialogOpen: false,
+    editing: null,
+    saving: false,
+    patternsText: '',
+  });
+  const setSField = useCallback(<K extends keyof typeof s>(key: K, value: typeof s[K]) => {
+    setS(prev => ({ ...prev, [key]: value }));
+  }, []);
+  const setCommands = useCallback((v: OmaiCommand[]) => setSField('commands', v), [setSField]);
+  const setLoading = useCallback((v: boolean) => setSField('loading', v), [setSField]);
+  const setDialogOpen = useCallback((v: boolean) => setSField('dialogOpen', v), [setSField]);
+  const setEditing = useCallback((v: Partial<OmaiCommand> | null) => setSField('editing', v), [setSField]);
+  const setSaving = useCallback((v: boolean) => setSField('saving', v), [setSField]);
+  const setPatternsText = useCallback((v: string) => setSField('patternsText', v), [setSField]);
+  const { commands, loading, dialogOpen, editing, saving, patternsText } = s;
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -680,13 +718,34 @@ const EMPTY_TR: Partial<TrainingResponse> = {
 };
 
 const TrainingResponsesTab: React.FC<{ notify: (msg: string, sev?: 'success' | 'error' | 'info') => void }> = ({ notify }) => {
-  const [responses, setResponses] = useState<TrainingResponse[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [editing, setEditing] = useState<Partial<TrainingResponse> | null>(null);
-  const [saving, setSaving] = useState(false);
-  const [varsText, setVarsText] = useState('');
-  const [previewText, setPreviewText] = useState('');
+  const [s, setS] = useState<{
+    responses: TrainingResponse[];
+    loading: boolean;
+    dialogOpen: boolean;
+    editing: Partial<TrainingResponse> | null;
+    saving: boolean;
+    varsText: string;
+    previewText: string;
+  }>({
+    responses: [],
+    loading: true,
+    dialogOpen: false,
+    editing: null,
+    saving: false,
+    varsText: '',
+    previewText: '',
+  });
+  const setSField = useCallback(<K extends keyof typeof s>(key: K, value: typeof s[K]) => {
+    setS(prev => ({ ...prev, [key]: value }));
+  }, []);
+  const setResponses = useCallback((v: TrainingResponse[]) => setSField('responses', v), [setSField]);
+  const setLoading = useCallback((v: boolean) => setSField('loading', v), [setSField]);
+  const setDialogOpen = useCallback((v: boolean) => setSField('dialogOpen', v), [setSField]);
+  const setEditing = useCallback((v: Partial<TrainingResponse> | null) => setSField('editing', v), [setSField]);
+  const setSaving = useCallback((v: boolean) => setSField('saving', v), [setSField]);
+  const setVarsText = useCallback((v: string) => setSField('varsText', v), [setSField]);
+  const setPreviewText = useCallback((v: string) => setSField('previewText', v), [setSField]);
+  const { responses, loading, dialogOpen, editing, saving, varsText, previewText } = s;
 
   const load = useCallback(async () => {
     setLoading(true);
