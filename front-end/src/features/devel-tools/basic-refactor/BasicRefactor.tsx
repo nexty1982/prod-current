@@ -80,33 +80,73 @@ const BasicRefactor: React.FC = () => {
   const { activeMode } = useContext(CustomizerContext);
   const theme = useTheme();
 
-  // ========================================================================
-  // Scopes State
-  // ========================================================================
+  // Standalone: scopes uses updater-fn callsites
   const [scopes, setScopes] = useState<ScanScope[]>(() => refactorConsoleClient.getSavedScopes());
-  const [showScopesPanel, setShowScopesPanel] = useState(false);
-  const [editingIgnoreScope, setEditingIgnoreScope] = useState<string | null>(null);
-  const [ignoreEditValue, setIgnoreEditValue] = useState('');
 
-  // ========================================================================
-  // Policy Files State
-  // ========================================================================
-  const [policyFiles, setPolicyFiles] = useState<PolicyFileEntry[]>([]);
-  const [isLoadingFiles, setIsLoadingFiles] = useState(false);
-  const [selectedPolicyPath, setSelectedPolicyPath] = useState<string>('');
-  const [editorContent, setEditorContent] = useState<string>('');
-  const [editorDirty, setEditorDirty] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [newFileName, setNewFileName] = useState('');
-  const [showNewFileInput, setShowNewFileInput] = useState(false);
+  // Bucketed state: UI (scopes panel + evaluation UI) — 7 fields
+  interface UiState {
+    showScopesPanel: boolean;
+    editingIgnoreScope: string | null;
+    ignoreEditValue: string;
+    policyFindings: PolicyEvaluationResult | null;
+    isEvaluating: boolean;
+    evalError: string | null;
+    showFindings: boolean;
+  }
+  const [uiState, setUiState] = useState<UiState>({
+    showScopesPanel: false,
+    editingIgnoreScope: null,
+    ignoreEditValue: '',
+    policyFindings: null,
+    isEvaluating: false,
+    evalError: null,
+    showFindings: false,
+  });
+  const setUiField = useCallback(<K extends keyof UiState>(key: K, value: UiState[K]) => {
+    setUiState(prev => ({ ...prev, [key]: value }));
+  }, []);
+  const { showScopesPanel, editingIgnoreScope, ignoreEditValue, policyFindings, isEvaluating, evalError, showFindings } = uiState;
+  const setShowScopesPanel = useCallback((v: boolean) => setUiField('showScopesPanel', v), [setUiField]);
+  const setEditingIgnoreScope = useCallback((v: string | null) => setUiField('editingIgnoreScope', v), [setUiField]);
+  const setIgnoreEditValue = useCallback((v: string) => setUiField('ignoreEditValue', v), [setUiField]);
+  const setPolicyFindings = useCallback((v: PolicyEvaluationResult | null) => setUiField('policyFindings', v), [setUiField]);
+  const setIsEvaluating = useCallback((v: boolean) => setUiField('isEvaluating', v), [setUiField]);
+  const setEvalError = useCallback((v: string | null) => setUiField('evalError', v), [setUiField]);
+  const setShowFindings = useCallback((v: boolean) => setUiField('showFindings', v), [setUiField]);
 
-  // ========================================================================
-  // Evaluation State
-  // ========================================================================
-  const [policyFindings, setPolicyFindings] = useState<PolicyEvaluationResult | null>(null);
-  const [isEvaluating, setIsEvaluating] = useState(false);
-  const [evalError, setEvalError] = useState<string | null>(null);
-  const [showFindings, setShowFindings] = useState(false);
+  // Bucketed state: policy files editor — 8 fields
+  interface PolicyFilesState {
+    policyFiles: PolicyFileEntry[];
+    isLoadingFiles: boolean;
+    selectedPolicyPath: string;
+    editorContent: string;
+    editorDirty: boolean;
+    isSaving: boolean;
+    newFileName: string;
+    showNewFileInput: boolean;
+  }
+  const [policyFilesState, setPolicyFilesState] = useState<PolicyFilesState>({
+    policyFiles: [],
+    isLoadingFiles: false,
+    selectedPolicyPath: '',
+    editorContent: '',
+    editorDirty: false,
+    isSaving: false,
+    newFileName: '',
+    showNewFileInput: false,
+  });
+  const setPolicyFilesField = useCallback(<K extends keyof PolicyFilesState>(key: K, value: PolicyFilesState[K]) => {
+    setPolicyFilesState(prev => ({ ...prev, [key]: value }));
+  }, []);
+  const { policyFiles, isLoadingFiles, selectedPolicyPath, editorContent, editorDirty, isSaving, newFileName, showNewFileInput } = policyFilesState;
+  const setPolicyFiles = useCallback((v: PolicyFileEntry[]) => setPolicyFilesField('policyFiles', v), [setPolicyFilesField]);
+  const setIsLoadingFiles = useCallback((v: boolean) => setPolicyFilesField('isLoadingFiles', v), [setPolicyFilesField]);
+  const setSelectedPolicyPath = useCallback((v: string) => setPolicyFilesField('selectedPolicyPath', v), [setPolicyFilesField]);
+  const setEditorContent = useCallback((v: string) => setPolicyFilesField('editorContent', v), [setPolicyFilesField]);
+  const setEditorDirty = useCallback((v: boolean) => setPolicyFilesField('editorDirty', v), [setPolicyFilesField]);
+  const setIsSaving = useCallback((v: boolean) => setPolicyFilesField('isSaving', v), [setPolicyFilesField]);
+  const setNewFileName = useCallback((v: string) => setPolicyFilesField('newFileName', v), [setPolicyFilesField]);
+  const setShowNewFileInput = useCallback((v: boolean) => setPolicyFilesField('showNewFileInput', v), [setPolicyFilesField]);
 
   // ========================================================================
   // Load policy file list
