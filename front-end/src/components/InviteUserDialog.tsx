@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { apiClient } from '@/api/utils/axiosInstance';
 import {
     Dialog,
     DialogTitle,
@@ -86,21 +87,14 @@ const InviteUserDialog: React.FC<InviteUserDialogProps> = ({ open, onClose, chur
         setError('');
 
         try {
-            const response = await fetch('/api/admin/invites', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-                body: JSON.stringify({
-                    email,
-                    role,
-                    church_id: churchId || null,
-                    expiration_days: expirationDays,
-                }),
+            const data = await apiClient.post<any>('/admin/invites', {
+                email,
+                role,
+                church_id: churchId || null,
+                expiration_days: expirationDays,
             });
 
-            const data = await response.json();
-
-            if (!response.ok || !data.success) {
+            if (!data.success) {
                 setError(data.message || 'Failed to create invite.');
                 return;
             }

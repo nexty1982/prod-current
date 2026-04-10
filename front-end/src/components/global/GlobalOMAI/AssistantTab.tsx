@@ -208,17 +208,10 @@ const AssistantTab: React.FC<AssistantTabProps> = ({
                                   onClick={async () => {
                                     console.log('Testing Kanban API directly...');
                                     try {
-                                      const response = await fetch('/api/kanban/health', {
-                                        credentials: 'include'
-                                      });
-                                      console.log('Health check response:', response.status);
-                                      if (response.ok) {
-                                        const data = await response.json();
-                                        console.log('Health check data:', data);
-                                        alert(`✅ Kanban API is working! ${data.message}`);
-                                      } else {
-                                        alert(`❌ Health check failed: ${response.status}`);
-                                      }
+                                      const { apiClient: axiosApiClient } = await import('@/api/utils/axiosInstance');
+                                      const data = await axiosApiClient.get<any>('/kanban/health');
+                                      console.log('Health check data:', data);
+                                      alert(`✅ Kanban API is working! ${data.message}`);
                                     } catch (error: any) {
                                       console.error('Health check error:', error);
                                       alert(`❌ Health check error: ${error.message}`);

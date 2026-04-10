@@ -1,6 +1,7 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import React, { useState, useEffect } from 'react';
+import { apiClient } from '@/api/utils/axiosInstance';
 import { Stack, Typography, IconButton, TextField, Button, Box, Snackbar, Alert } from '@mui/material';
 
 import ChildCard from 'src/shared/ui/ChildCard';
@@ -47,25 +48,19 @@ const IntroCard = () => {
       }
       
       try {
-        const response = await fetch('/api/user/profile', {
-          credentials: 'include'
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          if (data.success && data.profile) {
-            const profile = data.profile;
-            const newData: IntroData = {
-              introduction: profile.bio || '',
-              jobTitle: profile.job_title || '',
-              company: profile.company || '',
-              email: profile.email || user.email || '',
-              website: profile.website || '',
-              location: profile.location || ''
-            };
-            setIntroData(newData);
-            setEditData(newData);
-          }
+        const data = await apiClient.get<any>('/user/profile');
+        if (data.success && data.profile) {
+          const profile = data.profile;
+          const newData: IntroData = {
+            introduction: profile.bio || '',
+            jobTitle: profile.job_title || '',
+            company: profile.company || '',
+            email: profile.email || user.email || '',
+            website: profile.website || '',
+            location: profile.location || ''
+          };
+          setIntroData(newData);
+          setEditData(newData);
         }
       } catch (error) {
         console.error('Error fetching profile:', error);
@@ -92,33 +87,19 @@ const IntroCard = () => {
     
     setSaving(true);
     try {
-      const response = await fetch('/api/user/profile', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          bio: editData.introduction,
-          job_title: editData.jobTitle,
-          company: editData.company,
-          website: editData.website,
-          location: editData.location
-        }),
+      const result = await apiClient.put<any>('/user/profile', {
+        bio: editData.introduction,
+        job_title: editData.jobTitle,
+        company: editData.company,
+        website: editData.website,
+        location: editData.location
       });
-
-      if (response.ok) {
-        const result = await response.json();
-        if (result.success) {
-          setIntroData(editData);
-          setIsEditing(false);
-          setSnackbar({ open: true, message: 'Profile updated successfully!', severity: 'success' });
-        } else {
-          throw new Error(result.error || 'Failed to save');
-        }
+      if (result.success) {
+        setIntroData(editData);
+        setIsEditing(false);
+        setSnackbar({ open: true, message: 'Profile updated successfully!', severity: 'success' });
       } else {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to save profile');
+        throw new Error(result.error || 'Failed to save');
       }
     } catch (error: any) {
       console.error('Error saving profile:', error);
