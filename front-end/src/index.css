@@ -7,30 +7,22 @@
 /* Load Tailwind config for custom values */
 @config "../tailwind.config.js";
 
-/* Fix MUI button text visibility - Tailwind preflight sets color:inherit which breaks MUI buttons */
+/* Fix MUI button text visibility — Tailwind preflight sets color:inherit which
+   breaks MUI buttons. For contained buttons, honor MUI's per-button
+   --variant-containedColor (which MUI sets from the palette contrastText), so
+   themes with a light primary (e.g. WHITE_THEME #F5F5F0) still render readable
+   text instead of white-on-cream. */
 .MuiButton-root {
   color: inherit !important;
 }
-.MuiButton-root.MuiButton-contained {
-  color: #fff !important;
-}
-.MuiButton-root.MuiButton-containedPrimary {
-  color: #fff !important;
-}
-.MuiButton-root.MuiButton-containedSecondary {
-  color: #fff !important;
-}
-.MuiButton-root.MuiButton-containedSuccess {
-  color: #fff !important;
-}
-.MuiButton-root.MuiButton-containedError {
-  color: #fff !important;
-}
-.MuiButton-root.MuiButton-containedWarning {
-  color: #fff !important;
-}
+.MuiButton-root.MuiButton-contained,
+.MuiButton-root.MuiButton-containedPrimary,
+.MuiButton-root.MuiButton-containedSecondary,
+.MuiButton-root.MuiButton-containedSuccess,
+.MuiButton-root.MuiButton-containedError,
+.MuiButton-root.MuiButton-containedWarning,
 .MuiButton-root.MuiButton-containedInfo {
-  color: #fff !important;
+  color: var(--variant-containedColor, #fff) !important;
 }
 .MuiButton-root.MuiButton-outlined,
 .MuiButton-root.MuiButton-text {
