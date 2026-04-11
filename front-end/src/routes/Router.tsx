@@ -61,7 +61,6 @@ const ComingSoon = Loadable(lazy(() => import('../features/auth/authentication/C
 const ChurchList = Loadable(lazy(() => import('../features/church/apps/church-management/ChurchList')));
 const ChurchForm = Loadable(lazy(() => import('../features/church/apps/church-management/ChurchForm')));
 const ChurchSetupWizard = Loadable(lazy(() => import('../features/devel-tools/om-church-wizard/ChurchSetupWizard')));
-const FieldMapperPage = Loadable(lazy(() => import('../features/church/FieldMapperPage')));
 
 // Records Management
 const AdvancedGridPage = Loadable(lazy(() => import('../features/tables/AdvancedGridPage')));
