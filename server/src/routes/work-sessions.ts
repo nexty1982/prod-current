@@ -454,6 +454,105 @@ router.get('/stats', requireAuth, async (req: Request, res: Response) => {
   }
 });
 
+/**
+ * GET /api/work-sessions/summary
+ * Compact today + week totals for the header Start Work control.
+ * Returns the shape the Berry (OMAI) WorkSessionControl component expects,
+ * so both frontends can share this single endpoint.
+ *
+ * Response:
+ *   {
+ *     today: { total_seconds, sessions, active_session_seconds },
+ *     week:  { total_seconds, sessions, days_worked, avg_session_seconds, week_start, week_end }
+ *   }
+ */
+router.get('/summary', requireAuth, async (req: Request, res: Response) => {
+  try {
+    const userId = getUserId(req);
+    if (!userId) return res.status(401).json({ error: 'Authentication required' });
+
+    const pool = getAppPool();
+
+    // Today boundaries (server local time)
+    const now = new Date();
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
+    const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+
+    // Monday-based week boundaries
+    const dayOfWeek = now.getDay();
+    const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+    const monday = new Date(now);
+    monday.setDate(now.getDate() + mondayOffset);
+    monday.setHours(0, 0, 0, 0);
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
+    sunday.setHours(23, 59, 59, 999);
+    const weekStart = monday.toISOString().slice(0, 10);
+    const weekEnd = sunday.toISOString().slice(0, 10);
+
+    // Today: completed sessions only
+    const [todayRows]: any = await pool.query(
+      `SELECT COUNT(*) AS sessions,
+              COALESCE(SUM(duration_seconds), 0) AS total_seconds
+       FROM work_sessions
+       WHERE user_id = ? AND status = 'completed'
+         AND started_at >= ? AND started_at <= ?`,
+      [userId, todayStart, todayEnd]
+    );
+
+    // Active session (contributes live elapsed to today + week totals)
+    const [activeRows]: any = await pool.query(
+      `SELECT started_at FROM work_sessions
+       WHERE user_id = ? AND status = 'active' LIMIT 1`,
+      [userId]
+    );
+    const activeSeconds = activeRows.length > 0
+      ? Math.max(0, Math.floor((Date.now() - new Date(activeRows[0].started_at).getTime()) / 1000))
+      : 0;
+
+    // Week: completed sessions
+    const [weekRows]: any = await pool.query(
+      `SELECT COUNT(*) AS sessions,
+              COALESCE(SUM(duration_seconds), 0) AS total_seconds,
+              COUNT(DISTINCT DATE(started_at)) AS days_worked
+       FROM work_sessions
+       WHERE user_id = ? AND status = 'completed'
+         AND DATE(started_at) >= ? AND DATE(started_at) <= ?`,
+      [userId, weekStart, weekEnd]
+    );
+
+    const todaySessions = Number(todayRows[0].sessions) + (activeRows.length > 0 ? 1 : 0);
+    const todayTotal = Number(todayRows[0].total_seconds) + activeSeconds;
+
+    const weekCompletedSessions = Number(weekRows[0].sessions);
+    const weekSessionsIncludingActive = weekCompletedSessions + (activeRows.length > 0 ? 1 : 0);
+    const weekTotalWithActive = Number(weekRows[0].total_seconds) + activeSeconds;
+    const weekDaysWorked = Number(weekRows[0].days_worked)
+      + (Number(todayRows[0].sessions) === 0 && activeRows.length > 0 ? 1 : 0);
+
+    return res.json({
+      today: {
+        total_seconds: todayTotal,
+        sessions: todaySessions,
+        active_session_seconds: activeSeconds,
+      },
+      week: {
+        total_seconds: weekTotalWithActive,
+        sessions: weekSessionsIncludingActive,
+        days_worked: weekDaysWorked,
+        avg_session_seconds: weekSessionsIncludingActive > 0
+          ? Math.round(weekTotalWithActive / weekSessionsIncludingActive)
+          : 0,
+        week_start: weekStart,
+        week_end: weekEnd,
+      },
+    });
+  } catch (error: any) {
+    console.error('Error fetching summary:', error);
+    return res.status(500).json({ error: 'Failed to fetch summary' });
+  }
+});
+
 // ============================================================================
 // Weekly Report Endpoints
 // ============================================================================
