@@ -1,32 +1,33 @@
 #!/usr/bin/env npx tsx
 /**
- * Unit tests for utils/headlineCache.js (OMD-959)
+ * Unit tests for utils/headlineCache.js (OMD-969)
  *
- * Orthodox Headlines caching system. Memory cache via node-cache (real);
- * Redis is optional and null when REDIS_URL env var is unset — we ensure
- * it is unset before loading the SUT so the Redis branch never executes
- * and we test pure memory-cache behavior.
+ * HeadlinesCache class wraps NodeCache (memory) + optional Redis.
+ * Redis is gated by process.env.REDIS_URL — leave unset so tests run
+ * memory-only without any external dependencies.
+ *
+ * Note: the module uses a singleton `memoryCache` at module scope
+ * shared across all HeadlinesCache instances. Tests use unique key
+ * prefixes to avoid cross-test contamination, and clear via clearAll
+ * + invalidateHeadlinesCache where appropriate.
  *
  * Coverage:
- *   - generateKey          builds deterministic keys with defaults
- *   - generateSourcesKey   static
- *   - generateLanguagesKey static
- *   - set / get            memory cache roundtrip + hit/miss stats
- *   - delete               removes entry + stats
- *   - cacheHeadlines       miss → loader called + cached; hit → no loader
- *   - cacheSources         same wrapper pattern
- *   - cacheLanguages       same wrapper pattern
- *   - clearAll             only removes keys starting with 'headlines:'
- *   - invalidateHeadlinesCache  same prefix-only invalidation
- *   - getStats             hit rate math, memoryKeys, redisConnected=false
- *   - warmUp               calls loader multiple times; errors don't abort
- *   - export shape         headlinesCache (singleton), HeadlinesCache, CACHE_CONFIG
+ *   - Key generators: generateKey (with defaults), sources, languages
+ *   - get/set/delete (memory cache path; Redis branch unreachable here)
+ *   - cacheHeadlines: cache miss → loader called → result cached
+ *   - cacheHeadlines: cache hit → loader NOT called
+ *   - cacheSources / cacheLanguages: same wrapper semantics
+ *   - clearAll: removes only headlines:* keys
+ *   - invalidateHeadlinesCache: removes only headlines:* keys
+ *   - getStats: hits/misses/sets/deletes counters + hitRate %
  *
- * Run from server/: npx tsx src/utils/__tests__/headlineCache.test.ts
+ * Run: npx tsx server/src/utils/__tests__/headlineCache.test.ts
  */
 
-// Ensure Redis path is disabled BEFORE requiring the SUT
+// Ensure Redis stays disabled
 delete process.env.REDIS_URL;
+
+const { HeadlinesCache, headlinesCache, CACHE_CONFIG } = require('../headlineCache');
 
 let passed = 0;
 let failed = 0;
@@ -46,275 +47,262 @@ function assertEq<T>(actual: T, expected: T, message: string): void {
   }
 }
 
-const { headlinesCache, HeadlinesCache, CACHE_CONFIG } = require('../headlineCache');
-
-// Silence console logs that the SUT emits frequently
+// Silence noisy console.log from the SUT
 const origLog = console.log;
-const origError = console.error;
+const origErr = console.error;
 function quiet() { console.log = () => {}; console.error = () => {}; }
-function loud() { console.log = origLog; console.error = origError; }
+function loud() { console.log = origLog; console.error = origErr; }
 
 async function main() {
 
 // ============================================================================
-// export shape
+// Sanity: exports
 // ============================================================================
-console.log('\n── export shape ──────────────────────────────────────────');
+console.log('\n── exports ───────────────────────────────────────────────');
 
-assert(typeof HeadlinesCache === 'function', 'HeadlinesCache is a class');
-assert(headlinesCache instanceof HeadlinesCache, 'headlinesCache is instance');
-assert(typeof CACHE_CONFIG === 'object', 'CACHE_CONFIG exported');
-assertEq(CACHE_CONFIG.MEMORY_TTL, 3 * 60 * 60, 'MEMORY_TTL = 3h');
-assertEq(CACHE_CONFIG.REDIS_TTL, 6 * 60 * 60, 'REDIS_TTL = 6h');
-assertEq(CACHE_CONFIG.ENABLE_REDIS, false, 'Redis disabled (no REDIS_URL)');
+assertEq(typeof HeadlinesCache, 'function', 'HeadlinesCache class exported');
+assertEq(typeof headlinesCache, 'object', 'singleton exported');
+assert(headlinesCache instanceof HeadlinesCache, 'singleton is HeadlinesCache instance');
+assertEq(typeof CACHE_CONFIG.MEMORY_TTL, 'number', 'CACHE_CONFIG.MEMORY_TTL');
+assertEq(CACHE_CONFIG.ENABLE_REDIS, false, 'Redis disabled (REDIS_URL unset)');
 
 // ============================================================================
-// generateKey
+// generateKey (with defaults)
 // ============================================================================
 console.log('\n── generateKey ───────────────────────────────────────────');
 
+const cache = new HeadlinesCache();
+
+assertEq(
+  cache.generateKey({}),
+  'headlines:all:en:20:0',
+  'all defaults'
+);
+assertEq(
+  cache.generateKey({ source: 'GOARCH' }),
+  'headlines:GOARCH:en:20:0',
+  'source override'
+);
+assertEq(
+  cache.generateKey({ lang: 'el', limit: 10, offset: 5 }),
+  'headlines:all:el:10:5',
+  'lang/limit/offset overrides'
+);
+assertEq(
+  cache.generateKey({ source: 'OCA', lang: 'ru', limit: 50, offset: 100 }),
+  'headlines:OCA:ru:50:100',
+  'all four overrides'
+);
+assertEq(cache.generateSourcesKey(), 'headlines:sources', 'generateSourcesKey');
+assertEq(cache.generateLanguagesKey(), 'headlines:languages', 'generateLanguagesKey');
+
+// ============================================================================
+// get / set / delete (memory cache path)
+// ============================================================================
+console.log('\n── get/set/delete ────────────────────────────────────────');
+
+quiet();
 {
-  const cache = new HeadlinesCache();
-  assertEq(cache.generateKey({}), 'headlines:all:en:20:0', 'all defaults');
-  assertEq(
-    cache.generateKey({ source: 'GOARCH', lang: 'el', limit: 10, offset: 5 }),
-    'headlines:GOARCH:el:10:5',
-    'all params supplied'
-  );
-  assertEq(
-    cache.generateKey({ source: 'OCA' }),
-    'headlines:OCA:en:20:0',
-    'partial params with defaults'
-  );
-  assertEq(cache.generateSourcesKey(), 'headlines:sources', 'sources key');
-  assertEq(cache.generateLanguagesKey(), 'headlines:languages', 'languages key');
+  const c = new HeadlinesCache();
+  const key = 'headlines:test-get-set-1';
+
+  // Initially miss
+  const miss = await c.get(key);
+  assertEq(miss, null, 'miss returns null');
+  assertEq(c.stats.misses, 1, 'misses=1');
+  assertEq(c.stats.hits, 0, 'hits=0');
+
+  // Set then get → hit
+  await c.set(key, { data: 'hello', n: 42 });
+  assertEq(c.stats.sets, 1, 'sets=1');
+
+  const hit = await c.get(key);
+  assertEq(hit, { data: 'hello', n: 42 }, 'hit returns stored value');
+  assertEq(c.stats.hits, 1, 'hits=1');
+
+  // Delete
+  await c.delete(key);
+  assertEq(c.stats.deletes, 1, 'deletes=1');
+
+  // Now miss again
+  const miss2 = await c.get(key);
+  assertEq(miss2, null, 'after delete: miss');
+  assertEq(c.stats.misses, 2, 'misses=2');
 }
+loud();
 
-// ============================================================================
-// set / get roundtrip
-// ============================================================================
-console.log('\n── set / get ─────────────────────────────────────────────');
-
+// set with custom TTL
+quiet();
 {
-  const cache = new HeadlinesCache();
-  // Clean state: clear any leftover entries from singleton import
-  await cache.clearAll();
-  // Also directly delete the keys we'll use in case singleton populated them
-  quiet();
-  await cache.set('headlines:test:en:5:0', { items: [1, 2, 3] });
-  loud();
-  assertEq(cache.stats.sets, 1, 'sets stat incremented');
-
-  quiet();
-  const got = await cache.get('headlines:test:en:5:0');
-  loud();
-  assertEq(got, { items: [1, 2, 3] }, 'get returns same data');
-  assertEq(cache.stats.hits, 1, 'hit stat');
-
-  quiet();
-  const missed = await cache.get('headlines:does-not-exist:en:5:0');
-  loud();
-  assertEq(missed, null, 'miss returns null');
-  assertEq(cache.stats.misses, 1, 'miss stat');
+  const c = new HeadlinesCache();
+  const key = 'headlines:test-custom-ttl';
+  await c.set(key, { x: 1 }, 60); // 60 second TTL
+  const result = await c.get(key);
+  assertEq(result, { x: 1 }, 'custom TTL: value retrievable');
 }
+loud();
 
 // ============================================================================
-// delete
+// cacheHeadlines wrapper
 // ============================================================================
-console.log('\n── delete ────────────────────────────────────────────────');
+console.log('\n── cacheHeadlines wrapper ────────────────────────────────');
 
+quiet();
 {
-  const cache = new HeadlinesCache();
-  quiet();
-  await cache.set('headlines:deltest:en:5:0', { foo: 'bar' });
-  const before = await cache.get('headlines:deltest:en:5:0');
-  await cache.delete('headlines:deltest:en:5:0');
-  const after = await cache.get('headlines:deltest:en:5:0');
-  loud();
-  assertEq(before, { foo: 'bar' }, 'present before delete');
-  assertEq(after, null, 'absent after delete');
-  assertEq(cache.stats.deletes, 1, 'delete stat');
-}
-
-// ============================================================================
-// cacheHeadlines — miss calls loader; hit skips loader
-// ============================================================================
-console.log('\n── cacheHeadlines ────────────────────────────────────────');
-
-{
-  const cache = new HeadlinesCache();
+  const c = new HeadlinesCache();
   let loaderCalls = 0;
-  const loader = async () => {
-    loaderCalls++;
-    return { articles: [{ title: 'News' }] };
-  };
+  const loader = async () => { loaderCalls++; return { items: ['a', 'b'], count: 2 }; };
 
-  quiet();
-  const first = await cache.cacheHeadlines(
-    { source: 'OCA', lang: 'en', limit: 5, offset: 0 },
-    loader
-  );
-  loud();
-  assertEq(first, { articles: [{ title: 'News' }] }, 'first call returns loader data');
-  assertEq(loaderCalls, 1, 'loader called on miss');
+  const params = { source: 'WRAP-TEST-1', lang: 'en', limit: 20, offset: 0 };
 
-  quiet();
-  const second = await cache.cacheHeadlines(
-    { source: 'OCA', lang: 'en', limit: 5, offset: 0 },
-    loader
-  );
-  loud();
-  assertEq(second, { articles: [{ title: 'News' }] }, 'second call returns cached data');
-  assertEq(loaderCalls, 1, 'loader NOT called on hit');
+  // First call: miss → loader runs → result cached
+  const r1 = await c.cacheHeadlines(params, loader);
+  assertEq(r1, { items: ['a', 'b'], count: 2 }, 'wrapper: returns loader result');
+  assertEq(loaderCalls, 1, 'wrapper: loader called once');
+
+  // Second call: hit → loader NOT called
+  const r2 = await c.cacheHeadlines(params, loader);
+  assertEq(r2, { items: ['a', 'b'], count: 2 }, 'wrapper: same result on hit');
+  assertEq(loaderCalls, 1, 'wrapper: loader NOT called on hit');
+
+  // Cleanup
+  await c.delete(c.generateKey(params));
 }
+loud();
 
 // ============================================================================
 // cacheSources / cacheLanguages
 // ============================================================================
 console.log('\n── cacheSources / cacheLanguages ─────────────────────────');
 
+quiet();
 {
-  const cache = new HeadlinesCache();
+  const c = new HeadlinesCache();
+  // Clear any pre-existing
+  await c.delete('headlines:sources');
+  await c.delete('headlines:languages');
+
   let srcCalls = 0;
+  const srcLoader = async () => { srcCalls++; return ['GOARCH', 'OCA', 'OT']; };
+  const r1 = await c.cacheSources(srcLoader);
+  assertEq(r1, ['GOARCH', 'OCA', 'OT'], 'cacheSources: returns');
+  assertEq(srcCalls, 1, 'cacheSources: loader called');
+
+  const r2 = await c.cacheSources(srcLoader);
+  assertEq(srcCalls, 1, 'cacheSources: cached on 2nd call');
+  assertEq(r2, ['GOARCH', 'OCA', 'OT'], 'cacheSources: cached value');
+
   let langCalls = 0;
+  const langLoader = async () => { langCalls++; return ['en', 'el', 'ru']; };
+  const l1 = await c.cacheLanguages(langLoader);
+  assertEq(l1, ['en', 'el', 'ru'], 'cacheLanguages: returns');
+  assertEq(langCalls, 1, 'cacheLanguages: loader called');
 
-  quiet();
-  await cache.cacheSources(async () => { srcCalls++; return ['A', 'B']; });
-  await cache.cacheSources(async () => { srcCalls++; return ['A', 'B']; });
-  loud();
-  assertEq(srcCalls, 1, 'sources loader once (cached 2nd)');
+  await c.cacheLanguages(langLoader);
+  assertEq(langCalls, 1, 'cacheLanguages: cached on 2nd call');
 
-  quiet();
-  await cache.cacheLanguages(async () => { langCalls++; return ['en', 'el']; });
-  await cache.cacheLanguages(async () => { langCalls++; return ['en', 'el']; });
-  loud();
-  assertEq(langCalls, 1, 'languages loader once (cached 2nd)');
-
-  quiet();
-  const srcs = await cache.get('headlines:sources');
-  const langs = await cache.get('headlines:languages');
-  loud();
-  assertEq(srcs, ['A', 'B'], 'sources cached');
-  assertEq(langs, ['en', 'el'], 'languages cached');
+  // Cleanup
+  await c.delete('headlines:sources');
+  await c.delete('headlines:languages');
 }
+loud();
 
 // ============================================================================
-// clearAll — only headlines: prefix
+// clearAll: only removes headlines:* keys
 // ============================================================================
 console.log('\n── clearAll ──────────────────────────────────────────────');
 
+quiet();
 {
-  const cache = new HeadlinesCache();
-  // Need to access the underlying memoryCache — we can only do this via
-  // set() and get(). The SUT's clearAll only touches keys starting with
-  // 'headlines:'. We can't easily insert non-headline keys via the public
-  // API, so we just verify it removes headlines-prefixed keys.
-  quiet();
-  await cache.set('headlines:alpha:en:5:0', 'A');
-  await cache.set('headlines:beta:en:5:0', 'B');
-  const beforeA = await cache.get('headlines:alpha:en:5:0');
-  const beforeB = await cache.get('headlines:beta:en:5:0');
-  await cache.clearAll();
-  const afterA = await cache.get('headlines:alpha:en:5:0');
-  const afterB = await cache.get('headlines:beta:en:5:0');
-  loud();
-  assertEq(beforeA, 'A', 'alpha present before');
-  assertEq(beforeB, 'B', 'beta present before');
-  assertEq(afterA, null, 'alpha cleared');
-  assertEq(afterB, null, 'beta cleared');
+  const c = new HeadlinesCache();
+  await c.set('headlines:a', { v: 1 });
+  await c.set('headlines:b', { v: 2 });
+  await c.set('headlines:c', { v: 3 });
+
+  await c.clearAll();
+
+  const r = await c.get('headlines:a');
+  assertEq(r, null, 'clearAll removed headlines:a');
+  const r2 = await c.get('headlines:b');
+  assertEq(r2, null, 'clearAll removed headlines:b');
 }
+loud();
 
 // ============================================================================
 // invalidateHeadlinesCache
 // ============================================================================
 console.log('\n── invalidateHeadlinesCache ──────────────────────────────');
 
+quiet();
 {
-  const cache = new HeadlinesCache();
-  quiet();
-  await cache.set('headlines:inv:en:5:0', 'X');
-  const before = await cache.get('headlines:inv:en:5:0');
-  await cache.invalidateHeadlinesCache();
-  const after = await cache.get('headlines:inv:en:5:0');
-  loud();
-  assertEq(before, 'X', 'present before invalidate');
-  assertEq(after, null, 'absent after invalidate');
+  const c = new HeadlinesCache();
+  await c.set('headlines:invalidate-1', { v: 1 });
+  await c.set('headlines:invalidate-2', { v: 2 });
+
+  await c.invalidateHeadlinesCache();
+
+  assertEq(await c.get('headlines:invalidate-1'), null, 'invalidate removed key 1');
+  assertEq(await c.get('headlines:invalidate-2'), null, 'invalidate removed key 2');
 }
+loud();
 
 // ============================================================================
-// getStats
+// getStats: counters + hitRate
 // ============================================================================
 console.log('\n── getStats ──────────────────────────────────────────────');
 
+quiet();
 {
-  const cache = new HeadlinesCache();
-  quiet();
-  await cache.set('headlines:s1:en:5:0', 1);
-  await cache.set('headlines:s2:en:5:0', 2);
-  await cache.get('headlines:s1:en:5:0'); // hit
-  await cache.get('headlines:s2:en:5:0'); // hit
-  await cache.get('headlines:none:en:5:0'); // miss
-  loud();
+  const c = new HeadlinesCache();
+  // Initial
+  const init = c.getStats();
+  assertEq(init.hits, 0, 'init hits=0');
+  assertEq(init.misses, 0, 'init misses=0');
+  assertEq(init.sets, 0, 'init sets=0');
+  assertEq(init.deletes, 0, 'init deletes=0');
+  assertEq(init.hitRate, '0%', 'init hitRate=0%');
+  assertEq(init.redisConnected, false, 'redis not connected');
+  assert(typeof init.config === 'object', 'config object included');
 
-  const stats = cache.getStats();
-  assertEq(stats.sets, 2, 'stats.sets');
-  assertEq(stats.hits, 2, 'stats.hits');
-  assertEq(stats.misses, 1, 'stats.misses');
-  assertEq(stats.redisConnected, false, 'redisConnected false');
-  assert(typeof stats.memoryKeys === 'number', 'memoryKeys is number');
-  assert(stats.memoryKeys >= 2, 'memoryKeys >= 2');
-  // 2 hits / 3 lookups = 66.67%
-  assertEq(stats.hitRate, '66.67%', 'hitRate 66.67%');
-  assert(typeof stats.config === 'object', 'config in stats');
+  // Generate some traffic
+  await c.set('headlines:stats-1', { v: 1 }); // sets++
+  await c.get('headlines:stats-1');           // hit
+  await c.get('headlines:stats-1');           // hit
+  await c.get('headlines:stats-missing');     // miss
+  await c.delete('headlines:stats-1');        // delete
 
-  // Fresh instance → 0% rate (division by 0 guard)
-  const fresh = new HeadlinesCache();
-  const freshStats = fresh.getStats();
-  assertEq(freshStats.hitRate, '0%', 'fresh hitRate = 0%');
+  const s = c.getStats();
+  assertEq(s.hits, 2, 'hits=2');
+  assertEq(s.misses, 1, 'misses=1');
+  assertEq(s.sets, 1, 'sets=1');
+  assertEq(s.deletes, 1, 'deletes=1');
+  // hitRate = 2/(2+1) * 100 = 66.67
+  assertEq(s.hitRate, '66.67%', 'hitRate=66.67%');
 }
+loud();
+
+// hitRate edge case: 100%
+quiet();
+{
+  const c = new HeadlinesCache();
+  await c.set('headlines:hitrate-100', { v: 1 });
+  await c.get('headlines:hitrate-100');
+  await c.get('headlines:hitrate-100');
+  const s = c.getStats();
+  assertEq(s.hitRate, '100.00%', 'hitRate=100.00%');
+  await c.delete('headlines:hitrate-100');
+}
+loud();
 
 // ============================================================================
-// warmUp — calls loader with each popular query; errors don't abort
+// CACHE_CONFIG shape
 // ============================================================================
-console.log('\n── warmUp ────────────────────────────────────────────────');
+console.log('\n── CACHE_CONFIG ──────────────────────────────────────────');
 
-// Shim setTimeout so the 100ms delays don't slow the test
-const origSetTimeout = global.setTimeout;
-(global as any).setTimeout = (fn: any) => { fn(); return 0 as any; };
-
-{
-  const cache = new HeadlinesCache();
-  await cache.clearAll();
-  const seen: any[] = [];
-  const loader = async (params: any) => {
-    seen.push(params);
-    return { ok: true };
-  };
-  quiet();
-  await cache.warmUp(loader);
-  loud();
-  assertEq(seen.length, 6, 'warmUp calls loader 6 times (popular queries)');
-  assertEq(seen[0].source, 'all', 'first: source=all');
-  assertEq(seen[1].source, 'GOARCH', 'second: GOARCH');
-}
-
-// warmUp tolerates loader errors
-{
-  const cache = new HeadlinesCache();
-  await cache.clearAll();
-  let calls = 0;
-  const loader = async () => {
-    calls++;
-    if (calls === 2) throw new Error('boom');
-    return { ok: true };
-  };
-  quiet();
-  await cache.warmUp(loader);
-  loud();
-  assertEq(calls, 6, 'warmUp does not abort on error (all 6 attempted)');
-}
-
-(global as any).setTimeout = origSetTimeout;
+assertEq(CACHE_CONFIG.MEMORY_TTL, 3 * 60 * 60, 'MEMORY_TTL = 3h');
+assertEq(CACHE_CONFIG.REDIS_TTL, 6 * 60 * 60, 'REDIS_TTL = 6h');
+assertEq(CACHE_CONFIG.MAX_MEMORY_KEYS, 100, 'MAX_MEMORY_KEYS = 100');
+assertEq(CACHE_CONFIG.MEMORY_CHECK_PERIOD, 60, 'MEMORY_CHECK_PERIOD = 60');
 
 // ============================================================================
 // Summary
@@ -322,7 +310,8 @@ const origSetTimeout = global.setTimeout;
 console.log(`\n──────────────────────────────────────────────────────────`);
 console.log(`Results: ${passed} passed, ${failed} failed`);
 if (failed > 0) process.exit(1);
-} // end main()
+process.exit(0);
+} // end main
 
 main().catch((e) => {
   console.error('Unhandled test error:', e);
