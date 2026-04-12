@@ -124,83 +124,7 @@ class JsonToDatabaseMigrator {
   }
 
   /**
-   * 2. Migrate Component Registry (auto-discovered-components.json → component_registry)
-   */
-  async migrateComponentRegistry() {
-    const migrationName = 'component_registry';
-    console.log(`[MIGRATION] Starting ${migrationName}...`);
-    
-    try {
-      await this.updateMigrationStatus(migrationName, 'in_progress');
-      
-      const filePath = path.join(__dirname, '../../auto-discovered-components.json');
-      const fileContent = await fs.readFile(filePath, 'utf8');
-      const data = JSON.parse(fileContent);
-      
-      let recordsInserted = 0;
-      const totalRecords = data.components?.length || 0;
-      
-      if (data.components) {
-        for (const component of data.components) {
-          await getAppPool().query(`
-            INSERT INTO component_registry (
-              name, file_path, relative_path, directory, extension, category,
-              props, imports, exports, is_default, has_jsx, has_hooks,
-              dependencies, file_size, discovery_version
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ON DUPLICATE KEY UPDATE
-              file_path = VALUES(file_path),
-              relative_path = VALUES(relative_path),
-              directory = VALUES(directory),
-              extension = VALUES(extension),
-              category = VALUES(category),
-              props = VALUES(props),
-              imports = VALUES(imports),
-              exports = VALUES(exports),
-              is_default = VALUES(is_default),
-              has_jsx = VALUES(has_jsx),
-              has_hooks = VALUES(has_hooks),
-              dependencies = VALUES(dependencies),
-              file_size = VALUES(file_size),
-              updated_at = CURRENT_TIMESTAMP
-          `, [
-            component.name || '',
-            component.filePath || '',
-            component.relativePath || '',
-            component.directory || '',
-            component.extension || '',
-            component.category || '',
-            JSON.stringify(component.props || []),
-            JSON.stringify(component.imports || []),
-            JSON.stringify(component.exports || []),
-            Array.isArray(component.isDefault) && component.isDefault.length > 0,
-            component.hasJSX || false,
-            component.hasHooks || false,
-            JSON.stringify(component.dependencies || []),
-            component.size || 0,
-            data.version || '1.0.0'
-          ]);
-          recordsInserted++;
-          
-          // Update progress every 100 records
-          if (recordsInserted % 100 === 0) {
-            await this.updateMigrationStatus(migrationName, 'in_progress', recordsInserted, totalRecords);
-          }
-        }
-      }
-      
-      await this.updateMigrationStatus(migrationName, 'completed', recordsInserted, totalRecords);
-      console.log(`[MIGRATION] ✅ ${migrationName} completed: ${recordsInserted} records`);
-      
-    } catch (error) {
-      console.error(`[MIGRATION] ❌ ${migrationName} failed:`, error);
-      await this.updateMigrationStatus(migrationName, 'failed', 0, 0, error.message);
-      throw error;
-    }
-  }
-
-  /**
-   * 3. Migrate Build Configuration (build-config.json + paths.config.example → build_configs + build_paths)
+   * 2. Migrate Build Configuration (build-config.json + paths.config.example → build_configs + build_paths)
    */
   async migrateBuildConfiguration() {
     const migrationName = 'build_configs';
@@ -411,7 +335,6 @@ class JsonToDatabaseMigrator {
     
     const migrations = [
       { name: 'OMAI Commands', fn: () => this.migrateOmaiCommands() },
-      { name: 'Component Registry', fn: () => this.migrateComponentRegistry() },
       { name: 'Build Configuration', fn: () => this.migrateBuildConfiguration() },
       { name: 'OMAI Policies', fn: () => this.migrateOmaiPolicies() },
       { name: 'Parish Map Data', fn: () => this.migrateParishMapData() }

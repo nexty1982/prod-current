@@ -332,6 +332,25 @@ export const DEPRECATION_REGISTRY: DeprecatedEntry[] = [
     redirectTo: '/admin/logs',
     category: 'frontend',
   },
+  // ── Stage 4: Removed (dead code — router never mounted, JSON source file never existed) ──
+  {
+    id: 'component-discovery',
+    name: 'Component Discovery Subsystem',
+    stage: 4,
+    files: [
+      'server/src/api/componentDiscovery.js',
+      'server/src/services/componentRegistryService.js',
+      'server/src/utils/componentDiscovery.js',
+      'server/src/utils/__tests__/componentDiscovery.test.ts',
+      'server/src/services/__tests__/componentRegistryService.test.ts',
+    ],
+    reason: 'Dead code — router never mounted in index.ts, auto-discovered-components.json source file never existed on disk, component_registry DB table empty. Part of OM→OMAI boundary migration Wave 1, Cluster #20 Part A.',
+    deprecatedDate: '2026-04-12',
+    removedDate: '2026-04-12',
+    owner: 'nectarios',
+    changeSetCode: 'CS-0050',
+    category: 'backend',
+  },
 ];
 
 // ────────────────────────────────────────────────────────────

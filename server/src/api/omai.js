@@ -1507,8 +1507,7 @@ router.post('/learn-now', async (req, res) => {
           '/scripts - Administrative scripts',
           '/services - Service layer',
           '/config - Configuration files',
-          '/bigbook - Knowledge system',
-          '/auto-discovered-components.json - Component registry'
+          '/bigbook - Knowledge system'
         ],
         summary: `Processed ${learningStats.processedFiles} files from 8 learning sources`
       },
@@ -1584,8 +1583,7 @@ router.get('/learning-status', async (req, res) => {
         scripts: { path: '/scripts', priority: 'medium', type: 'code' },
         services: { path: '/services', priority: 'high', type: 'code' },
         config: { path: '/config', priority: 'medium', type: 'json' },
-        bigbook: { path: '/bigbook', priority: 'high', type: 'json' },
-        components_registry: { path: '/auto-discovered-components.json', priority: 'high', type: 'json' }
+        bigbook: { path: '/bigbook', priority: 'high', type: 'json' }
       },
       agents: {
         registered: status.registeredAgents,
