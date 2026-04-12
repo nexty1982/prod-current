@@ -460,12 +460,7 @@ const Menuitems: MenuitemsType[] = [
         icon: IconTool,
         href: '/devel-tools/refactor-console',
       },
-      {
-        id: uniqueId(),
-        title: 'API Explorer',
-        icon: IconBug,
-        href: '/devel-tools/api-explorer',
-      },
+      // API Explorer — migrated to OMAI (OMD-1283)
       {
         id: uniqueId(),
         title: 'OM Permission Center',
