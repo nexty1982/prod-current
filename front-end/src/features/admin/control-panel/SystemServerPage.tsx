@@ -83,7 +83,7 @@ const SUB_CATEGORIES: SubCategory[] = [
     color: '#c62828',
     href: '/admin/control-panel/system-server/server-devops',
     quickLinks: [
-      { label: 'API Explorer', href: '/devel-tools/api-explorer' },
+      // API Explorer — migrated to OMAI (OMD-1283)
       { label: 'Code Safety System', href: '/admin/control-panel/system-server/code-safety' },
       { label: 'Feature Lifecycle (SDLC)', href: '/admin/control-panel/sdlc' },
     ],
