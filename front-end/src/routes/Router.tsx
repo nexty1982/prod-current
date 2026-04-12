@@ -42,7 +42,6 @@ const InvoiceDetail = Loadable(lazy(() => import('../features/apps/invoice/Detai
 const InvoiceEdit = Loadable(lazy(() => import('../features/apps/invoice/Edit')));
 const DynamicRecordsPage = Loadable(lazy(() => import('../features/records-centralized/components/dynamic/DynamicRecordsPage')));
 const AnalyticsDashboard = Loadable(lazy(() => import('../features/admin/AnalyticsDashboard')));
-const Logs = Loadable(lazy(() => import('../features/system/apps/logs/Logs')));
 const Followers = Loadable(lazy(() => import('../features/apps/user-profile/Followers')));
 const Friends = Loadable(lazy(() => import('../features/apps/user-profile/Friends')));
 const UserProfileGallery = Loadable(lazy(() => import('../features/apps/user-profile/Gallery')));
@@ -591,12 +590,10 @@ const Router = [
         )
       },
       {
+        // Deprecated: old /apps/logs page was silently broken (missing imports).
+        // Real logs page is /admin/logs (ActivityLogs). Redirect preserves old bookmarks.
         path: '/apps/logs',
-        element: (
-          <ProtectedRoute>
-            <Logs />
-          </ProtectedRoute>
-        )
+        element: <Navigate to="/admin/logs" replace />,
       },
 
       // BIG BOOK CUSTOM COMPONENT ROUTES

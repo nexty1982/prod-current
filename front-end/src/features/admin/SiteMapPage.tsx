@@ -126,7 +126,6 @@ const ADMIN_MAP: SiteNode[] = [
       { label: 'Kanban Board', path: '/apps/kanban', icon: <KanbanIcon /> },
       { label: 'Gallery', path: '/apps/gallery', icon: <ImageIcon /> },
       { label: 'Page Image Index', path: '/apps/gallery/page-index', icon: <ImageIcon /> },
-      { label: 'System Logs', path: '/apps/logs', icon: <ServerIcon /> },
       {
         label: 'Invoices', icon: <InvoiceIcon />, children: [
           { label: 'Invoice List', path: '/apps/invoice/list', icon: <InvoiceIcon /> },
