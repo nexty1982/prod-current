@@ -312,6 +312,26 @@ export const DEPRECATION_REGISTRY: DeprecatedEntry[] = [
     redirectTo: '/admin/control-panel',
     category: 'frontend',
   },
+  {
+    id: 'logs-apps-page',
+    name: 'Legacy /apps/logs Page',
+    stage: 4,
+    files: [
+      'features/system/apps/logs/Logs.tsx',
+      'features/system/apps/logs/types.ts',
+      'features/system/apps/logs/tabs/SiteLogsTab.tsx',
+      'features/system/apps/logs/tabs/ComponentLogsTab.tsx',
+      'features/system/apps/logs/tabs/LogLevelsTab.tsx',
+    ],
+    replacement: '/admin/logs (ActivityLogs) and /admin/log-search (LogSearch)',
+    reason: 'Silently broken since commit 1e77e136 — the tab-extraction refactor stripped ~15 imports (useRef, styled, tabler Icon*, PageContainer, Breadcrumb, Tabs, Tab, Badge, Snackbar) but left references intact. No menu entry; only a stale SiteMapPage link. Real logs page is /admin/logs → ActivityLogs.',
+    deprecatedDate: '2026-04-12',
+    removedDate: '2026-04-12',
+    owner: 'nectarios',
+    originalRoute: '/apps/logs',
+    redirectTo: '/admin/logs',
+    category: 'frontend',
+  },
 ];
 
 // ────────────────────────────────────────────────────────────
