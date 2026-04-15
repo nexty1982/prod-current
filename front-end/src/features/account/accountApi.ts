@@ -194,7 +194,6 @@ export const profileApi = {
   }): Promise<{ success: boolean; message?: string }> {
     return request('/api/user/profile', {
       method: 'PUT',
-      headers: jsonHeaders(),
       body: JSON.stringify(fields),
     });
   },
@@ -212,7 +211,6 @@ export const profileApi = {
   }): Promise<ChangePasswordResponse> {
     return request<ChangePasswordResponse>('/api/user/profile/password', {
       method: 'PUT',
-      headers: jsonHeaders(),
       body: JSON.stringify(payload),
     });
   },
@@ -251,7 +249,6 @@ export const churchApi = {
   async updateSettings(payload: Record<string, any>): Promise<{ success: boolean; message?: string }> {
     return request('/api/my/church-settings', {
       method: 'PUT',
-      headers: jsonHeaders(),
       body: JSON.stringify(payload),
     });
   },
@@ -321,7 +318,6 @@ export const notificationsApi = {
   ): Promise<{ success: boolean; message?: string }> {
     return request('/api/notifications/preferences', {
       method: 'PUT',
-      headers: jsonHeaders(),
       body: JSON.stringify({ preferences }),
     });
   },
@@ -339,7 +335,6 @@ export const ocrApi = {
   async updatePreferences(prefs: OcrPreferences): Promise<{ success: boolean; message?: string }> {
     return request('/api/my/ocr-preferences', {
       method: 'PUT',
-      headers: jsonHeaders(),
       body: JSON.stringify(prefs),
     });
   },
