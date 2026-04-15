@@ -27,7 +27,7 @@ const RepoOpsPage = Loadable(lazy(() => import('../features/devel-tools/repo-ops
 const OcrOperationsDashboard = Loadable(lazy(() => import('../features/devel-tools/ocr-operations/OcrOperationsDashboard')));
 const OcrBatchManager = Loadable(lazy(() => import('../features/devel-tools/ocr-operations/OcrBatchManager')));
 const WorkSessionAdmin = Loadable(lazy(() => import('../features/devel-tools/work-sessions/WorkSessionAdminPage')));
-const ApiExplorerPage = Loadable(lazy(() => import('../features/devel-tools/api-explorer/ApiExplorerPage')));
+// ApiExplorerPage — migrated to OMAI (PR #99, OMD-1283). Route below redirects.
 const LiveTableBuilderPage = Loadable(lazy(() => import('../features/devel-tools/live-table-builder/LiveTableBuilderPage')));
 const TranslationManagerPage = Loadable(lazy(() => import('../features/devel-tools/translation-manager/TranslationManagerPage')));
 const OMPermissionCenter = Loadable(lazy(() => import('../features/devel-tools/om-permission-center/PermissionsManagement')));
@@ -232,17 +232,7 @@ export const develRoutes = [
   },
   {
     path: '/devel-tools/api-explorer',
-    element: (
-      <ProtectedRoute requiredRole={['super_admin']}>
-        <AdminErrorBoundary>
-          <ApiExplorerPage />
-        </AdminErrorBoundary>
-      </ProtectedRoute>
-    ),
-    meta: {
-      requiresAuth: true,
-      hidden: false
-    }
+    element: <Navigate to="/admin/control-panel" replace />,
   },
   {
     path: '/apps/devel/loading-demo',

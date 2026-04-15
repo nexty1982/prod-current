@@ -332,6 +332,24 @@ export const DEPRECATION_REGISTRY: DeprecatedEntry[] = [
     redirectTo: '/admin/logs',
     category: 'frontend',
   },
+  {
+    id: 'api-explorer',
+    name: 'API Explorer (OM Frontend + Test CRUD/Runner)',
+    stage: 4,
+    files: [
+      'features/devel-tools/api-explorer/ApiExplorerPage.tsx',
+      'server/src/api/apiExplorer.js',
+    ],
+    replacement: 'OMAI API Explorer (dual-target: OMAI + OM)',
+    reason: 'Migrated to OMAI as part of OM→OMAI boundary migration Wave 1, Cluster #20 Part C. Route introspection endpoint retained as server/src/api/systemRoutes.js for OMAI dual-target proxy.',
+    deprecatedDate: '2026-04-12',
+    removedDate: '2026-04-12',
+    owner: 'nectarios',
+    originalRoute: '/devel-tools/api-explorer',
+    redirectTo: '/admin/control-panel',
+    changeSetCode: 'CS-0050',
+    category: 'frontend',
+  },
   // ── Stage 4: Removed (dead code — router never mounted, JSON source file never existed) ──
   {
     id: 'component-discovery',

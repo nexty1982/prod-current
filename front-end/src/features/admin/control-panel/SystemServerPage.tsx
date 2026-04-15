@@ -78,12 +78,12 @@ const SUB_CATEGORIES: SubCategory[] = [
   {
     key: 'devops',
     title: 'Server & DevOps',
-    description: 'API explorer, build info, tracing, refactoring, and QA tools',
+    description: 'Build info, tracing, refactoring, and QA tools',
     icon: <DevOpsIcon sx={{ fontSize: 40 }} />,
     color: '#c62828',
     href: '/admin/control-panel/system-server/server-devops',
     quickLinks: [
-      { label: 'API Explorer', href: '/devel-tools/api-explorer' },
+      // API Explorer — migrated to OMAI (OMD-1283)
       { label: 'Code Safety System', href: '/admin/control-panel/system-server/code-safety' },
       { label: 'Feature Lifecycle (SDLC)', href: '/admin/control-panel/sdlc' },
     ],

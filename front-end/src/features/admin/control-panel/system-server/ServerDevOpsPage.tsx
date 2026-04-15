@@ -5,7 +5,6 @@
 import Breadcrumb from '@/layouts/full/shared/breadcrumb/Breadcrumb';
 import PageContainer from '@/shared/ui/PageContainer';
 import {
-    Api as ApiIcon,
     ArrowBack as BackIcon,
     Backup as BackupIcon,
     Build as BuildIcon,
@@ -33,7 +32,7 @@ const TOOLS = [
   { title: 'System Information', description: 'Node.js version, uptime, memory, CPU, and application settings', href: '/admin/settings?tab=general', icon: <SysInfoIcon /> },
   { title: 'Backup & Restore', description: 'Backup configuration, storage info, job history, and restore points', href: '/admin/settings?tab=backup', icon: <BackupIcon /> },
   { title: 'Services Monitor', description: 'System health, running services status, and process management', href: '/admin/settings?tab=services', icon: <ServicesIcon /> },
-  { title: 'API Explorer', description: 'Browse and test backend API endpoints interactively', href: '/devel-tools/api-explorer', icon: <ApiIcon /> },
+  // API Explorer — migrated to OMAI (OMD-1283)
   { title: 'Build Info', description: 'Current build version, commit hash, and deployment details', href: '/devel-tools/build-info', icon: <BuildIcon /> },
   { title: 'OMTrace Console', description: 'Real-time system tracing and debug output', href: '/devel-tools/omtrace', icon: <TraceIcon /> },
   { title: 'Refactor Console', description: 'Code refactoring tools and analysis', href: '/devel-tools/refactor-console', icon: <RefactorIcon /> },
@@ -57,7 +56,7 @@ const ServerDevOpsPage: React.FC = () => {
   ];
 
   return (
-    <PageContainer title="Server & DevOps" description="API explorer, build info, tracing, refactoring, and QA tools">
+    <PageContainer title="Server & DevOps" description="Build info, tracing, refactoring, and QA tools">
       <Breadcrumb title="Server & DevOps" items={BCrumb} />
       <Box sx={{ p: { xs: 2, md: 3 } }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 4 }}>
@@ -69,7 +68,7 @@ const ServerDevOpsPage: React.FC = () => {
           </Box>
           <Box>
             <Typography variant="h5" fontWeight={700}>Server & DevOps</Typography>
-            <Typography variant="body2" color="text.secondary">API explorer, build info, tracing, refactoring, and QA tools</Typography>
+            <Typography variant="body2" color="text.secondary">Build info, tracing, refactoring, and QA tools</Typography>
           </Box>
         </Box>
 

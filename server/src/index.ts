@@ -243,7 +243,7 @@ const churchDecomRouter = require('./routes/admin/church-decom');
 const analyticsRouter = require('./routes/analytics'); // US Church Map analytics
 const omChartsRouter = require('./api/om-charts'); // OM Charts: graphical charts from church records
 const dashboardHomeRouter = require('./api/dashboard-home'); // Dashboard Home: summary data for church dashboard
-const { routesRouter: apiExplorerRoutesRouter, testsRouter: apiExplorerTestsRouter } = require('./api/apiExplorer');
+const systemRoutesRouter = require('./api/systemRoutes'); // Route introspection (kept for OMAI dual-target proxy)
 // Add missing router imports
 const churchRecordsRouter = require('./routes/records'); // Church records functionality
 const powerSearchRouter = require('./api/powerSearchApi'); // Power Search API for advanced record filtering
@@ -858,9 +858,8 @@ console.log('✅ [Server] Mounted /api/maintenance routes (public status)');
 
 app.use('/api/version', versionRouter); // Version switcher for superadmins
 app.use('/api/system', systemStatusRouter); // System status for admin HUD
-app.use('/api/system', apiExplorerRoutesRouter); // API Explorer route introspection (super_admin)
-app.use('/api/admin/api-tests', apiExplorerTestsRouter); // API Explorer test cases CRUD + runner (super_admin)
-console.log('✅ [Server] Mounted /api/system/routes and /api/admin/api-tests (API Explorer)');
+app.use('/api/system', systemRoutesRouter); // Route introspection — kept for OMAI dual-target API Explorer
+console.log('✅ [Server] Mounted /api/system/routes (route introspection for OMAI API Explorer)');
 app.use('/api/admin/tasks', dailyTasksRouter); // Daily tasks management
 app.use('/api/admin/records-inspector', recordsInspectorRouter); // Dynamic Records Inspector
 app.use('/api/admin', seedRecordsRouter); // Seed Records (POST /api/admin/seed-records)

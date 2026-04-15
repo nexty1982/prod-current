@@ -107,7 +107,7 @@ const CATEGORIES: Category[] = [
       // User Management — migrated to OMAI (/omai/ops/users)
       { label: 'Code Safety System', href: '/admin/control-panel/system-server/code-safety' },
       { label: 'Site Map', href: '/site-map' },
-      { label: 'API Explorer', href: '/devel-tools/api-explorer' },
+      // API Explorer — migrated to OMAI (OMD-1283)
     ],
   },
   {
