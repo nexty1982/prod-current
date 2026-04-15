@@ -24,7 +24,7 @@ const NO_AUTH_PATHS = [
 
 function classifyAuth(path) {
   if (NO_AUTH_PATHS.includes(path)) return 'none';
-  if (path.startsWith('/api/admin')) return 'super_admin';
+  if (path.startsWith('/api/admin') || path.startsWith('/api/system')) return 'super_admin';
   if (path.startsWith('/__debug')) return 'none';
   return 'session';
 }
@@ -40,7 +40,7 @@ function classifyTag(path) {
   if (path.includes('library') || path.includes('docs')) return 'library';
   if (path.includes('social') || path.includes('blog') || path.includes('chat')) return 'social';
   if (path.includes('invoice') || path.includes('billing') || path.includes('ecommerce')) return 'billing';
-  if (path.includes('omai') || path.includes('ai')) return 'ai';
+  if (/\/(?:omai|ai)(?:\/|$)/.test(path)) return 'ai';
   if (path.includes('kanban') || path.includes('task')) return 'tasks';
   if (path.includes('notification')) return 'notifications';
   if (path.includes('calendar')) return 'calendar';

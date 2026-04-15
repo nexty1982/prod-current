@@ -5,7 +5,6 @@
 import Breadcrumb from '@/layouts/full/shared/breadcrumb/Breadcrumb';
 import PageContainer from '@/shared/ui/PageContainer';
 import {
-    Api as ApiIcon,
     ArrowBack as BackIcon,
     Backup as BackupIcon,
     Build as BuildIcon,
@@ -57,7 +56,7 @@ const ServerDevOpsPage: React.FC = () => {
   ];
 
   return (
-    <PageContainer title="Server & DevOps" description="API explorer, build info, tracing, refactoring, and QA tools">
+    <PageContainer title="Server & DevOps" description="Build info, tracing, refactoring, and QA tools">
       <Breadcrumb title="Server & DevOps" items={BCrumb} />
       <Box sx={{ p: { xs: 2, md: 3 } }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 4 }}>
@@ -69,7 +68,7 @@ const ServerDevOpsPage: React.FC = () => {
           </Box>
           <Box>
             <Typography variant="h5" fontWeight={700}>Server & DevOps</Typography>
-            <Typography variant="body2" color="text.secondary">API explorer, build info, tracing, refactoring, and QA tools</Typography>
+            <Typography variant="body2" color="text.secondary">Build info, tracing, refactoring, and QA tools</Typography>
           </Box>
         </Box>
 
