@@ -28,7 +28,6 @@ import {
     IconUpload,
     IconUser,
     IconUserPlus,
-    IconUsers,
     IconWriting
 } from '@tabler/icons-react';
 import { uniqueId } from 'lodash';
@@ -259,12 +258,6 @@ const Menuitems: MenuitemsType[] = [
     children: [
       {
         id: uniqueId(),
-        title: 'User Management',
-        icon: IconUsers,
-        href: '/admin/users',
-      },
-      {
-        id: uniqueId(),
         title: 'Menu Management',
         icon: IconLayout,
         href: '/admin/menu-management',
@@ -300,32 +293,6 @@ const Menuitems: MenuitemsType[] = [
         title: 'Welcome Message',
         icon: IconMessage,
         href: '/frontend-pages/welcome-message',
-      },
-    ],
-  },
-  {
-    id: uniqueId(),
-    title: 'System Monitoring',
-    icon: IconActivity,
-    href: '#',
-    children: [
-      {
-        id: uniqueId(),
-        title: 'Activity Logs',
-        icon: IconFileDescription,
-        href: '/admin/logs',
-      },
-      {
-        id: uniqueId(),
-        title: 'Log Search',
-        icon: IconDatabase,
-        href: '/admin/log-search',
-      },
-      {
-        id: uniqueId(),
-        title: 'Session Management',
-        icon: IconShield,
-        href: '/admin/sessions',
       },
     ],
   },
@@ -401,8 +368,6 @@ const Menuitems: MenuitemsType[] = [
       },
     ],
   },
-
-  // Prompt Plans, OM Seedlings, Daily Tasks, OM Tasks — retired, now on OMAI Operations Hub
 
   // Berry Components section removed — CRM, Calendar, Map, Cards prototypes retired
   // ========================================================================
@@ -491,7 +456,6 @@ const Menuitems: MenuitemsType[] = [
         icon: IconBell,
         href: '/devel-tools/badge-state-manager',
       },
-      // Record Creation Wizard — retired, now on OMAI /omai/tools/om-seedlings
       {
         id: uniqueId(),
         title: 'OCR Operations',
