@@ -110,12 +110,6 @@ export const SuperAdminMenuTemplate: MenuTemplateItem[] = [
     href: '#',
     children: [
       {
-        id: 'admin.users',
-        title: 'User Management',
-        icon: IconUsers,
-        href: '/admin/users',
-      },
-      {
         id: 'admin.menu-management',
         title: 'Menu Management',
         icon: IconLayout,
@@ -178,26 +172,6 @@ export const SuperAdminMenuTemplate: MenuTemplateItem[] = [
         title: 'Notifications',
         icon: IconBell,
         href: '/social/notifications',
-      },
-    ],
-  },
-  {
-    id: 'admin.system-monitoring',
-    title: 'System Monitoring',
-    icon: IconActivity,
-    href: '#',
-    children: [
-      {
-        id: 'admin.logs',
-        title: 'Activity Logs',
-        icon: IconFileDescription,
-        href: '/admin/logs',
-      },
-      {
-        id: 'admin.sessions',
-        title: 'Session Management',
-        icon: IconShield,
-        href: '/admin/sessions',
       },
     ],
   },
@@ -284,7 +258,6 @@ export const SuperAdminMenuTemplate: MenuTemplateItem[] = [
     icon: IconFileDescription,
     href: '/church/om-spec',
   },
-  // OM Tasks — retired, now on OMAI Operations Hub
   {
     id: 'church.omai-logger',
     title: 'OMAI Ultimate Logger',
@@ -348,7 +321,6 @@ export const SuperAdminMenuTemplate: MenuTemplateItem[] = [
         icon: IconClipboardCheck,
         href: '/devel-tools/page-edit-audit',
       },
-      // Daily Tasks — retired, now on OMAI Operations Hub
       {
         id: 'devel.live-table-builder',
         title: 'Live Table Builder',
