@@ -242,6 +242,7 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
 
   // Theme hook for dark mode detection
   const theme = useTheme();
+  const isDarkMode = theme.palette.mode === 'dark';
 
   // Toast helper functions
   const showToast = useCallback((message: string, severity: 'success' | 'error' | 'info' = 'success') => {
