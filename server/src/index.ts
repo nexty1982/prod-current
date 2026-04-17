@@ -1449,7 +1449,8 @@ app.use('/church-branding', express.static(path.resolve(__dirname, '../storage/c
 
 // Serve static assets with long cache (hashed filenames are immutable)
 // Vite produces hashed filenames like assets/index-abc123.js, so these can be cached forever
-app.use('/assets', express.static(path.resolve(__dirname, 'assets'), {
+// __dirname is server/dist at runtime; assets live in front-end/dist/assets
+app.use('/assets', express.static(path.join(prodRoot, 'front-end/dist/assets'), {
   maxAge: '1y', // 1 year cache for hashed assets (immutable)
   immutable: true, // Mark as immutable for better caching
   etag: true,
