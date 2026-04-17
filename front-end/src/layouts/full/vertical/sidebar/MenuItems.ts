@@ -344,18 +344,6 @@ const Menuitems: MenuitemsType[] = [
     children: [
       {
         id: uniqueId(),
-        title: 'OMAI Lab',
-        icon: IconRocket,
-        href: '/sandbox/ai-lab',
-      },
-      {
-        id: uniqueId(),
-        title: 'Project Generator',
-        icon: IconEdit,
-        href: '/sandbox/project-generator',
-      },
-      {
-        id: uniqueId(),
         title: 'AI Admin Panel',
         icon: IconRocket,
         href: '/admin/ai',
@@ -369,7 +357,6 @@ const Menuitems: MenuitemsType[] = [
     ],
   },
 
-  // Berry Components section removed — CRM, Calendar, Map, Cards prototypes retired
   // ========================================================================
   // DEVELOPER TOOLS (super_admin only)
   // ========================================================================
@@ -425,7 +412,6 @@ const Menuitems: MenuitemsType[] = [
         icon: IconTool,
         href: '/devel-tools/refactor-console',
       },
-      // API Explorer — migrated to OMAI (OMD-1283)
       {
         id: uniqueId(),
         title: 'OM Permission Center',
