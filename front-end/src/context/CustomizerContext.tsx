@@ -94,9 +94,11 @@ export const CustomizerContextProvider: React.FC<CustomizerContextProps> = ({ ch
     const [activeTheme, setActiveThemeState] = useState<string>(() =>
         getStoredValue('activeTheme', config.activeTheme)
     );
-    const [activeLayout, setActiveLayoutState] = useState<string>(() => 
-        getStoredValue('activeLayout', config.activeLayout)
-    );
+    const [activeLayout, setActiveLayoutState] = useState<string>(() => {
+        // Horizontal layout was removed — coerce any stale localStorage value to vertical.
+        const stored = getStoredValue('activeLayout', config.activeLayout);
+        return stored === 'horizontal' ? 'vertical' : stored;
+    });
     const [isCardShadow, setIsCardShadowState] = useState<boolean>(() => 
         getStoredValue('isCardShadow', config.isCardShadow)
     );
