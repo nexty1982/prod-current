@@ -19,7 +19,6 @@ import ChurchContext from '@/context/ChurchContext';
 // SuperadminSourcePathOverlay, VersionSwitcher (path: features/overlays — currently missing)
 // LoadingBar (path: ./LoadingBar)
 // SiteEditorOverlay (path: @/components/SiteEditorOverlay)
-// GlobalOMAI (path: @/components/global/GlobalOMAI)
 // ErrorNotificationToast (path: @/components/global/ErrorNotificationToast)
 // TutorialViewer — migrated to OMAI
 
