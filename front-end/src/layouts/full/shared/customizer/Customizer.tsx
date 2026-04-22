@@ -18,7 +18,7 @@ import { useDraggableFab } from '@/hooks/useDraggableFab';
 // @ts-ignore
 import Scrollbar from '@/components/custom-scroll/Scrollbar';
 import { CustomizerContext } from '@/context/CustomizerContext';
-import { BorderOuter, PaddingTwoTone, ViewComfyTwoTone } from '@mui/icons-material';
+import { BorderOuter } from '@mui/icons-material';
 import AspectRatioTwoToneIcon from '@mui/icons-material/AspectRatioTwoTone';
 import CallToActionTwoToneIcon from '@mui/icons-material/CallToActionTwoTone';
 import DarkModeTwoToneIcon from '@mui/icons-material/DarkModeTwoTone';
@@ -60,8 +60,6 @@ const Customizer: FC = () => {
     isCollapse,
     setIsCollapse,
     activeTheme,
-    activeLayout,
-    setActiveLayout,
     isLayout,
     isCardShadow,
     setIsCardShadow,
@@ -291,39 +289,6 @@ const Customizer: FC = () => {
             </Grid2>
             <Box pt={4} />
             {/* ------------------------------------------- */}
-            {/* ------------ Layout Horizontal / Vertical ------------- */}
-            {/* ------------------------------------------- */}
-            <Typography variant="h6" gutterBottom>
-              Layout Type
-            </Typography>
-            <Stack direction={"row"} gap={2} my={2}>
-              <StyledBox
-                onClick={() => setActiveLayout("vertical")}
-                display="flex"
-                gap={1}
-              >
-                <ViewComfyTwoTone
-                  color={
-                    activeLayout === 'vertical' ? "primary" : "inherit"
-                  }
-                />
-                Vertical
-              </StyledBox>
-              <StyledBox
-                onClick={() => setActiveLayout("horizontal")}
-                display="flex"
-                gap={1}
-              >
-                <PaddingTwoTone
-                  color={
-                    activeLayout === 'horizontal' ? "primary" : "inherit"
-                  }
-                />
-                Horizontal
-              </StyledBox>
-            </Stack>
-            <Box pt={4} />
-            {/* ------------------------------------------- */}
             {/* ------------ Layout Boxed / Full ------------- */}
             {/* ------------------------------------------- */}
             <Typography variant="h6" gutterBottom>
@@ -359,41 +324,35 @@ const Customizer: FC = () => {
             {/* ------------------------------------------- */}
 
             {/* ------------------------------------------- */}
-            {/* ------------ Theme Color setting ------------- */}
+            {/* ------------ Sidebar Type ------------- */}
             {/* ------------------------------------------- */}
-            {activeLayout === "horizontal" ? (
-              ""
-            ) : (
-              <>
-                <Typography variant="h6" gutterBottom>
-                  Sidebar Type
-                </Typography>
-                <Stack direction={"row"} gap={2} my={2}>
-                  <StyledBox
-                    onClick={() => {
-                      setIsCollapse('full-sidebar')
-                    }}
-                    display="flex"
-                    gap={1}
-                  >
-                    <WebAssetTwoToneIcon
-                      color={isCollapse === "full-sidebar" ? "primary" : "inherit"}
-                    />
-                    Full
-                  </StyledBox>
-                  <StyledBox
-                    onClick={() => setIsCollapse("mini-sidebar")}
-                    display="flex"
-                    gap={1}
-                  >
-                    <ViewSidebarTwoToneIcon
-                      color={isCollapse === "mini-sidebar" ? "primary" : "inherit"}
-                    />
-                    mini
-                  </StyledBox>
-                </Stack>
-              </>
-            )}
+            <Typography variant="h6" gutterBottom>
+              Sidebar Type
+            </Typography>
+            <Stack direction={"row"} gap={2} my={2}>
+              <StyledBox
+                onClick={() => {
+                  setIsCollapse('full-sidebar')
+                }}
+                display="flex"
+                gap={1}
+              >
+                <WebAssetTwoToneIcon
+                  color={isCollapse === "full-sidebar" ? "primary" : "inherit"}
+                />
+                Full
+              </StyledBox>
+              <StyledBox
+                onClick={() => setIsCollapse("mini-sidebar")}
+                display="flex"
+                gap={1}
+              >
+                <ViewSidebarTwoToneIcon
+                  color={isCollapse === "mini-sidebar" ? "primary" : "inherit"}
+                />
+                mini
+              </StyledBox>
+            </Stack>
             <Box pt={4} />
             <Typography variant="h6" gutterBottom>
               Card With

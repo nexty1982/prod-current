@@ -4,8 +4,6 @@ import { Outlet, useLocation } from 'react-router-dom';
 import Header from './vertical/header/Header';
 import Sidebar from './vertical/sidebar/Sidebar';
 import Customizer from './shared/customizer/Customizer';
-import Navigation from '../full/horizontal/navbar/Navigation';
-import HorizontalHeader from '../full/horizontal/header/Header';
 import ScrollToTop from '@/shared/ui/ScrollToTop';
 import { CustomizerContext } from '@/context/CustomizerContext';
 import config from '@/context/config';
@@ -43,7 +41,7 @@ const PageWrapper = styled('div')(({ theme }) => ({
 }));
 
 const FullLayout: FC = () => {
-  const { activeLayout, isLayout, activeMode, isCollapse } = useContext(CustomizerContext);
+  const { isLayout, activeMode, isCollapse } = useContext(CustomizerContext);
   const theme = useTheme();
   const { isSuperAdmin } = useAuth();
   const churchCtx = useContext(ChurchContext);
@@ -64,7 +62,7 @@ const FullLayout: FC = () => {
         {/* ------------------------------------------- */}
         {/* Sidebar */}
         {/* ------------------------------------------- */}
-        {activeLayout === 'horizontal' ? '' : <Sidebar />}
+        <Sidebar />
         {/* ------------------------------------------- */}
         {/* Main Wrapper */}
         {/* ------------------------------------------- */}
@@ -83,11 +81,9 @@ const FullLayout: FC = () => {
           {/* ------------------------------------------- */}
           {/* Header */}
           {/* ------------------------------------------- */}
-          {activeLayout === 'horizontal' ? <HorizontalHeader /> : <Header />}
+          <Header />
           {/* Work Session Start Prompt (shows once after login if no active session) */}
           <WorkSessionPrompt />
-          {/* PageContent */}
-          {activeLayout === 'horizontal' ? <Navigation /> : ''}
           <Container
             sx={{
               pt: '30px',
