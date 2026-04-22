@@ -26,9 +26,6 @@ export interface FeatureFlags {
   };
 }
 
-// Legacy support flag
-export const RECORDS_LEGACY_ENABLED = getEnvBool('VITE_RECORDS_LEGACY_ENABLED', false);
-
 // Default feature flags (can be overridden by environment variables)
 const defaultFlags: FeatureFlags = {
   interactiveReports: {
