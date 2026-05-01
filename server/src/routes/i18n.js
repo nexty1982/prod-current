@@ -554,7 +554,7 @@ const ENGLISH_DEFAULTS = {
   'auth.card_heading': 'Sign In',
   'auth.card_subheading': 'Access your parish dashboard',
   'auth.new_to_om': 'New to Orthodox Metrics?',
-  'auth.create_account': 'Create an account',
+  'auth.create_account': 'Get a demo',
   // Form fields
   'auth.label_email': 'Email or Username',
   'auth.label_password': 'Password',

@@ -18,6 +18,10 @@ export const PUBLIC_ROUTES = {
   CONTACT: '/frontend-pages/contact',
   FAQ: '/frontend-pages/faq',
   LOGIN: '/auth/login',
+  // Inquiry / "talk to us" wizard. Backed by /api/crm-public/inquiry —
+  // not a self-serve account-creation flow. /auth/register is kept as a
+  // backwards-compat alias for admin-issued registration links.
+  GET_STARTED: '/get-started',
 } as const;
 
 /** Navigation links shown in the public header and mobile sidebar. */
