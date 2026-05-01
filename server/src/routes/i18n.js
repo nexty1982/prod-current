@@ -31,6 +31,7 @@ const ENGLISH_DEFAULTS = {
   'common.sign_in': 'Sign In',
   'common.sign_out': 'Sign Out',
   'common.church_login': 'Church Login',
+  'common.get_started': 'Get Started',
   'common.dark_mode': 'Dark Mode',
   'common.light_mode': 'Light Mode',
   'common.language': 'Language',
