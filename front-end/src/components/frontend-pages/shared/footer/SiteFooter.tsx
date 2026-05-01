@@ -9,7 +9,7 @@ const SiteFooter = () => {
   return (
     <footer className="bg-[#2d1b4e] dark:bg-gray-950 text-white">
       <div className="max-w-7xl mx-auto px-6 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12">
           {/* Brand */}
           <div className="col-span-1">
             <div className="flex items-center gap-2 mb-4">
@@ -51,6 +51,23 @@ const SiteFooter = () => {
             <h3 className="font-['Inter'] font-medium text-[16px] mb-4">{t('footer.heading_company')}</h3>
             <ul className="space-y-3 list-none p-0 m-0">
               {FOOTER_LINKS.company.map((link) => (
+                <li key={link.to}>
+                  <Link
+                    to={link.to}
+                    className="font-['Inter'] text-[14px] text-[rgba(255,255,255,0.7)] hover:text-white transition-colors no-underline"
+                  >
+                    {t(link.tKey)}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Legal */}
+          <div>
+            <h3 className="font-['Inter'] font-medium text-[16px] mb-4">{t('footer.heading_legal')}</h3>
+            <ul className="space-y-3 list-none p-0 m-0">
+              {FOOTER_LINKS.legal.map((link) => (
                 <li key={link.to}>
                   <Link
                     to={link.to}

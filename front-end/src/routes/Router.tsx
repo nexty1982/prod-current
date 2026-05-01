@@ -190,6 +190,9 @@ const WelcomeMessage = Loadable(lazy(() => import('../features/pages/frontend-pa
 const Tour = Loadable(lazy(() => import('../features/pages/frontend-pages/Tour')));
 const Faq = Loadable(lazy(() => import('../features/pages/frontend-pages/Faq')));
 const SacramentalRestrictionsPublicPage = Loadable(lazy(() => import('../features/pages/frontend-pages/SacramentalRestrictionsPublicPage')));
+const Privacy = Loadable(lazy(() => import('../features/pages/frontend-pages/Privacy')));
+const Terms = Loadable(lazy(() => import('../features/pages/frontend-pages/Terms')));
+const Security = Loadable(lazy(() => import('../features/pages/frontend-pages/Security')));
 
 const CertificateGeneratorPage = Loadable(lazy(() => import('../features/certificates/CertificateGeneratorPage')));
 
@@ -924,6 +927,9 @@ const Router = [
           { path: '/frontend-pages/samples', element: <Samples /> },
           { path: '/samples/explorer', element: <SampleRecordsExplorer /> },
           { path: '/tour', element: <Tour /> },
+          { path: '/privacy', element: <Privacy /> },
+          { path: '/terms', element: <Terms /> },
+          { path: '/security', element: <Security /> },
         ],
       },
       { path: '/greek_baptism_table_demo.html', element: <GreekRecordsViewer /> },
