@@ -588,6 +588,9 @@ router.get('/watch-all', async (req, res) => {
 
   // Track log tailing offsets per build target
   const tailOffsets = {};
+  // Per-run cursor for build_run_events (so each SSE connection tracks its
+  // own progress without duplicating events). Map: run_id → max event id seen.
+  const eventCursors = new Map();
 
   const poll = async () => {
     try {
@@ -687,6 +690,63 @@ router.get('/watch-all', async (req, res) => {
             res.write(`data: ${JSON.stringify({ type: 'output', target: b.target, data: newData })}\n\n`);
           }
         } catch { /* log file not yet created */ }
+      }
+
+      // 5. Stream per-run telemetry events from build_run_events.
+      //    These come from omai-deploy.sh / om-deploy.sh / any caller that
+      //    POSTs to /api/internal/build-events (stage_started, heartbeat,
+      //    stage_completed, build_started, build_completed, build_failed).
+      //    Persisted by buildEventsService — we just tail the table per run.
+      //    Per-connection cursor (eventCursors) prevents duplicate emission;
+      //    each SSE connection has its own poll loop so cursors don't bleed
+      //    across clients.
+      try {
+        const { getAppPool } = require('../config/db-compat');
+        for (const b of builds) {
+          // run_id may be missing on file-based / in-process builds — skip those;
+          // they don't write to build_run_events.
+          if (!b.id) continue;
+          const lastSeen = eventCursors.get(b.id) || 0;
+          const [eventRows] = await getAppPool().query(
+            `SELECT id, run_id, event, stage, message, duration_ms, created_at, payload_json
+               FROM build_run_events
+              WHERE run_id = ? AND id > ?
+              ORDER BY id ASC
+              LIMIT 50`,
+            [b.id, lastSeen]
+          );
+          if (eventRows.length === 0) continue;
+          for (const ev of eventRows) {
+            // Structured event channel — new consumers can listen on type='event'.
+            res.write(`data: ${JSON.stringify({
+              type: 'event',
+              runId: ev.run_id,
+              target: b.target,
+              event: ev.event,
+              stage: ev.stage,
+              message: ev.message,
+              durationMs: ev.duration_ms,
+              ts: ev.created_at,
+            })}\n\n`);
+            // Synthesize an `output` line so the existing log viewer renders
+            // stage telemetry without needing a UI change. Format chosen to
+            // be visually distinct from raw build output.
+            const durationStr = ev.duration_ms != null ? ` (${(ev.duration_ms / 1000).toFixed(1)}s)` : '';
+            const stageStr = ev.stage ? ` [${ev.stage}]` : '';
+            const msgStr = ev.message ? ` — ${ev.message}` : '';
+            res.write(`data: ${JSON.stringify({
+              type: 'output',
+              target: b.target,
+              data: `▸ ${ev.event}${stageStr}${durationStr}${msgStr}\n`,
+            })}\n\n`);
+          }
+          eventCursors.set(b.id, eventRows[eventRows.length - 1].id);
+        }
+      } catch (err) {
+        // Non-fatal — keep SSE alive even if build_run_events lookups fail
+        if (err.code !== 'ER_NO_SUCH_TABLE') {
+          console.error('[watch-all] event poll error:', err.message);
+        }
       }
     } catch (err) {
       // Non-fatal — keep SSE alive
@@ -1040,89 +1100,81 @@ router.get('/run-stream', async (req, res) => {
 // HELPER FUNCTIONS
 // =====================================================
 
-// Execute build (traditional method)
+// Resolve om-build wrapper path. Symlinked into /usr/local/bin by ops; falls
+// back to absolute script path so the Build Console works even if PATH is
+// stripped down inside the systemd service environment.
+function resolveOmBuildPath() {
+  const fsSync = require('fs');
+  const candidates = [
+    '/usr/local/bin/om-build',
+    '/var/www/omai/_runtime/server/scripts/om-build.sh',
+  ];
+  for (const p of candidates) { if (fsSync.existsSync(p)) return p; }
+  return null;
+}
+
+// Map (config.repo, config.buildTarget) → om-build target name. Defaults to
+// 'om' for repo (backward-compatible: existing config rows have no `repo`
+// field but were always building OM). Validated against the authoritative
+// target set so a malformed config can't shell-inject via the wrapper.
+function resolveOmBuildTarget(config) {
+  const VALID = new Set(['om-frontend', 'om-server', 'omai-frontend', 'omai-server']);
+  const repo = config.repo === 'omai' ? 'omai' : 'om';
+  const kind = config.buildTarget === 'server' ? 'server' : 'frontend';
+  const target = `${repo}-${kind}`;
+  return VALID.has(target) ? target : null;
+}
+
+// Execute build via om-build wrapper.
+//
+// The wrapper registers the build in active-builds.json + tees output to
+// logs/builds/live/<id>.log so any consumer (Build Console SSE, CLI tail)
+// sees the same data. Targets resolve their own cwd from the wrapper's
+// TARGET_CWD table — Build Console no longer needs config.buildPath, and the
+// stale `/var/www/orthodoxmetrics/dev` default is gone.
 async function executeBuild(config, buildId) {
   return new Promise((resolve) => {
-    // Determine build path based on target
     const buildTarget = config.buildTarget || 'frontend';
-    const basePath = config.buildPath || '/var/www/orthodoxmetrics/dev';
-    const buildPath = buildTarget === 'server'
-      ? path.join(basePath, 'server')
-      : path.join(basePath, 'front-end');
-    
-    // Verify build path exists
-    const fsSync = require('fs');
-    if (!fsSync.existsSync(buildPath)) {
-      const errorMsg = `Build path does not exist: ${buildPath}`;
-      console.error(`❌ ${errorMsg}`);
-      resolve({
-        success: false,
-        output: `❌ ${errorMsg}\nPlease ensure the build directory exists.`,
-        error: errorMsg
-      });
+    const target = resolveOmBuildTarget(config);
+    const omBuildPath = resolveOmBuildPath();
+    let output = '';
+
+    if (!target) {
+      const msg = `Unknown om-build target for repo=${config.repo || 'om'} buildTarget=${buildTarget}`;
+      output += `❌ ${msg}\n`;
+      resolve({ success: false, output, error: msg });
       return;
     }
-    
-    let output = '';
-    let hasError = false;
-    
-    // Build the command based on configuration
-    const args = ['run', 'build'];
+    if (!omBuildPath) {
+      const msg = 'om-build wrapper not found (looked in /usr/local/bin and /var/www/omai/_runtime/server/scripts/)';
+      output += `❌ ${msg}\n`;
+      resolve({ success: false, output, error: msg });
+      return;
+    }
+
+    output += `🎯 Build target: ${target}\n`;
+    output += `🔨 Wrapper:       ${omBuildPath}\n`;
+    output += `💾 Memory:        ${config.memory}MB\n`;
+
+    if (config.dryRun) {
+      output += '🔍 DRY RUN — would invoke: ' + omBuildPath + ' ' + target + '\n';
+      resolve({ success: true, output: output + '✅ Dry run completed successfully\n', duration: 1000 });
+      return;
+    }
+
     const env = {
       ...process.env,
-      NODE_OPTIONS: `--max-old-space-size=${config.memory}`
+      NODE_OPTIONS: `--max-old-space-size=${config.memory}`,
+      // Ensure standard binary locations are present for the wrapper's npm/node calls.
+      PATH: `${process.env.PATH || ''}:/usr/local/bin:/usr/bin:/bin`,
     };
-    
-    output += `🎯 Build Target: ${buildTarget === 'server' ? 'Server (server/package.json)' : 'Frontend (front-end/package.json)'}\n`;
-    
-    if (config.legacyPeerDeps && buildTarget === 'frontend') {
-      // For legacy peer deps, we need to run install first (frontend only)
-      output += '📦 Installing dependencies with --legacy-peer-deps...\n';
-    }
-    
-    output += `🔨 Starting ${buildTarget} build...\n`;
-    output += `💾 Memory limit: ${config.memory}MB\n`;
-    output += `📁 Working directory: ${buildPath}\n`;
-    
-    if (config.dryRun) {
-      output += '🔍 DRY RUN MODE - No actual build execution\n';
-      resolve({
-        success: true,
-        output: output + '✅ Dry run completed successfully\n',
-        duration: 1000
-      });
-      return;
-    }
-    
-    // Refresh npm path before each build in case PATH changed
-    const currentNpmPath = refreshNpmPath();
-    
-    // Verify npm path exists before spawning
-    if (currentNpmPath !== 'npm' && !fsSync.existsSync(currentNpmPath)) {
-      console.warn(`⚠️ npm path ${currentNpmPath} does not exist, trying to find npm again...`);
-      const refreshedPath = refreshNpmPath();
-      if (refreshedPath === 'npm' || !fsSync.existsSync(refreshedPath)) {
-        output += `\n❌ ERROR: Cannot find npm executable. Please ensure npm is installed and in PATH.\n`;
-        output += `   Searched paths: ${currentNpmPath}\n`;
-        output += `   Current PATH: ${process.env.PATH || 'not set'}\n`;
-        resolve({
-          success: false,
-          output: output,
-          error: 'npm executable not found'
-        });
-        return;
-      }
-    }
-    
-    const buildProcess = spawn(currentNpmPath, args, {
-      cwd: buildPath,
-      env: {
-        ...env,
-        PATH: process.env.PATH || '' // Ensure PATH is passed to child process
-      },
+
+    const buildProcess = spawn(omBuildPath, [target], {
+      env,
       stdio: ['ignore', 'pipe', 'pipe'],
-      shell: process.platform === 'win32' // Use shell on Windows
     });
+
+    let hasError = false;
     
     buildProcess.stdout.on('data', (data) => {
       output += data.toString();
@@ -1171,79 +1223,51 @@ async function executeBuild(config, buildId) {
   });
 }
 
-// Execute build with streaming output
+// Execute build with streaming output (SSE consumer).
+// Mirrors executeBuild() — same wrapper resolution, same target mapping —
+// but pipes each output chunk through onData so the Build Console can
+// stream a live tail of the underlying om-build run.
 async function executeBuildWithStreaming(config, buildId, onData) {
   return new Promise((resolve) => {
-    // Determine build path based on target
     const buildTarget = config.buildTarget || 'frontend';
-    const basePath = config.buildPath || '/var/www/orthodoxmetrics/dev';
-    const buildPath = buildTarget === 'server'
-      ? path.join(basePath, 'server')
-      : path.join(basePath, 'front-end');
-    
-    // Verify build path exists
-    const fsSync = require('fs');
-    if (!fsSync.existsSync(buildPath)) {
-      const errorMsg = `Build path does not exist: ${buildPath}`;
-      onData(`❌ ${errorMsg}\n`);
-      onData(`Please ensure the build directory exists.\n`);
-      resolve({
-        success: false,
-        error: errorMsg
-      });
+    const target = resolveOmBuildTarget(config);
+    const omBuildPath = resolveOmBuildPath();
+
+    if (!target) {
+      const msg = `Unknown om-build target for repo=${config.repo || 'om'} buildTarget=${buildTarget}`;
+      onData(`❌ ${msg}\n`);
+      resolve({ success: false, error: msg });
       return;
     }
-    
-    // Build the command based on configuration
-    const args = ['run', 'build'];
-    const env = {
-      ...process.env,
-      NODE_OPTIONS: `--max-old-space-size=${config.memory}`
-    };
-    
-    onData(`🎯 Build Target: ${buildTarget === 'server' ? 'Server (server/package.json)' : 'Frontend (front-end/package.json)'}\n`);
-    
+    if (!omBuildPath) {
+      const msg = 'om-build wrapper not found (looked in /usr/local/bin and /var/www/omai/_runtime/server/scripts/)';
+      onData(`❌ ${msg}\n`);
+      resolve({ success: false, error: msg });
+      return;
+    }
+
+    onData(`🎯 Build target: ${target}\n`);
+    onData(`🔨 Wrapper:       ${omBuildPath}\n`);
+    onData(`💾 Memory:        ${config.memory}MB\n`);
+
     if (config.dryRun) {
-      onData('🔍 DRY RUN MODE - No actual build execution\n');
+      onData('🔍 DRY RUN — would invoke: ' + omBuildPath + ' ' + target + '\n');
       setTimeout(() => {
         onData('✅ Dry run completed successfully\n');
         resolve({ success: true });
       }, 1000);
       return;
     }
-    
-    // Refresh npm path before each build in case PATH changed
-    const currentNpmPath = refreshNpmPath();
-    
-    // Verify npm path exists before spawning
-    if (currentNpmPath !== 'npm' && !fsSync.existsSync(currentNpmPath)) {
-      console.warn(`⚠️ npm path ${currentNpmPath} does not exist, trying to find npm again...`);
-      const refreshedPath = refreshNpmPath();
-      if (refreshedPath === 'npm' || !fsSync.existsSync(refreshedPath)) {
-        onData(`\n❌ ERROR: Cannot find npm executable. Please ensure npm is installed and in PATH.\n`);
-        onData(`   Searched paths: ${currentNpmPath}\n`);
-        onData(`   Current PATH: ${process.env.PATH || 'not set'}\n`);
-        resolve({
-          success: false,
-          error: 'npm executable not found'
-        });
-        return;
-      }
-    }
-    
-    onData(`🔨 Starting ${buildTarget} build...\n`);
-    onData(`💾 Memory limit: ${config.memory}MB\n`);
-    onData(`📁 Working directory: ${buildPath}\n`);
-    onData(`📦 Using npm: ${currentNpmPath}\n`);
-    
-    const buildProcess = spawn(currentNpmPath, args, {
-      cwd: buildPath,
-      env: {
-        ...env,
-        PATH: process.env.PATH || '' // Ensure PATH is passed to child process
-      },
+
+    const env = {
+      ...process.env,
+      NODE_OPTIONS: `--max-old-space-size=${config.memory}`,
+      PATH: `${process.env.PATH || ''}:/usr/local/bin:/usr/bin:/bin`,
+    };
+
+    const buildProcess = spawn(omBuildPath, [target], {
+      env,
       stdio: ['ignore', 'pipe', 'pipe'],
-      shell: process.platform === 'win32' // Use shell on Windows
     });
     
     buildProcess.stdout.on('data', (data) => {

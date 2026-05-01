@@ -509,20 +509,29 @@ router.post('/conversations/:id/messages', requireAuth, async (req, res) => {
         const senderInfo = senderRows[0];
         const senderName = senderInfo.display_name || `${senderInfo.first_name} ${senderInfo.last_name}`.trim();
 
+        // Look up chat_message notification_type_id once
+        const [chatMessageType] = await promisePool.query(
+            `SELECT id FROM notification_types WHERE name = 'chat_message' LIMIT 1`
+        );
+        const chatMessageTypeId = chatMessageType[0]?.id;
+
         // Create notifications for other participants
-        for (const participant of otherParticipants) {
-            await promisePool.query(`
-                INSERT INTO notifications (user_id, type, title, message, sender_id, data)
-                VALUES (?, 'chat_message', 'New Message', ?, ?, ?)
-            `, [
-                participant.user_id,
-                `${senderName}: ${content.substring(0, 100)}${content.length > 100 ? '...' : ''}`,
-                userId,
-                JSON.stringify({
-                    conversation_id: conversationId,
-                    message_id: messageId
-                })
-            ]);
+        if (chatMessageTypeId) {
+            for (const participant of otherParticipants) {
+                await promisePool.query(`
+                    INSERT INTO notifications (user_id, notification_type_id, title, message, sender_id, data)
+                    VALUES (?, ?, 'New Message', ?, ?, ?)
+                `, [
+                    participant.user_id,
+                    chatMessageTypeId,
+                    `${senderName}: ${content.substring(0, 100)}${content.length > 100 ? '...' : ''}`,
+                    userId,
+                    JSON.stringify({
+                        conversation_id: conversationId,
+                        message_id: messageId
+                    })
+                ]);
+            }
         }
 
         // Update conversation last_message_id and last_activity
