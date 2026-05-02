@@ -8,6 +8,7 @@ import { createBrowserRouter, Navigate } from 'react-router-dom';
 import ProtectedRoute from '../components/auth/ProtectedRoute';
 import AdminErrorBoundary from '../components/ErrorBoundary/AdminErrorBoundary';
 import SmartRedirect from '../components/routing/SmartRedirect';
+import RootGate from '../components/routing/RootGate';
 import Loadable from '../layouts/full/shared/loadable/Loadable';
 
 // Route sub-modules
@@ -207,11 +208,17 @@ function AccountLayoutSwitcher() {
 }
 
 const Router = [
+  // Root: unauthenticated visitors see the marketing Homepage; authenticated
+  // users are redirected to their role-appropriate dashboard. Renders its own
+  // HpHeader + SiteFooter so it does not need FullLayout (which gates on auth).
+  {
+    path: '/',
+    element: <RootGate />,
+  },
   {
     path: '/',
     element: <FullLayout />,
     children: [
-      { path: '/', element: <SmartRedirect /> },
       {
         path: '/dashboards/modern',
         exact: true,
