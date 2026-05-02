@@ -18,10 +18,9 @@ export const PUBLIC_ROUTES = {
   CONTACT: '/frontend-pages/contact',
   FAQ: '/frontend-pages/faq',
   LOGIN: '/auth/login',
-  // Inquiry / "talk to us" wizard. Backed by /api/crm-public/inquiry —
-  // not a self-serve account-creation flow. /auth/register is kept as a
-  // backwards-compat alias for admin-issued registration links.
-  GET_STARTED: '/get-started',
+  PRIVACY: '/privacy',
+  TERMS: '/terms',
+  SECURITY: '/security',
 } as const;
 
 /** Navigation links shown in the public header and mobile sidebar. */
@@ -46,5 +45,10 @@ export const FOOTER_LINKS = {
     { tKey: 'footer.about_us', to: PUBLIC_ROUTES.ABOUT },
     { tKey: 'footer.blog', to: PUBLIC_ROUTES.BLOG },
     { tKey: 'footer.contact', to: PUBLIC_ROUTES.CONTACT },
+  ],
+  legal: [
+    { tKey: 'footer.privacy', to: PUBLIC_ROUTES.PRIVACY },
+    { tKey: 'footer.terms', to: PUBLIC_ROUTES.TERMS },
+    { tKey: 'footer.security', to: PUBLIC_ROUTES.SECURITY },
   ],
 } as const;

@@ -57,6 +57,7 @@ const ENGLISH_DEFAULTS = {
   'footer.tagline': 'Preserving sacred records for Orthodox Christian parishes.',
   'footer.heading_product': 'Product',
   'footer.heading_company': 'Company',
+  'footer.heading_legal': 'Legal',
   'footer.heading_support': 'Support',
   'footer.platform_tour': 'Platform Tour',
   'footer.sample_records': 'Sample Records',
@@ -64,8 +65,38 @@ const ENGLISH_DEFAULTS = {
   'footer.about_us': 'About Us',
   'footer.blog': 'Blog',
   'footer.contact': 'Contact',
+  'footer.privacy': 'Privacy Policy',
+  'footer.terms': 'Terms of Service',
+  'footer.security': 'Security',
   'footer.hours': 'Monday – Friday, 9am – 5pm EST',
   'footer.copyright': '© {year} Orthodox Metrics. All rights reserved.',
+
+  // ─── privacy.* ──────────────────────────────────────────────────────
+  'privacy.hero_badge': 'Legal',
+  'privacy.hero_title': 'Privacy Policy',
+  'privacy.hero_subtitle': 'How Orthodox Metrics collects, stores, and protects parish data.',
+  'privacy.draft_notice': 'This page is being finalized. The full Privacy Policy is under legal review and will be published here. For questions about how we handle your parish\'s data today, please email us using the address below.',
+  'privacy.body_p1': 'Orthodox Metrics processes sacramental records and parish administrative data on behalf of subscribed parishes. Each parish remains the data controller for its records; Orthodox Metrics acts as a data processor under your direction.',
+  'privacy.body_p2': 'When the full policy is published it will cover what we collect, how we store and secure it, how long we retain it, your rights, who we share it with (if anyone), our subprocessors, breach notification, and how we handle requests for access, correction, and deletion.',
+  'privacy.contact_prefix': 'For privacy questions or data requests, contact',
+
+  // ─── terms.* ────────────────────────────────────────────────────────
+  'terms.hero_badge': 'Legal',
+  'terms.hero_title': 'Terms of Service',
+  'terms.hero_subtitle': 'The agreement between Orthodox Metrics and your parish.',
+  'terms.draft_notice': 'This page is being finalized. The full Terms of Service are under legal review and will be published here. For questions about subscription terms, acceptable use, or contractual matters today, please email us using the address below.',
+  'terms.body_p1': 'These Terms will govern your parish\'s use of Orthodox Metrics, including subscription, payment, acceptable use, intellectual property, warranty, liability, and termination.',
+  'terms.body_p2': 'Until the full Terms are published, the working agreement is the onboarding letter or service order signed with your parish during setup. If you have not received one, please reach out to us.',
+  'terms.contact_prefix': 'For contract or licensing questions, contact',
+
+  // ─── security.* ─────────────────────────────────────────────────────
+  'security.hero_badge': 'Trust',
+  'security.hero_title': 'Security',
+  'security.hero_subtitle': 'How we protect your parish\'s sacramental records.',
+  'security.draft_notice': 'This page is being finalized. A full security overview — covering hosting, encryption, backup posture, role separation, audit logging, and our compliance roadmap — is being prepared. For specific security questions today, please email us using the address below.',
+  'security.body_p1': 'Orthodox Metrics is built around the principle that sacramental records are irreplaceable. Each parish gets an isolated tenant database. Access is gated by role-based permissions and audit-logged. Records are backed up regularly and stored in a hardened hosting environment.',
+  'security.body_p2': 'When the full security page is published it will cover hosting and data residency, encryption at rest and in transit, backup retention and recovery objectives, tenant isolation, role-based access control, audit logging, vendor management, our compliance posture (GDPR/CCPA), and breach disclosure commitments.',
+  'security.contact_prefix': 'For security questions, vulnerability reports, or compliance inquiries, contact',
 
   // ─── home.* ─────────────────────────────────────────────────────
   // Hero
