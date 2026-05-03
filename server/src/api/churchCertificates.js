@@ -828,19 +828,11 @@ router.post('/baptism/:id/preview', async (req, res) => {
       success: true,
       preview: `data:image/png;base64,${base64Image}`,
       positions: BAPTISM_POSITIONS,
-      record: {
-        id: record.id,
-        first_name: record.first_name,
-        last_name: record.last_name,
-        birth_date: record.birth_date,
-        birthplace: record.birthplace,
-        reception_date: record.reception_date,
-        baptism_date: record.baptism_date,
-        sponsors: record.sponsors,
-        godparents: record.godparents,
-        clergy: record.clergy,
-        churchName: record.churchName,
-      }
+      // Return the whole record so the front-end has every column it might
+      // want for drag-tile labels (parents, entry_type, etc.). Avoids the
+      // fragile per-field allowlist that previously dropped `parents` and
+      // left the new fatherName / motherName tiles empty.
+      record,
     });
 
   } catch (err) {
@@ -955,11 +947,8 @@ router.post('/marriage/:id/preview', async (req, res) => {
       success: true,
       preview: `data:image/png;base64,${base64Image}`,
       positions: MARRIAGE_POSITIONS,
-      record: {
-        id: record.id,
-        groom: `${record.fname_groom || ''} ${record.lname_groom || ''}`.trim(),
-        bride: `${record.fname_bride || ''} ${record.lname_bride || ''}`.trim(),
-      }
+      // Whole record (see baptism preview above for rationale).
+      record,
     });
 
   } catch (err) {
