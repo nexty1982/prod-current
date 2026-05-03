@@ -140,9 +140,9 @@ export const ORTHODOX_PRESETS: OrthodoxPreset[] = [
 export const THEME_TO_ACCENT_MAP: Record<string, string> = {
   PURPLE_THEME: '#bd56fa',
   AQUA_THEME:   '#E6E8EB',
-  GREEN_THEME:  '#2E7D32',
+  GREEN_THEME:  '#2E7D32', // Pentecost green
   ORANGE_THEME: '#6E0E1A',
-  BLUE_THEME:   '#6EC6FF',
+  BLUE_THEME:   '#00ACC1', // Aqua
   CYAN_THEME:   '#E0B84A',
 };
 
