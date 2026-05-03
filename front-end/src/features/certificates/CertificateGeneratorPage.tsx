@@ -62,6 +62,7 @@ import {
   MARRIAGE_FIELD_LABELS,
   formatDate,
   getRecordDisplayName,
+  splitParents,
 } from './certificateTypes';
 import GenerateReportWizard from './GenerateReportWizard';
 
@@ -180,6 +181,12 @@ const CertificateGeneratorPage: React.FC = () => {
         return formatDate(recordData.baptism_date || recordData.reception_date);
       case 'sponsors':
         return recordData.sponsors || recordData.godparents || '';
+      case 'fatherName':
+        return splitParents(recordData.parents)[0];
+      case 'motherName':
+        return splitParents(recordData.parents)[1];
+      case 'parents':
+        return recordData.parents || '';
       case 'clergyBy':
       case 'clergyRector':
       case 'clergy':
@@ -606,8 +613,22 @@ const CertificateGeneratorPage: React.FC = () => {
               </Typography>
               
               <Divider sx={{ my: 1 }} />
-              
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 0.5,
+                  // Cap the field list and let it scroll independently — the
+                  // baptism set has 11 fields and previously fell below the
+                  // viewport on shorter screens. min(60vh, 480px) keeps this
+                  // usable on laptop heights without dominating taller ones.
+                  maxHeight: 'min(60vh, 480px)',
+                  overflowY: 'auto',
+                  overflowX: 'hidden',
+                  pr: 0.5,
+                }}
+              >
                 {Object.keys(fieldLabels).map((fieldName) => {
                   const isPlaced = placedFields.has(fieldName);
                   const value = getFieldValue(fieldName);
@@ -673,7 +694,7 @@ const CertificateGeneratorPage: React.FC = () => {
               />
               
               {showCoordinates && placedFields.size > 0 && (
-                <Box sx={{ mt: 1, maxHeight: 150, overflow: 'auto' }}>
+                <Box sx={{ mt: 1, maxHeight: 'min(40vh, 280px)', overflowY: 'auto', overflowX: 'hidden', pr: 0.5 }}>
                   {Object.keys(fieldLabels).map((fieldName) => {
                     const pos = fieldPositions[fieldName];
                     if (!pos || !placedFields.has(fieldName)) return null;
