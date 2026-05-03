@@ -18,10 +18,7 @@
 
 const express = require('express');
 const { requireServiceToken } = require('../middleware/serviceTokenAuth');
-const {
-  queryPlatform,
-  getChurchRecordConnection,
-} = require('../services/databaseService');
+const { queryPlatform } = require('../services/databaseService');
 
 const router = express.Router();
 
@@ -112,58 +109,215 @@ router.get('/church-summary', async (req, res) => {
 
 // ── /resource-usage/certificates ────────────────────────────────
 //
-// Two-stage discovery:
-//   1. Enumerate active churches in orthodoxmetrics_db.
-//   2. Per-church, count records in the canonical sacrament tables
-//      (baptism_records, marriage_records, funeral_records, plus
-//      optional chrismation_records). information_schema is queried
-//      first so missing tables don't throw.
+// Two discovery modes — the response picks one based on what OM
+// actually has on disk, never overstates:
 //
-// Settle-per-church via Promise.allSettled — one broken church DB
-// does NOT fail the response. discoveryState reflects whether all
-// queries succeeded (`live`), some failed (`partial`), or
-// everything failed (`unavailable`).
+//   1. actual_certificate_usage
+//      Used when orthodoxmetrics_db.generated_certificates exists.
+//      That table is the audit trail written by
+//      POST /api/certificate-templates/generate. Per-church counts
+//      come from a single GROUP BY against it.
+//
+//   2. record_eligibility
+//      Used when generated_certificates is missing. Falls back to
+//      per-church sacramental record counts — these are NOT actual
+//      certificates issued; they are records that *could* back a
+//      certificate template. Honestly labelled as such.
+//
+//   3. unavailable
+//      Returned only when neither mode can produce a result.
+//
+// Per-church queries run cross-schema from the platform pool
+// (orthodoxapps has GRANT ALL ON *.*). information_schema is
+// consulted before each count so missing tables never throw.
+// Promise.allSettled keeps one broken church from killing the rest.
 
 const SACRAMENT_TABLES = [
-  // type, table, optional, dateColumn, certificateLabel
-  { type: 'baptism',     table: 'baptism_records',     optional: false, dateCol: 'reception_date',   certLabel: 'Baptism' },
-  { type: 'marriage',    table: 'marriage_records',    optional: false, dateCol: 'mdate',            certLabel: 'Marriage' },
-  { type: 'funeral',     table: 'funeral_records',     optional: false, dateCol: 'funeral_date',     certLabel: 'Funeral' },
-  { type: 'chrismation', table: 'chrismation_records', optional: true,  dateCol: 'chrismation_date', certLabel: 'Chrismation' },
+  // For actual_certificate_usage: enum values used by generated_certificates.record_type
+  // For record_eligibility: per-church table names + candidate date columns (probed,
+  // first-existing wins; null lastDate if none present).
+  { type: 'baptism',     certLabel: 'Baptism',     table: 'baptism_records',     dateCols: ['reception_date', 'birth_date', 'created_at'],   inEligibility: true,  inGenerated: true },
+  { type: 'marriage',    certLabel: 'Marriage',    table: 'marriage_records',    dateCols: ['marriage_date', 'mdate', 'created_at'],         inEligibility: true,  inGenerated: true },
+  { type: 'chrismation', certLabel: 'Chrismation', table: 'chrismation_records', dateCols: ['chrismation_date', 'reception_date', 'created_at'], inEligibility: true,  inGenerated: false },
+  { type: 'reception',   certLabel: 'Reception',   table: 'reception_records',   dateCols: ['reception_date', 'created_at'],                 inEligibility: true,  inGenerated: true },
+  { type: 'funeral',     certLabel: 'Funeral',     table: 'funeral_records',     dateCols: ['funeral_date', 'burial_date', 'deceased_date', 'created_at'], inEligibility: false, inGenerated: true },
 ];
 
-async function listExistingTables(conn, schemaName) {
-  const [rows] = await conn.query(
+const ELIGIBILITY_LABELS = SACRAMENT_TABLES.filter((s) => s.inEligibility).map((s) => s.certLabel);
+
+// Return Set<string> of tables (from `tables`) that exist in `schema`,
+// using a single information_schema query.
+async function listExistingTables(schema, tables) {
+  if (!schema || !tables.length) return new Set();
+  const [rows] = await queryPlatform(
     `SELECT table_name AS t
        FROM information_schema.tables
-       WHERE table_schema = ?
-         AND table_name IN (?)`,
-    [schemaName, SACRAMENT_TABLES.map((s) => s.table)],
+      WHERE table_schema = ?
+        AND table_name IN (?)`,
+    [schema, tables],
   );
   const set = new Set();
   for (const r of (rows || [])) {
-    // Some MariaDB returns lower-case keys.
     const tn = (r.t || r.TABLE_NAME || r.table_name || '').toString();
     if (tn) set.add(tn);
   }
   return set;
 }
 
-async function discoverChurchUsage(church) {
-  const churchId = church.id;
+// Return Map<table, Set<column>> for the schema's tables we care about.
+// Lets us pick the first present date column without crashing on schemas
+// where, e.g., funeral_records has deceased_date instead of funeral_date.
+async function listColumnsForTables(schema, tables) {
+  const map = new Map();
+  if (!schema || !tables.length) return map;
+  const [rows] = await queryPlatform(
+    `SELECT table_name AS t, column_name AS c
+       FROM information_schema.columns
+      WHERE table_schema = ?
+        AND table_name IN (?)`,
+    [schema, tables],
+  );
+  for (const r of (rows || [])) {
+    const t = (r.t || r.TABLE_NAME || r.table_name || '').toString();
+    const c = (r.c || r.COLUMN_NAME || r.column_name || '').toString();
+    if (!t || !c) continue;
+    if (!map.has(t)) map.set(t, new Set());
+    map.get(t).add(c);
+  }
+  return map;
+}
+
+// Quote a MySQL identifier (schema/table/column).
+function ident(s) {
+  return '`' + String(s).replace(/`/g, '``') + '`';
+}
+
+// Probe orthodoxmetrics_db for the presence of generated_certificates.
+// Decides usageMode at the response level.
+async function generatedCertificatesTableExists() {
+  try {
+    const [rows] = await queryPlatform(
+      `SELECT 1 AS ok
+         FROM information_schema.tables
+        WHERE table_schema = DATABASE()
+          AND table_name = 'generated_certificates'
+        LIMIT 1`,
+    );
+    return Array.isArray(rows) && rows.length > 0;
+  } catch {
+    return false;
+  }
+}
+
+// ── actual_certificate_usage path ───────────────────────────────
+//
+// Pulls everything in one round-trip from orthodoxmetrics_db.generated_certificates.
+
+async function discoverActualUsage(churches) {
+  // Single grouped query — efficient for any number of churches.
+  const [rows] = await queryPlatform(
+    `SELECT church_id,
+            record_type,
+            status,
+            COUNT(*)         AS c,
+            MAX(generated_at) AS latest
+       FROM generated_certificates
+      GROUP BY church_id, record_type, status`,
+  );
+
+  // church_id -> { totals, perType: Map<type, {generated, downloaded, voided, count, latest}>, latestEpoch }
+  const byChurch = new Map();
+  for (const r of (rows || [])) {
+    const cid = Number(r.church_id);
+    if (!Number.isFinite(cid)) continue;
+    if (!byChurch.has(cid)) {
+      byChurch.set(cid, { perType: new Map(), latestEpoch: null, generated: 0, downloaded: 0, voided: 0, total: 0 });
+    }
+    const slot = byChurch.get(cid);
+    const type = String(r.record_type || '');
+    const status = String(r.status || 'generated');
+    const count = Number(r.c || 0);
+    const latest = r.latest ? new Date(r.latest) : null;
+
+    slot.total += count;
+    if (status === 'generated')   slot.generated += count;
+    if (status === 'downloaded')  slot.downloaded += count;
+    if (status === 'voided')      slot.voided += count;
+
+    if (!slot.perType.has(type)) slot.perType.set(type, { count: 0, latestEpoch: null });
+    const tslot = slot.perType.get(type);
+    tslot.count += count;
+    if (latest && !Number.isNaN(latest.getTime())) {
+      const e = latest.getTime();
+      if (slot.latestEpoch === null || e > slot.latestEpoch) slot.latestEpoch = e;
+      if (tslot.latestEpoch === null || e > tslot.latestEpoch) tslot.latestEpoch = e;
+    }
+  }
+
+  return churches.map((church) => {
+    const cid = Number(church.id);
+    const slot = byChurch.get(cid);
+    const out = {
+      churchId: String(church.id),
+      churchName: church.name || null,
+      jurisdiction: extractJurisdiction(church.settings),
+      schema: church.database_name || null,
+      certificatesDiscovered: slot ? slot.total : 0,
+      certificateTypes: slot
+        ? Array.from(slot.perType.keys())
+            .filter((t) => slot.perType.get(t).count > 0)
+            .map((t) => t.charAt(0).toUpperCase() + t.slice(1))
+        : [],
+      lastCertificateDate: slot && slot.latestEpoch
+        ? new Date(slot.latestEpoch).toISOString().slice(0, 10)
+        : null,
+      recordsSource: 'orthodoxmetrics_db.generated_certificates',
+      status: church.is_active ? 'active' : 'inactive',
+      metadata: {
+        usageMode: 'actual_certificate_usage',
+        generated: slot ? slot.generated : 0,
+        downloaded: slot ? slot.downloaded : 0,
+        voided: slot ? slot.voided : 0,
+        perType: slot
+          ? Object.fromEntries(
+              Array.from(slot.perType.entries()).map(([t, v]) => [
+                t.charAt(0).toUpperCase() + t.slice(1),
+                {
+                  count: v.count,
+                  lastGeneratedAt: v.latestEpoch ? new Date(v.latestEpoch).toISOString() : null,
+                },
+              ]),
+            )
+          : {},
+      },
+    };
+    return out;
+  });
+}
+
+// ── record_eligibility path ─────────────────────────────────────
+//
+// Per-church: probe information_schema, count rows in tables that
+// exist, pick the first present date column to compute lastDate.
+// One broken church → status='unavailable' for that church only.
+
+async function discoverChurchEligibility(church) {
   const out = {
-    churchId: String(churchId),
+    churchId: String(church.id),
     churchName: church.name || null,
     jurisdiction: extractJurisdiction(church.settings),
     schema: church.database_name || null,
     certificatesDiscovered: 0,
     certificateTypes: [],
     lastCertificateDate: null,
-    recordsSource: church.database_name
-      ? `${church.database_name}.{baptism|marriage|funeral|chrismation}_records`
-      : 'unavailable',
+    recordsSource: church.database_name ? `${church.database_name}.{discovered tables}` : 'unavailable',
     status: church.is_active ? 'active' : 'inactive',
-    metadata: {},
+    metadata: {
+      usageMode: 'record_eligibility',
+      recordCounts: Object.fromEntries(ELIGIBILITY_LABELS.map((l) => [l, 0])),
+      missingTables: [],
+      queriedTables: [],
+    },
   };
 
   if (!church.database_name) {
@@ -172,19 +326,16 @@ async function discoverChurchUsage(church) {
     return out;
   }
 
-  let conn;
-  try {
-    conn = await getChurchRecordConnection(churchId);
-  } catch (err) {
-    out.status = 'unavailable';
-    out.metadata.reason = 'connection_failed';
-    out.metadata.error = err && err.message ? err.message : String(err);
-    return out;
-  }
+  const eligibilityTables = SACRAMENT_TABLES.filter((s) => s.inEligibility);
+  const tableNames = eligibilityTables.map((s) => s.table);
 
-  let existingTables;
+  let existing;
+  let columnsByTable;
   try {
-    existingTables = await listExistingTables(conn, church.database_name);
+    [existing, columnsByTable] = await Promise.all([
+      listExistingTables(church.database_name, tableNames),
+      listColumnsForTables(church.database_name, tableNames),
+    ]);
   } catch (err) {
     out.status = 'unavailable';
     out.metadata.reason = 'information_schema_failed';
@@ -192,38 +343,62 @@ async function discoverChurchUsage(church) {
     return out;
   }
 
+  for (const t of tableNames) {
+    if (!existing.has(t)) out.metadata.missingTables.push(t);
+  }
+
+  if (existing.size === 0) {
+    out.status = 'unavailable';
+    out.metadata.reason = 'no_eligibility_tables';
+    return out;
+  }
+
   let total = 0;
   let latestEpoch = null;
-  const types = [];
+  const presentTypes = [];
+  let hadAnyError = false;
 
-  for (const sacrament of SACRAMENT_TABLES) {
-    if (!existingTables.has(sacrament.table)) continue;
+  for (const s of eligibilityTables) {
+    if (!existing.has(s.table)) continue;
+    out.metadata.queriedTables.push(s.table);
+
+    const cols = columnsByTable.get(s.table) || new Set();
+    const dateCol = s.dateCols.find((c) => cols.has(c)) || null;
+    const dateExpr = dateCol ? `MAX(${ident(dateCol)})` : 'NULL';
+    const sql = `SELECT COUNT(*) AS c, ${dateExpr} AS latest FROM ${ident(church.database_name)}.${ident(s.table)}`;
+
     try {
-      const [rows] = await conn.query(
-        `SELECT COUNT(*) AS c, MAX(\`${sacrament.dateCol}\`) AS latest FROM \`${sacrament.table}\``,
-      );
+      const [rows] = await queryPlatform(sql);
       const r = rows && rows[0] ? rows[0] : {};
       const count = Number(r.c || 0);
-      if (count > 0) {
-        types.push(sacrament.certLabel);
-        total += count;
+      out.metadata.recordCounts[s.certLabel] = count;
+      total += count;
+      if (count > 0) presentTypes.push(s.certLabel);
+      if (dateCol) {
         const latest = r.latest ? new Date(r.latest) : null;
         if (latest && !Number.isNaN(latest.getTime())) {
-          const epoch = latest.getTime();
-          if (latestEpoch === null || epoch > latestEpoch) latestEpoch = epoch;
+          const e = latest.getTime();
+          if (latestEpoch === null || e > latestEpoch) latestEpoch = e;
         }
+      } else {
+        out.metadata[`${s.table}_dateColumn`] = 'none_detected';
       }
     } catch (err) {
-      // Non-fatal — note partial in metadata.
-      out.metadata[`${sacrament.table}_error`] = err && err.message ? err.message : String(err);
+      hadAnyError = true;
+      out.metadata[`${s.table}_error`] = err && err.message ? err.message : String(err);
     }
   }
 
   out.certificatesDiscovered = total;
-  out.certificateTypes = types;
-  out.lastCertificateDate = latestEpoch
-    ? new Date(latestEpoch).toISOString().slice(0, 10)
-    : null;
+  out.certificateTypes = presentTypes;
+  out.lastCertificateDate = latestEpoch ? new Date(latestEpoch).toISOString().slice(0, 10) : null;
+  out.recordsSource = `${church.database_name}.{${out.metadata.queriedTables.join('|') || 'none'}}`;
+
+  if (out.metadata.queriedTables.length === 0) {
+    out.status = 'unavailable';
+  } else if (hadAnyError || out.metadata.missingTables.length > 0) {
+    out.status = 'partial';
+  }
   return out;
 }
 
@@ -240,20 +415,51 @@ router.get('/resource-usage/certificates', async (req, res) => {
       [limit],
     );
 
-    const settled = await Promise.allSettled((churches || []).map(discoverChurchUsage));
+    const haveActualTable = await generatedCertificatesTableExists();
 
-    const usage = [];
-    let succeeded = 0;
-    let failed = 0;
-    settled.forEach((s, i) => {
-      if (s.status === 'fulfilled') {
-        usage.push(s.value);
-        if (s.value.status !== 'unavailable') succeeded += 1;
-        else failed += 1;
-      } else {
-        failed += 1;
-        const c = churches[i] || {};
-        usage.push({
+    let usage = [];
+    let usageMode;
+    let queryKind;
+    let querySql;
+    let queryLimitations;
+
+    if (haveActualTable) {
+      try {
+        usage = await discoverActualUsage(churches || []);
+        usageMode = 'actual_certificate_usage';
+        queryKind = 'existing';
+        querySql = [
+          '-- Stage 1 (orthodoxmetrics_db):',
+          'SELECT id, name, settings, is_active, database_name FROM churches WHERE is_active = 1;',
+          '',
+          '-- Stage 2 (orthodoxmetrics_db) — single grouped query against the audit trail:',
+          'SELECT church_id, record_type, status, COUNT(*) AS c, MAX(generated_at) AS latest',
+          '  FROM generated_certificates',
+          ' GROUP BY church_id, record_type, status;',
+        ].join('\n');
+        queryLimitations = [
+          'Counts only certificates produced by POST /api/certificate-templates/generate (the template-driven path).',
+          'Legacy per-sacrament PNG endpoints (baptismCertificates.js etc.) do not write to generated_certificates and are NOT counted here.',
+          'record_type enum covers baptism / marriage / funeral / reception. Chrismation certificates are not represented.',
+          'lastCertificateDate is the MAX(generated_at) across types for a church, not the global latest by type — see metadata.perType for per-type timestamps.',
+        ];
+      } catch (err) {
+        // generated_certificates exists but query failed — fall back to eligibility.
+        usage = [];
+        usageMode = null;
+        queryKind = null;
+        querySql = null;
+        queryLimitations = [`actual_certificate_usage query failed: ${err && err.message ? err.message : String(err)}`];
+      }
+    }
+
+    if (!usageMode) {
+      // record_eligibility path — per-church discovery, settle-per-church.
+      const settled = await Promise.allSettled((churches || []).map(discoverChurchEligibility));
+      usage = settled.map((s, i) => {
+        if (s.status === 'fulfilled') return s.value;
+        const c = (churches || [])[i] || {};
+        return {
           churchId: String(c.id || ''),
           churchName: c.name || null,
           jurisdiction: extractJurisdiction(c.settings),
@@ -263,43 +469,69 @@ router.get('/resource-usage/certificates', async (req, res) => {
           lastCertificateDate: null,
           recordsSource: 'unavailable',
           status: 'unavailable',
-          metadata: { reason: 'discovery_threw', error: s.reason && s.reason.message ? s.reason.message : String(s.reason) },
-        });
-      }
-    });
+          metadata: {
+            usageMode: 'record_eligibility',
+            recordCounts: Object.fromEntries(ELIGIBILITY_LABELS.map((l) => [l, 0])),
+            missingTables: [],
+            queriedTables: [],
+            reason: 'discovery_threw',
+            error: s.reason && s.reason.message ? s.reason.message : String(s.reason),
+          },
+        };
+      });
+      usageMode = haveActualTable ? 'unavailable' : 'record_eligibility';
+      queryKind = haveActualTable ? 'partial' : 'inferred';
+      querySql = [
+        '-- Stage 1 (orthodoxmetrics_db):',
+        'SELECT id, name, settings, is_active, database_name FROM churches WHERE is_active = 1;',
+        '',
+        '-- Stage 2 (per om_church_<id>) — defensive discovery, cross-schema from the platform pool:',
+        '--   a) Check which sacrament tables exist:',
+        "SELECT table_name FROM information_schema.tables",
+        " WHERE table_schema = ? AND table_name IN ('baptism_records','marriage_records','chrismation_records','reception_records');",
+        '--   b) For each existing table, find the first present date column (reception_date / mdate / chrismation_date / created_at, etc.):',
+        'SELECT column_name FROM information_schema.columns WHERE table_schema = ? AND table_name = ?;',
+        '--   c) Count + max date (MAX returns NULL when no date column was detected):',
+        'SELECT COUNT(*) AS c, MAX(<first_present_date_col>) AS latest FROM <church_db>.<sacrament_table>;',
+      ].join('\n');
+      queryLimitations = [
+        'OM does not currently expose certificate generation audit records (orthodoxmetrics_db.generated_certificates is missing or unreadable).',
+        'This provider reports record-backed certificate eligibility — counts of sacramental records that *could* support a certificate template, not certificates actually issued.',
+        'Funeral records are intentionally excluded from eligibility counts; funeral certificates are not on the OMStudio /today path.',
+        'Tables checked per church: baptism_records, marriage_records, chrismation_records, reception_records. Missing ones are recorded in metadata.missingTables, not treated as global failure.',
+        'lastCertificateDate is the MAX across whichever date column was discovered per table; null when no candidate column is present.',
+      ];
+    }
 
+    // discoveryState: live = every active church returned a real (non-unavailable) row.
+    let succeeded = 0;
+    let failed = 0;
+    for (const u of usage) {
+      if (u.status && u.status !== 'unavailable') succeeded += 1;
+      else failed += 1;
+    }
     let discoveryState = 'live';
     if (succeeded === 0 && failed > 0) discoveryState = 'unavailable';
     else if (failed > 0) discoveryState = 'partial';
+
+    const queryDescription = usageMode === 'actual_certificate_usage'
+      ? 'OM logs every template-driven certificate to orthodoxmetrics_db.generated_certificates. This provider returns actual certificate usage by grouping that audit trail per church / record_type / status.'
+      : usageMode === 'record_eligibility'
+        ? 'OM does not currently expose certificate generation audit records. This provider reports record-backed certificate eligibility by counting sacramental records in each active church schema where supported tables exist (information_schema is consulted before each count, so missing tables are recorded as limitations rather than failures).'
+        : 'Neither the certificate audit trail nor per-church eligibility tables could be queried — usage is unavailable for this snapshot.';
 
     res.json({
       ok: true,
       sourceSystem: 'om',
       generatedAt: new Date().toISOString(),
       discoveryState,
-      queryDescription:
-        'Two-stage: enumerate active churches in orthodoxmetrics_db; ' +
-        'per-church, count records in baptism_records / marriage_records / ' +
-        'funeral_records (and chrismation_records when present via ' +
-        'information_schema check). Settle-per-church via ' +
-        'Promise.allSettled so one broken church DB does not fail the ' +
-        'response.',
+      usageMode,
+      queryDescription,
       usage,
       query: {
-        kind: 'existing',
-        sqlOrDescription: [
-          "-- Stage 1 (orthodoxmetrics_db):",
-          "SELECT id, name, settings, is_active, database_name FROM churches WHERE is_active = 1;",
-          "",
-          "-- Stage 2 (per om_church_<id>):",
-          "SELECT COUNT(*), MAX(<date_col>) FROM <baptism|marriage|funeral|chrismation>_records;",
-        ].join('\n'),
-        limitations: [
-          'Funeral counts roll up into the per-church total but are sacramental records, not certificate templates.',
-          'Reception and Recognition certificates have no dedicated record table; they are not surfaced here.',
-          'lastCertificateDate is the MAX across the four sacrament tables, not the global latest by certificate type.',
-          'Per-church information_schema query runs on every request — consider caching once snapshot persistence lands.',
-        ],
+        kind: queryKind || 'partial',
+        sqlOrDescription: querySql || queryDescription,
+        limitations: queryLimitations || [],
       },
     });
   } catch (err) {
