@@ -121,31 +121,39 @@ const IGNORE_FIELDS = new Set([
 
 /**
  * Map incoming request body to { column: value } pairs for the DB.
+ *
+ * Combined-field handling (fatherName+motherName → parents,
+ * witness1+witness2 → witness) runs AFTER the main loop so that an
+ * explicit edit on the split fields always wins over an out-of-date
+ * snake_case `parents` / `witness` value the frontend also happens to
+ * spread into the body. (When the frontend opens an edit form it
+ * pre-populates both shapes — without this ordering, the loop would
+ * overwrite the user's just-edited combined value.)
  */
 const mapFields = (recordType, body, churchId) => {
   const mapping = FIELD_MAP[recordType] || {};
   const cols = {};
 
-  // Handle combined parents field for baptism (fatherName + motherName)
+  for (const [key, value] of Object.entries(body)) {
+    if (IGNORE_FIELDS.has(key)) continue;
+    if (key === 'fatherName' || key === 'motherName') continue; // handled below
+    if (key === 'witness1' || key === 'witness2') continue;     // handled below
+    const dbCol = mapping[key];
+    if (dbCol && value !== undefined && value !== null && value !== '') {
+      cols[dbCol] = value;
+    }
+  }
+
+  // Combined parents (baptism) — overrides anything the loop wrote to cols.parents.
   if (recordType === 'baptism' && (body.fatherName || body.motherName)) {
     const parts = [body.fatherName, body.motherName].filter(Boolean);
     if (parts.length) cols.parents = parts.join(', ');
   }
 
-  // Handle combined witness field for marriage (witness1 + witness2)
+  // Combined witness (marriage) — overrides anything the loop wrote to cols.witness.
   if (recordType === 'marriage' && (body.witness1 || body.witness2)) {
     const parts = [body.witness1, body.witness2].filter(Boolean);
     if (parts.length) cols.witness = parts.join(', ');
-  }
-
-  for (const [key, value] of Object.entries(body)) {
-    if (IGNORE_FIELDS.has(key)) continue;
-    if (key === 'fatherName' || key === 'motherName') continue; // handled above
-    if (key === 'witness1' || key === 'witness2') continue; // handled above
-    const dbCol = mapping[key];
-    if (dbCol && value !== undefined && value !== null && value !== '') {
-      cols[dbCol] = value;
-    }
   }
 
   // Always set church_id

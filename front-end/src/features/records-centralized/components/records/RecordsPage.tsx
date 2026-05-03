@@ -27,7 +27,7 @@ import StandardRecordsTable from './RecordsPage/StandardRecordsTable';
 import { BaptismRecord, SortConfig, RecordsPageProps } from './RecordsPage/types';
 import { useRecordsAutocomplete } from './RecordsPage/useRecordsAutocomplete';
 import RecordEditForm from './RecordsPage/RecordEditForm';
-import { parseJsonField, displayJsonField, highlightMatch, getCellValue, getColumnDefinitions, getSortFields, RECORD_TYPE_CONFIGS, DEFAULT_DATE_SORT_FIELD } from './RecordsPage/utils';
+import { parseJsonField, displayJsonField, highlightMatch, getCellValue, getColumnDefinitions, getSortFields, RECORD_TYPE_CONFIGS, DEFAULT_DATE_SORT_FIELD, recordToFormData } from './RecordsPage/utils';
 import RecordsControlsBar from './RecordsPage/RecordsControlsBar';
 import { fetchChurches as fetchChurchesApi, fetchRecords as fetchRecordsApi, fetchPriestOptions as fetchPriestOptionsApi } from './RecordsPage/useRecordsFetch';
 import { useAgGridConfig } from './RecordsPage/useAgGridConfig';
@@ -228,9 +228,9 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
     setViewEditMode(mode);
     if (mode === 'edit' && viewingRecord) {
       setEditingRecord(viewingRecord);
-      setFormData(viewingRecord);
+      setFormData(recordToFormData(viewingRecord, selectedRecordType));
     }
-  }, [viewingRecord]);
+  }, [viewingRecord, selectedRecordType]);
 
   // Collapsible Panel State
   const [isFiltersCollapsed, setIsFiltersCollapsed] = useState<boolean>(false);
@@ -426,9 +426,9 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
 
   const handleEditRecord = useCallback((record: BaptismRecord) => {
     setEditingRecord(record);
-    setFormData(record);
+    setFormData(recordToFormData(record, selectedRecordType));
     setDialogOpen(true);
-  }, []);
+  }, [selectedRecordType]);
 
   const handleViewRecord = useCallback((record: BaptismRecord) => {
     // Find the index of the record in the filtered list for navigation
@@ -447,7 +447,7 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
       setViewingRecordIndex(prevIndex);
       if (viewEditMode === 'edit') {
         setEditingRecord(prevRecord);
-        setFormData(prevRecord);
+        setFormData(recordToFormData(prevRecord, selectedRecordType));
       }
     }
   };
@@ -461,7 +461,7 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
       setViewingRecordIndex(nextIndex);
       if (viewEditMode === 'edit') {
         setEditingRecord(nextRecord);
-        setFormData(nextRecord);
+        setFormData(recordToFormData(nextRecord, selectedRecordType));
       }
     }
   };
@@ -477,8 +477,8 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
   // Edit from View Details dialog — populates form data for in-modal editing
   const handleEditFromView = useCallback((record: BaptismRecord) => {
     setEditingRecord(record);
-    setFormData(record);
-  }, []);
+    setFormData(recordToFormData(record, selectedRecordType));
+  }, [selectedRecordType]);
 
   // Generate Certificate (for baptism and marriage records)
   const handleGenerateCertificate = useCallback(() => {
