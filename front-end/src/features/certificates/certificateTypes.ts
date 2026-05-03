@@ -9,6 +9,9 @@ export const API_BASE = '/api/church';
 // Default field positions for baptism certificate
 export const BAPTISM_DEFAULT_POSITIONS: Record<string, { x: number; y: number }> = {
   fullName: { x: 400, y: 340 },
+  fatherName: { x: 300, y: 375 },
+  motherName: { x: 500, y: 375 },
+  parents: { x: 400, y: 375 },
   birthDate: { x: 530, y: 405 },
   birthplace: { x: 400, y: 405 },
   baptismDate: { x: 300, y: 510 },
@@ -31,6 +34,9 @@ export const MARRIAGE_DEFAULT_POSITIONS: Record<string, { x: number; y: number }
 // Field labels for display
 export const BAPTISM_FIELD_LABELS: Record<string, string> = {
   fullName: 'Full Name',
+  fatherName: "Father's Name",
+  motherName: "Mother's Name",
+  parents: 'Parents (combined)',
   birthDate: 'Birth Date',
   birthplace: 'Birthplace',
   baptismDate: 'Baptism Date',
@@ -94,6 +100,21 @@ export interface RecordData {
   witnesses?: string;
   churchName?: string;
   birthplace?: string;
+  parents?: string;
+}
+
+// Split a combined "A & B" / "A, B" / "A; B" string into [first, second].
+export function splitParents(combined: string | undefined | null): [string, string] {
+  if (!combined) return ['', ''];
+  const trimmed = String(combined).trim();
+  if (!trimmed) return ['', ''];
+  for (const sep of [' & ', '&', ';', ',']) {
+    if (trimmed.includes(sep)) {
+      const parts = trimmed.split(sep).map(s => s.trim()).filter(Boolean);
+      return [parts[0] || '', parts[1] || ''];
+    }
+  }
+  return [trimmed, ''];
 }
 
 export interface SearchCriteria {
