@@ -218,6 +218,24 @@ function ToolItem({ icon: Icon, label, description, onClick }: {
   );
 }
 
+/**
+ * Format a clergy name for display in Recent Activity / search results.
+ * Adds the "Fr." honorific only when the value doesn't already start
+ * with one — otherwise we end up with double-prefixed entries like
+ * "Fr. Rev. James Parsells".
+ *
+ * Honorifics matched (case-insensitive, leading whitespace tolerated):
+ *   Fr / Father / Rev / Reverend / V.Rev / Very Reverend / Archpriest /
+ *   Hieromonk / Hierodeacon / Deacon / Bishop / Metropolitan
+ */
+const HONORIFIC_RE = /^(?:fr|father|rev|reverend|v\.?\s*rev|very\s+reverend|archpriest|protopresbyter|hieromonk|hierodeacon|deacon|protodeacon|bishop|archbishop|metropolitan)\b\.?/i;
+function formatClergy(name?: string | null): string | undefined {
+  if (!name) return undefined;
+  const trimmed = String(name).trim();
+  if (!trimmed) return undefined;
+  return HONORIFIC_RE.test(trimmed) ? trimmed : `Fr. ${trimmed}`;
+}
+
 /* ══════════════════════════════════════════════════════════
    Main Dashboard Component
    ══════════════════════════════════════════════════════════ */
@@ -328,7 +346,7 @@ const ChurchPortalHub: React.FC = () => {
               id: r.id,
               label: r.child_name || r.first_name || [r.first_name, r.last_name].filter(Boolean).join(' ') || '\u2014',
               date: r.reception_date || r.baptism_date || r.date_entered || '',
-              sub: r.clergy ? `Fr. ${r.clergy}` : r.priest_name ? `Fr. ${r.priest_name}` : undefined,
+              sub: formatClergy(r.clergy) ?? formatClergy(r.priest_name),
               type: 'baptism',
             });
           });
@@ -344,7 +362,7 @@ const ChurchPortalHub: React.FC = () => {
                 [r.brideFirstName || r.fname_bride, r.brideLastName || r.lname_bride].filter(Boolean).join(' '),
               ].filter(Boolean).join(' & ') || '\u2014',
               date: r.mdate || r.marriage_date || r.date_entered || '',
-              sub: r.clergy ? `Fr. ${r.clergy}` : r.priest_name ? `Fr. ${r.priest_name}` : undefined,
+              sub: formatClergy(r.clergy) ?? formatClergy(r.priest_name),
               type: 'marriage',
             });
           });
@@ -357,7 +375,7 @@ const ChurchPortalHub: React.FC = () => {
               id: r.id,
               label: r.name || r.deceased_name || [r.name, r.lastname].filter(Boolean).join(' ') || '\u2014',
               date: r.burial_date || r.funeral_date || r.deceased_date || '',
-              sub: r.clergy ? `Fr. ${r.clergy}` : r.priest_name ? `Fr. ${r.priest_name}` : undefined,
+              sub: formatClergy(r.clergy) ?? formatClergy(r.priest_name),
               type: 'funeral',
             });
           });
@@ -417,7 +435,7 @@ const ChurchPortalHub: React.FC = () => {
             id: r.id,
             label: r.child_name || r.first_name || [r.first_name, r.last_name].filter(Boolean).join(' ') || '\u2014',
             date: r.reception_date || r.baptism_date || r.date_entered || '',
-            sub: r.clergy ? `Fr. ${r.clergy}` : r.priest_name ? `Fr. ${r.priest_name}` : undefined,
+            sub: formatClergy(r.clergy) ?? formatClergy(r.priest_name),
             type: 'baptism' as const,
           })),
         );
@@ -435,7 +453,7 @@ const ChurchPortalHub: React.FC = () => {
               [r.brideFirstName || r.fname_bride, r.brideLastName || r.lname_bride].filter(Boolean).join(' '),
             ].filter(Boolean).join(' & ') || '\u2014',
             date: r.mdate || r.marriage_date || r.date_entered || '',
-            sub: r.clergy ? `Fr. ${r.clergy}` : r.priest_name ? `Fr. ${r.priest_name}` : undefined,
+            sub: formatClergy(r.clergy) ?? formatClergy(r.priest_name),
             type: 'marriage' as const,
           })),
         );
@@ -450,7 +468,7 @@ const ChurchPortalHub: React.FC = () => {
             id: r.id,
             label: r.name || r.deceased_name || [r.name, r.lastname].filter(Boolean).join(' ') || '\u2014',
             date: r.burial_date || r.funeral_date || r.deceased_date || '',
-            sub: r.clergy ? `Fr. ${r.clergy}` : r.priest_name ? `Fr. ${r.priest_name}` : undefined,
+            sub: formatClergy(r.clergy) ?? formatClergy(r.priest_name),
             type: 'funeral' as const,
           })),
         );
