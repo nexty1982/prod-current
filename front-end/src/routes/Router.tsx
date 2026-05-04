@@ -202,6 +202,19 @@ function AccountLayoutSwitcher() {
   return <ChurchPortalLayout />;
 }
 
+/**
+ * Interactive Reports layout switcher.
+ * super_admin / admin → FullLayout admin shell.
+ * Everyone else (church_admin, priest, deacon, …) → ChurchPortalLayout, so
+ * church staff using Interactive Reports never leave their portal chrome.
+ */
+function InteractiveReportsLayoutSwitcher() {
+  const { user } = useAuth();
+  const role = user?.role;
+  if (role === 'super_admin' || role === 'admin') return <FullLayout />;
+  return <ChurchPortalLayout />;
+}
+
 const Router = [
   // Root: unauthenticated visitors see the marketing Homepage; authenticated
   // users are redirected to their role-appropriate dashboard. Renders its own
@@ -772,9 +785,23 @@ const Router = [
           </ProtectedRoute>
         )
       },
-      // Interactive Reports
+      // Interactive Reports — moved out of FullLayout block so non-admin users
+      // (priest, church_admin, …) render inside ChurchPortalLayout instead of
+      // the admin shell. See InteractiveReportsLayoutSwitcher block below.
+      { path: '/apps/records/manager', element: <DynamicRecordsManager /> },
+      { path: '/apps/records/modern-manager', element: <ModernDynamicRecordsManager /> },
+      { path: '/apps/records/editable', element: <EditableRecordPage /> },
+    ],
+  },
+  // ── Church Portal (extracted to portalRoutes.tsx) ──
+  portalRoute,
+  // ── Interactive Reports — admins use FullLayout, church staff stay in portal ──
+  {
+    path: '/apps/records/interactive-reports',
+    element: <InteractiveReportsLayoutSwitcher />,
+    children: [
       {
-        path: '/apps/records/interactive-reports',
+        index: true,
         element: (
           <ProtectedRoute requiredRole={['admin', 'super_admin', 'church_admin', 'priest']}>
             <EnvironmentAwarePage
@@ -785,10 +812,10 @@ const Router = [
               <InteractiveReportsPage />
             </EnvironmentAwarePage>
           </ProtectedRoute>
-        )
+        ),
       },
       {
-        path: '/apps/records/interactive-reports/:reportId',
+        path: ':reportId',
         element: (
           <ProtectedRoute requiredRole={['admin', 'super_admin', 'church_admin', 'priest']}>
             <EnvironmentAwarePage
@@ -799,15 +826,10 @@ const Router = [
               <InteractiveReportReview />
             </EnvironmentAwarePage>
           </ProtectedRoute>
-        )
+        ),
       },
-      { path: '/apps/records/manager', element: <DynamicRecordsManager /> },
-      { path: '/apps/records/modern-manager', element: <ModernDynamicRecordsManager /> },
-      { path: '/apps/records/editable', element: <EditableRecordPage /> },
     ],
   },
-  // ── Church Portal (extracted to portalRoutes.tsx) ──
-  portalRoute,
   // ── Account Hub — super_admin uses FullLayout, others use portal ──
   {
     path: '/account',
