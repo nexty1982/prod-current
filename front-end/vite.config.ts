@@ -114,6 +114,18 @@ export default defineConfig(({ mode }) => {
         },
         rollupOptions: {
             external: [],
+            onwarn(warning, warn) {
+                // react-helmet-async ships pre-minified ESM with /*#__PURE__*/
+                // comments that Rollup can't position-validate. Harmless; mute them.
+                if (
+                    warning.code === 'INVALID_ANNOTATION' &&
+                    typeof warning.message === 'string' &&
+                    warning.message.includes('react-helmet-async')
+                ) {
+                    return;
+                }
+                warn(warning);
+            },
             output: {
                 manualChunks: {
                     vendor: ['react', 'react-dom', 'react-router-dom'],
