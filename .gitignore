@@ -126,6 +126,10 @@ front-end/public/index.html
 front-end/dist-latest/
 front-end/dist-stable/
 front-end/dist-backup/
+# om-deploy.sh's stamp_version_json writes this each backend deploy — mirrors
+# the OMAI gitignore for _runtime/server/version.json. Without it, the next
+# deploy would see the file as untracked.
+server/version.json
 front-end/dupes/
 
 # --- Test / scratch data ---
