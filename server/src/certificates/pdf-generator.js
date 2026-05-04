@@ -45,6 +45,48 @@ function dateYY(raw) {
   return String(d.getUTCFullYear()).slice(-2);
 }
 
+// Saved positions live in template-image pixel space (top-left origin,
+// native image dimensions — what handleDrop captured via naturalWidth/
+// naturalHeight in the front-end editor). The PDF page is 612x792 points,
+// bottom-left origin, with the template drawn scaled-and-centered. This
+// converts each saved position into the PDF's point space so drawText
+// lands where the operator placed it on screen.
+function convertCanvasPositionsToPdf(positions, imgWidth, imgHeight, pageWidth, pageHeight) {
+  if (!positions || !imgWidth || !imgHeight) return positions || {};
+  const scale = Math.min(pageWidth / imgWidth, pageHeight / imgHeight);
+  const scaledWidth = imgWidth * scale;
+  const scaledHeight = imgHeight * scale;
+  const offsetX = (pageWidth - scaledWidth) / 2;
+  const offsetY = (pageHeight - scaledHeight) / 2;
+  const out = {};
+  for (const [key, pos] of Object.entries(positions)) {
+    if (!pos || typeof pos.x !== 'number' || typeof pos.y !== 'number') continue;
+    out[key] = {
+      x: offsetX + pos.x * scale,
+      // Flip Y: image origin top-left, PDF origin bottom-left.
+      y: offsetY + (imgHeight - pos.y) * scale,
+    };
+  }
+  return out;
+}
+
+// Split "Father & Mother" / "Father, Mother" / "Father; Mother" into
+// [father, mother]. Mirrors front-end splitParents in
+// certificateTypes.ts so the PDF renders the same fields the operator
+// dragged in the editor.
+function splitParents(combined) {
+  if (!combined) return ['', ''];
+  const trimmed = String(combined).trim();
+  if (!trimmed) return ['', ''];
+  for (const sep of [' & ', '&', ';', ',']) {
+    if (trimmed.includes(sep)) {
+      const parts = trimmed.split(sep).map(s => s.trim()).filter(Boolean);
+      return [parts[0] || '', parts[1] || ''];
+    }
+  }
+  return [trimmed, ''];
+}
+
 /**
  * Text alignment helper
  */
@@ -168,18 +210,13 @@ async function generateBaptismCertificatePDF(record, options = {}) {
     hiddenFields = [],
     templatePath = path.join(__dirname, '../../certificates/2026/adult-baptism.png'),
   } = options;
-  
+
   // Create PDF document
   const pdfDoc = await PDFDocument.create();
-  
-  // Get coordinate map
-  let coordinateMap = getCoordinateMap('baptism');
-  if (customPositions) {
-    coordinateMap = mergeCustomPositions(coordinateMap, customPositions);
-  }
-  
-  const { width, height } = coordinateMap.templateDimensions;
-  
+
+  const baseCoordinateMap = getCoordinateMap('baptism');
+  const { width, height } = baseCoordinateMap.templateDimensions;
+
   // Load and embed template image
   let templateImage = null;
   if (fs.existsSync(templatePath)) {
@@ -195,10 +232,26 @@ async function generateBaptismCertificatePDF(record, options = {}) {
       }
     }
   }
-  
+
+  // Merge customPositions AFTER we know the template's natural pixel
+  // dimensions — saved positions are in image-pixel space (top-left
+  // origin) and need to be projected into the PDF's point space
+  // (bottom-left origin, scaled-and-centered to fit the page).
+  let coordinateMap = baseCoordinateMap;
+  if (customPositions) {
+    let pdfPositions = customPositions;
+    if (templateImage) {
+      const imgDims = templateImage.scale(1);
+      pdfPositions = convertCanvasPositionsToPdf(
+        customPositions, imgDims.width, imgDims.height, width, height
+      );
+    }
+    coordinateMap = mergeCustomPositions(baseCoordinateMap, pdfPositions);
+  }
+
   // Create page
   const page = pdfDoc.addPage([width, height]);
-  
+
   // Draw template background
   if (templateImage) {
     const imgDims = templateImage.scale(1);
@@ -207,7 +260,7 @@ async function generateBaptismCertificatePDF(record, options = {}) {
     const scaledHeight = imgDims.height * scale;
     const x = (width - scaledWidth) / 2;
     const y = (height - scaledHeight) / 2;
-    
+
     page.drawImage(templateImage, {
       x,
       y,
@@ -215,13 +268,14 @@ async function generateBaptismCertificatePDF(record, options = {}) {
       height: scaledHeight,
     });
   }
-  
+
   // Embed fonts
   const font = await pdfDoc.embedFont(StandardFonts.TimesRoman);
   const fontBold = await pdfDoc.embedFont(StandardFonts.TimesRomanBold);
-  
+
   // Extract field data from record
   const baptismDateRaw = record.reception_date || record.baptism_date || null;
+  const [fatherName, motherName] = splitParents(record.parents);
   const fieldData = {
     fullName: `${record.first_name || ''} ${record.last_name || ''}`.trim(),
     birthDate: record.birth_date ? new Date(record.birth_date).toLocaleDateString() : '',
@@ -235,6 +289,9 @@ async function generateBaptismCertificatePDF(record, options = {}) {
     clergyBy: record.clergy || '',
     clergyRector: record.clergy || '',
     church: record.churchName || 'Orthodox Church',
+    fatherName,
+    motherName,
+    parents: record.parents || '',
   };
   
   // Draw each field
@@ -262,18 +319,13 @@ async function generateMarriageCertificatePDF(record, options = {}) {
     hiddenFields = [],
     templatePath = path.join(__dirname, '../../certificates/2026/marriage.png'),
   } = options;
-  
+
   // Create PDF document
   const pdfDoc = await PDFDocument.create();
-  
-  // Get coordinate map
-  let coordinateMap = getCoordinateMap('marriage');
-  if (customPositions) {
-    coordinateMap = mergeCustomPositions(coordinateMap, customPositions);
-  }
-  
-  const { width, height } = coordinateMap.templateDimensions;
-  
+
+  const baseCoordinateMap = getCoordinateMap('marriage');
+  const { width, height } = baseCoordinateMap.templateDimensions;
+
   // Load and embed template image
   let templateImage = null;
   if (fs.existsSync(templatePath)) {
@@ -288,7 +340,20 @@ async function generateMarriageCertificatePDF(record, options = {}) {
       }
     }
   }
-  
+
+  // Project saved canvas-pixel positions into PDF point space.
+  let coordinateMap = baseCoordinateMap;
+  if (customPositions) {
+    let pdfPositions = customPositions;
+    if (templateImage) {
+      const imgDims = templateImage.scale(1);
+      pdfPositions = convertCanvasPositionsToPdf(
+        customPositions, imgDims.width, imgDims.height, width, height
+      );
+    }
+    coordinateMap = mergeCustomPositions(baseCoordinateMap, pdfPositions);
+  }
+
   // Create page
   const page = pdfDoc.addPage([width, height]);
   
