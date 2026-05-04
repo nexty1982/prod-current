@@ -34,6 +34,7 @@ export const MARRIAGE_DEFAULT_POSITIONS: Record<string, { x: number; y: number }
   marriageDateYY: { x: 560, y: 678 },
   witnesses: { x: 400, y: 782 },
   clergy: { x: 410, y: 730 },
+  clergyRector: { x: 600, y: 870 },
   church: { x: 514, y: 756 },
 };
 
@@ -63,7 +64,8 @@ export const MARRIAGE_FIELD_LABELS: Record<string, string> = {
   marriageDateMD: 'Marriage Date — M/D',
   marriageDateYY: 'Marriage Date — YY',
   witnesses: 'Witnesses',
-  clergy: 'Clergy',
+  clergy: 'Clergy (By)',
+  clergyRector: 'Rector',
   church: 'Church Name',
 };
 
