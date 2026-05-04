@@ -220,27 +220,6 @@ const MARRIAGE_CERTIFICATE_MAP = {
       align: 'center',
       maxWidth: 40,
     },
-    marriagePlace: {
-      x: 306,
-      y: 390,
-      fontSize: 14,
-      align: 'center',
-      maxWidth: 300,
-    },
-    groomParents: {
-      x: 306,
-      y: 350,
-      fontSize: 12,
-      align: 'center',
-      maxWidth: 400,
-    },
-    brideParents: {
-      x: 306,
-      y: 325,
-      fontSize: 12,
-      align: 'center',
-      maxWidth: 400,
-    },
     witnesses: {
       x: 306,
       y: 280,
@@ -255,6 +234,16 @@ const MARRIAGE_CERTIFICATE_MAP = {
       fontSize: 14,
       align: 'center',
       maxWidth: 300,
+    },
+    // Marriage cert has two clergy slots — the officiating priest on
+    // the "By" line (rendered as `clergy`) and a second signature on
+    // the "Rector" line at the bottom. Same value as `clergy`.
+    clergyRector: {
+      x: 450,
+      y: 150,
+      fontSize: 12,
+      align: 'left',
+      maxWidth: 200,
     },
     church: {
       x: 306,

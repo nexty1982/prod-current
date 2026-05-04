@@ -382,18 +382,26 @@ async function generateMarriageCertificatePDF(record, options = {}) {
   const font = await pdfDoc.embedFont(StandardFonts.TimesRoman);
   const fontBold = await pdfDoc.embedFont(StandardFonts.TimesRomanBold);
   
-  // Extract field data from record
+  // Extract field data from record. groomParents/brideParents/marriagePlace
+  // are intentionally omitted — they are not exposed in
+  // MARRIAGE_FIELD_LABELS so the operator cannot place them, and their
+  // old default coordinates collided with the groomName/brideName saved
+  // positions (visible as overlapping text on every cert before this
+  // change).
+  const clergyName = record.clergy || '';
   const fieldData = {
     groomName: `${record.fname_groom || record.groom_first || ''} ${record.lname_groom || record.groom_last || ''}`.trim(),
     brideName: `${record.fname_bride || record.bride_first || ''} ${record.lname_bride || record.bride_last || ''}`.trim(),
     marriageDate: (record.mdate || record.marriage_date) ? new Date(record.mdate || record.marriage_date).toLocaleDateString() : '',
     marriageDateMD: dateMD(record.mdate || record.marriage_date),
     marriageDateYY: dateYY(record.mdate || record.marriage_date),
-    marriagePlace: record.marriage_place || record.place || record.mlicense || '',
-    groomParents: record.parentsg || record.parents_groom || '',
-    brideParents: record.parentsb || record.parents_bride || '',
     witnesses: record.witness || record.witnesses || '',
-    clergy: record.clergy || '',
+    clergy: clergyName,
+    // Second clergy slot — the OCA template has both a "By" line
+    // (officiating priest) and a "Rector" line at the bottom. Same
+    // value as `clergy`; the operator drags the two markers to the
+    // two locations.
+    clergyRector: clergyName,
     church: record.churchName || 'Orthodox Church',
   };
   
