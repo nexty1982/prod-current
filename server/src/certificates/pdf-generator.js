@@ -291,7 +291,11 @@ async function generateBaptismCertificatePDF(record, options = {}) {
     church: record.churchName || 'Orthodox Church',
     fatherName,
     motherName,
-    parents: record.parents || '',
+    // Only emit the combined "parents" string when splitParents
+    // actually produced two names. A single-name record.parents
+    // (e.g. "Robert Smith") is treated as fatherName only — otherwise
+    // we'd double-render the same text in two places.
+    parents: motherName ? (record.parents || '') : '',
   };
   
   // Draw each field
