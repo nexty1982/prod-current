@@ -1,5 +1,4 @@
 import { Box, Typography, Grid, Container, Link } from '@mui/material';
-
 import { styled } from '@mui/material/styles';
 import { IconMinus, IconPlus } from '@tabler/icons-react';
 import { useTheme } from '@mui/material/styles';
@@ -8,17 +7,18 @@ import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import { useState } from 'react';
 import { useLanguage } from '@/context/LanguageContext';
+import JsonLd from '@/components/seo/JsonLd';
+
+// Keys are emitted from server/src/routes/i18n.js (ENGLISH_DEFAULTS).
+// Numbered q1..qN / a1..aN — sequential. Adding a new pair = bump this list
+// AND add the key+value in i18n.js.
+const FAQ_KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'] as const;
 
 const FAQ = () => {
   const theme = useTheme();
   const { t } = useLanguage();
 
-  const [expanded, setExpanded] = useState(true);
-  const [expanded2, setExpanded2] = useState(false);
-  const [expanded3, setExpanded3] = useState(false);
-  const [expanded4, setExpanded4] = useState(false);
-  const [expanded5, setExpanded5] = useState(false);
-  const [expanded6, setExpanded6] = useState(false);
+  const [expandedKey, setExpandedKey] = useState<string | null>(FAQ_KEYS[0]);
 
   const StyledAccordian = styled(Accordion)(() => ({
     borderRadius: '8px',
@@ -42,29 +42,22 @@ const FAQ = () => {
     },
   }));
 
-  const handleChange = () => {
-    setExpanded(!expanded);
+  const handleChange = (key: string) => () => {
+    setExpandedKey((current) => (current === key ? null : key));
   };
 
-  const handleChange2 = () => {
-    setExpanded2(!expanded2);
-  };
-
-  const handleChange3 = () => {
-    setExpanded3(!expanded3);
-  };
-
-  const handleChange4 = () => {
-    setExpanded4(!expanded4);
-  };
-
-  const handleChange5 = () => {
-    setExpanded5(!expanded5);
-  };
-
-  const handleChange6 = () => {
-    setExpanded6(!expanded6);
-  };
+  // Build FAQPage schema from the live translations. Skip any entry whose
+  // q/a pair hasn't been translated yet (t() returns the key unchanged on miss).
+  const mainEntity = FAQ_KEYS.map((k) => {
+    const question = t(`faq.q${k}`);
+    const answer = t(`faq.a${k}`);
+    if (question === `faq.q${k}` || answer === `faq.a${k}`) return null;
+    return {
+      '@type': 'Question',
+      name: question,
+      acceptedAnswer: { '@type': 'Answer', text: answer },
+    };
+  }).filter(Boolean);
 
   return (
     (<Container
@@ -76,6 +69,15 @@ const FAQ = () => {
         },
       }}
     >
+      {mainEntity.length > 0 && (
+        <JsonLd
+          data={{
+            '@context': 'https://schema.org',
+            '@type': 'FAQPage',
+            mainEntity,
+          }}
+        />
+      )}
       <Grid container spacing={3} justifyContent="center">
         <Grid
           size={{
@@ -97,114 +99,34 @@ const FAQ = () => {
             {t('faq.accordion_title')}
           </Typography>
           <Box mt={7}>
-            <StyledAccordian expanded={expanded} onChange={handleChange}>
-              <AccordionSummary
-                expandIcon={
-                  expanded ? (
-                    <IconMinus size="21" stroke="1.5" />
-                  ) : (
-                    <IconPlus size="21" stroke="1.5" />
-                  )
-                }
-                aria-controls="panel1-content"
-                id="panel1-header"
-              >
-                {t('faq.q1')}
-              </AccordionSummary>
-              <AccordionDetails>
-                {t('faq.a1')}
-              </AccordionDetails>
-            </StyledAccordian>
-            <StyledAccordian expanded={expanded2} onChange={handleChange2}>
-              <AccordionSummary
-                expandIcon={
-                  expanded2 ? (
-                    <IconMinus size="21" stroke="1.5" />
-                  ) : (
-                    <IconPlus size="21" stroke="1.5" />
-                  )
-                }
-                aria-controls="panel2-content"
-                id="panel2-header"
-              >
-                {t('faq.q2')}
-              </AccordionSummary>
-              <AccordionDetails>
-                {t('faq.a2')}
-              </AccordionDetails>
-            </StyledAccordian>
-            <StyledAccordian expanded={expanded3} onChange={handleChange3}>
-              <AccordionSummary
-                expandIcon={
-                  expanded3 ? (
-                    <IconMinus size="21" stroke="1.5" />
-                  ) : (
-                    <IconPlus size="21" stroke="1.5" />
-                  )
-                }
-                aria-controls="panel3-content"
-                id="panel3-header"
-              >
-                {t('faq.q3')}
-              </AccordionSummary>
-              <AccordionDetails>
-                {t('faq.a3')}
-              </AccordionDetails>
-            </StyledAccordian>
-            <StyledAccordian expanded={expanded4} onChange={handleChange4}>
-              <AccordionSummary
-                expandIcon={
-                  expanded4 ? (
-                    <IconMinus size="21" stroke="1.5" />
-                  ) : (
-                    <IconPlus size="21" stroke="1.5" />
-                  )
-                }
-                aria-controls="panel4-content"
-                id="panel4-header"
-              >
-                {t('faq.q4')}
-              </AccordionSummary>
-              <AccordionDetails>
-                {t('faq.a4')}
-              </AccordionDetails>
-            </StyledAccordian>
-            <StyledAccordian expanded={expanded5} onChange={handleChange5}>
-              <AccordionSummary
-                expandIcon={
-                  expanded5 ? (
-                    <IconMinus size="21" stroke="1.5" />
-                  ) : (
-                    <IconPlus size="21" stroke="1.5" />
-                  )
-                }
-                aria-controls="panel5-content"
-                id="panel5-header"
-              >
-                {t('faq.q5')}
-              </AccordionSummary>
-              <AccordionDetails>
-                {t('faq.a5')}
-              </AccordionDetails>
-            </StyledAccordian>
-            <StyledAccordian expanded={expanded6} onChange={handleChange6}>
-              <AccordionSummary
-                expandIcon={
-                  expanded6 ? (
-                    <IconMinus size="21" stroke="1.5" />
-                  ) : (
-                    <IconPlus size="21" stroke="1.5" />
-                  )
-                }
-                aria-controls="panel6-content"
-                id="panel6-header"
-              >
-                {t('faq.q6')}
-              </AccordionSummary>
-              <AccordionDetails>
-                {t('faq.a6')}
-              </AccordionDetails>
-            </StyledAccordian>
+            {FAQ_KEYS.map((k) => {
+              const question = t(`faq.q${k}`);
+              const answer = t(`faq.a${k}`);
+              if (question === `faq.q${k}` || answer === `faq.a${k}`) return null;
+              const isOpen = expandedKey === k;
+              return (
+                <StyledAccordian
+                  key={k}
+                  expanded={isOpen}
+                  onChange={handleChange(k)}
+                >
+                  <AccordionSummary
+                    expandIcon={
+                      isOpen ? (
+                        <IconMinus size="21" stroke="1.5" />
+                      ) : (
+                        <IconPlus size="21" stroke="1.5" />
+                      )
+                    }
+                    aria-controls={`panel${k}-content`}
+                    id={`panel${k}-header`}
+                  >
+                    {question}
+                  </AccordionSummary>
+                  <AccordionDetails>{answer}</AccordionDetails>
+                </StyledAccordian>
+              );
+            })}
           </Box>
         </Grid>
       </Grid>
