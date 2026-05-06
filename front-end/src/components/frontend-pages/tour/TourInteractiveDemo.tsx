@@ -163,7 +163,7 @@ const TourInteractiveDemo = () => {
               {tx(translations,'tour.demo_badge', 'See It In Action')}
             </EditableText>
           </div>
-          <EditableText contentKey="tour.demo.heading" as="h2" className="om-heading-primary mb-3">
+          <EditableText contentKey="tour.demo.heading" as="h1" className="om-heading-primary mb-3">
             {tx(translations,'tour.demo_heading', 'How Orthodox Metrics Works')}
           </EditableText>
           <EditableText contentKey="tour.demo.subheading" as="p" className="om-text-body max-w-2xl mx-auto">

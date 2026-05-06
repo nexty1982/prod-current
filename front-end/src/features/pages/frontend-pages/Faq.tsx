@@ -40,7 +40,7 @@ const Faq = () => {
 
         <Container maxWidth="lg">
 
-          <Typography variant="h2" fontWeight={700} mb={1}>
+          <Typography variant="h2" component="h1" fontWeight={700} mb={1}>
 
             {t('faq.page_title')}
 
