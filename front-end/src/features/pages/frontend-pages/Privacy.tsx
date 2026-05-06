@@ -1,19 +1,14 @@
-import { HeroSection } from '@/components/frontend-pages/shared/sections';
 import PageContainer from '@/shared/ui/PageContainer';
 import PublicSeo from '@/components/seo/PublicSeo';
-import { useLanguage } from '@/context/LanguageContext';
 
 // Legal copy below is intentionally NOT i18n-driven. Translating a privacy
 // policy requires per-jurisdiction legal review; until that exists the
-// English text here is the source of truth. Hero badge/title/subtitle stay
-// in i18n because they're presentational.
+// English text here is the source of truth.
 const EFFECTIVE_DATE = 'May 6, 2026';
 const COMPANY = 'Orthodox Metrics LLC';
 const CONTACT_EMAIL = 'info@orthodoxmetrics.com';
 
 const Privacy = () => {
-  const { t } = useLanguage();
-
   return (
     <PageContainer title="Privacy Policy" description="Orthodox Metrics privacy policy">
       <PublicSeo
@@ -21,15 +16,13 @@ const Privacy = () => {
         description="Privacy Policy for Orthodox Metrics — what we collect, how we use it, payment processing, church/member data, sharing, retention, and your choices."
         path="/privacy"
       />
-      <HeroSection
-        badge={t('privacy.hero_badge')}
-        title={t('privacy.hero_title')}
-        subtitle={t('privacy.hero_subtitle')}
-        editKeyPrefix="privacy.hero"
-      />
 
       <section className="py-20 om-section-base">
         <div className="max-w-3xl mx-auto px-6 om-legal-prose">
+          <h1 className="font-['Georgia'] text-4xl md:text-5xl text-[#2d1b4e] dark:text-white mb-8">
+            Privacy Policy
+          </h1>
+
           <p className="font-['Inter'] text-[14px] text-[#6b7280] dark:text-gray-500 mb-2">
             <strong>Effective Date:</strong> {EFFECTIVE_DATE}
           </p>

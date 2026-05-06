@@ -1,7 +1,5 @@
-import { HeroSection } from '@/components/frontend-pages/shared/sections';
 import PageContainer from '@/shared/ui/PageContainer';
 import PublicSeo from '@/components/seo/PublicSeo';
-import { useLanguage } from '@/context/LanguageContext';
 
 // Legal copy below is intentionally NOT i18n-driven. Translating terms of
 // service requires per-jurisdiction legal review; until that exists the
@@ -12,8 +10,6 @@ const CONTACT_EMAIL = 'info@orthodoxmetrics.com';
 const GOVERNING_STATE = 'New Jersey';
 
 const Terms = () => {
-  const { t } = useLanguage();
-
   return (
     <PageContainer title="Terms of Service" description="Orthodox Metrics terms of service">
       <PublicSeo
@@ -21,15 +17,13 @@ const Terms = () => {
         description="Terms of Service for Orthodox Metrics — accounts, customer data, billing, acceptable use, third parties, IP, liability, and governing law."
         path="/terms"
       />
-      <HeroSection
-        badge={t('terms.hero_badge')}
-        title={t('terms.hero_title')}
-        subtitle={t('terms.hero_subtitle')}
-        editKeyPrefix="terms.hero"
-      />
 
       <section className="py-20 om-section-base">
         <div className="max-w-3xl mx-auto px-6 om-legal-prose">
+          <h1 className="font-['Georgia'] text-4xl md:text-5xl text-[#2d1b4e] dark:text-white mb-8">
+            Terms of Service
+          </h1>
+
           <p className="font-['Inter'] text-[14px] text-[#6b7280] dark:text-gray-500 mb-2">
             <strong>Effective Date:</strong> {EFFECTIVE_DATE}
           </p>
