@@ -4,6 +4,7 @@ import { PUBLIC_ROUTES } from '@/config/publicRoutes';
 import { HeroSection, CTASection } from '@/components/frontend-pages/shared/sections';
 import EditableText from '@/components/frontend-pages/shared/EditableText';
 import PublicSeo from '@/components/seo/PublicSeo';
+import JsonLd from '@/components/seo/JsonLd';
 import { useLanguage } from '@/context/LanguageContext';
 
 // Pricing temporarily hidden by request (2026-05-03). The plan tier
@@ -37,6 +38,32 @@ const PagePricing = () => {
         title="Pricing"
         description="Plan tiers for parishes of every size — small, medium, large, and enterprise. Contact us for a quote tailored to your parish."
         path="/frontend-pages/pricing"
+      />
+      <JsonLd
+        data={[
+          {
+            '@context': 'https://schema.org',
+            '@type': 'BreadcrumbList',
+            itemListElement: [
+              { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://orthodoxmetrics.com/' },
+              { '@type': 'ListItem', position: 2, name: 'Pricing', item: 'https://orthodoxmetrics.com/frontend-pages/pricing' },
+            ],
+          },
+          {
+            '@context': 'https://schema.org',
+            '@type': 'SoftwareApplication',
+            name: 'Orthodox Metrics',
+            applicationCategory: 'BusinessApplication',
+            applicationSubCategory: 'Church management / sacramental records',
+            operatingSystem: 'Web (any modern browser)',
+            url: 'https://orthodoxmetrics.com/frontend-pages/pricing',
+            offers: [
+              { '@type': 'Offer', name: t('pricing.plan_small_name'), category: 'Small Parish', priceCurrency: 'USD', price: '0', priceSpecification: { '@type': 'PriceSpecification', priceCurrency: 'USD', valueAddedTaxIncluded: false, description: 'Contact for quote' } },
+              { '@type': 'Offer', name: t('pricing.plan_medium_name'), category: 'Medium Parish', priceCurrency: 'USD', price: '0', priceSpecification: { '@type': 'PriceSpecification', priceCurrency: 'USD', valueAddedTaxIncluded: false, description: 'Contact for quote' } },
+              { '@type': 'Offer', name: t('pricing.plan_large_name'), category: 'Large Parish', priceCurrency: 'USD', price: '0', priceSpecification: { '@type': 'PriceSpecification', priceCurrency: 'USD', valueAddedTaxIncluded: false, description: 'Contact for quote' } },
+            ],
+          },
+        ]}
       />
       {/* Hero */}
       <HeroSection
