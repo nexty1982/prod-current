@@ -664,4 +664,107 @@ router.get('/work-sessions/active', async (req, res) => {
   }
 });
 
+// ── /build-runs/summary ─────────────────────────────────────────
+//
+// Service-to-service mirror of GET /api/admin/build-runs/summary
+// (server/src/routes/admin/buildRuns.js) — used by OMStudio's
+// /releases Build Console (CS-OMSTUDIO-RELEASES-BUILD-CONSOLE-V1)
+// since OMStudio cannot replay OM's session JWT (different secret +
+// claim shape).
+//
+// Auth: X-Service-Token + X-On-Behalf-Of-Email (same pattern as
+// /work-sessions/active). build_runs is global, so the email is not
+// used to scope the data — but the on-behalf-of header is required
+// for audit-attribution parity with other platform calls.
+//
+// Body shape matches the admin route 1:1 so the OMStudio consumer
+// doesn't have to translate.
+//
+// Read-only — never mutates build_runs or build_run_events.
+router.get('/build-runs/summary', async (req, res) => {
+  try {
+    const rawEmail = req.serviceCaller && typeof req.serviceCaller.email === 'string'
+      ? req.serviceCaller.email.trim()
+      : '';
+    if (!rawEmail) {
+      return res.status(400).json({
+        ok: false,
+        error: 'missing_on_behalf_of_email',
+        message: 'X-On-Behalf-Of-Email header is required for this endpoint.',
+      });
+    }
+    if (!EMAIL_RE.test(rawEmail)) {
+      return res.status(400).json({
+        ok: false,
+        error: 'invalid_email',
+        message: 'X-On-Behalf-Of-Email is not a valid email format.',
+      });
+    }
+
+    let hours = parseInt(req.query.hours, 10);
+    if (!Number.isFinite(hours)) hours = 24;
+    hours = Math.max(1, Math.min(168, hours));
+
+    const [countResults] = await queryPlatform(
+      `SELECT
+         SUM(frontend_hit) AS frontend_builds,
+         SUM(server_hit)   AS server_builds
+       FROM (
+         SELECT
+           e.run_id,
+           MAX(e.stage = 'Frontend Build' OR e.stage LIKE 'Frontend%') AS frontend_hit,
+           MAX(e.stage LIKE 'Backend%')                                AS server_hit
+         FROM build_run_events e
+         WHERE e.created_at >= NOW() - INTERVAL ? HOUR
+         GROUP BY e.run_id
+       ) t`,
+      [hours],
+    );
+
+    const frontendBuilds = Number(countResults?.[0]?.frontend_builds || 0);
+    const serverBuilds   = Number(countResults?.[0]?.server_builds   || 0);
+
+    const [last10Results] = await queryPlatform(
+      `SELECT
+         r.run_id, r.env, r.origin, r.status, r.started_at, r.ended_at,
+         MAX(e.stage = 'Frontend Build' OR e.stage LIKE 'Frontend%') AS built_frontend,
+         MAX(e.stage LIKE 'Backend%')                                AS built_server,
+         TIMESTAMPDIFF(SECOND, r.started_at, COALESCE(r.ended_at, NOW())) AS duration_seconds
+       FROM build_runs r
+       LEFT JOIN build_run_events e ON e.run_id = r.run_id
+       WHERE r.started_at >= NOW() - INTERVAL ? HOUR
+       GROUP BY r.run_id, r.env, r.origin, r.status, r.started_at, r.ended_at
+       ORDER BY r.started_at DESC
+       LIMIT 10`,
+      [hours],
+    );
+
+    const last10 = (last10Results || []).map((row) => ({
+      runId: row.run_id,
+      env: row.env,
+      origin: row.origin,
+      status: row.status,
+      startedAt: row.started_at,
+      endedAt: row.ended_at,
+      builtFrontend: !!row.built_frontend,
+      builtServer: !!row.built_server,
+      durationSeconds: row.duration_seconds,
+    }));
+
+    return res.json({
+      success: true,
+      hours,
+      frontendBuilds,
+      serverBuilds,
+      last10,
+    });
+  } catch (err) {
+    console.error('[platform] build-runs/summary failed:', err && err.message ? err.message : err);
+    return res.status(500).json({
+      ok: false,
+      error: 'build_runs_summary_failed',
+    });
+  }
+});
+
 module.exports = router;
