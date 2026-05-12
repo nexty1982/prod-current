@@ -19,24 +19,32 @@
  *   5xx here would make axios throw a generic error message — which was the
  *   regression behind the OMOD-1594 follow-up to OMOD-1592.
  *
- * Required env (or graceful empty-state if missing):
+ * Required config (graceful empty-state if missing):
  *   OMSTUDIO_URL                 default http://192.168.1.242 (LAN host).
  *                                Set to http://omstudio.orthodoxmetrics.com once
  *                                that DNS is reachable from the OM backend.
- *   OMSTUDIO_OMSVC_EMAIL         default omsvc@orthodoxmetrics.com
- *   OMSTUDIO_OMSVC_PASSWORD      no default — must be provisioned
+ *   OMSTUDIO_OMSVC_EMAIL         default omsvc@orthodoxmetrics.com (same email
+ *                                as the OMAI omsvc identity, but a DIFFERENT
+ *                                password lives in a DIFFERENT vault — do not
+ *                                confuse them).
+ *   OMSTUDIO_OMSVC_PASSWORD      env var, else read from
+ *                                /var/lib/omstudio/secrets/OMSTUDIO_OMSVC_PASSWORD.creds
+ *                                (matches the existing vault convention).
+ *                                Override the path via OMSTUDIO_OMSVC_PASSWORD_FILE.
  *
  * OM is intentionally NOT canonical — the page is read-only and we never
  * persist the response.
  */
 
 const express = require('express');
+const fs = require('fs');
 const { requireRole } = require('../../middleware/auth');
 
 const router = express.Router();
 
 const TOKEN_CACHE_MS = 7 * 60 * 60 * 1000; // refresh well inside OMStudio's 8h TTL
 const UPSTREAM_TIMEOUT_MS = 8000;
+const DEFAULT_PASSWORD_FILE = '/var/lib/omstudio/secrets/OMSTUDIO_OMSVC_PASSWORD.creds';
 
 let cachedToken = null;
 let cachedTokenExpiresAt = 0;
@@ -50,10 +58,25 @@ function emptyState(upstream, error, detail) {
   return { available: false, upstream, error, detail };
 }
 
+function readPassword() {
+  const fromEnv = process.env.OMSTUDIO_OMSVC_PASSWORD;
+  if (fromEnv && fromEnv.trim()) return fromEnv.trim();
+  const path = process.env.OMSTUDIO_OMSVC_PASSWORD_FILE || DEFAULT_PASSWORD_FILE;
+  try {
+    const raw = fs.readFileSync(path, 'utf8');
+    const trimmed = raw.trim();
+    return trimmed || null;
+  } catch {
+    return null;
+  }
+}
+
 async function mintToken(base) {
-  const password = process.env.OMSTUDIO_OMSVC_PASSWORD || '';
+  const password = readPassword();
   if (!password) {
-    const err = new Error('OMSTUDIO_OMSVC_PASSWORD env var not set');
+    const err = new Error(
+      `OMStudio omsvc password not found (checked OMSTUDIO_OMSVC_PASSWORD env, then ${process.env.OMSTUDIO_OMSVC_PASSWORD_FILE || DEFAULT_PASSWORD_FILE})`,
+    );
     err.code = 'credentials_not_provisioned';
     throw err;
   }
