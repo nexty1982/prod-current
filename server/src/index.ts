@@ -235,6 +235,7 @@ const demoChurchesRouter = require('./routes/admin/demo-churches');
 const churchDecomRouter = require('./routes/admin/church-decom');
 const analyticsRouter = require('./routes/analytics'); // US Church Map analytics
 const websiteStatsRouter = require('./routes/website-stats'); // public site traffic stats (admin-only)
+const ecosystemRoadmapRouter = require('./routes/admin/ecosystemRoadmap'); // read-only proxy to OMStudio component-maturity roadmap
 const omChartsRouter = require('./api/om-charts'); // OM Charts: graphical charts from church records
 const dashboardHomeRouter = require('./api/dashboard-home'); // Dashboard Home: summary data for church dashboard
 const systemRoutesRouter = require('./api/systemRoutes'); // Route introspection (kept for OMAI dual-target proxy)
@@ -651,6 +652,7 @@ app.use('/api/admin/church', churchAdminRouter);
 
 app.use('/api/admin/system', adminSystemRouter);
 app.use('/api/admin', websiteStatsRouter); // mounts GET /api/admin/website-stats
+app.use('/api/admin', ecosystemRoadmapRouter); // mounts GET /api/admin/ecosystem-roadmap (OMStudio proxy)
 // Admin churches routes - mount compatibility router first to catch legacy paths
 const churchesCompatRouter = require('./routes/admin/churches-compat');
 // Mount compatibility router for both /churches (plural) and /church (singular) paths
