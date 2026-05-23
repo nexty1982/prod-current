@@ -1,0 +1,129 @@
+/*
+ * om-church-onboarding theme — scoped under .om-cornerstone-scope so it
+ * does not bleed into the rest of the Orthodox Metrics site. The component
+ * mounts inside this scope on /frontend-pages/enroll and toggles dark mode
+ * by adding `dark` to its own wrapper (not to <html>).
+ */
+
+@custom-variant dark (&:is(.dark, .dark *));
+
+.om-cornerstone-scope {
+  --font-size: 15px;
+  --brand-purple: #3a1d6e;
+  --brand-purple-deep: #2a1450;
+  --brand-gold: #c9a14a;
+  --brand-gold-soft: #e3c483;
+  --background: #fbfaf7;
+  --foreground: #1a1226;
+  --card: #ffffff;
+  --card-foreground: #1a1226;
+  --popover: #ffffff;
+  --popover-foreground: #1a1226;
+  --primary: #3a1d6e;
+  --primary-foreground: #fbfaf7;
+  --secondary: #f1ecf7;
+  --secondary-foreground: #2a1450;
+  --muted: #f3f0ec;
+  --muted-foreground: #6b6177;
+  --accent: #f6efdb;
+  --accent-foreground: #5a4413;
+  --destructive: #b3261e;
+  --destructive-foreground: #ffffff;
+  --border: rgba(58, 29, 110, 0.12);
+  --input: transparent;
+  --input-background: #f5f2ee;
+  --switch-background: #cbced4;
+  --font-weight-medium: 500;
+  --font-weight-normal: 400;
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --radius: 0.625rem;
+  --sidebar: #2a1450;
+  --sidebar-foreground: #ede7f5;
+  --sidebar-primary: #c9a14a;
+  --sidebar-primary-foreground: #2a1450;
+  --sidebar-accent: #3a1d6e;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: rgba(255, 255, 255, 0.08);
+  --sidebar-ring: #c9a14a;
+
+  font-size: var(--font-size);
+  background: var(--background);
+  color: var(--foreground);
+}
+
+.om-cornerstone-scope.dark,
+.dark .om-cornerstone-scope {
+  --background: #14091f;
+  --foreground: #ede7f5;
+  --card: #1d0f30;
+  --card-foreground: #ede7f5;
+  --popover: #1d0f30;
+  --popover-foreground: #ede7f5;
+  --primary: #c9a14a;
+  --primary-foreground: #1a1226;
+  --secondary: #2a1450;
+  --secondary-foreground: #ede7f5;
+  --muted: #241638;
+  --muted-foreground: #9b8fb0;
+  --accent: #3a1d6e;
+  --accent-foreground: #f6efdb;
+  --destructive: #d44a40;
+  --destructive-foreground: #ffffff;
+  --border: rgba(201, 161, 74, 0.18);
+  --input: rgba(255, 255, 255, 0.06);
+  --input-background: #1d0f30;
+  --ring: oklch(0.439 0 0);
+  --sidebar: #0e0518;
+  --sidebar-foreground: #ede7f5;
+  --sidebar-primary: #c9a14a;
+  --sidebar-primary-foreground: #1a1226;
+  --sidebar-accent: #2a1450;
+  --sidebar-accent-foreground: #f6efdb;
+  --sidebar-border: rgba(201, 161, 74, 0.14);
+  --sidebar-ring: #c9a14a;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-input-background: var(--input-background);
+  --color-switch-background: var(--switch-background);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+.om-cornerstone-scope * {
+  border-color: var(--border);
+}
+
+.om-cornerstone-scope h1 { font-size: 1.5rem; font-weight: var(--font-weight-medium); line-height: 1.5; }
+.om-cornerstone-scope h2 { font-size: 1.25rem; font-weight: var(--font-weight-medium); line-height: 1.5; }
+.om-cornerstone-scope h3 { font-size: 1.125rem; font-weight: var(--font-weight-medium); line-height: 1.5; }
+.om-cornerstone-scope h4 { font-size: 1rem; font-weight: var(--font-weight-medium); line-height: 1.5; }
+.om-cornerstone-scope label { font-weight: var(--font-weight-medium); line-height: 1.5; }
+.om-cornerstone-scope button { font-weight: var(--font-weight-medium); line-height: 1.5; }
+.om-cornerstone-scope input { font-weight: var(--font-weight-normal); line-height: 1.5; }
