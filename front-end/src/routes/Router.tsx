@@ -937,7 +937,6 @@ const Router = [
           { path: '/frontend-pages/homepage', element: <Homepage /> },
           { path: '/frontend-pages/about', element: <About /> },
           { path: '/frontend-pages/contact', element: <Contact /> },
-          { path: '/frontend-pages/enroll', element: <Enrollment /> },
           { path: '/frontend-pages/pricing', element: <PagePricing /> },
           { path: '/frontend-pages/blog', element: <BlogPage /> },
           { path: '/samples', element: <Samples /> },
@@ -949,6 +948,9 @@ const Router = [
           { path: '/security', element: <Security /> },
         ],
       },
+      // Enrollment wizard brings its own header/footer chrome — keep it
+      // outside PublicLayout so HpHeader/SiteFooter don't double up.
+      { path: '/frontend-pages/enroll', element: <Enrollment /> },
       { path: '/greek_baptism_table_demo.html', element: <GreekRecordsViewer /> },
       { path: '/russian_wedding_table_demo.html', element: <HTMLViewer htmlFile="/russian_wedding_table_demo.html" /> },
       { path: '/romanian_funeral_table_demo.html', element: <HTMLViewer htmlFile="/romanian_funeral_table_demo.html" /> },
