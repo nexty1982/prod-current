@@ -1,8 +1,1 @@
-{
-  "app": "om",
-  "target": "frontend",
-  "gitSha": "dev",
-  "gitBranch": "dev",
-  "builtAt": null,
-  "buildHost": null
-}
+{"app":"om","target":"frontend","gitSha":"5c7051a4","gitBranch":"main","builtAt":"2026-05-24T01:17:43Z","buildHost":"om-prod01"}
