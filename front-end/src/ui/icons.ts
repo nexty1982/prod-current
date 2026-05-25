@@ -22,129 +22,50 @@
 // ── Re-export all Lucide icons used in the codebase ────────────────────────
 
 export {
-  // Action
-  Plus,
-  Pencil,
-  Trash2,
-  X,
-  Save,
-  Edit,
-  Copy,
-  Share2,
-  ClipboardList,
+    Activity, AlertCircle,
+    AlertTriangle, Archive, ArrowLeft,
+    ArrowRight, ArrowUpDown, Award, BarChart3, Bell, BookOpen, Bookmark,
+    // Buildings
+    Building2,
 
-  // Navigation
-  ChevronUp,
-  ChevronDown,
-  ChevronLeft,
-  ChevronRight,
-  ArrowLeft,
-  ArrowRight,
-  ExternalLink,
-  Globe,
-
-  // UI / Layout
-  Search,
-  Filter,
-  Eye,
-  EyeOff,
-  Settings,
-  Palette,
-  LayoutGrid,
-  LayoutList,
-  List,
-  Table,
-  Columns,
-  Grid,
-  Maximize2,
-  Minimize2,
-  SortAsc,
-  SortDesc,
-  Circle,
-  Table2,
-  TableProperties,
-
-  // Data / Files
-  Download,
-  Upload,
-  RefreshCw,
-  ArrowUpDown,
-  FileText,
-  FileBarChart,
-  FileCheck,
-  FileCode,
-  FileSearch,
-  FileX,
-  Folder,
-  FolderOpen,
-  Package,
-
-  // Users / People
-  Users,
-  User,
-
-  // Security — DANGEROUS NAMES (collide with browser globals)
-  Lock,
-  Unlock,
-  Shield,
-  ShieldOff,
-
-  // Status / Feedback
-  CheckCircle,
-  CheckCircle2,
-  AlertCircle,
-  AlertTriangle,
-  XCircle,
-  Clock,
-  Loader2,
-  Info,
-  Check,
-  HelpCircle,
-  Zap,
-
-  // Utility
-  MoreVertical,
-  Database,
-  BarChart3,
-  HardDrive,
-  Code,
-  GitBranch,
-  GitCompare,
-  Wrench,
-  ScanLine,
-
-  // Communication
-  Mail,
-  Phone,
-
-  // Buildings
-  Building2,
-
-  // Domain-specific
-  Calendar,
-  CalendarDays,
-  Bell,
-  Bookmark,
-  Star,
-  Heart,
-  Home,
-  Activity,
-  Play,
-  RotateCcw,
-  Archive,
-  BookOpen,
-  Church,
-  Coffee,
-  Cross,
-  Crown,
-  Droplets,
-  Fish,
-  Flame,
-  History,
-  MapPin,
-  Milk,
-  Scroll,
-  ScrollText,
+    // Domain-specific
+    Calendar,
+    CalendarDays, Check,
+    // Status / Feedback
+    CheckCircle,
+    CheckCircle2, ChevronDown,
+    ChevronLeft,
+    ChevronRight,
+    // Navigation
+    ChevronUp, ChevronsUpDown, Church, Circle, ClipboardList, Clock, Code, Coffee, Columns, Columns3, Copy, Cross,
+    Crown, Database,
+    // Data / Files
+    Download, Droplet, Droplets, Edit, ExternalLink, Eye,
+    EyeOff, FileBarChart,
+    FileCheck,
+    FileCode,
+    FileSearch, FileText, FileX, Filter, Fish,
+    Flame, Folder,
+    FolderOpen, GitBranch,
+    GitCompare, Globe, Grid, HardDrive, Heart, HelpCircle, History, Home, Info, LayoutGrid,
+    LayoutList, Link2, List, Loader2,
+    // Security — DANGEROUS NAMES (collide with browser globals)
+    Lock,
+    // Communication
+    Mail, MapPin, Maximize2, Milk, Minimize2, MoreHorizontal,
+    // Utility
+    MoreVertical, Package, Palette, Pencil, Phone, Play,
+    // Action
+    Plus, RefreshCw, RotateCcw, Rows, Save, ScanLine, Scroll,
+    ScrollText,
+    // UI / Layout
+    Search, Settings, Share2, Shield,
+    // Records Management
+    ShieldCheck, ShieldOff, SortAsc,
+    SortDesc, Star, Table, Table2,
+    TableProperties, Trash2, TrendingUp, Unlock, Upload, User, User2,
+    // Users / People
+    Users, Wrench, X, XCircle, Zap
 } from 'lucide-react';
 
 // ── Type re-exports ─────────────────────────────────────────────────────────
@@ -154,8 +75,6 @@ export type { LucideIcon } from 'lucide-react';
 // Use these when you want extra safety or clarity.
 
 export {
-  Lock as LockIcon,
-  Unlock as UnlockIcon,
-  History as HistoryIcon,
-  Table as TableIcon,
+    History as HistoryIcon, Lock as LockIcon, Table as TableIcon, Unlock as UnlockIcon
 } from 'lucide-react';
+

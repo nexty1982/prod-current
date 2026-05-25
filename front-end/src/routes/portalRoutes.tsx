@@ -5,7 +5,6 @@
 import { lazy } from 'react';
 import { Navigate } from 'react-router-dom';
 import ProtectedRoute from '../components/auth/ProtectedRoute';
-import { RecordsRouteErrorBoundary } from '@/shared/ui/RecordsRouteErrorBoundary';
 import Loadable from '../layouts/full/shared/loadable/Loadable';
 
 /* ── Lazy imports ── */
@@ -46,16 +45,10 @@ export const portalRoute = {
         </ProtectedRoute>
       ),
     },
-    // Records — all church staff
+    // Legacy records list routes → redirect to unified records page
     {
       path: 'records/baptism',
-      element: (
-        <ProtectedRoute requiredRole={['super_admin', 'admin', 'church_admin', 'priest', 'deacon', 'editor']}>
-          <RecordsRouteErrorBoundary>
-            <BaptismRecordsPage />
-          </RecordsRouteErrorBoundary>
-        </ProtectedRoute>
-      ),
+      element: <Navigate to="/portal/records" replace />,
     },
     {
       path: 'records/baptism/new',
@@ -75,13 +68,7 @@ export const portalRoute = {
     },
     {
       path: 'records/marriage',
-      element: (
-        <ProtectedRoute requiredRole={['super_admin', 'admin', 'church_admin', 'priest', 'deacon', 'editor']}>
-          <RecordsRouteErrorBoundary>
-            <MarriageRecordsPage />
-          </RecordsRouteErrorBoundary>
-        </ProtectedRoute>
-      ),
+      element: <Navigate to="/portal/records" replace />,
     },
     {
       path: 'records/marriage/new',
@@ -101,13 +88,7 @@ export const portalRoute = {
     },
     {
       path: 'records/funeral',
-      element: (
-        <ProtectedRoute requiredRole={['super_admin', 'admin', 'church_admin', 'priest', 'deacon', 'editor']}>
-          <RecordsRouteErrorBoundary>
-            <FuneralRecordsPage />
-          </RecordsRouteErrorBoundary>
-        </ProtectedRoute>
-      ),
+      element: <Navigate to="/portal/records" replace />,
     },
     {
       path: 'records/funeral/new',

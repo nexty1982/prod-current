@@ -118,6 +118,20 @@
   border-color: var(--border);
 }
 
+.om-cornerstone-scope [data-slot="select-content"] {
+  background-color: var(--popover);
+  color: var(--popover-foreground);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  z-index: 50;
+}
+
+.om-cornerstone-scope [data-slot="select-item"]:focus {
+  background-color: var(--accent);
+  color: var(--accent-foreground);
+}
+
 .om-cornerstone-scope h1 { font-size: 1.5rem; font-weight: var(--font-weight-medium); line-height: 1.5; }
 .om-cornerstone-scope h2 { font-size: 1.25rem; font-weight: var(--font-weight-medium); line-height: 1.5; }
 .om-cornerstone-scope h3 { font-size: 1.125rem; font-weight: var(--font-weight-medium); line-height: 1.5; }
