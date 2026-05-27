@@ -49,6 +49,7 @@ import {
 } from '@tabler/icons-react';
 import { useFormik } from 'formik';
 import React, { useCallback, useEffect, useState } from 'react';
+import { useSnackbar } from '@/hooks/useSnackbar';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import * as Yup from 'yup';
 import ChurchInfoTab from './ChurchForm/ChurchInfoTab';
@@ -177,7 +178,7 @@ const ChurchForm: React.FC = () => {
   });
 
   // Snackbar
-  const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' | 'info' }>({ open: false, message: '', severity: 'info' });
+  const { snackbar, showSnackbar, closeSnackbar } = useSnackbar();
 
   const isEdit = Boolean(id);
   const hasLoadedRef = React.useRef(false);
@@ -269,28 +270,16 @@ const ChurchForm: React.FC = () => {
           overrides: data.data.overrides,
           effective: data.data.effective
         });
-        setSnackbar({ 
-          open: true, 
-          message: 'Feature override updated successfully', 
-          severity: 'success' 
-        });
+        showSnackbar('Feature override updated successfully', 'success');
       } else {
         // Revert on failure
         setFeatureData(previousFeatureData);
-        setSnackbar({ 
-          open: true, 
-          message: data.error?.message || 'Failed to update feature', 
-          severity: 'error' 
-        });
+        showSnackbar(data.error?.message || 'Failed to update feature', 'error');
       }
     } catch (err: any) {
       // Revert on error
       setFeatureData(previousFeatureData);
-      setSnackbar({ 
-        open: true, 
-        message: `Error: ${err.message}`, 
-        severity: 'error' 
-      });
+      showSnackbar(`Error: ${err.message}`, 'error');
     } finally {
       setUpdatingFeatures(false);
     }
@@ -301,13 +290,13 @@ const ChurchForm: React.FC = () => {
       setLoadingDatabase(true);
       const data = await apiClient.post<any>(`/admin/churches/${churchId}/test-connection`);
       if (data.success && data.data?.connection) {
-        setSnackbar({ open: true, message: `Connection OK (${data.data.connection.connection_time_ms}ms)`, severity: 'success' });
+        showSnackbar(`Connection OK (${data.data.connection.connection_time_ms}ms)`, 'success');
         await loadDatabaseInfo(churchId);
       } else {
-        setSnackbar({ open: true, message: `Connection failed: ${data.error || 'Unknown'}`, severity: 'error' });
+        showSnackbar(`Connection failed: ${data.error || 'Unknown'}`, 'error');
       }
     } catch (err: any) {
-      setSnackbar({ open: true, message: `Connection error: ${err.message}`, severity: 'error' });
+      showSnackbar(`Connection error: ${err.message}`, 'error');
     } finally {
       setLoadingDatabase(false);
     }
@@ -321,31 +310,31 @@ const ChurchForm: React.FC = () => {
 
       const method = userDialogAction === 'add' ? 'post' : 'put';
       const data = await apiClient[method]<any>(endpoint.replace('/api', ''), userData);
-      setSnackbar({ open: true, message: `User ${userDialogAction === 'add' ? 'added' : 'updated'} successfully`, severity: 'success' });
+      showSnackbar(`User ${userDialogAction === 'add' ? 'added' : 'updated'} successfully`, 'success');
       setUserDialogOpen(false);
       setSelectedUser(null);
       if (id) loadChurchUsers(id);
     } catch (err: any) {
-      setSnackbar({ open: true, message: err.message, severity: 'error' });
+      showSnackbar(err.message, 'error');
     }
   };
 
   const handleUserAction = async (userId: number, action: string) => {
     try {
       await apiClient.post<any>(`/admin/churches/${id}/users/${userId}/${action}`);
-      setSnackbar({ open: true, message: `User ${action} successful`, severity: 'success' });
+      showSnackbar(`User ${action} successful`, 'success');
       if (id) loadChurchUsers(id);
     } catch (err: any) {
-      setSnackbar({ open: true, message: err.message, severity: 'error' });
+      showSnackbar(err.message, 'error');
     }
   };
 
   const handlePasswordReset = async (userId: number, email: string) => {
     try {
       const data = await apiClient.post<any>(`/admin/churches/${id}/users/${userId}/reset-password`);
-      setSnackbar({ open: true, message: `Password reset for ${email}. New: ${data.newPassword}`, severity: 'success' });
+      showSnackbar(`Password reset for ${email}. New: ${data.newPassword}`, 'success');
     } catch (err: any) {
-      setSnackbar({ open: true, message: err.message, severity: 'error' });
+      showSnackbar(err.message, 'error');
     }
   };
 
@@ -663,10 +652,10 @@ const ChurchForm: React.FC = () => {
       <Snackbar
         open={snackbar.open}
         autoHideDuration={6000}
-        onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
+        onClose={closeSnackbar}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <Alert severity={snackbar.severity} onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}>
+        <Alert severity={snackbar.severity} onClose={closeSnackbar}>
           {snackbar.message}
         </Alert>
       </Snackbar>

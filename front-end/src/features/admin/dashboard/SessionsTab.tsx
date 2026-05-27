@@ -7,52 +7,53 @@
  *   - useSessionsData    → list/stats/filter/pagination state + fetching
  *   - sessionsTabDialogs → 6 dialogs collapsed into a single reducer
  */
-import React, { useReducer, useState } from 'react';
+import { adminAPI } from '@/api/admin.api';
+import { useSnackbar } from '@/hooks/useSnackbar';
 import {
-  Alert, alpha,
-  Box,
-  Button,
-  Card, CardContent,
-  Chip,
-  CircularProgress,
-  Dialog, DialogActions, DialogContent, DialogTitle,
-  FormControl,
-  Grid,
-  IconButton,
-  InputAdornment,
-  InputLabel,
-  MenuItem,
-  Pagination,
-  Select,
-  Snackbar,
-  Stack,
-  Table, TableBody, TableCell, TableContainer,
-  TableHead, TableRow,
-  TextField,
-  Tooltip,
-  Typography,
-  useTheme,
+    Alert, alpha,
+    Box,
+    Button,
+    Card, CardContent,
+    Chip,
+    CircularProgress,
+    Dialog, DialogActions, DialogContent, DialogTitle,
+    FormControl,
+    Grid,
+    IconButton,
+    InputAdornment,
+    InputLabel,
+    MenuItem,
+    Pagination,
+    Select,
+    Snackbar,
+    Stack,
+    Table, TableBody, TableCell, TableContainer,
+    TableHead, TableRow,
+    TextField,
+    Tooltip,
+    Typography,
+    useTheme,
 } from '@mui/material';
 import {
-  IconAlertTriangle,
-  IconClock,
-  IconDevices,
-  IconLock,
-  IconMessage,
-  IconRefresh,
-  IconSearch,
-  IconShieldOff,
-  IconShieldX,
-  IconUser,
-  IconUsers,
-  IconX,
+    IconAlertTriangle,
+    IconClock,
+    IconDevices,
+    IconLock,
+    IconMessage,
+    IconRefresh,
+    IconSearch,
+    IconShieldOff,
+    IconShieldX,
+    IconUser,
+    IconUsers,
+    IconX,
 } from '@tabler/icons-react';
 import dayjs from 'dayjs';
-import { adminAPI } from '@/api/admin.api';
+import React, { useReducer, useState } from 'react';
 import type { SessionData } from './logSearchTypes';
 import { STAT_CARD } from './logSearchTypes';
-import { useSessionsData } from './useSessionsData';
 import { dialogReducer, initialDialogState } from './sessionsTabDialogs';
+import { useSessionsData } from './useSessionsData';
 
 interface SessionsTabProps {
   active: boolean;
@@ -61,9 +62,7 @@ interface SessionsTabProps {
 const SessionsTab: React.FC<SessionsTabProps> = ({ active }) => {
   const theme = useTheme();
 
-  const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({ open: false, message: '', severity: 'success' });
-  const showSnack = (message: string, severity: 'success' | 'error' = 'success') =>
-    setSnackbar({ open: true, message, severity });
+  const { snackbar, showSnackbar: showSnack, closeSnackbar } = useSnackbar();
 
   const data = useSessionsData({ active, onError: msg => showSnack(msg, 'error') });
   const { sessions, stats: sessionStats, loading: sessionLoading, search: sessionSearch, setSearch: setSessionSearch,
@@ -354,8 +353,8 @@ const SessionsTab: React.FC<SessionsTabProps> = ({ active }) => {
       </Dialog>
 
       {/* Snackbar */}
-      <Snackbar open={snackbar.open} autoHideDuration={5000} onClose={() => setSnackbar(s => ({ ...s, open: false }))} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
-        <Alert severity={snackbar.severity} onClose={() => setSnackbar(s => ({ ...s, open: false }))}>{snackbar.message}</Alert>
+      <Snackbar open={snackbar.open} autoHideDuration={5000} onClose={closeSnackbar} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
+        <Alert severity={snackbar.severity} onClose={closeSnackbar}>{snackbar.message}</Alert>
       </Snackbar>
     </>
   );

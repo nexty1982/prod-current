@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { useSnackbar } from '@/hooks/useSnackbar';
 import { useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -114,7 +115,7 @@ const ChurchList: React.FC = () => {
   const [shouldDeleteDatabase, setShouldDeleteDatabase] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
   const [refreshing, setRefreshing] = useState(false);
-  const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' | 'info' }>({ open: false, message: '', severity: 'info' });
+  const { snackbar, showSnackbar, closeSnackbar } = useSnackbar();
 
   const BCrumb = [
     { to: '/', title: 'Home' },
@@ -199,11 +200,11 @@ const ChurchList: React.FC = () => {
       setDeleteDialogOpen(false);
       setSelectedChurch(null);
       setShouldDeleteDatabase(false);
-      setSnackbar({ open: true, message: `"${church.name}" deleted successfully`, severity: 'success' });
+      showSnackbar(`"${church.name}" deleted successfully`, 'success');
       logger.info('Church Management', 'Church deleted', { churchId: church.id, churchName: church.name });
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to delete church';
-      setSnackbar({ open: true, message: errorMessage, severity: 'error' });
+      showSnackbar(errorMessage, 'error');
     }
   };
 
@@ -729,10 +730,10 @@ const ChurchList: React.FC = () => {
       <Snackbar
         open={snackbar.open}
         autoHideDuration={5000}
-        onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
+        onClose={closeSnackbar}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <Alert severity={snackbar.severity} onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}>
+        <Alert severity={snackbar.severity} onClose={closeSnackbar}>
           {snackbar.message}
         </Alert>
       </Snackbar>

@@ -4,30 +4,31 @@
  * Falls back to single-record mode when no candidates are available.
  */
 
-import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
-import {
-  Alert,
-  Box,
-  Button,
-  Chip,
-  CircularProgress,
-  FormControl,
-  IconButton,
-  InputLabel,
-  MenuItem,
-  Paper,
-  Select,
-  Snackbar,
-  Stack,
-  Tooltip,
-  Typography,
-  useTheme,
-} from '@mui/material';
-import { IconSend, IconAlertTriangle, IconColumns, IconSettings } from '@tabler/icons-react';
+import { useSnackbar } from '@/hooks/useSnackbar';
 import { apiClient } from '@/shared/lib/axiosInstance';
+import {
+    Alert,
+    Box,
+    Button,
+    Chip,
+    CircularProgress,
+    FormControl,
+    IconButton,
+    InputLabel,
+    MenuItem,
+    Paper,
+    Select,
+    Snackbar,
+    Stack,
+    Tooltip,
+    Typography,
+    useTheme,
+} from '@mui/material';
+import { IconColumns, IconSend, IconSettings } from '@tabler/icons-react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { getCustomFieldsForType } from '../utils/fieldConfig';
-import FieldConfigDialog from './FieldConfigDialog';
 import { type SuggestionResult } from '../utils/fieldSuggestions';
+import FieldConfigDialog from './FieldConfigDialog';
 import RecordCard from './RecordCard';
 import ReviewSummaryPanel from './ReviewSummaryPanel';
 
@@ -129,9 +130,7 @@ const FieldMappingPanel: React.FC<FieldMappingPanelProps> = ({
   const [isFinalized, setIsFinalized] = useState(initialIsFinalized);
   const [localFinalizedMeta, setLocalFinalizedMeta] = useState(finalizedMeta || null);
   const [internalExpandedIdx, setInternalExpandedIdx] = useState<number | false>(0);
-  const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({
-    open: false, message: '', severity: 'success',
-  });
+  const { snackbar, showSnackbar, closeSnackbar } = useSnackbar();
 
   // Use external selection if provided, otherwise internal
   const expandedIdx = externalSelectedIdx !== undefined && externalSelectedIdx !== null
@@ -508,7 +507,7 @@ const FieldMappingPanel: React.FC<FieldMappingPanelProps> = ({
 
     const selectedRecords = records.filter((r) => r.selected);
     if (selectedRecords.length === 0) {
-      setSnackbar({ open: true, message: 'No records selected', severity: 'error' });
+      showSnackbar('No records selected', 'error');
       return;
     }
 
@@ -524,11 +523,7 @@ const FieldMappingPanel: React.FC<FieldMappingPanelProps> = ({
         const data = res?.data || res;
         setIsFinalized(true);
         setLocalFinalizedMeta({ finalizedAt: new Date().toISOString(), createdRecordId: data.createdRecordId });
-        setSnackbar({
-          open: true,
-          message: `Created 1 ${data.record_type} record (record #${data.createdRecordId})`,
-          severity: 'success',
-        });
+        showSnackbar(`Created 1 ${data.record_type} record (record #${data.createdRecordId})`, 'success',);
         onFinalized?.({ recordId: data.createdRecordId, recordType: data.record_type });
       } else {
         // Batch finalize
@@ -542,19 +537,11 @@ const FieldMappingPanel: React.FC<FieldMappingPanelProps> = ({
         const data = res?.data || res;
         setIsFinalized(true);
         setLocalFinalizedMeta({ finalizedAt: new Date().toISOString(), createdRecordId: data.created_records?.[0]?.recordId || 0 });
-        setSnackbar({
-          open: true,
-          message: `Created ${data.created_count} record(s) in om_church_${churchId}`,
-          severity: 'success',
-        });
+        showSnackbar(`Created ${data.created_count} record(s) in om_church_${churchId}`, 'success',);
         onFinalized?.({ created_count: data.created_count });
       }
     } catch (err: any) {
-      setSnackbar({
-        open: true,
-        message: err?.response?.data?.error || err?.message || 'Finalize failed',
-        severity: 'error',
-      });
+      showSnackbar(err?.response?.data?.error || err?.message || 'Finalize failed', 'error',);
     }
     setFinalizing(false);
   }, [jobId, churchId, recordType, records, isFinalized, onFinalized]);
@@ -750,10 +737,10 @@ const FieldMappingPanel: React.FC<FieldMappingPanelProps> = ({
       <Snackbar
         open={snackbar.open}
         autoHideDuration={5000}
-        onClose={() => setSnackbar((s) => ({ ...s, open: false }))}
+        onClose={closeSnackbar}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <Alert severity={snackbar.severity} onClose={() => setSnackbar((s) => ({ ...s, open: false }))} sx={{ width: '100%' }}>
+        <Alert severity={snackbar.severity} onClose={closeSnackbar} sx={{ width: '100%' }}>
           {snackbar.message}
         </Alert>
       </Snackbar>

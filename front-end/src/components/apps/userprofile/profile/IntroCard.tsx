@@ -1,6 +1,7 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import React, { useState, useEffect } from 'react';
+import { useSnackbar } from '@/hooks/useSnackbar';
 import { apiClient } from '@/api/utils/axiosInstance';
 import { Stack, Typography, IconButton, TextField, Button, Box, Snackbar, Alert } from '@mui/material';
 
@@ -22,11 +23,7 @@ const IntroCard = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({
-    open: false,
-    message: '',
-    severity: 'success'
-  });
+  const { snackbar, showSnackbar, closeSnackbar } = useSnackbar();
   
   const [introData, setIntroData] = useState<IntroData>({
     introduction: '',
@@ -97,13 +94,13 @@ const IntroCard = () => {
       if (result.success) {
         setIntroData(editData);
         setIsEditing(false);
-        setSnackbar({ open: true, message: 'Profile updated successfully!', severity: 'success' });
+        showSnackbar('Profile updated successfully!', 'success');
       } else {
         throw new Error(result.error || 'Failed to save');
       }
     } catch (error: any) {
       console.error('Error saving profile:', error);
-      setSnackbar({ open: true, message: error.message || 'Failed to save profile', severity: 'error' });
+      showSnackbar(error.message || 'Failed to save profile', 'error');
     } finally {
       setSaving(false);
     }
@@ -224,10 +221,10 @@ const IntroCard = () => {
       <Snackbar
         open={snackbar.open}
         autoHideDuration={4000}
-        onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
+        onClose={closeSnackbar}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <Alert severity={snackbar.severity} onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}>
+        <Alert severity={snackbar.severity} onClose={closeSnackbar}>
           {snackbar.message}
         </Alert>
       </Snackbar>

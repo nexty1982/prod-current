@@ -1,45 +1,46 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import {
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  FormControl,
-  FormControlLabel,
-  IconButton,
-  InputLabel,
-  MenuItem,
-  Select,
-  Switch,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TextField,
-  Typography,
-  Paper,
-  Alert,
-  Snackbar,
-  Tooltip,
-  Divider,
-  Stack,
-} from '@mui/material';
-import {
-  Add as AddIcon,
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-  ArrowUpward as ArrowUpIcon,
-  ArrowDownward as ArrowDownIcon,
-  DragIndicator as DragIcon,
-} from '@mui/icons-material';
 import apiClient from '@/api/utils/axiosInstance';
+import { useSnackbar } from '@/hooks/useSnackbar';
+import {
+    Add as AddIcon,
+    ArrowDownward as ArrowDownIcon,
+    ArrowUpward as ArrowUpIcon,
+    Delete as DeleteIcon,
+    DragIndicator as DragIcon,
+    Edit as EditIcon,
+} from '@mui/icons-material';
+import {
+    Alert,
+    Box,
+    Button,
+    Card,
+    CardContent,
+    Chip,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    Divider,
+    FormControl,
+    FormControlLabel,
+    IconButton,
+    InputLabel,
+    MenuItem,
+    Paper,
+    Select,
+    Snackbar,
+    Stack,
+    Switch,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    TextField,
+    Tooltip,
+    Typography,
+} from '@mui/material';
+import React, { useCallback, useEffect, useState } from 'react';
 
 // ─── Types ─────────────────────────────────────────────────────────────
 
@@ -103,11 +104,7 @@ const TutorialManagement: React.FC = () => {
   const [editId, setEditId] = useState<number | null>(null);
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [form, setForm] = useState(emptyForm());
-  const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({
-    open: false,
-    message: '',
-    severity: 'success',
-  });
+  const { snackbar, showSnackbar, closeSnackbar } = useSnackbar();
 
   // ─── Data fetching ──────────────────────────────────────────────────
 
@@ -131,9 +128,6 @@ const TutorialManagement: React.FC = () => {
 
   // ─── Helpers ────────────────────────────────────────────────────────
 
-  const showSnackbar = (message: string, severity: 'success' | 'error' = 'success') => {
-    setSnackbar({ open: true, message, severity });
-  };
 
   // ─── Dialog handlers ───────────────────────────────────────────────
 
@@ -578,11 +572,11 @@ const TutorialManagement: React.FC = () => {
       <Snackbar
         open={snackbar.open}
         autoHideDuration={4000}
-        onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
+        onClose={closeSnackbar}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
       >
         <Alert
-          onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
+          onClose={closeSnackbar}
           severity={snackbar.severity}
           variant="filled"
         >

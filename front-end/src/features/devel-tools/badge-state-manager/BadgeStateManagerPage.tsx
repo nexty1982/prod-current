@@ -60,6 +60,7 @@ import {
     IconTrash
 } from '@tabler/icons-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useSnackbar } from '@/hooks/useSnackbar';
 
 // ── Known badge-capable items (mirrors badgeKey values in MenuItems.ts) ──
 
@@ -148,9 +149,7 @@ const BadgeStateManagerPage: React.FC = () => {
   const [setDialogDuration, setSetDialogDuration] = useState('');
 
   // Snackbar
-  const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({
-    open: false, message: '', severity: 'success',
-  });
+  const { snackbar, showSnackbar, closeSnackbar } = useSnackbar();
 
   // ── Fetch badges ─────────────────────────────────────────────
 
@@ -160,7 +159,7 @@ const BadgeStateManagerPage: React.FC = () => {
       const res: any = await apiClient.get('/badges');
       setBadges(res?.badges || []);
     } catch {
-      setSnackbar({ open: true, message: 'Failed to fetch badge states', severity: 'error' });
+      showSnackbar('Failed to fetch badge states', 'error');
     } finally {
       setLoading(false);
     }
@@ -269,10 +268,10 @@ const BadgeStateManagerPage: React.FC = () => {
         badge_state: state,
         badge_duration_days: durationDays || undefined,
       });
-      setSnackbar({ open: true, message: `Badge set to ${state === 'new' ? 'NEW' : 'UPDATED'} for "${itemKey}"`, severity: 'success' });
+      showSnackbar(`Badge set to ${state === 'new' ? 'NEW' : 'UPDATED'} for "${itemKey}"`, 'success');
       await fetchBadges();
     } catch {
-      setSnackbar({ open: true, message: `Failed to set badge for "${itemKey}"`, severity: 'error' });
+      showSnackbar(`Failed to set badge for "${itemKey}"`, 'error');
     } finally {
       setActionInProgress(null);
     }
@@ -284,10 +283,10 @@ const BadgeStateManagerPage: React.FC = () => {
       await apiClient.post(`/badges/${encodeURIComponent(itemKey)}/acknowledge`, {
         acknowledged_by: 'badge-manager',
       });
-      setSnackbar({ open: true, message: `Badge acknowledged for "${itemKey}"`, severity: 'success' });
+      showSnackbar(`Badge acknowledged for "${itemKey}"`, 'success');
       await fetchBadges();
     } catch {
-      setSnackbar({ open: true, message: `Failed to acknowledge badge for "${itemKey}"`, severity: 'error' });
+      showSnackbar(`Failed to acknowledge badge for "${itemKey}"`, 'error');
     } finally {
       setActionInProgress(null);
     }
@@ -299,10 +298,10 @@ const BadgeStateManagerPage: React.FC = () => {
       await apiClient.post(`/badges/${encodeURIComponent(itemKey)}/reset`, {
         badge_state: 'new',
       });
-      setSnackbar({ open: true, message: `Badge reset for "${itemKey}"`, severity: 'success' });
+      showSnackbar(`Badge reset for "${itemKey}"`, 'success');
       await fetchBadges();
     } catch {
-      setSnackbar({ open: true, message: `Failed to reset badge for "${itemKey}"`, severity: 'error' });
+      showSnackbar(`Failed to reset badge for "${itemKey}"`, 'error');
     } finally {
       setActionInProgress(null);
     }
@@ -312,10 +311,10 @@ const BadgeStateManagerPage: React.FC = () => {
     setActionInProgress(itemKey);
     try {
       await apiClient.delete(`/badges/${encodeURIComponent(itemKey)}`);
-      setSnackbar({ open: true, message: `Badge entry deleted for "${itemKey}"`, severity: 'success' });
+      showSnackbar(`Badge entry deleted for "${itemKey}"`, 'success');
       await fetchBadges();
     } catch {
-      setSnackbar({ open: true, message: `Failed to delete badge for "${itemKey}"`, severity: 'error' });
+      showSnackbar(`Failed to delete badge for "${itemKey}"`, 'error');
     } finally {
       setActionInProgress(null);
     }
@@ -758,11 +757,11 @@ const BadgeStateManagerPage: React.FC = () => {
       <Snackbar
         open={snackbar.open}
         autoHideDuration={4000}
-        onClose={() => setSnackbar(s => ({ ...s, open: false }))}
+        onClose={closeSnackbar}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
         <Alert
-          onClose={() => setSnackbar(s => ({ ...s, open: false }))}
+          onClose={closeSnackbar}
           severity={snackbar.severity}
           variant="filled"
           sx={{ width: '100%' }}

@@ -38,6 +38,7 @@ import {
   useTheme,
 } from '@mui/material';
 import React, { useCallback, useEffect, useState } from 'react';
+import { useSnackbar } from '@/hooks/useSnackbar';
 import { useNavigate } from 'react-router-dom';
 
 interface PendingUser {
@@ -63,7 +64,7 @@ const PendingMembersPage: React.FC = () => {
   const [users, setUsers] = useState<PendingUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [snack, setSnack] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({ open: false, message: '', severity: 'success' });
+  const { snackbar: snack, showSnackbar: showSnack, closeSnackbar } = useSnackbar();
   const [rejectDialog, setRejectDialog] = useState<{ open: boolean; userId: number | null; email: string }>({ open: false, userId: null, email: '' });
   const [rejectReason, setRejectReason] = useState('');
   const [actionLoading, setActionLoading] = useState<number | null>(null);
@@ -97,10 +98,10 @@ const PendingMembersPage: React.FC = () => {
     setActionLoading(userId);
     try {
       await apiClient.post<any>(`/admin/users/${userId}/unlock`);
-      setSnack({ open: true, message: `${email} approved and unlocked`, severity: 'success' });
+      showSnack(`${email} approved and unlocked`, 'success');
       setUsers(prev => prev.filter(u => u.id !== userId));
     } catch (err: any) {
-      setSnack({ open: true, message: err.message, severity: 'error' });
+      showSnack(err.message, 'error');
     } finally {
       setActionLoading(null);
     }
@@ -117,12 +118,12 @@ const PendingMembersPage: React.FC = () => {
         // User is already locked, so manually update the reason
         // The lockout endpoint returns 400 for already-locked users, so just remove from list
       }
-      setSnack({ open: true, message: `${rejectDialog.email} registration rejected`, severity: 'success' });
+      showSnack(`${rejectDialog.email} registration rejected`, 'success');
       setUsers(prev => prev.filter(u => u.id !== rejectDialog.userId));
       setRejectDialog({ open: false, userId: null, email: '' });
       setRejectReason('');
     } catch (err: any) {
-      setSnack({ open: true, message: err.message, severity: 'error' });
+      showSnack(err.message, 'error');
     } finally {
       setActionLoading(null);
     }
@@ -261,8 +262,8 @@ const PendingMembersPage: React.FC = () => {
       </Dialog>
 
       {/* Snackbar */}
-      <Snackbar open={snack.open} autoHideDuration={4000} onClose={() => setSnack(s => ({ ...s, open: false }))}>
-        <Alert severity={snack.severity} onClose={() => setSnack(s => ({ ...s, open: false }))}>{snack.message}</Alert>
+      <Snackbar open={snack.open} autoHideDuration={4000} onClose={closeSnackbar}>
+        <Alert severity={snack.severity} onClose={closeSnackbar}>{snack.message}</Alert>
       </Snackbar>
     </PageContainer>
   );

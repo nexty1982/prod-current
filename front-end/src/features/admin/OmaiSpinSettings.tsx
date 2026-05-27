@@ -3,24 +3,47 @@
  * Web interface for environment mirroring operations
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
-import {
-    Box, Card, CardContent, Typography, Grid, Button, Dialog, DialogTitle, DialogContent,
-    DialogActions, TextField, FormControlLabel, Switch, Alert, LinearProgress,
-    Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
-    Chip, IconButton, Tooltip, Tabs, Tab, Accordion, AccordionSummary, AccordionDetails,
-    List, ListItem, ListItemText, ListItemIcon, Pagination, FormControl, InputLabel,
-    Select, MenuItem, CircularProgress, Snackbar, Badge, Divider
-} from '@mui/material';
-import {
-    PlayArrow as StartIcon, Stop as StopIcon, Refresh as RefreshIcon,
-    History as HistoryIcon, Settings as SettingsIcon, Visibility as ViewIcon,
-    ExpandMore as ExpandMoreIcon, Computer as ServerIcon, Storage as DatabaseIcon,
-    FileCopy as FilesIcon, Security as SecurityIcon, CheckCircle as SuccessIcon,
-    Error as ErrorIcon, Warning as WarningIcon, Info as InfoIcon
-} from '@mui/icons-material';
-import { useAuth } from '@/context/AuthContext';
 import { apiClient } from '@/api/utils/axiosInstance';
+import { useAuth } from '@/context/AuthContext';
+import { useSnackbar } from '@/hooks/useSnackbar';
+import {
+    Storage as DatabaseIcon,
+    Error as ErrorIcon,
+    FileCopy as FilesIcon,
+    Info as InfoIcon,
+    Refresh as RefreshIcon,
+    Computer as ServerIcon,
+    PlayArrow as StartIcon,
+    CheckCircle as SuccessIcon,
+    Visibility as ViewIcon,
+    Warning as WarningIcon
+} from '@mui/icons-material';
+import {
+    Alert,
+    Box,
+    Button,
+    Card, CardContent,
+    Chip,
+    CircularProgress,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    FormControlLabel,
+    Grid,
+    IconButton,
+    LinearProgress,
+    Pagination,
+    Snackbar,
+    Switch,
+    Tab,
+    Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+    Tabs,
+    TextField,
+    Tooltip,
+    Typography
+} from '@mui/material';
+import React, { useCallback, useEffect, useState } from 'react';
 
 interface OmaiSpinStats {
     total_sessions: number;
@@ -85,7 +108,7 @@ const OmaiSpinSettings: React.FC = () => {
     const [sessionLogs, setSessionLogs] = useState<any[]>([]);
     
     // UI state
-    const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'info' as 'success' | 'error' | 'warning' | 'info' });
+    const { snackbar, showSnackbar, closeSnackbar } = useSnackbar('info');
     const [refreshing, setRefreshing] = useState(false);
     
     // Real-time updates
@@ -105,11 +128,7 @@ const OmaiSpinSettings: React.FC = () => {
             }
         } catch (error) {
             console.error('Error loading OMAI-Spin dashboard:', error);
-            setSnackbar({
-                open: true,
-                message: 'Failed to load dashboard data',
-                severity: 'error'
-            });
+            showSnackbar('Failed to load dashboard data', 'error');
         } finally {
             setLoading(false);
             setRefreshing(false);
@@ -189,20 +208,12 @@ const OmaiSpinSettings: React.FC = () => {
             const response = await apiClient.post('/api/admin/omai-spin/start', operationConfig);
             
             if (response.data.success) {
-                setSnackbar({
-                    open: true,
-                    message: 'OMAI-Spin operation started successfully',
-                    severity: 'success'
-                });
+                showSnackbar('OMAI-Spin operation started successfully', 'success');
                 setShowStartDialog(false);
                 loadDashboard();
             }
         } catch (error: any) {
-            setSnackbar({
-                open: true,
-                message: error.response?.data?.error || 'Failed to start operation',
-                severity: 'error'
-            });
+            showSnackbar(error.response?.data?.error || 'Failed to start operation', 'error');
         }
     };
 
@@ -210,18 +221,10 @@ const OmaiSpinSettings: React.FC = () => {
     const handleCancelOperation = async (operationId: string) => {
         try {
             await apiClient.delete(`/api/admin/omai-spin/operation/${operationId}`);
-            setSnackbar({
-                open: true,
-                message: 'Operation cancelled',
-                severity: 'info'
-            });
+            showSnackbar('Operation cancelled', 'info');
             loadDashboard();
         } catch (error) {
-            setSnackbar({
-                open: true,
-                message: 'Failed to cancel operation',
-                severity: 'error'
-            });
+            showSnackbar('Failed to cancel operation', 'error');
         }
     };
 
@@ -234,11 +237,7 @@ const OmaiSpinSettings: React.FC = () => {
                 setSelectedSession(sessionId);
             }
         } catch (error) {
-            setSnackbar({
-                open: true,
-                message: 'Failed to load session logs',
-                severity: 'error'
-            });
+            showSnackbar('Failed to load session logs', 'error');
         }
     };
 
@@ -697,10 +696,10 @@ const OmaiSpinSettings: React.FC = () => {
             <Snackbar
                 open={snackbar.open}
                 autoHideDuration={6000}
-                onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
+                onClose={closeSnackbar}
             >
                 <Alert 
-                    onClose={() => setSnackbar(prev => ({ ...prev, open: false }))} 
+                    onClose={closeSnackbar} 
                     severity={snackbar.severity}
                 >
                     {snackbar.message}

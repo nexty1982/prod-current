@@ -3,30 +3,31 @@
  * ServiceLogsModal for the Platform Status page.
  * Extracted from PlatformStatusPage.tsx
  */
-import React, { useCallback, useEffect, useState } from 'react';
+import { apiClient } from '@/api/utils/axiosInstance';
+import type { SnackbarSeverity } from '@/hooks/useSnackbar';
+import { useSnackbar } from '@/hooks/useSnackbar';
 import {
-  Box,
-  Paper,
-  Typography,
-  Stack,
-  CircularProgress,
-  IconButton,
-  Tooltip,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  useTheme,
-  alpha,
+    alpha,
+    Box,
+    Button,
+    CircularProgress,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    IconButton,
+    Stack,
+    Tooltip,
+    Typography,
+    useTheme
 } from '@mui/material';
 import {
-  IconRefresh,
-  IconAlertTriangle,
-  IconReload,
-  IconFileText,
+    IconAlertTriangle,
+    IconFileText,
+    IconRefresh,
+    IconReload,
 } from '@tabler/icons-react';
-import { apiClient } from '@/api/utils/axiosInstance';
+import React, { useCallback, useEffect, useState } from 'react';
 
 // ─── Action Types ────────────────────────────────────────────────
 
@@ -51,9 +52,8 @@ export interface ActionHistoryItem {
 // ─── Toast Hook ──────────────────────────────────────────────────
 
 export function useActionToast() {
-  const [toast, setToast] = useState<{ open: boolean; severity: 'success' | 'error' | 'warning' | 'info'; message: string }>({ open: false, severity: 'success', message: '' });
-  const show = (severity: 'success' | 'error' | 'warning' | 'info', message: string) => setToast({ open: true, severity, message });
-  const close = () => setToast(t => ({ ...t, open: false }));
+  const { snackbar: toast, showSnackbar, closeSnackbar: close } = useSnackbar();
+  const show = (severity: SnackbarSeverity, message: string) => showSnackbar(message, severity);
   return { toast, show, close };
 }
 
