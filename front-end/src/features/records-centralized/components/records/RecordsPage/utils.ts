@@ -264,8 +264,9 @@ export const DEFAULT_DATE_SORT_FIELD: Record<string, string> = {
 // "nothing happens" because the toast is easy to miss.
 //
 // We keep the original snake_case fields too, so anything that reads either
-// shape continues to work. The backend's mapFields() ignores camelCase fields
-// when the snake_case equivalent is also present, so duplicates are safe.
+// shape continues to work. Note that if both snake_case and camelCase versions
+// of the same field are later submitted, backend field mapping may process
+// both shapes rather than deterministically preferring snake_case.
 // ============================================================================
 
 // Coerce a date-ish value (Date object, ISO string, or YYYY-MM-DD) to the
