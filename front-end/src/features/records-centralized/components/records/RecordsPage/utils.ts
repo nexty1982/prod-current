@@ -271,17 +271,24 @@ export const DEFAULT_DATE_SORT_FIELD: Record<string, string> = {
 
 // Coerce a date-ish value (Date object, ISO string, or YYYY-MM-DD) to the
 // YYYY-MM-DD form that <input type="date"> requires.
+function formatDateInputFromLocalParts(d: Date): string {
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 function toDateInputValue(v: any): string {
   if (!v) return '';
   if (typeof v === 'string') {
     if (/^\d{4}-\d{2}-\d{2}/.test(v)) return v.slice(0, 10);
     const d = new Date(v);
-    if (!Number.isNaN(d.getTime())) return d.toISOString().slice(0, 10);
+    if (!Number.isNaN(d.getTime())) return formatDateInputFromLocalParts(d);
     return '';
   }
   try {
     const d = new Date(v);
-    if (!Number.isNaN(d.getTime())) return d.toISOString().slice(0, 10);
+    if (!Number.isNaN(d.getTime())) return formatDateInputFromLocalParts(d);
   } catch { /* fall through */ }
   return '';
 }
