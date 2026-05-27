@@ -1,5 +1,6 @@
 import { apiClient } from '@/api/utils/axiosInstance';
 import { CustomizerContext } from '@/context/CustomizerContext';
+import { useSnackbar } from '@/hooks/useSnackbar';
 import {
     Alert, alpha, Autocomplete,
     Badge,
@@ -50,9 +51,9 @@ import {
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
-import type { LogEntry, LogStats, SearchResult, FilterOptions, ServerLogFile } from './logSearchTypes';
-import { levelColors, levelIcons, ALL_LEVELS, STAT_CARD, SERVER_LOG_LABELS } from './logSearchTypes';
 import ActivityLogsTab from './ActivityLogsTab';
+import type { FilterOptions, LogEntry, LogStats, SearchResult, ServerLogFile } from './logSearchTypes';
+import { ALL_LEVELS, levelColors, levelIcons, SERVER_LOG_LABELS, STAT_CARD } from './logSearchTypes';
 import SessionsTab from './SessionsTab';
 
 dayjs.extend(relativeTime);
@@ -68,8 +69,7 @@ const LogSearch: React.FC = () => {
   const countdownRef = useRef<NodeJS.Timeout | null>(null);
 
   // ── Snackbar ──────────────────────────────────────────────────────────────
-  type SnackbarState = { open: boolean; message: string; severity: 'success' | 'error' };
-  const [snackbar, setSnackbar] = useState<SnackbarState>({ open: false, message: '', severity: 'success' });
+  const { snackbar, closeSnackbar } = useSnackbar();
 
   // ── Log search bucket ─────────────────────────────────────────────────────
   type ContextDialogState = { open: boolean; rows: LogEntry[]; targetId: number | null };
@@ -857,8 +857,8 @@ const LogSearch: React.FC = () => {
       <SessionsTab active={activeTab === 2} />
 
       {/* Global Snackbar */}
-      <Snackbar open={snackbar.open} autoHideDuration={5000} onClose={() => setSnackbar(s => ({ ...s, open: false }))} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
-        <Alert severity={snackbar.severity} onClose={() => setSnackbar(s => ({ ...s, open: false }))}>{snackbar.message}</Alert>
+      <Snackbar open={snackbar.open} autoHideDuration={5000} onClose={closeSnackbar} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
+        <Alert severity={snackbar.severity} onClose={closeSnackbar}>{snackbar.message}</Alert>
       </Snackbar>
     </Box>
   );

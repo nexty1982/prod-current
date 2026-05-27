@@ -32,6 +32,7 @@ import {
   useTheme,
 } from '@mui/material';
 import React, { useCallback, useEffect, useReducer, useState } from 'react';
+import { useSnackbar } from '@/hooks/useSnackbar';
 import { useNavigate, useParams } from 'react-router-dom';
 import { COLOR } from './ChurchLifecycleDetailPage/constants';
 import type { CRMContact, SnackState } from './ChurchLifecycleDetailPage/types';
@@ -99,7 +100,7 @@ const ChurchLifecycleDetailPage: React.FC = () => {
   }, [initialNotes]);
 
   /* --- snack + action loading flags -------------------------------- */
-  const [snack, setSnack] = useState<SnackState>({ open: false, message: '', severity: 'success' });
+  const { snackbar: snack, showSnackbar: showSnack, closeSnackbar } = useSnackbar();
   const [actionFlags, setActionFlags] = useState({
     notesSaving: false,
     togglingSetup: false,
@@ -178,10 +179,6 @@ const ChurchLifecycleDetailPage: React.FC = () => {
   /* ------------------------------------------------------------------ */
   /*  Helpers                                                            */
   /* ------------------------------------------------------------------ */
-
-  const showToast = (message: string, severity: 'success' | 'error' | 'info' = 'success') => {
-    setSnack({ open: true, message, severity });
-  };
 
   const formatDate = (d: string | null) => {
     if (!d) return '—';
@@ -746,8 +743,8 @@ const ChurchLifecycleDetailPage: React.FC = () => {
       />
 
       {/* Snackbar */}
-      <Snackbar open={snack.open} autoHideDuration={4000} onClose={() => setSnack(s => ({ ...s, open: false }))} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
-        <Alert severity={snack.severity} onClose={() => setSnack(s => ({ ...s, open: false }))} variant="filled" sx={{ width: '100%' }}>
+      <Snackbar open={snack.open} autoHideDuration={4000} onClose={closeSnackbar} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
+        <Alert severity={snack.severity} onClose={closeSnackbar} variant="filled" sx={{ width: '100%' }}>
           {snack.message}
         </Alert>
       </Snackbar>

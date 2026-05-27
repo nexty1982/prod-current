@@ -7,6 +7,7 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
+import { useSnackbar } from '@/hooks/useSnackbar';
 import { useAuth } from '@/context/AuthContext';
 import { useChurch } from '@/context/ChurchContext';
 import { apiClient } from '@/api/utils/axiosInstance';
@@ -171,7 +172,7 @@ const PortalSettingsPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [church, setChurch] = useState<ChurchData>(EMPTY_CHURCH);
-  const [toast, setToast] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({ open: false, message: '', severity: 'success' });
+  const { snackbar: toast, showSnackbar: showToast, closeSnackbar: closeToast } = useSnackbar();
 
   // Database Mapping state
   const [dbTableName, setDbTableName] = useState('baptism_records');
@@ -220,7 +221,7 @@ const PortalSettingsPage: React.FC = () => {
           });
         }
       } catch (err: any) {
-        if (!cancelled) setToast({ open: true, message: err.message || 'Failed to load', severity: 'error' });
+        if (!cancelled) showToast(err.message || 'Failed to load', 'error');
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -236,9 +237,9 @@ const PortalSettingsPage: React.FC = () => {
     try {
       setSaving(true);
       await apiClient.put('/my/church-settings', church);
-      setToast({ open: true, message: t('portal.settings_save_success'), severity: 'success' });
+      showToast(t('portal.settings_save_success'), 'success');
     } catch (err: any) {
-      setToast({ open: true, message: err.message, severity: 'error' });
+      showToast(err.message, 'error');
     } finally {
       setSaving(false);
     }
@@ -273,7 +274,7 @@ const PortalSettingsPage: React.FC = () => {
         setRowCount(counts[dbTableName] ?? null);
       } catch { /* non-fatal */ }
     } catch (err: any) {
-      setToast({ open: true, message: err.message, severity: 'error' });
+      showToast(err.message, 'error');
     } finally {
       setDbLoading(false);
     }
@@ -303,9 +304,9 @@ const PortalSettingsPage: React.FC = () => {
         mappings,
         field_settings: { visibility, sortable, default_sort_field: defaultSortField, default_sort_direction: defaultSortDirection },
       });
-      setToast({ open: true, message: t('portal.settings_dbmap_save_success'), severity: 'success' });
+      showToast(t('portal.settings_dbmap_save_success'), 'success');
     } catch (err: any) {
-      setToast({ open: true, message: err.message, severity: 'error' });
+      showToast(err.message, 'error');
     } finally {
       setDbSaving(false);
     }
@@ -735,10 +736,10 @@ const PortalSettingsPage: React.FC = () => {
       <Snackbar
         open={toast.open}
         autoHideDuration={4000}
-        onClose={() => setToast(t => ({ ...t, open: false }))}
+        onClose={closeToast}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <Alert severity={toast.severity} variant="filled" onClose={() => setToast(t => ({ ...t, open: false }))} sx={{ width: '100%' }}>
+        <Alert severity={toast.severity} variant="filled" onClose={closeToast} sx={{ width: '100%' }}>
           {toast.message}
         </Alert>
       </Snackbar>

@@ -6,6 +6,7 @@
 import { adminAPI } from '@/api/admin.api';
 import { useAuth } from '@/context/AuthContext';
 import useDataTableState from '@/hooks/useDataTableState';
+import { useSnackbar } from '@/hooks/useSnackbar';
 import {
     Alert, alpha,
     Box,
@@ -84,10 +85,7 @@ const ActivityLogsTab: React.FC<ActivityLogsTabProps> = ({ active }) => {
   const [activityViewDialog, setActivityViewDialog] = useState(false);
   const [cleanupDialog, setCleanupDialog] = useState(false);
   const [cleanupDays, setCleanupDays] = useState(90);
-  const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({ open: false, message: '', severity: 'success' });
-
-  const showSnack = (message: string, severity: 'success' | 'error' = 'success') =>
-    setSnackbar({ open: true, message, severity });
+  const { snackbar, showSnackbar: showSnack, closeSnackbar } = useSnackbar();
 
   const fetchActivities = useCallback(async () => {
     table.setLoading(true);
@@ -310,8 +308,8 @@ const ActivityLogsTab: React.FC<ActivityLogsTabProps> = ({ active }) => {
       </Dialog>
 
       {/* Snackbar */}
-      <Snackbar open={snackbar.open} autoHideDuration={5000} onClose={() => setSnackbar(s => ({ ...s, open: false }))} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
-        <Alert severity={snackbar.severity} onClose={() => setSnackbar(s => ({ ...s, open: false }))}>{snackbar.message}</Alert>
+      <Snackbar open={snackbar.open} autoHideDuration={5000} onClose={closeSnackbar} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
+        <Alert severity={snackbar.severity} onClose={closeSnackbar}>{snackbar.message}</Alert>
       </Snackbar>
     </>
   );

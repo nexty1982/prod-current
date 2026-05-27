@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { useSnackbar } from '@/hooks/useSnackbar';
 import {
   Box,
   Paper,
@@ -95,7 +96,7 @@ const RepoOpsPage: React.FC = () => {
   const [deleteTarget, setDeleteTarget] = useState<RemoteBranch | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
-  const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({ open: false, message: '', severity: 'success' });
+  const { snackbar, showSnackbar, closeSnackbar } = useSnackbar();
 
   // Merge branch
   const [mergeTarget, setMergeTarget] = useState<RemoteBranch | null>(null);
@@ -165,7 +166,7 @@ const RepoOpsPage: React.FC = () => {
     setDeleting(true);
     try {
       const res: any = await apiClient.delete(`/ops/git/branch/${encodeURIComponent(deleteTarget.name)}`);
-      setSnackbar({ open: true, message: res.message || `Branch "${deleteTarget.name}" deleted`, severity: 'success' });
+      showSnackbar(res.message || `Branch "${deleteTarget.name}" deleted`, 'success');
       setDeleteDialogOpen(false);
       setDeleteTarget(null);
       // Close drawer if the deleted branch was selected
@@ -176,7 +177,7 @@ const RepoOpsPage: React.FC = () => {
       // Refresh analysis to reflect the deletion
       fetchAnalysis();
     } catch (err: any) {
-      setSnackbar({ open: true, message: err.message || 'Deletion failed', severity: 'error' });
+      showSnackbar(err.message || 'Deletion failed', 'error');
     } finally {
       setDeleting(false);
     }
@@ -194,7 +195,7 @@ const RepoOpsPage: React.FC = () => {
     setMerging(true);
     try {
       const res: any = await apiClient.post(`/ops/git/branch/${encodeURIComponent(mergeTarget.name)}/merge`);
-      setSnackbar({ open: true, message: res.message || `Branch "${mergeTarget.name}" merged into main`, severity: 'success' });
+      showSnackbar(res.message || `Branch "${mergeTarget.name}" merged into main`, 'success');
       setMergeDialogOpen(false);
       setMergeTarget(null);
       if (selectedBranch?.name === mergeTarget.name) {
@@ -203,7 +204,7 @@ const RepoOpsPage: React.FC = () => {
       }
       fetchAnalysis();
     } catch (err: any) {
-      setSnackbar({ open: true, message: err.message || 'Merge failed', severity: 'error' });
+      showSnackbar(err.message || 'Merge failed', 'error');
     } finally {
       setMerging(false);
     }
@@ -215,11 +216,11 @@ const RepoOpsPage: React.FC = () => {
     setSavingNote(true);
     try {
       await apiClient.put(`/ops/git/branch-notes/${encodeURIComponent(branch.name)}`, { note: noteText });
-      setSnackbar({ open: true, message: noteText.trim() ? 'Note saved' : 'Note removed', severity: 'success' });
+      showSnackbar(noteText.trim() ? 'Note saved' : 'Note removed', 'success');
       setEditingNote(false);
       fetchAnalysis(); // refresh to pick up note in data
     } catch (err: any) {
-      setSnackbar({ open: true, message: err.message || 'Failed to save note', severity: 'error' });
+      showSnackbar(err.message || 'Failed to save note', 'error');
     } finally {
       setSavingNote(false);
     }
@@ -257,16 +258,12 @@ const RepoOpsPage: React.FC = () => {
     try {
       const res: any = await apiClient.post('/ops/git/branches/bulk-delete', { branches });
       setBulkDeleteProgress({ succeeded: res.succeeded, failed: res.failed, total: res.total });
-      setSnackbar({
-        open: true,
-        message: res.message || `Deleted ${res.succeeded} branch(es)`,
-        severity: res.failed === 0 ? 'success' : 'error',
-      });
+      showSnackbar(res.message || `Deleted ${res.succeeded} branch(es)`, res.failed === 0 ? 'success' : 'error',);
       setSelectedForDelete(new Set());
       setBulkDeleteDialogOpen(false);
       fetchAnalysis();
     } catch (err: any) {
-      setSnackbar({ open: true, message: err.message || 'Bulk delete failed', severity: 'error' });
+      showSnackbar(err.message || 'Bulk delete failed', 'error');
     } finally {
       setBulkDeleting(false);
     }
@@ -969,11 +966,11 @@ const RepoOpsPage: React.FC = () => {
       <Snackbar
         open={snackbar.open}
         autoHideDuration={4000}
-        onClose={() => setSnackbar(s => ({ ...s, open: false }))}
+        onClose={closeSnackbar}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
         <Alert
-          onClose={() => setSnackbar(s => ({ ...s, open: false }))}
+          onClose={closeSnackbar}
           severity={snackbar.severity}
           sx={{ fontFamily: f, fontSize: '0.8125rem' }}
         >

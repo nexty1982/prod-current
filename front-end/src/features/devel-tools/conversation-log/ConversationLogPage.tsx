@@ -46,6 +46,7 @@ import {
     IconX,
 } from '@tabler/icons-react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useSnackbar } from '@/hooks/useSnackbar';
 import { apiClient as axiosInstance } from '../../../api/utils/axiosInstance';
 import type { ConversationSummary, ConversationDetail, SearchResult, Stats, Task, ReviewResult, PipelineExportItem } from './ConversationLogPage/types';
 import { AGENT_TOOLS_CONV, AGENT_TOOL_LABELS_CONV, AGENT_TOOL_COLORS_CONV, HORIZON_OPTIONS } from './ConversationLogPage/types';
@@ -65,7 +66,7 @@ const ConversationLogPage: React.FC = () => {
 
   // ── Standalone UI state ──
   const [activeTab, setActiveTab] = useState(0);
-  const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({ open: false, message: '', severity: 'success' });
+  const { snackbar, showSnackbar, closeSnackbar } = useSnackbar();
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<SearchResult[] | null>(null);
   const [searching, setSearching] = useState(false);
@@ -380,7 +381,7 @@ const ConversationLogPage: React.FC = () => {
       } else if (selectedConvs.size > 0) {
         body.filenames = [...selectedConvs];
       } else {
-        setSnackbar({ open: true, message: 'Select conversations or use a date group to export', severity: 'error' });
+        showSnackbar('Select conversations or use a date group to export', 'error');
         setExporting(false);
         return;
       }
@@ -395,9 +396,9 @@ const ConversationLogPage: React.FC = () => {
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
 
-      setSnackbar({ open: true, message: `Exported ${date ? 'all conversations for ' + date : selectedConvs.size + ' conversation(s)'}`, severity: 'success' });
+      showSnackbar(`Exported ${date ? 'all conversations for ' + date : selectedConvs.size + ' conversation(s)'}`, 'success');
     } catch (err: any) {
-      setSnackbar({ open: true, message: err.message || 'Export failed', severity: 'error' });
+      showSnackbar(err.message || 'Export failed', 'error');
     } finally {
       setExporting(false);
     }
@@ -415,7 +416,7 @@ const ConversationLogPage: React.FC = () => {
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
     } catch (err: any) {
-      setSnackbar({ open: true, message: err.message || 'Export failed', severity: 'error' });
+      showSnackbar(err.message || 'Export failed', 'error');
     }
   }, []);
 
@@ -423,7 +424,7 @@ const ConversationLogPage: React.FC = () => {
 
   const handleReviewSelected = useCallback(async () => {
     if (selectedConvs.size === 0) {
-      setSnackbar({ open: true, message: 'Select conversations to review', severity: 'error' });
+      showSnackbar('Select conversations to review', 'error');
       return;
     }
     setReviewLoading(true);
@@ -476,7 +477,7 @@ const ConversationLogPage: React.FC = () => {
         setPipelineItems(items);
       }
     } catch (err: any) {
-      setSnackbar({ open: true, message: err.message || 'Review failed', severity: 'error' });
+      showSnackbar(err.message || 'Review failed', 'error');
     } finally {
       setReviewLoading(false);
     }
@@ -518,7 +519,7 @@ const ConversationLogPage: React.FC = () => {
         setPipelineItems(items);
       }
     } catch (err: any) {
-      setSnackbar({ open: true, message: err.message || 'Review failed', severity: 'error' });
+      showSnackbar(err.message || 'Review failed', 'error');
     } finally {
       setReviewLoading(false);
     }
@@ -527,7 +528,7 @@ const ConversationLogPage: React.FC = () => {
   const handleExportToPipeline = useCallback(async () => {
     const enabledItems = pipelineItems.filter(i => i.enabled);
     if (enabledItems.length === 0) {
-      setSnackbar({ open: true, message: 'No items enabled for export', severity: 'error' });
+      showSnackbar('No items enabled for export', 'error');
       return;
     }
     setPipelineExporting(true);
@@ -541,11 +542,11 @@ const ConversationLogPage: React.FC = () => {
         agent_tool: pipelineAgentTool || null,
       });
       if (data.success) {
-        setSnackbar({ open: true, message: `${data.count} item(s) exported to OM Daily pipeline`, severity: 'success' });
+        showSnackbar(`${data.count} item(s) exported to OM Daily pipeline`, 'success');
         setPipelineItems(prev => prev.map(i => i.enabled ? { ...i, enabled: false } : i));
       }
     } catch (err: any) {
-      setSnackbar({ open: true, message: err.message || 'Export failed', severity: 'error' });
+      showSnackbar(err.message || 'Export failed', 'error');
     } finally {
       setPipelineExporting(false);
     }
@@ -560,11 +561,11 @@ const ConversationLogPage: React.FC = () => {
       if (data.success) {
         setBulkExportPreview(data.items || []);
         if (data.skipped > 0) {
-          setSnackbar({ open: true, message: `${data.would_create} items ready, ${data.skipped} already in pipeline (skipped)`, severity: 'success' });
+          showSnackbar(`${data.would_create} items ready, ${data.skipped} already in pipeline (skipped)`, 'success');
         }
       }
     } catch (err: any) {
-      setSnackbar({ open: true, message: err.message || 'Preview failed', severity: 'error' });
+      showSnackbar(err.message || 'Preview failed', 'error');
     } finally {
       setBulkExportLoading(false);
     }
@@ -577,10 +578,10 @@ const ConversationLogPage: React.FC = () => {
       if (data.success) {
         setBulkExportResult({ count: data.count, skipped: data.skipped });
         setBulkExportPreview(null);
-        setSnackbar({ open: true, message: `${data.count} completed tasks exported to OM Daily pipeline`, severity: 'success' });
+        showSnackbar(`${data.count} completed tasks exported to OM Daily pipeline`, 'success');
       }
     } catch (err: any) {
-      setSnackbar({ open: true, message: err.message || 'Export failed', severity: 'error' });
+      showSnackbar(err.message || 'Export failed', 'error');
     } finally {
       setBulkExportLoading(false);
     }
@@ -888,11 +889,11 @@ const ConversationLogPage: React.FC = () => {
       <Snackbar
         open={snackbar.open}
         autoHideDuration={4000}
-        onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
+        onClose={closeSnackbar}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
         <Alert
-          onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
+          onClose={closeSnackbar}
           severity={snackbar.severity}
           variant="filled"
           sx={{ width: '100%' }}

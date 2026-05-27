@@ -5,31 +5,32 @@
  * URL-driven step navigation via :step param.
  */
 
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import {
-  Box,
-  Paper,
-  Typography,
-  useTheme,
-  TextField,
-  Switch,
-  FormControlLabel,
-  Radio,
-  Slider,
-  Button,
-  Chip,
-  Alert,
-  CircularProgress,
-  Snackbar,
-} from '@mui/material';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+import { useSnackbar } from '@/hooks/useSnackbar';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import SaveOutlinedIcon from '@mui/icons-material/SaveOutlined';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import ContentCopyOutlinedIcon from '@mui/icons-material/ContentCopyOutlined';
+import SaveOutlinedIcon from '@mui/icons-material/SaveOutlined';
 import ShareOutlinedIcon from '@mui/icons-material/ShareOutlined';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+import {
+    Alert,
+    Box,
+    Button,
+    Chip,
+    CircularProgress,
+    FormControlLabel,
+    Paper,
+    Radio,
+    Slider,
+    Snackbar,
+    Switch,
+    TextField,
+    Typography,
+    useTheme,
+} from '@mui/material';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useParishSettings } from './useParishSettings';
 
 const BASE = '/account/parish-management/database-mapping';
@@ -172,7 +173,7 @@ const DatabaseMappingPage: React.FC = () => {
   const [fields, setFields] = useState<FieldDef[]>(() => defaultFieldsFor('baptism'));
   const [defaultSort, setDefaultSort] = useState('last_name');
   const [dirty, setDirty] = useState(false);
-  const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({ open: false, message: '', severity: 'success' });
+  const { snackbar, showSnackbar, closeSnackbar } = useSnackbar();
 
   // Load saved config on mount. Saved settings store one snapshot
   // (selectedRecord + fields). If the saved type doesn't match the
@@ -227,9 +228,9 @@ const DatabaseMappingPage: React.FC = () => {
     const ok = await saveSettings({ config });
     if (ok) {
       setDirty(false);
-      setSnackbar({ open: true, message: 'Configuration saved successfully', severity: 'success' });
+      showSnackbar('Configuration saved successfully', 'success');
     } else {
-      setSnackbar({ open: true, message: settingsError || 'Failed to save configuration', severity: 'error' });
+      showSnackbar(settingsError || 'Failed to save configuration', 'error');
     }
   };
 
@@ -915,11 +916,11 @@ const DatabaseMappingPage: React.FC = () => {
       <Snackbar
         open={snackbar.open}
         autoHideDuration={4000}
-        onClose={() => setSnackbar((s) => ({ ...s, open: false }))}
+        onClose={closeSnackbar}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
         <Alert
-          onClose={() => setSnackbar((s) => ({ ...s, open: false }))}
+          onClose={closeSnackbar}
           severity={snackbar.severity}
           sx={{ fontFamily: "'Inter'", fontSize: '0.8125rem' }}
         >

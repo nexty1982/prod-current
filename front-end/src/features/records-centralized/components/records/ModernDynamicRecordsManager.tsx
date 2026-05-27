@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useMemo, useCallback } from 'react';
+import { useSnackbar } from '@/hooks/useSnackbar';
 import {
   Box,
   Typography,
@@ -89,11 +90,7 @@ export function ModernDynamicRecordsManager({
   const [showSettings, setShowSettings] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [recordToDelete, setRecordToDelete] = useState<RecordData | null>(null);
-  const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' | 'info' }>({
-    open: false,
-    message: '',
-    severity: 'info',
-  });
+  const { snackbar, showSnackbar, closeSnackbar } = useSnackbar();
 
   // Get current template
   const currentTemplate = getCurrentTemplate();
@@ -161,19 +158,11 @@ export function ModernDynamicRecordsManager({
     churchId,
     tableName: selectedTable,
     onSuccess: (data) => {
-      setSnackbar({
-        open: true,
-        message: 'Record saved successfully',
-        severity: 'success',
-      });
+      showSnackbar('Record saved successfully', 'success',);
       refetchRecords();
     },
     onError: (error) => {
-      setSnackbar({
-        open: true,
-        message: `Error: ${error.message}`,
-        severity: 'error',
-      });
+      showSnackbar(`Error: ${error.message}`, 'error',);
     },
   });
 
@@ -248,36 +237,20 @@ export function ModernDynamicRecordsManager({
       await deleteRecord(recordToDelete.id);
       setShowDeleteConfirm(false);
       setRecordToDelete(null);
-      setSnackbar({
-        open: true,
-        message: 'Record deleted successfully',
-        severity: 'success',
-      });
+      showSnackbar('Record deleted successfully', 'success',);
     } catch (error) {
-      setSnackbar({
-        open: true,
-        message: `Error deleting record: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        severity: 'error',
-      });
+      showSnackbar(`Error deleting record: ${error instanceof Error ? error.message : 'Unknown error'}`, 'error',);
     }
   }, [recordToDelete, deleteRecord]);
 
   const handleFormSuccess = useCallback((record: RecordData) => {
     setShowForm(false);
     setSelectedRecord(null);
-    setSnackbar({
-      open: true,
-      message: 'Record saved successfully',
-      severity: 'success',
-    });
+    showSnackbar('Record saved successfully', 'success',);
   }, []);
 
   const handleFormError = useCallback((error: string) => {
-    setSnackbar({
-      open: true,
-      message: `Form error: ${error}`,
-      severity: 'error',
-    });
+    showSnackbar(`Form error: ${error}`, 'error',);
   }, []);
 
   const handleLockToggle = useCallback(() => {
@@ -286,11 +259,7 @@ export function ModernDynamicRecordsManager({
 
   const handleTemplateSwitch = useCallback((template: string) => {
     switchTemplate(template as any);
-    setSnackbar({
-      open: true,
-      message: `Switched to ${template} template`,
-      severity: 'info',
-    });
+    showSnackbar(`Switched to ${template} template`, 'info',);
   }, []);
 
   // Loading state for tables
@@ -591,7 +560,7 @@ export function ModernDynamicRecordsManager({
       <Snackbar
         open={snackbar.open}
         autoHideDuration={6000}
-        onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
+        onClose={closeSnackbar}
         message={snackbar.message}
       />
     </Box>

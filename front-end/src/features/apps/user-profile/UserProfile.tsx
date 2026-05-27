@@ -30,6 +30,7 @@ import PersonOutlineTwoToneIcon from '@mui/icons-material/PersonOutlineTwoTone';
 import VpnKeyTwoToneIcon from '@mui/icons-material/VpnKeyTwoTone';
 import { IconEye, IconEyeOff } from '@tabler/icons-react';
 import React, { useEffect, useState } from 'react';
+import { useSnackbar } from '@/hooks/useSnackbar';
 
 interface ProfileData {
   display_name: string;
@@ -71,11 +72,7 @@ const UserProfile = () => {
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({
-    open: false,
-    message: '',
-    severity: 'success'
-  });
+  const { snackbar, showSnackbar, closeSnackbar } = useSnackbar();
 
   const [profileData, setProfileData] = useState<ProfileData>({
     display_name: '',
@@ -144,17 +141,17 @@ const UserProfile = () => {
     const { currentPassword, newPassword, confirmPassword } = passwordData;
 
     if (!currentPassword || !newPassword || !confirmPassword) {
-      setSnackbar({ open: true, message: 'All password fields are required', severity: 'error' });
+      showSnackbar('All password fields are required', 'error');
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      setSnackbar({ open: true, message: 'New password and confirm password do not match', severity: 'error' });
+      showSnackbar('New password and confirm password do not match', 'error');
       return;
     }
 
     if (newPassword.length < 8) {
-      setSnackbar({ open: true, message: 'Password must be at least 8 characters', severity: 'error' });
+      showSnackbar('Password must be at least 8 characters', 'error');
       return;
     }
 
@@ -163,12 +160,12 @@ const UserProfile = () => {
       const data = await apiClient.put<any>('/user/profile/password', { currentPassword, newPassword, confirmPassword });
       if (data.success) {
         setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
-        setSnackbar({ open: true, message: 'Password changed successfully', severity: 'success' });
+        showSnackbar('Password changed successfully', 'success');
       } else {
-        setSnackbar({ open: true, message: data.message || 'Failed to change password', severity: 'error' });
+        showSnackbar(data.message || 'Failed to change password', 'error');
       }
     } catch (error) {
-      setSnackbar({ open: true, message: 'Failed to change password', severity: 'error' });
+      showSnackbar('Failed to change password', 'error');
     } finally {
       setSaving(false);
     }
@@ -184,12 +181,12 @@ const UserProfile = () => {
         phone: profileData.phone,
       });
       if (data.success) {
-        setSnackbar({ open: true, message: 'Profile saved successfully', severity: 'success' });
+        showSnackbar('Profile saved successfully', 'success');
       } else {
         throw new Error(data.message || 'Save failed');
       }
     } catch (error: any) {
-      setSnackbar({ open: true, message: error.message || 'Failed to save profile', severity: 'error' });
+      showSnackbar(error.message || 'Failed to save profile', 'error');
     } finally {
       setSaving(false);
     }
@@ -448,10 +445,10 @@ const UserProfile = () => {
       <Snackbar
         open={snackbar.open}
         autoHideDuration={4000}
-        onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
+        onClose={closeSnackbar}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <Alert severity={snackbar.severity} onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}>
+        <Alert severity={snackbar.severity} onClose={closeSnackbar}>
           {snackbar.message}
         </Alert>
       </Snackbar>
