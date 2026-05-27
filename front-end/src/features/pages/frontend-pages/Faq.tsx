@@ -10,6 +10,8 @@ import ScrollToTop from '@/components/frontend-pages/shared/scroll-to-top';
 
 import PageContainer from '@/shared/ui/PageContainer';
 
+import PublicSeo from '@/components/seo/PublicSeo';
+
 import { Box, Container, Typography } from '@mui/material';
 
 import { useLanguage } from '@/context/LanguageContext';
@@ -22,7 +24,13 @@ const Faq = () => {
 
   return (
 
-    <PageContainer title="Faq" description="this is Faq page">
+    <PageContainer title="FAQ" description="Frequently asked questions about Orthodox Metrics">
+
+      <PublicSeo
+        title="Frequently Asked Questions"
+        description="Answers to common questions about Orthodox Metrics — onboarding, sacramental records, OCR digitization, security, pricing, and more."
+        path="/frontend-pages/faq"
+      />
 
 
 
@@ -32,7 +40,7 @@ const Faq = () => {
 
         <Container maxWidth="lg">
 
-          <Typography variant="h2" fontWeight={700} mb={1}>
+          <Typography variant="h2" component="h1" fontWeight={700} mb={1}>
 
             {t('faq.page_title')}
 

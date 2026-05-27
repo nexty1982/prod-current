@@ -24,10 +24,13 @@ const DarkThemeColors = [
   {
     name: 'GREEN_THEME',
     palette: {
+      // Pentecost green (dark variant) — same #2E7D32 main as light
+      // theme; light slot uses a deep shadow color so dark-mode card
+      // backgrounds stay readable behind primary text.
       primary: {
-        main: '#A4C639',
-        light: '#2d3518',
-        dark: '#8DB32E',
+        main: '#2E7D32',
+        light: '#1a2e1c',
+        dark: '#1B5E20',
         contrastText: '#ffffff',
       },
       secondary: {
@@ -90,10 +93,11 @@ const DarkThemeColors = [
   {
     name: 'BLUE_THEME',
     palette: {
+      // Aqua blue (dark variant) — same #00ACC1 main as light theme.
       primary: {
-        main: '#1E6B8C',
-        light: '#152535',
-        dark: '#1A5C7A',
+        main: '#00ACC1',
+        light: '#0a2730',
+        dark: '#00838F',
         contrastText: '#ffffff',
       },
       secondary: {
@@ -118,10 +122,11 @@ const DarkThemeColors = [
         dark: '#B8931F',
         contrastText: '#ffffff',
       },
+      // Secondary tracks BLUE_THEME's aqua primary for visual consistency.
       secondary: {
-        main: '#1E6B8C',
-        light: '#152535',
-        dark: '#1A5C7A',
+        main: '#00ACC1',
+        light: '#0a2730',
+        dark: '#00838F',
         contrastText: '#ffffff',
       },
       background: {

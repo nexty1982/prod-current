@@ -3,7 +3,15 @@ import { Check, HelpCircle } from '@/ui/icons';
 import { PUBLIC_ROUTES } from '@/config/publicRoutes';
 import { HeroSection, CTASection } from '@/components/frontend-pages/shared/sections';
 import EditableText from '@/components/frontend-pages/shared/EditableText';
+import PublicSeo from '@/components/seo/PublicSeo';
+import JsonLd from '@/components/seo/JsonLd';
 import { useLanguage } from '@/context/LanguageContext';
+
+// Pricing temporarily hidden by request (2026-05-03). The plan tier
+// + features still ship; just the dollar amounts and billing notes
+// are masked so visitors are routed to Contact for a quote. Flip
+// back to false to restore the published prices in one place.
+const HIDE_PRICES = true;
 
 const PagePricing = () => {
   const { t } = useLanguage();
@@ -26,6 +34,37 @@ const PagePricing = () => {
 
   return (
     <>
+      <PublicSeo
+        title="Pricing"
+        description="Plan tiers for parishes of every size — small, medium, large, and enterprise. Contact us for a quote tailored to your parish."
+        path="/frontend-pages/pricing"
+      />
+      <JsonLd
+        data={[
+          {
+            '@context': 'https://schema.org',
+            '@type': 'BreadcrumbList',
+            itemListElement: [
+              { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://orthodoxmetrics.com/' },
+              { '@type': 'ListItem', position: 2, name: 'Pricing', item: 'https://orthodoxmetrics.com/frontend-pages/pricing' },
+            ],
+          },
+          {
+            '@context': 'https://schema.org',
+            '@type': 'SoftwareApplication',
+            name: 'Orthodox Metrics',
+            applicationCategory: 'BusinessApplication',
+            applicationSubCategory: 'Church management / sacramental records',
+            operatingSystem: 'Web (any modern browser)',
+            url: 'https://orthodoxmetrics.com/frontend-pages/pricing',
+            offers: [
+              { '@type': 'Offer', name: t('pricing.plan_small_name'), category: 'Small Parish', priceCurrency: 'USD', price: '0', priceSpecification: { '@type': 'PriceSpecification', priceCurrency: 'USD', valueAddedTaxIncluded: false, description: 'Contact for quote' } },
+              { '@type': 'Offer', name: t('pricing.plan_medium_name'), category: 'Medium Parish', priceCurrency: 'USD', price: '0', priceSpecification: { '@type': 'PriceSpecification', priceCurrency: 'USD', valueAddedTaxIncluded: false, description: 'Contact for quote' } },
+              { '@type': 'Offer', name: t('pricing.plan_large_name'), category: 'Large Parish', priceCurrency: 'USD', price: '0', priceSpecification: { '@type': 'PriceSpecification', priceCurrency: 'USD', valueAddedTaxIncluded: false, description: 'Contact for quote' } },
+            ],
+          },
+        ]}
+      />
       {/* Hero */}
       <HeroSection
         badge={t('pricing.hero_badge')}
@@ -63,13 +102,19 @@ const PagePricing = () => {
                 </p>
               </div>
               <div className="mb-6">
-                <div className="flex items-baseline gap-2">
-                  <span className="font-['Georgia'] text-5xl">{t('pricing.plan_medium_price')}</span>
-                  <span className="font-['Inter'] text-[16px] text-[rgba(255,255,255,0.8)] dark:text-[rgba(45,27,78,0.8)]">{t('pricing.per_month')}</span>
-                </div>
-                <p className="font-['Inter'] text-[14px] text-[rgba(255,255,255,0.8)] dark:text-[rgba(45,27,78,0.8)] mt-2">
-                  {t('pricing.plan_medium_billing')}
-                </p>
+                {HIDE_PRICES ? (
+                  <p className="font-['Georgia'] text-3xl">Contact for Pricing</p>
+                ) : (
+                  <>
+                    <div className="flex items-baseline gap-2">
+                      <span className="font-['Georgia'] text-5xl">{t('pricing.plan_medium_price')}</span>
+                      <span className="font-['Inter'] text-[16px] text-[rgba(255,255,255,0.8)] dark:text-[rgba(45,27,78,0.8)]">{t('pricing.per_month')}</span>
+                    </div>
+                    <p className="font-['Inter'] text-[14px] text-[rgba(255,255,255,0.8)] dark:text-[rgba(45,27,78,0.8)] mt-2">
+                      {t('pricing.plan_medium_billing')}
+                    </p>
+                  </>
+                )}
               </div>
               <ul className="space-y-4 mb-8">
                 {MEDIUM_FEAT_KEYS.map((i) => (
@@ -190,11 +235,17 @@ function PricingCard({ name, description, price, perMonth, billingNote, features
         <p className="font-['Inter'] text-[15px] text-[#4a5565] dark:text-gray-400">{description}</p>
       </div>
       <div className="mb-6">
-        <div className="flex items-baseline gap-2">
-          <span className="font-['Georgia'] text-5xl text-[#2d1b4e] dark:text-white">{price}</span>
-          <span className="font-['Inter'] text-[16px] text-[#4a5565] dark:text-gray-400">{perMonth}</span>
-        </div>
-        <p className="font-['Inter'] text-[14px] text-[#4a5565] dark:text-gray-400 mt-2">{billingNote}</p>
+        {HIDE_PRICES ? (
+          <p className="font-['Georgia'] text-3xl text-[#2d1b4e] dark:text-white">Contact for Pricing</p>
+        ) : (
+          <>
+            <div className="flex items-baseline gap-2">
+              <span className="font-['Georgia'] text-5xl text-[#2d1b4e] dark:text-white">{price}</span>
+              <span className="font-['Inter'] text-[16px] text-[#4a5565] dark:text-gray-400">{perMonth}</span>
+            </div>
+            <p className="font-['Inter'] text-[14px] text-[#4a5565] dark:text-gray-400 mt-2">{billingNote}</p>
+          </>
+        )}
       </div>
       <ul className="space-y-4 mb-8">
         {features.map((f, i) => (

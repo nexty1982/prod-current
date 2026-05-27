@@ -7,6 +7,7 @@
  */
 
 const { promisePool } = require('../config/db');
+const { validateRecord: validateRecordFields } = require('./records-validation');
 
 // Cache: churchId -> database_name
 const churchDbCache = new Map();
@@ -151,9 +152,14 @@ const mapFields = (recordType, body, churchId) => {
   }
 
   // Combined witness (marriage) — overrides anything the loop wrote to cols.witness.
-  if (recordType === 'marriage' && (body.witness1 || body.witness2)) {
+  if (
+    recordType === 'marriage' &&
+    (Object.prototype.hasOwnProperty.call(body, 'witness1') ||
+      Object.prototype.hasOwnProperty.call(body, 'witness2'))
+  ) {
     const parts = [body.witness1, body.witness2].filter(Boolean);
-    if (parts.length) cols.witness = parts.join(', ');
+    delete cols.witness;
+    cols.witness = parts.length ? parts.join(', ') : null;
   }
 
   // Always set church_id
@@ -245,6 +251,18 @@ const createRecord = async (req, res) => {
     const churchId = req.params.churchId || req.user?.church_id;
     const table = qt(dbName, getTableName(recordType));
 
+    // Field-level validation BEFORE the SQL — turns malformed input
+    // (e.g. 5-digit year typo) into a clean 400 with structured
+    // fieldErrors instead of a 500 + SQL stack trace.
+    const v = validateRecordFields(recordType, req.body || {});
+    if (!v.ok) {
+      return res.status(400).json({
+        error: 'Validation failed',
+        message: 'One or more fields are invalid.',
+        fieldErrors: v.fieldErrors,
+      });
+    }
+
     const cols = mapFields(recordType, req.body, churchId);
 
     // Set entry_type default for baptism
@@ -287,6 +305,16 @@ const updateRecord = async (req, res) => {
       return res.status(404).json({ error: 'Record not found' });
     }
 
+    // Field-level validation BEFORE the SQL — same defense as create.
+    const v = validateRecordFields(recordType, req.body || {});
+    if (!v.ok) {
+      return res.status(400).json({
+        error: 'Validation failed',
+        message: 'One or more fields are invalid.',
+        fieldErrors: v.fieldErrors,
+      });
+    }
+
     const cols = mapFields(recordType, req.body, churchId);
     // Don't update church_id on update
     delete cols.church_id;
@@ -300,9 +328,22 @@ const updateRecord = async (req, res) => {
 
     await promisePool.execute(`UPDATE ${table} SET ${setClause} WHERE id = ?`, values);
 
+    // Return the FULL updated row so the front-end can replace the grid
+    // entry without losing all its other fields. Previously we returned
+    // only { id, recordType, message } — RecordsPage's setRecords map
+    // would then overwrite the row with that stub and the cells would
+    // appear blank until the next refresh. Re-SELECT after UPDATE keeps
+    // the response consistent with whatever just landed (including
+    // computed columns like updated_at).
+    const [updatedRows] = await promisePool.execute(
+      `SELECT * FROM ${table} WHERE id = ?`,
+      [id],
+    );
+    const updated = updatedRows[0] || { id };
+
     res.json({
       success: true,
-      data: { id, recordType, message: `${recordType} record updated successfully` }
+      data: { ...updated, recordType, message: `${recordType} record updated successfully` },
     });
   } catch (error) {
     console.error('Error updating record:', error);

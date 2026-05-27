@@ -234,6 +234,8 @@ const certificateTemplatesRouter = require('./routes/certificate-templates');
 const demoChurchesRouter = require('./routes/admin/demo-churches');
 const churchDecomRouter = require('./routes/admin/church-decom');
 const analyticsRouter = require('./routes/analytics'); // US Church Map analytics
+const websiteStatsRouter = require('./routes/website-stats'); // public site traffic stats (admin-only)
+const ecosystemRoadmapRouter = require('./routes/admin/ecosystemRoadmap'); // read-only proxy to OMStudio component-maturity roadmap
 const omChartsRouter = require('./api/om-charts'); // OM Charts: graphical charts from church records
 const dashboardHomeRouter = require('./api/dashboard-home'); // Dashboard Home: summary data for church dashboard
 const systemRoutesRouter = require('./api/systemRoutes'); // Route introspection (kept for OMAI dual-target proxy)
@@ -596,6 +598,12 @@ console.log('✅ [Server] Mounted /api/admin/orthodox-schedule-guidelines route'
 app.use('/api/admin/change-sets', changeSetsRouter);
 console.log('✅ [Server] Mounted /api/admin/change-sets route (SDLC delivery container)');
 app.use('/api/churches', churchesRouter);
+// Church metadata header — used by ChurchContext on every page load.
+// Lives at /api/church-branding/* so it doesn't collide with the
+// per-church static logo serve at /church-branding (no /api prefix).
+const churchBrandingRouter = require('./routes/church-branding');
+app.use('/api/church-branding', churchBrandingRouter);
+console.log('✅ [Server] Mounted /api/church-branding route (church metadata header)');
 // Mount churches router at /api/my to handle /api/my/churches
 // UI Preferences — per-user UI settings (FAB positions, etc.) (mount BEFORE /api/my catchall)
 const uiPreferencesRouter = require('./routes/ui-preferences');
@@ -614,6 +622,11 @@ console.log('✅ [Server] Mounted /api/parish-settings route');
 const parishStatsRouter = require('./routes/parish-stats');
 app.use('/api/parish-stats', parishStatsRouter);
 console.log('✅ [Server] Mounted /api/parish-stats route');
+// OMOD-1502: Tenant Portal Config Registry (per-tenant rows, §C of OMSD-1491).
+// Platform-side known-slots read endpoint lives in routes/platform.js.
+const tenantConfigRouter = require('./routes/tenant-config');
+app.use('/api/tenant-config', tenantConfigRouter);
+console.log('✅ [Server] Mounted /api/tenant-config route');
 // Church records landing page branding
 const churchRecordsLandingRouter = require('./routes/church-records-landing');
 app.use('/api/churches', churchRecordsLandingRouter);
@@ -638,6 +651,8 @@ console.log('✅ [Server] Mounted /api/internal/build-events route');
 app.use('/api/admin/church', churchAdminRouter);
 
 app.use('/api/admin/system', adminSystemRouter);
+app.use('/api/admin', websiteStatsRouter); // mounts GET /api/admin/website-stats
+app.use('/api/admin', ecosystemRoadmapRouter); // mounts GET /api/admin/ecosystem-roadmap (OMStudio proxy)
 // Admin churches routes - mount compatibility router first to catch legacy paths
 const churchesCompatRouter = require('./routes/admin/churches-compat');
 // Mount compatibility router for both /churches (plural) and /church (singular) paths
@@ -657,6 +672,11 @@ app.use('/api/admin/global-images', globalImagesRouter);
 const buildStatusRouter = require('./routes/admin/buildStatus');
 app.use('/api/admin', buildStatusRouter);
 console.log('✅ [Server] Mounted /api/admin/build-status route');
+
+// Deployment fingerprint (super_admin only) — used by DeploymentFingerprintBar
+const deploymentFingerprintRouter = require('./routes/admin/deployment-fingerprint');
+app.use('/api/admin', deploymentFingerprintRouter);
+console.log('✅ [Server] Mounted /api/admin/deployment-fingerprint route');
 
 const buildApprovalRouter = require('./routes/admin/build-approval');
 app.use('/api/admin/build-approval', buildApprovalRouter);
@@ -859,6 +879,9 @@ app.use('/api/churches/:churchId/charts', omChartsRouter); // OM Charts
 console.log('✅ [Server] Mounted /api/churches/:churchId/charts routes (OM Charts)');
 app.use('/api/churches/:churchId/dashboard', dashboardHomeRouter); // Dashboard Home
 console.log('✅ [Server] Mounted /api/churches/:churchId/dashboard routes (Dashboard Home)');
+const clergyTenureRouter = require('./routes/clergy-tenure');
+app.use('/api/churches/:churchId/clergy-tenure', clergyTenureRouter);
+console.log('✅ [Server] Mounted /api/churches/:churchId/clergy-tenure route (rector tenure)');
 
 // Other authenticated routes
 app.use('/api/user', userRouter);
@@ -894,6 +917,10 @@ app.use('/api/platform', platformProviderRouter);
 // Profile image upload routes (avatar + banner)
 const profileUploadRouter = require('./routes/upload');
 app.use('/api/upload', profileUploadRouter);
+
+// Parish enrollment form (public - no auth required)
+const enrollRouter = require('./routes/enroll');
+app.use('/api/enroll', enrollRouter);
 
 // Contact form (public - no auth required)
 app.post('/api/contact', async (req: any, res: any) => {

@@ -20,6 +20,7 @@ import {
   Button,
   IconButton,
   Avatar,
+  CircularProgress,
   Tooltip,
   Divider,
   useTheme,
@@ -81,6 +82,12 @@ const ModernRecordViewerModal: React.FC<ModernRecordViewerModalProps> = ({
   accentColor,
   mode: externalMode,
   onModeChange,
+  // These were declared in the props interface but the previous patch
+  // forgot to destructure them — referencing `saveLoading` / `onSave`
+  // in the JSX threw a ReferenceError at render time, blowing up the
+  // page when a user tried to enter Edit mode.
+  onSave,
+  saveLoading = false,
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -436,7 +443,19 @@ const ModernRecordViewerModal: React.FC<ModernRecordViewerModalProps> = ({
           ) : (
             <>
               <Button size="small" onClick={handleCancelEdit} startIcon={<CancelIcon />} color="inherit">Cancel</Button>
-              <Button size="small" variant="contained" color="success" startIcon={<SaveIcon />}>Save</Button>
+              {/* The Save button never had an onClick — clicking did literally
+                  nothing, no toast, no network call. Wire it through to the
+                  onSave prop the parent already passes (handleSaveRecord). */}
+              <Button
+                size="small"
+                variant="contained"
+                color="success"
+                startIcon={saveLoading ? <CircularProgress size={14} color="inherit" /> : <SaveIcon />}
+                onClick={onSave}
+                disabled={!onSave || saveLoading}
+              >
+                {saveLoading ? 'Saving…' : 'Save'}
+              </Button>
             </>
           )}
         </Box>

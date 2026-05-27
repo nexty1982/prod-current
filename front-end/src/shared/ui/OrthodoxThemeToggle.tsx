@@ -66,10 +66,10 @@ const OrthodoxThemeToggle: React.FC<OrthodoxThemeToggleProps> = ({
 
   const themes = [
     { key: 'WHITE_THEME', name: 'Resurrection White', color: '#F5F5F0' },
-    { key: 'GREEN_THEME', name: 'Ordinary Time Green', color: '#A4C639' },
+    { key: 'GREEN_THEME', name: 'Pentecost Green', color: '#2E7D32' },
     { key: 'PURPLE_THEME', name: 'Lenten Purple', color: '#6B2D75' },
     { key: 'RED_THEME', name: 'Martyrs Red', color: '#B22234' },
-    { key: 'BLUE_THEME', name: 'Theotokos Blue', color: '#1E6B8C' },
+    { key: 'BLUE_THEME', name: 'Aqua Blue', color: '#00ACC1' },
     { key: 'GOLD_THEME', name: 'Royal Gold', color: '#C9A227' },
     { key: 'LENT_THEME', name: 'Great Lent', color: '#1a1a1a' },
   ];
