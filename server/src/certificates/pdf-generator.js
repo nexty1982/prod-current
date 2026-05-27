@@ -16,6 +16,87 @@ const fs = require('fs');
 const path = require('path');
 const { getCoordinateMap, mergeCustomPositions } = require('./coordinate-maps');
 
+// Date format helpers — UTC-anchored so the rendered date matches the
+// DB's stored value regardless of server timezone. Mirrors the
+// front-end formatDateMD / formatDateYY in
+// front-end/src/features/certificates/certificateTypes.ts.
+function _parseUtcDate(raw) {
+  if (raw == null || raw === '') return null;
+  if (raw instanceof Date) return Number.isNaN(raw.getTime()) ? null : raw;
+  if (typeof raw === 'string') {
+    const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(raw);
+    if (m) return new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]));
+    const d = new Date(raw);
+    return Number.isNaN(d.getTime()) ? null : d;
+  }
+  return null;
+}
+// "12/3" — month/day, no zero padding (matches the OCA cert artwork).
+function dateMD(raw) {
+  const d = _parseUtcDate(raw);
+  if (!d) return '';
+  return `${d.getUTCMonth() + 1}/${d.getUTCDate()}`;
+}
+// "25" — last 2 digits of the year. Pairs with the OCA "20___"
+// pre-printed prefix.
+function dateYY(raw) {
+  const d = _parseUtcDate(raw);
+  if (!d) return '';
+  return String(d.getUTCFullYear()).slice(-2);
+}
+// "12/3/2025" — full M/D/YYYY for cert templates that have a single
+// date string field (no split tiles). Used for birthDate / baptismDate /
+// marriageDate. Was previously `new Date(raw).toLocaleDateString()`,
+// which resolves in the server-process timezone and rendered the
+// day-before for midnight-UTC values on non-UTC hosts.
+function dateMDY(raw) {
+  const d = _parseUtcDate(raw);
+  if (!d) return '';
+  return `${d.getUTCMonth() + 1}/${d.getUTCDate()}/${d.getUTCFullYear()}`;
+}
+
+// Saved positions live in template-image pixel space (top-left origin,
+// native image dimensions — what handleDrop captured via naturalWidth/
+// naturalHeight in the front-end editor). The PDF page is 612x792 points,
+// bottom-left origin, with the template drawn scaled-and-centered. This
+// converts each saved position into the PDF's point space so drawText
+// lands where the operator placed it on screen.
+function convertCanvasPositionsToPdf(positions, imgWidth, imgHeight, pageWidth, pageHeight) {
+  if (!positions || !imgWidth || !imgHeight) return positions || {};
+  const scale = Math.min(pageWidth / imgWidth, pageHeight / imgHeight);
+  const scaledWidth = imgWidth * scale;
+  const scaledHeight = imgHeight * scale;
+  const offsetX = (pageWidth - scaledWidth) / 2;
+  const offsetY = (pageHeight - scaledHeight) / 2;
+  const out = {};
+  for (const [key, pos] of Object.entries(positions)) {
+    if (!pos || typeof pos.x !== 'number' || typeof pos.y !== 'number') continue;
+    out[key] = {
+      x: offsetX + pos.x * scale,
+      // Flip Y: image origin top-left, PDF origin bottom-left.
+      y: offsetY + (imgHeight - pos.y) * scale,
+    };
+  }
+  return out;
+}
+
+// Split "Father & Mother" / "Father, Mother" / "Father; Mother" into
+// [father, mother]. Mirrors front-end splitParents in
+// certificateTypes.ts so the PDF renders the same fields the operator
+// dragged in the editor.
+function splitParents(combined) {
+  if (!combined) return ['', ''];
+  const trimmed = String(combined).trim();
+  if (!trimmed) return ['', ''];
+  for (const sep of [' & ', '&', ';', ',']) {
+    if (trimmed.includes(sep)) {
+      const parts = trimmed.split(sep).map(s => s.trim()).filter(Boolean);
+      return [parts[0] || '', parts[1] || ''];
+    }
+  }
+  return [trimmed, ''];
+}
+
 /**
  * Text alignment helper
  */
@@ -139,18 +220,13 @@ async function generateBaptismCertificatePDF(record, options = {}) {
     hiddenFields = [],
     templatePath = path.join(__dirname, '../../certificates/2026/adult-baptism.png'),
   } = options;
-  
+
   // Create PDF document
   const pdfDoc = await PDFDocument.create();
-  
-  // Get coordinate map
-  let coordinateMap = getCoordinateMap('baptism');
-  if (customPositions) {
-    coordinateMap = mergeCustomPositions(coordinateMap, customPositions);
-  }
-  
-  const { width, height } = coordinateMap.templateDimensions;
-  
+
+  const baseCoordinateMap = getCoordinateMap('baptism');
+  const { width, height } = baseCoordinateMap.templateDimensions;
+
   // Load and embed template image
   let templateImage = null;
   if (fs.existsSync(templatePath)) {
@@ -166,10 +242,26 @@ async function generateBaptismCertificatePDF(record, options = {}) {
       }
     }
   }
-  
+
+  // Merge customPositions AFTER we know the template's natural pixel
+  // dimensions — saved positions are in image-pixel space (top-left
+  // origin) and need to be projected into the PDF's point space
+  // (bottom-left origin, scaled-and-centered to fit the page).
+  let coordinateMap = baseCoordinateMap;
+  if (customPositions) {
+    let pdfPositions = customPositions;
+    if (templateImage) {
+      const imgDims = templateImage.scale(1);
+      pdfPositions = convertCanvasPositionsToPdf(
+        customPositions, imgDims.width, imgDims.height, width, height
+      );
+    }
+    coordinateMap = mergeCustomPositions(baseCoordinateMap, pdfPositions);
+  }
+
   // Create page
   const page = pdfDoc.addPage([width, height]);
-  
+
   // Draw template background
   if (templateImage) {
     const imgDims = templateImage.scale(1);
@@ -178,7 +270,7 @@ async function generateBaptismCertificatePDF(record, options = {}) {
     const scaledHeight = imgDims.height * scale;
     const x = (width - scaledWidth) / 2;
     const y = (height - scaledHeight) / 2;
-    
+
     page.drawImage(templateImage, {
       x,
       y,
@@ -186,22 +278,34 @@ async function generateBaptismCertificatePDF(record, options = {}) {
       height: scaledHeight,
     });
   }
-  
+
   // Embed fonts
   const font = await pdfDoc.embedFont(StandardFonts.TimesRoman);
   const fontBold = await pdfDoc.embedFont(StandardFonts.TimesRomanBold);
-  
+
   // Extract field data from record
+  const baptismDateRaw = record.reception_date || record.baptism_date || null;
+  const [fatherName, motherName] = splitParents(record.parents);
   const fieldData = {
     fullName: `${record.first_name || ''} ${record.last_name || ''}`.trim(),
-    birthDate: record.birth_date ? new Date(record.birth_date).toLocaleDateString() : '',
+    birthDate: dateMDY(record.birth_date),
+    birthDateMD: dateMD(record.birth_date),
+    birthDateYY: dateYY(record.birth_date),
     birthplace: record.birthplace || '',
-    baptismDate: record.reception_date ? new Date(record.reception_date).toLocaleDateString() : 
-                 (record.baptism_date ? new Date(record.baptism_date).toLocaleDateString() : ''),
+    baptismDate: dateMDY(baptismDateRaw),
+    baptismDateMD: dateMD(baptismDateRaw),
+    baptismDateYY: dateYY(baptismDateRaw),
     sponsors: record.sponsors || record.godparents || '',
     clergyBy: record.clergy || '',
     clergyRector: record.clergy || '',
     church: record.churchName || 'Orthodox Church',
+    fatherName,
+    motherName,
+    // Only emit the combined "parents" string when splitParents
+    // actually produced two names. A single-name record.parents
+    // (e.g. "Robert Smith") is treated as fatherName only — otherwise
+    // we'd double-render the same text in two places.
+    parents: motherName ? (record.parents || '') : '',
   };
   
   // Draw each field
@@ -229,18 +333,13 @@ async function generateMarriageCertificatePDF(record, options = {}) {
     hiddenFields = [],
     templatePath = path.join(__dirname, '../../certificates/2026/marriage.png'),
   } = options;
-  
+
   // Create PDF document
   const pdfDoc = await PDFDocument.create();
-  
-  // Get coordinate map
-  let coordinateMap = getCoordinateMap('marriage');
-  if (customPositions) {
-    coordinateMap = mergeCustomPositions(coordinateMap, customPositions);
-  }
-  
-  const { width, height } = coordinateMap.templateDimensions;
-  
+
+  const baseCoordinateMap = getCoordinateMap('marriage');
+  const { width, height } = baseCoordinateMap.templateDimensions;
+
   // Load and embed template image
   let templateImage = null;
   if (fs.existsSync(templatePath)) {
@@ -255,7 +354,20 @@ async function generateMarriageCertificatePDF(record, options = {}) {
       }
     }
   }
-  
+
+  // Project saved canvas-pixel positions into PDF point space.
+  let coordinateMap = baseCoordinateMap;
+  if (customPositions) {
+    let pdfPositions = customPositions;
+    if (templateImage) {
+      const imgDims = templateImage.scale(1);
+      pdfPositions = convertCanvasPositionsToPdf(
+        customPositions, imgDims.width, imgDims.height, width, height
+      );
+    }
+    coordinateMap = mergeCustomPositions(baseCoordinateMap, pdfPositions);
+  }
+
   // Create page
   const page = pdfDoc.addPage([width, height]);
   
@@ -280,16 +392,26 @@ async function generateMarriageCertificatePDF(record, options = {}) {
   const font = await pdfDoc.embedFont(StandardFonts.TimesRoman);
   const fontBold = await pdfDoc.embedFont(StandardFonts.TimesRomanBold);
   
-  // Extract field data from record
+  // Extract field data from record. groomParents/brideParents/marriagePlace
+  // are intentionally omitted — they are not exposed in
+  // MARRIAGE_FIELD_LABELS so the operator cannot place them, and their
+  // old default coordinates collided with the groomName/brideName saved
+  // positions (visible as overlapping text on every cert before this
+  // change).
+  const clergyName = record.clergy || '';
   const fieldData = {
     groomName: `${record.fname_groom || record.groom_first || ''} ${record.lname_groom || record.groom_last || ''}`.trim(),
     brideName: `${record.fname_bride || record.bride_first || ''} ${record.lname_bride || record.bride_last || ''}`.trim(),
-    marriageDate: record.marriage_date ? new Date(record.marriage_date).toLocaleDateString() : '',
-    marriagePlace: record.marriage_place || record.place || '',
-    groomParents: record.parentsg || record.parents_groom || '',
-    brideParents: record.parentsb || record.parents_bride || '',
-    witnesses: record.witnesses || '',
-    clergy: record.clergy || '',
+    marriageDate: dateMDY(record.mdate || record.marriage_date),
+    marriageDateMD: dateMD(record.mdate || record.marriage_date),
+    marriageDateYY: dateYY(record.mdate || record.marriage_date),
+    witnesses: record.witness || record.witnesses || '',
+    clergy: clergyName,
+    // Second clergy slot — the OCA template has both a "By" line
+    // (officiating priest) and a "Rector" line at the bottom. Same
+    // value as `clergy`; the operator drags the two markers to the
+    // two locations.
+    clergyRector: clergyName,
     church: record.churchName || 'Orthodox Church',
   };
   

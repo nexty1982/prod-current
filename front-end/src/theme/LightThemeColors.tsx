@@ -19,10 +19,13 @@ const LightThemeColors = [
   {
     name: 'GREEN_THEME',
     palette: {
+      // Pentecost green — the deep, vibrant evergreen used liturgically
+      // for Pentecost / Holy Spirit feasts. Replaces the chartreuse #A4C639
+      // which read as "spring lime" rather than "feast green".
       primary: {
-        main: '#A4C639',
-        light: '#E8F5C8',
-        dark: '#8DB32E',
+        main: '#2E7D32',
+        light: '#C8E6C9',
+        dark: '#1B5E20',
         contrastText: '#ffffff',
       },
       secondary: {
@@ -70,10 +73,13 @@ const LightThemeColors = [
   {
     name: 'BLUE_THEME',
     palette: {
+      // Aqua blue — bright cyan-leaning blue, replacing the previous
+      // steel-blue #1E6B8C. Aligns with the user-facing label
+      // "Aqua / Theotokos" in OrthodoxThemeToggle.
       primary: {
-        main: '#1E6B8C',
-        light: '#D6E8F0',
-        dark: '#1A5C7A',
+        main: '#00ACC1',
+        light: '#B2EBF2',
+        dark: '#00838F',
         contrastText: '#ffffff',
       },
       secondary: {
@@ -93,10 +99,12 @@ const LightThemeColors = [
         dark: '#B8931F',
         contrastText: '#ffffff',
       },
+      // Secondary tracks BLUE_THEME's primary so the gold/blue pairing
+      // stays consistent across both themes.
       secondary: {
-        main: '#1E6B8C',
-        light: '#D6E8F0',
-        dark: '#1A5C7A',
+        main: '#00ACC1',
+        light: '#B2EBF2',
+        dark: '#00838F',
         contrastText: '#ffffff',
       },
     },

@@ -1,4 +1,5 @@
-import { Outlet } from 'react-router-dom';
+import { useEffect, useRef } from 'react';
+import { Outlet, useLocation } from 'react-router-dom';
 import HpHeader from '@/components/frontend-pages/shared/header/HpHeader';
 import SiteFooter from '@/components/frontend-pages/shared/footer/SiteFooter';
 import Customizer from '@/layouts/full/shared/customizer/Customizer';
@@ -7,21 +8,31 @@ import { useAuth } from '@/hooks/useAuth';
 import { Pencil, Save, X, Undo2, Globe } from 'lucide-react';
 import { OmAssistant } from '@/components/OmAssistant';
 
-/**
- * Shared layout for all public-facing pages (Homepage, About, Pricing, etc.).
- * Renders the auth-aware HpHeader, page content via <Outlet />, and SiteFooter.
- * Super_admin users also get the Customizer panel for container/theme settings.
- *
- * Pages nested under this layout should NOT render their own header/footer.
- */
 const PublicLayout = () => {
   const { isSuperAdmin } = useAuth();
+  const mainRef = useRef<HTMLElement | null>(null);
+  const { pathname } = useLocation();
+
+  // Move focus to <main> on route change so screen readers announce the new
+  // page and keyboard users continue from the top of the new view, not the
+  // last-focused element on the previous one.
+  useEffect(() => {
+    if (mainRef.current) mainRef.current.focus();
+  }, [pathname]);
 
   return (
     <div className="om-page-container">
+      <a
+        href="#main-content"
+        className="om-skip-link sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:bg-[#2d1b4e] focus:text-[#d4af37] focus:px-4 focus:py-2 focus:rounded-md focus:shadow-lg focus:outline-none focus:ring-2 focus:ring-[#d4af37]"
+      >
+        Skip to main content
+      </a>
       <HpHeader />
       <EditModeProvider>
-        <Outlet />
+        <main id="main-content" ref={mainRef} tabIndex={-1} className="om-main">
+          <Outlet />
+        </main>
         <EditModeToggle />
       </EditModeProvider>
       <SiteFooter />

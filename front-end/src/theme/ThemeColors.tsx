@@ -17,10 +17,11 @@ const ThemeColors = [
   {
     name: 'GREEN_THEME',
     palette: {
+      // Pentecost green — see LightThemeColors.tsx for the rationale.
       primary: {
-        main: '#A4C639',
-        light: '#E8F5C8',
-        dark: '#8DB32E',
+        main: '#2E7D32',
+        light: '#C8E6C9',
+        dark: '#1B5E20',
       },
       secondary: {
         main: '#F5F5F0',
@@ -62,10 +63,11 @@ const ThemeColors = [
   {
     name: 'BLUE_THEME',
     palette: {
+      // Aqua blue — see LightThemeColors.tsx for the rationale.
       primary: {
-        main: '#1E6B8C',
-        light: '#D6E8F0',
-        dark: '#1A5C7A',
+        main: '#00ACC1',
+        light: '#B2EBF2',
+        dark: '#00838F',
       },
       secondary: {
         main: '#C9A227',
@@ -83,9 +85,9 @@ const ThemeColors = [
         dark: '#B8931F',
       },
       secondary: {
-        main: '#1E6B8C',
-        light: '#D6E8F0',
-        dark: '#1A5C7A',
+        main: '#00ACC1',
+        light: '#B2EBF2',
+        dark: '#00838F',
       },
     },
   },

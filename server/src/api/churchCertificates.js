@@ -58,14 +58,22 @@ const BAPTISM_TEMPLATE_PATH = path.join(__dirname, '../../certificates/2026/adul
 const BAPTISM_CHILD_TEMPLATE_PATH = path.join(__dirname, '../../certificates/2026/adult-baptism.png');
 const MARRIAGE_TEMPLATE_PATH = path.join(__dirname, '../../certificates/2026/marriage.png');
 
-// Default field positions for baptism certificate
+// Default field positions for baptism certificate.
+// The MD / YY split tiles match the OCA artwork's "ON ___, 20___"
+// layout — the long blank takes month/day, and YY fills the trailing
+// two underscores after the pre-printed "20". Operators can drag to
+// fine-tune; these are starter positions only.
 const BAPTISM_POSITIONS = {
   fullName: { x: 383, y: 574 },
   birthplace: { x: 400, y: 600 },
   birthDate: { x: 444, y: 626 },
+  birthDateMD: { x: 350, y: 626 },
+  birthDateYY: { x: 560, y: 626 },
   clergyBy: { x: 410, y: 698 },       // BY field (clergy who performed baptism)
   church: { x: 514, y: 724 },
   baptismDate: { x: 424, y: 754 },
+  baptismDateMD: { x: 350, y: 754 },
+  baptismDateYY: { x: 560, y: 754 },
   sponsors: { x: 400, y: 784 },
   clergyRector: { x: 500, y: 850 }    // Rector field (signing clergy)
 };
@@ -77,11 +85,38 @@ const MARRIAGE_POSITIONS = {
   brideName: { x: 383, y: 626 },
   brideParents: { x: 400, y: 652 },
   marriageDate: { x: 444, y: 678 },
+  marriageDateMD: { x: 350, y: 678 },
+  marriageDateYY: { x: 560, y: 678 },
   marriagePlace: { x: 410, y: 704 },
   clergy: { x: 410, y: 730 },
   church: { x: 514, y: 756 },
   witnesses: { x: 400, y: 782 }
 };
+
+// Date format helpers. Match the front-end formatDateMD / formatDateYY
+// behavior in certificateTypes.ts so the drag-tile preview value and
+// the rendered cert always agree.
+function _parseUtcDate(raw) {
+  if (raw == null || raw === '') return null;
+  if (raw instanceof Date) return Number.isNaN(raw.getTime()) ? null : raw;
+  if (typeof raw === 'string') {
+    const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(raw);
+    if (m) return new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]));
+    const d = new Date(raw);
+    return Number.isNaN(d.getTime()) ? null : d;
+  }
+  return null;
+}
+function dateMD(raw) {
+  const d = _parseUtcDate(raw);
+  if (!d) return '';
+  return `${d.getUTCMonth() + 1}/${d.getUTCDate()}`;
+}
+function dateYY(raw) {
+  const d = _parseUtcDate(raw);
+  if (!d) return '';
+  return String(d.getUTCFullYear()).slice(-2);
+}
 
 /**
  * Generate baptism certificate preview using canvas (PNG)
@@ -226,6 +261,14 @@ const generateBaptismPreview = async (record, fieldOffsets = {}, hiddenFields = 
       const birthDate = new Date(record.birth_date).toLocaleDateString();
       ctx.fillText(birthDate, positions.birthDate.x, positions.birthDate.y);
     }
+    if (record.birth_date && !hiddenFields.includes('birthDateMD') && positions.birthDateMD) {
+      const md = dateMD(record.birth_date);
+      if (md) ctx.fillText(md, positions.birthDateMD.x, positions.birthDateMD.y);
+    }
+    if (record.birth_date && !hiddenFields.includes('birthDateYY') && positions.birthDateYY) {
+      const yy = dateYY(record.birth_date);
+      if (yy) ctx.fillText(yy, positions.birthDateYY.x, positions.birthDateYY.y);
+    }
     
     // Clergy BY field (who performed the baptism)
     if (record.clergy && !hiddenFields.includes('clergyBy')) {
@@ -244,6 +287,14 @@ const generateBaptismPreview = async (record, fieldOffsets = {}, hiddenFields = 
     if (record.reception_date && !hiddenFields.includes('baptismDate')) {
       const baptismDate = new Date(record.reception_date).toLocaleDateString();
       ctx.fillText(baptismDate, positions.baptismDate.x, positions.baptismDate.y);
+    }
+    if (record.reception_date && !hiddenFields.includes('baptismDateMD') && positions.baptismDateMD) {
+      const md = dateMD(record.reception_date);
+      if (md) ctx.fillText(md, positions.baptismDateMD.x, positions.baptismDateMD.y);
+    }
+    if (record.reception_date && !hiddenFields.includes('baptismDateYY') && positions.baptismDateYY) {
+      const yy = dateYY(record.reception_date);
+      if (yy) ctx.fillText(yy, positions.baptismDateYY.x, positions.baptismDateYY.y);
     }
     
     if (record.sponsors && !hiddenFields.includes('sponsors')) {
@@ -307,6 +358,47 @@ const generateMarriagePreview = async (record, fieldOffsets = {}, hiddenFields =
   ctx.font = '28px serif';
   ctx.fillStyle = '#000000';
   ctx.textAlign = 'center';
+
+  // ── Template path: positioned drawing (mirrors baptism) ──────────────────
+  // Previously this branch did nothing — the bare template image was
+  // returned as-is. So saved drag positions for marriage were silently
+  // ignored. Now we draw each known field at its saved (or default)
+  // position, including the new MD/YY split tiles.
+  if (fs.existsSync(MARRIAGE_TEMPLATE_PATH)) {
+    const positions = {};
+    Object.keys(MARRIAGE_POSITIONS).forEach(key => {
+      if (fieldOffsets[key] && typeof fieldOffsets[key].x === 'number' && typeof fieldOffsets[key].y === 'number') {
+        positions[key] = { x: fieldOffsets[key].x, y: fieldOffsets[key].y };
+      } else {
+        positions[key] = { x: MARRIAGE_POSITIONS[key].x, y: MARRIAGE_POSITIONS[key].y };
+      }
+    });
+
+    const draw = (key, value) => {
+      if (!value || hiddenFields.includes(key) || !positions[key]) return;
+      ctx.fillText(String(value), positions[key].x, positions[key].y);
+    };
+
+    const groomName = `${record.fname_groom || record.groom_first || ''} ${record.lname_groom || record.groom_last || ''}`.trim();
+    const brideName = `${record.fname_bride || record.bride_first || ''} ${record.lname_bride || record.bride_last || ''}`.trim();
+    draw('groomName', groomName);
+    draw('brideName', brideName);
+    draw('groomParents', record.parentsg || record.parents_groom);
+    draw('brideParents', record.parentsb || record.parents_bride);
+    // marriage_records uses `mdate` (not marriage_date) and `witness`
+    // (not witnesses). Honor both shapes so refactors don't silently
+    // empty the cert.
+    const mDateRaw = record.mdate || record.marriage_date;
+    if (mDateRaw) {
+      draw('marriageDate', new Date(mDateRaw).toLocaleDateString());
+      draw('marriageDateMD', dateMD(mDateRaw));
+      draw('marriageDateYY', dateYY(mDateRaw));
+    }
+    draw('marriagePlace', record.marriage_place || record.place || record.mlicense);
+    draw('clergy', record.clergy);
+    draw('church', record.churchName || 'Orthodox Church');
+    draw('witnesses', record.witness || record.witnesses);
+  }
 
   // For template-less version
   if (!fs.existsSync(MARRIAGE_TEMPLATE_PATH)) {
@@ -440,12 +532,16 @@ const generateBaptismPDF = async (record, fieldPositions = null, hiddenFields = 
     
     if (record.birth_date) {
       drawField('birthDate', new Date(record.birth_date).toLocaleDateString());
+      drawField('birthDateMD', dateMD(record.birth_date));
+      drawField('birthDateYY', dateYY(record.birth_date));
     }
-    
+
     drawField('birthplace', record.birthplace);
-    
+
     if (record.reception_date) {
       drawField('baptismDate', new Date(record.reception_date).toLocaleDateString());
+      drawField('baptismDateMD', dateMD(record.reception_date));
+      drawField('baptismDateYY', dateYY(record.reception_date));
     }
     
     drawField('sponsors', record.sponsors);
@@ -828,19 +924,11 @@ router.post('/baptism/:id/preview', async (req, res) => {
       success: true,
       preview: `data:image/png;base64,${base64Image}`,
       positions: BAPTISM_POSITIONS,
-      record: {
-        id: record.id,
-        first_name: record.first_name,
-        last_name: record.last_name,
-        birth_date: record.birth_date,
-        birthplace: record.birthplace,
-        reception_date: record.reception_date,
-        baptism_date: record.baptism_date,
-        sponsors: record.sponsors,
-        godparents: record.godparents,
-        clergy: record.clergy,
-        churchName: record.churchName,
-      }
+      // Return the whole record so the front-end has every column it might
+      // want for drag-tile labels (parents, entry_type, etc.). Avoids the
+      // fragile per-field allowlist that previously dropped `parents` and
+      // left the new fatherName / motherName tiles empty.
+      record,
     });
 
   } catch (err) {
@@ -904,7 +992,16 @@ router.get('/baptism/:id/download', async (req, res) => {
       hiddenFields,
     });
 
-    const filename = `baptism_certificate_${record.first_name || 'unknown'}_${record.last_name || 'unknown'}_${id}.pdf`;
+    // Filename: firstname+lastname+dateofbaptism.pdf — matches what
+    // operators expect when archiving / emailing the certificate.
+    const safeFirst = String(record.first_name || 'baptism').trim().replace(/[^A-Za-z0-9]+/g, '');
+    const safeLast  = String(record.last_name  || '').trim().replace(/[^A-Za-z0-9]+/g, '');
+    const dateRaw = record.reception_date || record.baptism_date;
+    const safeDate = dateRaw
+      ? new Date(dateRaw).toISOString().slice(0, 10) // YYYY-MM-DD
+      : '';
+    const filenameParts = [safeFirst, safeLast, safeDate].filter(Boolean);
+    const filename = `${filenameParts.join('+') || 'baptism_certificate'}.pdf`;
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
     res.send(Buffer.from(pdfBytes));
@@ -955,11 +1052,8 @@ router.post('/marriage/:id/preview', async (req, res) => {
       success: true,
       preview: `data:image/png;base64,${base64Image}`,
       positions: MARRIAGE_POSITIONS,
-      record: {
-        id: record.id,
-        groom: `${record.fname_groom || ''} ${record.lname_groom || ''}`.trim(),
-        bride: `${record.fname_bride || ''} ${record.lname_bride || ''}`.trim(),
-      }
+      // Whole record (see baptism preview above for rationale).
+      record,
     });
 
   } catch (err) {
@@ -1023,9 +1117,13 @@ router.get('/marriage/:id/download', async (req, res) => {
       hiddenFields,
     });
 
-    const groomName = `${record.fname_groom || 'unknown'}_${record.lname_groom || ''}`.trim();
-    const brideName = `${record.fname_bride || 'unknown'}_${record.lname_bride || ''}`.trim();
-    const filename = `marriage_certificate_${groomName}_${brideName}_${id}.pdf`;
+    // Filename: marriage-cert-groomslastname+brideslastname.pdf
+    const safeGroom = String(record.lname_groom || '').trim().replace(/[^A-Za-z0-9]+/g, '');
+    const safeBride = String(record.lname_bride || '').trim().replace(/[^A-Za-z0-9]+/g, '');
+    const lastNameParts = [safeGroom, safeBride].filter(Boolean);
+    const filename = lastNameParts.length
+      ? `marriage-cert-${lastNameParts.join('+')}.pdf`
+      : 'marriage-certificate.pdf';
     
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);

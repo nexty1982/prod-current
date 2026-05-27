@@ -45,6 +45,31 @@ const BAPTISM_CERTIFICATE_MAP = {
       align: 'center',
       maxWidth: 400,
     },
+    // Parents — exposed in BAPTISM_FIELD_LABELS so the operator can
+    // drag any combination of these onto the template. Defaults sit
+    // just below fullName so the cert is readable even before the
+    // operator saves a custom layout.
+    fatherName: {
+      x: 280,
+      y: 488,
+      fontSize: 14,
+      align: 'center',
+      maxWidth: 250,
+    },
+    motherName: {
+      x: 430,
+      y: 488,
+      fontSize: 14,
+      align: 'center',
+      maxWidth: 250,
+    },
+    parents: {
+      x: 306,
+      y: 488,
+      fontSize: 14,
+      align: 'center',
+      maxWidth: 400,
+    },
     birthDate: {
       x: 350,
       y: 480,
@@ -65,6 +90,36 @@ const BAPTISM_CERTIFICATE_MAP = {
       fontSize: 14,
       align: 'center',
       maxWidth: 200,
+    },
+    // Split date variants — match the OCA artwork's "ON ___, 20___"
+    // layout. Operators drag to fine-tune; these are starter coords.
+    birthDateMD: {
+      x: 280,
+      y: 480,
+      fontSize: 14,
+      align: 'center',
+      maxWidth: 100,
+    },
+    birthDateYY: {
+      x: 430,
+      y: 480,
+      fontSize: 14,
+      align: 'center',
+      maxWidth: 40,
+    },
+    baptismDateMD: {
+      x: 280,
+      y: 400,
+      fontSize: 14,
+      align: 'center',
+      maxWidth: 100,
+    },
+    baptismDateYY: {
+      x: 430,
+      y: 400,
+      fontSize: 14,
+      align: 'center',
+      maxWidth: 40,
     },
     sponsors: {
       x: 306,
@@ -149,26 +204,21 @@ const MARRIAGE_CERTIFICATE_MAP = {
       align: 'center',
       maxWidth: 200,
     },
-    marriagePlace: {
-      x: 306,
-      y: 390,
+    // Split date variants — match the OCA artwork's "ON ___, 20___"
+    // layout. Operators drag to fine-tune; these are starter coords.
+    marriageDateMD: {
+      x: 280,
+      y: 420,
       fontSize: 14,
       align: 'center',
-      maxWidth: 300,
+      maxWidth: 100,
     },
-    groomParents: {
-      x: 306,
-      y: 350,
-      fontSize: 12,
+    marriageDateYY: {
+      x: 430,
+      y: 420,
+      fontSize: 14,
       align: 'center',
-      maxWidth: 400,
-    },
-    brideParents: {
-      x: 306,
-      y: 325,
-      fontSize: 12,
-      align: 'center',
-      maxWidth: 400,
+      maxWidth: 40,
     },
     witnesses: {
       x: 306,
@@ -184,6 +234,16 @@ const MARRIAGE_CERTIFICATE_MAP = {
       fontSize: 14,
       align: 'center',
       maxWidth: 300,
+    },
+    // Marriage cert has two clergy slots — the officiating priest on
+    // the "By" line (rendered as `clergy`) and a second signature on
+    // the "Rector" line at the bottom. Same value as `clergy`.
+    clergyRector: {
+      x: 450,
+      y: 150,
+      fontSize: 12,
+      align: 'left',
+      maxWidth: 200,
     },
     church: {
       x: 306,
@@ -229,20 +289,37 @@ function mergeCustomPositions(coordinateMap, customPositions) {
   if (!customPositions || Object.keys(customPositions).length === 0) {
     return coordinateMap;
   }
-  
+
   const merged = JSON.parse(JSON.stringify(coordinateMap)); // Deep clone
-  
+
+  // Sane defaults for any field the front-end exposes but the
+  // back-end map hasn't been taught about — prevents silently
+  // dropping a saved position when the front-end ships a new field
+  // before coordinate-maps catches up.
+  const defaultFieldStyle = {
+    fontSize: 14,
+    align: 'center',
+    maxWidth: 300,
+  };
+
   Object.keys(customPositions).forEach(fieldName => {
-    if (merged.fields[fieldName] && customPositions[fieldName]) {
-      // Merge custom x, y while preserving other field properties
+    const pos = customPositions[fieldName];
+    if (!pos || typeof pos.x !== 'number' || typeof pos.y !== 'number') return;
+    if (merged.fields[fieldName]) {
       merged.fields[fieldName] = {
         ...merged.fields[fieldName],
-        x: customPositions[fieldName].x,
-        y: customPositions[fieldName].y,
+        x: pos.x,
+        y: pos.y,
+      };
+    } else {
+      merged.fields[fieldName] = {
+        ...defaultFieldStyle,
+        x: pos.x,
+        y: pos.y,
       };
     }
   });
-  
+
   return merged;
 }
 
