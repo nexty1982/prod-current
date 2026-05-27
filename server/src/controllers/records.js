@@ -152,9 +152,14 @@ const mapFields = (recordType, body, churchId) => {
   }
 
   // Combined witness (marriage) — overrides anything the loop wrote to cols.witness.
-  if (recordType === 'marriage' && (body.witness1 || body.witness2)) {
+  if (
+    recordType === 'marriage' &&
+    (Object.prototype.hasOwnProperty.call(body, 'witness1') ||
+      Object.prototype.hasOwnProperty.call(body, 'witness2'))
+  ) {
     const parts = [body.witness1, body.witness2].filter(Boolean);
-    if (parts.length) cols.witness = parts.join(', ');
+    delete cols.witness;
+    cols.witness = parts.length ? parts.join(', ') : null;
   }
 
   // Always set church_id
