@@ -61,7 +61,10 @@ import {
   BAPTISM_FIELD_LABELS,
   MARRIAGE_FIELD_LABELS,
   formatDate,
+  formatDateMD,
+  formatDateYY,
   getRecordDisplayName,
+  splitParents,
 } from './certificateTypes';
 import GenerateReportWizard from './GenerateReportWizard';
 
@@ -174,12 +177,26 @@ const CertificateGeneratorPage: React.FC = () => {
       }
       case 'birthDate':
         return formatDate(recordData.birth_date);
+      case 'birthDateMD':
+        return formatDateMD(recordData.birth_date);
+      case 'birthDateYY':
+        return formatDateYY(recordData.birth_date);
       case 'birthplace':
         return recordData.birthplace || '';
       case 'baptismDate':
         return formatDate(recordData.baptism_date || recordData.reception_date);
+      case 'baptismDateMD':
+        return formatDateMD(recordData.baptism_date || recordData.reception_date);
+      case 'baptismDateYY':
+        return formatDateYY(recordData.baptism_date || recordData.reception_date);
       case 'sponsors':
         return recordData.sponsors || recordData.godparents || '';
+      case 'fatherName':
+        return splitParents(recordData.parents)[0];
+      case 'motherName':
+        return splitParents(recordData.parents)[1];
+      case 'parents':
+        return recordData.parents || '';
       case 'clergyBy':
       case 'clergyRector':
       case 'clergy':
@@ -198,6 +215,10 @@ const CertificateGeneratorPage: React.FC = () => {
       }
       case 'marriageDate':
         return formatDate(recordData.marriage_date);
+      case 'marriageDateMD':
+        return formatDateMD(recordData.marriage_date);
+      case 'marriageDateYY':
+        return formatDateYY(recordData.marriage_date);
       case 'witnesses':
         return recordData.witnesses || '';
       default:
@@ -244,12 +265,24 @@ const CertificateGeneratorPage: React.FC = () => {
     try {
       const data = await apiClient.get<any>(`/church/${churchId}/certificate/positions/${recordType}`);
       if (data.success && data.positions && !data.isDefault) {
-        setSavedPositions(data.positions);
-        setFieldPositions(data.positions);
-        setPlacedFields(new Set(Object.keys(data.positions)));
+        // Drop any keys that aren't in this record type's field labels.
+        // The certificate_positions row for some churches got corrupted
+        // by an old save bug that stored a JSON-stringified object as
+        // a character-indexed map ({ "0": "{", "1": "\"", ... }) — those
+        // numeric keys would render as "[undefined]" labels otherwise.
+        const cleaned: Record<string, { x: number; y: number }> = {};
+        for (const k of Object.keys(data.positions)) {
+          if (fieldLabels[k] && data.positions[k] && typeof data.positions[k] === 'object'
+              && typeof data.positions[k].x === 'number' && typeof data.positions[k].y === 'number') {
+            cleaned[k] = data.positions[k];
+          }
+        }
+        setSavedPositions(cleaned);
+        setFieldPositions(cleaned);
+        setPlacedFields(new Set(Object.keys(cleaned)));
         setSavedPositionsLoaded(true);
         setShowCoordinates(true); // Show coordinates by default when saved positions exist
-        return data.positions;
+        return cleaned;
       }
     } catch (err) {
       console.warn('Could not load saved positions:', err);
@@ -507,7 +540,18 @@ const CertificateGeneratorPage: React.FC = () => {
     return `${recordData.first_name || recordData.person_first || ''} ${recordData.last_name || recordData.person_last || ''}`.trim();
   };
 
-  const handleGoBack = () => navigate(-1);
+  const handleGoBack = () => {
+    // navigate(-1) silently no-ops when there's no prior history (direct
+    // page load, browser refresh, or external link). Fall back to the
+    // matching records page so the button always does *something*.
+    const fallback = `/portal/records/${recordType || 'baptism'}`;
+    const hasHistory = typeof window !== 'undefined' && window.history.length > 1;
+    if (hasHistory) {
+      navigate(-1);
+    } else {
+      navigate(fallback);
+    }
+  };
 
   const getScreenPosition = (fieldName: string) => {
     if (!imageRef.current || !imageWrapperRef.current) return null;
@@ -606,8 +650,22 @@ const CertificateGeneratorPage: React.FC = () => {
               </Typography>
               
               <Divider sx={{ my: 1 }} />
-              
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 0.5,
+                  // Cap the field list and let it scroll independently — the
+                  // baptism set has 11 fields and previously fell below the
+                  // viewport on shorter screens. min(60vh, 480px) keeps this
+                  // usable on laptop heights without dominating taller ones.
+                  maxHeight: 'min(60vh, 480px)',
+                  overflowY: 'auto',
+                  overflowX: 'hidden',
+                  pr: 0.5,
+                }}
+              >
                 {Object.keys(fieldLabels).map((fieldName) => {
                   const isPlaced = placedFields.has(fieldName);
                   const value = getFieldValue(fieldName);
@@ -673,7 +731,7 @@ const CertificateGeneratorPage: React.FC = () => {
               />
               
               {showCoordinates && placedFields.size > 0 && (
-                <Box sx={{ mt: 1, maxHeight: 150, overflow: 'auto' }}>
+                <Box sx={{ mt: 1, maxHeight: 'min(40vh, 280px)', overflowY: 'auto', overflowX: 'hidden', pr: 0.5 }}>
                   {Object.keys(fieldLabels).map((fieldName) => {
                     const pos = fieldPositions[fieldName];
                     if (!pos || !placedFields.has(fieldName)) return null;
@@ -794,9 +852,12 @@ const CertificateGeneratorPage: React.FC = () => {
                 />
                 
                 {imageLoaded && Array.from(placedFields).map((fieldName) => {
+                  // Skip stale keys not in this record type's labels —
+                  // otherwise they render as "[undefined]" overlays.
+                  if (!fieldLabels[fieldName]) return null;
                   const screenPos = getScreenPosition(fieldName);
                   if (!screenPos) return null;
-                  
+
                   const value = getFieldValue(fieldName);
                   const displayValue = value || `[${fieldLabels[fieldName]}]`;
                   

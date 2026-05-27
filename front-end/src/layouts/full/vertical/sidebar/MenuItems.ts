@@ -453,6 +453,12 @@ const Menuitems: MenuitemsType[] = [
         icon: IconClock,
         href: '/devel-tools/work-session-admin',
       },
+      {
+        id: uniqueId(),
+        title: 'Ecosystem Roadmap',
+        icon: IconChartBar,
+        href: '/admin/ecosystem-roadmap',
+      },
     ],
   },
   {

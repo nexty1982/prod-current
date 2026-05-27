@@ -103,7 +103,7 @@ const Customizer: FC = () => {
     },
     {
       id: 2,
-      bgColor: "#A4C639",
+      bgColor: "#2E7D32", // Pentecost green — match LightThemeColors GREEN_THEME
       disp: "GREEN_THEME",
     },
     {
@@ -118,7 +118,7 @@ const Customizer: FC = () => {
     },
     {
       id: 5,
-      bgColor: "#1E6B8C",
+      bgColor: "#00ACC1", // Aqua blue — match LightThemeColors BLUE_THEME
       disp: "BLUE_THEME",
     },
     {

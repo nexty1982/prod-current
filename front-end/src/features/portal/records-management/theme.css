@@ -1,0 +1,59 @@
+.rm-scope {
+  --rm-accent: #11307a;
+  --rm-accent-dark: #0a1e52;
+  --rm-accent-hover: #0e2865;
+  --rm-accent-soft: rgba(17, 48, 122, 0.12);
+  --rm-bg: #ffffff;
+  --rm-fg: #1a1a2e;
+  --rm-card: #ffffff;
+  --rm-muted: #f8f9fa;
+  --rm-muted-fg: #6b7280;
+  --rm-border: #e5e7eb;
+  --rm-popover: #ffffff;
+
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--rm-fg);
+}
+
+/* Theme color overrides based on site-wide Customizer activeTheme */
+[data-color-theme="GREEN_THEME"] .rm-scope { --rm-accent: #2E7D32; --rm-accent-dark: #1B5E20; --rm-accent-soft: rgba(46, 125, 50, 0.12); }
+[data-color-theme="PURPLE_THEME"] .rm-scope { --rm-accent: #6B2D75; --rm-accent-dark: #4a1f52; --rm-accent-soft: rgba(107, 45, 117, 0.12); }
+[data-color-theme="RED_THEME"] .rm-scope { --rm-accent: #B22234; --rm-accent-dark: #7a1824; --rm-accent-soft: rgba(178, 34, 52, 0.12); }
+[data-color-theme="BLUE_THEME"] .rm-scope { --rm-accent: #00838F; --rm-accent-dark: #005662; --rm-accent-soft: rgba(0, 131, 143, 0.12); }
+[data-color-theme="GOLD_THEME"] .rm-scope { --rm-accent: #C9A227; --rm-accent-dark: #9a7b1b; --rm-accent-soft: rgba(201, 162, 39, 0.12); }
+[data-color-theme="LENT_THEME"] .rm-scope { --rm-accent: #1a1a1a; --rm-accent-dark: #000000; --rm-accent-soft: rgba(26, 26, 26, 0.12); }
+[data-color-theme="WHITE_THEME"] .rm-scope { --rm-accent: #11307a; --rm-accent-dark: #0a1e52; --rm-accent-soft: rgba(17, 48, 122, 0.12); }
+
+.dark .rm-scope,
+.rm-scope.dark {
+  --rm-accent: #4f7cff;
+  --rm-accent-dark: #3656b3;
+  --rm-accent-hover: #3d6ae8;
+  --rm-accent-soft: rgba(79, 124, 255, 0.15);
+  --rm-bg: #0f1117;
+  --rm-fg: #e8e9ed;
+  --rm-card: #1a1d27;
+  --rm-muted: #1f2330;
+  --rm-muted-fg: #9ca3af;
+  --rm-border: #2d3140;
+  --rm-popover: #1a1d27;
+}
+
+/* Dark mode theme overrides */
+.dark [data-color-theme="GREEN_THEME"] .rm-scope,
+[data-color-theme="GREEN_THEME"] .dark .rm-scope { --rm-accent: #2E7D32; --rm-accent-dark: #1B5E20; --rm-accent-soft: rgba(46, 125, 50, 0.2); }
+.dark [data-color-theme="PURPLE_THEME"] .rm-scope,
+[data-color-theme="PURPLE_THEME"] .dark .rm-scope { --rm-accent: #6B2D75; --rm-accent-dark: #4a1f52; --rm-accent-soft: rgba(107, 45, 117, 0.2); }
+.dark [data-color-theme="RED_THEME"] .rm-scope,
+[data-color-theme="RED_THEME"] .dark .rm-scope { --rm-accent: #B22234; --rm-accent-dark: #7a1824; --rm-accent-soft: rgba(178, 34, 52, 0.2); }
+.dark [data-color-theme="BLUE_THEME"] .rm-scope,
+[data-color-theme="BLUE_THEME"] .dark .rm-scope { --rm-accent: #00838F; --rm-accent-dark: #005662; --rm-accent-soft: rgba(0, 131, 143, 0.2); }
+.dark [data-color-theme="GOLD_THEME"] .rm-scope,
+[data-color-theme="GOLD_THEME"] .dark .rm-scope { --rm-accent: #C9A227; --rm-accent-dark: #9a7b1b; --rm-accent-soft: rgba(201, 162, 39, 0.2); }
+.dark [data-color-theme="LENT_THEME"] .rm-scope,
+[data-color-theme="LENT_THEME"] .dark .rm-scope { --rm-accent: #444444; --rm-accent-dark: #1a1a1a; --rm-accent-soft: rgba(68, 68, 68, 0.2); }

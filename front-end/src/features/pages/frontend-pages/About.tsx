@@ -4,6 +4,8 @@ import { PUBLIC_ROUTES } from '@/config/publicRoutes';
 import { HeroSection, SectionHeader, CTASection } from '@/components/frontend-pages/shared/sections';
 import ScrollToTop from '@/components/frontend-pages/shared/scroll-to-top';
 import PageContainer from '@/shared/ui/PageContainer';
+import PublicSeo from '@/components/seo/PublicSeo';
+import JsonLd from '@/components/seo/JsonLd';
 import { useLanguage } from '@/context/LanguageContext';
 import leadershipBanner from '@/assets/images/frontend-pages/about/Orthodox-Leadership-banner.png';
 import EditableText from '@/components/frontend-pages/shared/EditableText';
@@ -41,6 +43,38 @@ const About = () => {
 
   return (
     <PageContainer title="About Us" description="About Orthodox Metrics">
+      <PublicSeo
+        title="About"
+        description="Why we built Orthodox Metrics: a records platform for Orthodox parishes that respects canonical custody, supports multiple jurisdictions, and modernizes the work of preserving sacramental life."
+        path="/frontend-pages/about"
+      />
+      <JsonLd
+        data={[
+          {
+            '@context': 'https://schema.org',
+            '@type': 'BreadcrumbList',
+            itemListElement: [
+              { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://orthodoxmetrics.com/' },
+              { '@type': 'ListItem', position: 2, name: 'About', item: 'https://orthodoxmetrics.com/frontend-pages/about' },
+            ],
+          },
+          {
+            '@context': 'https://schema.org',
+            '@type': 'AboutPage',
+            name: 'About Orthodox Metrics',
+            url: 'https://orthodoxmetrics.com/frontend-pages/about',
+            publisher: { '@type': 'Organization', name: 'Orthodox Metrics', url: 'https://orthodoxmetrics.com/' },
+          },
+          {
+            '@context': 'https://schema.org',
+            '@type': 'Person',
+            name: t('about.founder_name'),
+            jobTitle: t('about.founder_role'),
+            worksFor: { '@type': 'Organization', name: 'Orthodox Metrics', url: 'https://orthodoxmetrics.com/' },
+            description: `${t('about.founder_p1')} ${t('about.founder_p2')}`,
+          },
+        ]}
+      />
       {/* Hero */}
       <HeroSection
         badge={t('about.hero_badge')}

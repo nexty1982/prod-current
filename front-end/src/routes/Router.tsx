@@ -3,8 +3,8 @@
 import { useAuth } from '@/context/AuthContext';
 import AppErrorBoundary from '@/shared/ui/AppErrorBoundary';
 import { RecordsRouteErrorBoundary } from '@/shared/ui/RecordsRouteErrorBoundary';
-import { lazy } from 'react';
-import { createBrowserRouter, Navigate } from 'react-router-dom';
+import { lazy, Suspense } from 'react';
+import { createBrowserRouter, Navigate, Outlet } from 'react-router-dom';
 import ProtectedRoute from '../components/auth/ProtectedRoute';
 import AdminErrorBoundary from '../components/ErrorBoundary/AdminErrorBoundary';
 import SmartRedirect from '../components/routing/SmartRedirect';
@@ -39,6 +39,9 @@ const Tickets = Loadable(lazy(() => import('../features/apps/tickets/Tickets')))
 const Kanban = Loadable(lazy(() => import('../features/apps/kanban/Kanban')));
 const DynamicRecordsPage = Loadable(lazy(() => import('../features/records-centralized/components/dynamic/DynamicRecordsPage')));
 const AnalyticsDashboard = Loadable(lazy(() => import('../features/admin/AnalyticsDashboard')));
+const WebsiteStatsPage = Loadable(lazy(() => import('../features/admin/website-stats/WebsiteStatsPage')));
+// OMOD-1502: Tenant Portal Config Registry (Phase 5 of 8 of OMSD-1491)
+const TenantPortalConfigPage = Loadable(lazy(() => import('../features/admin/tenant-portal-config/TenantPortalConfigPage')));
 const Followers = Loadable(lazy(() => import('../features/apps/user-profile/Followers')));
 const Friends = Loadable(lazy(() => import('../features/apps/user-profile/Friends')));
 const UserProfileGallery = Loadable(lazy(() => import('../features/apps/user-profile/Gallery')));
@@ -169,6 +172,7 @@ const Maintenance = Loadable(lazy(() => import('../features/auth/authentication/
 const Homepage = Loadable(lazy(() => import('../features/pages/frontend-pages/Homepage')));
 const About = Loadable(lazy(() => import('../features/pages/frontend-pages/About')));
 const Contact = Loadable(lazy(() => import('../features/pages/frontend-pages/Contact')));
+const Enrollment = Loadable(lazy(() => import('../features/pages/frontend-pages/Enrollment')));
 const Portfolio = Loadable(lazy(() => import('../features/pages/frontend-pages/Portfolio')));
 const PagePricing = Loadable(lazy(() => import('../features/pages/frontend-pages/Pricing')));
 const BlogPage = Loadable(lazy(() => import('../features/pages/frontend-pages/Blog')));
@@ -198,6 +202,19 @@ const CertificateGeneratorPage = Loadable(lazy(() => import('../features/certifi
 function AccountLayoutSwitcher() {
   const { user } = useAuth();
   if (user?.role === 'super_admin') return <FullLayout />;
+  return <ChurchPortalLayout />;
+}
+
+/**
+ * Interactive Reports layout switcher.
+ * super_admin / admin → FullLayout admin shell.
+ * Everyone else (church_admin, priest, deacon, …) → ChurchPortalLayout, so
+ * church staff using Interactive Reports never leave their portal chrome.
+ */
+function InteractiveReportsLayoutSwitcher() {
+  const { user } = useAuth();
+  const role = user?.role;
+  if (role === 'super_admin' || role === 'admin') return <FullLayout />;
   return <ChurchPortalLayout />;
 }
 
@@ -371,6 +388,15 @@ const Router = [
         element: (
           <ProtectedRoute requiredRole={['super_admin']}>
             <ChurchSetupWizard />
+          </ProtectedRoute>
+        )
+      },
+      // OMOD-1502: Tenant Portal Config Registry (Phase 5 of OMSD-1491)
+      {
+        path: '/admin/tenant-portal-config',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin', 'admin']}>
+            <TenantPortalConfigPage />
           </ProtectedRoute>
         )
       },
@@ -549,6 +575,17 @@ const Router = [
             <AnalyticsDashboard />
           </ProtectedRoute>
         )
+      },
+      {
+        // Public-website traffic stats — admin/super_admin only.
+        // Reads from the configured analytics provider via /api/admin/website-stats;
+        // shows a "configuration needed" empty state when no provider is set.
+        path: '/admin/website-stats',
+        element: (
+          <ProtectedRoute requiredRole={['super_admin', 'admin']}>
+            <WebsiteStatsPage />
+          </ProtectedRoute>
+        ),
       },
       {
         // Deprecated: old /apps/logs page was silently broken (missing imports).
@@ -760,9 +797,23 @@ const Router = [
           </ProtectedRoute>
         )
       },
-      // Interactive Reports
+      // Interactive Reports — moved out of FullLayout block so non-admin users
+      // (priest, church_admin, …) render inside ChurchPortalLayout instead of
+      // the admin shell. See InteractiveReportsLayoutSwitcher block below.
+      { path: '/apps/records/manager', element: <DynamicRecordsManager /> },
+      { path: '/apps/records/modern-manager', element: <ModernDynamicRecordsManager /> },
+      { path: '/apps/records/editable', element: <EditableRecordPage /> },
+    ],
+  },
+  // ── Church Portal (extracted to portalRoutes.tsx) ──
+  portalRoute,
+  // ── Interactive Reports — admins use FullLayout, church staff stay in portal ──
+  {
+    path: '/apps/records/interactive-reports',
+    element: <InteractiveReportsLayoutSwitcher />,
+    children: [
       {
-        path: '/apps/records/interactive-reports',
+        index: true,
         element: (
           <ProtectedRoute requiredRole={['admin', 'super_admin', 'church_admin', 'priest']}>
             <EnvironmentAwarePage
@@ -773,10 +824,10 @@ const Router = [
               <InteractiveReportsPage />
             </EnvironmentAwarePage>
           </ProtectedRoute>
-        )
+        ),
       },
       {
-        path: '/apps/records/interactive-reports/:reportId',
+        path: ':reportId',
         element: (
           <ProtectedRoute requiredRole={['admin', 'super_admin', 'church_admin', 'priest']}>
             <EnvironmentAwarePage
@@ -787,15 +838,10 @@ const Router = [
               <InteractiveReportReview />
             </EnvironmentAwarePage>
           </ProtectedRoute>
-        )
+        ),
       },
-      { path: '/apps/records/manager', element: <DynamicRecordsManager /> },
-      { path: '/apps/records/modern-manager', element: <ModernDynamicRecordsManager /> },
-      { path: '/apps/records/editable', element: <EditableRecordPage /> },
     ],
   },
-  // ── Church Portal (extracted to portalRoutes.tsx) ──
-  portalRoute,
   // ── Account Hub — super_admin uses FullLayout, others use portal ──
   {
     path: '/account',
@@ -902,6 +948,9 @@ const Router = [
           { path: '/security', element: <Security /> },
         ],
       },
+      // Enrollment wizard brings its own header/footer chrome — keep it
+      // outside PublicLayout so HpHeader/SiteFooter don't double up.
+      { path: '/frontend-pages/enroll', element: <Enrollment /> },
       { path: '/greek_baptism_table_demo.html', element: <GreekRecordsViewer /> },
       { path: '/russian_wedding_table_demo.html', element: <HTMLViewer htmlFile="/russian_wedding_table_demo.html" /> },
       { path: '/romanian_funeral_table_demo.html', element: <HTMLViewer htmlFile="/romanian_funeral_table_demo.html" /> },
@@ -919,6 +968,28 @@ const Router = [
     ],
   },
 ];
-const router = createBrowserRouter(Router);
+
+// Wrap every route under a tiny layout so AnalyticsRouterListener
+// sits inside the router context and can call useLocation. The
+// listener is a render-null component that fires pageviews on
+// route change — and no-ops if no analytics provider is configured.
+const AnalyticsRouterListener = lazy(
+  () => import('@/components/analytics/AnalyticsRouterListener'),
+);
+const RouterRootLayout = () => (
+  <>
+    <Suspense fallback={null}>
+      <AnalyticsRouterListener />
+    </Suspense>
+    <Outlet />
+  </>
+);
+
+const router = createBrowserRouter([
+  {
+    element: <RouterRootLayout />,
+    children: Router,
+  },
+]);
 
 export default router;

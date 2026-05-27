@@ -252,3 +252,113 @@ export const DEFAULT_DATE_SORT_FIELD: Record<string, string> = {
   marriage: 'mdate',
   funeral: 'burial_date',
 };
+
+// ============================================================================
+// recordToFormData — DB row (snake_case) → edit-form data (camelCase aliases)
+//
+// The records list endpoints return raw DB columns (first_name, reception_date,
+// parents, ...). The Edit dialog reads camelCase keys (firstName,
+// dateOfBaptism, fatherName, ...). Without this transform, opening the edit
+// dialog leaves required fields blank and useRecordSave's validation (which
+// checks firstName/lastName/dateOfBaptism) silently fails — user sees
+// "nothing happens" because the toast is easy to miss.
+//
+// We keep the original snake_case fields too, so anything that reads either
+// shape continues to work. Note that if both snake_case and camelCase versions
+// of the same field are later submitted, backend field mapping may process
+// both shapes rather than deterministically preferring snake_case.
+// ============================================================================
+
+// Coerce a date-ish value (Date object, ISO string, or YYYY-MM-DD) to the
+// YYYY-MM-DD form that <input type="date"> requires.
+function formatDateInputFromLocalParts(d: Date): string {
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function toDateInputValue(v: any): string {
+  if (!v) return '';
+  if (typeof v === 'string') {
+    if (/^\d{4}-\d{2}-\d{2}/.test(v)) return v.slice(0, 10);
+    const d = new Date(v);
+    if (!Number.isNaN(d.getTime())) return formatDateInputFromLocalParts(d);
+    return '';
+  }
+  try {
+    const d = new Date(v);
+    if (!Number.isNaN(d.getTime())) return formatDateInputFromLocalParts(d);
+  } catch { /* fall through */ }
+  return '';
+}
+
+// Split a "Father, Mother" / "Father & Mother" combined field into two parts.
+// Returns [first, second] — second may be empty when only one party is present.
+function splitTwoParty(combined: string | null | undefined): [string, string] {
+  if (!combined || typeof combined !== 'string') return ['', ''];
+  const trimmed = combined.trim();
+  if (!trimmed) return ['', ''];
+  // Try " & " first (most common in baptism records like "Nicholas Torrisi & Samantha Dominy"),
+  // then "&", then ",", then ";".
+  for (const sep of [' & ', '&', ';', ',']) {
+    if (trimmed.includes(sep)) {
+      const parts = trimmed.split(sep).map((s) => s.trim()).filter(Boolean);
+      return [parts[0] || '', parts[1] || ''];
+    }
+  }
+  return [trimmed, ''];
+}
+
+export function recordToFormData(record: any, recordType: string): any {
+  if (!record || typeof record !== 'object') return record;
+  const out: any = { ...record };
+
+  if (recordType === 'baptism') {
+    out.firstName       = record.firstName       ?? record.first_name       ?? '';
+    out.lastName        = record.lastName        ?? record.last_name        ?? '';
+    out.dateOfBirth     = record.dateOfBirth     ?? toDateInputValue(record.birth_date);
+    out.dateOfBaptism   = record.dateOfBaptism   ?? toDateInputValue(record.reception_date);
+    out.placeOfBirth    = record.placeOfBirth    ?? record.birthplace        ?? '';
+    out.godparentNames  = record.godparentNames  ?? record.sponsors          ?? '';
+    out.priest          = record.priest          ?? record.clergy            ?? '';
+    out.registryNumber  = record.registryNumber  ?? record.source_scan_id    ?? '';
+    out.entryType       = record.entryType       ?? record.entry_type        ?? '';
+
+    if (record.fatherName === undefined && record.motherName === undefined) {
+      const [father, mother] = splitTwoParty(record.parents);
+      out.fatherName = father;
+      out.motherName = mother;
+    }
+  } else if (recordType === 'marriage') {
+    out.groomFirstName    = record.groomFirstName    ?? record.fname_groom        ?? '';
+    out.groomLastName     = record.groomLastName     ?? record.lname_groom        ?? '';
+    out.brideFirstName    = record.brideFirstName    ?? record.fname_bride        ?? '';
+    out.brideLastName     = record.brideLastName     ?? record.lname_bride        ?? '';
+    out.groomParents      = record.groomParents      ?? record.parentsg           ?? '';
+    out.brideParents      = record.brideParents      ?? record.parentsb           ?? '';
+    out.marriageDate      = record.marriageDate      ?? toDateInputValue(record.mdate);
+    out.marriageLocation  = record.marriageLocation  ?? record.mlicense           ?? '';
+    out.priest            = record.priest            ?? record.clergy             ?? '';
+
+    if (record.witness1 === undefined && record.witness2 === undefined) {
+      const [w1, w2] = splitTwoParty(record.witness);
+      out.witness1 = w1;
+      out.witness2 = w2;
+    }
+  } else if (recordType === 'funeral') {
+    const fn = record.firstName ?? record.deceasedFirstName ?? record.name     ?? '';
+    const ln = record.lastName  ?? record.deceasedLastName  ?? record.lastname ?? '';
+    out.firstName            = fn;
+    out.lastName             = ln;
+    out.deceasedFirstName    = record.deceasedFirstName ?? fn;
+    out.deceasedLastName     = record.deceasedLastName  ?? ln;
+    out.dateOfDeath          = record.dateOfDeath       ?? record.deathDate          ?? toDateInputValue(record.deceased_date);
+    out.deathDate            = record.deathDate         ?? out.dateOfDeath;
+    out.burialDate           = record.burialDate        ?? toDateInputValue(record.burial_date);
+    out.priest               = record.priest            ?? record.clergy             ?? '';
+    out.burialLocation       = record.burialLocation    ?? record.burial_location    ?? '';
+  }
+
+  return out;
+}

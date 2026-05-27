@@ -7,6 +7,7 @@
  */
 
 const { promisePool } = require('../config/db');
+const { validateRecord: validateRecordFields } = require('./records-validation');
 
 // Cache: churchId -> database_name
 const churchDbCache = new Map();
@@ -121,31 +122,44 @@ const IGNORE_FIELDS = new Set([
 
 /**
  * Map incoming request body to { column: value } pairs for the DB.
+ *
+ * Combined-field handling (fatherName+motherName → parents,
+ * witness1+witness2 → witness) runs AFTER the main loop so that an
+ * explicit edit on the split fields always wins over an out-of-date
+ * snake_case `parents` / `witness` value the frontend also happens to
+ * spread into the body. (When the frontend opens an edit form it
+ * pre-populates both shapes — without this ordering, the loop would
+ * overwrite the user's just-edited combined value.)
  */
 const mapFields = (recordType, body, churchId) => {
   const mapping = FIELD_MAP[recordType] || {};
   const cols = {};
 
-  // Handle combined parents field for baptism (fatherName + motherName)
+  for (const [key, value] of Object.entries(body)) {
+    if (IGNORE_FIELDS.has(key)) continue;
+    if (key === 'fatherName' || key === 'motherName') continue; // handled below
+    if (key === 'witness1' || key === 'witness2') continue;     // handled below
+    const dbCol = mapping[key];
+    if (dbCol && value !== undefined && value !== null && value !== '') {
+      cols[dbCol] = value;
+    }
+  }
+
+  // Combined parents (baptism) — overrides anything the loop wrote to cols.parents.
   if (recordType === 'baptism' && (body.fatherName || body.motherName)) {
     const parts = [body.fatherName, body.motherName].filter(Boolean);
     if (parts.length) cols.parents = parts.join(', ');
   }
 
-  // Handle combined witness field for marriage (witness1 + witness2)
-  if (recordType === 'marriage' && (body.witness1 || body.witness2)) {
+  // Combined witness (marriage) — overrides anything the loop wrote to cols.witness.
+  if (
+    recordType === 'marriage' &&
+    (Object.prototype.hasOwnProperty.call(body, 'witness1') ||
+      Object.prototype.hasOwnProperty.call(body, 'witness2'))
+  ) {
     const parts = [body.witness1, body.witness2].filter(Boolean);
-    if (parts.length) cols.witness = parts.join(', ');
-  }
-
-  for (const [key, value] of Object.entries(body)) {
-    if (IGNORE_FIELDS.has(key)) continue;
-    if (key === 'fatherName' || key === 'motherName') continue; // handled above
-    if (key === 'witness1' || key === 'witness2') continue; // handled above
-    const dbCol = mapping[key];
-    if (dbCol && value !== undefined && value !== null && value !== '') {
-      cols[dbCol] = value;
-    }
+    delete cols.witness;
+    cols.witness = parts.length ? parts.join(', ') : null;
   }
 
   // Always set church_id
@@ -237,6 +251,18 @@ const createRecord = async (req, res) => {
     const churchId = req.params.churchId || req.user?.church_id;
     const table = qt(dbName, getTableName(recordType));
 
+    // Field-level validation BEFORE the SQL — turns malformed input
+    // (e.g. 5-digit year typo) into a clean 400 with structured
+    // fieldErrors instead of a 500 + SQL stack trace.
+    const v = validateRecordFields(recordType, req.body || {});
+    if (!v.ok) {
+      return res.status(400).json({
+        error: 'Validation failed',
+        message: 'One or more fields are invalid.',
+        fieldErrors: v.fieldErrors,
+      });
+    }
+
     const cols = mapFields(recordType, req.body, churchId);
 
     // Set entry_type default for baptism
@@ -279,6 +305,16 @@ const updateRecord = async (req, res) => {
       return res.status(404).json({ error: 'Record not found' });
     }
 
+    // Field-level validation BEFORE the SQL — same defense as create.
+    const v = validateRecordFields(recordType, req.body || {});
+    if (!v.ok) {
+      return res.status(400).json({
+        error: 'Validation failed',
+        message: 'One or more fields are invalid.',
+        fieldErrors: v.fieldErrors,
+      });
+    }
+
     const cols = mapFields(recordType, req.body, churchId);
     // Don't update church_id on update
     delete cols.church_id;
@@ -292,9 +328,22 @@ const updateRecord = async (req, res) => {
 
     await promisePool.execute(`UPDATE ${table} SET ${setClause} WHERE id = ?`, values);
 
+    // Return the FULL updated row so the front-end can replace the grid
+    // entry without losing all its other fields. Previously we returned
+    // only { id, recordType, message } — RecordsPage's setRecords map
+    // would then overwrite the row with that stub and the cells would
+    // appear blank until the next refresh. Re-SELECT after UPDATE keeps
+    // the response consistent with whatever just landed (including
+    // computed columns like updated_at).
+    const [updatedRows] = await promisePool.execute(
+      `SELECT * FROM ${table} WHERE id = ?`,
+      [id],
+    );
+    const updated = updatedRows[0] || { id };
+
     res.json({
       success: true,
-      data: { id, recordType, message: `${recordType} record updated successfully` }
+      data: { ...updated, recordType, message: `${recordType} record updated successfully` },
     });
   } catch (error) {
     console.error('Error updating record:', error);

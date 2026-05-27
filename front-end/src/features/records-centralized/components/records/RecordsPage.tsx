@@ -27,13 +27,14 @@ import StandardRecordsTable from './RecordsPage/StandardRecordsTable';
 import { BaptismRecord, SortConfig, RecordsPageProps } from './RecordsPage/types';
 import { useRecordsAutocomplete } from './RecordsPage/useRecordsAutocomplete';
 import RecordEditForm from './RecordsPage/RecordEditForm';
-import { parseJsonField, displayJsonField, highlightMatch, getCellValue, getColumnDefinitions, getSortFields, RECORD_TYPE_CONFIGS, DEFAULT_DATE_SORT_FIELD } from './RecordsPage/utils';
+import { parseJsonField, displayJsonField, highlightMatch, getCellValue, getColumnDefinitions, getSortFields, RECORD_TYPE_CONFIGS, DEFAULT_DATE_SORT_FIELD, recordToFormData } from './RecordsPage/utils';
 import RecordsControlsBar from './RecordsPage/RecordsControlsBar';
 import { fetchChurches as fetchChurchesApi, fetchRecords as fetchRecordsApi, fetchPriestOptions as fetchPriestOptionsApi } from './RecordsPage/useRecordsFetch';
 import { useAgGridConfig } from './RecordsPage/useAgGridConfig';
 import { useRecordSave } from './RecordsPage/useRecordSave';
 import {
     Alert,
+    Autocomplete,
     Box,
     Button,
     Chip,
@@ -43,6 +44,7 @@ import {
     Snackbar,
     Stack,
     TablePagination,
+    TextField,
     Tooltip,
     Typography
 } from '@mui/material';
@@ -50,7 +52,7 @@ import { useTheme } from '@mui/material/styles';
 import { ColDef } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import RecordSection from '../../common/RecordSection';
 import { useLanguage } from '@/context/LanguageContext';
 
@@ -75,6 +77,8 @@ const highlightSearchMatch = (text: string, searchTerm: string): React.ReactNode
 const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism' }) => {
   const { t } = useLanguage();
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const location = useLocation();
   
   // State management
   const [records, setRecords] = useState<BaptismRecord[]>([]);
@@ -228,9 +232,9 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
     setViewEditMode(mode);
     if (mode === 'edit' && viewingRecord) {
       setEditingRecord(viewingRecord);
-      setFormData(viewingRecord);
+      setFormData(recordToFormData(viewingRecord, selectedRecordType));
     }
-  }, [viewingRecord]);
+  }, [viewingRecord, selectedRecordType]);
 
   // Collapsible Panel State
   const [isFiltersCollapsed, setIsFiltersCollapsed] = useState<boolean>(false);
@@ -256,14 +260,21 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
   const fetchChurches = () => fetchChurchesApi({ setLoading, setChurches, setError, showToast });
   const fetchRecords = (recordType: string, churchId?: number, search?: string, serverPage?: number, serverLimit?: number, sortField?: string, sortDir?: string) =>
     fetchRecordsApi({ recordType, churchId, search, serverPage, serverLimit, sortField, sortDir }, fetchCb);
-  const fetchPriestOptions = (recordType: string) => fetchPriestOptionsApi(recordType, selectedChurch, setPriestOptions);
 
-  // Effective church ID — resolves 0 to the single real church when only 1 exists
+  // Effective church ID — resolves 0 ("All Churches") to the single real
+  // church when only 1 exists. Used by every flow that needs a CONCRETE
+  // church (priest fetch, save, edit-dialog church-name display).
   const effectiveChurchId = useMemo(() => {
     if (selectedChurch && selectedChurch !== 0) return selectedChurch;
     const realChurches = churches.filter(c => c.id !== 0);
     return realChurches.length === 1 ? realChurches[0].id : 0;
   }, [selectedChurch, churches]);
+
+  // Use the effective church for the clergy lookup so the dropdown is
+  // populated even when the user implicitly has the "All Churches"
+  // option selected and only one real church exists.
+  const fetchPriestOptions = (recordType: string) =>
+    fetchPriestOptionsApi(recordType, effectiveChurchId || null, setPriestOptions);
 
   // Effects
   useEffect(() => {
@@ -275,12 +286,15 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
   useEffect(() => {
     if (selectedRecordType) {
       setPage(0); // Reset to first page on type/church change
+      setSelectedPriest(null); // priest options change with type/church
       const dateSortKey = DEFAULT_DATE_SORT_FIELD[selectedRecordType] || 'id';
       setSortConfig({ key: dateSortKey, direction: 'desc' });
       fetchRecords(selectedRecordType, selectedChurch, undefined, 0, rowsPerPage, dateSortKey, 'desc');
       fetchPriestOptions(selectedRecordType);
     }
-  }, [selectedRecordType, selectedChurch]);
+    // effectiveChurchId added so the priest fetch retries once the
+    // churches list resolves (selectedChurch=0 → real church id).
+  }, [selectedRecordType, selectedChurch, effectiveChurchId]);
 
   // Debounce search term: update debouncedSearch 300ms after typing stops
   useEffect(() => {
@@ -358,8 +372,13 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
     } catch { return []; }
   }, [selectedRecordType]);
 
+  // Priest filter — when set, restrict displayed rows to those whose
+  // clergy field exactly matches the selected priest. Pulled from the
+  // same priestOptions list the edit dialog uses.
+  const [selectedPriest, setSelectedPriest] = useState<string | null>(null);
+
   // Server-sorted records — no client-side re-sorting (server handles ORDER BY)
-  // Only apply Best Matches client-side filter when searching
+  // Only apply Best Matches + priest client-side filters
   const filteredAndSortedRecords = useMemo(() => {
     let result = [...records];
 
@@ -368,8 +387,13 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
       result = result.filter(r => (r._matchedFields?.length || 0) >= 2);
     }
 
+    // Priest filter: client-side exact-match against the record's clergy field.
+    if (selectedPriest) {
+      result = result.filter(r => (r.clergy || '').trim() === selectedPriest);
+    }
+
     return result;
-  }, [records, debouncedSearch, showBestMatches]);
+  }, [records, debouncedSearch, showBestMatches, selectedPriest]);
 
   // Paginated records — server returns the exact page, no client-side slicing needed
   const paginatedRecords = filteredAndSortedRecords;
@@ -377,12 +401,31 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
   // Handlers
   const handleRecordTypeChange = useCallback((newType: string) => {
     setSelectedRecordType(newType);
+    // Switching record type changes the path (/portal/records/<type>),
+    // not just a ?type= query param. Each type has its own route, so
+    // staying on /portal/records/baptism with ?type=marriage left the
+    // URL in a misleading state and broke deep-link / refresh.
+    if (validRecordTypes.includes(newType)) {
+      const target = location.pathname.replace(
+        /\/records\/(baptism|marriage|funeral)(\/.*)?$/,
+        `/records/${newType}$2`,
+      );
+      if (target !== location.pathname) {
+        // Drop any stale ?type= from the URL when navigating.
+        const params = new URLSearchParams(searchParams);
+        params.delete('type');
+        const qs = params.toString();
+        navigate(qs ? `${target}?${qs}` : target, { replace: true });
+        return;
+      }
+    }
+    // Fallback: same path, just sync the query param.
     setSearchParams(prev => {
       const next = new URLSearchParams(prev);
       next.set('type', newType);
       return next;
     }, { replace: true });
-  }, [setSearchParams]);
+  }, [setSearchParams, navigate, location.pathname, searchParams]);
 
   const handleSort = (key: keyof BaptismRecord) => {
     const newDirection = sortConfig.key === key && sortConfig.direction === 'asc' ? 'desc' : 'asc';
@@ -417,18 +460,23 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
       godparentNames: '',
       priest: '',
       registryNumber: '',
-      churchId: selectedChurch ? selectedChurch.toString() : '',
+      // effectiveChurchId resolves the implicit "All Churches" (id=0)
+      // to the real parish when only one exists, so the new record
+      // gets associated with the right church without operator click.
+      churchId: effectiveChurchId ? effectiveChurchId.toString() : '',
       notes: '',
       customPriest: false,
     });
+    setFieldErrors({}); // fresh dialog → no stale errors
     setDialogOpen(true);
   };
 
   const handleEditRecord = useCallback((record: BaptismRecord) => {
     setEditingRecord(record);
-    setFormData(record);
+    setFormData(recordToFormData(record, selectedRecordType));
+    setFieldErrors({}); // clear any leftover errors from a prior dialog session
     setDialogOpen(true);
-  }, []);
+  }, [selectedRecordType]);
 
   const handleViewRecord = useCallback((record: BaptismRecord) => {
     // Find the index of the record in the filtered list for navigation
@@ -447,7 +495,7 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
       setViewingRecordIndex(prevIndex);
       if (viewEditMode === 'edit') {
         setEditingRecord(prevRecord);
-        setFormData(prevRecord);
+        setFormData(recordToFormData(prevRecord, selectedRecordType));
       }
     }
   };
@@ -461,7 +509,7 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
       setViewingRecordIndex(nextIndex);
       if (viewEditMode === 'edit') {
         setEditingRecord(nextRecord);
-        setFormData(nextRecord);
+        setFormData(recordToFormData(nextRecord, selectedRecordType));
       }
     }
   };
@@ -477,8 +525,8 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
   // Edit from View Details dialog — populates form data for in-modal editing
   const handleEditFromView = useCallback((record: BaptismRecord) => {
     setEditingRecord(record);
-    setFormData(record);
-  }, []);
+    setFormData(recordToFormData(record, selectedRecordType));
+  }, [selectedRecordType]);
 
   // Generate Certificate (for baptism and marriage records)
   const handleGenerateCertificate = useCallback(() => {
@@ -581,11 +629,20 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
     highlightSearchMatch, t,
   });
 
+  // Field-level validation errors (per-field messages) for the edit
+  // dialog. useRecordSave runs the validators, populates this on
+  // failure, and clears it before each save attempt.
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
   const handleSaveRecord = useRecordSave({
-    selectedRecordType, selectedChurch, churches, editingRecord, formData,
+    // Pass the effective church (resolves 0 → real church id when only
+    // one parish exists) so save isn't blocked by the implicit
+    // "All Churches" selection. selectedChurch (the literal toggle state)
+    // is preserved everywhere else for UI rendering.
+    selectedRecordType, selectedChurch: effectiveChurchId, churches, editingRecord, formData,
     viewDialogOpen, viewEditMode,
     setLoading, setRecords, setDialogOpen, setViewingRecord, setViewEditMode,
-    showToast, handleRowSelect,
+    showToast, handleRowSelect, setFieldErrors,
   });
 
   // Navigate to Interactive Reports with pre-selected record type
@@ -702,6 +759,31 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
             onCollaborativeReport={handleCollaborativeReport}
             onAdvancedGrid={() => setAdvancedGridOpen(true)}
           />
+
+          {/* Priest filter — narrows the table to records whose clergy
+              column exactly matches the selected priest. priestOptions
+              comes from LookupService.getClergy (one row per distinct
+              clergy value already present in this church's records). */}
+          {priestOptions.length > 0 && (
+            <Box sx={{ mb: 2, px: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Autocomplete
+                size="small"
+                sx={{ minWidth: 280, flex: '0 0 auto' }}
+                options={priestOptions}
+                value={selectedPriest}
+                onChange={(_e, val) => setSelectedPriest(val)}
+                clearOnEscape
+                renderInput={(params) => (
+                  <TextField {...params} label="Filter by priest" placeholder="All priests" />
+                )}
+              />
+              {selectedPriest && (
+                <Typography variant="caption" color="text.secondary">
+                  {filteredAndSortedRecords.length} of {records.length} match
+                </Typography>
+              )}
+            </Box>
+          )}
                 
           {/* Status Information */}
           {selectedRecordType && !loading && totalRecords > 0 && (
@@ -904,10 +986,15 @@ const RecordsPage: React.FC<RecordsPageProps> = ({ defaultRecordType = 'baptism'
               setFormData={setFormData}
               priestOptions={priestOptions}
               churches={churches}
-              selectedChurch={selectedChurch}
+              // Pass the effective church so the dialog's "Church" field
+              // displays the real parish name even when the user is on
+              // the implicit "All Churches" selection (selectedChurch=0).
+              selectedChurch={effectiveChurchId}
               loading={loading}
               onSave={handleSaveRecord}
               isDarkMode={isDarkMode}
+              fieldErrors={fieldErrors}
+              setFieldErrors={setFieldErrors}
             />
             {/* Modern Record Viewer Modal */}
             <ModernRecordViewerModal
