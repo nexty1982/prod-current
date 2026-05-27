@@ -63,7 +63,6 @@ const OMAIDiscoveryPanelMobile = Loadable(lazy(() => import('../features/admin/O
 const LogSearch = Loadable(lazy(() => import('../features/admin/dashboard/LogSearch')));
 const ChurchAdminList = Loadable(lazy(() => import('../features/admin/ChurchAdminList')));
 const ChurchAdminPanel = Loadable(lazy(() => import('../features/admin/ChurchAdminPanelWorking')));
-const EcosystemRoadmapPage = Loadable(lazy(() => import('../features/admin/ecosystem-roadmap/EcosystemRoadmapPage')));
 
 /**
  * All /admin/* route definitions.
@@ -128,5 +127,4 @@ export const adminRoutes = [
   guardedRoute('/admin/log-search', <LogSearch />, ROLE_ADMIN_SUPER),
   protectedRoute('/admin/churches', <ChurchAdminList />, ROLE_ADMIN_SUPER),
   protectedRoute('/admin/church/:id', <ChurchAdminPanel />, ROLE_ADMIN_SUPER),
-  guardedRoute('/admin/ecosystem-roadmap', <EcosystemRoadmapPage />, ROLE_SUPER_ADMIN),
 ];
