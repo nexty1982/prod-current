@@ -20,18 +20,6 @@ function getRecordsPoolForRequest(req) {
   return getChurchPool(churchId);
 }
 
-// Records live in the church-scoped DB (om_church_<id>), not the platform DB.
-// Resolve the right pool from the authenticated user's church_id.
-function getRecordsPoolForRequest(req) {
-  const churchId = req.user && (req.user.church_id || req.user.churchId);
-  if (!churchId) {
-    const err = new Error('No church context on request');
-    err.code = 'NO_CHURCH_CONTEXT';
-    throw err;
-  }
-  return getChurchPool(churchId);
-}
-
 // Certificate output path
 const OUTPUT_DIR = path.join(__dirname, '../certificates');
 if (!fs.existsSync(OUTPUT_DIR)) fs.mkdirSync(OUTPUT_DIR);
