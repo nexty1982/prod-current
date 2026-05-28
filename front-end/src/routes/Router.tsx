@@ -7,6 +7,7 @@ import { lazy, Suspense } from 'react';
 import { createBrowserRouter, Navigate, Outlet } from 'react-router-dom';
 import ProtectedRoute from '../components/auth/ProtectedRoute';
 import AdminErrorBoundary from '../components/ErrorBoundary/AdminErrorBoundary';
+import SmartRedirect from '../components/routing/SmartRedirect';
 import RootGate from '../components/routing/RootGate';
 import Loadable from '../layouts/full/shared/loadable/Loadable';
 
@@ -29,6 +30,7 @@ const ChurchPortalLayout = Loadable(lazy(() => import('../layouts/portal/ChurchP
 
 /* ****Pages***** */
 const ModernDash = Loadable(lazy(() => import('../features/dashboard/ModernDashboard')));
+const EcommerceDash = Loadable(lazy(() => import('../features/dashboard/Ecommerce')));
 
 /* ****Apps***** */
 const Contacts = Loadable(lazy(() => import('../features/apps/contacts/Contacts')));
@@ -96,6 +98,7 @@ const OMLearn = Loadable(lazy(() => import('../features/omlearn/OMLearn')));
 const BigBookDynamicRoute = Loadable(lazy(() => import('../features/admin/BigBookDynamicRoute')));
 
 const Gallery = Loadable(lazy(() => import('../features/devel-tools/om-gallery/Gallery')));
+const TaskWheelPage = Loadable(lazy(() => import('../features/task-wheel/TaskWheelPage')));
 const PageImageIndex = Loadable(lazy(() => import('../features/devel-tools/PageImageIndex')));
 const LiturgicalCalendarPage = Loadable(lazy(() => import('../features/liturgical-calendar/LiturgicalCalendarPage')));
 
@@ -229,6 +232,14 @@ const Router = [
     element: <FullLayout />,
     children: [
       {
+        path: '/task-wheel',
+        element: (
+          <ProtectedRoute requiredRole={["super_admin"]}>
+            <TaskWheelPage />
+          </ProtectedRoute>
+        )
+      },
+      {
         path: '/dashboards/modern',
         exact: true,
         element: (
@@ -239,6 +250,16 @@ const Router = [
           </ProtectedRoute>
         )
       },
+      {
+        path: '/dashboards/ecommerce',
+        exact: true,
+        element: (
+          <ProtectedRoute requiredPermission="view_dashboard">
+            <EcommerceDash />
+          </ProtectedRoute>
+        )
+      },
+
       // Apps
       {
         path: '/apps/contacts',
@@ -906,8 +927,8 @@ const Router = [
       // Public "Get Started" entry — same Register inquiry wizard.
       // /auth/register stays as an alias for admin-issued registration-token links.
       { path: '/get-started', element: <Register /> },
-      { path: '/landingpage', element: <Navigate to="/account/profile" replace /> },
-      { path: '/pages/pricing', element: <Navigate to="/account/profile" replace /> },
+      { path: '/landingpage', element: <Navigate to="/task-wheel" replace /> },
+      { path: '/pages/pricing', element: <Navigate to="/task-wheel" replace /> },
       { path: '/pages/faq', element: <Faq /> },
       { path: '/frontend-pages/faq', element: <Faq /> },
       { path: '/frontend-pages/menu', element: <PagesMenu /> },
@@ -934,6 +955,15 @@ const Router = [
           { path: '/privacy', element: <Privacy /> },
           { path: '/terms', element: <Terms /> },
           { path: '/security', element: <Security /> },
+          // OM-Workshop Website-workspace canonical routes — these are the
+          // page_key → preview_route mappings the workshop iframes into.
+          // Aliases of the existing pages so a future content edit lands in
+          // one place.
+          { path: '/', element: <Homepage /> },
+          { path: '/platform-tour', element: <Tour /> },
+          { path: '/sample-records', element: <Samples /> },
+          { path: '/pricing', element: <PagePricing /> },
+          { path: '/contact', element: <Contact /> },
         ],
       },
       // Enrollment wizard brings its own header/footer chrome — keep it
