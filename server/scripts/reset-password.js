@@ -13,9 +13,9 @@ const bcrypt = require('bcrypt');
 const mysql = require('mysql2/promise');
 
 const dbConfig = {
-  host: process.env.DB_HOST || 'localhost',
+  host: process.env.DB_HOST || '192.168.1.241',
   user: process.env.DB_USER || 'orthodoxapps',
-  password: process.env.DB_PASSWORD || 'Summerof1982@!',
+  password: process.env.DB_PASSWORD || ':mLvah6+u6+qFWeR4^,T',
   database: 'orthodoxmetrics_db',
   connectTimeout: 10000,
 };
