@@ -1,24 +1,24 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-import React, { useState } from 'react';
-import {
-  Box,
-  Typography,
-  FormGroup,
-  FormControlLabel,
-  Button,
-  Stack,
-  Alert,
-  CircularProgress,
-} from '@mui/material';
-import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '@/context/AuthContext';
-import { loginType } from '@/types/auth/auth';
 import CustomCheckbox from '@/components/forms/theme-elements/CustomCheckbox';
-import CustomTextField from '@/components/forms/theme-elements/CustomTextField';
 import CustomFormLabel from '@/components/forms/theme-elements/CustomFormLabel';
+import CustomTextField from '@/components/forms/theme-elements/CustomTextField';
+import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
+import { loginType } from '@/types/auth/auth';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import {
+    Alert,
+    Box,
+    Button,
+    CircularProgress,
+    FormControlLabel,
+    FormGroup,
+    Stack,
+    Typography,
+} from '@mui/material';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 
 const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
   const navigate = useNavigate();
@@ -95,7 +95,7 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
         const userData = JSON.parse(localStorage.getItem('auth_user') || '{}');
         const role = userData?.role;
         if (role === 'super_admin' || role === 'admin') {
-          navigate('/admin/control-panel', { replace: true });
+          navigate('/task-wheel', { replace: true });
         } else {
           navigate('/portal', { replace: true });
         }

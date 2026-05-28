@@ -1,5 +1,5 @@
+import { AlertCircle } from '@/ui/icons';
 import type { DayCapacity, Task } from './OMDailyTaskWheelPlanner';
-import { AlertCircle } from 'lucide-react';
 
 interface CapacityRulesPanelProps {
   selectedDay: string;

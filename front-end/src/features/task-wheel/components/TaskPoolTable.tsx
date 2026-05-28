@@ -1,6 +1,6 @@
+import { Filter, Search } from '@/ui/icons';
 import { useState } from 'react';
-import type { Task, DifficultyMix } from './OMDailyTaskWheelPlanner';
-import { Filter, Search } from 'lucide-react';
+import type { DifficultyMix, Task } from './OMDailyTaskWheelPlanner';
 
 interface TaskPoolTableProps {
   availableTasks: Task[];

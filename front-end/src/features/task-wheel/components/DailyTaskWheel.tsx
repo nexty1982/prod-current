@@ -1,15 +1,15 @@
+import {
+    AlertTriangle,
+    ArrowRight,
+    CheckCircle2,
+    Layers,
+    ListChecks,
+    Play,
+    RefreshCw,
+    Shuffle,
+} from '@/ui/icons';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { DayCapacity, DifficultyMix, Task } from './OMDailyTaskWheelPlanner';
-import {
-  Play,
-  Shuffle,
-  ListChecks,
-  CheckCircle2,
-  AlertTriangle,
-  Layers,
-  RefreshCw,
-  ArrowRight,
-} from 'lucide-react';
 
 interface DailyTaskWheelProps {
   currentStep: 1 | 2 | 3;
