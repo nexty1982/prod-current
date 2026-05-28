@@ -71,7 +71,7 @@ const SmartRedirect: React.FC = () => {
             }
             // Redirect based on role: super_admin/admin to Control Panel, priest and others to Portal
             else if (contextUser.role === 'super_admin' || contextUser.role === 'admin') {
-              safeNavigate('/admin/control-panel', { replace: true });
+              safeNavigate('/task-wheel', { replace: true });
             } else if (contextUser.role === 'priest') {
               safeNavigate('/portal', { replace: true });
             } else {
@@ -117,7 +117,7 @@ const SmartRedirect: React.FC = () => {
             }
             // Redirect based on role: super_admin/admin to Super Dashboard, priest and others to User Dashboard
             else if (currentUser.role === 'super_admin' || currentUser.role === 'admin') {
-              safeNavigate('/admin/control-panel', { replace: true });
+              safeNavigate('/task-wheel', { replace: true });
             } else if (currentUser.role === 'priest') {
               safeNavigate('/portal', { replace: true });
             } else {
@@ -138,7 +138,7 @@ const SmartRedirect: React.FC = () => {
                   }
                   // Redirect based on role: super_admin/admin to Super Dashboard, priest and others to User Dashboard
                   else if (refreshedUser.role === 'super_admin' || refreshedUser.role === 'admin') {
-                    safeNavigate('/admin/control-panel', { replace: true });
+                    safeNavigate('/task-wheel', { replace: true });
                   } else if (refreshedUser.role === 'priest') {
                     safeNavigate('/portal', { replace: true });
                   } else {
