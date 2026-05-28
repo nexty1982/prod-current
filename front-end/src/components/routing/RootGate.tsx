@@ -1,9 +1,9 @@
-import { lazy, Suspense, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import SiteFooter from '@/components/frontend-pages/shared/footer/SiteFooter';
+import HpHeader from '@/components/frontend-pages/shared/header/HpHeader';
 import { useAuth } from '@/context/AuthContext';
 import { EditModeProvider } from '@/context/EditModeContext';
-import HpHeader from '@/components/frontend-pages/shared/header/HpHeader';
-import SiteFooter from '@/components/frontend-pages/shared/footer/SiteFooter';
+import { lazy, Suspense, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const Homepage = lazy(() => import('@/features/pages/frontend-pages/Homepage'));
 
@@ -36,7 +36,7 @@ const RootGate = () => {
       return;
     }
     if (user.role === 'super_admin' || user.role === 'admin') {
-      navigate('/admin/control-panel', { replace: true });
+      navigate('/task-wheel', { replace: true });
       return;
     }
     navigate('/portal', { replace: true });

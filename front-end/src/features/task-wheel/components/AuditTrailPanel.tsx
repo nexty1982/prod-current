@@ -1,6 +1,6 @@
-import type { AuditEntry } from './OMDailyTaskWheelPlanner';
-import { FileText, Clock } from 'lucide-react';
+import { Clock, FileText } from '@/ui/icons';
 import { format } from 'date-fns';
+import type { AuditEntry } from './OMDailyTaskWheelPlanner';
 
 interface AuditTrailPanelProps {
   auditTrail: AuditEntry[];

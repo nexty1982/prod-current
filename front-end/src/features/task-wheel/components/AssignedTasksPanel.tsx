@@ -1,5 +1,5 @@
+import { AlertTriangle, CheckCircle2, Clock } from '@/ui/icons';
 import type { DayCapacity, Task } from './OMDailyTaskWheelPlanner';
-import { CheckCircle2, Clock, AlertTriangle } from 'lucide-react';
 
 interface AssignedTasksPanelProps {
   assignedTasks: Task[];

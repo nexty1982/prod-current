@@ -47,8 +47,7 @@ export {
     FileSearch, FileText, FileX, Filter, Fish,
     Flame, Folder,
     FolderOpen, GitBranch,
-    GitCompare, Globe, Grid, HardDrive, Heart, HelpCircle, History, Home, Info, LayoutGrid,
-    LayoutList, Link2, List, Loader2,
+    GitCompare, Globe, Grid, HardDrive, Heart, HelpCircle, History, Home, Info, Layers, LayoutGrid, LayoutList, Link2, List, ListChecks, Loader2,
     // Security — DANGEROUS NAMES (collide with browser globals)
     Lock,
     // Communication
@@ -61,7 +60,7 @@ export {
     // UI / Layout
     Search, Settings, Share2, Shield,
     // Records Management
-    ShieldCheck, ShieldOff, SortAsc,
+    ShieldCheck, ShieldOff, Shuffle, SortAsc,
     SortDesc, Star, Table, Table2,
     TableProperties, Trash2, TrendingUp, Unlock, Upload, User, User2,
     // Users / People
