@@ -225,11 +225,40 @@ function samplePreviewValue(field: FieldDef, row: number): string {
 
 // ── Component ───────────────────────────────────────────────────
 
-/** Shape of mapping config stored in parish_settings */
+/** Legacy single-config shape (pre per-type storage). */
 interface MappingConfig {
   selectedRecord?: string;
   fields?: FieldDef[];
   defaultSort?: string;
+}
+
+/** Field mapping persisted for one record type. */
+interface TypeMapping {
+  fields?: FieldDef[];
+  defaultSort?: string;
+}
+
+/**
+ * The 'mapping' parish-settings category — stored per record type so each type
+ * keeps its own column layout. `config` is the legacy single-type blob, read as
+ * a fallback for whichever type it was last saved under.
+ */
+interface MappingSettings {
+  baptism?: TypeMapping;
+  marriage?: TypeMapping;
+  funeral?: TypeMapping;
+  config?: MappingConfig;
+}
+
+/** Resolve the saved mapping for a record type (per-type key, else legacy). */
+function savedMappingForType(s: MappingSettings | undefined, type: string): TypeMapping | undefined {
+  if (!s) return undefined;
+  const direct = (s as Record<string, TypeMapping | undefined>)[type];
+  if (direct && Array.isArray(direct.fields)) return direct;
+  if (s.config && s.config.selectedRecord === type && Array.isArray(s.config.fields)) {
+    return { fields: s.config.fields, defaultSort: s.config.defaultSort };
+  }
+  return undefined;
 }
 
 const DatabaseMappingPage: React.FC = () => {
@@ -239,7 +268,7 @@ const DatabaseMappingPage: React.FC = () => {
   const isDark = theme.palette.mode === 'dark';
 
   // ── Persistence via parish settings API ─────────────────────
-  const { data: savedSettings, loading: settingsLoading, saving, error: settingsError, save: saveSettings } = useParishSettings<{ config?: MappingConfig }>('mapping');
+  const { data: savedSettings, loading: settingsLoading, saving, error: settingsError, patch: patchSettings } = useParishSettings<MappingSettings>('mapping');
 
   const currentStepIndex = useMemo(() => {
     if (!step) return 0;
@@ -286,18 +315,18 @@ const DatabaseMappingPage: React.FC = () => {
       setColumnsLoading(true);
       setColumnsError(null);
       try {
-        const cfg = savedSettings?.config;
-        const type = cfg?.selectedRecord || 'baptism';
+        const type = savedSettings?.config?.selectedRecord || 'baptism';
+        const saved = savedMappingForType(savedSettings, type);
         const cols = await fetchColumns(type);
         if (cancelled) return;
-        const merged = mergeSavedFields(buildFieldsFromColumns(type, cols), cfg?.fields);
+        const merged = mergeSavedFields(buildFieldsFromColumns(type, cols), saved?.fields);
         const validCols = new Set(merged.map((f) => f.column));
         initializedRef.current = true;
         setSelectedRecord(type);
         setFields(merged);
         setDefaultSort(
-          cfg?.defaultSort && validCols.has(cfg.defaultSort)
-            ? cfg.defaultSort
+          saved?.defaultSort && validCols.has(saved.defaultSort)
+            ? saved.defaultSort
             : firstSortableColumn(merged),
         );
       } catch (err: any) {
@@ -326,12 +355,12 @@ const DatabaseMappingPage: React.FC = () => {
     setColumnsError(null);
     try {
       const cols = await fetchColumns(newType);
-      const cfg = savedSettings?.config;
+      const saved = savedMappingForType(savedSettings, newType);
       const base = buildFieldsFromColumns(newType, cols);
-      const merged = cfg?.selectedRecord === newType ? mergeSavedFields(base, cfg?.fields) : base;
+      const merged = mergeSavedFields(base, saved?.fields);
       const validCols = new Set(merged.map((f) => f.column));
       setFields(merged);
-      setDefaultSort((prev) => (validCols.has(prev) ? prev : firstSortableColumn(merged)));
+      setDefaultSort(saved?.defaultSort && validCols.has(saved.defaultSort) ? saved.defaultSort : firstSortableColumn(merged));
       markDirty();
     } catch (err: any) {
       setColumnsError(err?.message || 'Failed to load database columns');
@@ -346,8 +375,8 @@ const DatabaseMappingPage: React.FC = () => {
   };
 
   const handleSave = async () => {
-    const config: MappingConfig = { selectedRecord, fields, defaultSort };
-    const ok = await saveSettings({ config });
+    // Persist under this record type's key so other types keep their layouts.
+    const ok = await patchSettings({ [selectedRecord]: { fields, defaultSort } } as Partial<MappingSettings>);
     if (ok) {
       setDirty(false);
       showSnackbar('Configuration saved successfully', 'success');

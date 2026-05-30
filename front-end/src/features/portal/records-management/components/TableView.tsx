@@ -21,6 +21,7 @@ const THEME_COLORS: Record<string, { main: string; dark: string }> = {
 interface Props {
   records: AnyRecord[];
   recordType: RecordType;
+  fieldConfig?: { column: string; displayName: string; sortable: boolean }[];
   highlight?: string;
   density: Density;
   standard: boolean;
@@ -84,7 +85,34 @@ function makeDateComparator(rawField: string) {
   };
 }
 
-export function TableView({ records, recordType, highlight, density, standard, visibleCols, onOpen, onEdit, onAudit, onExport, onCertificate }: Props) {
+// DB date columns per record type — used to format + date-sort config-driven columns.
+const DATE_COLUMNS_BY_TYPE: Record<RecordType, string[]> = {
+  baptism: ["birth_date", "reception_date"],
+  marriage: ["mdate"],
+  funeral: ["deceased_date", "burial_date"],
+};
+
+// Format a raw DB date value ("YYYY-MM-DD" / ISO) for display.
+function formatCellDate(v: unknown): string {
+  if (v === null || v === undefined || v === "") return "—";
+  const t = new Date(v as string);
+  if (isNaN(t.getTime())) return String(v);
+  return t.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+}
+
+// Date comparator for a config-driven column, reading the raw value off the row.
+function makeRawDateComparator(column: string) {
+  return (_a: unknown, _b: unknown, nodeA: any, nodeB: any, isDescending: boolean): number => {
+    const ta = parseTs(nodeA?.data?.raw?.[column]);
+    const tb = parseTs(nodeB?.data?.raw?.[column]);
+    if (ta === null && tb === null) return 0;
+    if (ta === null) return isDescending ? -1 : 1;
+    if (tb === null) return isDescending ? 1 : -1;
+    return ta - tb;
+  };
+}
+
+export function TableView({ records, recordType, fieldConfig, highlight, density, standard, visibleCols, onOpen, onEdit, onAudit, onExport, onCertificate }: Props) {
   const { activeTheme } = useContext(CustomizerContext);
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
   const [menuRecord, setMenuRecord] = useState<AnyRecord | null>(null);
@@ -147,18 +175,43 @@ export function TableView({ records, recordType, highlight, density, standard, v
   }, []);
 
   const columnDefs = useMemo((): ColDef[] => {
-    const defs = COL_DEFS[recordType];
-    const cols: ColDef[] = defs
-      .filter((d) => visibleCols[d.headerName] ?? true)
-      .map((d) => ({
-        field: d.field,
-        headerName: d.headerName,
-        flex: 1,
-        minWidth: 120,
-        sortable: true,
-        filter: false,
-        ...(d.rawField ? { comparator: makeDateComparator(d.rawField) } : {}),
-      }));
+    let cols: ColDef[];
+    if (fieldConfig && fieldConfig.length > 0) {
+      // Config-driven: one column per field the user marked visible in the
+      // Database Mapping wizard, reading values straight from the raw DB row.
+      const dateCols = DATE_COLUMNS_BY_TYPE[recordType];
+      cols = fieldConfig
+        .filter((d) => visibleCols[d.displayName] ?? true)
+        .map((d) => {
+          const isDate = dateCols.includes(d.column);
+          return {
+            colId: d.column,
+            headerName: d.displayName,
+            flex: 1,
+            minWidth: 120,
+            sortable: d.sortable,
+            filter: false,
+            valueGetter: (p: any) => {
+              const v = p.data?.raw?.[d.column];
+              return isDate ? formatCellDate(v) : (v === null || v === undefined || v === "" ? "—" : String(v));
+            },
+            ...(isDate ? { comparator: makeRawDateComparator(d.column) } : {}),
+          } as ColDef;
+        });
+    } else {
+      const defs = COL_DEFS[recordType];
+      cols = defs
+        .filter((d) => visibleCols[d.headerName] ?? true)
+        .map((d) => ({
+          field: d.field,
+          headerName: d.headerName,
+          flex: 1,
+          minWidth: 120,
+          sortable: true,
+          filter: false,
+          ...(d.rawField ? { comparator: makeDateComparator(d.rawField) } : {}),
+        }));
+    }
 
     cols.push({
       headerName: "Status",
@@ -182,7 +235,7 @@ export function TableView({ records, recordType, highlight, density, standard, v
     });
 
     return cols;
-  }, [recordType, visibleCols, statusRenderer, actionsRenderer]);
+  }, [recordType, fieldConfig, visibleCols, statusRenderer, actionsRenderer]);
 
   const defaultColDef = useMemo((): ColDef => ({
     resizable: true,

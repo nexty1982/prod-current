@@ -31,6 +31,27 @@ const DEFAULT_SORT_BY_TYPE: Record<RecordType, string> = {
   funeral: "deceased_date",
 };
 
+// Field mapping persisted per record type by the Database Mapping wizard.
+interface MappingFieldDef { column: string; displayName: string; visible?: boolean; sortable?: boolean }
+interface MappingTypeConfig { fields?: MappingFieldDef[]; defaultSort?: string }
+interface MappingSettings {
+  baptism?: MappingTypeConfig;
+  marriage?: MappingTypeConfig;
+  funeral?: MappingTypeConfig;
+  config?: { selectedRecord?: string; fields?: MappingFieldDef[]; defaultSort?: string };
+}
+
+/** Resolve the saved mapping for a record type (per-type key, else legacy blob). */
+function mappingForType(s: MappingSettings | undefined, type: RecordType): MappingTypeConfig | undefined {
+  if (!s) return undefined;
+  const direct = (s as Record<string, MappingTypeConfig | undefined>)[type];
+  if (direct && Array.isArray(direct.fields)) return direct;
+  if (s.config && s.config.selectedRecord === type && Array.isArray(s.config.fields)) {
+    return { fields: s.config.fields, defaultSort: s.config.defaultSort };
+  }
+  return undefined;
+}
+
 function formatDate(d: string | null | undefined): string {
   if (!d) return "—";
   try {
@@ -54,6 +75,7 @@ function mapBaptismRecords(rows: any[], churchName: string): AnyRecord[] {
     address: r.address || r.birthplace || "—",
     clergy: r.clergy || r.priest || r.priest_name || "—",
     status: r.status || "Recorded",
+    raw: r,
   }));
 }
 
@@ -69,6 +91,7 @@ function mapMarriageRecords(rows: any[], churchName: string): AnyRecord[] {
     celebrant: r.clergy || r.priest || r.priest_name || "—",
     witnesses: r.witness || r.witnesses || "—",
     status: r.status || "Recorded",
+    raw: r,
   }));
 }
 
@@ -85,6 +108,7 @@ function mapFuneralRecords(rows: any[], churchName: string): AnyRecord[] {
     burialPlace: r.burial_location || r.burialLocation || "—",
     clergy: r.clergy || r.priest || r.priest_name || "—",
     status: r.status || "Recorded",
+    raw: r,
   }));
 }
 
@@ -117,21 +141,22 @@ const RecordsManagement: React.FC = () => {
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
   const [useDefaultSort, setUseDefaultSort] = useState(true);
 
-  // Load the church's mapping config to get the user-defined default sort field.
-  // The mapping config holds ONE record type's settings (selectedRecord +
-  // defaultSort), so it only applies when the user is viewing that same type.
-  const { data: mappingSettings } = useParishSettings<{ config?: { defaultSort?: string; selectedRecord?: string } }>('mapping');
-  const configDefaultSort = mappingSettings?.config?.defaultSort;
-  const configSelectedRecord = mappingSettings?.config?.selectedRecord;
+  // Load the church's per-type field mapping (visible columns, display names,
+  // default sort) saved by the Database Mapping wizard.
+  const { data: mappingSettings } = useParishSettings<MappingSettings>('mapping');
+  const typeMapping = mappingForType(mappingSettings, recordType);
 
-  // Sensible default sort per record type (primary date, newest first) — used
-  // for any type the saved mapping config doesn't cover. Without this, switching
-  // to marriage/funeral kept the baptism default field, which is invalid for
-  // those tables and made the backend silently fall back to sorting by id.
-  const effectiveDefaultSort =
-    configSelectedRecord === recordType && configDefaultSort
-      ? configDefaultSort
-      : DEFAULT_SORT_BY_TYPE[recordType];
+  // Columns the user marked visible in the wizard for this record type. When
+  // present, these drive the records table; otherwise it falls back to defaults.
+  const fieldConfig = useMemo(
+    () => (typeMapping?.fields || [])
+      .filter((f) => f.visible)
+      .map((f) => ({ column: f.column, displayName: f.displayName, sortable: f.sortable !== false })),
+    [typeMapping],
+  );
+
+  // Default sort: the configured type's default if set, else the type's date.
+  const effectiveDefaultSort = typeMapping?.defaultSort || DEFAULT_SORT_BY_TYPE[recordType];
 
   // When default sort is toggled ON, apply this record type's default sort field.
   useEffect(() => {
@@ -234,7 +259,9 @@ const RecordsManagement: React.FC = () => {
   }
 
   const editRecord = editIdx !== null ? filtered[editIdx] ?? null : null;
-  const cols = COL_KEYS_BY_TYPE[recordType];
+  // Column-toggle list: the configured visible columns (by display name) when a
+  // mapping exists, else the built-in default set.
+  const cols = fieldConfig.length > 0 ? fieldConfig.map((f) => f.displayName) : COL_KEYS_BY_TYPE[recordType];
 
   return (
     <div className="rm-scope">
@@ -284,6 +311,7 @@ const RecordsManagement: React.FC = () => {
               <TableView
                 records={filtered}
                 recordType={recordType}
+                fieldConfig={fieldConfig}
                 highlight={search}
                 density={density}
                 standard={standardTable}

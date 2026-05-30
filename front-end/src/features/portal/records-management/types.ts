@@ -18,6 +18,8 @@ export interface BaptismRecord {
   address: string;
   clergy: string;
   status: RecordStatus;
+  /** The raw DB row, keyed by column name — used to render config-driven columns. */
+  raw?: Record<string, any>;
 }
 
 export interface MarriageRecord {
@@ -31,6 +33,8 @@ export interface MarriageRecord {
   celebrant: string;
   witnesses: string;
   status: RecordStatus;
+  /** The raw DB row, keyed by column name — used to render config-driven columns. */
+  raw?: Record<string, any>;
 }
 
 export interface FuneralRecord {
@@ -45,6 +49,8 @@ export interface FuneralRecord {
   burialPlace: string;
   clergy: string;
   status: RecordStatus;
+  /** The raw DB row, keyed by column name — used to render config-driven columns. */
+  raw?: Record<string, any>;
 }
 
 export type AnyRecord = BaptismRecord | MarriageRecord | FuneralRecord;
