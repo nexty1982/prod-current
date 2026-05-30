@@ -22,6 +22,8 @@ const writeSacramentHistoryModule = safeRequire(
 );
 
 const { writeSacramentHistory, generateRequestId } = writeSacramentHistoryModule;
+const { buildRecordSearch } = require('../utils/recordSearch');
+const { readSacramentHistory } = require('../utils/readSacramentHistory');
 const router = express.Router();
 
 /**
@@ -116,11 +118,27 @@ async function getChurchDatabaseName(churchId) {
 
 // Test endpoint to verify API is working
 	router.get('/test', (req, res) => {
-    	res.json({ 
-        message: 'Funeral API is working', 
+    	res.json({
+        message: 'Funeral API is working',
         timestamp: new Date().toISOString(),
-        headers: req.headers 
+        headers: req.headers
     });
+});
+
+// GET /api/funeral-records/:id/history — audit trail from funeral_history
+router.get('/:id/history', requireAuth, async (req, res) => {
+    try {
+        const churchId = req.query.church_id || req.session?.user?.church_id || req.user?.church_id || null;
+        const churchInfo = await getChurchInfo(churchId);
+        if (!churchInfo || !churchInfo.databaseName) {
+            return res.status(404).json({ success: false, error: 'Church not found' });
+        }
+        const history = await readSacramentHistory(churchInfo.databaseName, 'funeral_history', req.params.id);
+        res.json({ success: true, history });
+    } catch (err) {
+        console.error('❌ Error fetching funeral record history:', err);
+        res.status(500).json({ success: false, error: 'Failed to fetch record history' });
+    }
 });
 
 // GET /api/funeral-records - Require authentication
@@ -158,19 +176,18 @@ async function getChurchDatabaseName(churchId) {
             console.log(`🏛️ Filtering funeral records by church_id: ${church_id}`);
         }
 
-        // Add search functionality
+        // Add search functionality — field-qualified (clergy:x, year:2011, age:72),
+        // year/date matching, and multi-term AND. See utils/recordSearch.js.
+        let searchEngaged = false;
         if (isSearchActive) {
-            const searchCondition = `(name LIKE ? 
-                OR lastname LIKE ? 
-                OR clergy LIKE ? 
-                OR burial_location LIKE ?)`;
-            const searchParam = `%${search.trim()}%`;
-            
-            whereConditions.push(searchCondition);
-            
-            queryParams.push(searchParam, searchParam, searchParam, searchParam);
-            countParams.push(searchParam, searchParam, searchParam, searchParam);
-            console.log(`🔍 Searching funeral records for: "${search.trim()}"`);
+            const parsed = buildRecordSearch(search, 'funeral');
+            if (parsed.where) {
+                whereConditions.push(parsed.where);
+                queryParams.push(...parsed.params);
+                countParams.push(...parsed.params);
+                searchEngaged = true;
+                console.log(`🔍 Searching funeral records for: "${search.trim()}"`);
+            }
         }
         
         // Build WHERE clause
@@ -186,7 +203,7 @@ async function getChurchDatabaseName(churchId) {
         let mainQueryParams;
         const pageOffset = (parseInt(page) - 1) * parseInt(limit);
 
-        if (isSearchActive) {
+        if (searchEngaged) {
             const searchRaw = search.trim();
 
             // Tiered relevance: exact → prefix → contains (per field, highest tier wins)
@@ -526,6 +543,54 @@ async function getChurchInfo(churchIdFromRequest) {
     } catch (err) {
         console.error('update funeral-record error:', err);
         res.status(500).json({ error: 'Could not update funeral record' });
+    }
+});
+
+// PATCH /api/funeral-records/:id/status — change record status (+ verification)
+router.patch('/:id/status', requireAuth, async (req, res) => {
+    try {
+        const VALID_STATUSES = ['Recorded', 'Verified', 'Awaiting Clergy'];
+        const id = req.params.id;
+        const { status } = req.body || {};
+        if (!VALID_STATUSES.includes(status)) {
+            return res.status(400).json({ error: `Invalid status. Must be one of: ${VALID_STATUSES.join(', ')}` });
+        }
+        const church_id = req.body.church_id || req.query.church_id || req.user?.church_id || null;
+        const churchInfo = await getChurchInfo(church_id);
+        const churchDbPool = await getChurchDbConnection(churchInfo.databaseName);
+
+        const [beforeRows] = await churchDbPool.query('SELECT * FROM funeral_records WHERE id = ?', [id]);
+        if (beforeRows.length === 0) return res.status(404).json({ error: 'Record not found' });
+        const beforeRecord = beforeRows[0];
+
+        const verifying = status === 'Verified';
+        await churchDbPool.query(
+            'UPDATE funeral_records SET status = ?, verified_by = ?, verified_at = ? WHERE id = ?',
+            [status, verifying ? (req.user?.id || null) : null, verifying ? new Date() : null, id]
+        );
+
+        const [afterRows] = await churchDbPool.query('SELECT * FROM funeral_records WHERE id = ?', [id]);
+        const afterRecord = afterRows[0];
+
+        await writeSacramentHistory({
+            historyTableName: 'funeral_history',
+            churchId: churchInfo.churchId,
+            recordId: parseInt(id),
+            type: 'update',
+            description: `Status changed to "${status}" for funeral record ${id}`,
+            before: beforeRecord,
+            after: afterRecord,
+            actorUserId: req.user?.id || null,
+            source: 'ui',
+            requestId: req.requestId || generateRequestId(),
+            ipAddress: req.ip || null,
+            databaseName: churchInfo.databaseName
+        });
+
+        res.json({ success: true, id: parseInt(id), status, verified_at: afterRecord.verified_at, verified_by: afterRecord.verified_by });
+    } catch (err) {
+        console.error('update funeral status error:', err);
+        res.status(500).json({ error: 'Could not update record status' });
     }
 });
 

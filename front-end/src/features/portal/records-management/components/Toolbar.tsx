@@ -103,7 +103,7 @@ export function Toolbar({ view, onView, search, onSearch, searchLoading, setDebo
                 setDebouncedSearch(search);
               }
             }}
-            placeholder="Search by name, record #, date, clergy..."
+            placeholder="Search — try a name, 2011, clergy:nicholas, year:2011…"
             className="w-full pl-9 pr-16 py-2 rounded-md border border-[var(--rm-border)] bg-[var(--rm-card)] text-sm text-[var(--rm-fg)] outline-none focus:border-[var(--rm-accent)] focus:ring-2 focus:ring-[var(--rm-accent-soft)] transition-all"
           />
           <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">

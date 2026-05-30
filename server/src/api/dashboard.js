@@ -19,17 +19,17 @@ router.get('/summary/:churchId', requireAuth, async (req, res) => {
     
     // Get real record counts
     const [baptisms] = await getAppPool().query(
-      'SELECT COUNT(*) as count FROM baptism_records WHERE church_id = ? AND status = "active"',
+      'SELECT COUNT(*) as count FROM baptism_records WHERE church_id = ?',
       [churchId]
     );
     
     const [marriages] = await getAppPool().query(
-      'SELECT COUNT(*) as count FROM marriage_records WHERE church_id = ? AND status = "active"',
+      'SELECT COUNT(*) as count FROM marriage_records WHERE church_id = ?',
       [churchId]
     );
     
     const [funerals] = await getAppPool().query(
-      'SELECT COUNT(*) as count FROM funeral_records WHERE church_id = ? AND status = "active"',
+      'SELECT COUNT(*) as count FROM funeral_records WHERE church_id = ?',
       [churchId]
     );
     

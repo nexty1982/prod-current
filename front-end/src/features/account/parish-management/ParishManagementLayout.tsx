@@ -31,6 +31,8 @@ interface NavItem {
   labelKey: string;
   path: string;
   icon: React.ReactNode;
+  /** When true, the item is kept in config but not shown in the sidebar. */
+  hidden?: boolean;
 }
 
 interface NavGroup {
@@ -40,33 +42,36 @@ interface NavGroup {
 
 const BASE = '/account/parish-management';
 
+// Per product decision (2026-05-30) only Database Mapping is exposed in the
+// Parish Management sidebar. Every other item is marked `hidden` rather than
+// deleted, so the full menu can be restored by flipping the flags back.
 const NAV_GROUPS: NavGroup[] = [
   {
     sectionKey: 'parish.overview',
     items: [
-      { labelKey: 'parish.parish_dashboard', path: `${BASE}`, icon: <DashboardOutlinedIcon fontSize="small" /> },
+      { labelKey: 'parish.parish_dashboard', path: `${BASE}`, icon: <DashboardOutlinedIcon fontSize="small" />, hidden: true },
     ],
   },
   {
     sectionKey: 'parish.data_configuration',
     items: [
       { labelKey: 'parish.database_mapping', path: `${BASE}/database-mapping`, icon: <StorageOutlinedIcon fontSize="small" /> },
-      { labelKey: 'parish.record_settings', path: `${BASE}/record-settings`, icon: <DescriptionOutlinedIcon fontSize="small" /> },
+      { labelKey: 'parish.record_settings', path: `${BASE}/record-settings`, icon: <DescriptionOutlinedIcon fontSize="small" />, hidden: true },
     ],
   },
   {
     sectionKey: 'parish.appearance',
     items: [
-      { labelKey: 'parish.landing_page_branding', path: `${BASE}/landing-page-branding`, icon: <BrushOutlinedIcon fontSize="small" /> },
-      { labelKey: 'parish.theme_studio', path: `${BASE}/theme-studio`, icon: <PaletteOutlinedIcon fontSize="small" /> },
-      { labelKey: 'parish.ui_theme', path: `${BASE}/ui-theme`, icon: <TuneOutlinedIcon fontSize="small" /> },
+      { labelKey: 'parish.landing_page_branding', path: `${BASE}/landing-page-branding`, icon: <BrushOutlinedIcon fontSize="small" />, hidden: true },
+      { labelKey: 'parish.theme_studio', path: `${BASE}/theme-studio`, icon: <PaletteOutlinedIcon fontSize="small" />, hidden: true },
+      { labelKey: 'parish.ui_theme', path: `${BASE}/ui-theme`, icon: <TuneOutlinedIcon fontSize="small" />, hidden: true },
     ],
   },
   {
     sectionKey: 'parish.advanced',
     items: [
-      { labelKey: 'parish.search_configuration', path: `${BASE}/search-configuration`, icon: <SearchOutlinedIcon fontSize="small" /> },
-      { labelKey: 'parish.system_behavior', path: `${BASE}/system-behavior`, icon: <SettingsOutlinedIcon fontSize="small" /> },
+      { labelKey: 'parish.search_configuration', path: `${BASE}/search-configuration`, icon: <SearchOutlinedIcon fontSize="small" />, hidden: true },
+      { labelKey: 'parish.system_behavior', path: `${BASE}/system-behavior`, icon: <SettingsOutlinedIcon fontSize="small" />, hidden: true },
     ],
   },
 ];
@@ -105,7 +110,10 @@ const ParishManagementLayout: React.FC = () => {
           borderRadius: 2,
         }}
       >
-        {NAV_GROUPS.map((group) => (
+        {NAV_GROUPS.map((group) => {
+          const items = group.items.filter((item) => !item.hidden);
+          if (items.length === 0) return null;
+          return (
           <Box key={group.sectionKey} sx={{ mb: 2 }}>
             <Typography
               variant="subtitle2"
@@ -123,7 +131,7 @@ const ParishManagementLayout: React.FC = () => {
               {t(group.sectionKey)}
             </Typography>
             <List disablePadding>
-              {group.items.map((item) => {
+              {items.map((item) => {
                 const active = isActive(item.path);
                 return (
                   <ListItemButton
@@ -180,7 +188,8 @@ const ParishManagementLayout: React.FC = () => {
               })}
             </List>
           </Box>
-        ))}
+          );
+        })}
       </Paper>
 
       {/* Content */}
