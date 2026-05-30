@@ -1,11 +1,10 @@
+import SiteFooter from '@/components/frontend-pages/shared/footer/SiteFooter';
 import {
     ArrowRight,
     ClipboardCheck,
     Cpu,
     FileSignature,
     Lock,
-    Mail,
-    Phone,
     ShieldCheck,
     UploadCloud
 } from "lucide-react";
@@ -26,7 +25,7 @@ export function Landing({ onStart, onAdmin, theme, onToggleTheme }: Props) {
     <div className="min-h-screen bg-background text-foreground">
       <header className="border-b border-border bg-card/60 backdrop-blur sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <img src="/images/misc/enroll-header.png" alt="Orthodox Metrics" className="h-10 w-auto object-contain" />
+          <img src="/images/logos/logo-top.svg" alt="Orthodox Metrics" className="h-10 w-auto object-contain" />
           <div className="flex items-center gap-2">
             <Button variant="ghost" onClick={() => { window.location.href = '/auth/login'; }}>Sign In</Button>
             <Button onClick={onStart} className="bg-[#3a1d6e] hover:bg-[#2a1450] text-white">
@@ -69,7 +68,7 @@ export function Landing({ onStart, onAdmin, theme, onToggleTheme }: Props) {
               >
                 Start Church Setup <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
-              <Button size="lg" variant="outline">
+              <Button size="lg" variant="outline" onClick={() => { window.location.href = '/frontend-pages/contact'; }}>
                 Contact Orthodox Metrics
               </Button>
             </div>
@@ -143,30 +142,7 @@ export function Landing({ onStart, onAdmin, theme, onToggleTheme }: Props) {
         </div>
       </section>
 
-      <footer className="border-t border-border bg-card/60">
-        <div className="max-w-6xl mx-auto px-6 py-10 grid sm:grid-cols-2 lg:grid-cols-4 gap-6 text-sm">
-          <div className="space-y-2">
-            <img src="/images/misc/enroll-header.png" alt="Orthodox Metrics" className="h-8 w-auto object-contain" />
-            <p className="text-muted-foreground">
-              The church-facing platform of Orthodox Metrics.
-            </p>
-          </div>
-          <FooterCol title="Product" items={["Onboarding", "Records", "Pages", "Pricing"]} />
-          <FooterCol title="Company" items={["About", "Mission", "Contact", "Privacy"]} />
-          <div className="space-y-2">
-            <div>Contact</div>
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <Mail className="h-4 w-4" /> hello@orthodoxmetrics.org
-            </div>
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <Phone className="h-4 w-4" /> +1 (555) 010-1820
-            </div>
-          </div>
-        </div>
-        <div className="border-t border-border py-4 text-center text-xs text-muted-foreground">
-          © 2026 Orthodox Metrics. All rights reserved.
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }
@@ -180,15 +156,3 @@ function TrustItem({ icon: Icon, text }: { icon: any; text: string }) {
   );
 }
 
-function FooterCol({ title, items }: { title: string; items: string[] }) {
-  return (
-    <div className="space-y-2">
-      <div>{title}</div>
-      <ul className="space-y-1 text-muted-foreground">
-        {items.map((i) => (
-          <li key={i}>{i}</li>
-        ))}
-      </ul>
-    </div>
-  );
-}
