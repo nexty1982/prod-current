@@ -22,6 +22,8 @@ const writeSacramentHistoryModule = safeRequire(
 );
 
 const { writeSacramentHistory, generateRequestId } = writeSacramentHistoryModule;
+const { buildRecordSearch } = require('../utils/recordSearch');
+const { readSacramentHistory } = require('../utils/readSacramentHistory');
 const router = express.Router();
 
 /**
@@ -192,11 +194,27 @@ async function getChurchInfo(churchId) {
 
 // Test endpoint to verify API is working
 router.get('/test', (req, res) => {
-    res.json({ 
-        message: 'Marriage API is working', 
+    res.json({
+        message: 'Marriage API is working',
         timestamp: new Date().toISOString(),
-        headers: req.headers 
+        headers: req.headers
     });
+});
+
+// GET /api/marriage-records/:id/history — audit trail from marriage_history
+router.get('/:id/history', requireAuth, async (req, res) => {
+    try {
+        const churchId = req.query.church_id || req.session?.user?.church_id || req.user?.church_id || null;
+        const churchInfo = await getChurchInfo(churchId);
+        if (!churchInfo || !churchInfo.databaseName) {
+            return res.status(404).json({ success: false, error: 'Church not found' });
+        }
+        const history = await readSacramentHistory(churchInfo.databaseName, 'marriage_history', req.params.id);
+        res.json({ success: true, history });
+    } catch (err) {
+        console.error('❌ Error fetching marriage record history:', err);
+        res.status(500).json({ success: false, error: 'Failed to fetch record history' });
+    }
 });
 
 // GET /api/marriage-records - Require authentication
@@ -234,23 +252,18 @@ router.get('/', requireAuth, async (req, res) => {
             console.log(`🏛️ Filtering marriage records by church_id: ${church_id}`);
         }
 
-        // Add search functionality
+        // Add search functionality — field-qualified (groom:x, bride:x, year:2011),
+        // year/date matching, and multi-term AND. See utils/recordSearch.js.
+        let searchEngaged = false;
         if (isSearchActive) {
-            const searchCondition = `(fname_groom LIKE ? 
-                OR lname_groom LIKE ? 
-                OR fname_bride LIKE ? 
-                OR lname_bride LIKE ? 
-                OR clergy LIKE ? 
-                OR witness LIKE ? 
-                OR parentsg LIKE ? 
-                OR parentsb LIKE ?)`;
-            const searchParam = `%${search.trim()}%`;
-            
-            whereConditions.push(searchCondition);
-            
-            queryParams.push(searchParam, searchParam, searchParam, searchParam, searchParam, searchParam, searchParam, searchParam);
-            countParams.push(searchParam, searchParam, searchParam, searchParam, searchParam, searchParam, searchParam, searchParam);
-            console.log(`🔍 Searching marriage records for: "${search.trim()}"`);
+            const parsed = buildRecordSearch(search, 'marriage');
+            if (parsed.where) {
+                whereConditions.push(parsed.where);
+                queryParams.push(...parsed.params);
+                countParams.push(...parsed.params);
+                searchEngaged = true;
+                console.log(`🔍 Searching marriage records for: "${search.trim()}"`);
+            }
         }
         
         // Build WHERE clause
@@ -266,7 +279,7 @@ router.get('/', requireAuth, async (req, res) => {
         let mainQueryParams;
         const pageOffset = (parseInt(page) - 1) * parseInt(limit);
 
-        if (isSearchActive) {
+        if (searchEngaged) {
             const searchRaw = search.trim();
 
             // Tiered relevance: exact → prefix → contains (per field, highest tier wins)
@@ -592,6 +605,54 @@ router.put('/:id', async (req, res) => {
     } catch (err) {
         console.error('update marriage-record error:', err);
         res.status(500).json({ error: 'Could not update marriage record' });
+    }
+});
+
+// PATCH /api/marriage-records/:id/status — change record status (+ verification)
+router.patch('/:id/status', requireAuth, async (req, res) => {
+    try {
+        const VALID_STATUSES = ['Recorded', 'Verified', 'Awaiting Clergy'];
+        const id = req.params.id;
+        const { status } = req.body || {};
+        if (!VALID_STATUSES.includes(status)) {
+            return res.status(400).json({ error: `Invalid status. Must be one of: ${VALID_STATUSES.join(', ')}` });
+        }
+        const church_id = req.body.church_id || req.query.church_id || req.user?.church_id || null;
+        const churchInfo = await getChurchInfo(church_id);
+        const churchDbPool = await getChurchDbConnection(churchInfo.databaseName);
+
+        const [beforeRows] = await churchDbPool.query('SELECT * FROM marriage_records WHERE id = ?', [id]);
+        if (beforeRows.length === 0) return res.status(404).json({ error: 'Record not found' });
+        const beforeRecord = beforeRows[0];
+
+        const verifying = status === 'Verified';
+        await churchDbPool.query(
+            'UPDATE marriage_records SET status = ?, verified_by = ?, verified_at = ? WHERE id = ?',
+            [status, verifying ? (req.user?.id || null) : null, verifying ? new Date() : null, id]
+        );
+
+        const [afterRows] = await churchDbPool.query('SELECT * FROM marriage_records WHERE id = ?', [id]);
+        const afterRecord = afterRows[0];
+
+        await writeSacramentHistory({
+            historyTableName: 'marriage_history',
+            churchId: churchInfo.churchId,
+            recordId: parseInt(id),
+            type: 'update',
+            description: `Status changed to "${status}" for marriage record ${id}`,
+            before: beforeRecord,
+            after: afterRecord,
+            actorUserId: req.user?.id || null,
+            source: 'ui',
+            requestId: req.requestId || generateRequestId(),
+            ipAddress: req.ip || null,
+            databaseName: churchInfo.databaseName
+        });
+
+        res.json({ success: true, id: parseInt(id), status, verified_at: afterRecord.verified_at, verified_by: afterRecord.verified_by });
+    } catch (err) {
+        console.error('update marriage status error:', err);
+        res.status(500).json({ error: 'Could not update record status' });
     }
 });
 

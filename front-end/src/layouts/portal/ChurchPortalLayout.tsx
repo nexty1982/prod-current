@@ -21,7 +21,6 @@ function getPageLabel(pathname: string): string {
   if (pathname.startsWith('/portal/records')) return 'Church Records';
   if (pathname.startsWith('/portal/charts')) return 'Analytics';
   if (pathname.startsWith('/portal/guide')) return 'Help';
-  if (pathname.startsWith('/portal/settings')) return 'Settings';
   if (pathname.startsWith('/portal/certificates')) return 'Certificates';
   if (pathname.startsWith('/account')) return 'Account';
   return 'Portal';
@@ -192,7 +191,7 @@ const PortalHeader: React.FC = () => {
               <ListItemIcon><IconUser size={18} /></ListItemIcon>
               <Typography variant="body2">My Profile</Typography>
             </MenuItem>
-            <MenuItem onClick={() => { setProfileAnchor(null); navigate('/portal/settings'); }}>
+            <MenuItem onClick={() => { setProfileAnchor(null); navigate('/account/parish-management'); }}>
               <ListItemIcon><IconSettings size={18} /></ListItemIcon>
               <Typography variant="body2">Settings</Typography>
             </MenuItem>

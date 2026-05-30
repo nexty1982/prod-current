@@ -74,6 +74,8 @@ const NAV_ITEMS: NavItem[] = [
     path: '/account/notifications',
     icon: <NotificationsActiveIcon />,
     descriptionKey: 'account.notification_preferences',
+    // Hidden from the account nav per product decision (2026-05-30).
+    visible: () => false,
   },
   // ── Church-context (visible when user has a church) ──
   {
@@ -88,14 +90,16 @@ const NAV_ITEMS: NavItem[] = [
     path: '/account/church-details',
     icon: <InfoOutlinedIcon />,
     descriptionKey: 'account.parish_information',
-    visible: (user) => hasChurchContext(user),
+    // Hidden from the account nav per product decision (2026-05-30).
+    visible: () => false,
   },
   {
     labelKey: 'account.branding',
     path: '/account/branding',
     icon: <PaletteIcon />,
     descriptionKey: 'account.logo_and_brand_identity',
-    visible: (user) => hasChurchContext(user),
+    // Hidden from the account nav per product decision (2026-05-30).
+    visible: () => false,
   },
   {
     labelKey: 'account.ocr_preferences',
@@ -105,12 +109,14 @@ const NAV_ITEMS: NavItem[] = [
     visible: (user) => canManageOcrPreferences(user),
   },
   // ── Parish Management ──
+  // Hidden from the account nav — reached via the profile menu's "Settings"
+  // entry (→ /account/parish-management) per product decision (2026-05-30).
   {
     labelKey: 'account.parish_management',
     path: '/account/parish-management',
     icon: <DashboardCustomizeOutlinedIcon />,
     descriptionKey: 'account.database_mapping_themes_settings',
-    visible: (user) => hasChurchContext(user),
+    visible: () => false,
   },
 ];
 

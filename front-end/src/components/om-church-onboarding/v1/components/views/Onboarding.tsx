@@ -79,6 +79,50 @@ const STATE_NAMES: Record<string, string> = {
 };
 const STATE_CODES = Object.keys(STATE_NAMES);
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function isStrongPassword(pw: string): boolean {
+  return pw.length >= 12 && /\d/.test(pw) && /[^A-Za-z0-9]/.test(pw);
+}
+
+// Required-field validation for the Church Profile step. Returns a map of
+// field → error message; an empty map means the step is valid.
+function getProfileErrors(p: any): Record<string, string> {
+  const e: Record<string, string> = {};
+  const required: [string, string][] = [
+    ["churchName", "Church name"],
+    ["jurisdiction", "Jurisdiction"],
+    ["firstName", "Parish contact first name"],
+    ["lastName", "Parish contact last name"],
+    ["address", "Address"],
+    ["city", "City"],
+    ["state", "State / Province"],
+    ["zip", "Postal code"],
+    ["country", "Country"],
+    ["timezone", "Timezone"],
+  ];
+  for (const [k, label] of required) {
+    if (!String(p[k] ?? "").trim()) e[k] = `${label} is required`;
+  }
+  if (!String(p.email ?? "").trim()) e.email = "Contact email is required";
+  else if (!EMAIL_RE.test(String(p.email).trim())) e.email = "Enter a valid email address";
+  return e;
+}
+
+// Required-field validation for the Admin Account step.
+function getAdminErrors(a: any): Record<string, string> {
+  const e: Record<string, string> = {};
+  if (!String(a.firstName ?? "").trim()) e.firstName = "Admin first name is required";
+  if (!String(a.lastName ?? "").trim()) e.lastName = "Admin last name is required";
+  if (!String(a.email ?? "").trim()) e.email = "Admin email is required";
+  else if (!EMAIL_RE.test(String(a.email).trim())) e.email = "Enter a valid email address";
+  if (!a.password) e.password = "Password is required";
+  else if (!isStrongPassword(a.password)) e.password = "At least 12 characters, with one number and one symbol";
+  if (!a.confirm) e.confirm = "Please confirm your password";
+  else if (a.confirm !== a.password) e.confirm = "Passwords do not match";
+  return e;
+}
+
 export function Onboarding({ onCancel, onComplete, theme, onToggleTheme }: Props) {
   const [step, setStep] = useState<StepKey>("find-parish");
 
@@ -102,31 +146,35 @@ export function Onboarding({ onCancel, onComplete, theme, onToggleTheme }: Props
   });
 
   const [profile, setProfile] = useState({
-    churchName: "Holy Trinity Orthodox Church",
-    jurisdiction: "Greek Orthodox Archdiocese of America",
-    firstName: "Andreas",
-    lastName: "Stavros",
-    email: "frandreas@holytrinity.org",
-    phone: "(312) 555-0140",
-    website: "https://holytrinity.org",
-    address: "245 N. Cathedral Way",
-    city: "Chicago",
-    state: "IL",
-    zip: "60611",
-    country: "United States",
-    timezone: "America/Chicago",
-    size: "200–500",
-    referral: "Diocesan recommendation",
+    churchName: "",
+    jurisdiction: "",
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    website: "",
+    address: "",
+    city: "",
+    state: "",
+    zip: "",
+    country: "",
+    timezone: "",
+    size: "",
+    referral: "",
   });
   const [modules, setModules] = useState({ baptism: true, marriage: true, funeral: false });
   const [admin, setAdmin] = useState({
-    firstName: "Andreas",
-    lastName: "Stavros",
-    email: "frandreas@holytrinity.org",
+    firstName: "",
+    lastName: "",
+    email: "",
     password: "",
     confirm: "",
     secondAdmin: false,
   });
+
+  // Reveals inline field errors once the user has attempted to advance past a
+  // form step. Reset whenever the active step changes.
+  const [triedNext, setTriedNext] = useState(false);
 
   const stepIndex = steps.findIndex((s) => s.key === step);
 
@@ -134,13 +182,53 @@ export function Onboarding({ onCancel, onComplete, theme, onToggleTheme }: Props
     parish.selected !== null ||
     (parish.notListed && parish.manualName.trim().length > 0);
 
+  const profileErrors = getProfileErrors(profile);
+  const adminErrors = getAdminErrors(admin);
+  const profileComplete = Object.keys(profileErrors).length === 0;
+  const adminComplete = Object.keys(adminErrors).length === 0;
+
+  // find-parish drives the disabled state of Next; the form steps stay
+  // clickable so pressing Next can surface their validation errors.
   const canProceed = step === "find-parish" ? findParishComplete : true;
 
   function goNext() {
     if (!canProceed) return;
-    if (stepIndex < steps.length - 1) setStep(steps[stepIndex + 1].key);
+    // Block advancing past a form step until its required fields are valid,
+    // and reveal the inline errors.
+    if (step === "profile" && !profileComplete) { setTriedNext(true); return; }
+    if (step === "admin" && !adminComplete) { setTriedNext(true); return; }
+    // Carry the chosen church forward into the profile step. Without this the
+    // profile step keeps its seeded placeholder church name, so a user who
+    // selected (or typed in) a different church sees the wrong name pre-filled.
+    if (step === "find-parish") {
+      if (parish.selected) {
+        const c = parish.selected;
+        setProfile((p) => ({
+          ...p,
+          churchName: c.name,
+          jurisdiction: c.jurisdiction || "",
+          city: c.city || "",
+          state: c.state_code || "",
+        }));
+      } else if (parish.notListed && parish.manualName.trim()) {
+        setProfile((p) => ({
+          ...p,
+          churchName: parish.manualName.trim(),
+          // A church the CRM doesn't know about — clear the placeholder
+          // location fields so the user enters their own, not another church's.
+          jurisdiction: "",
+          city: "",
+          state: "",
+        }));
+      }
+    }
+    if (stepIndex < steps.length - 1) {
+      setTriedNext(false);
+      setStep(steps[stepIndex + 1].key);
+    }
   }
   function goBack() {
+    setTriedNext(false);
     if (stepIndex > 0) setStep(steps[stepIndex - 1].key);
     else onCancel();
   }
@@ -176,7 +264,7 @@ export function Onboarding({ onCancel, onComplete, theme, onToggleTheme }: Props
               return (
                 <li key={s.key}>
                   <button
-                    onClick={() => i <= stepIndex && setStep(s.key)}
+                    onClick={() => { if (i <= stepIndex) { setTriedNext(false); setStep(s.key); } }}
                     className={`w-full flex items-center gap-3 px-3 py-3 rounded-md text-left transition-colors ${
                       active
                         ? "bg-[#3a1d6e] text-white"
@@ -215,12 +303,14 @@ export function Onboarding({ onCancel, onComplete, theme, onToggleTheme }: Props
             <FindParishStep parish={parish} setParish={setParish} />
           )}
           {step === "profile" && (
-            <ProfileStep profile={profile} setProfile={setProfile} />
+            <ProfileStep profile={profile} setProfile={setProfile} errors={profileErrors} showErrors={triedNext} />
           )}
           {step === "modules" && (
             <ModulesStep modules={modules} setModules={setModules} />
           )}
-          {step === "admin" && <AdminStep admin={admin} setAdmin={setAdmin} />}
+          {step === "admin" && (
+            <AdminStep admin={admin} setAdmin={setAdmin} errors={adminErrors} showErrors={triedNext} />
+          )}
           {step === "review" && (
             <ReviewStep
               profile={profile}
@@ -237,6 +327,15 @@ export function Onboarding({ onCancel, onComplete, theme, onToggleTheme }: Props
               onHome={onCancel}
             />
           )}
+
+          {triedNext &&
+            ((step === "profile" && !profileComplete) ||
+              (step === "admin" && !adminComplete)) && (
+              <div className="flex items-start gap-2 p-3 rounded-md border border-destructive/40 bg-destructive/5 text-sm text-destructive">
+                <CircleAlert className="h-4 w-4 mt-0.5 shrink-0" />
+                <span>Please complete the required fields highlighted above before continuing.</span>
+              </div>
+            )}
 
           {step !== "confirm" && (
             <div className="flex items-center justify-between pt-2">
@@ -299,11 +398,13 @@ function Field({
   label,
   required,
   hint,
+  error,
   children,
 }: {
   label: string;
   required?: boolean;
   hint?: string;
+  error?: string;
   children: React.ReactNode;
 }) {
   return (
@@ -313,7 +414,11 @@ function Field({
         {required && <Req />}
       </Label>
       {children}
-      {hint && <div className="text-xs text-muted-foreground">{hint}</div>}
+      {error ? (
+        <div className="text-xs text-destructive">{error}</div>
+      ) : (
+        hint && <div className="text-xs text-muted-foreground">{hint}</div>
+      )}
     </div>
   );
 }
@@ -506,8 +611,9 @@ function FindParishStep({
   );
 }
 
-function ProfileStep({ profile, setProfile }: any) {
+function ProfileStep({ profile, setProfile, errors = {}, showErrors = false }: any) {
   const set = (k: string, v: string) => setProfile({ ...profile, [k]: v });
+  const err = (k: string) => (showErrors ? errors[k] : undefined);
   return (
     <SectionCard
       number={2}
@@ -515,12 +621,12 @@ function ProfileStep({ profile, setProfile }: any) {
       description="Tell us about your parish. These details help Orthodox Metrics provision your workspace and tailor your records."
     >
       <div className="grid md:grid-cols-2 gap-5">
-        <Field label="Church name" required>
+        <Field label="Church name" required error={err("churchName")}>
           <Input value={profile.churchName} onChange={(e) => set("churchName", e.target.value)} />
         </Field>
-        <Field label="Jurisdiction" required>
+        <Field label="Jurisdiction" required error={err("jurisdiction")}>
           <Select value={profile.jurisdiction} onValueChange={(v) => set("jurisdiction", v)}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectTrigger><SelectValue placeholder="Select jurisdiction…" /></SelectTrigger>
             <SelectContent>
               {[
                 "Greek Orthodox Archdiocese of America",
@@ -536,13 +642,13 @@ function ProfileStep({ profile, setProfile }: any) {
             </SelectContent>
           </Select>
         </Field>
-        <Field label="Parish contact first name" required>
+        <Field label="Parish contact first name" required error={err("firstName")}>
           <Input value={profile.firstName} onChange={(e) => set("firstName", e.target.value)} />
         </Field>
-        <Field label="Parish contact last name" required>
+        <Field label="Parish contact last name" required error={err("lastName")}>
           <Input value={profile.lastName} onChange={(e) => set("lastName", e.target.value)} />
         </Field>
-        <Field label="Contact email" required hint="Used for provisioning updates.">
+        <Field label="Contact email" required hint="Used for provisioning updates." error={err("email")}>
           <Input type="email" value={profile.email} onChange={(e) => set("email", e.target.value)} />
         </Field>
         <Field label="Phone">
@@ -553,7 +659,7 @@ function ProfileStep({ profile, setProfile }: any) {
         </Field>
         <Field label="Church size">
           <Select value={profile.size} onValueChange={(v) => set("size", v)}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectTrigger><SelectValue placeholder="Select church size…" /></SelectTrigger>
             <SelectContent>
               {["Under 100", "100–200", "200–500", "500–1000", "1000+"].map((v) => (
                 <SelectItem key={v} value={v}>{v}</SelectItem>
@@ -561,24 +667,24 @@ function ProfileStep({ profile, setProfile }: any) {
             </SelectContent>
           </Select>
         </Field>
-        <Field label="Address" required>
+        <Field label="Address" required error={err("address")}>
           <Input value={profile.address} onChange={(e) => set("address", e.target.value)} />
         </Field>
-        <Field label="City" required>
+        <Field label="City" required error={err("city")}>
           <Input value={profile.city} onChange={(e) => set("city", e.target.value)} />
         </Field>
-        <Field label="State / Province" required>
+        <Field label="State / Province" required error={err("state")}>
           <Input value={profile.state} onChange={(e) => set("state", e.target.value)} />
         </Field>
-        <Field label="Postal code" required>
+        <Field label="Postal code" required error={err("zip")}>
           <Input value={profile.zip} onChange={(e) => set("zip", e.target.value)} />
         </Field>
-        <Field label="Country" required>
+        <Field label="Country" required error={err("country")}>
           <Input value={profile.country} onChange={(e) => set("country", e.target.value)} />
         </Field>
-        <Field label="Timezone" required>
+        <Field label="Timezone" required error={err("timezone")}>
           <Select value={profile.timezone} onValueChange={(v) => set("timezone", v)}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectTrigger><SelectValue placeholder="Select timezone…" /></SelectTrigger>
             <SelectContent>
               {[
                 "America/New_York",
@@ -705,8 +811,9 @@ function ModulesStep({ modules, setModules }: any) {
   );
 }
 
-function AdminStep({ admin, setAdmin }: any) {
+function AdminStep({ admin, setAdmin, errors = {}, showErrors = false }: any) {
   const set = (k: string, v: any) => setAdmin({ ...admin, [k]: v });
+  const err = (k: string) => (showErrors ? errors[k] : undefined);
   return (
     <SectionCard
       number={4}
@@ -714,13 +821,13 @@ function AdminStep({ admin, setAdmin }: any) {
       description="Create the first church administrator. You can invite additional users after approval."
     >
       <div className="grid md:grid-cols-2 gap-5">
-        <Field label="Admin first name" required>
+        <Field label="Admin first name" required error={err("firstName")}>
           <Input value={admin.firstName} onChange={(e) => set("firstName", e.target.value)} />
         </Field>
-        <Field label="Admin last name" required>
+        <Field label="Admin last name" required error={err("lastName")}>
           <Input value={admin.lastName} onChange={(e) => set("lastName", e.target.value)} />
         </Field>
-        <Field label="Admin email" required>
+        <Field label="Admin email" required error={err("email")}>
           <Input type="email" value={admin.email} onChange={(e) => set("email", e.target.value)} />
         </Field>
         <div />
@@ -728,6 +835,7 @@ function AdminStep({ admin, setAdmin }: any) {
           label="Password"
           required
           hint="At least 12 characters, with one number and one symbol."
+          error={err("password")}
         >
           <Input
             type="password"
@@ -736,7 +844,7 @@ function AdminStep({ admin, setAdmin }: any) {
             placeholder="••••••••••••"
           />
         </Field>
-        <Field label="Confirm password" required>
+        <Field label="Confirm password" required error={err("confirm")}>
           <Input
             type="password"
             value={admin.confirm}

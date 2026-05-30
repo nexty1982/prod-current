@@ -14,13 +14,21 @@ import { TableView } from "./components/TableView";
 import { TimelineView } from "./components/TimelineView";
 import { Toolbar, type MoreAction as ToolbarMore } from "./components/Toolbar";
 import "./theme.css";
-import type { AnyRecord, Density, RecordType, ViewMode } from "./types";
+import type { AnyRecord, Density, RecordStatus, RecordType, ViewMode } from "./types";
 import { recordClergy } from "./types";
 
 const COL_KEYS_BY_TYPE: Record<RecordType, string[]> = {
   baptism: ["Name", "Record No.", "Date of Birth", "Baptism Date", "Church", "Birthplace", "Clergy"],
   marriage: ["Bride", "Groom", "Record No.", "Marriage Date", "Church", "Celebrant", "Witnesses"],
   funeral: ["Name", "Record No.", "Date of Death", "Funeral Date", "Church", "Burial Place", "Clergy"],
+};
+
+// Default sort column per record type (the primary sacrament date), used when
+// the saved mapping config doesn't apply to the type currently being viewed.
+const DEFAULT_SORT_BY_TYPE: Record<RecordType, string> = {
+  baptism: "reception_date",
+  marriage: "mdate",
+  funeral: "deceased_date",
 };
 
 function formatDate(d: string | null | undefined): string {
@@ -112,17 +120,29 @@ const RecordsManagement: React.FC = () => {
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
   const [useDefaultSort, setUseDefaultSort] = useState(true);
 
-  // Load the church's mapping config to get the user-defined default sort field
-  const { data: mappingSettings } = useParishSettings<{ config?: { defaultSort?: string } }>('mapping');
-  const configDefaultSort = mappingSettings?.config?.defaultSort || "id";
+  // Load the church's mapping config to get the user-defined default sort field.
+  // The mapping config holds ONE record type's settings (selectedRecord +
+  // defaultSort), so it only applies when the user is viewing that same type.
+  const { data: mappingSettings } = useParishSettings<{ config?: { defaultSort?: string; selectedRecord?: string } }>('mapping');
+  const configDefaultSort = mappingSettings?.config?.defaultSort;
+  const configSelectedRecord = mappingSettings?.config?.selectedRecord;
 
-  // When default sort is toggled ON, apply the config's sort field
+  // Sensible default sort per record type (primary date, newest first) — used
+  // for any type the saved mapping config doesn't cover. Without this, switching
+  // to marriage/funeral kept the baptism default field, which is invalid for
+  // those tables and made the backend silently fall back to sorting by id.
+  const effectiveDefaultSort =
+    configSelectedRecord === recordType && configDefaultSort
+      ? configDefaultSort
+      : DEFAULT_SORT_BY_TYPE[recordType];
+
+  // When default sort is toggled ON, apply this record type's default sort field.
   useEffect(() => {
-    if (useDefaultSort && configDefaultSort) {
-      setSortField(configDefaultSort);
+    if (useDefaultSort) {
+      setSortField(effectiveDefaultSort);
       setSortDir("desc");
     }
-  }, [useDefaultSort, configDefaultSort]);
+  }, [useDefaultSort, effectiveDefaultSort]);
   const [page, setPage] = useState(0);
   const [rowsPerPage] = useState(100);
   const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -238,7 +258,7 @@ const RecordsManagement: React.FC = () => {
           priest={priest}
           onPriest={setPriest}
           recordType={recordType}
-          onRecordType={(t) => { setRecordType(t); setDrawerIdx(null); setSearch(""); setDebouncedSearch(""); }}
+          onRecordType={(t) => { setRecordType(t); setDrawerIdx(null); setSearch(""); setDebouncedSearch(""); setUseDefaultSort(true); }}
           totalShown={shown}
           totalAll={totalRecords}
           onAdd={() => setAddOpen(true)}
@@ -254,7 +274,7 @@ const RecordsManagement: React.FC = () => {
           onSort={(field: string, dir: "asc" | "desc") => { setUseDefaultSort(false); setSortField(field); setSortDir(dir); }}
           useDefaultSort={useDefaultSort}
           onToggleDefaultSort={() => setUseDefaultSort((v) => !v)}
-          defaultSortLabel={configDefaultSort}
+          defaultSortLabel={effectiveDefaultSort}
         />
 
         {loading ? (
@@ -287,6 +307,8 @@ const RecordsManagement: React.FC = () => {
 
       <RecordDrawer
         record={drawerRecord}
+        churchId={churchId}
+        onStatusChange={(id, status) => setRecords((prev) => prev.map((r) => (r.id === id ? { ...r, status: status as RecordStatus } : r)))}
         focusAudit={drawerAudit}
         onClose={() => setDrawerIdx(null)}
         onPrev={() => setDrawerIdx((i) => (i === null ? null : (i - 1 + filtered.length) % filtered.length))}

@@ -147,6 +147,9 @@ function transformBaptismRecord(record) {
     clergy: record.clergy || '',
     entry_type: entryType,
     church_id: record.church_id,
+    status: record.status || 'Recorded',
+    verified_by: record.verified_by ?? null,
+    verified_at: record.verified_at ? formatDateTime(record.verified_at) : null,
     // ═══════════════════════════════════════════════════════════════
     // CAMELCASE FIELDS (legacy frontend compatibility)
     // ═══════════════════════════════════════════════════════════════
@@ -220,6 +223,9 @@ function transformMarriageRecord(record) {
     witness: record.witness || '',
     mlicense: record.mlicense || '',
     church_id: record.church_id,
+    status: record.status || 'Recorded',
+    verified_by: record.verified_by ?? null,
+    verified_at: record.verified_at ? formatDateTime(record.verified_at) : null,
     // ═══════════════════════════════════════════════════════════════
     // CAMELCASE FIELDS (legacy frontend compatibility)
     // ═══════════════════════════════════════════════════════════════
@@ -299,6 +305,9 @@ function transformFuneralRecord(record) {
     burial_location: record.burial_location || '',
     clergy: record.clergy || '',
     church_id: record.church_id,
+    status: record.status || 'Recorded',
+    verified_by: record.verified_by ?? null,
+    verified_at: record.verified_at ? formatDateTime(record.verified_at) : null,
     notes: record.notes || '',
     // ═══════════════════════════════════════════════════════════════
     // CAMELCASE FIELDS (legacy frontend compatibility)

@@ -10,7 +10,6 @@ import { protectedRoute, redirectRoute } from './routeConfigHelpers';
 /* ── Lazy imports ── */
 const ChurchPortalLayout = Loadable(lazy(() => import('../layouts/portal/ChurchPortalLayout')));
 const ChurchPortalHub = Loadable(lazy(() => import('../features/portal/ChurchPortalHub')));
-const PortalSettingsPage = Loadable(lazy(() => import('../features/portal/PortalSettingsPage')));
 const PortalRecordsPage = Loadable(lazy(() => import('../features/portal/PortalRecordsPage')));
 const PortalCertificatesPage = Loadable(lazy(() => import('../features/portal/PortalCertificatesPage')));
 const BaptismRecordsPage = Loadable(lazy(() => import('../features/records-centralized/components/baptism/BaptismRecordsPage')));
@@ -56,8 +55,6 @@ export const portalRoute = {
     protectedRoute('certificates', <PortalCertificatesPage />, ROLE_ALL_CHURCH),
     // Certificates — legacy drag-and-drop generator
     protectedRoute('certificates/generate', <CertificateGeneratorPage />, ROLE_ALL_CHURCH),
-    // Parish Settings
-    protectedRoute('settings', <PortalSettingsPage />, ROLE_STAFF),
     // User Profile → redirect to Account Hub
     redirectRoute('profile', '/account/profile'),
     // User Guide
