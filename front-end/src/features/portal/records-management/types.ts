@@ -6,7 +6,6 @@ export type Density = "compact" | "default" | "comfortable";
 export interface BaptismRecord {
   id: string;
   type: "baptism";
-  recordNo: string;
   name: string;
   dob: string;
   baptismDate: string;
@@ -24,7 +23,6 @@ export interface BaptismRecord {
 export interface MarriageRecord {
   id: string;
   type: "marriage";
-  recordNo: string;
   bride: string;
   groom: string;
   marriageDate: string;
@@ -38,7 +36,6 @@ export interface MarriageRecord {
 export interface FuneralRecord {
   id: string;
   type: "funeral";
-  recordNo: string;
   name: string;
   dod: string;
   funeralDate: string;

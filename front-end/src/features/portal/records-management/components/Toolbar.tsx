@@ -47,21 +47,18 @@ const RECORD_TYPE_LABEL: Record<RecordType, string> = {
 
 const SORT_OPTIONS: Record<RecordType, { field: string; label: string }[]> = {
   baptism: [
-    { field: "id", label: "Record #" },
     { field: "first_name", label: "Name" },
     { field: "birth_date", label: "Date of Birth" },
     { field: "reception_date", label: "Baptism Date" },
     { field: "clergy", label: "Clergy" },
   ],
   marriage: [
-    { field: "id", label: "Record #" },
     { field: "fname_bride", label: "Bride" },
     { field: "fname_groom", label: "Groom" },
     { field: "mdate", label: "Marriage Date" },
     { field: "clergy", label: "Celebrant" },
   ],
   funeral: [
-    { field: "id", label: "Record #" },
     { field: "name", label: "Name" },
     { field: "deceased_date", label: "Date of Death" },
     { field: "burial_date", label: "Burial Date" },
@@ -205,7 +202,7 @@ export function Toolbar({ view, onView, search, onSearch, searchLoading, setDebo
           }`}
         >
           <span className="text-[var(--rm-muted-fg)]">Sort:</span>
-          <span>{SORT_OPTIONS[recordType].find((o) => o.field === sortField)?.label || "Record #"}</span>
+          <span>{SORT_OPTIONS[recordType].find((o) => o.field === sortField)?.label || SORT_OPTIONS[recordType][0].label}</span>
           <ChevronDown className="w-3.5 h-3.5" />
         </button>
         <Menu anchorEl={sortAnchor} open={Boolean(sortAnchor)} onClose={() => setSortAnchor(null)}>

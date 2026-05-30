@@ -98,7 +98,6 @@ function Card({ record, highlight, density, onOpen }: { record: AnyRecord; highl
           </div>
           <div>
             <div className="text-[var(--rm-fg)]">{name}</div>
-            <div className="text-xs text-[var(--rm-muted-fg)]">Record No. {record.recordNo}</div>
           </div>
         </div>
         <StatusBadge status={record.status} />

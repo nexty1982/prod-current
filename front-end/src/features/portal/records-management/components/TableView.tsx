@@ -37,7 +37,6 @@ type ColDefSpec = { field: string; headerName: string; valueGetter?: (r: any) =>
 const COL_DEFS: Record<RecordType, ColDefSpec[]> = {
   baptism: [
     { field: "name", headerName: "Name" },
-    { field: "recordNo", headerName: "Record No." },
     { field: "dob", headerName: "Date of Birth", rawField: "dobRaw" },
     { field: "baptismDate", headerName: "Baptism Date", rawField: "baptismDateRaw" },
     { field: "church", headerName: "Church" },
@@ -47,7 +46,6 @@ const COL_DEFS: Record<RecordType, ColDefSpec[]> = {
   marriage: [
     { field: "bride", headerName: "Bride" },
     { field: "groom", headerName: "Groom" },
-    { field: "recordNo", headerName: "Record No." },
     { field: "marriageDate", headerName: "Marriage Date", rawField: "marriageDateRaw" },
     { field: "church", headerName: "Church" },
     { field: "celebrant", headerName: "Celebrant" },
@@ -55,7 +53,6 @@ const COL_DEFS: Record<RecordType, ColDefSpec[]> = {
   ],
   funeral: [
     { field: "name", headerName: "Name" },
-    { field: "recordNo", headerName: "Record No." },
     { field: "dod", headerName: "Date of Death", rawField: "dodRaw" },
     { field: "funeralDate", headerName: "Funeral Date", rawField: "funeralDateRaw" },
     { field: "church", headerName: "Church" },

@@ -36,7 +36,6 @@ export function EditRecordDrawer({ record, recordType, clergyList, onClose, onSa
         godparentNames: "",
         clergy: record.clergy || "",
         church: record.church || "",
-        registryNumber: record.recordNo || "",
       });
     } else if (record.type === "marriage") {
       const brideParts = record.bride.split(" ");
@@ -54,7 +53,6 @@ export function EditRecordDrawer({ record, recordType, clergyList, onClose, onSa
         witness2: record.witnesses?.split(",")[1]?.trim() || "",
         celebrant: record.celebrant || "",
         church: record.church || "",
-        registryNumber: record.recordNo || "",
       });
     } else {
       const parts = record.name.split(" ");
@@ -68,7 +66,6 @@ export function EditRecordDrawer({ record, recordType, clergyList, onClose, onSa
         burialLocation: record.burialPlace || "",
         clergy: record.clergy || "",
         church: record.church || "",
-        registryNumber: record.recordNo || "",
       });
     }
   }, [record]);
@@ -130,12 +127,11 @@ export function EditRecordDrawer({ record, recordType, clergyList, onClose, onSa
                 <FormField label="Godparent Names" value={form.godparentNames} onChange={(v) => set("godparentNames", v)} full />
               </FormSection>
 
-              <FormSection title="Church & Registry Information">
+              <FormSection title="Church Information">
                 <div className="grid grid-cols-2 gap-3">
                   <FormSelect label="Priest" value={form.clergy} onChange={(v) => set("clergy", v)} options={clergyList} />
                   <FormField label="Church" value={form.church} onChange={(v) => set("church", v)} />
                 </div>
-                <FormField label="Registry Number" value={form.registryNumber} onChange={(v) => set("registryNumber", v)} full />
               </FormSection>
             </>
           )}
