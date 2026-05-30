@@ -128,7 +128,6 @@ export function RecordDrawer({ record, churchId, onClose, onPrev, onNext, focusA
             <div className="space-y-1">
               <div className="text-xs uppercase tracking-widest text-[#e9c46a]">{typeLabel}</div>
               <div className="text-lg font-semibold">{recordPrimaryName(record)}</div>
-              <div className="text-xs text-white/70">Record No. {record.recordNo}</div>
             </div>
             <div className="mt-3"><StatusBadge status={record.status} /></div>
           </div>

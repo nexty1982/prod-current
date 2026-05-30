@@ -18,9 +18,9 @@ import type { AnyRecord, Density, RecordStatus, RecordType, ViewMode } from "./t
 import { recordClergy } from "./types";
 
 const COL_KEYS_BY_TYPE: Record<RecordType, string[]> = {
-  baptism: ["Name", "Record No.", "Date of Birth", "Baptism Date", "Church", "Birthplace", "Clergy"],
-  marriage: ["Bride", "Groom", "Record No.", "Marriage Date", "Church", "Celebrant", "Witnesses"],
-  funeral: ["Name", "Record No.", "Date of Death", "Funeral Date", "Church", "Burial Place", "Clergy"],
+  baptism: ["Name", "Date of Birth", "Baptism Date", "Church", "Birthplace", "Clergy"],
+  marriage: ["Bride", "Groom", "Marriage Date", "Church", "Celebrant", "Witnesses"],
+  funeral: ["Name", "Date of Death", "Funeral Date", "Church", "Burial Place", "Clergy"],
 };
 
 // Default sort column per record type (the primary sacrament date), used when
@@ -44,7 +44,6 @@ function mapBaptismRecords(rows: any[], churchName: string): AnyRecord[] {
   return rows.map((r: any) => ({
     id: String(r.id),
     type: "baptism" as const,
-    recordNo: r.registryNumber || r.record_no || r.recordNo || String(r.id),
     name: [r.first_name, r.last_name].filter(Boolean).join(" ") || r.child_name || r.name || "—",
     dob: formatDate(r.birth_date || r.dateOfBirth || r.child_birth_date),
     baptismDate: formatDate(r.reception_date || r.dateOfBaptism || r.baptism_date),
@@ -62,7 +61,6 @@ function mapMarriageRecords(rows: any[], churchName: string): AnyRecord[] {
   return rows.map((r: any) => ({
     id: String(r.id),
     type: "marriage" as const,
-    recordNo: r.registryNumber || r.record_no || r.recordNo || String(r.id),
     bride: [r.fname_bride || r.brideFirstName, r.lname_bride || r.brideLastName].filter(Boolean).join(" ") || r.bride_name || "—",
     groom: [r.fname_groom || r.groomFirstName, r.lname_groom || r.groomLastName].filter(Boolean).join(" ") || r.groom_name || "—",
     marriageDate: formatDate(r.mdate || r.marriageDate || r.marriage_date),
@@ -78,7 +76,6 @@ function mapFuneralRecords(rows: any[], churchName: string): AnyRecord[] {
   return rows.map((r: any) => ({
     id: String(r.id),
     type: "funeral" as const,
-    recordNo: r.registryNumber || r.record_no || r.recordNo || String(r.id),
     name: [r.name, r.lastname].filter(Boolean).join(" ") || r.deceased_name || "—",
     dod: formatDate(r.deceased_date || r.dateOfDeath || r.death_date),
     funeralDate: formatDate(r.burial_date || r.funeralDate || r.dateOfFuneral),

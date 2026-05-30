@@ -16,26 +16,22 @@ const SORT_OPTIONS: Record<RecordType, { key: string; label: string; getter: (r:
     { key: "date", label: "Baptism Date", getter: (r) => recordPrimaryDate(r) },
     { key: "name", label: "Name", getter: (r) => recordPrimaryName(r) },
     { key: "dob", label: "Date of Birth", getter: (r) => r.type === "baptism" ? r.dob : "" },
-    { key: "recordNo", label: "Record #", getter: (r) => r.recordNo },
     { key: "clergy", label: "Clergy", getter: (r) => recordClergy(r) },
   ],
   marriage: [
     { key: "date", label: "Marriage Date", getter: (r) => recordPrimaryDate(r) },
     { key: "name", label: "Bride & Groom", getter: (r) => recordPrimaryName(r) },
-    { key: "recordNo", label: "Record #", getter: (r) => r.recordNo },
     { key: "clergy", label: "Celebrant", getter: (r) => recordClergy(r) },
   ],
   funeral: [
     { key: "date", label: "Funeral Date", getter: (r) => recordPrimaryDate(r) },
     { key: "name", label: "Name", getter: (r) => recordPrimaryName(r) },
     { key: "dod", label: "Date of Death", getter: (r) => r.type === "funeral" ? r.dod : "" },
-    { key: "recordNo", label: "Record #", getter: (r) => r.recordNo },
     { key: "clergy", label: "Clergy", getter: (r) => recordClergy(r) },
   ],
 };
 
 const DB_FIELD_TO_KEY: Record<string, string> = {
-  id: "recordNo",
   first_name: "name",
   birth_date: "dob",
   reception_date: "date",
@@ -95,11 +91,6 @@ export function TimelineView({ records, recordType, highlight, density, loading,
         if (da) return -1;
         if (db) return 1;
         return 0;
-      }
-      if (activeOpt.key === "recordNo") {
-        const na = parseInt(va, 10);
-        const nb = parseInt(vb, 10);
-        if (!isNaN(na) && !isNaN(nb)) return (na - nb) * dir;
       }
       return va.localeCompare(vb) * dir;
     });
@@ -249,7 +240,6 @@ export function TimelineView({ records, recordType, highlight, density, loading,
 
                       <div className="flex-1 min-w-0">
                         <div className="text-sm font-semibold text-[var(--rm-fg)] truncate">{name}</div>
-                        <div className="text-xs text-[var(--rm-muted-fg)]">Record No. {r.recordNo}</div>
                       </div>
 
                       <div className="hidden sm:flex items-center gap-4 shrink-0 text-xs">
