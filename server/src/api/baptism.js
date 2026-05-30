@@ -9,6 +9,7 @@ const { requireAuth } = require('../middleware/auth');
 const { getEffectiveSetting } = require('../utils/settingsHelper');
 const { buildRecordSearch } = require('../utils/recordSearch');
 const { readSacramentHistory } = require('../utils/readSacramentHistory');
+const { loadSearchWeights, buildRelevanceExpr } = require('../utils/searchWeights');
 
 // Safe require for writeSacramentHistory - handles missing module gracefully
 const writeSacramentHistoryModule = safeRequire(
@@ -293,23 +294,16 @@ router.get('/', requireAuth, async (req, res) => {
         if (searchEngaged) {
             const searchRaw = search.trim();
 
-            // Tiered relevance: exact → prefix → contains (per field, highest tier wins)
-            // Exact match on name fields scores highest so true matches always beat partials
-            const relevanceExpr = `(
-              (CASE WHEN LOWER(first_name) = LOWER(?) THEN 1000 WHEN LOWER(first_name) LIKE CONCAT(LOWER(?), '%') THEN 400 WHEN LOWER(first_name) LIKE CONCAT('%', LOWER(?), '%') THEN 80 ELSE 0 END) +
-              (CASE WHEN LOWER(last_name)  = LOWER(?) THEN 900  WHEN LOWER(last_name)  LIKE CONCAT(LOWER(?), '%') THEN 350 WHEN LOWER(last_name)  LIKE CONCAT('%', LOWER(?), '%') THEN 70 ELSE 0 END) +
-              (CASE WHEN LOWER(clergy)     = LOWER(?) THEN 300  WHEN LOWER(clergy)     LIKE CONCAT(LOWER(?), '%') THEN 150 WHEN LOWER(clergy)     LIKE CONCAT('%', LOWER(?), '%') THEN 30 ELSE 0 END) +
-              (CASE WHEN LOWER(parents)    = LOWER(?) THEN 200  WHEN LOWER(parents)    LIKE CONCAT(LOWER(?), '%') THEN 100 WHEN LOWER(parents)    LIKE CONCAT('%', LOWER(?), '%') THEN 20 ELSE 0 END) +
-              (CASE WHEN LOWER(sponsors)   = LOWER(?) THEN 150  WHEN LOWER(sponsors)   LIKE CONCAT(LOWER(?), '%') THEN 75  WHEN LOWER(sponsors)   LIKE CONCAT('%', LOWER(?), '%') THEN 15 ELSE 0 END) +
-              (CASE WHEN LOWER(birthplace) = LOWER(?) THEN 100  WHEN LOWER(birthplace) LIKE CONCAT(LOWER(?), '%') THEN 50  WHEN LOWER(birthplace) LIKE CONCAT('%', LOWER(?), '%') THEN 10 ELSE 0 END)
-            ) AS _matchScore`;
+            // Weighted relevance driven by the church's configured search weights
+            // (Database Mapping → Search Configuration). See utils/searchWeights.js.
+            const weights = await loadSearchWeights(finalChurchId, 'baptism');
+            const { expr, fieldCount } = buildRelevanceExpr('baptism', weights, '_matchScore');
 
-            query = `SELECT *, ${relevanceExpr} FROM baptism_records${whereClause}`;
+            query = `SELECT *, ${expr} FROM baptism_records${whereClause}`;
             query += ` ORDER BY _matchScore DESC, reception_date DESC, id DESC`;
             query += ` LIMIT ? OFFSET ?`;
 
-            // 6 fields × 3 tiers = 18 params (all same value: raw search term)
-            const scoreParams = Array(18).fill(searchRaw);
+            const scoreParams = Array(fieldCount * 3).fill(searchRaw);
             const whereParams = [...queryParams];
             mainQueryParams = [...scoreParams, ...whereParams, clampedLimit, pageOffset];
         } else {
