@@ -40,45 +40,13 @@ const LOGIN_SLIDES = [
 const HomepageHero = () => {
   const { t } = useLanguage();
   const [slideIdx, setSlideIdx] = useState(0);
-  const [prevIdx, setPrevIdx] = useState(-1);
-  const [hovered, setHovered] = useState(false);
-  const [lightboxOpen, setLightboxOpen] = useState(false);
-  const [lightboxIdx, setLightboxIdx] = useState(0);
 
   useEffect(() => {
-    if (hovered || lightboxOpen) return;
     const id = setInterval(() => {
-      setPrevIdx(slideIdx);
       setSlideIdx((i) => (i + 1) % LOGIN_SLIDES.length);
-    }, 8000);
+    }, 5000);
     return () => clearInterval(id);
-  }, [slideIdx, hovered, lightboxOpen]);
-
-  const openLightbox = useCallback(() => {
-    setLightboxIdx(slideIdx);
-    setLightboxOpen(true);
-  }, [slideIdx]);
-
-  const closeLightbox = useCallback(() => setLightboxOpen(false), []);
-
-  const lbPrev = useCallback(() => {
-    setLightboxIdx((i) => (i - 1 + LOGIN_SLIDES.length) % LOGIN_SLIDES.length);
   }, []);
-
-  const lbNext = useCallback(() => {
-    setLightboxIdx((i) => (i + 1) % LOGIN_SLIDES.length);
-  }, []);
-
-  useEffect(() => {
-    if (!lightboxOpen) return;
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') closeLightbox();
-      if (e.key === 'ArrowLeft') lbPrev();
-      if (e.key === 'ArrowRight') lbNext();
-    };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [lightboxOpen, closeLightbox, lbPrev, lbNext]);
 
   return (
     <>
@@ -147,57 +115,16 @@ const HomepageHero = () => {
           </div>
 
           <div className="flex items-center justify-center">
-            <div
-              className="relative w-full max-w-[700px] aspect-[16/10] rounded-2xl overflow-hidden cursor-pointer group"
-              onMouseEnter={() => setHovered(true)}
-              onMouseLeave={() => setHovered(false)}
-              onClick={openLightbox}
-              title="Click to view full size"
-            >
-              {LOGIN_SLIDES.map((src, i) => {
-                const isActive = i === slideIdx;
-                const isLeaving = i === prevIdx;
-                return (
-                  <img
-                    key={src}
-                    src={src}
-                    alt={`Slide ${i + 1}`}
-                    className="absolute inset-0 w-full h-full object-contain"
-                    style={{
-                      opacity: isActive ? 1 : isLeaving ? 0 : 0,
-                      transform: isActive
-                        ? hovered ? 'scale(1.15)' : 'scale(1.08)'
-                        : 'scale(1)',
-                      transition: isActive
-                        ? hovered
-                          ? 'opacity 1.2s ease-in, transform 0.4s ease-out'
-                          : 'opacity 1.2s ease-in, transform 8s ease-out'
-                        : isLeaving
-                          ? 'opacity 1.2s ease-out, transform 0.6s ease-in'
-                          : 'none',
-                      zIndex: isActive ? 2 : isLeaving ? 1 : 0,
-                    }}
-                  />
-                );
-              })}
-              {/* Hover overlay hint */}
-              <div
-                className="absolute inset-0 z-10 flex items-end justify-center pb-3 transition-opacity duration-300"
-                style={{ opacity: hovered ? 1 : 0 }}
-              >
-                <span className="bg-black/60 backdrop-blur-sm text-white/90 text-xs font-['Inter'] px-3 py-1.5 rounded-full">
-                  Click to view full size
-                </span>
-              </div>
-              {/* Hover glow border */}
-              <div
-                className="absolute inset-0 z-10 rounded-2xl pointer-events-none transition-all duration-300"
-                style={{
-                  boxShadow: hovered
-                    ? '0 0 30px rgba(212,175,55,0.4), inset 0 0 0 2px rgba(212,175,55,0.3)'
-                    : 'none',
-                }}
-              />
+            <div className="relative w-full max-w-[700px] aspect-[16/10]">
+              {LOGIN_SLIDES.map((src, i) => (
+                <img
+                  key={src}
+                  src={src}
+                  alt={`Slide ${i + 1}`}
+                  className="absolute inset-0 w-full h-full object-contain transition-opacity duration-700"
+                  style={{ opacity: i === slideIdx ? 1 : 0 }}
+                />
+              ))}
             </div>
           </div>
         </div>
