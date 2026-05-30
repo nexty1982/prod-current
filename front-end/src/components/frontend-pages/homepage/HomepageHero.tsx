@@ -1,7 +1,7 @@
 import { PUBLIC_ROUTES } from '@/config/publicRoutes';
 import { useLanguage } from '@/context/LanguageContext';
-import { ArrowRight } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { ArrowRight, ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 const AMBIENT_KEYFRAMES = `
@@ -49,6 +49,7 @@ const HomepageHero = () => {
   }, []);
 
   return (
+    <>
     <section className="relative overflow-hidden bg-gradient-to-br from-[#2d1b4e] via-[#3a2461] to-[#4a2f74] dark:from-gray-950 dark:via-gray-900 dark:to-gray-800 text-white">
       {/* Ambient lighting layer */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
@@ -96,7 +97,7 @@ const HomepageHero = () => {
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <div className="flex flex-col">
             <WelcomeRotator />
-            <div className="flex flex-col sm:flex-row gap-4 mt-8">
+            <div className="relative z-10 flex flex-col sm:flex-row gap-4 mt-8">
               <Link
                 to={PUBLIC_ROUTES.TOUR}
                 className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-[#d4af37] text-[#2d1b4e] rounded-lg font-['Inter'] font-medium text-[16px] hover:bg-[#c29d2f] transition-colors no-underline"
@@ -129,6 +130,76 @@ const HomepageHero = () => {
         </div>
       </div>
     </section>
+
+    {/* Lightbox */}
+    {lightboxOpen && (
+      <div
+        className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/90 backdrop-blur-sm"
+        onClick={closeLightbox}
+      >
+        {/* Close button */}
+        <button
+          onClick={closeLightbox}
+          className="absolute top-4 right-4 z-10 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors border-0 cursor-pointer"
+          aria-label="Close lightbox"
+        >
+          <X size={24} />
+        </button>
+
+        {/* Prev button */}
+        <button
+          onClick={(e) => { e.stopPropagation(); lbPrev(); }}
+          className="absolute left-4 md:left-8 z-10 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors border-0 cursor-pointer"
+          aria-label="Previous slide"
+        >
+          <ChevronLeft size={28} />
+        </button>
+
+        {/* Image */}
+        <div
+          className="relative max-w-[90vw] max-h-[85vh] flex items-center justify-center"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <img
+            src={LOGIN_SLIDES[lightboxIdx]}
+            alt={`Slide ${lightboxIdx + 1}`}
+            className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl"
+          />
+        </div>
+
+        {/* Next button */}
+        <button
+          onClick={(e) => { e.stopPropagation(); lbNext(); }}
+          className="absolute right-4 md:right-8 z-10 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors border-0 cursor-pointer"
+          aria-label="Next slide"
+        >
+          <ChevronRight size={28} />
+        </button>
+
+        {/* Dot indicators + counter */}
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3 z-10">
+          <span className="font-['Inter'] text-white/60 text-sm">
+            {lightboxIdx + 1} / {LOGIN_SLIDES.length}
+          </span>
+          <div className="flex gap-2">
+            {LOGIN_SLIDES.map((_, i) => (
+              <button
+                key={i}
+                type="button"
+                aria-label={`Go to slide ${i + 1}`}
+                onClick={(e) => { e.stopPropagation(); setLightboxIdx(i); }}
+                className={`h-2 rounded-full transition-all border-0 cursor-pointer ${
+                  lightboxIdx === i
+                    ? 'w-6 bg-[#d4af37]'
+                    : 'w-2 bg-white/30 hover:bg-white/50'
+                }`}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+    )}
+    </>
   );
 };
 
@@ -156,6 +227,14 @@ const WelcomeRotator = () => {
   const [active, setActive] = useState(0);
   const [prev, setPrev] = useState(-1);
 
+  useEffect(() => {
+    const id = setInterval(() => {
+      setPrev(active);
+      setActive((a) => (a + 1) % WELCOME_SLIDES.length);
+    }, 7000);
+    return () => clearInterval(id);
+  }, [active]);
+
   const goTo = (i: number) => {
     if (i === active) return;
     setPrev(active);
@@ -170,7 +249,7 @@ const WelcomeRotator = () => {
   };
 
   return (
-    <div className="relative h-[220px] md:h-[260px]">
+    <div className="relative h-[220px] md:h-[260px] pointer-events-none">
       {WELCOME_SLIDES.map((slide, i) => (
         <div key={i} className={slideClass(i)}>
           <h1 className="font-['Georgia'] text-3xl md:text-5xl leading-tight mb-4 text-white tracking-wide">
@@ -181,7 +260,7 @@ const WelcomeRotator = () => {
           </p>
         </div>
       ))}
-      <div className="absolute bottom-0 left-0 flex gap-2">
+      <div className="absolute bottom-0 left-0 flex gap-2 pointer-events-auto">
         {WELCOME_SLIDES.map((_, i) => (
           <button
             key={i}
