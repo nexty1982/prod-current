@@ -24,6 +24,7 @@ const writeSacramentHistoryModule = safeRequire(
 const { writeSacramentHistory, generateRequestId } = writeSacramentHistoryModule;
 const { buildRecordSearch } = require('../utils/recordSearch');
 const { readSacramentHistory } = require('../utils/readSacramentHistory');
+const { loadSearchWeights, buildRelevanceExpr } = require('../utils/searchWeights');
 const router = express.Router();
 
 /**
@@ -206,20 +207,16 @@ router.get('/:id/history', requireAuth, async (req, res) => {
         if (searchEngaged) {
             const searchRaw = search.trim();
 
-            // Tiered relevance: exact → prefix → contains (per field, highest tier wins)
-            const relevanceExpr = `(
-              (CASE WHEN LOWER(name)            = LOWER(?) THEN 1000 WHEN LOWER(name)            LIKE CONCAT(LOWER(?), '%') THEN 400 WHEN LOWER(name)            LIKE CONCAT('%', LOWER(?), '%') THEN 80 ELSE 0 END) +
-              (CASE WHEN LOWER(lastname)        = LOWER(?) THEN 900  WHEN LOWER(lastname)        LIKE CONCAT(LOWER(?), '%') THEN 350 WHEN LOWER(lastname)        LIKE CONCAT('%', LOWER(?), '%') THEN 70 ELSE 0 END) +
-              (CASE WHEN LOWER(clergy)          = LOWER(?) THEN 300  WHEN LOWER(clergy)          LIKE CONCAT(LOWER(?), '%') THEN 150 WHEN LOWER(clergy)          LIKE CONCAT('%', LOWER(?), '%') THEN 30 ELSE 0 END) +
-              (CASE WHEN LOWER(burial_location) = LOWER(?) THEN 200  WHEN LOWER(burial_location) LIKE CONCAT(LOWER(?), '%') THEN 100 WHEN LOWER(burial_location) LIKE CONCAT('%', LOWER(?), '%') THEN 20 ELSE 0 END)
-            ) AS relevance_score`;
+            // Weighted relevance driven by the church's configured search weights
+            // (Database Mapping → Search Configuration). See utils/searchWeights.js.
+            const weights = await loadSearchWeights(finalChurchId, 'funeral');
+            const { expr, fieldCount } = buildRelevanceExpr('funeral', weights, 'relevance_score');
 
-            query = `SELECT *, ${relevanceExpr} FROM funeral_records${whereClause}`;
+            query = `SELECT *, ${expr} FROM funeral_records${whereClause}`;
             query += ` ORDER BY relevance_score DESC, burial_date DESC, id DESC`;
             query += ` LIMIT ? OFFSET ?`;
 
-            // 4 fields × 3 tiers = 12 params (all same value: raw search term)
-            const scoreParams = Array(12).fill(searchRaw);
+            const scoreParams = Array(fieldCount * 3).fill(searchRaw);
             const whereParams = [...queryParams];
             mainQueryParams = [...scoreParams, ...whereParams, parseInt(limit), pageOffset];
         } else {
