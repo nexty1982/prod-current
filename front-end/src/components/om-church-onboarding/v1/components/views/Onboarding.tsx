@@ -17,7 +17,8 @@ import {
     ShieldCheck,
     X
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import type { ParishGeoJSON } from "@/features/devel-tools/us-church-map/ParishDetailMap";
 import { apiClient } from "@/api/utils/axiosInstance";
 import { inferLocationFields, reconcileInferredLocation } from "../../lib/inferLocationFields";
 import { ThemeToggle } from "../ThemeToggle";
@@ -77,6 +78,12 @@ const STATE_NAMES: Record<string, string> = {
 const STATE_CODES = Object.keys(STATE_NAMES);
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+const EnrollmentParishMap = lazy(() =>
+  import("@/features/devel-tools/us-church-map/ParishDetailMap").then((m) => ({
+    default: m.EnrollmentParishMap,
+  }))
+);
 
 function isStrongPassword(pw: string): boolean {
   return pw.length >= 12 && /\d/.test(pw) && /[^A-Za-z0-9]/.test(pw);
@@ -395,7 +402,7 @@ export function Onboarding({ onCancel, onComplete, theme, onToggleTheme }: Props
 
         <div className="space-y-6">
           {step === "find-parish" && (
-            <FindParishStep parish={parish} setParish={setParish} />
+            <FindParishStep parish={parish} setParish={setParish} theme={theme} />
           )}
           {step === "profile" && (
             <ProfileStep profile={profile} setProfile={setProfile} errors={profileErrors} showErrors={triedNext} locSource={locSource} markLocationUserEdited={markLocationUserEdited} />
@@ -536,6 +543,7 @@ function Field({
 function FindParishStep({
   parish,
   setParish,
+  theme,
 }: {
   parish: {
     state: string;
@@ -547,9 +555,34 @@ function FindParishStep({
     manualName: string;
   };
   setParish: React.Dispatch<React.SetStateAction<any>>;
+  theme: "light" | "dark";
 }) {
   const { state, query, results, selected, searching, notListed, manualName } = parish;
   const update = (patch: Partial<typeof parish>) => setParish((p: any) => ({ ...p, ...patch }));
+  const [geoData, setGeoData] = useState<ParishGeoJSON | null>(null);
+  const [geoLoading, setGeoLoading] = useState(false);
+
+  function selectParishById(id: number) {
+    const fromList = results.find((c) => c.id === id);
+    if (fromList) {
+      update({ selected: fromList, query: fromList.name, notListed: false });
+      return;
+    }
+    const feature = geoData?.features.find((f) => f.properties.id === id);
+    if (feature) {
+      update({
+        selected: {
+          id: feature.properties.id,
+          name: feature.properties.name,
+          city: feature.properties.city || "",
+          state_code: feature.properties.state || state,
+          jurisdiction: feature.properties.affiliation || feature.properties.affiliation_normalized || "",
+        },
+        query: feature.properties.name,
+        notListed: false,
+      });
+    }
+  }
 
   // Live church search: debounced fetch against OM public API.
   // In Workshop preview the API isn't reachable — fail soft and surface
@@ -583,11 +616,39 @@ function FindParishStep({
     };
   }, [state, query]);
 
+  useEffect(() => {
+    if (!state) {
+      setGeoData(null);
+      return;
+    }
+    let cancelled = false;
+    setGeoLoading(true);
+    fetch(`/api/crm-public/parishes-geo?state=${encodeURIComponent(state)}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (cancelled) return;
+        if (data?.type === "FeatureCollection") {
+          setGeoData(data as ParishGeoJSON);
+        } else {
+          setGeoData(null);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setGeoData(null);
+      })
+      .finally(() => {
+        if (!cancelled) setGeoLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [state]);
+
   return (
     <SectionCard
       number={1}
       title="Find Your Parish"
-      description="Tell us which Orthodox parish you serve. We use this to match you to the right diocese and pre-fill what we already know."
+      description="Select your state, then pick your parish on the map or search by name. We match you to our CRM directory and pre-fill your profile."
     >
       <div className="space-y-5">
         <Field label="State" required>
@@ -609,6 +670,46 @@ function FindParishStep({
             </SelectContent>
           </Select>
         </Field>
+
+        {state && !notListed && (
+          <div className="space-y-2">
+            <div className="text-sm font-medium">
+              Parish map
+              <span className="text-destructive ml-0.5">*</span>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Zoom and tap a pin, or search by name below. Pins use our CRM parish directory.
+            </p>
+            <div className="rounded-md border border-border overflow-hidden bg-muted/30">
+              {geoLoading ? (
+                <div className="flex items-center justify-center gap-2 h-[340px] text-sm text-muted-foreground">
+                  <Loader2 className="h-4 w-4 animate-spin" /> Loading map…
+                </div>
+              ) : geoData ? (
+                <Suspense
+                  fallback={
+                    <div className="flex items-center justify-center h-[340px] text-sm text-muted-foreground">
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" /> Loading map…
+                    </div>
+                  }
+                >
+                  <EnrollmentParishMap
+                    geoData={geoData}
+                    selectedParishId={selected?.id ?? null}
+                    nameQuery={selected ? "" : query}
+                    colorScheme={theme}
+                    stateCode={state}
+                    onSelectParish={selectParishById}
+                  />
+                </Suspense>
+              ) : (
+                <div className="p-4 text-sm text-muted-foreground">
+                  Map unavailable. Use parish search below.
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {state && !notListed && (
           <Field
@@ -642,7 +743,7 @@ function FindParishStep({
                       <li key={c.id}>
                         <button
                           type="button"
-                          onClick={() => update({ selected: c })}
+                          onClick={() => selectParishById(c.id)}
                           className="w-full text-left px-3 py-2.5 hover:bg-muted transition-colors"
                         >
                           <div className="text-sm">{c.name}</div>
@@ -713,8 +814,8 @@ function FindParishStep({
       <div className="flex items-start gap-3 p-4 rounded-lg bg-[rgba(212,175,55,0.08)] dark:bg-[rgba(30,42,58,0.8)] border border-[#d4af37]/25 dark:border-white/8 text-sm">
         <MapPin className="h-4 w-4 mt-0.5 text-[#2d1b4e] dark:text-[#d4af37] shrink-0" />
         <div>
-          We pull from the Orthodox Metrics parish directory. If your church
-          isn't there yet, choose <em>I don't see my church</em> — we'll add it.
+          Parishes shown on the map come from the Orthodox Metrics CRM directory.
+          If yours is not listed, choose <em>I don&apos;t see my church</em> and we will verify it with you.
         </div>
       </div>
     </SectionCard>

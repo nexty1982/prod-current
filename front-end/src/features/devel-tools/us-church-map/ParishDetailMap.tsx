@@ -490,4 +490,241 @@ const ParishDetailMap: React.FC<ParishDetailMapProps> = ({
   );
 };
 
+/** Public enrollment wizard — Mapbox parish picker (no CRM ops chrome). */
+export function EnrollmentParishMap({
+  geoData,
+  selectedParishId,
+  nameQuery = '',
+  colorScheme = 'light',
+  stateCode,
+  onSelectParish,
+}: {
+  geoData: ParishGeoJSON;
+  selectedParishId: number | null;
+  nameQuery?: string;
+  colorScheme?: 'light' | 'dark';
+  stateCode: string;
+  onSelectParish: (id: number) => void;
+}) {
+  const mapRef = useRef<MapRef>(null);
+  const [popupInfo, setPopupInfo] = useState<(ParishProperties & { lng: number; lat: number }) | null>(null);
+  const isDark = colorScheme === 'dark';
+
+  const filteredGeoJSON = useMemo(() => {
+    const q = nameQuery.trim().toLowerCase();
+    const filtered = geoData.features.filter((f) => {
+      if (!f.geometry) return false;
+      if (q.length >= 2 && !f.properties.name.toLowerCase().includes(q)) return false;
+      return true;
+    });
+    return { type: 'FeatureCollection' as const, features: filtered };
+  }, [geoData, nameQuery]);
+
+  const center = STATE_CENTERS[stateCode] || { lat: 39.8, lng: -98.6, zoom: 4.5 };
+  const selectedId = selectedParishId ?? -1;
+  const mapStyle = isDark ? 'mapbox://styles/mapbox/dark-v10' : 'mapbox://styles/mapbox/light-v10';
+
+  const handleMapClick = useCallback(
+    (e: any) => {
+      const features = e.features;
+      if (!features?.length) {
+        setPopupInfo(null);
+        return;
+      }
+      const feature = features[0];
+      if (feature.properties?.cluster) {
+        const source = mapRef.current?.getSource('enroll-parishes') as GeoJSONSource | undefined;
+        if (source && feature.properties.cluster_id != null) {
+          source.getClusterExpansionZoom(feature.properties.cluster_id, (err: any, zoom: number | null | undefined) => {
+            if (err || zoom == null || feature.geometry?.type !== 'Point') return;
+            mapRef.current?.easeTo({
+              center: feature.geometry.coordinates as [number, number],
+              zoom: Math.min(zoom || 14, 16),
+              duration: 500,
+            });
+          });
+        }
+        return;
+      }
+      const props = feature.properties;
+      if (props?.id && feature.geometry?.type === 'Point') {
+        const parishId = typeof props.id === 'string' ? parseInt(props.id, 10) : props.id;
+        const [lng, lat] = feature.geometry.coordinates;
+        onSelectParish(parishId);
+        setPopupInfo({
+          id: parishId,
+          name: props.name || '',
+          city: props.city || null,
+          state: props.state || stateCode,
+          street: props.street || null,
+          zip: props.zip || null,
+          phone: props.phone || null,
+          website: props.website || null,
+          affiliation: props.affiliation || null,
+          affiliation_normalized: props.affiliation_normalized || 'Other',
+          op_status: 'directory',
+          stage_label: null,
+          stage_color: null,
+          priority: null,
+          is_client: 0,
+          has_coordinates: true,
+          directory_only: true,
+          lng,
+          lat,
+        });
+      }
+    },
+    [onSelectParish, stateCode],
+  );
+
+  useEffect(() => {
+    if (!selectedParishId || !mapRef.current) {
+      if (!selectedParishId) setPopupInfo(null);
+      return;
+    }
+    const feature = geoData.features.find((f) => f.properties.id === selectedParishId && f.geometry);
+    if (feature?.geometry) {
+      const [lng, lat] = feature.geometry.coordinates!;
+      mapRef.current.flyTo({ center: [lng, lat], zoom: 13, duration: 800 });
+      setPopupInfo({ ...feature.properties, lng, lat });
+    }
+  }, [selectedParishId, geoData]);
+
+  if (!MAPBOX_TOKEN) {
+    return (
+      <Box
+        sx={{
+          p: 2,
+          borderRadius: 1,
+          border: '1px dashed',
+          borderColor: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)',
+          color: 'text.secondary',
+          fontSize: '0.875rem',
+        }}
+      >
+        Map view is unavailable. Use the parish search list below.
+      </Box>
+    );
+  }
+
+  if (geoData.metadata.withCoordinates === 0) {
+    return (
+      <Box
+        sx={{
+          p: 2,
+          borderRadius: 1,
+          bgcolor: isDark ? 'rgba(30,42,58,0.6)' : 'rgba(45,27,78,0.05)',
+          fontSize: '0.875rem',
+          color: 'text.secondary',
+        }}
+      >
+        No mapped parishes in this state yet. Search by name or use &ldquo;I don&apos;t see my church.&rdquo;
+      </Box>
+    );
+  }
+
+  return (
+    <Box sx={{ position: 'relative', width: '100%', height: 340, borderRadius: 1, overflow: 'hidden' }}>
+      <Map
+        ref={mapRef}
+        mapboxAccessToken={MAPBOX_TOKEN}
+        initialViewState={{
+          latitude: center.lat,
+          longitude: center.lng,
+          zoom: center.zoom,
+        }}
+        mapStyle={mapStyle}
+        interactiveLayerIds={['enroll-clusters', 'enroll-unclustered']}
+        onClick={handleMapClick}
+        style={{ width: '100%', height: '100%' }}
+        attributionControl={false}
+      >
+        <NavigationControl position="top-left" showCompass={false} />
+        <Source
+          id="enroll-parishes"
+          type="geojson"
+          data={filteredGeoJSON as any}
+          cluster
+          clusterMaxZoom={13}
+          clusterRadius={45}
+        >
+          <Layer
+            id="enroll-clusters"
+            type="circle"
+            filter={['has', 'point_count']}
+            paint={{
+              'circle-color': isDark ? '#3d2a5c' : '#2d1b4e',
+              'circle-opacity': 0.88,
+              'circle-radius': ['step', ['get', 'point_count'], 14, 10, 18, 30, 24],
+              'circle-stroke-width': 2,
+              'circle-stroke-color': '#d4af37',
+            }}
+          />
+          <Layer
+            id="enroll-cluster-count"
+            type="symbol"
+            filter={['has', 'point_count']}
+            layout={{
+              'text-field': '{point_count_abbreviated}',
+              'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
+              'text-size': 11,
+            }}
+            paint={{ 'text-color': '#fff' }}
+          />
+          <Layer
+            id="enroll-unclustered"
+            type="circle"
+            filter={['!', ['has', 'point_count']]}
+            paint={{
+              'circle-color': '#d4af37',
+              'circle-radius': ['case', ['==', ['get', 'id'], selectedId], 10, 6.5],
+              'circle-stroke-width': ['case', ['==', ['get', 'id'], selectedId], 3, 1.5],
+              'circle-stroke-color': isDark ? '#1e2a3a' : '#2d1b4e',
+              'circle-opacity': 0.95,
+            }}
+          />
+        </Source>
+        {popupInfo && (
+          <Popup
+            longitude={popupInfo.lng}
+            latitude={popupInfo.lat}
+            anchor="bottom"
+            onClose={() => setPopupInfo(null)}
+            closeButton
+            closeOnClick={false}
+            maxWidth="260px"
+            offset={12}
+          >
+            <Box sx={{ p: 0.5, minWidth: 180 }}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 700, fontSize: '0.85rem', mb: 0.25 }}>
+                {popupInfo.name}
+              </Typography>
+              <Typography variant="caption" sx={{ color: '#555', display: 'block', mb: 0.75 }}>
+                {[popupInfo.city, popupInfo.state].filter(Boolean).join(', ')}
+                {popupInfo.affiliation_normalized ? ` · ${popupInfo.affiliation_normalized}` : ''}
+              </Typography>
+            </Box>
+          </Popup>
+        )}
+      </Map>
+      <Box
+        sx={{
+          position: 'absolute',
+          bottom: 8,
+          right: 8,
+          zIndex: 10,
+          px: 1,
+          py: 0.5,
+          borderRadius: 1,
+          bgcolor: isDark ? 'rgba(30,42,58,0.9)' : 'rgba(255,255,255,0.92)',
+          fontSize: '0.65rem',
+          color: 'text.secondary',
+        }}
+      >
+        Tap a pin to select your parish
+      </Box>
+    </Box>
+  );
+}
+
 export default ParishDetailMap;
