@@ -1,16 +1,17 @@
 // routes/admin/nfs-backup.js
-// NFS backup configuration router
-
-const express = require('express');
-const router = express.Router();
-
-// Placeholder routes - implement NFS backup functionality as needed
-router.get('/', (req, res) => {
-  res.json({ 
-    message: 'NFS backup configuration endpoint',
-    status: 'not_implemented'
+// Delegates to OMAI ops remote-backup API (rsync/SSH hub at 192.168.1.244).
+let mod;
+try {
+  mod = require('/var/www/omai/_runtime/server/src/api-ops/admin-nfs-backup');
+} catch (e) {
+  const express = require('express');
+  const router = express.Router();
+  router.use((_req, res) => {
+    res.status(503).json({
+      success: false,
+      error: 'OMAI backup module not available. Ensure /var/www/omai is deployed on this host.',
+    });
   });
-});
-
-module.exports = router;
-
+  mod = { router };
+}
+module.exports = mod.router || mod;
