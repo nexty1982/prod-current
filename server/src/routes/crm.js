@@ -223,11 +223,45 @@ router.get('/churches/:id', requireAuth, async (req, res) => {
       'SELECT * FROM omai_crm_followups WHERE church_id = ? ORDER BY due_date ASC', [id]
     );
 
+    let provisionedClient = null;
+    const provisionedId = churchRows[0].provisioned_church_id;
+    if (provisionedId) {
+      const [clientRows] = await pool.query(
+        `SELECT
+          c.id, c.name, c.email, c.phone, c.address, c.city, c.state_province, c.country,
+          c.jurisdiction, c.website, c.rector_name, c.calendar_type, c.is_active, c.setup_complete,
+          c.onboarding_phase, c.onboarding_stage, c.crm_lead_id, c.db_name, c.has_baptism_records,
+          c.has_marriage_records, c.has_funeral_records, c.created_at,
+          COALESCE(tok.active_tokens, 0) AS active_token_count,
+          COALESCE(usr.total_users, 0) AS total_users,
+          COALESCE(usr.active_users, 0) AS active_users,
+          COALESCE(usr.pending_users, 0) AS pending_users
+        FROM churches c
+        LEFT JOIN (
+          SELECT church_id, COUNT(*) AS active_tokens
+          FROM church_registration_tokens WHERE is_active = 1
+          GROUP BY church_id
+        ) tok ON tok.church_id = c.id
+        LEFT JOIN (
+          SELECT church_id,
+            COUNT(*) AS total_users,
+            SUM(CASE WHEN is_locked = 0 THEN 1 ELSE 0 END) AS active_users,
+            SUM(CASE WHEN is_locked = 1 THEN 1 ELSE 0 END) AS pending_users
+          FROM users WHERE church_id IS NOT NULL
+          GROUP BY church_id
+        ) usr ON usr.church_id = c.id
+        WHERE c.id = ?`,
+        [provisionedId]
+      );
+      provisionedClient = clientRows[0] || null;
+    }
+
     res.json({
       church: churchRows[0],
       contacts,
       activities,
       followUps,
+      provisionedClient,
     });
   } catch (err) {
     console.error('CRM church detail error:', err);
