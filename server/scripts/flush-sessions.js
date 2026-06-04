@@ -25,7 +25,9 @@ async function main() {
 
   const [result] = await connection.execute('DELETE FROM sessions');
   const count = result.affectedRows || 0;
-  console.log(`[flush-sessions] Cleared ${count} session(s) from database`);
+  if (process.env.OM_DEPLOY_QUIET !== '1' && process.env.OM_DEPLOY_QUIET !== 'true') {
+    console.log(`[flush-sessions] Cleared ${count} session(s) from database`);
+  }
 
   await connection.end();
 }

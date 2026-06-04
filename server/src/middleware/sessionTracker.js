@@ -82,18 +82,34 @@ if (!routeLogTimer) {
   if (routeLogTimer.unref) routeLogTimer.unref(); // Don't block process exit
 }
 
-// ─── Session token derivation ───────────────────────────────
-function deriveSessionToken(req) {
-  // Prefer refresh_token cookie hash (JWT flow)
-  const refreshToken = req.cookies?.refresh_token;
-  if (refreshToken) {
-    return 'jwt_' + crypto.createHash('sha256').update(refreshToken).digest('hex').substring(0, 40);
-  }
-  // Fall back to express session ID
-  if (req.sessionID) {
-    return 'sid_' + req.sessionID;
-  }
+// ─── Stable device session key (one row per user + device, not per token refresh) ──
+const SESSION_IDLE_MINUTES = parseInt(process.env.SESSION_IDLE_MINUTES || '30', 10);
+const SESSION_ABSOLUTE_HOURS = parseInt(process.env.SESSION_ABSOLUTE_HOURS || '24', 10);
+const SESSION_CLI_MINUTES = parseInt(process.env.SESSION_CLI_MINUTES || '10', 10);
+
+function deriveDeviceSessionKey(userId, ip, client, deviceType) {
+  const raw = `${userId}|${ip}|${client}|${deviceType}`;
+  return 'dev_' + crypto.createHash('sha256').update(raw).digest('hex').substring(0, 40);
+}
+
+function detectSourceApplication(req) {
+  const realm = req.headers['x-om-realm'] || req.session?.activeRealm || req.session?.realm;
+  if (realm === 'omstudio') return 'OMStudio';
+  if (realm === 'workshop') return 'OM-Workshop';
+  if (realm === 'omai') return 'OMAI';
+  const path = req.path || '';
+  if (path.startsWith('/api/omai') || path.includes('control-panel')) return 'OMAI';
+  return 'OM';
+}
+
+/** @deprecated Use deriveDeviceSessionKey — kept for terminate sid cleanup */
+function deriveLegacySidToken(req) {
+  if (req.sessionID) return 'sid_' + req.sessionID;
   return null;
+}
+
+function deriveSessionToken(req, user, ip, client, device_type) {
+  return deriveDeviceSessionKey(user.id, ip, client, device_type);
 }
 
 // ─── Main middleware ─────────────────────────────────────────
@@ -130,52 +146,65 @@ async function sessionTracker(req, res, next) {
     return next(); // Anonymous — don't track
   }
 
-  const sessionToken = deriveSessionToken(req);
+  const ip = resolveIP(req);
+  const ua = (req.get('User-Agent') || '').substring(0, 2000);
+  const { client, device_type } = parseUA(ua);
+  const sessionToken = deriveSessionToken(req, user, ip, client, device_type);
   if (!sessionToken) {
     return next();
   }
 
-  const ip = resolveIP(req);
-  const ua = (req.get('User-Agent') || '').substring(0, 2000);
-  const { client, device_type } = parseUA(ua);
   const isCli = ['curl', 'API Client', 'Claude CLI', 'Node.js'].includes(client);
-  const sessionExpiryInterval = isCli ? 'INTERVAL 10 MINUTE' : 'INTERVAL 24 HOUR';
+  const sessionExpiryMinutes = isCli ? SESSION_CLI_MINUTES : SESSION_ABSOLUTE_HOURS * 60;
+  const sourceApp = detectSourceApplication(req);
+  const authProvider = req.session?.oidc ? 'keycloak' : (req.cookies?.refresh_token ? 'jwt' : 'express-session');
   const now = Date.now();
 
   try {
-    // Check throttle — skip heavy DB work if we updated recently
+    // Mark expired rows for this device key before upsert (idle + absolute)
+    await getAppPool().query(
+      `UPDATE user_sessions SET is_active = 0
+       WHERE session_token = ? AND terminated_at IS NULL
+         AND (expires_at <= NOW() OR last_activity < DATE_SUB(NOW(), INTERVAL ? MINUTE))`,
+      [sessionToken, SESSION_IDLE_MINUTES]
+    ).catch(() => {});
+
     const lastUpdate = activityThrottle.get(sessionToken);
     const shouldUpdate = !lastUpdate || (now - lastUpdate) > THROTTLE_MS;
 
     if (shouldUpdate) {
-      // Upsert session into user_sessions (CLI sessions get 10-minute expiry)
-      await getAppPool().query(`
-        INSERT INTO user_sessions
+      await getAppPool().query(
+        `INSERT INTO user_sessions
           (user_id, user_email, role, session_token, session_source, church_id,
            ip_address, user_agent, client, device_type, last_activity, expires_at, is_active, created_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), DATE_ADD(NOW(), ${sessionExpiryInterval}), 1, NOW())
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), DATE_ADD(NOW(), INTERVAL ? MINUTE), 1, NOW())
         ON DUPLICATE KEY UPDATE
           user_email = VALUES(user_email),
           role = VALUES(role),
           user_id = VALUES(user_id),
+          session_source = VALUES(session_source),
           ip_address = VALUES(ip_address),
           user_agent = VALUES(user_agent),
           client = VALUES(client),
           device_type = VALUES(device_type),
           last_activity = NOW(),
-          is_active = CASE WHEN terminated_at IS NOT NULL THEN 0 ELSE 1 END
-      `, [
-        user.id,
-        user.email || null,
-        user.role || null,
-        sessionToken,
-        sessionToken.startsWith('jwt_') ? 'jwt' : 'session',
-        user.church_id || null,
-        ip,
-        ua,
-        client,
-        device_type
-      ]);
+          expires_at = GREATEST(expires_at, DATE_ADD(NOW(), INTERVAL ? MINUTE)),
+          is_active = CASE WHEN terminated_at IS NOT NULL THEN 0 ELSE 1 END`,
+        [
+          user.id,
+          user.email || null,
+          user.role || null,
+          sessionToken,
+          sourceApp,
+          user.church_id || null,
+          ip,
+          ua,
+          client,
+          device_type,
+          sessionExpiryMinutes,
+          sessionExpiryMinutes,
+        ]
+      );
 
       activityThrottle.set(sessionToken, now);
     }
@@ -240,3 +269,7 @@ module.exports = sessionTracker;
 module.exports.parseUA = parseUA;
 module.exports.resolveIP = resolveIP;
 module.exports.flushRouteLog = flushRouteLog;
+module.exports.SESSION_IDLE_MINUTES = SESSION_IDLE_MINUTES;
+module.exports.SESSION_ABSOLUTE_HOURS = SESSION_ABSOLUTE_HOURS;
+module.exports.deriveDeviceSessionKey = deriveDeviceSessionKey;
+module.exports.detectSourceApplication = detectSourceApplication;
