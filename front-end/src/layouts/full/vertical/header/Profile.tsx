@@ -39,21 +39,11 @@ const Profile = () => {
   };
 
   const handleLogout = async () => {
+    handleClose2();
     try {
-      handleClose2(); // Close the menu first
       await logout();
-      // Clear any remaining auth state
-      localStorage.removeItem('auth_user');
-      sessionStorage.clear();
-      // Redirect to homepage after logout
-      window.location.href = 'https://orthodoxmetrics.com/frontend-pages/homepage';
     } catch (error) {
       console.error('Logout failed:', error);
-      // Even if logout fails, clear local state and redirect
-      localStorage.removeItem('auth_user');
-      sessionStorage.clear();
-      // Redirect to homepage after logout
-      window.location.href = 'https://orthodoxmetrics.com/frontend-pages/homepage';
     }
   };
 

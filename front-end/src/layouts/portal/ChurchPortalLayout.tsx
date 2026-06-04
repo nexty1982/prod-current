@@ -65,7 +65,6 @@ const PortalHeader: React.FC = () => {
   const handleLogout = async () => {
     setProfileAnchor(null);
     await logout();
-    window.location.href = '/frontend-pages/homepage';
   };
 
   return (

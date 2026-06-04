@@ -17,7 +17,22 @@ import {
   ResetPasswordData,
 } from '@/types/auth/auth';
 
+const OM_LOGGED_OUT_KEY = 'om_logged_out';
+const OM_LOGOUT_IN_PROGRESS_KEY = 'om_logout_in_progress';
+
 export class AuthService {
+  static isSignedOut(): boolean {
+    return sessionStorage.getItem(OM_LOGGED_OUT_KEY) === '1';
+  }
+
+  /** Clear browser auth state only — no Keycloak redirect (safe for refreshAuth / 401). */
+  static clearLocalAuth(): void {
+    localStorage.removeItem('auth_user');
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    localStorage.removeItem('orthodoxmetrics_profile_data');
+  }
+
   /**
    * Login user with email and password
    */
@@ -30,6 +45,8 @@ export class AuthService {
 
       // Backend returns { success: true, user: {...}, access_token: "...", message: "...", redirectUrl: "..." }
       if ((response.ok || response.success) && response.user) {
+        sessionStorage.removeItem(OM_LOGGED_OUT_KEY);
+        sessionStorage.removeItem(OM_LOGOUT_IN_PROGRESS_KEY);
         // Store user data
         localStorage.setItem('auth_user', JSON.stringify(response.user));
 
@@ -87,17 +104,22 @@ export class AuthService {
   /**
    * Logout user
    */
-  static async logout(): Promise<void> {
+  static async logout(realm: string = 'orthodoxmetrics'): Promise<void> {
+    if (sessionStorage.getItem(OM_LOGOUT_IN_PROGRESS_KEY) === '1') {
+      return;
+    }
+    sessionStorage.setItem(OM_LOGOUT_IN_PROGRESS_KEY, '1');
+    sessionStorage.setItem(OM_LOGGED_OUT_KEY, '1');
+    this.clearLocalAuth();
     try {
       await apiJson("/auth/logout", { method: "POST" });
     } catch (error) {
-      // Continue with logout even if API call fails
       console.error('Logout API error:', error);
-    } finally {
-      // Clear local storage (user data and tokens)
-      localStorage.removeItem('auth_user');
-      localStorage.removeItem('access_token');
     }
+    const post = encodeURIComponent(`${window.location.origin}/login`);
+    window.location.replace(
+      `/api/auth/oidc/${realm}/logout?post_logout_redirect_uri=${post}`,
+    );
   }
 
   /**
@@ -248,6 +270,12 @@ export class AuthService {
    * @returns Promise<{authenticated: boolean, user?: User}>
    */
   static async checkAuth(): Promise<{ authenticated: boolean; user?: User }> {
+    if (this.isSignedOut()) {
+      return { authenticated: false };
+    }
+    if (!localStorage.getItem('access_token')) {
+      return { authenticated: false };
+    }
     try {
       console.log('🔍 AuthService: Checking authentication with backend');
 
@@ -255,28 +283,24 @@ export class AuthService {
         method: "GET"
       });
 
-      if (response.ok || response.success) {
+      const signedIn = Boolean(
+        response.authenticated === true
+        || (response.user && (response.ok || response.success)),
+      );
+
+      if (signedIn) {
         console.log('✅ AuthService: Authentication verified');
-
-        // Update stored user data if provided
-        if (response.user) {
-          localStorage.setItem('auth_user', JSON.stringify(response.user));
+        const user = response.user || this.getStoredUser();
+        if (user) {
+          localStorage.setItem('auth_user', JSON.stringify(user));
         }
-
-        return {
-          authenticated: true,
-          user: response.user || this.getStoredUser()
-        };
-      } else {
-        console.log('❌ AuthService: Authentication check failed');
-
-        // Clear stored data on failed auth check
-        localStorage.removeItem('auth_user');
-
-        return {
-          authenticated: false
-        };
+        return { authenticated: true, user: user || undefined };
       }
+
+      console.log('❌ AuthService: Authentication check failed');
+      localStorage.removeItem('auth_user');
+      localStorage.removeItem('access_token');
+      return { authenticated: false };
     } catch (error: any) {
       console.error('💥 AuthService: Error checking authentication:', error);
 

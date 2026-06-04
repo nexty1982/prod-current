@@ -30,7 +30,6 @@ const PortalNavigations: React.FC = () => {
   const handleLogout = async () => {
     setAnchorEl(null);
     await logout();
-    navigate('/auth/login');
   };
 
   const initials = user

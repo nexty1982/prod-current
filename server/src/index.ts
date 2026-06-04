@@ -560,6 +560,30 @@ app.get('/api/system/health', async (req, res) => {
 console.log('✅ Public health endpoints registered (no auth required)');
 // ============================================================================
 
+// Legacy path used by some clients / api.orthodoxmetrics.com gateways
+const { authMiddleware: legacyAuthMiddleware, requireRole: legacyRequireRole } = require('./middleware/auth');
+const { getAppPool: getLegacyAppPool } = require('./config/db-compat');
+app.get(
+  '/api/v1/churches',
+  legacyAuthMiddleware,
+  legacyRequireRole(['admin', 'super_admin']),
+  async (req, res) => {
+    try {
+      const [churches] = await getLegacyAppPool().query(
+        `SELECT id, name, church_name, is_active
+           FROM churches
+          WHERE is_active = 1
+          ORDER BY name ASC`,
+      );
+      res.json({ success: true, churches });
+    } catch (err) {
+      console.error('[GET /api/v1/churches]', err);
+      res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+  },
+);
+console.log('✅ [Server] Mounted GET /api/v1/churches (legacy alias → admin church list)');
+
 // Removed root route to allow SPA to serve index.html
 
 // --- DEBUG HELPERS (read‑only) ------------------------------------
@@ -1972,10 +1996,6 @@ server.listen(PORT, HOST, () => {
   // ============================================================================
 });
 
-app.get('/api/auth/check', (req,res)=>{
-  const u = req.session && req.session.user;
-  if (u) return res.json({ authenticated: true, user: u });
-  res.status(401).json({ authenticated: false, message: 'Not authenticated' });
-});
+// /api/auth/check is handled by routes/auth.js (session + JWT Bearer).
 
 // Removed duplicate /api/user/profile route - already handled by userProfileRouter

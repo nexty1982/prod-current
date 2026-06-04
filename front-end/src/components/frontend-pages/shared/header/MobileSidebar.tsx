@@ -39,7 +39,6 @@ const MobileSidebar = ({ isPortal = false }: MobileSidebarProps) => {
   const toggleMode = () => setActiveMode(activeMode === 'light' ? 'dark' : 'light');
   const handleLogout = async () => {
     await logout();
-    navigate('/auth/login');
   };
 
   return (

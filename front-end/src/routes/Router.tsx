@@ -155,7 +155,8 @@ const ReactSortingTable = Loadable(lazy(() => import('../features/tables/react-t
 const ReactStickyTable = Loadable(lazy(() => import('../features/tables/react-tables/sticky/page')));
 
 // authentication
-const Login2 = Loadable(lazy(() => import('../features/auth/authentication/auth2/Login2')));
+const Login2 = Loadable(lazy(() => import('../features/auth/authentication/SsoLoginRedirect')));
+const OidcComplete = Loadable(lazy(() => import('../features/auth/authentication/OidcComplete')));
 const Register = Loadable(lazy(() => import('../features/auth/authentication/auth1/Register')));
 const Register2 = Loadable(lazy(() => import('../features/auth/authentication/auth2/Register2')));
 const RegisterToken = Loadable(lazy(() => import('../features/auth/authentication/authForms/AuthRegisterToken')));
@@ -897,6 +898,7 @@ const Router = [
           { path: '404', element: <NotFound404 /> },
           { path: 'coming-soon', element: <ComingSoon /> },
           { path: 'unauthorized', element: <Unauthorized /> },
+          { path: 'oidc-complete', element: <OidcComplete /> },
           { path: 'login', element: <Login2 /> },
           { path: 'login2', element: <Login2 /> },
           { path: 'register', element: <Register /> },

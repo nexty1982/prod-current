@@ -62,6 +62,12 @@ function AuthProvider({ children }: AuthProviderProps) {
   // Initialize auth state from localStorage, then validate with server
   useEffect(() => {
     try {
+      if (AuthService.isSignedOut()) {
+        setUser(null);
+        AuthService.clearLocalAuth();
+        return;
+      }
+
       const storedUser = AuthService.getStoredUser();
 
       if (storedUser) {
@@ -168,26 +174,12 @@ function AuthProvider({ children }: AuthProviderProps) {
   };
 
   const logout = async () => {
-    try {
-      setLoading(true);
-
-      try {
-        await AuthService.logout();
-      } catch (err) {
-        console.warn('Logout API call failed:', err);
-      }
-
-      setUser(null);
-      setError(null);
-      localStorage.removeItem('auth_user');
-      // Clear profile data on logout
-      localStorage.removeItem('orthodoxmetrics_profile_data');
-
-    } catch (err) {
-      console.error('Error during logout:', err);
-    } finally {
-      setLoading(false);
-    }
+    setLoading(true);
+    setUser(null);
+    setError(null);
+    localStorage.removeItem('orthodoxmetrics_profile_data');
+    // Ends OM JWT + Keycloak SSO; browser navigates away (no return).
+    await AuthService.logout('orthodoxmetrics');
   };
 
   const refreshAuth = async () => {
@@ -198,15 +190,13 @@ function AuthProvider({ children }: AuthProviderProps) {
         setUser(authCheck.user);
         localStorage.setItem('auth_user', JSON.stringify(authCheck.user));
       } else {
-        // Session expired - clear profile data
-        localStorage.removeItem('orthodoxmetrics_profile_data');
-        await logout();
+        setUser(null);
+        AuthService.clearLocalAuth();
       }
     } catch (err) {
       console.error('Error refreshing auth:', err);
-      // Session expired - clear profile data
-      localStorage.removeItem('orthodoxmetrics_profile_data');
-      await logout();
+      setUser(null);
+      AuthService.clearLocalAuth();
     }
   };
 

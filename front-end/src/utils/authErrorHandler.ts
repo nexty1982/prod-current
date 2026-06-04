@@ -109,22 +109,11 @@ export async function handle401Error(error: any, context: string = 'api'): Promi
   // Refresh failed — session is truly expired
   console.warn(`[AuthErrorHandler] Refresh failed in ${context}, redirecting to login`);
 
-  try {
-    await AuthService.logout();
-  } catch (logoutError) {
-    console.error('Error during logout:', logoutError);
-  }
+  AuthService.clearLocalAuth();
+  sessionStorage.setItem('om_logged_out', '1');
 
-  // Clear any stored authentication data
-  localStorage.removeItem('auth_user');
-  localStorage.removeItem('access_token');
-
-  // Redirect to login page
-  const currentPath = window.location.pathname;
-  const loginUrl = `/auth/login${currentPath !== '/auth/login' ? `?redirect=${encodeURIComponent(currentPath)}` : ''}`;
-
-  console.log(`[AuthErrorHandler] Redirecting to login: ${loginUrl}`);
-  window.location.href = loginUrl;
+  console.log('[AuthErrorHandler] Redirecting to platform login');
+  window.location.replace('/login');
 
   throw new Error('Authentication required - redirecting to login');
 }
