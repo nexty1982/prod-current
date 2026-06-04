@@ -18,6 +18,7 @@ import {
     X
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { apiClient } from "@/api/utils/axiosInstance";
 import { inferLocationFields, reconcileInferredLocation } from "../../lib/inferLocationFields";
 import { ThemeToggle } from "../ThemeToggle";
 import { Badge } from "../ui/badge";
@@ -171,6 +172,13 @@ export function Onboarding({ onCancel, onComplete, theme, onToggleTheme }: Props
   // Reveals inline field errors once the user has attempted to advance past a
   // form step. Reset whenever the active step changes.
   const [triedNext, setTriedNext] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
+  const [confirmation, setConfirmation] = useState<{
+    reference: string;
+    inquiryId: number;
+    leadId: number;
+  } | null>(null);
 
   // Location auto-fill: remembers where each inferred field's value came from
   // ("city_state" | "address" | "user") so we never clobber a user edit — the
@@ -225,12 +233,68 @@ export function Onboarding({ onCancel, onComplete, theme, onToggleTheme }: Props
   // clickable so pressing Next can surface their validation errors.
   const canProceed = step === "find-parish" ? findParishComplete : true;
 
+  async function submitEnrollment() {
+    setSubmitError("");
+    setSubmitting(true);
+    try {
+      const data = await apiClient.post<{
+        success: boolean;
+        message?: string;
+        reference?: string;
+        inquiryId?: number;
+        leadId?: number;
+      }>("/crm-public/enroll", {
+        churchId: parish.selected?.id ?? null,
+        churchName: profile.churchName.trim(),
+        stateCode: parish.state || profile.state || null,
+        firstName: profile.firstName.trim(),
+        lastName: profile.lastName.trim(),
+        email: profile.email.trim(),
+        phone: profile.phone.trim() || null,
+        website: profile.website.trim() || null,
+        address: profile.address.trim(),
+        city: profile.city.trim(),
+        state: profile.state.trim(),
+        zip: profile.zip.trim(),
+        country: profile.country.trim(),
+        timezone: profile.timezone.trim(),
+        jurisdiction: profile.jurisdiction.trim(),
+        parishSize: profile.size.trim() || null,
+        referral: profile.referral.trim() || null,
+        modules,
+        adminFirstName: admin.firstName.trim(),
+        adminLastName: admin.lastName.trim(),
+        adminEmail: admin.email.trim(),
+        secondAdmin: admin.secondAdmin,
+      });
+      if (!data.success) {
+        setSubmitError(data.message || "Submission failed. Please try again.");
+        return;
+      }
+      setConfirmation({
+        reference: data.reference || `OM-ENR-${data.inquiryId}`,
+        inquiryId: data.inquiryId ?? 0,
+        leadId: data.leadId ?? 0,
+      });
+      setTriedNext(false);
+      setStep("confirm");
+    } catch {
+      setSubmitError("Network error. Please try again later.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
   function goNext() {
-    if (!canProceed) return;
+    if (!canProceed || submitting) return;
     // Block advancing past a form step until its required fields are valid,
     // and reveal the inline errors.
     if (step === "profile" && !profileComplete) { setTriedNext(true); return; }
     if (step === "admin" && !adminComplete) { setTriedNext(true); return; }
+    if (step === "review") {
+      void submitEnrollment();
+      return;
+    }
     // Carry the chosen church forward into the profile step. Without this the
     // profile step keeps its seeded placeholder church name, so a user who
     // selected (or typed in) a different church sees the wrong name pre-filled.
@@ -278,9 +342,6 @@ export function Onboarding({ onCancel, onComplete, theme, onToggleTheme }: Props
             <img src="/images/logos/logo-top-dark.svg" alt="Orthodox Metrics" className="h-10 w-auto object-contain hidden dark:block" />
           </a>
           <div className="flex items-center gap-3">
-            <Badge variant="outline" className="hidden md:inline-flex">
-              <Save className="h-3 w-3 mr-1" /> Draft saved · 2 min ago
-            </Badge>
             <Button variant="ghost" onClick={onCancel}>
               <X className="h-4 w-4 mr-2" /> Cancel
             </Button>
@@ -357,9 +418,16 @@ export function Onboarding({ onCancel, onComplete, theme, onToggleTheme }: Props
               profile={profile}
               modules={selectedModules}
               admin={admin}
-              onDashboard={onComplete}
+              reference={confirmation?.reference ?? ""}
               onHome={onCancel}
             />
+          )}
+
+          {submitError && step === "review" && (
+            <div className="flex items-start gap-2 p-3 rounded-md border border-destructive/40 bg-destructive/5 text-sm text-destructive">
+              <CircleAlert className="h-4 w-4 mt-0.5 shrink-0" />
+              <span>{submitError}</span>
+            </div>
           )}
 
           {triedNext &&
@@ -382,11 +450,19 @@ export function Onboarding({ onCancel, onComplete, theme, onToggleTheme }: Props
                 </Button>
                 <Button
                   onClick={goNext}
-                  disabled={!canProceed}
+                  disabled={!canProceed || submitting}
                   className="bg-[#d4af37] hover:bg-[#c29d2f] text-[#2d1b4e] font-medium px-6"
                 >
-                  {step === "review" ? "Submit Provision Request" : "Next"}{" "}
-                  <ArrowRight className="h-4 w-4 ml-2" />
+                  {submitting ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" /> Submitting…
+                    </>
+                  ) : (
+                    <>
+                      {step === "review" ? "Submit Provision Request" : "Next"}{" "}
+                      <ArrowRight className="h-4 w-4 ml-2" />
+                    </>
+                  )}
                 </Button>
               </div>
             </div>
@@ -907,7 +983,7 @@ function AdminStep({ admin, setAdmin, errors = {}, showErrors = false }: any) {
     <SectionCard
       number={4}
       title="Admin Account Setup"
-      description="Create the first church administrator. You can invite additional users after approval."
+      description="Tell us who should be the first administrator. Your sign-in account is created after Orthodox Metrics approves your request."
     >
       <div className="grid md:grid-cols-2 gap-5">
         <Field label="Admin first name" required error={err("firstName")}>
@@ -923,7 +999,7 @@ function AdminStep({ admin, setAdmin, errors = {}, showErrors = false }: any) {
         <Field
           label="Password"
           required
-          hint="At least 12 characters, with one number and one symbol."
+          hint="Choose a password for later — it is not sent until your workspace is provisioned. At least 12 characters, with one number and one symbol."
           error={err("password")}
         >
           <Input
@@ -959,8 +1035,8 @@ function AdminStep({ admin, setAdmin, errors = {}, showErrors = false }: any) {
       <div className="flex items-start gap-3 p-4 rounded-lg bg-[rgba(212,175,55,0.08)] dark:bg-[rgba(30,42,58,0.8)] border border-[#d4af37]/25 dark:border-white/8 text-sm">
         <ShieldCheck className="h-4 w-4 mt-0.5 text-[#2d1b4e] dark:text-[#d4af37] shrink-0" />
         <div>
-          Your password is hashed and stored securely. Orthodox Metrics staff cannot read your
-          password. You can change it at any time from Settings.
+          Your enrollment request is saved to our CRM now. Password and admin sign-in are set up
+          only after staff approve your parish workspace.
         </div>
       </div>
     </SectionCard>
@@ -1021,8 +1097,30 @@ function ReviewStep({ profile, modules, admin }: any) {
   );
 }
 
-function ConfirmStep({ profile, modules, admin, onDashboard, onHome }: any) {
-  const requestId = "OM-PROV-2026-0429";
+function ConfirmStep({
+  profile,
+  modules,
+  admin,
+  reference,
+  onHome,
+}: {
+  profile: any;
+  modules: string[];
+  admin: any;
+  reference: string;
+  onHome: () => void;
+}) {
+  const [copied, setCopied] = useState(false);
+  const requestId = reference || "—";
+
+  function copyReference() {
+    if (!requestId || requestId === "—") return;
+    void navigator.clipboard.writeText(requestId).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }
+
   return (
     <SectionCard
       number={6}
@@ -1038,11 +1136,19 @@ function ConfirmStep({ profile, modules, admin, onDashboard, onHome }: any) {
           We've received your request for {profile.churchName}. Our staff will review it shortly.
         </p>
         <div className="flex items-center gap-2 px-4 py-2 rounded-md bg-muted">
-          <span className="text-sm text-muted-foreground">Provision ID:</span>
+          <span className="text-sm text-muted-foreground">Reference:</span>
           <code className="text-sm">{requestId}</code>
-          <Button variant="ghost" size="icon" className="h-7 w-7">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7"
+            onClick={copyReference}
+            disabled={!reference}
+            title="Copy reference"
+          >
             <Copy className="h-3.5 w-3.5" />
           </Button>
+          {copied && <span className="text-xs text-muted-foreground">Copied</span>}
         </div>
       </div>
 
@@ -1065,8 +1171,8 @@ function ConfirmStep({ profile, modules, admin, onDashboard, onHome }: any) {
 
       <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
         <Button variant="outline" onClick={onHome}>Return Home</Button>
-        <Button onClick={onDashboard} className="bg-[#d4af37] hover:bg-[#c29d2f] text-[#2d1b4e] font-medium">
-          Go to Dashboard <ArrowRight className="ml-2 h-4 w-4" />
+        <Button asChild className="bg-[#d4af37] hover:bg-[#c29d2f] text-[#2d1b4e] font-medium">
+          <a href="/auth/login">Sign in when your account is ready</a>
         </Button>
       </div>
     </SectionCard>

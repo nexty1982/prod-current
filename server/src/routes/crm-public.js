@@ -334,6 +334,329 @@ router.post('/inquiry', async (req, res) => {
   }
 });
 
+// Affiliation labels for public parish map (enrollment)
+const AFFILIATION_NORMALIZE = {
+  'greek orthodox': 'Greek Orthodox',
+  goarch: 'Greek Orthodox',
+  oca: 'OCA',
+  'orthodox church in america': 'OCA',
+  rocor: 'ROCOR',
+  antiochian: 'Antiochian',
+  aocana: 'Antiochian',
+  serbian: 'Serbian',
+  romanian: 'Romanian',
+  ukrainian: 'Ukrainian',
+  bulgarian: 'Bulgarian',
+  albanian: 'Albanian',
+  'carpatho-russian': 'Carpatho-Russian',
+  georgian: 'Georgian',
+};
+
+function normalizeAffiliation(raw) {
+  if (!raw) return 'Other';
+  const key = String(raw).trim().toLowerCase();
+  return AFFILIATION_NORMALIZE[key] || String(raw).trim();
+}
+
+// ── GET /api/crm-public/parishes-geo?state=NY ──────────────────
+// GeoJSON parish pins for enrollment map (public, CRM leads)
+router.get('/parishes-geo', async (req, res) => {
+  try {
+    const { state } = req.query;
+    if (!state || typeof state !== 'string' || state.length !== 2) {
+      return res.status(400).json({ success: false, message: 'state query param required (2-letter code)' });
+    }
+
+    const stateUpper = state.toUpperCase();
+    const pool = getAppPool();
+    const [rows] = await pool.query(
+      `SELECT uc.id, uc.name, uc.street, uc.city, uc.state_code, uc.zip,
+              uc.phone, uc.website, uc.latitude, uc.longitude,
+              COALESCE(j.abbreviation, j.name, uc.jurisdiction, '') AS jurisdiction
+       FROM omai_crm_leads uc
+       LEFT JOIN jurisdictions j ON uc.jurisdiction_id = j.id
+       WHERE uc.state_code = ?
+       ORDER BY uc.name`,
+      [stateUpper]
+    );
+
+    const features = [];
+    const affiliationCounts = {};
+
+    for (const r of rows) {
+      const lat = parseFloat(r.latitude);
+      const lng = parseFloat(r.longitude);
+      const hasCoords = !Number.isNaN(lat) && !Number.isNaN(lng) && lat !== 0 && lng !== 0;
+      const affNorm = normalizeAffiliation(r.jurisdiction);
+      affiliationCounts[affNorm] = (affiliationCounts[affNorm] || 0) + 1;
+
+      const properties = {
+        id: r.id,
+        name: r.name,
+        city: r.city || null,
+        state: r.state_code,
+        street: r.street || null,
+        zip: r.zip || null,
+        phone: r.phone || null,
+        website: r.website || null,
+        affiliation: r.jurisdiction || null,
+        affiliation_normalized: affNorm,
+        has_coordinates: hasCoords,
+      };
+
+      features.push({
+        type: 'Feature',
+        geometry: hasCoords ? { type: 'Point', coordinates: [lng, lat] } : null,
+        properties,
+      });
+    }
+
+    const affiliations = Object.entries(affiliationCounts)
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count);
+
+    res.json({
+      type: 'FeatureCollection',
+      features,
+      metadata: {
+        state: stateUpper,
+        total: features.length,
+        withCoordinates: features.filter((f) => f.geometry !== null).length,
+        withoutCoordinates: features.filter((f) => f.geometry === null).length,
+        affiliations,
+      },
+    });
+  } catch (error) {
+    console.error('Enrollment parishes-geo error:', error);
+    res.status(500).json({ success: false, message: 'Failed to load parish map data.' });
+  }
+});
+
+// ── POST /api/crm-public/enroll ────────────────────────────────
+// Parish enrollment wizard — creates CRM inquiry + follow-up (no auth)
+router.post('/enroll', async (req, res) => {
+  try {
+    const {
+      churchId,
+      churchName,
+      stateCode,
+      firstName,
+      lastName,
+      email,
+      phone,
+      website,
+      address,
+      city,
+      state,
+      zip,
+      country,
+      timezone,
+      jurisdiction,
+      parishSize,
+      referral,
+      modules,
+      adminFirstName,
+      adminLastName,
+      adminEmail,
+      secondAdmin,
+    } = req.body;
+
+    if (!churchName || !firstName || !email) {
+      return res.status(400).json({
+        success: false,
+        message: 'Church name, contact first name, and email are required.',
+      });
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ success: false, message: 'Please enter a valid email address.' });
+    }
+
+    const pool = getAppPool();
+    const effectiveState = stateCode || state || '';
+
+    let resolvedLeadId = churchId ? parseInt(churchId, 10) : null;
+    if (!resolvedLeadId || Number.isNaN(resolvedLeadId)) {
+      const [existing] = await pool.query(
+        `SELECT id FROM omai_crm_leads
+         WHERE LOWER(name) = LOWER(?) AND (state_code = ? OR ? IS NULL OR ? = '')
+         ORDER BY id ASC LIMIT 1`,
+        [churchName, effectiveState || null, effectiveState || null, effectiveState || '']
+      );
+      if (existing.length) {
+        resolvedLeadId = existing[0].id;
+      } else {
+        const extId = `web-enroll-${Date.now()}`;
+        const [leadIns] = await pool.query(
+          `INSERT INTO omai_crm_leads (ext_id, name, state_code, pipeline_stage, priority, crm_notes, last_contacted_at)
+           VALUES (?, ?, ?, 'prospects', 'medium', ?, NOW())`,
+          [
+            extId,
+            churchName,
+            effectiveState,
+            `Auto-created from public enrollment wizard (${new Date().toISOString().slice(0, 10)})`,
+          ]
+        );
+        resolvedLeadId = leadIns.insertId;
+      }
+    }
+
+    const leadUpdates = [];
+    const leadParams = [];
+    const setLead = (col, val) => {
+      if (val !== undefined && val !== null && String(val).trim() !== '') {
+        leadUpdates.push(`${col} = ?`);
+        leadParams.push(val);
+      }
+    };
+    setLead('street', address);
+    setLead('city', city);
+    setLead('state_code', effectiveState);
+    setLead('zip', zip);
+    setLead('phone', phone);
+    setLead('website', website);
+    if (jurisdiction) {
+      leadUpdates.push('jurisdiction = ?');
+      leadParams.push(jurisdiction);
+    }
+    if (leadUpdates.length) {
+      leadParams.push(resolvedLeadId);
+      await pool.query(`UPDATE omai_crm_leads SET ${leadUpdates.join(', ')} WHERE id = ?`, leadParams);
+    }
+
+    const [primaryRows] = await pool.query(
+      'SELECT id FROM omai_crm_contacts WHERE church_id = ? AND is_primary = 1 LIMIT 1',
+      [resolvedLeadId]
+    );
+    if (primaryRows.length) {
+      await pool.query(
+        `UPDATE omai_crm_contacts SET first_name = ?, last_name = ?, email = ?, phone = ?, notes = ?
+         WHERE id = ?`,
+        [
+          firstName,
+          lastName || null,
+          email,
+          phone || null,
+          'Updated via public enrollment wizard',
+          primaryRows[0].id,
+        ]
+      );
+    } else {
+      await pool.query(
+        `INSERT INTO omai_crm_contacts (church_id, first_name, last_name, role, email, phone, is_primary, notes)
+         VALUES (?, ?, ?, ?, ?, ?, 1, ?)`,
+        [
+          resolvedLeadId,
+          firstName,
+          lastName || null,
+          'Enrollment — parish contact',
+          email,
+          phone || null,
+          'Submitted via public enrollment wizard',
+        ]
+      );
+    }
+
+    const moduleList = modules && typeof modules === 'object'
+      ? Object.entries(modules).filter(([, v]) => v).map(([k]) => k)
+      : [];
+    const enrollmentNote = [
+      `Enrollment wizard submission`,
+      `Modules: ${moduleList.length ? moduleList.join(', ') : 'none'}`,
+      parishSize ? `Parish size: ${parishSize}` : null,
+      country ? `Country: ${country}` : null,
+      timezone ? `Timezone: ${timezone}` : null,
+      referral ? `Referral: ${referral}` : null,
+      adminEmail
+        ? `Requested admin: ${adminFirstName || ''} ${adminLastName || ''} (${adminEmail})${secondAdmin ? ' + second admin later' : ''}`
+        : null,
+    ].filter(Boolean).join('\n');
+
+    const followDue = new Date();
+    followDue.setDate(followDue.getDate() + 2);
+    const dueStr = followDue.toISOString().split('T')[0];
+    await pool.query(
+      `INSERT INTO omai_crm_followups (church_id, due_date, subject, description)
+       VALUES (?, ?, ?, ?)`,
+      [
+        resolvedLeadId,
+        dueStr,
+        `Review enrollment: ${churchName}`,
+        `New enrollment from ${firstName} ${lastName || ''} (${email}). ${enrollmentNote}`,
+      ]
+    );
+    await pool.query(
+      'UPDATE omai_crm_leads SET next_follow_up = ?, last_contacted_at = NOW() WHERE id = ?',
+      [dueStr, resolvedLeadId]
+    );
+
+    const heardAbout = referral ? String(referral).slice(0, 100) : 'enrollment_wizard';
+    const [result] = await pool.query(
+      `INSERT INTO omai_crm_inquiries
+       (church_id, church_name_entered, state_code, contact_first_name, contact_last_name,
+        contact_email, contact_phone, contact_role, maintains_records, heard_about,
+        heard_about_detail, interested_digital_records, wants_meeting, appointment_id)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, NULL)`,
+      [
+        resolvedLeadId,
+        churchName,
+        effectiveState || null,
+        firstName,
+        lastName || null,
+        email,
+        phone || null,
+        'Enrollment wizard — parish contact',
+        'yes',
+        heardAbout,
+        enrollmentNote.slice(0, 2000),
+        'yes',
+      ]
+    );
+
+    const reference = `OM-ENR-${result.insertId}`;
+
+    try {
+      await pool.query(
+        `INSERT INTO omai_crm_activities (church_id, activity_type, subject, body, metadata)
+         VALUES (?, 'note', ?, ?, ?)`,
+        [
+          resolvedLeadId,
+          `Enrollment request from ${firstName} ${lastName || ''}`.trim(),
+          enrollmentNote,
+          JSON.stringify({
+            source: 'enrollment_wizard',
+            inquiryId: result.insertId,
+            reference,
+            modules: moduleList,
+            adminEmail: adminEmail || null,
+          }),
+        ]
+      );
+      await pool.query(
+        `UPDATE omai_crm_leads SET pipeline_stage = 'engagement', last_contacted_at = NOW()
+         WHERE id = ? AND pipeline_stage IN ('prospects', 'new_lead')`,
+        [resolvedLeadId]
+      );
+    } catch (actErr) {
+      console.error('Failed to create enrollment CRM activity:', actErr);
+    }
+
+    console.log(`✅ CRM enrollment ${reference} from ${email} (church: ${churchName}, lead #${resolvedLeadId})`);
+
+    res.json({
+      success: true,
+      inquiryId: result.insertId,
+      leadId: resolvedLeadId,
+      reference,
+      message: 'Thank you! Your enrollment request has been received. Our team will review it within 1–2 business days.',
+    });
+  } catch (error) {
+    console.error('Enrollment submission error:', error);
+    res.status(500).json({ success: false, message: 'Failed to submit enrollment. Please try again.' });
+  }
+});
+
 // Helper: format minutes to 12-hour display
 function formatTime(totalMinutes) {
   const h = Math.floor(totalMinutes / 60);

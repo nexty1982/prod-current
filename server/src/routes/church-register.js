@@ -5,12 +5,14 @@ const crypto = require('crypto');
 const router = express.Router();
 const { getAppPool } = require('../config/db');
 
-// GET /api/auth/church-search/states — Public: list US states that have churches
+// GET /api/auth/church-search/states — Public: list US states that have CRM leads
 router.get('/church-search/states', async (req, res) => {
   try {
     const pool = getAppPool();
     const [rows] = await pool.query(
-      `SELECT DISTINCT state_code FROM us_churches WHERE state_code IS NOT NULL ORDER BY state_code`
+      `SELECT DISTINCT state_code FROM omai_crm_leads
+       WHERE state_code IS NOT NULL AND TRIM(state_code) != ''
+       ORDER BY state_code`
     );
     res.json({ success: true, states: rows.map(r => r.state_code) });
   } catch (error) {
@@ -19,7 +21,7 @@ router.get('/church-search/states', async (req, res) => {
   }
 });
 
-// GET /api/auth/church-search?state=NY&q=saint — Public: search CRM churches by state + name
+// GET /api/auth/church-search?state=NY&q=saint — Public: search omai_crm_leads by state + name
 router.get('/church-search', async (req, res) => {
   try {
     const { state, q } = req.query;
@@ -29,15 +31,21 @@ router.get('/church-search', async (req, res) => {
 
     const pool = getAppPool();
     const params = [state];
-    let where = 'WHERE state_code = ?';
+    let where = 'WHERE uc.state_code = ?';
 
     if (q && String(q).trim().length >= 2) {
-      where += ' AND name LIKE ?';
+      where += ' AND uc.name LIKE ?';
       params.push(`%${String(q).trim()}%`);
     }
 
     const [rows] = await pool.query(
-      `SELECT id, name, city, state_code, jurisdiction FROM us_churches ${where} ORDER BY name LIMIT 50`,
+      `SELECT uc.id, uc.name, uc.city, uc.state_code,
+              COALESCE(j.abbreviation, j.name, uc.jurisdiction, '') AS jurisdiction
+       FROM omai_crm_leads uc
+       LEFT JOIN jurisdictions j ON uc.jurisdiction_id = j.id
+       ${where}
+       ORDER BY uc.name
+       LIMIT 50`,
       params
     );
     res.json({ success: true, churches: rows });
