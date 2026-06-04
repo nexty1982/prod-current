@@ -87,10 +87,6 @@ const EnrollmentParishMap = lazy(() =>
   }))
 );
 
-function isStrongPassword(pw: string): boolean {
-  return pw.length >= 12 && /\d/.test(pw) && /[^A-Za-z0-9]/.test(pw);
-}
-
 function getContactErrors(p: any): Record<string, string> {
   const e: Record<string, string> = {};
   if (!String(p.firstName ?? "").trim()) e.firstName = "First name is required";
@@ -112,14 +108,6 @@ function getAdminErrors(a: any): Record<string, string> {
   if (!String(a.lastName ?? "").trim()) e.lastName = "Last name is required";
   if (!String(a.email ?? "").trim()) e.email = "Email is required";
   else if (!EMAIL_RE.test(String(a.email).trim())) e.email = "Enter a valid email address";
-  if (a.password || a.confirm) {
-    if (!a.password) e.password = "Enter a password or clear both fields";
-    else if (!isStrongPassword(a.password)) {
-      e.password = "At least 12 characters, with one number and one symbol";
-    }
-    if (!a.confirm) e.confirm = "Please confirm your password";
-    else if (a.confirm !== a.password) e.confirm = "Passwords do not match";
-  }
   return e;
 }
 
@@ -283,8 +271,12 @@ export function Onboarding({ onCancel, onComplete, theme, onToggleTheme }: Props
       });
       setTriedNext(false);
       setStep("confirm");
-    } catch {
-      setSubmitError("Network error. Please try again later.");
+    } catch (err: unknown) {
+      const msg =
+        err instanceof Error && err.message
+          ? err.message
+          : "Network error. Please try again later.";
+      setSubmitError(msg);
     } finally {
       setSubmitting(false);
     }
@@ -458,7 +450,16 @@ export function Onboarding({ onCancel, onComplete, theme, onToggleTheme }: Props
               (step === "admin" && !adminComplete)) && (
               <div className="flex items-start gap-2 p-3 rounded-md border border-destructive/40 bg-destructive/5 text-sm text-destructive">
                 <CircleAlert className="h-4 w-4 mt-0.5 shrink-0" />
-                <span>Please complete the required fields highlighted above before continuing.</span>
+                <div>
+                  <div>Please complete the required fields highlighted above before continuing.</div>
+                  {step === "admin" && !adminComplete && (
+                    <ul className="mt-2 list-disc pl-4 space-y-0.5">
+                      {Object.values(adminErrors).map((msg) => (
+                        <li key={msg}>{msg}</li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
               </div>
             )}
 
@@ -484,7 +485,13 @@ export function Onboarding({ onCancel, onComplete, theme, onToggleTheme }: Props
                     </>
                   ) : (
                     <>
-                      {step === "review" ? "Submit Provision Request" : step === "location" ? "Continue" : "Next"}{" "}
+                      {step === "review"
+                        ? "Submit Provision Request"
+                        : step === "admin"
+                          ? "Next — Review & Submit"
+                          : step === "location"
+                            ? "Continue"
+                            : "Next"}{" "}
                       <ArrowRight className="h-4 w-4 ml-2" />
                     </>
                   )}
@@ -1140,39 +1147,20 @@ function AdminStep({ admin, setAdmin, profile, errors = {}, showErrors = false }
     <SectionCard
       number={6}
       title="Administrator"
-      description="Who should be the first admin when your workspace is ready? Password is optional until we provision your account."
+      description="Who should be the first admin when your workspace is ready? You will set your sign-in password after we approve your parish."
     >
-      <div className="grid md:grid-cols-2 gap-5">
+      <div className="grid md:grid-cols-2 gap-5 max-w-xl">
         <Field label="Admin first name" required error={err("firstName")}>
-          <Input value={admin.firstName} onChange={(e) => set("firstName", e.target.value)} />
+          <Input value={admin.firstName} onChange={(e) => set("firstName", e.target.value)} autoComplete="given-name" />
         </Field>
         <Field label="Admin last name" required error={err("lastName")}>
-          <Input value={admin.lastName} onChange={(e) => set("lastName", e.target.value)} />
+          <Input value={admin.lastName} onChange={(e) => set("lastName", e.target.value)} autoComplete="family-name" />
         </Field>
-        <Field label="Admin email" required error={err("email")}>
-          <Input type="email" value={admin.email} onChange={(e) => set("email", e.target.value)} />
-        </Field>
-        <div />
-        <Field
-          label="Password"
-          hint="Optional — choose now or when you receive your approval email. At least 12 characters with a number and symbol if you fill this in."
-          error={err("password")}
-        >
-          <Input
-            type="password"
-            value={admin.password}
-            onChange={(e) => set("password", e.target.value)}
-            placeholder="••••••••••••"
-          />
-        </Field>
-        <Field label="Confirm password" error={err("confirm")}>
-          <Input
-            type="password"
-            value={admin.confirm}
-            onChange={(e) => set("confirm", e.target.value)}
-            placeholder="••••••••••••"
-          />
-        </Field>
+        <div className="md:col-span-2">
+          <Field label="Admin email" required error={err("email")}>
+            <Input type="email" value={admin.email} onChange={(e) => set("email", e.target.value)} autoComplete="email" />
+          </Field>
+        </div>
       </div>
 
       <div className="flex items-start justify-between gap-4 p-4 rounded-md border border-border">
@@ -1191,8 +1179,8 @@ function AdminStep({ admin, setAdmin, profile, errors = {}, showErrors = false }
       <div className="flex items-start gap-3 p-4 rounded-lg bg-[rgba(212,175,55,0.08)] dark:bg-[rgba(30,42,58,0.8)] border border-[#d4af37]/25 dark:border-white/8 text-sm">
         <ShieldCheck className="h-4 w-4 mt-0.5 text-[#2d1b4e] dark:text-[#d4af37] shrink-0" />
         <div>
-          Your enrollment request is saved to our CRM now. Password and admin sign-in are set up
-          only after staff approve your parish workspace.
+          Click <strong>Next</strong> to review everything on step 7, then submit. Your sign-in
+          password is set only after staff approve your parish workspace.
         </div>
       </div>
     </SectionCard>
@@ -1237,7 +1225,6 @@ function ReviewStep({ profile, modules, admin }: any) {
         <SummaryCard title="Admin account" icon={ShieldCheck}>
           <Row k="Name" v={`${admin.firstName} ${admin.lastName}`} />
           <Row k="Email" v={admin.email} />
-          <Row k="Password" v="••••••••••••" />
           <Row k="Second admin" v={admin.secondAdmin ? "Yes — invite later" : "No"} />
         </SummaryCard>
       </div>
