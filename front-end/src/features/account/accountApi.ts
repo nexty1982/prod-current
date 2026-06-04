@@ -286,7 +286,7 @@ export const sessionsApi = {
     const sessions = data.data?.sessions ?? data.sessions ?? [];
     return sessions.map((s: SessionData & { id?: number; session_id?: string }) => ({
       ...s,
-      id: s.id ?? Number(s.session_id) || 0,
+      id: s.id ?? (Number(s.session_id) || 0),
     }));
   },
 
