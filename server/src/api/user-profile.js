@@ -6,6 +6,55 @@ const { promisePool } = require('../config/db-compat');
 const { requireAuth } = require('../middleware/auth');
 const { sendVerificationEmail } = require('../utils/emailService');
 
+/** Verify password against Keycloak orthodoxmetrics realm (OIDC users). */
+async function verifyKeycloakPassword(email, password) {
+    try {
+        const fs = require('fs');
+        const envPath = process.env.KEYCLOAK_ENV_FILE || '/var/www/omai/.env.keycloak';
+        if (!fs.existsSync(envPath)) return false;
+        const env = {};
+        for (const raw of fs.readFileSync(envPath, 'utf8').split('\n')) {
+            const line = raw.trim();
+            if (!line || line.startsWith('#')) continue;
+            const eq = line.indexOf('=');
+            if (eq < 0) continue;
+            env[line.slice(0, eq).trim()] = line.slice(eq + 1).trim();
+        }
+        const KC_URL = (env.KC_URL || '').replace(/\/+$/, '');
+        const clientId = env.OIDC_ORTHODOXMETRICS_CLIENT_ID || 'om-app';
+        const clientSecret = env.OIDC_ORTHODOXMETRICS_CLIENT_SECRET || env.KC_CLIENT_SECRET_ORTHODOXMETRICS;
+        if (!KC_URL || !clientSecret) return false;
+        const tokenUrl = `${KC_URL}/realms/orthodoxmetrics/protocol/openid-connect/token`;
+        const body = new URLSearchParams({
+            grant_type: 'password',
+            client_id: clientId,
+            client_secret: clientSecret,
+            username: String(email).trim(),
+            password: String(password),
+        });
+        const res = await fetch(tokenUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: body.toString(),
+        });
+        return res.ok;
+    } catch (err) {
+        console.warn('[profile] Keycloak password verify failed:', err.message);
+        return false;
+    }
+}
+
+async function syncKeycloakPassword(email, password) {
+    try {
+        const { syncKeycloakPasswordForEmail } = require('/var/www/omai/_runtime/server/scripts/keycloak-bootstrap.js');
+        await syncKeycloakPasswordForEmail(email, password);
+        return true;
+    } catch (err) {
+        console.warn('[profile] Keycloak password sync failed:', err.message);
+        return false;
+    }
+}
+
 // Get user profile data (root route for /api/user/profile)
 router.get('/', requireAuth, async (req, res) => {
     try {
@@ -16,13 +65,15 @@ router.get('/', requireAuth, async (req, res) => {
 
         // Get user data from individual columns in users table
         const [users] = await getAppPool().query(`
-            SELECT id, first_name, last_name, email, role, display_name,
-                   phone, company, location, bio, website, birthday,
-                   status_message, avatar_url, banner_url, job_title,
-                   church_affiliation, social_links, privacy_settings,
-                   currency, ui_theme, church_id
-            FROM orthodoxmetrics_db.users
-            WHERE id = ?
+            SELECT u.id, u.first_name, u.last_name, u.email, u.role, u.display_name,
+                   u.phone, u.company, u.location, u.bio, u.website, u.birthday,
+                   u.status_message, u.avatar_url, u.banner_url, u.job_title,
+                   u.church_affiliation, u.social_links, u.privacy_settings,
+                   u.currency, u.ui_theme, u.church_id,
+                   COALESCE(c.church_name, c.name) AS church_name
+            FROM orthodoxmetrics_db.users u
+            LEFT JOIN orthodoxmetrics_db.churches c ON c.id = u.church_id
+            WHERE u.id = ?
         `, [userId]);
 
         let profileData = {};
@@ -58,6 +109,7 @@ router.get('/', requireAuth, async (req, res) => {
                 currency: user.currency,
                 church_affiliation: user.church_affiliation,
                 church_id: user.church_id,
+                church_name: user.church_name || null,
                 // User basic info
                 first_name: user.first_name,
                 last_name: user.last_name,
@@ -246,9 +298,9 @@ router.put('/password', requireAuth, async (req, res) => {
             });
         }
 
-        // Get user's current password hash
+        // Get user's current password hash and email (for Keycloak verify/sync)
         const [users] = await getAppPool().query(
-            'SELECT password_hash FROM orthodoxmetrics_db.users WHERE id = ?',
+            'SELECT password_hash, email FROM orthodoxmetrics_db.users WHERE id = ?',
             [userId]
         );
 
@@ -256,9 +308,17 @@ router.put('/password', requireAuth, async (req, res) => {
             return res.status(404).json({ success: false, message: 'User not found' });
         }
 
-        // Verify current password
+        const userEmail = users[0].email;
+
+        // Verify current password (DB hash and/or Keycloak — parish login uses Keycloak)
         const bcrypt = require('bcrypt');
-        const isValidPassword = await bcrypt.compare(currentPassword, users[0].password_hash);
+        let isValidPassword = false;
+        if (users[0].password_hash) {
+            isValidPassword = await bcrypt.compare(currentPassword, users[0].password_hash);
+        }
+        if (!isValidPassword && userEmail) {
+            isValidPassword = await verifyKeycloakPassword(userEmail, currentPassword);
+        }
 
         if (!isValidPassword) {
             return res.status(400).json({
@@ -279,10 +339,13 @@ router.put('/password', requireAuth, async (req, res) => {
 
         // Revoke all other refresh tokens (keep current session alive)
         const crypto = require('crypto');
-        const refreshToken = req.cookies?.refresh_token;
+        const refreshToken =
+            req.cookies?.refresh_token
+            || req.headers['x-refresh-token']
+            || req.body?.refresh_token;
         let sessionsRevoked = 0;
         if (refreshToken) {
-            const currentTokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
+            const currentTokenHash = crypto.createHash('sha256').update(String(refreshToken)).digest('hex');
             const [result] = await getAppPool().query(
                 'UPDATE refresh_tokens SET revoked_at = NOW() WHERE user_id = ? AND token_hash != ? AND revoked_at IS NULL',
                 [userId, currentTokenHash]
@@ -308,6 +371,10 @@ router.put('/password', requireAuth, async (req, res) => {
                 (req.get('User-Agent') || 'unknown').substring(0, 255),
             ]
         ).catch((err) => console.error('Failed to log password_changed activity:', err.message));
+
+        if (userEmail) {
+            await syncKeycloakPassword(userEmail, newPassword);
+        }
 
         console.log(`🔐 Password changed for user ${userId}, revoked ${sessionsRevoked} other session(s)`);
 

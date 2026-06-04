@@ -1,46 +1,52 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import CircularProgress from '@mui/material/CircularProgress';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import AuthService from '@/shared/lib/authService';
+import { getPostLoginPath } from '@/utils/roles';
 
 /**
  * Keycloak → OM JWT handoff after /api/auth/oidc/orthodoxmetrics/callback.
  */
 export default function OidcComplete() {
   const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    const accessToken = searchParams.get('access_token');
+    const refreshToken = searchParams.get('refresh_token');
+    if (!accessToken) {
+      setError('Missing access token. Try signing in again from /login.');
+      return;
+    }
+
     let cancelled = false;
 
     (async () => {
-      const accessToken = searchParams.get('access_token');
-      const refreshToken = searchParams.get('refresh_token');
-      if (!accessToken) {
-        if (!cancelled) setError('Missing access token. Try signing in again from /login.');
-        return;
-      }
       try {
-        sessionStorage.removeItem('om_logged_out');
-        sessionStorage.removeItem('om_logout_in_progress');
-        localStorage.setItem('access_token', accessToken);
-        if (refreshToken) localStorage.setItem('refresh_token', refreshToken);
+        AuthService.persistAuthSession(accessToken, refreshToken);
 
-        const authCheck = await AuthService.checkAuth();
-        if (!authCheck.authenticated || !authCheck.user) {
+        let user = (await AuthService.checkAuthWithRetry(3)).user;
+        if (!user) {
+          user = AuthService.userFromAccessToken(accessToken);
+          if (user) {
+            localStorage.setItem('auth_user', JSON.stringify(user));
+          }
+        }
+
+        if (!user) {
           if (!cancelled) {
             setError('Sign-in token was not accepted by the API. Try signing in again.');
           }
           return;
         }
 
-        if (!cancelled) {
-          navigate('/dashboards/modern', { replace: true });
-        }
+        if (cancelled) return;
+
+        // Full navigation so AuthContext re-initializes with the new session (one sign-in).
+        window.location.replace(getPostLoginPath(user));
       } catch (e) {
         console.error('[OidcComplete]', e);
         if (!cancelled) setError('Could not process sign-in response.');
@@ -48,7 +54,7 @@ export default function OidcComplete() {
     })();
 
     return () => { cancelled = true; };
-  }, [searchParams, navigate]);
+  }, [searchParams]);
 
   if (error) {
     return (

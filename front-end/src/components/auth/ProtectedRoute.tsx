@@ -3,6 +3,7 @@ import { Navigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext.tsx';
 import AuthService from '../../shared/lib/authService';
 import { UserRole } from '../../types/orthodox-metrics.types.ts';
+import { isPlatformOperator } from '../../utils/roles';
 import { Box, CircularProgress } from '@mui/material';
 
 interface ProtectedRouteProps {
@@ -39,9 +40,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     return <Navigate to="/auth/login2" replace />;
   }
 
-  // Helper function to get redirect path for non-superadmin users
-  const getNonSuperAdminRedirect = (): string | null => {
-    if (user && user.role !== 'super_admin' && user.church_id) {
+  const getChurchPortalRedirect = (): string | null => {
+    if (user && !isPlatformOperator(user)) {
       return '/portal';
     }
     return null;
@@ -50,7 +50,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   // Check role requirements
   if (requiredRole && !hasRole(requiredRole)) {
     // For non-superadmin users, redirect to their baptism records page instead of unauthorized
-    const redirectPath = getNonSuperAdminRedirect();
+    const redirectPath = getChurchPortalRedirect();
     if (redirectPath) {
       return <Navigate to={redirectPath} replace />;
     }
@@ -60,7 +60,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   // Check permission requirements
   if (requiredPermission && !hasPermission(requiredPermission)) {
     // For non-superadmin users, redirect to their baptism records page instead of unauthorized
-    const redirectPath = getNonSuperAdminRedirect();
+    const redirectPath = getChurchPortalRedirect();
     if (redirectPath) {
       return <Navigate to={redirectPath} replace />;
     }

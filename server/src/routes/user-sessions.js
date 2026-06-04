@@ -36,9 +36,12 @@ router.get('/', requireAuth, async (req, res) => {
       return res.status(401).json(ApiResponse(false, null, { message: 'Authentication required', code: 'AUTH_REQUIRED' }));
     }
 
-    // Identify current session by hashing the refresh_token cookie
-    const refreshToken = req.cookies?.refresh_token;
-    const currentTokenHash = refreshToken ? hashToken(refreshToken) : null;
+    // Identify current session by hashing refresh_token (cookie, body, or SPA header)
+    const refreshToken =
+      req.cookies?.refresh_token
+      || req.headers['x-refresh-token']
+      || req.body?.refresh_token;
+    const currentTokenHash = refreshToken ? hashToken(String(refreshToken)) : null;
 
     // Fetch sessions: active first, then recently expired/revoked (last 30 days)
     const [rows] = await getAppPool().query(`
@@ -67,7 +70,8 @@ router.get('/', requireAuth, async (req, res) => {
       LIMIT 50
     `, [userId]);
 
-    const sessions = rows.map((row) => ({
+    const reqUa = (req.get('User-Agent') || '').substring(0, 255);
+    let sessions = rows.map((row) => ({
       id: row.id,
       is_current: currentTokenHash ? row.token_hash === currentTokenHash : false,
       status: row.status,
@@ -77,6 +81,18 @@ router.get('/', requireAuth, async (req, res) => {
       expires_at: row.expires_at,
       revoked_at: row.revoked_at,
     }));
+
+    // OIDC login often stores refresh_token only in localStorage — mark best match as current
+    if (!sessions.some((s) => s.is_current)) {
+      const active = sessions.filter((s) => s.status === 'active');
+      if (active.length === 1) {
+        active[0].is_current = true;
+      } else if (active.length > 0 && reqUa) {
+        const uaMatch = active.find((s) => s.user_agent && s.user_agent === reqUa);
+        if (uaMatch) uaMatch.is_current = true;
+        else active[0].is_current = true;
+      }
+    }
 
     res.json(ApiResponse(true, { sessions }));
   } catch (error) {
@@ -103,8 +119,11 @@ router.delete('/:sessionId', requireAuth, async (req, res) => {
     }
 
     // Verify the session belongs to this user and check if it's the current session
-    const refreshToken = req.cookies?.refresh_token;
-    const currentTokenHash = refreshToken ? hashToken(refreshToken) : null;
+    const refreshToken =
+      req.cookies?.refresh_token
+      || req.headers['x-refresh-token']
+      || req.body?.refresh_token;
+    const currentTokenHash = refreshToken ? hashToken(String(refreshToken)) : null;
 
     const [existing] = await getAppPool().query(
       'SELECT id, token_hash, revoked_at FROM refresh_tokens WHERE id = ? AND user_id = ?',
@@ -165,8 +184,11 @@ router.post('/revoke-others', requireAuth, async (req, res) => {
       return res.status(401).json(ApiResponse(false, null, { message: 'Authentication required', code: 'AUTH_REQUIRED' }));
     }
 
-    const refreshToken = req.cookies?.refresh_token;
-    const currentTokenHash = refreshToken ? hashToken(refreshToken) : null;
+    const refreshToken =
+      req.cookies?.refresh_token
+      || req.headers['x-refresh-token']
+      || req.body?.refresh_token;
+    const currentTokenHash = refreshToken ? hashToken(String(refreshToken)) : null;
 
     let result;
     if (currentTokenHash) {

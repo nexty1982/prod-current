@@ -1,6 +1,8 @@
 import { FC, useContext, useEffect } from 'react';
-import { styled, Container, Box, useTheme } from '@mui/material';
-import { Outlet, useLocation } from 'react-router-dom';
+import { styled, Container, Box, useTheme, CircularProgress } from '@mui/material';
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
+import { useAuth } from '@/context/AuthContext';
+import { getPostLoginPath, isPlatformOperator } from '@/utils/roles';
 import Header from './vertical/header/Header';
 import Sidebar from './vertical/sidebar/Sidebar';
 import Customizer from './shared/customizer/Customizer';
@@ -36,7 +38,20 @@ const FullLayout: FC = () => {
   const theme = useTheme();
   const churchCtx = useContext(ChurchContext);
   const location = useLocation();
+  const { user, authenticated, loading } = useAuth();
   const MiniSidebarWidth = config.miniSidebarWidth;
+
+  if (loading) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (authenticated && user && !isPlatformOperator(user)) {
+    return <Navigate to={getPostLoginPath(user)} replace />;
+  }
 
   // Update page title based on current route
   useEffect(() => {

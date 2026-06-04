@@ -1,4 +1,7 @@
+import { apiClient } from "@/api/utils/axiosInstance";
+import { useChurch } from "@/context/ChurchContext";
 import { Activity, Award, Calendar, ChevronRight, Cross, Droplet, Heart, TrendingUp } from "@/ui/icons";
+import { useEffect, useMemo, useState } from "react";
 import { Bar, BarChart, CartesianGrid, Cell, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import type { AnyRecord, RecordType } from "../types";
 import { recordClergy, recordPrimaryDate, recordPrimaryName } from "../types";
@@ -103,6 +106,36 @@ export function AnalyticsView({ records, recordType, totalRecords, onOpen }: { r
   const cfg = CONFIGS[recordType];
   const accent = "var(--rm-accent)";
   const displayTotal = totalRecords > 0 ? String(totalRecords) : cfg.totalValue;
+  const { activeChurchId } = useChurch();
+  const [sacramentCounts, setSacramentCounts] = useState<{ baptisms: number; marriages: number; funerals: number } | null>(null);
+
+  useEffect(() => {
+    if (!activeChurchId) return;
+    let cancelled = false;
+    apiClient.get<{ baptisms?: number; marriages?: number; funerals?: number }>(`/parish-stats/${activeChurchId}`)
+      .then((res) => {
+        if (!cancelled && res) {
+          setSacramentCounts({
+            baptisms: res.baptisms ?? 0,
+            marriages: res.marriages ?? 0,
+            funerals: res.funerals ?? 0,
+          });
+        }
+      })
+      .catch(() => { if (!cancelled) setSacramentCounts(null); });
+    return () => { cancelled = true; };
+  }, [activeChurchId]);
+
+  const distribution = useMemo(() => {
+    if (sacramentCounts && (sacramentCounts.baptisms + sacramentCounts.marriages + sacramentCounts.funerals) > 0) {
+      return [
+        { name: "Baptisms", value: sacramentCounts.baptisms, color: "var(--rm-accent)" },
+        { name: "Funerals", value: sacramentCounts.funerals, color: "#e9c46a" },
+        { name: "Marriages", value: sacramentCounts.marriages, color: "#7a1111" },
+      ].filter((d) => d.value > 0);
+    }
+    return cfg.distribution;
+  }, [sacramentCounts, cfg.distribution]);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
@@ -124,23 +157,34 @@ export function AnalyticsView({ records, recordType, totalRecords, onOpen }: { r
       </ChartCard>
 
       <ChartCard title="Record Distribution">
-        <div className="flex items-center gap-4">
-          <div className="w-[55%] h-[220px]" style={{ overflow: 'visible' }}>
+        <div className="flex flex-col sm:flex-row items-center gap-4 min-h-[240px]">
+          <div className="w-full sm:w-[58%] h-[220px] min-w-0">
             <ResponsiveContainer width="100%" height="100%">
-            <PieChart margin={{ top: 10, right: 10, bottom: 10, left: 10 }}>
-              <Pie data={cfg.distribution} dataKey="value" nameKey="name" innerRadius={45} outerRadius={75} paddingAngle={2}>
-                {cfg.distribution.map((d, i) => <Cell key={`cell-${i}`} fill={d.color} />)}
-              </Pie>
-              <Tooltip contentStyle={{ background: "var(--rm-popover)", border: "1px solid var(--rm-border)", borderRadius: 8 }} />
-            </PieChart>
+              <PieChart>
+                <Pie
+                  data={distribution}
+                  dataKey="value"
+                  nameKey="name"
+                  cx="50%"
+                  cy="50%"
+                  innerRadius="52%"
+                  outerRadius="78%"
+                  paddingAngle={2}
+                  startAngle={90}
+                  endAngle={-270}
+                >
+                  {distribution.map((d, i) => <Cell key={`cell-${i}`} fill={d.color} stroke="var(--rm-card)" strokeWidth={2} />)}
+                </Pie>
+                <Tooltip contentStyle={{ background: "var(--rm-popover)", border: "1px solid var(--rm-border)", borderRadius: 8 }} />
+              </PieChart>
             </ResponsiveContainer>
           </div>
-          <div className="space-y-2 text-sm">
-            {cfg.distribution.map((d, i) => (
+          <div className="space-y-2 text-sm w-full sm:flex-1">
+            {distribution.map((d, i) => (
               <div key={i} className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-sm" style={{ background: d.color }} />
-                <span className="text-[var(--rm-muted-fg)] w-28">{d.name}</span>
-                <span className="text-[var(--rm-fg)]">{d.value}</span>
+                <span className="w-2.5 h-2.5 rounded-sm shrink-0" style={{ background: d.color }} />
+                <span className="text-[var(--rm-muted-fg)] flex-1">{d.name}</span>
+                <span className="text-[var(--rm-fg)] font-medium">{d.value}</span>
               </div>
             ))}
           </div>

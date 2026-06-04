@@ -16,9 +16,11 @@ import {
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import { useAuth } from '@/context/AuthContext';
+import { useChurch } from '@/context/ChurchContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { RoleAvatar, getRoleLabel } from '@/utils/roleAvatars';
-import { profileApi } from './accountApi';
+import { getChurchDisplayName } from './accountConstants';
+import { churchApi, profileApi } from './accountApi';
 
 interface ProfileData {
   display_name: string;
@@ -32,15 +34,20 @@ interface ProfileData {
 
 const AccountProfilePage: React.FC = () => {
   const { user } = useAuth();
+  const { churchMetadata } = useChurch();
   const { t } = useLanguage();
   const navigate = useNavigate();
   const [profile, setProfile] = useState<ProfileData | null>(null);
+  const [churchName, setChurchName] = useState('');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const data = await profileApi.getProfile();
+        const [data, settings] = await Promise.all([
+          profileApi.getProfile(),
+          churchApi.getSettings<Record<string, unknown>>().catch(() => null),
+        ]);
         if (data.success && data.profile) {
           const p = data.profile;
           setProfile({
@@ -53,6 +60,12 @@ const AccountProfilePage: React.FC = () => {
             last_name: p.last_name || '',
           });
         }
+        const p = data.success && data.profile ? data.profile as { church_name?: string } : null;
+        const fromProfile = p?.church_name || '';
+        const fromSettings = settings ? getChurchDisplayName(settings) : '';
+        const fromContext =
+          churchMetadata?.church_name_display || churchMetadata?.church_name || '';
+        setChurchName(fromProfile || fromSettings || fromContext || '');
       } catch (err) {
         console.error('Failed to load profile:', err);
       } finally {
@@ -60,7 +73,7 @@ const AccountProfilePage: React.FC = () => {
       }
     };
     fetchProfile();
-  }, [user?.id]);
+  }, [user?.id, churchMetadata?.church_id]);
 
   if (loading) {
     return (
@@ -77,7 +90,7 @@ const AccountProfilePage: React.FC = () => {
     { label: t('account.label_organization'), value: profile?.company || '—' },
     { label: t('account.label_location'), value: profile?.location || '—' },
     { label: t('account.label_role'), value: getRoleLabel(user?.role) },
-    { label: t('account.label_church'), value: user?.church_name || '—' },
+    { label: t('account.label_church'), value: churchName || '—' },
   ];
 
   return (

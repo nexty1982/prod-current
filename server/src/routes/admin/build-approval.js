@@ -33,6 +33,41 @@ router.use(requireAdmin);
 
 function db() { return getAppPool(); }
 
+/** True when the user is super_admin (session role or DB users.role / RBAC). */
+async function isSuperAdminUser(req) {
+  const user = req.session?.user || req.user || {};
+  if (user.role === 'super_admin') return true;
+  const userId = user.id;
+  if (!userId) return false;
+  try {
+    const [[row]] = await db().query(
+      'SELECT role FROM users WHERE id = ? AND is_active = 1',
+      [userId]
+    );
+    if (row?.role === 'super_admin') return true;
+    const [rbac] = await db().query(
+      `SELECT 1 AS ok FROM user_roles ur
+       JOIN roles r ON r.id = ur.role_id
+       WHERE ur.user_id = ? AND r.name = 'super_admin'
+       LIMIT 1`,
+      [userId]
+    );
+    return rbac.length > 0;
+  } catch (err) {
+    console.error('[build-approval] isSuperAdminUser lookup failed:', err.message);
+    return false;
+  }
+}
+
+async function gitExec(repoPath, args, timeout = 30000) {
+  const { stdout, stderr } = await execFileAsync('git', args, {
+    cwd: repoPath,
+    timeout,
+    maxBuffer: 4 * 1024 * 1024,
+  });
+  return (stdout || '') + (stderr ? `\n${stderr}` : '');
+}
+
 // ── Repo path mapping ────────────────────────────────────────────────────────
 
 const REPO_PATHS = {
@@ -131,7 +166,14 @@ router.get('/preflight', async (req, res) => {
       return res.status(400).json({ success: false, error: 'Invalid build target' });
     }
     const repoState = await inspectRepo(REPO_PATHS[target]);
-    res.json({ success: true, target, label: TARGET_LABELS[target], ...repoState });
+    const superAdmin = await isSuperAdminUser(req);
+    res.json({
+      success: true,
+      target,
+      label: TARGET_LABELS[target],
+      superAdmin,
+      ...repoState,
+    });
   } catch (error) {
     console.error('Preflight error:', error);
     res.status(500).json({ success: false, error: error.message });
@@ -155,7 +197,12 @@ router.post('/request', async (req, res) => {
     const user = req.session?.user || {};
     const requestedBy = user.email || 'unknown';
     const requestedById = user.id || null;
-    const status = repoState.isClean ? 'pending_approval' : 'blocked_dirty_repo';
+    const superAdmin = await isSuperAdminUser(req);
+    let status = repoState.isClean ? 'pending_approval' : 'blocked_dirty_repo';
+    // Single-operator: super_admin with a clean tree can skip the approval queue.
+    if (superAdmin && repoState.isClean) {
+      status = 'approved';
+    }
 
     await db().query(
       `INSERT INTO build_approval_requests
@@ -167,6 +214,16 @@ router.post('/request', async (req, res) => {
        repoState.dirtySummary, status, note || null]
     );
 
+    if (superAdmin && repoState.isClean) {
+      await db().query(
+        `UPDATE build_approval_requests
+         SET reviewed_by_id = ?, reviewed_by = ?, reviewed_at = NOW(),
+             review_decision = 'approved', execution_sha = ?
+         WHERE request_id = ?`,
+        [requestedById, requestedBy, repoState.commitSha, requestId]
+      );
+    }
+
     const [[record]] = await db().query(
       'SELECT * FROM build_approval_requests WHERE request_id = ?', [requestId]
     );
@@ -175,7 +232,9 @@ router.post('/request', async (req, res) => {
       success: true, status, request: record, repoState,
       message: status === 'blocked_dirty_repo'
         ? `Build blocked: repo has uncommitted changes (${repoState.dirtySummary}). Commit your changes and retry.`
-        : 'Build request created. Awaiting approval.',
+        : status === 'approved'
+          ? 'Build request approved (super_admin). Ready to execute.'
+          : 'Build request created. Awaiting approval.',
     });
   } catch (error) {
     console.error('Build request error:', error);
@@ -223,6 +282,63 @@ router.get('/requests/pending', async (req, res) => {
   }
 });
 
+// ── POST /commit-push ─────────────────────────────────────────────────────────
+// super_admin: stage all, commit, push current branch to origin
+
+router.post('/commit-push', async (req, res) => {
+  try {
+    if (!(await isSuperAdminUser(req))) {
+      return res.status(403).json({ success: false, error: 'Only super_admin can commit from the build console' });
+    }
+
+    const { target, message, push = true } = req.body || {};
+    if (!target || !REPO_PATHS[target]) {
+      return res.status(400).json({ success: false, error: 'Invalid build target' });
+    }
+    if (!message || !String(message).trim()) {
+      return res.status(400).json({ success: false, error: 'Commit message is required' });
+    }
+
+    const repoPath = REPO_PATHS[target];
+    const before = await inspectRepo(repoPath);
+    if (before.isClean) {
+      return res.status(400).json({ success: false, error: 'Working tree is already clean' });
+    }
+
+    const branch = before.branch;
+    if (!branch || branch === 'HEAD') {
+      return res.status(400).json({ success: false, error: 'Detached HEAD — cannot commit/push' });
+    }
+
+    await gitExec(repoPath, ['add', '-A'], 60000);
+    const commitOut = await gitExec(repoPath, ['commit', '-m', String(message).trim()], 60000);
+
+    let pushOut = '';
+    if (push) {
+      if (branch === 'main' || branch === 'master') {
+        pushOut = await gitExec(repoPath, ['push', 'origin', branch], 120000);
+      } else {
+        pushOut = await gitExec(repoPath, ['push', '-u', 'origin', branch], 120000);
+      }
+    }
+
+    const repoState = await inspectRepo(repoPath);
+    const user = req.session?.user || {};
+    res.json({
+      success: true,
+      message: push ? 'Changes committed and pushed to origin.' : 'Changes committed locally.',
+      branch,
+      commitOutput: commitOut.trim(),
+      pushOutput: pushOut.trim(),
+      repoState,
+      committed_by: user.email || 'unknown',
+    });
+  } catch (error) {
+    console.error('Commit-push error:', error);
+    res.status(500).json({ success: false, error: error.message || 'Commit/push failed' });
+  }
+});
+
 // ── POST /approve/:requestId ─────────────────────────────────────────────────
 
 router.post('/approve/:requestId', async (req, res) => {
@@ -231,9 +347,8 @@ router.post('/approve/:requestId', async (req, res) => {
     const user = req.session?.user || {};
     const reviewerEmail = user.email || 'unknown';
     const reviewerId = user.id || null;
-    const reviewerRole = user.role || '';
 
-    if (reviewerRole !== 'super_admin') {
+    if (!(await isSuperAdminUser(req))) {
       return res.status(403).json({ success: false, error: 'Only super_admin can approve build requests' });
     }
 
@@ -245,10 +360,7 @@ router.post('/approve/:requestId', async (req, res) => {
       return res.status(400).json({ success: false, error: `Cannot approve request in status: ${request.status}` });
     }
 
-    // Self-approval check
-    if (request.requested_by_id && request.requested_by_id === reviewerId) {
-      return res.status(403).json({ success: false, error: 'Cannot self-approve build requests' });
-    }
+    // Non–super_admin cannot self-approve (super_admin may approve own requests).
 
     // Re-verify repo state
     const currentState = await inspectRepo(REPO_PATHS[request.repo_target]);
@@ -303,7 +415,7 @@ router.post('/deny/:requestId', async (req, res) => {
     const { reason } = req.body;
     const user = req.session?.user || {};
 
-    if (user.role !== 'super_admin') {
+    if (!(await isSuperAdminUser(req))) {
       return res.status(403).json({ success: false, error: 'Only super_admin can deny build requests' });
     }
 

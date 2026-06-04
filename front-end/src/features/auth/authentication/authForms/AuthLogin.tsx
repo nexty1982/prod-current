@@ -4,6 +4,7 @@ import CustomCheckbox from '@/components/forms/theme-elements/CustomCheckbox';
 import CustomFormLabel from '@/components/forms/theme-elements/CustomFormLabel';
 import CustomTextField from '@/components/forms/theme-elements/CustomTextField';
 import { useAuth } from '@/context/AuthContext';
+import { getPostLoginPath } from '@/utils/roles';
 import { useLanguage } from '@/context/LanguageContext';
 import { loginType } from '@/types/auth/auth';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
@@ -87,6 +88,7 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
     try {
       const result = await login(formData.username, formData.password, formData.rememberMe);
       if (result && typeof result === 'object' && 'pendingRedirect' in result && (result as { pendingRedirect?: boolean }).pendingRedirect) {
+        // Keep loading state until browser leaves for /auth/oidc-complete
         return;
       }
       // Use redirectUrl from login response if available, otherwise route based on role
@@ -96,12 +98,7 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
         // Navigate directly to the correct layout based on role
         // This avoids a flash of FullLayout when SmartRedirect runs at '/'
         const userData = JSON.parse(localStorage.getItem('auth_user') || '{}');
-        const role = userData?.role;
-        if (role === 'super_admin' || role === 'admin') {
-          navigate('/task-wheel', { replace: true });
-        } else {
-          navigate('/portal', { replace: true });
-        }
+        navigate(getPostLoginPath(userData), { replace: true });
       }
     } catch (err) {
       // Error is handled by the auth context

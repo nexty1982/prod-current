@@ -1,11 +1,13 @@
 import ScrollToTop from '@/components/frontend-pages/shared/scroll-to-top';
 import { useAuth } from '@/context/AuthContext';
 import { useChurch } from '@/context/ChurchContext';
+import { useLanguage } from '@/context/LanguageContext';
+import { churchApi } from '@/features/account/accountApi';
 import { CustomizerContext } from '@/context/CustomizerContext';
 import Customizer from '@/layouts/full/shared/customizer/Customizer';
 import { Box, CircularProgress, Container, Divider, ListItemIcon, Menu, MenuItem, Typography } from '@mui/material';
 import { IconChevronDown, IconLogout, IconMoon, IconSettings, IconSun, IconUser, IconWorld } from '@tabler/icons-react';
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Navigate, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 
 /* ── Portal nav links ── */
@@ -40,27 +42,33 @@ const LANG_OPTIONS = [
 const PortalHeader: React.FC = () => {
   const { user, logout } = useAuth();
   const { churchMetadata } = useChurch();
+  const { lang } = useLanguage();
   const { activeMode, setActiveMode } = useContext(CustomizerContext);
   const location = useLocation();
   const navigate = useNavigate();
 
-  const [langOpen, setLangOpen] = useState(false);
+  const [configuredLang, setConfiguredLang] = useState<string>('en');
   const [profileAnchor, setProfileAnchor] = useState<null | HTMLElement>(null);
-  const langRef = useRef<HTMLDivElement>(null);
 
   const churchName = churchMetadata?.church_name_display || churchMetadata?.church_name || '';
   const logoUrl = churchMetadata?.logo_url || null;
   const displayName = user?.nick || (user?.first_name ? `${user.first_name.split(' ')[0]}. ${user.last_name || ''}`.trim() : 'User');
 
-  // Close language dropdown on outside click
   useEffect(() => {
-    if (!langOpen) return;
-    const handler = (e: MouseEvent) => {
-      if (langRef.current && !langRef.current.contains(e.target as Node)) setLangOpen(false);
-    };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, [langOpen]);
+    let cancelled = false;
+    churchApi.getSettings<{ preferred_language?: string }>().then((settings) => {
+      if (!cancelled && settings?.preferred_language) {
+        const code = settings.preferred_language === 'gr' ? 'el' : settings.preferred_language;
+        setConfiguredLang(code);
+      }
+    }).catch(() => { /* keep default */ });
+    return () => { cancelled = true; };
+  }, [churchMetadata?.church_id]);
+
+  const visibleLangOptions = LANG_OPTIONS.filter(
+    (opt) => opt.code === configuredLang || opt.code === lang,
+  );
+  const activeLang = visibleLangOptions[0] || LANG_OPTIONS[0];
 
   const handleLogout = async () => {
     setProfileAnchor(null);
@@ -111,30 +119,10 @@ const PortalHeader: React.FC = () => {
 
         {/* Right: Language, Theme toggle, Profile */}
         <div className="flex items-center gap-2">
-          {/* Language selector */}
-          <div ref={langRef} className="relative">
-            <button
-              onClick={() => setLangOpen(!langOpen)}
-              className="flex items-center gap-1 px-2 py-1.5 text-[#6b7280] dark:text-gray-400 hover:text-[#2d1b4e] dark:hover:text-white rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer border-0 bg-transparent text-[13px] font-['Inter']"
-            >
-              <IconWorld size={16} />
-              <span>EN</span>
-              <IconChevronDown size={12} />
-            </button>
-            {langOpen && (
-              <div className="absolute right-0 top-full mt-1 w-32 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-[60]">
-                {LANG_OPTIONS.map((opt) => (
-                  <button
-                    key={opt.code}
-                    onClick={() => setLangOpen(false)}
-                    className="w-full text-left px-3 py-1.5 flex items-center gap-2 text-[13px] font-['Inter'] text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer border-0 bg-transparent"
-                  >
-                    <span>{opt.flag}</span>
-                    <span>{opt.label}</span>
-                  </button>
-                ))}
-              </div>
-            )}
+          {/* Language — show only the parish-configured language */}
+          <div className="flex items-center gap-1 px-2 py-1.5 text-[#6b7280] dark:text-gray-400 text-[13px] font-['Inter']">
+            <IconWorld size={16} />
+            <span>{activeLang.label}</span>
           </div>
 
           {/* Dark/Light toggle */}

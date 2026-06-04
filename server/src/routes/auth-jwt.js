@@ -392,6 +392,43 @@ router.post('/logout', async (req, res) => {
   }
 });
 
+// POST /api/auth/bind-refresh — set httpOnly cookie from SPA-stored refresh token (OIDC handoff)
+router.post('/bind-refresh', async (req, res) => {
+  try {
+    const refreshToken =
+      req.cookies?.refresh_token
+      || req.body?.refresh_token
+      || req.headers['x-refresh-token'];
+    if (!refreshToken) {
+      return res.status(400).json({ success: false, message: 'Refresh token required' });
+    }
+    const tokenHash = hashToken(String(refreshToken));
+    const [rows] = await pool.execute(
+      `SELECT id, user_id, expires_at, revoked_at FROM refresh_tokens
+       WHERE token_hash = ? AND revoked_at IS NULL AND expires_at > NOW() LIMIT 1`,
+      [tokenHash],
+    );
+    if (!rows.length) {
+      return res.status(401).json({ success: false, message: 'Invalid or expired refresh token' });
+    }
+    const ua = (req.headers['user-agent'] || '').substring(0, 255);
+    await pool.execute(
+      'UPDATE refresh_tokens SET ip_address = ?, user_agent = ? WHERE id = ?',
+      [req.ip || null, ua || null, rows[0].id],
+    );
+    res.cookie('refresh_token', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: REFRESH_TOKEN_TTL * 1000,
+    });
+    return res.json({ success: true, message: 'Session bound' });
+  } catch (error) {
+    console.error('[AUTH] bind-refresh error:', error);
+    return res.status(500).json({ success: false, message: 'Failed to bind session' });
+  }
+});
+
 // GET /api/auth/verify - Verify token
 router.get('/verify', (req, res) => {
   try {

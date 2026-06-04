@@ -166,7 +166,13 @@ const AccountSessionsPage: React.FC = () => {
     }
   }, []);
 
-  useEffect(() => { fetchSessions(); }, [fetchSessions]);
+  useEffect(() => {
+    fetchSessions();
+    const interval = window.setInterval(() => {
+      fetchSessions();
+    }, 30000);
+    return () => window.clearInterval(interval);
+  }, [fetchSessions]);
 
   // ── Derived data ──
 

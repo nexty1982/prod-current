@@ -40,11 +40,23 @@ const quickActions = [
   },
 ] as const;
 
-const recentActivity = [
-  { actionKey: 'parish.activity_mapping_updated', time: '2 hours ago', user: 'Admin' },
-  { actionKey: 'parish.activity_theme_changed', time: '1 day ago', user: 'Fr. John' },
-  { actionKey: 'parish.activity_new_baptism', time: '2 days ago', user: 'Secretary' },
-] as const;
+interface ActivityRow {
+  description: string;
+  userName: string;
+  timestamp: string;
+}
+
+function formatActivityTime(iso: string): string {
+  const diffMs = Date.now() - new Date(iso).getTime();
+  const mins = Math.floor(diffMs / 60000);
+  if (mins < 1) return 'Just now';
+  if (mins < 60) return `${mins}m ago`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days}d ago`;
+  return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
 
 const statsDef = [
   { key: 'total' as const, nameKey: 'parish.total_records', icon: StorageOutlinedIcon },
@@ -62,16 +74,35 @@ const ParishDashboard: React.FC = () => {
   const churchName = churchMetadata?.church_name_display || t('parish.default_title');
 
   const [stats, setStats] = useState<ParishStats | null>(null);
+  const [recentActivity, setRecentActivity] = useState<ActivityRow[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!activeChurchId) return;
     let cancelled = false;
     setLoading(true);
-    apiClient.get<ParishStats>(`/parish-stats/${activeChurchId}`).then((res) => {
-      if (!cancelled) setStats(res);
+    Promise.all([
+      apiClient.get<ParishStats>(`/parish-stats/${activeChurchId}`),
+      apiClient.get<{ data?: { activities?: ActivityRow[] }; activities?: ActivityRow[] }>(
+        `/dashboard/activity-log/${activeChurchId}?limit=8`,
+      ),
+    ]).then(([statsRes, activityRes]) => {
+      if (cancelled) return;
+      setStats(statsRes);
+      const payload = (activityRes as { data?: { activities?: ActivityRow[] } })?.data ?? activityRes;
+      const rows = (payload as { activities?: ActivityRow[] })?.activities ?? [];
+      setRecentActivity(
+        rows.map((a: ActivityRow & { user_name?: string; created_at?: string }) => ({
+          description: a.description || a.action || 'Activity',
+          userName: a.userName || a.user_name || '—',
+          timestamp: a.timestamp || a.created_at || new Date().toISOString(),
+        })),
+      );
     }).catch(() => {
-      if (!cancelled) setStats(null);
+      if (!cancelled) {
+        setStats(null);
+        setRecentActivity([]);
+      }
     }).finally(() => {
       if (!cancelled) setLoading(false);
     });
@@ -274,49 +305,56 @@ const ParishDashboard: React.FC = () => {
           {t('parish.recent_activity')}
         </Typography>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-          {recentActivity.map((activity, i) => (
-            <Box
-              key={i}
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                py: 1.5,
-                borderBottom: i < recentActivity.length - 1 ? `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}` : 'none',
-              }}
-            >
-              <Box>
-                <Typography
-                  sx={{
-                    fontFamily: "'Inter', sans-serif",
-                    fontSize: '0.8125rem',
-                    fontWeight: 500,
-                    color: isDark ? '#f3f4f6' : '#111827',
-                  }}
-                >
-                  {t(activity.actionKey)}
-                </Typography>
+          {recentActivity.length === 0 ? (
+            <Typography sx={{ fontSize: '0.8125rem', color: isDark ? '#6b7280' : '#9ca3af' }}>
+              {t('portal.no_recent_activity')}
+            </Typography>
+          ) : (
+            recentActivity.map((activity, i) => (
+              <Box
+                key={`${activity.timestamp}-${i}`}
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  py: 1.5,
+                  borderBottom: i < recentActivity.length - 1 ? `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}` : 'none',
+                }}
+              >
+                <Box sx={{ minWidth: 0, pr: 2 }}>
+                  <Typography
+                    sx={{
+                      fontFamily: "'Inter', sans-serif",
+                      fontSize: '0.8125rem',
+                      fontWeight: 500,
+                      color: isDark ? '#f3f4f6' : '#111827',
+                    }}
+                  >
+                    {activity.description}
+                  </Typography>
+                  <Typography
+                    sx={{
+                      fontFamily: "'Inter', sans-serif",
+                      fontSize: '0.75rem',
+                      color: isDark ? '#6b7280' : '#9ca3af',
+                    }}
+                  >
+                    {activity.userName}
+                  </Typography>
+                </Box>
                 <Typography
                   sx={{
                     fontFamily: "'Inter', sans-serif",
                     fontSize: '0.75rem',
                     color: isDark ? '#6b7280' : '#9ca3af',
+                    flexShrink: 0,
                   }}
                 >
-                  {activity.user}
+                  {formatActivityTime(activity.timestamp)}
                 </Typography>
               </Box>
-              <Typography
-                sx={{
-                  fontFamily: "'Inter', sans-serif",
-                  fontSize: '0.75rem',
-                  color: isDark ? '#6b7280' : '#9ca3af',
-                }}
-              >
-                {activity.time}
-              </Typography>
-            </Box>
-          ))}
+            ))
+          )}
         </Box>
       </Paper>
     </Box>

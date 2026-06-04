@@ -330,6 +330,19 @@ export const isAdmin = (user: User | null | undefined): boolean => {
   return hasRole(user, 'admin');
 };
 
+/** Platform operators use the admin shell (FullLayout). All other roles use /portal. */
+export const isPlatformOperator = (user: User | null | undefined): boolean => {
+  if (!user?.role) return false;
+  const role = normalizeLegacyRole(user.role as string);
+  return role === 'super_admin' || role === 'admin';
+};
+
+/** Post-login landing path on orthodoxmetrics.com */
+export const getPostLoginPath = (user: User | null | undefined): string => {
+  if (isPlatformOperator(user)) return '/task-wheel';
+  return '/portal';
+};
+
 /**
  * Check if user can manage churches
  * @param user - User object

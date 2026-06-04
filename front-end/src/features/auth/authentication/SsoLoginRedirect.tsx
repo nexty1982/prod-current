@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import AuthService from '@/shared/lib/authService';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
@@ -17,7 +18,7 @@ export default function SsoLoginRedirect() {
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
 
-  const next = '/dashboards/modern';
+  const next = '/portal';
 
   // Do not redirect to /login — nginx + platform-login would loop with /auth/login2.
 
@@ -32,6 +33,7 @@ export default function SsoLoginRedirect() {
     setError('');
     setBusy(true);
     try {
+      AuthService.prepareForLogin();
       const res = await fetch(
         `/api/auth/oidc/orthodoxmetrics/credentials?next=${encodeURIComponent(next)}`,
         {
@@ -46,9 +48,8 @@ export default function SsoLoginRedirect() {
         setError((data as { message?: string }).message || 'Invalid email or password.');
         return;
       }
-      clearSignedOutFlags();
       if ((data as { redirect_url?: string }).redirect_url) {
-        window.location.href = (data as { redirect_url: string }).redirect_url;
+        window.location.replace((data as { redirect_url: string }).redirect_url);
       }
     } catch {
       setError('Sign-in service unavailable. Try again.');

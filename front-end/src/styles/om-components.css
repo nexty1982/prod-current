@@ -19,15 +19,33 @@
   background-color: #111827;
 }
 
-/* Grow main/hero so footer sits at the bottom on short pages (e.g. login). */
+/* Public chrome: header + main grow + footer pinned to viewport bottom. */
+.om-page-container > nav,
+.om-page-container > header {
+  flex-shrink: 0;
+}
+
 .om-page-container > main.om-main,
 .om-page-container > section.om-hero-gradient {
-  flex: 1 0 auto;
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
 .om-page-container > footer {
   flex-shrink: 0;
   margin-top: auto;
+}
+
+/* Login (/auth/login2): vertically center the two-column block between nav and footer. */
+.om-page-container > section.om-login-hero {
+  display: flex;
+  flex-direction: column;
+  padding-block: clamp(1.5rem, 5vh, 3rem);
+}
+
+.om-page-container > section.om-login-hero > .om-login-hero-inner {
+  width: 100%;
+  margin-block: auto;
 }
 
 /* ========================================

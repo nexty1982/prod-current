@@ -33,12 +33,63 @@ export class AuthService {
     localStorage.removeItem('orthodoxmetrics_profile_data');
   }
 
+  /** Clear logout flags and stale tokens before a new sign-in attempt. */
+  static prepareForLogin(): void {
+    sessionStorage.removeItem(OM_LOGGED_OUT_KEY);
+    sessionStorage.removeItem(OM_LOGOUT_IN_PROGRESS_KEY);
+    document.cookie = 'om_logged_out=; path=/; max-age=0; SameSite=Lax';
+    this.clearLocalAuth();
+  }
+
+  /** Best-effort user from OM JWT (used when /auth/check is slow right after OIDC). */
+  static userFromAccessToken(token: string): User | null {
+    try {
+      const part = token.split('.')[1];
+      if (!part) return null;
+      const payload = JSON.parse(
+        atob(part.replace(/-/g, '+').replace(/_/g, '/')),
+      ) as { userId?: number; email?: string; role?: string; churchId?: number; church_id?: number };
+      if (!payload.userId || !payload.email) return null;
+      return {
+        id: payload.userId,
+        email: payload.email,
+        role: payload.role as User['role'],
+        church_id: payload.churchId ?? payload.church_id,
+      };
+    } catch {
+      return null;
+    }
+  }
+
+  static persistAuthSession(accessToken: string, refreshToken?: string | null, user?: User | null): void {
+    sessionStorage.removeItem(OM_LOGGED_OUT_KEY);
+    sessionStorage.removeItem(OM_LOGOUT_IN_PROGRESS_KEY);
+    localStorage.setItem('access_token', accessToken);
+    if (refreshToken) {
+      localStorage.setItem('refresh_token', refreshToken);
+      fetch('/api/auth/bind-refresh', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Refresh-Token': refreshToken,
+        },
+        body: JSON.stringify({ refresh_token: refreshToken }),
+      }).catch(() => { /* non-blocking */ });
+    }
+    const resolved = user || this.userFromAccessToken(accessToken);
+    if (resolved) {
+      localStorage.setItem('auth_user', JSON.stringify(resolved));
+    }
+  }
+
   /**
    * Login user with email and password
    */
   static async login(credentials: LoginCredentials): Promise<AuthResponse> {
     try {
-      const next = '/dashboards/modern';
+      this.prepareForLogin();
+      const next = '/portal';
       const res = await fetch(
         `/api/auth/oidc/orthodoxmetrics/credentials?next=${encodeURIComponent(next)}`,
         {
@@ -58,9 +109,7 @@ export class AuthService {
         throw err;
       }
       if ((data as { redirect_url?: string }).redirect_url) {
-        sessionStorage.removeItem(OM_LOGGED_OUT_KEY);
-        sessionStorage.removeItem(OM_LOGOUT_IN_PROGRESS_KEY);
-        window.location.href = (data as { redirect_url: string }).redirect_url;
+        window.location.replace((data as { redirect_url: string }).redirect_url);
         return { success: true, pendingRedirect: true } as AuthResponse;
       }
       throw new Error((data as { message?: string }).message || 'Login failed');
@@ -304,8 +353,6 @@ export class AuthService {
       }
 
       console.log('❌ AuthService: Authentication check failed');
-      localStorage.removeItem('auth_user');
-      localStorage.removeItem('access_token');
       return { authenticated: false };
     } catch (error: any) {
       console.error('💥 AuthService: Error checking authentication:', error);
@@ -320,12 +367,26 @@ export class AuthService {
       // On 401/403, clear stored data
       if (error.status === 401 || error.status === 403) {
         localStorage.removeItem('auth_user');
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
       }
 
       return {
         authenticated: false
       };
     }
+  }
+
+  /** Verify session after OIDC; retries — avoids a false failure right after token handoff. */
+  static async checkAuthWithRetry(maxAttempts = 2): Promise<{ authenticated: boolean; user?: User }> {
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      const result = await this.checkAuth();
+      if (result.authenticated && result.user) return result;
+      if (attempt < maxAttempts) {
+        await new Promise((r) => setTimeout(r, 150));
+      }
+    }
+    return { authenticated: false };
   }
 }
 

@@ -153,50 +153,7 @@ router.get('/activity-log/:churchId', requireAuth, async (req, res) => {
       [churchId]
     );
     
-    // If no activities, return mock data for now
-    const formattedActivities = activities.length > 0 ? activities : [
-      {
-        id: '1',
-        timestamp: new Date().toISOString(),
-        userId: 'user1',
-        userName: 'Father John',
-        userRole: 'priest',
-        action: 'CREATE_BAPTISM',
-        recordType: 'baptism',
-        recordId: 'B123',
-        description: 'Created new baptism record for John Smith',
-        ipAddress: '192.168.1.100',
-        userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-        changes: { name: 'John Smith', date: '2024-01-15' }
-      },
-      {
-        id: '2',
-        timestamp: new Date(Date.now() - 3600000).toISOString(),
-        userId: 'user2',
-        userName: 'Mary Johnson',
-        userRole: 'volunteer',
-        action: 'FILE_UPLOAD',
-        recordType: 'upload',
-        description: 'Uploaded file: baptism_records_1920.pdf',
-        ipAddress: '192.168.1.101',
-        userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-        changes: { filename: 'baptism_records_1920.pdf', size: '2.5MB' }
-      },
-      {
-        id: '3',
-        timestamp: new Date(Date.now() - 7200000).toISOString(),
-        userId: 'user3',
-        userName: 'Administrator',
-        userRole: 'admin',
-        action: 'UPDATE_MARRIAGE',
-        recordType: 'marriage',
-        recordId: 'M456',
-        description: 'Updated marriage record for Peter and Anna Wilson',
-        ipAddress: '192.168.1.102',
-        userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-        changes: { witness1: 'Updated witness name' }
-      }
-    ];
+    const formattedActivities = activities;
     
     const totalCount = countResult[0]?.total || formattedActivities.length;
     const hasMore = (parseInt(offset) + parseInt(limit)) < totalCount;

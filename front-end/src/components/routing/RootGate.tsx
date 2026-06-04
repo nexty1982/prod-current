@@ -1,6 +1,7 @@
 import SiteFooter from '@/components/frontend-pages/shared/footer/SiteFooter';
 import HpHeader from '@/components/frontend-pages/shared/header/HpHeader';
 import { useAuth } from '@/context/AuthContext';
+import { getPostLoginPath } from '@/utils/roles';
 import { EditModeProvider } from '@/context/EditModeContext';
 import { lazy, Suspense, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -31,15 +32,7 @@ const RootGate = () => {
   useEffect(() => {
     if (!authenticated || !user) return;
 
-    if (user.email === 'frjames@ssppoc.org') {
-      navigate('/portal', { replace: true });
-      return;
-    }
-    if (user.role === 'super_admin' || user.role === 'admin') {
-      navigate('/task-wheel', { replace: true });
-      return;
-    }
-    navigate('/portal', { replace: true });
+    navigate(getPostLoginPath(user), { replace: true });
   }, [authenticated, user, navigate]);
 
   return (

@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { checkAuth, clearAuthData, getCurrentUser } from '../../auth/authClient';
 import { useAuth } from '../../context/AuthContext';
+import { getPostLoginPath } from '../../utils/roles';
 
 const SmartRedirect: React.FC = () => {
   const navigate = useNavigate();
@@ -65,18 +66,7 @@ const SmartRedirect: React.FC = () => {
               id: contextUser.id
             });
 
-            // Special case: frjames@ssppoc.org always goes to user dashboard
-            if (contextUser.email === 'frjames@ssppoc.org') {
-              safeNavigate('/portal', { replace: true });
-            }
-            // Redirect based on role: super_admin/admin to Control Panel, priest and others to Portal
-            else if (contextUser.role === 'super_admin' || contextUser.role === 'admin') {
-              safeNavigate('/task-wheel', { replace: true });
-            } else if (contextUser.role === 'priest') {
-              safeNavigate('/portal', { replace: true });
-            } else {
-              safeNavigate('/portal', { replace: true });
-            }
+            safeNavigate(getPostLoginPath(contextUser), { replace: true });
           } else {
             debugLog('Context auth - user not authenticated');
             clearAuthData();
@@ -111,18 +101,7 @@ const SmartRedirect: React.FC = () => {
               church_id: currentUser.church_id
             });
 
-            // Special case: frjames@ssppoc.org always goes to user dashboard
-            if (currentUser.email === 'frjames@ssppoc.org') {
-              safeNavigate('/portal', { replace: true });
-            }
-            // Redirect based on role: super_admin/admin to Super Dashboard, priest and others to User Dashboard
-            else if (currentUser.role === 'super_admin' || currentUser.role === 'admin') {
-              safeNavigate('/task-wheel', { replace: true });
-            } else if (currentUser.role === 'priest') {
-              safeNavigate('/portal', { replace: true });
-            } else {
-              safeNavigate('/portal', { replace: true });
-            }
+            safeNavigate(getPostLoginPath(currentUser), { replace: true });
           } else {
             // Authenticated but no user data - try to refresh auth
             debugLog('Authenticated but no user data, refreshing auth');
@@ -132,18 +111,7 @@ const SmartRedirect: React.FC = () => {
                 // After refresh, try again
                 const refreshedUser = auth.user || getCurrentUser();
                 if (refreshedUser) {
-                  // Special case: frjames@ssppoc.org always goes to user dashboard
-                  if (refreshedUser.email === 'frjames@ssppoc.org') {
-                    safeNavigate('/portal', { replace: true });
-                  }
-                  // Redirect based on role: super_admin/admin to Super Dashboard, priest and others to User Dashboard
-                  else if (refreshedUser.role === 'super_admin' || refreshedUser.role === 'admin') {
-                    safeNavigate('/task-wheel', { replace: true });
-                  } else if (refreshedUser.role === 'priest') {
-                    safeNavigate('/portal', { replace: true });
-                  } else {
-                    safeNavigate('/portal', { replace: true });
-                  }
+                  safeNavigate(getPostLoginPath(refreshedUser), { replace: true });
                 } else {
                   // Still no user data after refresh
                   safeNavigate('/auth/login', { replace: true });

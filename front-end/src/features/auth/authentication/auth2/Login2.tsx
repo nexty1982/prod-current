@@ -133,9 +133,9 @@ const Login2 = () => {
       <div className="om-page-container">
         <HpHeader />
 
-        {/* Hero Login Section */}
-        <section className="om-hero-gradient py-16 md:py-24">
-          <div className="max-w-7xl mx-auto px-6">
+        {/* Hero Login Section — flex-centered between HpHeader and SiteFooter */}
+        <section className="om-hero-gradient om-login-hero">
+          <div className="om-login-hero-inner max-w-7xl mx-auto px-6">
             <div className="grid md:grid-cols-2 gap-12 items-center">
               {/* Left: Canonical Duty Carousel */}
               <CanonicalDutyCarousel />

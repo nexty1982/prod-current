@@ -48,6 +48,10 @@ class ApiClient {
           if (accessToken && !config.headers['Authorization']) {
             config.headers['Authorization'] = `Bearer ${accessToken}`;
           }
+          const refreshToken = localStorage.getItem('refresh_token');
+          if (refreshToken && !config.headers['X-Refresh-Token']) {
+            config.headers['X-Refresh-Token'] = refreshToken;
+          }
         }
 
         // Remove any invalid church_id headers for routes that don't need them

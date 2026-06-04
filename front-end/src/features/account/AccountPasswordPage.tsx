@@ -246,34 +246,6 @@ const AccountPasswordPage: React.FC = () => {
     }
   };
 
-  // ── Security recommendations ──
-
-  const recommendations = useMemo(() => {
-    if (!security) return [];
-    const items: { text: string; severity: 'warning' | 'info' }[] = [];
-    if (!security.password_changed_at) {
-      items.push({ text: t('account.never_changed_password'), severity: 'warning' });
-    } else {
-      const daysSince = Math.floor((Date.now() - new Date(security.password_changed_at).getTime()) / 86400000);
-      if (daysSince > 180) {
-        items.push({ text: t('account.password_old_warning').replace('{days}', String(daysSince)), severity: 'warning' });
-      }
-    }
-    if (security.active_sessions > 3) {
-      items.push({
-        text: t('account.sessions_review_warning').replace('{count}', String(security.active_sessions)),
-        severity: 'info',
-      });
-    }
-    if (!security.email_verified) {
-      items.push({ text: t('account.email_not_verified_rec'), severity: 'warning' });
-    }
-    if (!security.two_factor_enabled) {
-      items.push({ text: t('account.twofactor_not_available_rec'), severity: 'info' });
-    }
-    return items;
-  }, [security]);
-
   // ── Password field helper ──
 
   const pwField = (
@@ -584,90 +556,6 @@ const AccountPasswordPage: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* ── Two-Factor Authentication ── */}
-      <Card variant="outlined" sx={{ mb: 2 }}>
-        <CardContent sx={{ p: 3 }}>
-          <Box display="flex" alignItems="center" gap={1} mb={0.5}>
-            <ShieldIcon color="primary" />
-            <Typography variant="h5" fontWeight={600}>
-              {t('account.twofactor_authentication')}
-            </Typography>
-          </Box>
-          <Typography variant="body2" color="text.secondary" mb={3}>
-            {t('account.twofactor_desc')}
-          </Typography>
-          <Divider sx={{ mb: 3 }} />
-
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'flex-start',
-              gap: 2,
-              p: 2,
-              borderRadius: 2,
-              bgcolor: 'action.hover',
-            }}
-          >
-            <ShieldIcon sx={{ color: 'text.disabled', mt: 0.25 }} />
-            <Box>
-              <Box display="flex" alignItems="center" gap={1} mb={0.5}>
-                <Typography variant="body2" fontWeight={600}>
-                  {t('account.status')}
-                </Typography>
-                <Chip
-                  label={t('account.not_available_chip')}
-                  size="small"
-                  variant="outlined"
-                  color="default"
-                  sx={{ borderRadius: '4px', fontSize: '0.6875rem', fontWeight: 500, letterSpacing: '0.02em' }}
-                />
-              </Box>
-              <Typography variant="body2" color="text.secondary">
-                {t('account.twofactor_not_implemented')}
-              </Typography>
-            </Box>
-          </Box>
-        </CardContent>
-      </Card>
-
-      {/* ── Security Recommendations ── */}
-      {recommendations.length > 0 && (
-        <Card variant="outlined" sx={{ mb: 2 }}>
-          <CardContent sx={{ p: 3 }}>
-            <Box display="flex" alignItems="center" gap={1} mb={0.5}>
-              <InfoOutlinedIcon color="primary" />
-              <Typography variant="h5" fontWeight={600}>
-                {t('account.security_recommendations')}
-              </Typography>
-            </Box>
-            <Typography variant="body2" color="text.secondary" mb={2}>
-              {t('account.security_recommendations_desc')}
-            </Typography>
-            <Divider sx={{ mb: 2 }} />
-
-            <Stack spacing={1.5}>
-              {recommendations.map((rec, i) => (
-                <Box
-                  key={i}
-                  display="flex"
-                  alignItems="flex-start"
-                  gap={1.5}
-                  sx={{ p: 1.5, borderRadius: 1.5, bgcolor: 'action.hover' }}
-                >
-                  {rec.severity === 'warning' ? (
-                    <WarningAmberIcon sx={{ fontSize: 20, color: 'warning.main', mt: 0.25 }} />
-                  ) : (
-                    <InfoOutlinedIcon sx={{ fontSize: 20, color: 'info.main', mt: 0.25 }} />
-                  )}
-                  <Typography variant="body2" color="text.secondary">
-                    {rec.text}
-                  </Typography>
-                </Box>
-              ))}
-            </Stack>
-          </CardContent>
-        </Card>
-      )}
 
       {/* ── Snackbar ── */}
       <AppSnackbar

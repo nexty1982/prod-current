@@ -105,6 +105,7 @@ function AuthProvider({ children }: AuthProviderProps) {
   }, []);
 
   const login = async (username: string, password: string, rememberMe: boolean = false) => {
+    let awaitingOidcRedirect = false;
     try {
       setLoading(true);
       setError(null);
@@ -121,6 +122,7 @@ function AuthProvider({ children }: AuthProviderProps) {
       }
 
       if ((response as { pendingRedirect?: boolean }).pendingRedirect) {
+        awaitingOidcRedirect = true;
         return { success: true, pendingRedirect: true };
       }
 
@@ -173,7 +175,9 @@ function AuthProvider({ children }: AuthProviderProps) {
       localStorage.removeItem('access_token');
       throw new Error(errorMessage);
     } finally {
-      setLoading(false);
+      if (!awaitingOidcRedirect) {
+        setLoading(false);
+      }
     }
   };
 

@@ -1797,10 +1797,12 @@ router.get('/:lang', async (req, res) => {
         srcParams.push(...namespaces);
       }
       const [srcRows] = await pool.query(srcQuery, srcParams);
-      englishBase = {};
+      const fromDb = {};
       for (const row of srcRows) {
-        englishBase[row.translation_key] = row.english_text;
+        fromDb[row.translation_key] = row.english_text;
       }
+      // DB rows override defaults; defaults fill any keys missing from translations_source.
+      englishBase = { ...filterByNamespace(ENGLISH_DEFAULTS, namespaces), ...fromDb };
     } catch (dbErr) {
       console.warn('[i18n] translations_source query failed, using ENGLISH_DEFAULTS:', dbErr.message);
       englishBase = filterByNamespace(ENGLISH_DEFAULTS, namespaces);

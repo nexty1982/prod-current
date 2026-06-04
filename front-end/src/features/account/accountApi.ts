@@ -62,6 +62,7 @@ export interface ProfileResponse {
     location: string;
     first_name: string;
     last_name: string;
+    church_name?: string | null;
   };
 }
 
@@ -281,8 +282,12 @@ export const churchApi = {
 export const sessionsApi = {
   /** GET /api/user/sessions */
   async getSessions(): Promise<SessionData[]> {
-    const data = await request<SessionsResponse>('/api/user/sessions');
-    return data.data?.sessions || [];
+    const data = await request<SessionsResponse & { sessions?: SessionData[] }>('/api/user/sessions');
+    const sessions = data.data?.sessions ?? data.sessions ?? [];
+    return sessions.map((s: SessionData & { id?: number; session_id?: string }) => ({
+      ...s,
+      id: s.id ?? Number(s.session_id) || 0,
+    }));
   },
 
   /** DELETE /api/user/sessions/:id */

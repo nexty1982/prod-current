@@ -405,40 +405,6 @@ const AccountParishInfoPage: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* ── Quick Actions ── */}
-      {(canEditDetails || canEditBranding) && (
-        <Card variant="outlined" sx={{ mb: 2 }}>
-          <CardContent sx={{ p: 3 }}>
-            <Typography variant="subtitle2" color="text.secondary" mb={1.5}>
-              {t('account.quick_actions')}
-            </Typography>
-            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
-              {canEditDetails && (
-                <Button
-                  variant="outlined"
-                  size="small"
-                  startIcon={<EditIcon />}
-                  onClick={() => navigate('/account/church-details')}
-                  sx={{ textTransform: 'none' }}
-                >
-                  {t('account.edit_church_details')}
-                </Button>
-              )}
-              {canEditBranding && (
-                <Button
-                  variant="outlined"
-                  size="small"
-                  startIcon={<PaletteIcon />}
-                  onClick={() => navigate('/account/branding')}
-                  sx={{ textTransform: 'none' }}
-                >
-                  {t('account.manage_branding')}
-                </Button>
-              )}
-            </Stack>
-          </CardContent>
-        </Card>
-      )}
     </>
   );
 };

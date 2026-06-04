@@ -120,6 +120,20 @@ const NAV_ITEMS: NavItem[] = [
   },
 ];
 
+/** Page heading + breadcrumb label for each account route (not the generic hub title). */
+const ROUTE_PAGE_TITLE_KEYS: Record<string, string> = {
+  '/account/profile': 'account.profile_overview',
+  '/account/personal-info': 'account.personal_info',
+  '/account/password': 'account.password_and_auth',
+  '/account/sessions': 'account.active_sessions',
+  '/account/notifications': 'account.notifications_label',
+  '/account/parish': 'account.parish_info',
+  '/account/church-details': 'account.church_details',
+  '/account/branding': 'account.branding',
+  '/account/ocr-preferences': 'account.ocr_preferences',
+  '/account/parish-management': 'account.parish_management',
+};
+
 const AccountLayout: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -128,18 +142,22 @@ const AccountLayout: React.FC = () => {
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
 
+  const pageTitleKey =
+    ROUTE_PAGE_TITLE_KEYS[location.pathname] || 'account.account_settings';
+  const pageTitle = t(pageTitleKey);
+
   const visibleItems = useMemo(
     () => NAV_ITEMS.filter((item) => !item.visible || item.visible(user)),
     [user],
   );
 
   return (
-    <PageContainer title={t('account.hub_title')} description={t('account.hub_description')}>
+    <PageContainer title={pageTitle} description={t('account.hub_description')}>
       <Breadcrumb
-        title={t('account.hub_title')}
+        title={pageTitle}
         items={[
           { to: '/', title: t('nav.home') },
-          { title: t('account.hub_title') },
+          { title: pageTitle },
         ]}
       />
 
