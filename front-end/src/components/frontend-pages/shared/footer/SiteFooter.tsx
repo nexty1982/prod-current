@@ -1,59 +1,32 @@
 import { FOOTER_LINKS } from '@/config/publicRoutes';
 import { useLanguage } from '@/context/LanguageContext';
-import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-
-const FOOTER_SACRAMENT_IMAGES = [
-  { src: '/images/home/baptism-small-footer.png', delay: 3000 },
-  { src: '/images/home/wedding-small-footer.png', delay: 4000 },
-  { src: '/images/home/funeral-small-footer.png', delay: 5000 },
-];
 
 const SiteFooter = () => {
   const { t } = useLanguage();
   const copyrightText = t('footer.copyright').replace('{year}', String(new Date().getFullYear()));
 
-  const [activeIndex, setActiveIndex] = useState(0);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setActiveIndex((prev) => (prev + 1) % FOOTER_SACRAMENT_IMAGES.length);
-    }, FOOTER_SACRAMENT_IMAGES[activeIndex].delay);
-    return () => clearTimeout(timer);
-  }, [activeIndex]);
-
   return (
     <footer className="bg-[#2d1b4e] dark:bg-[#0d1117] text-white">
       <div className="max-w-7xl mx-auto px-6 py-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-          {/* Brand — LLC wordmark + sacrament images */}
+          {/* Brand */}
           <div className="col-span-1">
-            <div className="inline-flex items-center gap-4 mb-4 flex-wrap">
-              <a
-                href="/frontend-pages/homepage"
-                className="no-underline shrink-0 group"
-                aria-label="Orthodox Metrics LLC"
+            <a
+              href="/frontend-pages/homepage"
+              className="no-underline inline-block mb-4"
+              aria-label="Orthodox Metrics LLC"
+            >
+              <span
+                className="font-['Georgia'] text-[1.35rem] leading-tight tracking-[0.02em] text-white block"
+                style={{ fontWeight: 400 }}
               >
-                <span
-                  className="font-['Georgia'] text-[1.35rem] leading-tight tracking-[0.02em] text-white block"
-                  style={{ fontWeight: 400 }}
-                >
-                  Orthodox Metrics
-                  <span className="text-[#d4af37] font-['Inter'] text-[0.7rem] uppercase tracking-[0.22em] ml-1.5 align-middle">
-                    LLC
-                  </span>
+                Orthodox Metrics
+                <span className="text-[#d4af37] font-['Inter'] text-[0.7rem] uppercase tracking-[0.22em] ml-1.5 align-middle">
+                  LLC
                 </span>
-              </a>
-              <img
-                src={FOOTER_SACRAMENT_IMAGES[activeIndex].src}
-                alt=""
-                role="presentation"
-                className="h-16 w-auto object-contain transition-opacity duration-500 drop-shadow-sm"
-              />
-            </div>
-            <p className="font-['Inter'] text-[14px] text-[rgba(255,255,255,0.7)] leading-relaxed">
-              {t('footer.tagline')}
-            </p>
+              </span>
+            </a>
           </div>
 
           {/* Product */}
