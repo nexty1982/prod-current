@@ -11,10 +11,23 @@
 
 .om-page-container {
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
   background-color: #fff;
 }
 .dark .om-page-container {
   background-color: #111827;
+}
+
+/* Grow main/hero so footer sits at the bottom on short pages (e.g. login). */
+.om-page-container > main.om-main,
+.om-page-container > section.om-hero-gradient {
+  flex: 1 0 auto;
+}
+
+.om-page-container > footer {
+  flex-shrink: 0;
+  margin-top: auto;
 }
 
 /* ========================================
