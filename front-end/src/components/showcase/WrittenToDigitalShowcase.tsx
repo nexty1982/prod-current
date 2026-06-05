@@ -215,7 +215,7 @@ export default function WrittenToDigitalShowcase({
       )}
 
       {/* Transformation Display Panel */}
-      <div className="relative rounded-2xl overflow-hidden border border-white/10 shadow-2xl shadow-purple-900/30 bg-black/20 backdrop-blur" style={{ aspectRatio: '16/10' }}>
+      <div className="relative rounded-2xl overflow-hidden border border-white/10 shadow-2xl shadow-purple-900/30 bg-black/20 backdrop-blur w-full h-[460px] sm:h-[500px] md:h-[540px] lg:h-auto lg:aspect-[16/10]">
         {/* LAYER 1: Ledger Image */}
         <motion.div className="absolute inset-0" animate={{ opacity: imageOpacity }} transition={{ duration: 0.6, ease: 'easeInOut' }}>
           <AnimatePresence mode="wait">

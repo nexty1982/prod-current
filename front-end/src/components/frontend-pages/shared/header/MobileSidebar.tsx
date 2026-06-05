@@ -10,6 +10,7 @@ import { IconMoon, IconSun } from '@tabler/icons-react';
 import { useContext } from 'react';
 import { BrandLogo } from '@/layouts/full/shared/logo/Logo';
 import { PUBLIC_ROUTES } from '@/config/publicRoutes';
+import { Link } from 'react-router-dom';
 
 const portalMobileLinks = [
   { tKey: 'portal', to: '/portal' },
@@ -81,7 +82,8 @@ const MobileSidebar = ({ isPortal = false }: MobileSidebarProps) => {
                 <Button
                   color="inherit"
                   key={i}
-                  href={link.to}
+                  component={Link}
+                  to={link.to}
                   sx={{ justifyContent: 'start' }}
                 >
                   {link.tKey === 'portal' ? 'Portal' :
@@ -96,10 +98,10 @@ const MobileSidebar = ({ isPortal = false }: MobileSidebarProps) => {
             </>
           ) : (
             <>
-              <Button color="inherit" href={PUBLIC_ROUTES.HOME} sx={{ justifyContent: 'start' }}>
+              <Button color="inherit" component={Link} to={PUBLIC_ROUTES.HOME} sx={{ justifyContent: 'start' }}>
                 {t('nav.home')}
               </Button>
-              <Button color="inherit" href={PUBLIC_ROUTES.PRICING} sx={{ justifyContent: 'start' }}>
+              <Button color="inherit" component={Link} to={PUBLIC_ROUTES.PRICING} sx={{ justifyContent: 'start' }}>
                 {t('nav.pricing')}
               </Button>
               {PUBLIC_MOBILE_NAV_GROUPS.map((group) => (
@@ -112,7 +114,8 @@ const MobileSidebar = ({ isPortal = false }: MobileSidebarProps) => {
                       <Button
                         color="inherit"
                         key={link.to}
-                        href={link.to}
+                        component={Link}
+                        to={link.to}
                         sx={{ justifyContent: 'start' }}
                       >
                         {t(link.tKey)}
@@ -121,7 +124,7 @@ const MobileSidebar = ({ isPortal = false }: MobileSidebarProps) => {
                   </Stack>
                 </Box>
               ))}
-              <Button color="primary" variant="outlined" href="/auth/login">
+              <Button color="primary" variant="outlined" component={Link} to="/auth/login">
                 {t('common.church_login')}
               </Button>
             </>

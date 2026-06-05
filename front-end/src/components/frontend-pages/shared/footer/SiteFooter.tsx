@@ -12,8 +12,8 @@ const SiteFooter = () => {
         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-x-6 gap-y-8">
           {/* Brand */}
           <div className="col-span-2 lg:col-span-1">
-            <a
-              href={PUBLIC_ROUTES.HOME}
+            <Link
+              to={PUBLIC_ROUTES.HOME}
               className="no-underline inline-block mb-4"
               aria-label="Orthodox Metrics LLC"
             >
@@ -26,7 +26,7 @@ const SiteFooter = () => {
                   LLC
                 </span>
               </span>
-            </a>
+            </Link>
           </div>
 
           {/* Product */}
