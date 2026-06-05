@@ -627,7 +627,9 @@ const AnalyticsDashboard: React.FC = () => {
                       <NavigationControl position="top-left" showCompass={false} />
                       
                       {data.charts.geoParishes.map((p) => {
-                        const markerSize = Math.max(20, Math.min(50, Math.round(p.total / 150) + 18));
+                        const markerSize = Math.max(24, Math.min(52, Math.round(p.total / 150) + 20));
+                        const isOMClient = p.isClient === 'TRUE' || p.isClient === '1' || p.isClient === true;
+                        
                         return (
                           <Marker
                             key={p.churchId}
@@ -644,25 +646,37 @@ const AnalyticsDashboard: React.FC = () => {
                                 width: markerSize,
                                 height: markerSize,
                                 borderRadius: '50%',
-                                bgcolor: isDark ? 'rgba(201, 161, 74, 0.85)' : 'rgba(26, 54, 93, 0.85)',
-                                border: '2px solid white',
+                                bgcolor: isOMClient 
+                                  ? (isDark ? 'rgba(201, 161, 74, 0.15)' : 'rgba(201, 161, 74, 0.22)')
+                                  : (isDark ? 'rgba(99, 102, 241, 0.15)' : 'rgba(26, 54, 93, 0.22)'),
+                                border: isOMClient
+                                  ? '2px solid #c9a14a'
+                                  : '2px solid #6366F1',
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                color: 'white',
-                                fontWeight: 'bold',
-                                fontSize: `${Math.max(9, Math.min(13, Math.round(p.total / 500) + 9))}px`,
                                 cursor: 'pointer',
-                                transition: 'all 0.2s',
+                                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                                 '&:hover': {
-                                  transform: 'scale(1.15)',
-                                  bgcolor: '#c9a14a',
+                                  bgcolor: isOMClient 
+                                    ? 'rgba(201, 161, 74, 0.35)' 
+                                    : 'rgba(99, 102, 241, 0.35)',
+                                  boxShadow: isOMClient 
+                                    ? '0 0 16px rgba(201, 161, 74, 0.8)' 
+                                    : '0 0 16px rgba(99, 102, 241, 0.8)',
                                   zIndex: 10,
                                 },
-                                boxShadow: '0 4px 6px rgba(0,0,0,0.15)',
+                                boxShadow: '0 4px 10px rgba(0,0,0,0.12)',
                               }}
                             >
-                              {p.total >= 1000 ? `${(p.total / 1000).toFixed(1)}k` : p.total}
+                              <Box
+                                sx={{
+                                  width: '35%',
+                                  height: '35%',
+                                  borderRadius: '50%',
+                                  bgcolor: isOMClient ? '#c9a14a' : '#6366F1',
+                                }}
+                              />
                             </Box>
                           </Marker>
                         );
@@ -676,26 +690,97 @@ const AnalyticsDashboard: React.FC = () => {
                           closeButton={true}
                           closeOnClick={false}
                           anchor="top"
-                          maxWidth="280px"
+                          maxWidth="300px"
                         >
-                          <Box sx={{ p: 1, color: '#1a202c', fontFamily: 'Inter' }}>
-                            <Typography variant="subtitle2" fontWeight={700} sx={{ mb: 0.5 }}>
+                          <Box sx={{ p: 1.5, color: '#1e293b', fontFamily: 'Inter', minWidth: '240px' }}>
+                            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 1 }}>
+                              {(mapPopup.isClient === 'TRUE' || mapPopup.isClient === '1' || mapPopup.isClient === true) && (
+                                <Chip 
+                                  size="small" 
+                                  label="Platform Client" 
+                                  sx={{ 
+                                    height: '18px', 
+                                    fontSize: '9px', 
+                                    bgcolor: 'rgba(201, 161, 74, 0.15)', 
+                                    color: '#c9a14a',
+                                    border: '1px solid #c9a14a',
+                                    fontWeight: 600 
+                                  }} 
+                                />
+                              )}
+                              {(mapPopup.hasMetrical === 'TRUE' || mapPopup.hasMetrical === '1' || mapPopup.hasMetrical === true) && (
+                                <Chip 
+                                  size="small" 
+                                  label="Sacramental Ledger" 
+                                  sx={{ 
+                                    height: '18px', 
+                                    fontSize: '9px', 
+                                    bgcolor: 'rgba(34, 197, 94, 0.12)', 
+                                    color: '#22c55e',
+                                    border: '1px solid rgba(34, 197, 94, 0.3)',
+                                    fontWeight: 600 
+                                  }} 
+                                />
+                              )}
+                            </Box>
+                            
+                            <Typography variant="subtitle2" fontWeight={700} sx={{ mb: 0.5, fontSize: '13px', lineHeight: 1.2 }}>
                               {mapPopup.name}
                             </Typography>
-                            <Typography variant="body2" color="textSecondary" sx={{ mb: 1, fontSize: '11px' }}>
-                              {mapPopup.city}, {mapPopup.state}
+                            
+                            <Typography variant="body2" color="textSecondary" sx={{ mb: 1, fontSize: '11px', display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                              {mapPopup.street ? `${mapPopup.street}, ` : ''}{mapPopup.city}, {mapPopup.state}
                             </Typography>
-                            <Divider sx={{ my: 0.5 }} />
-                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, mt: 1, fontSize: '11px' }}>
-                              <div><strong>Total Registers:</strong> {mapPopup.total.toLocaleString()}</div>
-                              <div><strong>Added (Period):</strong> {mapPopup.addedInPeriod}</div>
-                              <div>
-                                <strong>Growth:</strong>{' '}
-                                <span style={{ color: mapPopup.changePercent >= 0 ? 'green' : 'red', fontWeight: 600 }}>
-                                  {mapPopup.changePercent >= 0 ? '+' : ''}{mapPopup.changePercent}%
-                                </span>
+                            
+                            <Divider sx={{ my: 1 }} />
+                            
+                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, fontSize: '11px', mb: 1.5 }}>
+                              <div className="flex justify-between">
+                                <span style={{ color: '#64748b' }}>Total Registers:</span>
+                                <strong>{mapPopup.total.toLocaleString()}</strong>
                               </div>
+                              <div className="flex justify-between">
+                                <span style={{ color: '#64748b' }}>Added (Period):</span>
+                                <strong>+{mapPopup.addedInPeriod}</strong>
+                              </div>
+                              <div className="flex justify-between">
+                                <span style={{ color: '#64748b' }}>Growth Rate:</span>
+                                <strong style={{ color: mapPopup.changePercent >= 0 ? '#22c55e' : '#ef4444' }}>
+                                  {mapPopup.changePercent >= 0 ? '+' : ''}{mapPopup.changePercent}%
+                                </strong>
+                              </div>
+                              
+                              {mapPopup.phone && (
+                                <div className="mt-1 pt-1 border-t border-slate-100" style={{ fontSize: '10px', color: '#64748b' }}>
+                                  <strong>Phone:</strong> {mapPopup.phone}
+                                </div>
+                              )}
+                              {mapPopup.website && (
+                                <div style={{ fontSize: '10px', color: '#64748b' }}>
+                                  <strong>Site:</strong>{' '}
+                                  <a href={mapPopup.website} target="_blank" rel="noopener noreferrer" style={{ color: '#c9a14a', textDecoration: 'underline' }}>
+                                    {mapPopup.website.replace(/^https?:\/\/(www\.)?/, '')}
+                                  </a>
+                                </div>
+                              )}
                             </Box>
+
+                            {mapPopup.assignmentNotes && (
+                              <Box sx={{ 
+                                mt: 1, 
+                                p: 1, 
+                                bgcolor: 'rgba(0,0,0,0.03)', 
+                                borderRadius: '4px',
+                                borderLeft: '3px solid #c9a14a',
+                                fontSize: '10px',
+                                fontStyle: 'italic',
+                                color: 'text.secondary',
+                                mb: 1.5
+                              }}>
+                                <strong>Assignment Note:</strong> {mapPopup.assignmentNotes}
+                              </Box>
+                            )}
+
                             <Button
                               size="small"
                               variant="contained"
@@ -705,7 +790,13 @@ const AnalyticsDashboard: React.FC = () => {
                                 if (hit) setSelectedParish(hit);
                                 setMapPopup(null);
                               }}
-                              sx={{ mt: 1.5, py: 0.5, fontSize: '10px', bgcolor: '#1a365d', '&:hover': { bgcolor: '#2c5282' } }}
+                              sx={{ 
+                                py: 0.5, 
+                                fontSize: '10px', 
+                                bgcolor: '#1a365d', 
+                                color: 'white',
+                                '&:hover': { bgcolor: '#2c5282' } 
+                              }}
                             >
                               Explore Parish Details
                             </Button>
@@ -858,6 +949,46 @@ const AnalyticsDashboard: React.FC = () => {
               <li>Status: {selectedParish.records.dataStatus}</li>
               {selectedParish.records.lastActivityAt && (
                 <li>Last activity: {new Date(selectedParish.records.lastActivityAt).toLocaleDateString()}</li>
+              )}
+            </ul>
+
+            <Typography variant="subtitle2" fontWeight={600} sx={{ mt: 3, mb: 1 }}>Parish Directory & Onboarding (xlsx)</Typography>
+            <ul className={`text-sm space-y-1.5 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
+              {selectedParish.street && (
+                <li><strong>Street Address:</strong> {selectedParish.street}</li>
+              )}
+              {selectedParish.phone && (
+                <li><strong>Phone Number:</strong> {selectedParish.phone}</li>
+              )}
+              {selectedParish.website && (
+                <li>
+                  <strong>Website:</strong>{' '}
+                  <a href={selectedParish.website} target="_blank" rel="noopener noreferrer" className="text-[#c9a14a] hover:underline">
+                    {selectedParish.website}
+                  </a>
+                </li>
+              )}
+              <li>
+                <strong>Platform Status:</strong>{' '}
+                {(selectedParish.isClient === 'TRUE' || selectedParish.isClient === '1' || selectedParish.isClient === true) ? (
+                  <span className="text-green-500 font-semibold">Active Client</span>
+                ) : (
+                  <span className="text-amber-500 font-semibold">CRM Lead</span>
+                )}
+              </li>
+              <li>
+                <strong>Historical Data available:</strong>{' '}
+                {(selectedParish.hasMetrical === 'TRUE' || selectedParish.hasMetrical === '1' || selectedParish.hasMetrical === true) ? 'Yes' : 'No'}
+              </li>
+              {selectedParish.salesNotes && (
+                <li className="mt-2 p-2 bg-slate-100 dark:bg-slate-800 rounded text-xs border-l-2 border-indigo-500">
+                  <strong>Sales Notes:</strong> {selectedParish.salesNotes}
+                </li>
+              )}
+              {selectedParish.assignmentNotes && (
+                <li className="mt-2 p-2 bg-slate-100 dark:bg-slate-800 rounded text-xs border-l-2 border-[#c9a14a]">
+                  <strong>Assignment Notes:</strong> {selectedParish.assignmentNotes}
+                </li>
               )}
             </ul>
 

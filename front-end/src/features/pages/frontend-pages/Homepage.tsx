@@ -255,24 +255,42 @@ function HomepageDiocesanMapPanel() {
               return (
                 <g
                   key={p.name}
-                  className="cursor-pointer group"
+                  className="cursor-pointer group/node"
                   onClick={() => setActiveParish(p)}
                 >
+                  {/* Stable hover sensor hotspot */}
                   <circle
                     cx={p.x}
                     cy={p.y}
-                    r={isActive ? 12 : 8}
+                    r="22"
+                    fill="transparent"
+                    className="pointer-events-auto"
+                  />
+                  {/* Visual concentric rings representing geolocated parishes */}
+                  <circle
+                    cx={p.x}
+                    cy={p.y}
+                    r={isActive ? 11 : 7}
+                    fill={isActive ? 'rgba(201, 161, 74, 0.2)' : 'rgba(26, 54, 93, 0.2)'}
+                    stroke={isActive ? '#c9a14a' : '#1a365d'}
+                    strokeWidth="1.5"
+                    className="transition-all duration-300 group-hover/node:fill-slate-200 dark:group-hover/node:fill-slate-800"
+                  />
+                  <circle
+                    cx={p.x}
+                    cy={p.y}
+                    r={isActive ? 4 : 3}
                     fill={isActive ? '#c9a14a' : '#1a365d'}
-                    className="transition-all duration-300 group-hover:scale-125 dark:fill-[#e8d5a3]"
+                    className="transition-all duration-300 group-hover/node:fill-[#c9a14a]"
                   />
                   {isActive && (
                     <circle
                       cx={p.x}
                       cy={p.y}
-                      r="20"
+                      r="18"
                       fill="none"
                       stroke="#c9a14a"
-                      strokeWidth="1.5"
+                      strokeWidth="1"
                       className="animate-ping"
                       style={{ transformOrigin: `${p.x}px ${p.y}px` }}
                     />
@@ -281,7 +299,7 @@ function HomepageDiocesanMapPanel() {
                     x={p.x}
                     y={p.y - (isActive ? 18 : 12)}
                     textAnchor="middle"
-                    className="font-['Inter'] text-[9px] font-medium fill-[#334155] dark:fill-gray-300 opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="font-['Inter'] text-[9px] font-semibold fill-[#1a365d] dark:fill-[#e8d5a3] opacity-0 group-hover/node:opacity-100 transition-opacity"
                   >
                     {p.city}
                   </text>

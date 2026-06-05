@@ -82,8 +82,14 @@ with zipfile.ZipFile(path) as z:
         out[ext_id] = {
             'diocese': row.get(13, ''),
             'name': row.get(1, ''),
+            'street': row.get(2, ''),
             'city': row.get(3, ''),
             'state': row.get(4, ''),
+            'phone': row.get(6, ''),
+            'website': row.get(7, ''),
+            'hasMetrical': row.get(10, ''),
+            'isClient': row.get(11, ''),
+            'salesNotes': row.get(12, ''),
             'notes': row.get(14, ''),
         }
     print(json.dumps(out))
@@ -998,7 +1004,17 @@ router.get('/diocesan-dashboard', requireAuth, async (req, res) => {
 
       if (selectedChurchIds && !selectedChurchIds.includes(row.church_id)) continue;
 
-      parishesRaw.push({ ...row, dioceseName, assignmentNotes: xlsxRow?.notes || '' });
+      parishesRaw.push({
+        ...row,
+        dioceseName,
+        assignmentNotes: xlsxRow?.notes || '',
+        street: xlsxRow?.street || '',
+        phone: xlsxRow?.phone || '',
+        website: xlsxRow?.website || '',
+        salesNotes: xlsxRow?.salesNotes || '',
+        isClient: xlsxRow?.isClient || '',
+        hasMetrical: xlsxRow?.hasMetrical || '',
+      });
     }
 
     const metricsList = [];
@@ -1032,6 +1048,12 @@ router.get('/diocesan-dashboard', requireAuth, async (req, res) => {
         assignmentNotes: row.assignmentNotes,
         records: metrics,
         changePercent,
+        street: row.street,
+        phone: row.phone,
+        website: row.website,
+        salesNotes: row.salesNotes,
+        isClient: row.isClient,
+        hasMetrical: row.hasMetrical,
       });
     }
 
@@ -1198,6 +1220,13 @@ router.get('/diocesan-dashboard', requireAuth, async (req, res) => {
             total: p.records.total,
             addedInPeriod: p.records.addedInPeriod,
             changePercent: p.changePercent,
+            street: p.street,
+            phone: p.phone,
+            website: p.website,
+            salesNotes: p.salesNotes,
+            isClient: p.isClient,
+            hasMetrical: p.hasMetrical,
+            assignmentNotes: p.assignmentNotes,
           })),
       },
       insights,
