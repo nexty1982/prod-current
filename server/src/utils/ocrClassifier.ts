@@ -4,8 +4,54 @@
  * Returns suggested_type + confidence. Unknown stays Unknown.
  */
 
+import Anthropic from '@anthropic-ai/sdk';
 import fs from 'fs';
 import path from 'path';
+
+const OCR_AGENT_MODEL = process.env.OCR_AGENT_MODEL || 'claude-haiku-4-5';
+const OCR_AGENT_MAX_RECORDS = 12;
+const OCR_AGENT_OCR_CONTEXT_CHARS = 3500;
+
+const RECORD_FIELD_KEYS: Record<string, string[]> = {
+  baptism: [
+    'record_number', 'child_name', 'date_of_birth', 'place_of_birth', 'father_name',
+    'mother_name', 'parents_name', 'address', 'date_of_baptism', 'godparents',
+    'performed_by', 'church', 'notes',
+  ],
+  marriage: [
+    'record_number', 'groom_name', 'bride_name', 'date_of_marriage', 'place_of_marriage',
+    'witnesses', 'best_man', 'maid_of_honor', 'officiant', 'church', 'notes',
+  ],
+  funeral: [
+    'record_number', 'deceased_name', 'date_of_death', 'date_of_funeral', 'date_of_burial',
+    'place_of_burial', 'age_at_death', 'cause_of_death', 'next_of_kin', 'officiant', 'church', 'notes',
+  ],
+};
+
+const SUBMIT_RECORD_FIELDS_TOOL: Anthropic.Tool = {
+  name: 'submit_record_fields',
+  description: 'Return cleaned parish record field extractions for human review before database seeding.',
+  input_schema: {
+    type: 'object',
+    properties: {
+      record_type: { type: 'string', enum: ['baptism', 'marriage', 'funeral', 'custom'] },
+      records: {
+        type: 'array',
+        items: {
+          type: 'object',
+          properties: {
+            fields: { type: 'object', additionalProperties: { type: 'string' } },
+            confidence: { type: 'number' },
+            needs_review: { type: 'boolean' },
+          },
+          required: ['fields'],
+        },
+      },
+      refinement_notes: { type: 'string' },
+    },
+    required: ['record_type', 'records'],
+  },
+};
 
 interface ClassifierResult {
   suggested_type: 'baptism' | 'marriage' | 'funeral' | 'unknown';
@@ -162,6 +208,9 @@ export interface AgentExtractResult {
   candidate_index?: number;
   total_candidates?: number;
   needs_review?: boolean;
+  llm_model?: string;
+  refinement_notes?: string;
+  draft_method?: 'assembler' | 'heuristic';
 }
 
 const DATE_RE = /\b(\d{1,2}[\/\.\-]\d{1,2}[\/\.\-]\d{2,4}|\d{4}[\/\.\-]\d{1,2}[\/\.\-]\d{1,2}|(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+\d{1,2},?\s+\d{4})\b/gi;
@@ -302,46 +351,193 @@ function pickPrimaryCandidate(candidates: any[]): { candidate: any; index: numbe
   return { candidate: scored[0].c, index: scored[0].index };
 }
 
-/** Prefer structured table assembly; fall back to regex heuristics on flat OCR text. */
-export function extractAgentFieldsForJob(
+function requiredFieldsForType(record_type: AgentExtractResult['record_type']): string[] {
+  if (record_type === 'baptism') return ['child_name', 'date_of_baptism'];
+  if (record_type === 'marriage') return ['groom_name', 'bride_name', 'date_of_marriage'];
+  if (record_type === 'funeral') return ['deceased_name'];
+  return [];
+}
+
+function sanitizeFieldMap(
+  raw: Record<string, unknown> | null | undefined,
+  record_type: AgentExtractResult['record_type']
+): Record<string, string> {
+  const allowed = new Set(RECORD_FIELD_KEYS[record_type] || []);
+  const out: Record<string, string> = {};
+  if (!raw || typeof raw !== 'object') return out;
+  for (const [key, value] of Object.entries(raw)) {
+    if (!allowed.has(key)) continue;
+    if (value == null) continue;
+    const text = String(value).trim().replace(/\s{2,}/g, ' ');
+    if (text) out[key] = text.slice(0, 500);
+  }
+  return out;
+}
+
+function buildAssemblerDraft(
   jobId: number,
   ocrText: string,
   recordTypeHint?: string
-): AgentExtractResult {
+): AgentExtractResult | null {
   const candidates = loadFeederRecordCandidates(jobId);
-  if (candidates.length > 0) {
-    const picked = pickPrimaryCandidate(candidates);
-    if (picked?.candidate?.fields && Object.keys(picked.candidate.fields).length > 0) {
-      const record_type = resolveRecordType(
-        ocrText,
-        recordTypeHint && recordTypeHint !== 'custom'
-          ? recordTypeHint
-          : (picked.candidate.recordType || recordTypeHint)
-      );
-      const allRecords = candidates.map((c) => ({ ...(c.fields || {}) }));
-      const fields = { ...(picked.candidate.fields || {}) };
-      const required = record_type === 'baptism'
-        ? ['child_name', 'date_of_baptism']
-        : record_type === 'marriage'
-          ? ['groom_name', 'bride_name', 'date_of_marriage']
-          : record_type === 'funeral'
-            ? ['deceased_name']
-            : [];
-      return {
-        record_type,
-        fields,
-        records: allRecords,
-        confidence: typeof picked.candidate.confidence === 'number'
-          ? picked.candidate.confidence
-          : scoreFields(fields, required),
-        method: 'assembler',
-        candidate_index: picked.index,
-        total_candidates: candidates.length,
-        needs_review: !!picked.candidate.needsReview,
-      };
+  if (!candidates.length) return null;
+
+  const picked = pickPrimaryCandidate(candidates);
+  if (!picked?.candidate?.fields || !Object.keys(picked.candidate.fields).length) return null;
+
+  const record_type = resolveRecordType(
+    ocrText,
+    recordTypeHint && recordTypeHint !== 'custom'
+      ? recordTypeHint
+      : (picked.candidate.recordType || recordTypeHint)
+  );
+  const allRecords = candidates.map((c) => ({ ...(c.fields || {}) }));
+  const fields = { ...(picked.candidate.fields || {}) };
+  const required = requiredFieldsForType(record_type);
+
+  return {
+    record_type,
+    fields,
+    records: allRecords,
+    confidence: typeof picked.candidate.confidence === 'number'
+      ? picked.candidate.confidence
+      : scoreFields(fields, required),
+    method: 'assembler',
+    candidate_index: picked.index,
+    total_candidates: candidates.length,
+    needs_review: !!picked.candidate.needsReview,
+  };
+}
+
+function isOcrAgentEnabled(): boolean {
+  if (process.env.OCR_AGENT_ENABLED === 'false') return false;
+  return !!process.env.ANTHROPIC_API_KEY?.trim();
+}
+
+function parseLlmToolPayload(message: Anthropic.Message): any | null {
+  for (const block of message.content || []) {
+    if (block.type === 'tool_use' && block.name === 'submit_record_fields') {
+      return block.input;
     }
   }
-  return extractAgentFields(ocrText, recordTypeHint);
+  const textBlock = message.content?.find((b) => b.type === 'text');
+  if (textBlock?.type === 'text') {
+    const match = textBlock.text.match(/\{[\s\S]*\}/);
+    if (match) {
+      try {
+        return JSON.parse(match[0]);
+      } catch {
+        return null;
+      }
+    }
+  }
+  return null;
+}
+
+async function refineExtractWithLlm(
+  draft: AgentExtractResult,
+  ocrText: string
+): Promise<AgentExtractResult | null> {
+  if (!isOcrAgentEnabled()) return null;
+
+  const draftRecords = (draft.records?.length ? draft.records : [draft.fields])
+    .slice(0, OCR_AGENT_MAX_RECORDS)
+    .map((fields, index) => ({
+      index,
+      fields,
+    }));
+
+  const systemPrompt = [
+    'You clean Orthodox parish sacramental records extracted from OCR ledger pages.',
+    'The draft fields come from table layout assembly and may include OCR noise.',
+    'Rules:',
+    '- Map each record to the correct schema fields only; do not invent people, dates, or places.',
+    '- Remove header text, column labels, and Cyrillic boilerplate from field values.',
+    '- Fix date bleed into names (example: "-69 DAVID JAMES" → child_name "DAVID JAMES", date_of_birth "5-24-69").',
+    '- Separate priest/officiant from godparents/sponsors when combined.',
+    '- Split father and mother names when they appear in one parents column.',
+    '- Keep dates in the source style (M-D-YY or M/D/YYYY). Leave blank when uncertain.',
+    '- Preserve record_number when present.',
+    '- Set needs_review=true when a required field is missing or highly ambiguous.',
+    '- Return one output record per input draft record, same order and count.',
+    'Respond only via the submit_record_fields tool.',
+  ].join('\n');
+
+  const userPrompt = JSON.stringify({
+    record_type_hint: draft.record_type,
+    draft_records: draftRecords,
+    ocr_context: (ocrText || '').slice(0, OCR_AGENT_OCR_CONTEXT_CHARS),
+  }, null, 2);
+
+  try {
+    const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+    const message = await client.messages.create({
+      model: OCR_AGENT_MODEL,
+      max_tokens: 4096,
+      system: systemPrompt,
+      tools: [SUBMIT_RECORD_FIELDS_TOOL],
+      tool_choice: { type: 'tool', name: 'submit_record_fields' },
+      messages: [{ role: 'user', content: userPrompt }],
+    });
+
+    const payload = parseLlmToolPayload(message);
+    if (!payload?.records || !Array.isArray(payload.records) || !payload.records.length) {
+      return null;
+    }
+
+    const record_type = (payload.record_type && payload.record_type !== 'custom')
+      ? payload.record_type as AgentExtractResult['record_type']
+      : draft.record_type;
+
+    const records = payload.records.map((rec: any) =>
+      sanitizeFieldMap(rec?.fields, record_type)
+    ).filter((r: Record<string, string>) => Object.keys(r).length > 0);
+
+    if (!records.length) return null;
+
+    const idx = Math.min(
+      typeof draft.candidate_index === 'number' ? draft.candidate_index : 0,
+      records.length - 1
+    );
+    const fields = { ...records[idx] };
+    const required = requiredFieldsForType(record_type);
+    const primaryNeedsReview = !!payload.records[idx]?.needs_review
+      || scoreFields(fields, required) < 0.5;
+
+    return {
+      record_type,
+      fields,
+      records,
+      confidence: typeof payload.records[idx]?.confidence === 'number'
+        ? Math.max(0, Math.min(1, payload.records[idx].confidence))
+        : scoreFields(fields, required),
+      method: 'llm',
+      candidate_index: idx,
+      total_candidates: records.length,
+      needs_review: primaryNeedsReview,
+      llm_model: OCR_AGENT_MODEL,
+      refinement_notes: typeof payload.refinement_notes === 'string'
+        ? payload.refinement_notes.slice(0, 500)
+        : undefined,
+      draft_method: draft.method === 'llm' ? draft.draft_method : draft.method,
+    };
+  } catch (err: any) {
+    console.warn(`[OCR Agent LLM] refinement failed: ${err?.message || err}`);
+    return null;
+  }
+}
+
+/** Prefer table assembly, optionally refine with LLM, then fall back to heuristics. */
+export async function extractAgentFieldsForJob(
+  jobId: number,
+  ocrText: string,
+  recordTypeHint?: string
+): Promise<AgentExtractResult> {
+  const draft = buildAssemblerDraft(jobId, ocrText, recordTypeHint)
+    || extractAgentFields(ocrText, recordTypeHint);
+
+  const refined = await refineExtractWithLlm(draft, ocrText);
+  return refined || draft;
 }
 
 export function extractAgentFields(ocrText: string, recordTypeHint?: string): AgentExtractResult {

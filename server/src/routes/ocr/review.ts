@@ -462,7 +462,7 @@ router.post('/jobs/:jobId/agent-extract', async (req: any, res: any) => {
       [jobId]
     );
 
-    const extract = extractAgentFieldsForJob(jobId, job.ocr_text, job.record_type);
+    const extract = await extractAgentFieldsForJob(jobId, job.ocr_text, job.record_type);
     const payload = {
       ...extract,
       extracted_at: new Date().toISOString(),

@@ -84,6 +84,7 @@ const OcrReviewPage: React.FC = () => {
   const [allRecords, setAllRecords] = useState<Array<Record<string, string>>>([]);
   const [selectedRecordIndex, setSelectedRecordIndex] = useState(0);
   const [needsReviewFlag, setNeedsReviewFlag] = useState(false);
+  const [refinementNotes, setRefinementNotes] = useState<string | null>(null);
 
   const backPath = isPortal ? '/portal/upload' : '/devel/ocr-studio/upload';
   const reviewBase = churchId
@@ -130,6 +131,7 @@ const OcrReviewPage: React.FC = () => {
       setSelectedRecordIndex(Math.min(idx, Math.max(records.length - 1, 0)));
       setExtractMethod(extract?.method || null);
       setNeedsReviewFlag(!!extract?.needs_review);
+      setRefinementNotes(extract?.refinement_notes || null);
       setFields({ ...(records[idx] || extract?.fields || {}) });
     } catch (err: any) {
       setError(err?.response?.data?.error || err?.message || 'Failed to load extraction');
@@ -161,6 +163,7 @@ const OcrReviewPage: React.FC = () => {
       setSelectedRecordIndex(Math.min(idx, Math.max(records.length - 1, 0)));
       setExtractMethod(extract?.method || null);
       setNeedsReviewFlag(!!extract?.needs_review);
+      setRefinementNotes(extract?.refinement_notes || null);
       setFields({ ...(records[idx] || extract?.fields || {}) });
       setReviewStatus('agent_extracted');
       await loadJobs();
@@ -332,7 +335,13 @@ const OcrReviewPage: React.FC = () => {
 
               {extractMethod === 'heuristic' && (
                 <Alert severity="info">
-                  Field mapping used basic text patterns. Click <strong>Re-run Agent</strong> after deploy to use structured table assembly, or wait for the AI agent layer to clean up ambiguous fields.
+                  Field mapping used basic text patterns. Click <strong>Re-run Agent</strong> to retry structured assembly and AI cleanup.
+                </Alert>
+              )}
+
+              {extractMethod === 'llm' && refinementNotes && (
+                <Alert severity="success">
+                  AI agent refinements: {refinementNotes}
                 </Alert>
               )}
 

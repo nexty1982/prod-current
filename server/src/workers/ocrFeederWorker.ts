@@ -2773,7 +2773,7 @@ async function processJob(job: JobRow): Promise<void> {
         console.log(`OCR_CLASSIFIER ${JSON.stringify({ jobId, suggested: classResult.suggested_type, confidence: classResult.confidence })}`);
 
         const hintType = record_type && record_type !== 'custom' ? record_type : classResult.suggested_type;
-        const extract = extractAgentFieldsForJob(jobId, combinedText, hintType !== 'unknown' ? hintType : record_type);
+        const extract = await extractAgentFieldsForJob(jobId, combinedText, hintType !== 'unknown' ? hintType : record_type);
         const payload = {
           ...extract,
           extracted_at: new Date().toISOString(),
