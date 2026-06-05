@@ -34,28 +34,9 @@ const OrthodoxLogin: React.FC = () => {
         setError('');
 
         try {
-            const result = await login(email, password);
-            
-            console.log('🔑 Login successful! Checking for redirect URL...');
-            console.log('🔑 User email:', email);
-            console.log('🔑 Redirect URL:', result.redirectUrl);
-
-            const storedUserStr = localStorage.getItem('auth_user');
-            const currentUser = storedUserStr ? JSON.parse(storedUserStr) : null;
-
-            if (currentUser?.role === 'priest' && currentUser?.church_id) {
-                const redirectPath = `/apps/records/baptism?church_id=${currentUser.church_id}`;
-                console.log('🔑 Priest user detected, redirecting to:', redirectPath);
-                navigate(redirectPath);
+            const result = await login('', '');
+            if (result && typeof result === 'object' && 'pendingRedirect' in result && (result as { pendingRedirect?: boolean }).pendingRedirect) {
                 return;
-            }
-
-            if (result.redirectUrl) {
-                console.log('🔑 Redirecting to:', result.redirectUrl);
-                navigate(result.redirectUrl);
-            } else {
-                console.log('🔑 No redirect URL provided, using default navigation to "/"');
-                navigate('/');
             }
         } catch (err: any) {
             setError(err.message || 'Login failed');

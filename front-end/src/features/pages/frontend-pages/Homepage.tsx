@@ -10,7 +10,6 @@ import {
   BarChart3,
   BookOpen,
   Calendar,
-  CheckCircle2,
   ChevronLeft,
   ChevronRight,
   FileText,
@@ -68,66 +67,6 @@ const Homepage = () => {
       <HomepageHighlightCarousel />
 
       <HomepageRecordsTransformSection />
-
-      {/* Why Choose Us */}
-      <section className="py-20 bg-white dark:bg-[#0d1117]">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid md:grid-cols-2 gap-16 items-center">
-            <div>
-              <div className="inline-flex items-center gap-2 bg-[rgba(45,27,78,0.05)] dark:bg-gray-800 px-4 py-2 rounded-full mb-6">
-                <EditableText contentKey="why.badge" as="span" className="font-['Inter'] text-[14px] text-[#2d1b4e] dark:text-white">
-                  {t('home.why_badge')}
-                </EditableText>
-              </div>
-              <RichEditableText contentKey="why.title" as="h2" className="font-['Georgia'] text-4xl md:text-5xl text-[#2d1b4e] dark:text-white mb-6">
-                {t('home.why_title')}
-              </RichEditableText>
-              <RichEditableText contentKey="why.description" as="p" className="font-['Inter'] text-lg text-[#4a5565] dark:text-gray-400 leading-relaxed mb-8">
-                {t('home.why_desc')}
-              </RichEditableText>
-              <div className="space-y-4">
-                {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="flex items-start gap-3">
-                    <CheckCircle2 className="text-[#d4af37] flex-shrink-0 mt-1" size={20} />
-                    <EditableText contentKey={`why.item${i}`} as="span" className="font-['Inter'] text-[16px] text-[#4a5565] dark:text-gray-400">
-                      {t(`home.why_item${i}`)}
-                    </EditableText>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="bg-gradient-to-br from-[#f9fafb] to-[#f3f4f6] dark:from-gray-800 dark:to-gray-700 rounded-2xl p-12 border border-[rgba(45,27,78,0.1)] dark:border-gray-600">
-              <div className="space-y-8">
-                <div className="bg-white dark:bg-[#0d1117] rounded-xl p-6 shadow-sm">
-                  <EditableText contentKey="why.stat1.number" as="div" className="text-[#d4af37] font-['Georgia'] text-5xl mb-2">
-                    {t('home.why_stat1_number')}
-                  </EditableText>
-                  <EditableText contentKey="why.stat1.label" as="p" className="font-['Inter'] text-[16px] text-[#4a5565] dark:text-gray-400">
-                    {t('home.why_stat1_label')}
-                  </EditableText>
-                </div>
-                <div className="bg-white dark:bg-[#0d1117] rounded-xl p-6 shadow-sm">
-                  <EditableText contentKey="why.stat2.number" as="div" className="text-[#2d1b4e] dark:text-[#d4af37] font-['Georgia'] text-5xl mb-2">
-                    {t('home.why_stat2_number')}
-                  </EditableText>
-                  <EditableText contentKey="why.stat2.label" as="p" className="font-['Inter'] text-[16px] text-[#4a5565] dark:text-gray-400">
-                    {t('home.why_stat2_label')}
-                  </EditableText>
-                </div>
-                <div className="bg-white dark:bg-[#0d1117] rounded-xl p-6 shadow-sm">
-                  <EditableText contentKey="why.stat3.number" as="div" className="text-[#d4af37] font-['Georgia'] text-5xl mb-2">
-                    {t('home.why_stat3_number')}
-                  </EditableText>
-                  <EditableText contentKey="why.stat3.label" as="p" className="font-['Inter'] text-[16px] text-[#4a5565] dark:text-gray-400">
-                    {t('home.why_stat3_label')}
-                  </EditableText>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
 
       <ParishRecordsAssessment />
     </>

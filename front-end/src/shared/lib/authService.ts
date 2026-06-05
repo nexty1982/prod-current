@@ -83,76 +83,23 @@ export class AuthService {
     }
   }
 
+  /** Redirect browser to Keycloak OIDC start (password + MFA/TOTP when enabled). */
+  static startOidcLogin(next?: string): void {
+    this.prepareForLogin();
+    const params = new URLSearchParams(window.location.search);
+    const raw = next || params.get('next') || '/portal';
+    const dest = raw.startsWith('/') ? raw : '/portal';
+    window.location.replace(
+      `/api/auth/oidc/orthodoxmetrics/start?next=${encodeURIComponent(dest)}`,
+    );
+  }
+
   /**
-   * Login user with email and password
+   * Begin sign-in — redirects to Keycloak (credentials are collected there, including MFA).
    */
-  static async login(credentials: LoginCredentials): Promise<AuthResponse> {
-    try {
-      this.prepareForLogin();
-      const next = '/portal';
-      const res = await fetch(
-        `/api/auth/oidc/orthodoxmetrics/credentials?next=${encodeURIComponent(next)}`,
-        {
-          method: 'POST',
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-          body: JSON.stringify({
-            username: credentials.username,
-            password: credentials.password,
-          }),
-        },
-      );
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        const err = new Error((data as { message?: string }).message || 'Login failed') as Error & { status?: number };
-        err.status = res.status;
-        throw err;
-      }
-      if ((data as { redirect_url?: string }).redirect_url) {
-        window.location.replace((data as { redirect_url: string }).redirect_url);
-        return { success: true, pendingRedirect: true } as AuthResponse;
-      }
-      throw new Error((data as { message?: string }).message || 'Login failed');
-    } catch (error: any) {
-      // Convert technical errors to user-friendly messages
-      let friendlyMessage = "Something went wrong. Please try again.";
-
-      // Network/connection errors (server down, no internet, etc.)
-      if (error.isNetworkError || error.code === 'NETWORK_ERROR' || !error.status) {
-        friendlyMessage = "We're having trouble connecting to the server. Please try again later.";
-      }
-      // Unauthorized - bad credentials
-      else if (error.status === 401) {
-        friendlyMessage = "Incorrect email or password.";
-      }
-      // Server errors (502 Bad Gateway, 503 Service Unavailable, 504 Gateway Timeout)
-      else if (error.status && [502, 503, 504].includes(error.status)) {
-        friendlyMessage = "The system is temporarily unavailable. Please try again shortly.";
-      }
-      // Rate limiting
-      else if (error.status === 429) {
-        friendlyMessage = "Too many login attempts. Please wait a moment and try again.";
-      }
-      // Maintenance mode
-      else if (error.status === 503) {
-        friendlyMessage = "The system is undergoing maintenance. Please try again later.";
-      }
-      // If we have a custom error message from the backend that's user-friendly, use it
-      else if (error.message && !error.message.includes('status code') && !error.message.includes('Network Error')) {
-        friendlyMessage = error.message;
-      }
-
-      // Log technical details for debugging while showing friendly message to user
-      console.error('Login error details:', {
-        status: error.status,
-        code: error.code,
-        isNetworkError: error.isNetworkError,
-        originalMessage: error.message,
-        friendlyMessage
-      });
-
-      throw new Error(friendlyMessage);
-    }
+  static async login(_credentials?: LoginCredentials): Promise<AuthResponse> {
+    this.startOidcLogin();
+    return { success: true, pendingRedirect: true } as AuthResponse;
   }
 
   /**
