@@ -612,11 +612,13 @@ export function computeFieldRegions({
   if (!Number.isFinite(recY0)) { recY0 = 0; recY1 = 1; }
 
   const keys = fieldKeys.length ? fieldKeys : Array.from(new Set(Object.values(columnMapping))) as string[];
-  const regions: FieldRegion[] = [];
+
+  // Resolve each field to its primary column band; collect the field's text/y.
+  type Resolved = { fieldName: string; bandKey: string; colKeys: string[]; y0: number; y1: number; text: string };
+  const resolved: Resolved[] = [];
   for (const fieldName of keys) {
     const colKeys = fieldColumnKeys(fieldName, columnMapping).filter((k) => bands[k]);
     if (!colKeys.length) continue;
-    const band = bands[colKeys[0]];
     let y0 = Infinity, y1 = -Infinity;
     const texts: string[] = [];
     for (const c of cells) {
@@ -625,7 +627,35 @@ export function computeFieldRegions({
       if (c.bbox?.length === 4) { y0 = Math.min(y0, c.bbox[1]); y1 = Math.max(y1, c.bbox[3]); }
     }
     if (!Number.isFinite(y0)) { y0 = recY0; y1 = recY1; }
-    regions.push({ fieldName, frac: [band[0], y0, band[1], y1], text: texts.join(' ').replace(/\s+/g, ' ').trim() });
+    resolved.push({ fieldName, bandKey: colKeys[0], colKeys, y0, y1, text: texts.join(' ').replace(/\s+/g, ' ').trim() });
+  }
+
+  // Group fields that share a column band so their boxes don't perfectly overlap
+  // (e.g. date_of_birth + date_of_baptism, or father_name + mother_name). The
+  // shared column's y-span is split into stacked slices, one per field.
+  const groups = new Map<string, Resolved[]>();
+  for (const r of resolved) {
+    if (!groups.has(r.bandKey)) groups.set(r.bandKey, []);
+    groups.get(r.bandKey)!.push(r);
+  }
+
+  const regions: FieldRegion[] = [];
+  for (const [bandKey, members] of groups) {
+    const band = bands[bandKey];
+    // Shared y-span = union of all members' y-spans for this band.
+    let gy0 = Infinity, gy1 = -Infinity;
+    for (const m of members) { gy0 = Math.min(gy0, m.y0); gy1 = Math.max(gy1, m.y1); }
+    if (!Number.isFinite(gy0)) { gy0 = recY0; gy1 = recY1; }
+    const n = members.length;
+    members.forEach((m, i) => {
+      let y0 = m.y0, y1 = m.y1;
+      if (n > 1) {
+        const h = (gy1 - gy0) / n;
+        y0 = gy0 + i * h;
+        y1 = gy0 + (i + 1) * h;
+      }
+      regions.push({ fieldName: m.fieldName, frac: [band[0], y0, band[1], y1], text: m.text });
+    });
   }
   return regions;
 }
@@ -637,7 +667,10 @@ export function fieldRegionsToBoxes(
   focusedField: string | null,
   cropBbox?: number[] | null,
 ): OverlayBox[] {
-  const boxes: OverlayBox[] = regions.map((r) => ({
+  const ordered = focusedField
+    ? [...regions].sort((a, b) => (a.fieldName === focusedField ? 1 : 0) - (b.fieldName === focusedField ? 1 : 0))
+    : regions;
+  const boxes: OverlayBox[] = ordered.map((r) => ({
     bbox: cellBboxToVision(r.frac, pageDims),
     color: REVIEW_FIELD_COLORS[r.fieldName] || '#1976d2',
     label: r.fieldName.replace(/_/g, ' '),
