@@ -2868,6 +2868,22 @@ async function workerLoop(): Promise<void> {
 
   while (!isShutdownRequested()) {
     try {
+      // Reclaim jobs stuck in processing (worker crash, Vision timeout, etc.)
+      try {
+        const [reclaimResult] = await platformPool.query(
+          `UPDATE ocr_jobs SET status = 'pending'
+           WHERE status = 'processing'
+             AND processing_started_at IS NOT NULL
+             AND processing_started_at < DATE_SUB(NOW(), INTERVAL 10 MINUTE)`
+        ) as any[];
+        const reclaimed = reclaimResult?.affectedRows || 0;
+        if (reclaimed > 0) {
+          console.log(`OCR_WORKER_RECLAIM ${JSON.stringify({ reclaimed })}`);
+        }
+      } catch (reclaimErr: any) {
+        console.warn(`[OCR Worker] Stale job reclaim skipped: ${reclaimErr.message}`);
+      }
+
       // Poll pending jobs from PLATFORM DB — priority first, then FIFO
       const [rows] = await platformPool.query(
         `SELECT id, church_id, filename, record_type, language
