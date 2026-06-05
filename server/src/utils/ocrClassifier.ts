@@ -4,6 +4,9 @@
  * Returns suggested_type + confidence. Unknown stays Unknown.
  */
 
+import fs from 'fs';
+import path from 'path';
+
 interface ClassifierResult {
   suggested_type: 'baptism' | 'marriage' | 'funeral' | 'unknown';
   confidence: number;
@@ -155,7 +158,10 @@ export interface AgentExtractResult {
   fields: Record<string, string>;
   records: Array<Record<string, string>>;
   confidence: number;
-  method: 'heuristic';
+  method: 'assembler' | 'heuristic' | 'llm';
+  candidate_index?: number;
+  total_candidates?: number;
+  needs_review?: boolean;
 }
 
 const DATE_RE = /\b(\d{1,2}[\/\.\-]\d{1,2}[\/\.\-]\d{2,4}|\d{4}[\/\.\-]\d{1,2}[\/\.\-]\d{1,2}|(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+\d{1,2},?\s+\d{4})\b/gi;
@@ -251,6 +257,91 @@ function scoreFields(fields: Record<string, string>, required: string[]): number
   if (!required.length) return Object.keys(fields).length > 0 ? 0.5 : 0;
   const hit = required.filter((k) => fields[k]?.trim()).length;
   return Math.round((hit / required.length) * 1000) / 1000;
+}
+
+function feederJobDir(jobId: number): string {
+  return path.join(__dirname, '../../storage/feeder', `job_${jobId}`);
+}
+
+/** Load record_candidates.json artifacts produced during OCR table assembly. */
+export function loadFeederRecordCandidates(jobId: number): any[] {
+  const jobDir = feederJobDir(jobId);
+  if (!fs.existsSync(jobDir)) return [];
+
+  const merged: any[] = [];
+  const pageDirs = fs.readdirSync(jobDir)
+    .filter((d) => d.startsWith('page_'))
+    .sort((a, b) => {
+      const ai = parseInt(a.replace('page_', ''), 10);
+      const bi = parseInt(b.replace('page_', ''), 10);
+      return ai - bi;
+    });
+
+  for (const pageDir of pageDirs) {
+    const candPath = path.join(jobDir, pageDir, 'record_candidates.json');
+    if (!fs.existsSync(candPath)) continue;
+    try {
+      const data = JSON.parse(fs.readFileSync(candPath, 'utf8'));
+      if (Array.isArray(data?.candidates)) merged.push(...data.candidates);
+    } catch {
+      /* skip corrupt artifact */
+    }
+  }
+  return merged;
+}
+
+function pickPrimaryCandidate(candidates: any[]): { candidate: any; index: number } | null {
+  if (!candidates.length) return null;
+  const scored = candidates.map((c, index) => {
+    const conf = typeof c.confidence === 'number' ? c.confidence : 0;
+    const reviewPenalty = c.needsReview ? 0.15 : 0;
+    const fieldBonus = Object.keys(c.fields || {}).filter((k) => c.fields[k]?.trim()).length * 0.02;
+    return { c, index, score: conf - reviewPenalty + fieldBonus };
+  });
+  scored.sort((a, b) => b.score - a.score);
+  return { candidate: scored[0].c, index: scored[0].index };
+}
+
+/** Prefer structured table assembly; fall back to regex heuristics on flat OCR text. */
+export function extractAgentFieldsForJob(
+  jobId: number,
+  ocrText: string,
+  recordTypeHint?: string
+): AgentExtractResult {
+  const candidates = loadFeederRecordCandidates(jobId);
+  if (candidates.length > 0) {
+    const picked = pickPrimaryCandidate(candidates);
+    if (picked?.candidate?.fields && Object.keys(picked.candidate.fields).length > 0) {
+      const record_type = resolveRecordType(
+        ocrText,
+        recordTypeHint && recordTypeHint !== 'custom'
+          ? recordTypeHint
+          : (picked.candidate.recordType || recordTypeHint)
+      );
+      const allRecords = candidates.map((c) => ({ ...(c.fields || {}) }));
+      const fields = { ...(picked.candidate.fields || {}) };
+      const required = record_type === 'baptism'
+        ? ['child_name', 'date_of_baptism']
+        : record_type === 'marriage'
+          ? ['groom_name', 'bride_name', 'date_of_marriage']
+          : record_type === 'funeral'
+            ? ['deceased_name']
+            : [];
+      return {
+        record_type,
+        fields,
+        records: allRecords,
+        confidence: typeof picked.candidate.confidence === 'number'
+          ? picked.candidate.confidence
+          : scoreFields(fields, required),
+        method: 'assembler',
+        candidate_index: picked.index,
+        total_candidates: candidates.length,
+        needs_review: !!picked.candidate.needsReview,
+      };
+    }
+  }
+  return extractAgentFields(ocrText, recordTypeHint);
 }
 
 export function extractAgentFields(ocrText: string, recordTypeHint?: string): AgentExtractResult {

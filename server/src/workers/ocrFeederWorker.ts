@@ -42,7 +42,7 @@ import { detectAndSplitSpread } from '../ocr/preprocessing/splitSpread';
 import { buildRetryPlan, computeStructureScore, extractSignals } from '../ocr/preprocessing/structureRetry';
 import type { TemplateMatchResult } from '../ocr/preprocessing/templateSpec';
 import { extractWithTemplate, resolveTemplate, selectTemplate } from '../ocr/preprocessing/templateSpec';
-import { classifyRecordType, extractAgentFields } from '../utils/ocrClassifier';
+import { classifyRecordType, extractAgentFieldsForJob } from '../utils/ocrClassifier';
 
 const { dbLogger } = require('../utils/dbLogger');
 
@@ -2773,7 +2773,7 @@ async function processJob(job: JobRow): Promise<void> {
         console.log(`OCR_CLASSIFIER ${JSON.stringify({ jobId, suggested: classResult.suggested_type, confidence: classResult.confidence })}`);
 
         const hintType = record_type && record_type !== 'custom' ? record_type : classResult.suggested_type;
-        const extract = extractAgentFields(combinedText, hintType !== 'unknown' ? hintType : record_type);
+        const extract = extractAgentFieldsForJob(jobId, combinedText, hintType !== 'unknown' ? hintType : record_type);
         const payload = {
           ...extract,
           extracted_at: new Date().toISOString(),

@@ -8,7 +8,7 @@
 const express = require('express');
 const router = express.Router({ mergeParams: true });
 import { resolveChurchDb, promisePool, mapFieldsToDbColumns, buildInsertQuery } from './helpers';
-import { extractAgentFields } from '../../utils/ocrClassifier';
+import { extractAgentFieldsForJob } from '../../utils/ocrClassifier';
 
 // ---------------------------------------------------------------------------
 // POST /jobs/:jobId/review/finalize
@@ -462,7 +462,7 @@ router.post('/jobs/:jobId/agent-extract', async (req: any, res: any) => {
       [jobId]
     );
 
-    const extract = extractAgentFields(job.ocr_text, job.record_type);
+    const extract = extractAgentFieldsForJob(jobId, job.ocr_text, job.record_type);
     const payload = {
       ...extract,
       extracted_at: new Date().toISOString(),

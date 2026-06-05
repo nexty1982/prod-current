@@ -15,7 +15,11 @@ import {
   Chip,
   CircularProgress,
   Divider,
+  FormControl,
+  InputLabel,
   List,
+  MenuItem,
+  Select,
   ListItemButton,
   ListItemText,
   Paper,
@@ -76,6 +80,10 @@ const OcrReviewPage: React.FC = () => {
   const [fields, setFields] = useState<Record<string, string>>({});
   const [ocrPreview, setOcrPreview] = useState<string | null>(null);
   const [reviewStatus, setReviewStatus] = useState<PipelineStatus>('uploaded');
+  const [extractMethod, setExtractMethod] = useState<string | null>(null);
+  const [allRecords, setAllRecords] = useState<Array<Record<string, string>>>([]);
+  const [selectedRecordIndex, setSelectedRecordIndex] = useState(0);
+  const [needsReviewFlag, setNeedsReviewFlag] = useState(false);
 
   const backPath = isPortal ? '/portal/upload' : '/devel/ocr-studio/upload';
   const reviewBase = churchId
@@ -112,8 +120,17 @@ const OcrReviewPage: React.FC = () => {
       const rt = extract?.record_type || 'baptism';
       if (rt && rt !== 'custom') setRecordType(rt);
 
-      const sourceFields = extract?.fields || extract?.records?.[0] || {};
-      setFields({ ...sourceFields });
+      const records: Array<Record<string, string>> = Array.isArray(extract?.records) && extract.records.length
+        ? extract.records
+        : extract?.fields
+          ? [extract.fields]
+          : [];
+      const idx = typeof extract?.candidate_index === 'number' ? extract.candidate_index : 0;
+      setAllRecords(records);
+      setSelectedRecordIndex(Math.min(idx, Math.max(records.length - 1, 0)));
+      setExtractMethod(extract?.method || null);
+      setNeedsReviewFlag(!!extract?.needs_review);
+      setFields({ ...(records[idx] || extract?.fields || {}) });
     } catch (err: any) {
       setError(err?.response?.data?.error || err?.message || 'Failed to load extraction');
       setFields({});
@@ -136,7 +153,15 @@ const OcrReviewPage: React.FC = () => {
       const res: any = await apiClient.post(`/api/church/${churchId}/ocr/jobs/${selectedJobId}/agent-extract`);
       const extract = res?.data?.extract ?? res?.extract;
       if (extract?.record_type && extract.record_type !== 'custom') setRecordType(extract.record_type);
-      setFields({ ...(extract?.fields || {}) });
+      const records: Array<Record<string, string>> = Array.isArray(extract?.records) && extract.records.length
+        ? extract.records
+        : extract?.fields ? [extract.fields] : [];
+      const idx = typeof extract?.candidate_index === 'number' ? extract.candidate_index : 0;
+      setAllRecords(records);
+      setSelectedRecordIndex(Math.min(idx, Math.max(records.length - 1, 0)));
+      setExtractMethod(extract?.method || null);
+      setNeedsReviewFlag(!!extract?.needs_review);
+      setFields({ ...(records[idx] || extract?.fields || {}) });
       setReviewStatus('agent_extracted');
       await loadJobs();
     } catch (err: any) {
@@ -268,7 +293,48 @@ const OcrReviewPage: React.FC = () => {
                 <Typography variant="h6" fontWeight={700}>Job #{selectedJobId}</Typography>
                 <Chip label={statusCfg.label} color={statusCfg.color} size="small" />
                 <Chip label={recordType} size="small" variant="outlined" />
+                {extractMethod && (
+                  <Chip
+                    label={extractMethod === 'assembler' ? 'Table assembly' : extractMethod === 'llm' ? 'AI agent' : 'Heuristic'}
+                    size="small"
+                    color={extractMethod === 'assembler' ? 'success' : extractMethod === 'llm' ? 'primary' : 'default'}
+                    variant="outlined"
+                  />
+                )}
               </Stack>
+
+              {allRecords.length > 1 && (
+                <FormControl size="small" sx={{ maxWidth: 360 }}>
+                  <InputLabel>Record on this page</InputLabel>
+                  <Select
+                    label="Record on this page"
+                    value={selectedRecordIndex}
+                    onChange={(e) => {
+                      const idx = Number(e.target.value);
+                      setSelectedRecordIndex(idx);
+                      setFields({ ...(allRecords[idx] || {}) });
+                    }}
+                  >
+                    {allRecords.map((rec, i) => (
+                      <MenuItem key={i} value={i}>
+                        #{rec.record_number || i + 1} — {rec.child_name || rec.groom_name || rec.deceased_name || `Record ${i + 1}`}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              )}
+
+              {needsReviewFlag && (
+                <Alert severity="warning">
+                  This record may need manual review — some key fields could not be confidently mapped from the ledger layout.
+                </Alert>
+              )}
+
+              {extractMethod === 'heuristic' && (
+                <Alert severity="info">
+                  Field mapping used basic text patterns. Click <strong>Re-run Agent</strong> after deploy to use structured table assembly, or wait for the AI agent layer to clean up ambiguous fields.
+                </Alert>
+              )}
 
               {error && <Alert severity="error" onClose={() => setError(null)}>{error}</Alert>}
 
