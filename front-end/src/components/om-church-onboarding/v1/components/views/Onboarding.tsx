@@ -335,11 +335,6 @@ export function Onboarding({ onCancel, onComplete, theme, onToggleTheme }: Props
     // and reveal the inline errors.
     if (step === "contact" && !contactComplete) { setTriedNext(true); return; }
     if (step === "parish" && !parishComplete) { setTriedNext(true); return; }
-    if (step === "modules") {
-      if (!modulesComplete) { setTriedNext(true); return; }
-      void submitEnrollment();
-      return;
-    }
     // Carry the chosen church forward into the profile step. Without this the
     // profile step keeps its seeded placeholder church name, so a user who
     // selected (or typed in) a different church sees the wrong name pre-filled.
@@ -518,8 +513,15 @@ export function Onboarding({ onCancel, onComplete, theme, onToggleTheme }: Props
               setImportMethod={setImportMethod}
               startTimeline={startTimeline}
               setStartTimeline={setStartTimeline}
-              errors={modulesErrors}
-              showErrors={triedNext}
+              submitting={submitting}
+              onSubmit={() => {
+                if (!modulesComplete) {
+                  setTriedNext(true);
+                  return;
+                }
+                void submitEnrollment();
+              }}
+              onBackToWizardStep={goBack}
             />
           )}
           {step === "confirm" && (
@@ -559,7 +561,7 @@ export function Onboarding({ onCancel, onComplete, theme, onToggleTheme }: Props
               </div>
             )}
 
-          {step !== "confirm" && (
+          {step !== "confirm" && step !== "modules" && (
             <div className="flex items-center justify-between pt-2">
               <Button variant="ghost" onClick={goBack}>
                 <ArrowLeft className="h-4 w-4 mr-2" /> Back
@@ -575,20 +577,8 @@ export function Onboarding({ onCancel, onComplete, theme, onToggleTheme }: Props
                   disabled={!canProceed || submitting}
                   className="bg-[#d4af37] hover:bg-[#c29d2f] text-[#2d1b4e] font-medium px-6"
                 >
-                  {submitting ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" /> Submitting…
-                    </>
-                  ) : (
-                    <>
-                      {step === "modules"
-                        ? "Submit Enrollment"
-                        : step === "location"
-                          ? "Continue"
-                          : "Next"}{" "}
-                      <ArrowRight className="h-4 w-4 ml-2" />
-                    </>
-                  )}
+                  {step === "location" ? "Continue" : "Next"}{" "}
+                  <ArrowRight className="h-4 w-4 ml-2" />
                 </Button>
               </div>
             </div>
@@ -1126,6 +1116,75 @@ function LocationStep({
   );
 }
 
+const MODULE_SUB_STAGES = [
+  { n: 1, label: "Record Types" },
+  { n: 2, label: "Import Method" },
+  { n: 3, label: "Start Timeline" },
+] as const;
+
+const MODULE_CARDS = [
+  {
+    key: "baptism",
+    icon: Droplets,
+    title: "Baptism Records",
+    desc: "Names, sponsors, clergy, and dates of holy baptism — searchable across decades.",
+    recommended: true,
+  },
+  {
+    key: "marriage",
+    icon: HeartHandshake,
+    title: "Marriage Records",
+    desc: "Sacramental marriages with full witness, clergy, and dispensation details.",
+    recommended: true,
+  },
+  {
+    key: "funeral",
+    icon: Flame,
+    title: "Funeral Records",
+    desc: "Honor the departed with organized funeral, burial, and memorial records.",
+    recommended: false,
+  },
+  {
+    key: "custom",
+    icon: FileText,
+    title: "Custom Records",
+    desc: "Other parish registers, historical ledgers, or record types tailored to your needs.",
+    recommended: false,
+  },
+] as const;
+
+function ModulesSelectionSummary({
+  modules,
+  importMethod,
+  showImport,
+}: {
+  modules: Record<string, boolean>;
+  importMethod?: ImportMethod;
+  showImport?: boolean;
+}) {
+  const selected = Object.entries(modules).filter(([, v]) => v);
+  if (!selected.length) return null;
+
+  return (
+    <div className="rounded-lg border border-border bg-muted/60 px-4 py-3 space-y-2">
+      <div className="flex flex-wrap items-center gap-2 text-sm">
+        <span className="text-muted-foreground shrink-0">Selected modules:</span>
+        {selected.map(([k]) => (
+          <Badge key={k} variant="outline" className="font-normal">
+            {MODULE_LABELS[k] ?? k}
+          </Badge>
+        ))}
+      </div>
+      {showImport && importMethod && (
+        <p className="text-sm text-muted-foreground">
+          <span className="text-[#2d1b4e] dark:text-[#d4af37] font-medium">Import: </span>
+          {formatImportMethod(importMethod)}
+        </p>
+      )}
+    </div>
+  );
+}
+
 function ModulesStep({
   modules,
   setModules,
@@ -1133,8 +1192,9 @@ function ModulesStep({
   setImportMethod,
   startTimeline,
   setStartTimeline,
-  errors = {},
-  showErrors = false,
+  onSubmit,
+  onBackToWizardStep,
+  submitting = false,
 }: {
   modules: Record<string, boolean>;
   setModules: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
@@ -1142,181 +1202,275 @@ function ModulesStep({
   setImportMethod: (v: ImportMethod) => void;
   startTimeline: StartTimeline;
   setStartTimeline: (v: StartTimeline) => void;
-  errors?: Record<string, string>;
-  showErrors?: boolean;
+  onSubmit: () => void;
+  onBackToWizardStep: () => void;
+  submitting?: boolean;
 }) {
-  const cards = [
-    {
-      key: "baptism",
-      icon: Droplets,
-      title: "Baptism Records",
-      desc: "Names, sponsors, clergy, and dates of holy baptism — searchable across decades.",
-      recommended: true,
-    },
-    {
-      key: "marriage",
-      icon: HeartHandshake,
-      title: "Marriage Records",
-      desc: "Sacramental marriages with full witness, clergy, and dispensation details.",
-      recommended: true,
-    },
-    {
-      key: "funeral",
-      icon: Flame,
-      title: "Funeral Records",
-      desc: "Honor the departed with organized funeral, burial, and memorial records.",
-      recommended: false,
-    },
-    {
-      key: "custom",
-      icon: FileText,
-      title: "Custom Records",
-      desc: "Other parish registers, historical ledgers, or record types tailored to your needs.",
-      recommended: false,
-    },
-  ] as const;
-  const count = Object.values(modules).filter(Boolean).length;
-  const moduleErr = showErrors ? errors.modules : undefined;
-  const importErr = showErrors ? errors.importMethod : undefined;
-  const timelineErr = showErrors ? errors.startTimeline : undefined;
+  const [subStage, setSubStage] = useState(1);
+  const [triedAdvance, setTriedAdvance] = useState(false);
+  const [transitioning, setTransitioning] = useState(false);
+  const stageMeta = MODULE_SUB_STAGES[subStage - 1];
+  const moduleCount = Object.values(modules).filter(Boolean).length;
+  const hasModules = moduleCount > 0;
+  const hasImport = Boolean(importMethod);
+  const hasTimeline = Boolean(startTimeline);
+
+  const bumpTransition = () => {
+    setTransitioning(true);
+    window.setTimeout(() => setTransitioning(false), 200);
+  };
+
+  const goSubStage = (next: number) => {
+    bumpTransition();
+    setTriedAdvance(false);
+    setSubStage(next);
+  };
+
+  const handleBack = () => {
+    if (subStage > 1) {
+      goSubStage(subStage - 1);
+    } else {
+      onBackToWizardStep();
+    }
+  };
+
+  const handleContinue = () => {
+    if (subStage === 1) {
+      if (!hasModules) {
+        setTriedAdvance(true);
+        return;
+      }
+      goSubStage(2);
+      return;
+    }
+    if (subStage === 2) {
+      if (!hasImport) {
+        setTriedAdvance(true);
+        return;
+      }
+      goSubStage(3);
+    }
+  };
+
+  const handleSubmit = () => {
+    if (!hasTimeline) {
+      setTriedAdvance(true);
+      return;
+    }
+    onSubmit();
+  };
+
+  const stageError =
+    triedAdvance && subStage === 1 && !hasModules
+      ? "Select at least one record module."
+      : triedAdvance && subStage === 2 && !hasImport
+        ? "Choose how you want to import your records."
+        : triedAdvance && subStage === 3 && !hasTimeline
+          ? "Let us know when you hope to get started."
+          : undefined;
+
+  const primaryDisabled =
+    submitting ||
+    (subStage === 1 && !hasModules) ||
+    (subStage === 2 && !hasImport) ||
+    (subStage === 3 && !hasTimeline);
 
   return (
     <SectionCard
       number={5}
       title="Record Modules & Next Steps"
-      description="Choose the records you want to manage, how you'd like to import them, and when you hope to begin."
+      description="Choose your record types, import approach, and preferred start timeline."
     >
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {cards.map((c) => {
-          const selected = modules[c.key];
-          const Icon = c.icon;
-          return (
-            <button
-              key={c.key}
-              type="button"
-              onClick={() => setModules({ ...modules, [c.key]: !selected })}
-              className={`text-left rounded-lg border p-5 transition-all ${
-                selected
-                  ? "border-[#2d1b4e] dark:border-[#d4af37] ring-2 ring-[#2d1b4e]/15 dark:ring-[#d4af37]/20 bg-[rgba(45,27,78,0.05)] dark:bg-[rgba(212,175,55,0.06)]"
-                  : "border-border hover:border-[#2d1b4e]/30"
-              }`}
-            >
-              <div className="flex items-start justify-between mb-4">
-                <div className="h-10 w-10 rounded-md bg-[#2d1b4e] dark:bg-[#1e2a3a] text-[#d4af37] flex items-center justify-center">
-                  <Icon className="h-5 w-5" />
+      <p className="font-['Inter'] text-sm text-muted-foreground mb-4" aria-live="polite">
+        {stageMeta.n} of {MODULE_SUB_STAGES.length} — {stageMeta.label}
+      </p>
+
+      <div className="min-h-[280px] md:min-h-[300px]">
+        <div
+          className={`transition-opacity duration-200 ease-out ${transitioning ? "opacity-0" : "opacity-100"}`}
+        >
+          {subStage === 1 && (
+            <div className="space-y-4">
+              <p className="font-['Inter'] text-[15px] text-muted-foreground">
+                Select every sacramental record type you want to manage digitally.
+              </p>
+              <div className="grid sm:grid-cols-2 gap-4">
+                {MODULE_CARDS.map((c) => {
+                  const selected = modules[c.key];
+                  const Icon = c.icon;
+                  return (
+                    <button
+                      key={c.key}
+                      type="button"
+                      aria-pressed={selected}
+                      onClick={() => setModules({ ...modules, [c.key]: !selected })}
+                      className={`text-left rounded-lg border p-5 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d4af37] focus-visible:ring-offset-2 ${
+                        selected
+                          ? "border-[#2d1b4e] dark:border-[#d4af37] ring-2 ring-[#2d1b4e]/15 dark:ring-[#d4af37]/20 bg-[rgba(45,27,78,0.05)] dark:bg-[rgba(212,175,55,0.06)]"
+                          : "border-border hover:border-[#2d1b4e]/30"
+                      }`}
+                    >
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="h-10 w-10 rounded-md bg-[#2d1b4e] dark:bg-[#1e2a3a] text-[#d4af37] flex items-center justify-center">
+                          <Icon className="h-5 w-5" />
+                        </div>
+                        {c.recommended && (
+                          <Badge className="bg-[#d4af37] text-[#2d1b4e] border-transparent">
+                            Recommended
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="space-y-1">
+                        <div>{c.title}</div>
+                        <p className="text-sm text-muted-foreground">{c.desc}</p>
+                      </div>
+                      <div className="mt-4 flex items-center justify-between">
+                        <span className="text-xs text-muted-foreground">
+                          {selected ? "Selected" : "Tap to select"}
+                        </span>
+                        <span
+                          className={`h-5 w-5 rounded-full border flex items-center justify-center ${
+                            selected
+                              ? "bg-[#2d1b4e] dark:bg-[#d4af37] border-[#2d1b4e] dark:border-[#d4af37] text-white dark:text-[#2d1b4e]"
+                              : "border-border"
+                          }`}
+                        >
+                          {selected && <Check className="h-3 w-3" />}
+                        </span>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="flex flex-wrap items-center justify-between gap-3 p-4 rounded-md bg-muted">
+                <div className="text-sm">
+                  <span className="text-muted-foreground">Selected modules: </span>
+                  <strong>{moduleCount}</strong> of {MODULE_CARDS.length}
                 </div>
-                {c.recommended && (
-                  <Badge className="bg-[#d4af37] text-[#2d1b4e] border-transparent">
-                    Recommended
-                  </Badge>
-                )}
+                <div className="flex flex-wrap gap-2">
+                  {Object.entries(modules)
+                    .filter(([, v]) => v)
+                    .map(([k]) => (
+                      <Badge key={k} variant="outline">
+                        {MODULE_LABELS[k] ?? k}
+                      </Badge>
+                    ))}
+                </div>
               </div>
-              <div className="space-y-1">
-                <div>{c.title}</div>
-                <p className="text-sm text-muted-foreground">{c.desc}</p>
+            </div>
+          )}
+
+          {subStage === 2 && (
+            <div className="space-y-4">
+              <ModulesSelectionSummary modules={modules} />
+              <fieldset className="border-0 p-0 m-0 min-w-0">
+                <legend className="font-['Inter'] text-base font-medium mb-3 block w-full">
+                  How do you want to import your records? <span className="text-destructive">*</span>
+                </legend>
+                <div className="grid md:grid-cols-2 gap-4" role="radiogroup" aria-label="Record import method">
+                  {IMPORT_METHOD_OPTIONS.map((opt) => {
+                    const selected = importMethod === opt.value;
+                    return (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        role="radio"
+                        aria-checked={selected}
+                        onClick={() => setImportMethod(opt.value)}
+                        className={`text-left rounded-lg border p-5 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d4af37] focus-visible:ring-offset-2 ${
+                          selected
+                            ? "border-[#2d1b4e] dark:border-[#d4af37] ring-2 ring-[#2d1b4e]/15 dark:ring-[#d4af37]/20 bg-[rgba(45,27,78,0.05)] dark:bg-[rgba(212,175,55,0.06)]"
+                            : "border-border hover:border-[#2d1b4e]/30"
+                        }`}
+                      >
+                        <div className="font-medium mb-2">{opt.label}</div>
+                        <p className="text-sm text-muted-foreground">{opt.description}</p>
+                      </button>
+                    );
+                  })}
+                </div>
+              </fieldset>
+            </div>
+          )}
+
+          {subStage === 3 && (
+            <div className="space-y-4">
+              <ModulesSelectionSummary modules={modules} importMethod={importMethod} showImport />
+              <fieldset className="border-0 p-0 m-0 min-w-0">
+                <legend className="font-['Inter'] text-base font-medium mb-3 block w-full">
+                  How soon are you interested in getting started? <span className="text-destructive">*</span>
+                </legend>
+                <div className="grid sm:grid-cols-1 md:grid-cols-3 gap-3" role="radiogroup" aria-label="Preferred start timeline">
+                  {START_TIMELINE_OPTIONS.map((opt) => {
+                    const selected = startTimeline === opt.value;
+                    return (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        role="radio"
+                        aria-checked={selected}
+                        onClick={() => setStartTimeline(opt.value)}
+                        className={`rounded-lg border px-4 py-3 text-left text-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d4af37] focus-visible:ring-offset-2 ${
+                          selected
+                            ? "border-[#2d1b4e] dark:border-[#d4af37] bg-[#2d1b4e] text-white dark:bg-[#1e2a3a] dark:text-[#d4af37]"
+                            : "border-border hover:border-[#2d1b4e]/30"
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </fieldset>
+              <div className="flex items-start gap-3 p-4 rounded-lg bg-[rgba(212,175,55,0.08)] dark:bg-[rgba(30,42,58,0.8)] border border-[#d4af37]/25 dark:border-white/8 text-sm">
+                <ShieldCheck className="h-4 w-4 mt-0.5 text-[#2d1b4e] dark:text-[#d4af37] shrink-0" />
+                <div>
+                  Click <strong>Submit Enrollment</strong> when you're ready. Our team will follow up using
+                  the contact details you provided.
+                </div>
               </div>
-              <div className="mt-4 flex items-center justify-between">
-                <span className="text-xs text-muted-foreground">
-                  {selected ? "Selected" : "Tap to select"}
-                </span>
-                <span
-                  className={`h-5 w-5 rounded-full border flex items-center justify-center ${
-                    selected
-                      ? "bg-[#2d1b4e] dark:bg-[#d4af37] border-[#2d1b4e] dark:border-[#d4af37] text-white dark:text-[#2d1b4e]"
-                      : "border-border"
-                  }`}
-                >
-                  {selected && <Check className="h-3 w-3" />}
-                </span>
-              </div>
-            </button>
-          );
-        })}
+            </div>
+          )}
+        </div>
       </div>
 
-      {moduleErr && (
-        <p className="text-sm text-destructive" role="alert">{moduleErr}</p>
+      {stageError && (
+        <p className="text-sm text-destructive mt-3" role="alert">
+          {stageError}
+        </p>
       )}
 
-      <div className="flex flex-wrap items-center justify-between gap-3 p-4 rounded-md bg-muted">
-        <div className="text-sm">
-          <span className="text-muted-foreground">Selected modules: </span>
-          <strong>{count}</strong> of {cards.length}
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {Object.entries(modules)
-            .filter(([, v]) => v)
-            .map(([k]) => (
-              <Badge key={k} variant="outline">
-                {MODULE_LABELS[k] ?? k}
-              </Badge>
-            ))}
-        </div>
-      </div>
-
-      <div className="space-y-3 pt-2">
-        <Label className="text-base">
-          How do you want to import your records? <span className="text-destructive">*</span>
-        </Label>
-        <div className="grid md:grid-cols-2 gap-4" role="radiogroup" aria-invalid={!!importErr}>
-          {IMPORT_METHOD_OPTIONS.map((opt) => {
-            const selected = importMethod === opt.value;
-            return (
-              <button
-                key={opt.value}
-                type="button"
-                role="radio"
-                aria-checked={selected}
-                onClick={() => setImportMethod(opt.value)}
-                className={`text-left rounded-lg border p-5 transition-all ${
-                  selected
-                    ? "border-[#2d1b4e] dark:border-[#d4af37] ring-2 ring-[#2d1b4e]/15 dark:ring-[#d4af37]/20 bg-[rgba(45,27,78,0.05)] dark:bg-[rgba(212,175,55,0.06)]"
-                    : "border-border hover:border-[#2d1b4e]/30"
-                }`}
-              >
-                <div className="font-medium mb-2">{opt.label}</div>
-                <p className="text-sm text-muted-foreground">{opt.description}</p>
-              </button>
-            );
-          })}
-        </div>
-        {importErr && <p className="text-sm text-destructive" role="alert">{importErr}</p>}
-      </div>
-
-      <div className="space-y-3 pt-2">
-        <Label className="text-base">
-          How soon are you interested in getting started? <span className="text-destructive">*</span>
-        </Label>
-        <div className="grid sm:grid-cols-3 gap-3" role="radiogroup" aria-invalid={!!timelineErr}>
-          {START_TIMELINE_OPTIONS.map((opt) => {
-            const selected = startTimeline === opt.value;
-            return (
-              <button
-                key={opt.value}
-                type="button"
-                role="radio"
-                aria-checked={selected}
-                onClick={() => setStartTimeline(opt.value)}
-                className={`rounded-lg border px-4 py-3 text-left text-sm transition-all ${
-                  selected
-                    ? "border-[#2d1b4e] dark:border-[#d4af37] bg-[#2d1b4e] text-white dark:bg-[#1e2a3a] dark:text-[#d4af37]"
-                    : "border-border hover:border-[#2d1b4e]/30"
-                }`}
-              >
-                {opt.label}
-              </button>
-            );
-          })}
-        </div>
-        {timelineErr && <p className="text-sm text-destructive" role="alert">{timelineErr}</p>}
-      </div>
-
-      <div className="flex items-start gap-3 p-4 rounded-lg bg-[rgba(212,175,55,0.08)] dark:bg-[rgba(30,42,58,0.8)] border border-[#d4af37]/25 dark:border-white/8 text-sm">
-        <ShieldCheck className="h-4 w-4 mt-0.5 text-[#2d1b4e] dark:text-[#d4af37] shrink-0" />
-        <div>
-          Click <strong>Submit Enrollment</strong> when you're ready. Our team will follow up using
-          the contact details you provided.
-        </div>
+      <div className="flex items-center justify-between gap-4 mt-6 pt-6 border-t border-border">
+        <Button type="button" variant="ghost" onClick={handleBack} disabled={submitting}>
+          <ArrowLeft className="h-4 w-4 mr-2" /> Back
+        </Button>
+        {subStage < 3 ? (
+          <Button
+            type="button"
+            onClick={handleContinue}
+            disabled={primaryDisabled}
+            className="bg-[#d4af37] hover:bg-[#c29d2f] text-[#2d1b4e] font-medium px-6"
+          >
+            Continue <ArrowRight className="h-4 w-4 ml-2" />
+          </Button>
+        ) : (
+          <Button
+            type="button"
+            onClick={handleSubmit}
+            disabled={primaryDisabled}
+            className="bg-[#d4af37] hover:bg-[#c29d2f] text-[#2d1b4e] font-medium px-6"
+          >
+            {submitting ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" /> Submitting…
+              </>
+            ) : (
+              <>
+                Submit Enrollment <ArrowRight className="h-4 w-4 ml-2" />
+              </>
+            )}
+          </Button>
+        )}
       </div>
     </SectionCard>
   );
