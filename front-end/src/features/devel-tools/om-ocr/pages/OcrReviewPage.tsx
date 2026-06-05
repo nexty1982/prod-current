@@ -39,6 +39,7 @@ import {
   InputLabel,
   InputAdornment,
   List,
+  ListItem,
   MenuItem,
   Select,
   ListItemButton,
@@ -71,6 +72,7 @@ import {
   IconRobot,
   IconZoomIn,
   IconZoomOut,
+  IconTrash,
 } from '@tabler/icons-react';
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
@@ -835,6 +837,30 @@ const OcrReviewPage: React.FC = () => {
     }
   };
 
+  const [deleteConfirmJobId, setDeleteConfirmJobId] = useState<number | null>(null);
+  const [deletingJobId, setDeletingJobId] = useState<number | null>(null);
+
+  const handleDeleteJob = useCallback(async (jobId: number) => {
+    if (!churchId) return;
+    setDeletingJobId(jobId);
+    try {
+      await apiClient.delete(`/api/church/${churchId}/ocr/jobs`, { data: { jobIds: [jobId] } });
+      
+      // Update local state
+      setJobs((prevJobs) => prevJobs.filter((j) => Number(j.id) !== jobId));
+      
+      // If currently active job is deleted, navigate back to the main review page
+      if (selectedJobId === jobId) {
+        navigate(reviewBase);
+      }
+    } catch (err: any) {
+      alert(`Failed to delete job: ${err?.response?.data?.error || err?.message || err}`);
+    } finally {
+      setDeletingJobId(null);
+      setDeleteConfirmJobId(null);
+    }
+  }, [churchId, selectedJobId, navigate, reviewBase]);
+
   if (!churchId) {
     return (
       <Box sx={{ p: 4, textAlign: 'center' }}>
@@ -938,19 +964,41 @@ const OcrReviewPage: React.FC = () => {
                 const active = selectedJobId === Number(j.id);
                 const countStr = typeof j.records_count === 'number' ? `${j.confirmed_count || 0}/${j.records_count} ` : '';
                 return (
-                  <ListItemButton
+                  <ListItem
                     key={j.id}
-                    selected={active}
-                    onClick={() => navigate(`${reviewBase}/${j.id}`)}
-                    sx={{ borderRadius: 1, mb: 0.5 }}
+                    disablePadding
+                    secondaryAction={
+                      <Stack direction="row" spacing={0.5} alignItems="center">
+                        <Chip label={cfg.label} size="small" color={cfg.color} variant="outlined" />
+                        <Tooltip title="Delete job completely">
+                          <IconButton
+                            edge="end"
+                            size="small"
+                            color="error"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setDeleteConfirmJobId(Number(j.id));
+                            }}
+                          >
+                            <IconTrash size={16} />
+                          </IconButton>
+                        </Tooltip>
+                      </Stack>
+                    }
+                    sx={{ mb: 0.5 }}
                   >
-                    <ListItemText
-                      primary={`${countStr}${j.filename || `Job #${j.id}`}`}
-                      secondary={new Date(j.created_at).toLocaleString()}
-                      primaryTypographyProps={{ noWrap: true, fontSize: '0.85rem', fontWeight: active ? 700 : 500 }}
-                    />
-                    <Chip label={cfg.label} size="small" color={cfg.color} variant="outlined" />
-                  </ListItemButton>
+                    <ListItemButton
+                      selected={active}
+                      onClick={() => navigate(`${reviewBase}/${j.id}`)}
+                      sx={{ borderRadius: 1, pr: 12 }}
+                    >
+                      <ListItemText
+                        primary={`${countStr}${j.filename || `Job #${j.id}`}`}
+                        secondary={new Date(j.created_at).toLocaleString()}
+                        primaryTypographyProps={{ noWrap: true, fontSize: '0.85rem', fontWeight: active ? 700 : 500 }}
+                      />
+                    </ListItemButton>
+                  </ListItem>
                 );
               })}
             </List>
@@ -965,19 +1013,41 @@ const OcrReviewPage: React.FC = () => {
                 const active = selectedJobId === Number(j.id);
                 const countStr = typeof j.records_count === 'number' ? `${j.confirmed_count || 0}/${j.records_count} ` : '';
                 return (
-                  <ListItemButton
+                  <ListItem
                     key={j.id}
-                    selected={active}
-                    onClick={() => navigate(`${reviewBase}/${j.id}`)}
-                    sx={{ borderRadius: 1, mb: 0.5 }}
+                    disablePadding
+                    secondaryAction={
+                      <Stack direction="row" spacing={0.5} alignItems="center">
+                        <Chip label={cfg.label} size="small" color={cfg.color} variant="outlined" />
+                        <Tooltip title="Delete job completely">
+                          <IconButton
+                            edge="end"
+                            size="small"
+                            color="error"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setDeleteConfirmJobId(Number(j.id));
+                            }}
+                          >
+                            <IconTrash size={16} />
+                          </IconButton>
+                        </Tooltip>
+                      </Stack>
+                    }
+                    sx={{ mb: 0.5 }}
                   >
-                    <ListItemText
-                      primary={`${countStr}${j.filename || `Job #${j.id}`}`}
-                      secondary={new Date(j.created_at).toLocaleString()}
-                      primaryTypographyProps={{ noWrap: true, fontSize: '0.85rem', fontWeight: active ? 700 : 500 }}
-                    />
-                    <Chip label={cfg.label} size="small" color={cfg.color} variant="outlined" />
-                  </ListItemButton>
+                    <ListItemButton
+                      selected={active}
+                      onClick={() => navigate(`${reviewBase}/${j.id}`)}
+                      sx={{ borderRadius: 1, pr: 12 }}
+                    >
+                      <ListItemText
+                        primary={`${countStr}${j.filename || `Job #${j.id}`}`}
+                        secondary={new Date(j.created_at).toLocaleString()}
+                        primaryTypographyProps={{ noWrap: true, fontSize: '0.85rem', fontWeight: active ? 700 : 500 }}
+                      />
+                    </ListItemButton>
+                  </ListItem>
                 );
               })}
             </List>
@@ -1595,6 +1665,27 @@ const OcrReviewPage: React.FC = () => {
           <Button onClick={() => setSaveTemplateDialogOpen(false)} disabled={saveTemplateLoading}>Cancel</Button>
           <Button onClick={handleSaveTemplate} variant="contained" disabled={saveTemplateLoading || !templateName.trim()}>
             {saveTemplateLoading ? <CircularProgress size={24} /> : 'Save'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={deleteConfirmJobId !== null} onClose={() => setDeleteConfirmJobId(null)}>
+        <DialogTitle>Delete Job Completely</DialogTitle>
+        <DialogContent>
+          <Typography>
+            Are you sure you want to delete Job #{deleteConfirmJobId} completely?
+            This will permanently remove the job metadata, all extracted records, draft records, and uploaded files from the server. This action cannot be undone.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteConfirmJobId(null)} disabled={deletingJobId !== null}>Cancel</Button>
+          <Button
+            onClick={() => deleteConfirmJobId !== null && handleDeleteJob(deleteConfirmJobId)}
+            color="error"
+            variant="contained"
+            disabled={deletingJobId !== null}
+          >
+            {deletingJobId !== null ? <CircularProgress size={24} color="inherit" /> : 'Delete Completely'}
           </Button>
         </DialogActions>
       </Dialog>
