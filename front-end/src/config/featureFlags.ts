@@ -34,8 +34,8 @@ const defaultFlags: FeatureFlags = {
   environmentGating: {
     // Enable the environment gating system
     enableLatestEnvironment: getEnvBool('VITE_ENABLE_LATEST_ENVIRONMENT', true),
-    // Show development banners for latest features
-    showDevBanners: getEnvBool('VITE_SHOW_DEV_BANNERS', true),
+    // Development priority banners disabled (reconstruction badges removed site-wide)
+    showDevBanners: getEnvBool('VITE_SHOW_DEV_BANNERS', false),
   },
   recordsV2: {
     // Records V2 feature flags (used with environment gating)

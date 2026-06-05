@@ -14,6 +14,7 @@
 
 import { useAuth } from '@/context/AuthContext';
 import OcrSetupGate from '@/features/devel-tools/om-ocr/components/OcrSetupGate';
+import churchService, { type Church as ChurchRecord } from '@/shared/lib/churchService';
 import OcrWorkbench from '@/features/devel-tools/om-ocr/components/workbench/OcrWorkbench';
 import { WorkbenchProvider } from '@/features/devel-tools/om-ocr/context/WorkbenchContext';
 import { apiClient } from '@/shared/lib/axiosInstance';
@@ -65,10 +66,7 @@ interface QueuedFile {
   jobId?: string;
 }
 
-interface Church {
-  id: number;
-  name: string;
-}
+type Church = ChurchRecord;
 
 interface OcrJob {
   id: string;
@@ -194,8 +192,8 @@ const ReviewStatusChip: React.FC<{ status: ReviewStatus; size?: 'small' | 'mediu
 const UploadRecordsPage: React.FC = () => {
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
-  const { user } = useAuth();
-  const isAdmin = user?.role === 'super_admin' || user?.role === 'admin';
+  const { user, isSuperAdmin } = useAuth();
+  const isAdmin = isSuperAdmin() || user?.role === 'admin' || user?.role === 'manager';
 
   // Tab
   const [activeTab, setActiveTab] = useState(0);
@@ -232,24 +230,35 @@ const UploadRecordsPage: React.FC = () => {
   const failedCount = queue.filter((f) => f.status === 'failed' || f.status === 'error').length;
   const pendingCount = queue.filter((f) => f.status === 'pending').length;
 
-  // ─── Load churches for admin ──
+  // ─── Load churches for admin / manager church picker ──
   useEffect(() => {
     if (!isAdmin) return;
+    let cancelled = false;
     (async () => {
       try {
-        const res: any = await apiClient.get('/api/my/churches');
-        const data = res?.data ?? res;
-        let list = data?.churches || data || [];
-        if (!Array.isArray(list)) list = [];
+        let list = await churchService.fetchChurches();
         if (list.length === 0) {
           const fallback: any = await apiClient.get('/api/churches');
-          const fData = fallback?.data ?? fallback;
-          list = fData?.churches || fData || [];
+          const body = fallback?.data ?? fallback;
+          const inner = body?.data ?? body;
+          list = inner?.churches || (Array.isArray(inner) ? inner : []);
         }
-        setChurches(Array.isArray(list) ? list : []);
-      } catch { setChurches([]); }
+        if (cancelled) return;
+        setChurches(list);
+        if (list.length > 0) {
+          setSelectedChurchId((prev) => {
+            if (prev && list.some((c) => c.id === prev)) return prev;
+            const userChurchId = user?.church_id ? Number(user.church_id) : null;
+            if (userChurchId && list.some((c) => c.id === userChurchId)) return userChurchId;
+            return list[0].id;
+          });
+        }
+      } catch {
+        if (!cancelled) setChurches([]);
+      }
     })();
-  }, [isAdmin]);
+    return () => { cancelled = true; };
+  }, [isAdmin, user?.church_id]);
 
   // ─── Load church OCR settings ──
   useEffect(() => {
@@ -430,7 +439,7 @@ const UploadRecordsPage: React.FC = () => {
               onChange={(e) => setSelectedChurchId(Number(e.target.value) || null)}
             >
               {churches.map((c) => (
-                <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>
+                <MenuItem key={c.id} value={c.id}>{c.church_name || c.name || `Church ${c.id}`}</MenuItem>
               ))}
             </Select>
           </FormControl>

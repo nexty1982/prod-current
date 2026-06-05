@@ -76,17 +76,8 @@ const EnvironmentAwarePage: React.FC<EnvironmentAwarePageProps> = ({
 }) => {
   const { environment, hasLatestAccess } = useEnvironment();
   
-  // Determine if we should show the development banner
-  // Priority 0 = never show banner (production ready with no notification)
-  const shouldShowBanner =
-    showBanner &&
-    hasLatestAccess &&
-    shouldShowDevBanners() &&
-    priority !== 0 &&
-    (
-      (priority !== undefined && priority <= 4) ||
-      (!!riskLevel && riskLevel !== 'production-ready')
-    );
+  // Priority/reconstruction banners removed site-wide
+  const shouldShowBanner = false;
 
   // Get banner content based on priority/risk
   const getBannerContent = () => {

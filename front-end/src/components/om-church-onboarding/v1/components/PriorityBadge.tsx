@@ -41,7 +41,6 @@ export function FrameHeader({
         )}
       </div>
       <div className="flex items-center gap-2">
-        <PriorityBadge p={priority} />
         {actions}
       </div>
     </div>
