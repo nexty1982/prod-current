@@ -1,209 +1,667 @@
-import React, { useEffect, useState } from 'react';
+/**
+ * Diocesan Church Analytics Dashboard
+ * Executive benchmarking across parishes within an OCA diocese.
+ * Diocese assignments sourced from color-coded sales xlsx (ext_id → us_churches).
+ */
+
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell, Legend, CartesianGrid
+  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line,
+  CartesianGrid, Legend, Cell, ScatterChart, Scatter, ZAxis, ComposedChart,
 } from 'recharts';
-import axios from 'axios';
+import {
+  Alert, Box, Button, Chip, CircularProgress, Drawer, FormControl, InputLabel,
+  MenuItem, Select, Typography, useTheme,
+} from '@mui/material';
+import {
+  IconArrowDown, IconArrowUp, IconDownload, IconMapPin, IconMinus,
+} from '@tabler/icons-react';
+import PageContainer from '@/shared/ui/PageContainer';
+import { apiClient } from '@/api/utils/axiosInstance';
+import {
+  DIOCESAN_PALETTE, DIOCESE_PERIODS, DIOCESE_RECORD_TYPES, DIOCESE_PARISH_SIZES, DIOCESE_OPTIONS,
+  type DiocesanParishRow, type VsAverage,
+} from '@/features/records-centralized/components/records/analyticsConfig';
 
-// Mocked data
-const recordCounts = { baptism: 124, marriage: 53, funeral: 39 };
-const monthlyData = [
-  { month: 'Jan', count: 15 },
-  { month: 'Feb', count: 12 },
-  { month: 'Mar', count: 18 },
-  { month: 'Apr', count: 20 },
-  { month: 'May', count: 22 },
-  { month: 'Jun', count: 17 },
-  { month: 'Jul', count: 19 },
-  { month: 'Aug', count: 21 },
-  { month: 'Sep', count: 16 },
-  { month: 'Oct', count: 14 },
-  { month: 'Nov', count: 13 },
-  { month: 'Dec', count: 11 },
-];
-const clergyStats = [
-  { name: 'Fr. John', count: 24 },
-  { name: 'Fr. Alex', count: 19 },
-  { name: 'Fr. George', count: 15 },
-  { name: 'Fr. Paul', count: 12 },
-  { name: 'Fr. Mark', count: 10 },
-];
-const ageDist = [
-  { ageGroup: '0-10', count: 12 },
-  { ageGroup: '11-20', count: 18 },
-  { ageGroup: '21-30', count: 25 },
-  { ageGroup: '31-40', count: 20 },
-  { ageGroup: '41-50', count: 15 },
-  { ageGroup: '51-60', count: 10 },
-  { ageGroup: '61+', count: 5 },
-];
-const genderDist = [
-  { gender: 'Male', count: 66 },
-  { gender: 'Female', count: 58 },
-];
-const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff8042', '#8dd1e1', '#a4de6c', '#d0ed57', '#ffc0cb'];
+/* ── Types ── */
 
-const FEAST_ORDER = [
-  'Nativity', 'Theophany', 'Annunciation', 'Transfiguration', 'Dormition', 'Elevation of the Cross', 'Pascha'
-];
-const RECORD_TYPES = ['baptism', 'marriage', 'funeral'];
-const RECORD_LABELS = { baptism: 'Baptism', marriage: 'Marriage', funeral: 'Funeral' };
-const RECORD_COLORS = { baptism: '#8884d8', marriage: '#82ca9d', funeral: '#ffc658' };
+interface MetricCard {
+  value: number;
+  previous: number;
+  changePercent: number;
+  label?: string;
+}
 
-const AnalyticsDashboard: React.FC = () => {
-  // --- Sacraments on Major Feasts ---
-  const [feastData, setFeastData] = useState<any[]>([]);
-  const [feastLoading, setFeastLoading] = useState(false);
-  const [feastError, setFeastError] = useState<string | null>(null);
+interface DashboardPayload {
+  filters: {
+    diocese: string;
+    dioceseName: string;
+    periodLabel: string;
+    period: string;
+    recordType: string;
+    region: string;
+    parishSize: string;
+  };
+  dioceses: Array<{ slug: string; name: string; directoryParishes: number; reportingParishes: number; color?: string }>;
+  regions: string[];
+  executiveSummary: Record<string, MetricCard & { churchId?: number; name?: string; reason?: string; value?: number | string }>;
+  averages: { totalRecords: number; addedInPeriod: number; completeness: number; baptism: number; marriage: number; funeral: number };
+  parishes: DiocesanParishRow[];
+  charts: {
+    recordsByParish: Array<{ churchId: number; name: string; total: number; baptism: number; marriage: number; funeral: number; custom: number }>;
+    activityOverTime: Array<Record<string, number | string>>;
+    growthComparison: Array<{ churchId: number; name: string; changePercent: number; diocesanAvg: number }>;
+    completenessMatrix: Array<{ churchId: number; name: string; baptism: number; marriage: number; funeral: number; overall: number }>;
+    geoParishes: Array<{ churchId: number; name: string; city: string; state: string; latitude: number; longitude: number; total: number; addedInPeriod: number; changePercent: number }>;
+  };
+  insights: Array<{ type: string; severity: string; title: string; detail: string; parishIds: number[] }>;
+  meta: { source: string; computedAt: string; totalParishesInDiocese: number };
+}
 
-  useEffect(() => {
-    setFeastLoading(true);
-    setFeastError(null);
-    axios.get('/api/analytics/by-feast-day', { withCredentials: true })
-      .then(res => {
-        // Only show most recent year for Pascha and fixed feasts
-        const now = new Date();
-        const year = now.getFullYear();
-        // Group by feast and type, keep only most recent year for each feast
-        const filtered = FEAST_ORDER.flatMap(feast => {
-          const feastRows = res.data.filter((row: any) => row.feast === feast);
-          if (feast === 'Pascha') {
-            // Only most recent Pascha
-            const paschaRows = feastRows.filter((row: any) => row.date.startsWith(year.toString()));
-            return paschaRows;
-          } else {
-            // Only current year for fixed feasts
-            return feastRows.filter((row: any) => row.date.startsWith(year.toString()));
-          }
-        });
-        // Pivot to { feast, Baptism, Marriage, Funeral }
-        const grouped: any = {};
-        filtered.forEach((row: any) => {
-          if (!grouped[row.feast]) grouped[row.feast] = { feast: row.feast, date: row.date };
-          grouped[row.feast][row.type] = row.count;
-        });
-        setFeastData(Object.values(grouped));
-      })
-      .catch(err => {
-        setFeastError('Error loading feast analytics');
-      })
-      .finally(() => setFeastLoading(false));
-  }, []);
+/* ── Helpers ── */
 
+const VS_AVERAGE_STYLES: Record<VsAverage, { label: string; color: string; icon: React.ElementType }> = {
+  above: { label: 'Above avg', color: DIOCESAN_PALETTE.above, icon: IconArrowUp },
+  near: { label: 'Near avg', color: DIOCESAN_PALETTE.near, icon: IconMinus },
+  below: { label: 'Below avg', color: DIOCESAN_PALETTE.below, icon: IconArrowDown },
+  no_data: { label: 'No data', color: '#94a3b8', icon: IconMinus },
+};
+
+function truncateName(name: string, max = 22) {
+  return name.length > max ? `${name.slice(0, max)}…` : name;
+}
+
+function exportCsv(parishes: DiocesanParishRow[], dioceseName: string) {
+  const headers = ['Parish', 'City', 'State', 'Total Records', 'Baptisms', 'Marriages', 'Funerals', 'Added (Period)', 'Change %', 'Completeness', 'vs Average', 'Last Activity', 'Status'];
+  const rows = parishes.map((p) => [
+    p.name, p.city, p.state, p.records.total, p.records.baptism, p.records.marriage, p.records.funeral,
+    p.records.addedInPeriod, p.changePercent, p.records.completeness, p.vsDiocesanAverage,
+    p.records.lastActivityAt || '', p.records.dataStatus,
+  ]);
+  const csv = [headers, ...rows].map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `diocesan-analytics-${dioceseName.replace(/\s+/g, '-').toLowerCase()}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+/* ── Subcomponents ── */
+
+const ChartShell: React.FC<{ title: string; subtitle?: string; children: React.ReactNode; className?: string }> = ({
+  title, subtitle, children, className = '',
+}) => {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
   return (
-    <div className="p-4 max-w-7xl mx-auto">
-      <h1 className="text-3xl font-bold mb-2">Church Records Analytics</h1>
-      <p className="mb-6 text-gray-600">Visual analytics for SSPPOC baptism, marriage, and funeral records</p>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-        {/* Total Record Counts */}
-        <div className="bg-white rounded-lg shadow p-4 flex flex-col items-center">
-          <h2 className="text-xl font-semibold mb-2">Total Record Counts</h2>
-          <div className="flex w-full justify-around mt-4">
-            <div className="flex flex-col items-center">
-              <span className="text-2xl font-bold text-blue-600">{recordCounts.baptism}</span>
-              <span className="text-gray-500">Baptisms</span>
-            </div>
-            <div className="flex flex-col items-center">
-              <span className="text-2xl font-bold text-green-600">{recordCounts.marriage}</span>
-              <span className="text-gray-500">Marriages</span>
-            </div>
-            <div className="flex flex-col items-center">
-              <span className="text-2xl font-bold text-purple-600">{recordCounts.funeral}</span>
-              <span className="text-gray-500">Funerals</span>
-            </div>
-          </div>
-        </div>
-        {/* Monthly Record Activity */}
-        <div className="bg-white rounded-lg shadow p-4">
-          <h2 className="text-xl font-semibold mb-2">Monthly Record Activity</h2>
-          <ResponsiveContainer width="100%" height={220}>
-            <LineChart data={monthlyData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="month" />
-              <YAxis allowDecimals={false} />
-              <Tooltip />
-              <Line type="monotone" dataKey="count" stroke="#8884d8" strokeWidth={2} />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-        {/* Top Clergy by Record Count */}
-        <div className="bg-white rounded-lg shadow p-4">
-          <h2 className="text-xl font-semibold mb-2">Top 5 Clergy by Record Count</h2>
-          <ResponsiveContainer width="100%" height={220}>
-            <BarChart data={clergyStats} layout="vertical" margin={{ left: 20, right: 20 }}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis type="number" allowDecimals={false} />
-              <YAxis dataKey="name" type="category" width={100} />
-              <Tooltip />
-              <Bar dataKey="count" fill="#82ca9d" />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-        {/* Age Distribution */}
-        <div className="bg-white rounded-lg shadow p-4">
-          <h2 className="text-xl font-semibold mb-2">Age Distribution</h2>
-          <ResponsiveContainer width="100%" height={220}>
-            <BarChart data={ageDist} margin={{ left: 10, right: 10 }}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="ageGroup" />
-              <YAxis allowDecimals={false} />
-              <Tooltip />
-              <Bar dataKey="count" fill="#ffc658" />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+    <div className={`rounded-xl border shadow-sm p-6 ${isDark ? 'bg-slate-900 border-slate-700' : 'bg-white border-slate-200'} ${className}`}>
+      <div className="mb-4">
+        <h3 className={`text-base font-semibold ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>{title}</h3>
+        {subtitle && <p className={`text-sm mt-0.5 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>{subtitle}</p>}
       </div>
-      {/* Gender Distribution (full width on mobile, half on desktop) */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-white rounded-lg shadow p-4 flex flex-col items-center">
-          <h2 className="text-xl font-semibold mb-2">Gender Distribution</h2>
-          <ResponsiveContainer width="100%" height={220}>
-            <PieChart>
-              <Pie
-                data={genderDist}
-                dataKey="count"
-                nameKey="gender"
-                cx="50%"
-                cy="50%"
-                outerRadius={80}
-                label
-              >
-                {genderDist.map((entry, index) => (
-                  <Cell key={`cell-gender-${index}`} fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip />
-              <Legend />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-
-      {/* Sacraments on Major Feasts */}
-      <div className="mt-10">
-        <h2 className="text-2xl font-bold mb-2">Sacraments on Major Feasts</h2>
-        <p className="mb-4 text-gray-600">Number of baptisms, marriages, and funerals performed on major Orthodox feast days (current year)</p>
-        {feastLoading && <div className="text-gray-500">Loading...</div>}
-        {feastError && <div className="text-red-500">{feastError}</div>}
-        {!feastLoading && !feastError && feastData.length > 0 && (
-          <ResponsiveContainer width="100%" height={320}>
-            <BarChart data={feastData} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="feast" />
-              <YAxis allowDecimals={false} />
-              <Tooltip formatter={(value: any, name: any, props: any) => [`${value}`, RECORD_LABELS[name as keyof typeof RECORD_LABELS]]} />
-              <Legend />
-              {RECORD_TYPES.map(type => (
-                <Bar key={type} dataKey={type} name={RECORD_LABELS[type as keyof typeof RECORD_LABELS]} fill={RECORD_COLORS[type as keyof typeof RECORD_COLORS]} />
-              ))}
-            </BarChart>
-          </ResponsiveContainer>
-        )}
-        {!feastLoading && !feastError && feastData.length === 0 && (
-          <div className="text-gray-500">No feast day data available for this year.</div>
-        )}
-      </div>
+      {children}
     </div>
   );
 };
 
-export default AnalyticsDashboard; 
+const SummaryCard: React.FC<{
+  label: string;
+  value: string | number;
+  changePercent?: number;
+  sublabel?: string;
+  highlight?: boolean;
+}> = ({ label, value, changePercent, sublabel, highlight }) => {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+  const trend = changePercent ?? 0;
+  const trendColor = trend > 0 ? DIOCESAN_PALETTE.above : trend < 0 ? DIOCESAN_PALETTE.below : DIOCESAN_PALETTE.near;
+
+  return (
+    <div
+      className={`rounded-xl border p-5 ${isDark ? 'bg-slate-900 border-slate-700' : 'bg-white border-slate-200'}`}
+      style={highlight ? { borderColor: DIOCESAN_PALETTE.gold } : undefined}
+    >
+      <p className={`text-xs font-medium uppercase tracking-wide ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>{label}</p>
+      <p className={`text-2xl font-semibold mt-1 tabular-nums ${isDark ? 'text-slate-50' : 'text-slate-900'}`}>
+        {typeof value === 'number' ? value.toLocaleString() : value}
+      </p>
+      {sublabel && <p className={`text-xs mt-1 ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>{sublabel}</p>}
+      {changePercent !== undefined && (
+        <div className="flex items-center gap-1 mt-2 text-xs font-medium" style={{ color: trendColor }}>
+          {trend > 0 ? <IconArrowUp size={14} /> : trend < 0 ? <IconArrowDown size={14} /> : <IconMinus size={14} />}
+          {trend > 0 ? '+' : ''}{trend}% vs prior period
+        </div>
+      )}
+    </div>
+  );
+};
+
+const VsBadge: React.FC<{ status: VsAverage }> = ({ status }) => {
+  const cfg = VS_AVERAGE_STYLES[status];
+  const Icon = cfg.icon;
+  return (
+    <span className="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full" style={{ backgroundColor: `${cfg.color}18`, color: cfg.color }}>
+      <Icon size={12} /> {cfg.label}
+    </span>
+  );
+};
+
+/* ══════════════════════════════════════════════════════════════ */
+/*  MAIN DASHBOARD                                               */
+/* ══════════════════════════════════════════════════════════════ */
+
+const AnalyticsDashboard: React.FC = () => {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+
+  const [diocese, setDiocese] = useState('diocese-of-new-york-and-new-jersey');
+  const [period, setPeriod] = useState('12m');
+  const [recordType, setRecordType] = useState('all');
+  const [region, setRegion] = useState('all');
+  const [parishSize, setParishSize] = useState('all');
+  const [highlightIds, setHighlightIds] = useState<number[]>([]);
+  const [selectedParish, setSelectedParish] = useState<DiocesanParishRow | null>(null);
+
+  const [data, setData] = useState<DashboardPayload | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const gridStroke = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
+  const axisColor = isDark ? '#94a3b8' : '#64748b';
+
+  const fetchDashboard = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await apiClient.get('/analytics/diocesan-dashboard', {
+        params: { diocese, period, recordType, region, parishSize },
+      });
+      setData(res.data || res);
+    } catch (err: any) {
+      setError(err?.response?.data?.error || err.message || 'Failed to load diocesan dashboard');
+    } finally {
+      setLoading(false);
+    }
+  }, [diocese, period, recordType, region, parishSize]);
+
+  useEffect(() => { fetchDashboard(); }, [fetchDashboard]);
+
+  const parishes = data?.parishes ?? [];
+  const topParishesChart = useMemo(
+    () => (data?.charts.recordsByParish ?? []).slice(0, 20),
+    [data?.charts.recordsByParish],
+  );
+
+  const lineColors = useMemo(() => {
+    const palette = ['#c9a14a', '#6366F1', '#22C55E', '#F59E0B', '#3b82f6', '#ec4899', '#14b8a6'];
+    const map: Record<number, string> = {};
+    parishes.forEach((p, i) => { map[p.churchId] = palette[i % palette.length]; });
+    return map;
+  }, [parishes]);
+
+  const highlightedSet = useMemo(() => new Set(highlightIds), [highlightIds]);
+
+  const toggleHighlight = (id: number) => {
+    setHighlightIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+  };
+
+  const es = data?.executiveSummary;
+
+  const selectSx = {
+    minWidth: 160,
+    '& .MuiOutlinedInput-root': {
+      borderRadius: '10px',
+      backgroundColor: isDark ? 'rgba(30,41,59,0.6)' : DIOCESAN_PALETTE.cream,
+    },
+  };
+
+  return (
+    <PageContainer
+      title="Diocesan Analytics"
+      description="Executive parish benchmarking and record activity across your diocese"
+    >
+      <Box sx={{ maxWidth: 1400, mx: 'auto', px: { xs: 2, md: 3 }, pb: 6 }}>
+        {/* Header */}
+        <div className="mb-6 pt-2">
+          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: DIOCESAN_PALETTE.gold }}>
+                Orthodox Metrics · Diocesan Leadership
+              </p>
+              <h1 className={`text-2xl md:text-3xl font-bold ${isDark ? 'text-slate-50' : 'text-slate-900'}`}>
+                {data?.filters.dioceseName || 'Diocesan Church Analytics'}
+              </h1>
+              <p className={`text-sm mt-1 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                Compare parish performance, trends, and data quality — {data?.filters.periodLabel || 'loading…'}
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                size="small"
+                variant="outlined"
+                startIcon={<IconDownload size={16} />}
+                onClick={() => data && exportCsv(parishes, data.filters.dioceseName)}
+                disabled={!parishes.length}
+                sx={{ borderColor: DIOCESAN_PALETTE.gold, color: DIOCESAN_PALETTE.gold }}
+              >
+                Export CSV
+              </Button>
+              <Button
+                size="small"
+                variant="outlined"
+                onClick={() => window.print()}
+                sx={{ borderColor: isDark ? '#475569' : '#cbd5e1' }}
+              >
+                Print / PDF
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* Filters */}
+        <div
+          className={`sticky top-0 z-10 rounded-xl border p-4 mb-6 flex flex-wrap gap-3 items-end ${isDark ? 'bg-slate-900/95 border-slate-700 backdrop-blur' : 'bg-white/95 border-slate-200 backdrop-blur'}`}
+        >
+          <FormControl size="small" sx={selectSx}>
+            <InputLabel>Diocese</InputLabel>
+            <Select label="Diocese" value={diocese} onChange={(e) => setDiocese(e.target.value)}>
+              {(data?.dioceses?.length ? data.dioceses : DIOCESE_OPTIONS).map((d) => (
+                <MenuItem key={d.slug} value={d.slug}>{d.name}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <FormControl size="small" sx={selectSx}>
+            <InputLabel>Reporting period</InputLabel>
+            <Select label="Reporting period" value={period} onChange={(e) => setPeriod(e.target.value)}>
+              {DIOCESE_PERIODS.map((p) => <MenuItem key={p.id} value={p.id}>{p.label}</MenuItem>)}
+            </Select>
+          </FormControl>
+          <FormControl size="small" sx={selectSx}>
+            <InputLabel>Record type</InputLabel>
+            <Select label="Record type" value={recordType} onChange={(e) => setRecordType(e.target.value)}>
+              {DIOCESE_RECORD_TYPES.map((r) => <MenuItem key={r.id} value={r.id}>{r.label}</MenuItem>)}
+            </Select>
+          </FormControl>
+          <FormControl size="small" sx={selectSx}>
+            <InputLabel>Geographic region</InputLabel>
+            <Select label="Geographic region" value={region} onChange={(e) => setRegion(e.target.value)}>
+              {(data?.regions ?? ['all']).map((r) => <MenuItem key={r} value={r}>{r === 'all' ? 'All regions' : r}</MenuItem>)}
+            </Select>
+          </FormControl>
+          <FormControl size="small" sx={selectSx}>
+            <InputLabel>Parish size</InputLabel>
+            <Select label="Parish size" value={parishSize} onChange={(e) => setParishSize(e.target.value)}>
+              {DIOCESE_PARISH_SIZES.map((s) => <MenuItem key={s.id} value={s.id}>{s.label}</MenuItem>)}
+            </Select>
+          </FormControl>
+        </div>
+
+        {loading && (
+          <div className="flex flex-col items-center justify-center py-24 gap-3">
+            <CircularProgress sx={{ color: DIOCESAN_PALETTE.gold }} />
+            <Typography color="textSecondary">Loading diocesan analytics…</Typography>
+          </div>
+        )}
+
+        {error && !loading && (
+          <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>
+        )}
+
+        {!loading && !error && data && parishes.length === 0 && (
+          <Alert severity="info">
+            No reporting parishes found for this diocese and filter combination.
+            Diocese assignments are loaded from the color-coded OCA sales workbook.
+          </Alert>
+        )}
+
+        {!loading && !error && data && parishes.length > 0 && (
+          <>
+            {/* Executive summary */}
+            <section className="mb-8">
+              <h2 className={`text-lg font-semibold mb-4 ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>Executive Summary</h2>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <SummaryCard
+                  label="Parishes reporting"
+                  value={es?.totalParishesReporting?.value ?? 0}
+                  changePercent={es?.totalParishesReporting?.changePercent}
+                  sublabel={es?.totalParishesReporting?.label}
+                />
+                <SummaryCard
+                  label="Total records managed"
+                  value={es?.totalRecordsManaged?.value ?? 0}
+                  changePercent={es?.totalRecordsManaged?.changePercent}
+                />
+                <SummaryCard
+                  label="Records added (period)"
+                  value={es?.recordsAddedInPeriod?.value ?? 0}
+                  changePercent={es?.recordsAddedInPeriod?.changePercent}
+                />
+                <SummaryCard
+                  label="Avg records / parish"
+                  value={es?.avgRecordsPerParish?.value ?? 0}
+                  changePercent={es?.avgRecordsPerParish?.changePercent}
+                />
+                <SummaryCard
+                  label="Participation rate"
+                  value={`${es?.participationRate?.value ?? 0}%`}
+                  sublabel={es?.participationRate?.label}
+                />
+                <SummaryCard
+                  label="Diocesan growth rate"
+                  value={`${es?.diocesanGrowthRate?.value ?? 0}%`}
+                  changePercent={es?.diocesanGrowthRate?.changePercent}
+                />
+                <SummaryCard
+                  label="Most active parish"
+                  value={es?.mostActiveParish?.name ? truncateName(String(es.mostActiveParish.name), 28) : '—'}
+                  sublabel={es?.mostActiveParish?.value != null ? `${es.mostActiveParish.value} added` : undefined}
+                  highlight
+                />
+                <SummaryCard
+                  label="Needs attention"
+                  value={es?.parishRequiringAttention?.name ? truncateName(String(es.parishRequiringAttention.name), 28) : '—'}
+                  sublabel={es?.parishRequiringAttention?.reason ? String(es.parishRequiringAttention.reason) : 'None flagged'}
+                />
+              </div>
+            </section>
+
+            {/* Insights */}
+            {data.insights.length > 0 && (
+              <section className="mb-8">
+                <h2 className={`text-lg font-semibold mb-3 ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>Diocesan Insights</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {data.insights.map((ins, i) => (
+                    <div
+                      key={i}
+                      className={`rounded-lg border p-4 ${isDark ? 'bg-slate-900 border-slate-700' : 'bg-white border-slate-200'}`}
+                      style={{ borderLeftWidth: 4, borderLeftColor: ins.severity === 'positive' ? DIOCESAN_PALETTE.above : ins.severity === 'warning' ? DIOCESAN_PALETTE.incomplete : DIOCESAN_PALETTE.gold }}
+                    >
+                      <p className={`text-sm font-semibold ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>{ins.title}</p>
+                      <p className={`text-sm mt-1 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>{ins.detail}</p>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* Comparison table */}
+            <section className="mb-8">
+              <ChartShell title="Parish Comparison" subtitle="Ranked by total records · click a row for drill-down">
+                <div className="overflow-x-auto -mx-2">
+                  <table className="w-full text-sm min-w-[900px]">
+                    <thead>
+                      <tr className={isDark ? 'text-slate-400 border-b border-slate-700' : 'text-slate-500 border-b border-slate-200'}>
+                        <th className="text-left py-2 px-2 font-medium">Parish</th>
+                        <th className="text-right py-2 px-2 font-medium">Total</th>
+                        <th className="text-right py-2 px-2 font-medium">B</th>
+                        <th className="text-right py-2 px-2 font-medium">M</th>
+                        <th className="text-right py-2 px-2 font-medium">F</th>
+                        <th className="text-right py-2 px-2 font-medium">Added</th>
+                        <th className="text-right py-2 px-2 font-medium">Δ%</th>
+                        <th className="text-right py-2 px-2 font-medium">Complete</th>
+                        <th className="text-left py-2 px-2 font-medium">vs Avg</th>
+                        <th className="text-left py-2 px-2 font-medium">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {parishes.map((p) => (
+                        <tr
+                          key={p.churchId}
+                          onClick={() => setSelectedParish(p)}
+                          className={`cursor-pointer border-b transition-colors ${isDark ? 'border-slate-800 hover:bg-slate-800/60' : 'border-slate-100 hover:bg-slate-50'}`}
+                        >
+                          <td className="py-2.5 px-2">
+                            <span className={`font-medium ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>{p.name}</span>
+                            <span className={`block text-xs ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>{p.city}, {p.state}</span>
+                          </td>
+                          <td className="text-right py-2.5 px-2 tabular-nums">{p.records.total.toLocaleString()}</td>
+                          <td className="text-right py-2.5 px-2 tabular-nums text-indigo-500">{p.records.baptism}</td>
+                          <td className="text-right py-2.5 px-2 tabular-nums text-green-600">{p.records.marriage}</td>
+                          <td className="text-right py-2.5 px-2 tabular-nums text-amber-600">{p.records.funeral}</td>
+                          <td className="text-right py-2.5 px-2 tabular-nums">{p.records.addedInPeriod}</td>
+                          <td className="text-right py-2.5 px-2 tabular-nums" style={{ color: p.changePercent >= 0 ? DIOCESAN_PALETTE.above : DIOCESAN_PALETTE.below }}>
+                            {p.changePercent > 0 ? '+' : ''}{p.changePercent}%
+                          </td>
+                          <td className="text-right py-2.5 px-2 tabular-nums">{p.records.completeness}%</td>
+                          <td className="py-2.5 px-2"><VsBadge status={p.vsDiocesanAverage} /></td>
+                          <td className="py-2.5 px-2">
+                            <Chip
+                              size="small"
+                              label={p.records.dataStatus.replace('_', ' ')}
+                              sx={{
+                                fontSize: '0.7rem',
+                                bgcolor: p.records.dataStatus === 'live' ? `${DIOCESAN_PALETTE.above}22` : `${DIOCESAN_PALETTE.stale}22`,
+                                color: p.records.dataStatus === 'live' ? DIOCESAN_PALETTE.above : DIOCESAN_PALETTE.stale,
+                              }}
+                            />
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </ChartShell>
+            </section>
+
+            {/* Charts grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+              <ChartShell title="Records by Parish" subtitle="Top parishes by total sacramental records">
+                <ResponsiveContainer width="100%" height={Math.max(280, topParishesChart.length * 28)}>
+                  <BarChart data={topParishesChart} layout="vertical" margin={{ left: 8, right: 16 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} horizontal={false} />
+                    <XAxis type="number" tick={{ fill: axisColor, fontSize: 11 }} />
+                    <YAxis type="category" dataKey="name" width={140} tick={{ fill: axisColor, fontSize: 10 }} tickFormatter={(v) => truncateName(v, 18)} />
+                    <Tooltip contentStyle={{ backgroundColor: isDark ? '#1e293b' : '#fff', borderRadius: 8 }} />
+                    <Bar dataKey="total" fill={DIOCESAN_PALETTE.navyMid} radius={[0, 4, 4, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </ChartShell>
+
+              <ChartShell title="Record-Type Distribution" subtitle="Baptism, marriage, and funeral mix by parish (top 12)">
+                <ResponsiveContainer width="100%" height={320}>
+                  <BarChart data={topParishesChart.slice(0, 12)} margin={{ bottom: 60 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} />
+                    <XAxis dataKey="name" tick={{ fill: axisColor, fontSize: 9 }} angle={-35} textAnchor="end" height={70} tickFormatter={(v) => truncateName(v, 14)} />
+                    <YAxis tick={{ fill: axisColor, fontSize: 11 }} />
+                    <Tooltip contentStyle={{ backgroundColor: isDark ? '#1e293b' : '#fff', borderRadius: 8 }} />
+                    <Legend />
+                    <Bar dataKey="baptism" stackId="a" fill={DIOCESAN_PALETTE.baptism} name="Baptism" />
+                    <Bar dataKey="marriage" stackId="a" fill={DIOCESAN_PALETTE.marriage} name="Marriage" />
+                    <Bar dataKey="funeral" stackId="a" fill={DIOCESAN_PALETTE.funeral} name="Funeral" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </ChartShell>
+
+              <ChartShell
+                title="Parish Activity Over Time"
+                subtitle="Click parish names in the table to highlight lines"
+                className="lg:col-span-2"
+              >
+                <div className="flex flex-wrap gap-2 mb-3">
+                  {parishes.slice(0, 10).map((p) => (
+                    <Chip
+                      key={p.churchId}
+                      size="small"
+                      label={truncateName(p.name, 16)}
+                      onClick={() => toggleHighlight(p.churchId)}
+                      sx={{
+                        bgcolor: highlightedSet.has(p.churchId) ? `${lineColors[p.churchId]}33` : 'transparent',
+                        borderColor: lineColors[p.churchId],
+                        border: '1px solid',
+                        opacity: highlightIds.length === 0 || highlightedSet.has(p.churchId) ? 1 : 0.35,
+                      }}
+                    />
+                  ))}
+                </div>
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={data.charts.activityOverTime}>
+                    <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} />
+                    <XAxis dataKey="month" tick={{ fill: axisColor, fontSize: 10 }} />
+                    <YAxis tick={{ fill: axisColor, fontSize: 11 }} />
+                    <Tooltip contentStyle={{ backgroundColor: isDark ? '#1e293b' : '#fff', borderRadius: 8 }} />
+                    {parishes.slice(0, 12).map((p) => (
+                      <Line
+                        key={p.churchId}
+                        type="monotone"
+                        dataKey={`p${p.churchId}`}
+                        name={p.name}
+                        stroke={lineColors[p.churchId]}
+                        strokeWidth={highlightedSet.has(p.churchId) || highlightIds.length === 0 ? 2 : 1}
+                        dot={false}
+                        opacity={highlightIds.length === 0 || highlightedSet.has(p.churchId) ? 1 : 0.15}
+                      />
+                    ))}
+                  </LineChart>
+                </ResponsiveContainer>
+              </ChartShell>
+
+              <ChartShell title="Growth Comparison" subtitle="Period change % vs diocesan average">
+                <ResponsiveContainer width="100%" height={300}>
+                  <ComposedChart data={data.charts.growthComparison.slice(0, 16)} margin={{ bottom: 60 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} />
+                    <XAxis dataKey="name" tick={{ fill: axisColor, fontSize: 9 }} angle={-35} textAnchor="end" height={70} tickFormatter={(v) => truncateName(v, 12)} />
+                    <YAxis tick={{ fill: axisColor, fontSize: 11 }} />
+                    <Tooltip contentStyle={{ backgroundColor: isDark ? '#1e293b' : '#fff', borderRadius: 8 }} />
+                    <Legend />
+                    <Bar dataKey="changePercent" name="Parish %" radius={[4, 4, 0, 0]}>
+                      {data.charts.growthComparison.slice(0, 16).map((entry, i) => (
+                        <Cell key={i} fill={entry.changePercent >= 0 ? DIOCESAN_PALETTE.above : DIOCESAN_PALETTE.below} />
+                      ))}
+                    </Bar>
+                    <Line type="monotone" dataKey="diocesanAvg" stroke={DIOCESAN_PALETTE.gold} strokeWidth={2} dot={false} name="Diocesan avg" />
+                  </ComposedChart>
+                </ResponsiveContainer>
+              </ChartShell>
+
+              <ChartShell title="Data Completeness Matrix" subtitle="Completeness % by record type">
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={data.charts.completenessMatrix.slice(0, 14)} margin={{ bottom: 60 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} />
+                    <XAxis dataKey="name" tick={{ fill: axisColor, fontSize: 9 }} angle={-35} textAnchor="end" height={70} tickFormatter={(v) => truncateName(v, 12)} />
+                    <YAxis domain={[0, 100]} tick={{ fill: axisColor, fontSize: 11 }} />
+                    <Tooltip contentStyle={{ backgroundColor: isDark ? '#1e293b' : '#fff', borderRadius: 8 }} />
+                    <Legend />
+                    <Bar dataKey="baptism" fill={DIOCESAN_PALETTE.baptism} name="Baptism" />
+                    <Bar dataKey="marriage" fill={DIOCESAN_PALETTE.marriage} name="Marriage" />
+                    <Bar dataKey="funeral" fill={DIOCESAN_PALETTE.funeral} name="Funeral" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </ChartShell>
+
+              <ChartShell
+                title="Geographic Parish Overview"
+                subtitle="Marker size reflects record volume · coordinates from parish directory"
+                className="lg:col-span-2"
+              >
+                {data.charts.geoParishes.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={320}>
+                    <ScatterChart margin={{ top: 10, right: 20, bottom: 10, left: 10 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} />
+                      <XAxis type="number" dataKey="longitude" name="Longitude" tick={{ fill: axisColor, fontSize: 10 }} domain={['auto', 'auto']} />
+                      <YAxis type="number" dataKey="latitude" name="Latitude" tick={{ fill: axisColor, fontSize: 10 }} domain={['auto', 'auto']} />
+                      <ZAxis type="number" dataKey="total" range={[40, 400]} />
+                      <Tooltip
+                        cursor={{ strokeDasharray: '3 3' }}
+                        content={({ active, payload }) => {
+                          if (!active || !payload?.length) return null;
+                          const d = payload[0].payload;
+                          return (
+                            <div className={`rounded-lg shadow-lg border px-3 py-2 text-xs ${isDark ? 'bg-slate-800 border-slate-600 text-slate-100' : 'bg-white border-slate-200'}`}>
+                              <p className="font-semibold">{d.name}</p>
+                              <p>{d.city}, {d.state}</p>
+                              <p>{d.total?.toLocaleString()} records · {d.changePercent}% growth</p>
+                            </div>
+                          );
+                        }}
+                      />
+                      <Scatter
+                        data={data.charts.geoParishes}
+                        fill={DIOCESAN_PALETTE.gold}
+                        onClick={(d: any) => {
+                          const hit = parishes.find((p) => p.churchId === d.churchId);
+                          if (hit) setSelectedParish(hit);
+                        }}
+                      />
+                    </ScatterChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className={`flex items-center justify-center h-48 gap-2 text-sm ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
+                    <IconMapPin size={18} /> No geocoded parishes in this selection
+                  </div>
+                )}
+              </ChartShell>
+            </div>
+
+            <p className={`text-xs text-center ${isDark ? 'text-slate-600' : 'text-slate-400'}`}>
+              Diocese mapping: {data.meta.source} · {data.meta.totalParishesInDiocese} reporting parishes · Updated {new Date(data.meta.computedAt).toLocaleString()}
+            </p>
+          </>
+        )}
+      </Box>
+
+      {/* Drill-down drawer */}
+      <Drawer
+        anchor="right"
+        open={!!selectedParish}
+        onClose={() => setSelectedParish(null)}
+        PaperProps={{ sx: { width: { xs: '100%', sm: 400 }, p: 3 } }}
+      >
+        {selectedParish && data && (
+          <div>
+            <Typography variant="h6" fontWeight={700} gutterBottom>{selectedParish.name}</Typography>
+            <Typography variant="body2" color="textSecondary" gutterBottom>
+              {selectedParish.city}, {selectedParish.state} · {selectedParish.region}
+            </Typography>
+            <Chip size="small" label={selectedParish.parishSize} sx={{ mr: 1, mb: 2 }} />
+            <VsBadge status={selectedParish.vsDiocesanAverage} />
+
+            <div className="grid grid-cols-2 gap-3 my-4">
+              <SummaryCard label="Total records" value={selectedParish.records.total} />
+              <SummaryCard label="Added (period)" value={selectedParish.records.addedInPeriod} changePercent={selectedParish.changePercent} />
+              <SummaryCard label="Completeness" value={`${selectedParish.records.completeness}%`} />
+              <SummaryCard label="Diocesan avg (total)" value={data.averages.totalRecords} />
+            </div>
+
+            <Typography variant="subtitle2" fontWeight={600} sx={{ mt: 2, mb: 1 }}>Similar-sized parishes</Typography>
+            <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+              Avg among {selectedParish.parishSize} parishes:{' '}
+              {Math.round(
+                parishes.filter((p) => p.parishSize === selectedParish.parishSize).reduce((s, p) => s + p.records.total, 0)
+                / Math.max(parishes.filter((p) => p.parishSize === selectedParish.parishSize).length, 1)
+              ).toLocaleString()} records
+            </p>
+
+            <Typography variant="subtitle2" fontWeight={600} sx={{ mt: 3, mb: 1 }}>Data quality</Typography>
+            <ul className={`text-sm space-y-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
+              <li>Baptism completeness: {selectedParish.records.completenessByType.baptism}%</li>
+              <li>Marriage completeness: {selectedParish.records.completenessByType.marriage}%</li>
+              <li>Funeral completeness: {selectedParish.records.completenessByType.funeral}%</li>
+              <li>Status: {selectedParish.records.dataStatus}</li>
+              {selectedParish.records.lastActivityAt && (
+                <li>Last activity: {new Date(selectedParish.records.lastActivityAt).toLocaleDateString()}</li>
+              )}
+            </ul>
+
+            <Typography variant="subtitle2" fontWeight={600} sx={{ mt: 3, mb: 1 }}>Recommended follow-up</Typography>
+            <ul className={`text-sm space-y-2 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+              {selectedParish.records.dataStatus === 'stale' && <li>Confirm whether recent sacraments need to be entered or imported.</li>}
+              {selectedParish.records.completeness < 70 && <li>Review missing required fields before diocesan reporting deadlines.</li>}
+              {selectedParish.vsDiocesanAverage === 'below' && <li>Compare digitization progress with similar-sized parishes in the diocese.</li>}
+              {selectedParish.records.dataStatus === 'live' && selectedParish.vsDiocesanAverage === 'above' && (
+                <li>Consider sharing digitization practices with parishes reporting lower activity.</li>
+              )}
+            </ul>
+
+            <Button fullWidth variant="contained" sx={{ mt: 4, bgcolor: DIOCESAN_PALETTE.navy, '&:hover': { bgcolor: DIOCESAN_PALETTE.navyMid } }} onClick={() => setSelectedParish(null)}>
+              Close
+            </Button>
+          </div>
+        )}
+      </Drawer>
+    </PageContainer>
+  );
+};
+
+export default AnalyticsDashboard;

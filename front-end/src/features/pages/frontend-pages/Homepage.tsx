@@ -15,11 +15,15 @@ import {
   ChevronRight,
   FileText,
   Globe,
+  FileBarChart,
+  MapPin,
   Search,
   Shield,
   Church,
+  TrendingUp,
   type LucideIcon,
 } from '@/ui/icons';
+import { PUBLIC_ROUTES } from '@/config/publicRoutes';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ParishRecordsAssessment } from '@/components/frontend-pages/shared/sections';
 import { Link } from 'react-router-dom';
@@ -59,6 +63,7 @@ const Homepage = () => {
         bare
       />
       <HomepageHero />
+      <HomepageDiocesanAnalyticsSection />
       <HomepageProofStrip />
       <HomepageHighlightCarousel />
 
@@ -130,6 +135,184 @@ const Homepage = () => {
 };
 
 export default Homepage;
+
+/** Illustrative NY/NJ diocese sample — mirrors onboarded parish data in production */
+const DIOCESAN_SAMPLE_STATS = {
+  diocese: 'Diocese of New York and New Jersey',
+  parishesReporting: 73,
+  totalRecords: 63897,
+  growthPercent: 14,
+  participationRate: 99,
+  topParishes: [
+    { name: 'Saint Vladimir Church', city: 'Trenton, NJ', total: 3552 },
+    { name: 'Saint John the Baptist Church', city: 'Passaic, NJ', total: 2016 },
+    { name: 'Church of the Holy Trinity', city: 'Brooklyn, NY', total: 1924 },
+    { name: 'SS. Cosmas and Damian Chapel', city: 'Staten Island, NY', total: 1750 },
+    { name: 'Holy Apostles Mission', city: 'Lansing, NY', total: 1793 },
+  ],
+};
+
+const DIOCESAN_ANALYTICS_LINKS: {
+  titleKey: string;
+  descKey: string;
+  to: string;
+  icon: LucideIcon;
+  external?: boolean;
+}[] = [
+  {
+    titleKey: 'home.diocesan_link_diocesan_title',
+    descKey: 'home.diocesan_link_diocesan_desc',
+    to: '/dashboards/analytics',
+    icon: BarChart3,
+  },
+  {
+    titleKey: 'home.diocesan_link_parish_title',
+    descKey: 'home.diocesan_link_parish_desc',
+    to: '/portal/charts',
+    icon: FileBarChart,
+  },
+  {
+    titleKey: 'home.diocesan_link_explorer_title',
+    descKey: 'home.diocesan_link_explorer_desc',
+    to: PUBLIC_ROUTES.SAMPLES_EXPLORER,
+    icon: Search,
+  },
+  {
+    titleKey: 'home.diocesan_link_tour_title',
+    descKey: 'home.diocesan_link_tour_desc',
+    to: PUBLIC_ROUTES.TOUR,
+    icon: MapPin,
+  },
+];
+
+function HomepageDiocesanAnalyticsSection() {
+  const { t } = useLanguage();
+  const maxBar = Math.max(...DIOCESAN_SAMPLE_STATS.topParishes.map((p) => p.total));
+
+  return (
+    <section
+      className="py-16 md:py-20 border-b border-[rgba(26,54,93,0.1)] dark:border-white/10 bg-gradient-to-b from-[#f5f0e6] to-[#f9fafb] dark:from-[#0d1117] dark:to-[#161b22]"
+      aria-label="Diocesan analytics preview"
+    >
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 mb-10">
+          <div className="max-w-2xl">
+            <div className="inline-flex items-center gap-2 bg-[#1a365d]/10 dark:bg-[#c9a14a]/15 px-4 py-2 rounded-full mb-4">
+              <TrendingUp className="text-[#c9a14a]" size={16} aria-hidden />
+              <EditableText contentKey="diocesan.badge" as="span" className="font-['Inter'] text-[13px] font-medium text-[#1a365d] dark:text-[#e8d5a3] tracking-wide uppercase">
+                {t('home.diocesan_badge')}
+              </EditableText>
+            </div>
+            <RichEditableText contentKey="diocesan.title" as="h2" className="font-['Georgia'] text-3xl md:text-4xl text-[#1a365d] dark:text-white mb-3 leading-tight">
+              {t('home.diocesan_title')}
+            </RichEditableText>
+            <RichEditableText contentKey="diocesan.subtitle" as="p" className="font-['Inter'] text-[16px] text-[#4a5565] dark:text-gray-400 leading-relaxed">
+              {t('home.diocesan_subtitle')}
+            </RichEditableText>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <Link
+              to="/dashboards/analytics"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#1a365d] hover:bg-[#2c5282] text-white font-['Inter'] text-sm font-medium transition-colors"
+            >
+              {t('home.diocesan_cta_dashboard')}
+              <ArrowRight size={16} />
+            </Link>
+            <Link
+              to={PUBLIC_ROUTES.SAMPLES_EXPLORER}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg border border-[#c9a14a] text-[#1a365d] dark:text-[#e8d5a3] hover:bg-[#c9a14a]/10 font-['Inter'] text-sm font-medium transition-colors"
+            >
+              {t('home.diocesan_cta_explore')}
+            </Link>
+          </div>
+        </div>
+
+        <div className="grid lg:grid-cols-5 gap-6">
+          {/* Sample metrics + chart */}
+          <div className="lg:col-span-3 space-y-4">
+            <div className="flex items-center gap-2 text-xs font-medium text-[#64748b] dark:text-gray-500 uppercase tracking-wider">
+              <span className="w-2 h-2 rounded-full bg-[#c9a14a]" aria-hidden />
+              {t('home.diocesan_sample_label')}: {DIOCESAN_SAMPLE_STATS.diocese}
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {[
+                { labelKey: 'home.diocesan_stat_parishes', value: DIOCESAN_SAMPLE_STATS.parishesReporting },
+                { labelKey: 'home.diocesan_stat_records', value: DIOCESAN_SAMPLE_STATS.totalRecords.toLocaleString() },
+                { labelKey: 'home.diocesan_stat_growth', value: `+${DIOCESAN_SAMPLE_STATS.growthPercent}%` },
+                { labelKey: 'home.diocesan_stat_participation', value: `${DIOCESAN_SAMPLE_STATS.participationRate}%` },
+              ].map((stat) => (
+                <div
+                  key={stat.labelKey}
+                  className="rounded-xl border border-[rgba(26,54,93,0.12)] dark:border-white/10 bg-white dark:bg-[#161b22] p-4 shadow-sm"
+                >
+                  <p className="font-['Inter'] text-[11px] uppercase tracking-wide text-[#64748b] dark:text-gray-500 mb-1">
+                    {t(stat.labelKey)}
+                  </p>
+                  <p className="font-['Georgia'] text-2xl text-[#1a365d] dark:text-[#e8d5a3] tabular-nums">{stat.value}</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="rounded-xl border border-[rgba(26,54,93,0.12)] dark:border-white/10 bg-white dark:bg-[#161b22] p-5 shadow-sm">
+              <h3 className="font-['Inter'] font-medium text-[#1a365d] dark:text-white mb-1">
+                {t('home.diocesan_chart_title')}
+              </h3>
+              <p className="font-['Inter'] text-xs text-[#64748b] dark:text-gray-500 mb-4">{t('home.diocesan_chart_note')}</p>
+              <ul className="space-y-3" aria-label="Sample parish record volumes">
+                {DIOCESAN_SAMPLE_STATS.topParishes.map((parish) => (
+                  <li key={parish.name}>
+                    <div className="flex justify-between gap-2 mb-1">
+                      <span className="font-['Inter'] text-sm text-[#334155] dark:text-gray-300 truncate">{parish.name}</span>
+                      <span className="font-['Inter'] text-xs text-[#64748b] dark:text-gray-500 tabular-nums flex-shrink-0">
+                        {parish.total.toLocaleString()}
+                      </span>
+                    </div>
+                    <div className="h-2 rounded-full bg-[#f1f5f9] dark:bg-slate-800 overflow-hidden">
+                      <div
+                        className="h-full rounded-full bg-gradient-to-r from-[#1a365d] to-[#c9a14a]"
+                        style={{ width: `${Math.round((parish.total / maxBar) * 100)}%` }}
+                      />
+                    </div>
+                    <span className="font-['Inter'] text-[11px] text-[#94a3b8] dark:text-gray-600">{parish.city}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+          {/* Analytics destinations */}
+          <div className="lg:col-span-2 grid sm:grid-cols-2 lg:grid-cols-1 gap-3">
+            {DIOCESAN_ANALYTICS_LINKS.map((link) => {
+              const Icon = link.icon;
+              return (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  className="group rounded-xl border border-[rgba(26,54,93,0.12)] dark:border-white/10 bg-white dark:bg-[#161b22] p-4 hover:border-[#c9a14a]/50 hover:shadow-md transition-all"
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-[#1a365d]/10 dark:bg-[#c9a14a]/15 flex items-center justify-center flex-shrink-0 group-hover:bg-[#c9a14a]/20 transition-colors">
+                      <Icon className="text-[#1a365d] dark:text-[#c9a14a]" size={20} />
+                    </div>
+                    <div className="min-w-0">
+                      <EditableText contentKey={`diocesan.link.${link.to}.title`} as="h3" className="font-['Inter'] font-medium text-[15px] text-[#1a365d] dark:text-white mb-1 group-hover:text-[#2c5282] dark:group-hover:text-[#e8d5a3]">
+                        {t(link.titleKey)}
+                      </EditableText>
+                      <RichEditableText contentKey={`diocesan.link.${link.to}.desc`} as="p" className="font-['Inter'] text-[13px] text-[#64748b] dark:text-gray-500 leading-snug">
+                        {t(link.descKey)}
+                      </RichEditableText>
+                    </div>
+                    <ArrowRight className="text-[#c9a14a] opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 mt-1" size={16} />
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
 
 const PROOF_STRIP_ITEMS: { tKey: string; icon: LucideIcon }[] = [
   { tKey: 'home.proof_records', icon: BookOpen },

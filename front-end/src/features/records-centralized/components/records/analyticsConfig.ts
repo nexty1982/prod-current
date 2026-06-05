@@ -215,3 +215,89 @@ export const ANALYTICS_CONFIGS: Record<RecordType, RecordAnalyticsConfig> = {
 };
 
 export { TYPE_LABELS, TYPE_ICONS, getTypeCount, getThisYearCount, getPeakYear, getAvgPerYear };
+
+/* ── Diocesan dashboard palette (navy, gold, cream, neutrals) ── */
+export const DIOCESAN_PALETTE = {
+  navy: '#1a365d',
+  navyMid: '#2c5282',
+  gold: '#c9a14a',
+  goldLight: '#e8d5a3',
+  cream: '#f5f0e6',
+  baptism: '#6366F1',
+  marriage: '#22C55E',
+  funeral: '#F59E0B',
+  custom: '#8b5cf6',
+  above: '#16a34a',
+  near: '#64748b',
+  below: '#dc2626',
+  stale: '#f59e0b',
+  incomplete: '#ea580c',
+};
+
+export const DIOCESE_PERIODS = [
+  { id: '30d', label: 'Last 30 days' },
+  { id: '90d', label: 'Last 90 days' },
+  { id: 'ytd', label: 'Year to date' },
+  { id: '12m', label: 'Last 12 months' },
+  { id: 'all', label: 'All time' },
+];
+
+export const DIOCESE_RECORD_TYPES = [
+  { id: 'all', label: 'All record types' },
+  { id: 'baptism', label: 'Baptisms' },
+  { id: 'marriage', label: 'Marriages' },
+  { id: 'funeral', label: 'Funerals' },
+  { id: 'custom', label: 'Custom records' },
+];
+
+export const DIOCESE_PARISH_SIZES = [
+  { id: 'all', label: 'All sizes' },
+  { id: 'small', label: 'Small (< 500 records)' },
+  { id: 'medium', label: 'Medium (500–999)' },
+  { id: 'large', label: 'Large (1,000+)' },
+];
+
+/** OCA dioceses from color-coded sales workbook (OCA Diocese Legend sheet) */
+export const DIOCESE_OPTIONS = [
+  { slug: 'diocese-of-alaska', name: 'Diocese of Alaska' },
+  { slug: 'diocese-of-eastern-pennsylvania', name: 'Diocese of Eastern Pennsylvania' },
+  { slug: 'diocese-of-the-midwest', name: 'Diocese of the Midwest' },
+  { slug: 'diocese-of-new-england', name: 'Diocese of New England' },
+  { slug: 'diocese-of-new-york-and-new-jersey', name: 'Diocese of New York and New Jersey' },
+  { slug: 'diocese-of-the-south', name: 'Diocese of the South' },
+  { slug: 'archdiocese-of-washington-d-c', name: 'Archdiocese of Washington, D.C.' },
+  { slug: 'diocese-of-the-west', name: 'Diocese of the West' },
+  { slug: 'archdiocese-of-western-pennsylvania', name: 'Archdiocese of Western Pennsylvania' },
+  { slug: 'albanian-archdiocese', name: 'Albanian Archdiocese' },
+  { slug: 'bulgarian-diocese', name: 'Bulgarian Diocese' },
+  { slug: 'romanian-episcopate', name: 'Romanian Episcopate' },
+  { slug: 'archdiocese-of-canada', name: 'Archdiocese of Canada' },
+  { slug: 'diocese-of-mexico', name: 'Diocese of Mexico' },
+];
+
+export type VsAverage = 'above' | 'near' | 'below' | 'no_data';
+
+export interface DiocesanParishRow {
+  churchId: number;
+  name: string;
+  city: string;
+  state: string;
+  region: string;
+  parishSize: string;
+  records: {
+    total: number;
+    baptism: number;
+    marriage: number;
+    funeral: number;
+    custom: number;
+    addedInPeriod: number;
+    completeness: number;
+    lastActivityAt: string | null;
+    dataStatus: string;
+    completenessByType: { baptism: number; marriage: number; funeral: number };
+  };
+  changePercent: number;
+  vsDiocesanAverage: VsAverage;
+  latitude?: number | null;
+  longitude?: number | null;
+}
