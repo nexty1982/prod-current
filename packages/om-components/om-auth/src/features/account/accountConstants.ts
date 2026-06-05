@@ -30,6 +30,7 @@ export const LANGUAGE_OPTIONS = [
   { value: 'ru', labelKey: 'account.lang_russian' },
   { value: 'ro', labelKey: 'account.lang_romanian' },
   { value: 'ka', labelKey: 'account.lang_georgian' },
+  { value: 'zh', labelKey: 'account.lang_chinese_traditional' },
 ] as const;
 
 /** ISO 639-1 code to translation key mapping. Use with t() for display. */

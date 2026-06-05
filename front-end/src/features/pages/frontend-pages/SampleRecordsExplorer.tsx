@@ -55,6 +55,7 @@ const DATA_LANG_OPTIONS: { value: string; tKey: string }[] = [
   { value: 'ru', tKey: 'common.lang_russian' },
   { value: 'ro', tKey: 'common.lang_romanian' },
   { value: 'ge', tKey: 'common.lang_georgian' },
+  { value: 'zh', tKey: 'common.lang_chinese_traditional' },
 ];
 
 // Internal value → translation key for record type filter
@@ -72,6 +73,7 @@ const UI_LANGUAGES = [
   { value: 'ru', label: 'Русский' },
   { value: 'ro', label: 'Română' },
   { value: 'ka', label: 'ქართული' },
+  { value: 'zh', label: '繁體中文' },
 ];
 
 const TYPE_COLORS: Record<string, string> = {

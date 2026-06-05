@@ -14,7 +14,8 @@ const languages = [
   { code: 'el', title: 'Ορθόδοξες\nΜετρήσεις', tagline: 'Καταγράφοντας τοὺς Ἁγίους ἀνάμεσά μας' },
   { code: 'ru', title: 'Православные\nМетрики', tagline: 'Записывая святых среди нас' },
   { code: 'ro', title: 'Metrici\nOrtodoxe', tagline: 'Înregistrăm sfinții din mijlocul nostru' },
-  { code: 'ka', title: 'მართმადიდებლური\nმეტრიკა', tagline: 'ვაკონწილებთ ჩვენ შორის წმინდანებს' }
+  { code: 'ka', title: 'მართმადიდებლური\nმეტრიკა', tagline: 'ვაკონწილებთ ჩვენ შორის წმინდანებს' },
+  { code: 'zh', title: '東正教\n指標', tagline: '為東正教教區保存神聖記錄' }
 ];
 
 interface OrthodoxBannerProps {

@@ -15,7 +15,7 @@ import React, { createContext, useCallback, useContext, useEffect, useRef, useSt
 import { apiClient } from '@/api/utils/axiosInstance';
 import { safeTranslate } from '@/utils/safeTranslate';
 
-const SUPPORTED_LANGS = ['en', 'el', 'ru', 'ro', 'ka'] as const;
+const SUPPORTED_LANGS = ['en', 'el', 'ru', 'ro', 'ka', 'zh'] as const;
 type LangCode = (typeof SUPPORTED_LANGS)[number];
 
 const STORAGE_KEY = 'orthodoxmetrics-lang';

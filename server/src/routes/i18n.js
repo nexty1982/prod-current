@@ -45,6 +45,8 @@ const ENGLISH_DEFAULTS = {
   'common.lang_russian': 'Russian',
   'common.lang_romanian': 'Romanian',
   'common.lang_georgian': 'Georgian',
+  'common.lang_chinese_traditional': 'Chinese Traditional',
+
 
   // ─── nav.* ──────────────────────────────────────────────────────
   'nav.group_product': 'Product',
@@ -1505,6 +1507,8 @@ const ENGLISH_DEFAULTS = {
   'account.lang_russian': 'Russian',
   'account.lang_romanian': 'Romanian',
   'account.lang_georgian': 'Georgian',
+  'account.lang_chinese_traditional': 'Chinese Traditional',
+
   'account.calendar_not_set': 'Not set',
   'account.calendar_julian': 'Julian (Old Calendar)',
   'account.calendar_revised_julian': 'Revised Julian (New Calendar)',
@@ -1780,7 +1784,7 @@ const ENGLISH_DEFAULTS = {
 };
 
 // Supported non-English language codes
-const SUPPORTED_LANGS = new Set(['el', 'ru', 'ro', 'ka']);
+const SUPPORTED_LANGS = new Set(['el', 'ru', 'ro', 'ka', 'zh']);
 
 // In-memory cache: { cacheKey: { translations, cachedAt } }
 // cacheKey = lang or lang:ns1,ns2 (sorted)
@@ -1931,13 +1935,14 @@ router.get('/:lang', async (req, res) => {
 router.get('/', (req, res) => {
   res.json({
     default: 'en',
-    supported: ['en', 'el', 'ru', 'ro', 'ka'],
+    supported: ['en', 'el', 'ru', 'ro', 'ka', 'zh'],
     labels: {
       en: 'English',
       el: 'Ελληνικά',
       ru: 'Русский',
       ro: 'Română',
       ka: 'ქართული',
+      zh: '繁體中文',
     },
   });
 });

@@ -19,7 +19,7 @@ const path = require('path');
 const fs = require('fs');
 
 // Supported non-English language codes (must match i18n.js)
-const SUPPORTED_LANGS = ['el', 'ru', 'ro', 'ka'];
+const SUPPORTED_LANGS = ['el', 'ru', 'ro', 'ka', 'zh'];
 
 // Placeholder pattern: {word} or {word_word}
 const PLACEHOLDER_RE = /\{[a-zA-Z_]+\}/g;

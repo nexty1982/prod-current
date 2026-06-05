@@ -177,7 +177,7 @@ assertEq(extractPlaceholders('Foo: {bar-baz}'), [], 'hyphen not matched');
 // SUPPORTED_LANGS exported
 // ============================================================================
 console.log('\n── SUPPORTED_LANGS ────────────────────────────────────────');
-assertEq(SUPPORTED_LANGS, ['el', 'ru', 'ro', 'ka'], 'supported languages');
+assertEq(SUPPORTED_LANGS, ['el', 'ru', 'ro', 'ka', 'zh'], 'supported languages');
 
 // ============================================================================
 // runAudit: invalid language

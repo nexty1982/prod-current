@@ -7,9 +7,7 @@ import { useLanguage } from '@/context/LanguageContext';
 // is intended to stay stable.
 //
 // Each slide displays for SLIDE_DURATION_MS; manual dot navigation is also
-// available, and hovering pauses the rotation.
-
-type Lang = 'en' | 'el' | 'ru' | 'ro' | 'ka';
+// available, and hovering pauses the rotation.type Lang = 'en' | 'el' | 'ru' | 'ro' | 'ka' | 'zh';
 type Slide = { title: Record<Lang, string>; desc: Record<Lang, string> };
 
 const SLIDES: Slide[] = [
@@ -20,6 +18,7 @@ const SLIDES: Slide[] = [
       ru: 'ДОБРО ПОЖАЛОВАТЬ В ORTHODOX METRICS',
       ro: 'BINE AȚI VENIT LA ORTHODOX METRICS',
       ka: 'მოგესალმებათ ORTHODOX METRICS',
+      zh: '歡迎來到 ORTHODOX METRICS',
     },
     desc: {
       en: 'Preserving Orthodox Christian records across languages, generations, and jurisdictions.',
@@ -27,6 +26,7 @@ const SLIDES: Slide[] = [
       ru: 'Сохранение православных христианских записей на разных языках, в разных поколениях и юрисдикциях.',
       ro: 'Păstrarea înregistrărilor creștine ortodoxe în diferite limbi, generații și jurisdicții.',
       ka: 'მართლმადიდებელი ქრისტიანული ჩანაწერების დაცვა სხვადასხვა ენაზე, თაობებსა და იურისდიქციებში.',
+      zh: '跨越語言、世代和管轄區，保存東正教基督徒的檔案記錄。',
     },
   },
   {
@@ -36,6 +36,7 @@ const SLIDES: Slide[] = [
       ru: 'ВАШ ПРИХОД ИМЕЕТ УНИКАЛЬНУЮ ИСТОРИЮ.',
       ro: 'PAROHIA DUMNEAVOASTRĂ ARE O ISTORIE UNICĂ.',
       ka: 'თქვენს სამრევლოს უნიკალური ისტორია აქვს.',
+      zh: '您的教區擁有獨特的歷史。',
     },
     desc: {
       en: 'Orthodox Metrics helps keep that history alive, secure, and accessible. Parish priests and deacons can manage sacred records, generate certificates, and gain meaningful insights from parish data without relying on scattered spreadsheets or fragile paper archives.',
@@ -43,6 +44,7 @@ const SLIDES: Slide[] = [
       ru: 'Orthodox Metrics помогает сохранять эту историю живой, защищённой и доступной. Приходские священники и диаконы могут вести священные записи, выдавать справки и получать значимые аналитические сведения из приходских данных, не прибегая к разрозненным таблицам или ненадёжным бумажным архивам.',
       ro: 'Orthodox Metrics ajută la păstrarea acestei istorii vii, securizate și accesibile. Preoții și diaconii de parohie pot gestiona registrele sfinte, genera certificate și obține informații relevante din datele parohiale, fără a depinde de foi de calcul disparate sau arhive de hârtie fragile.',
       ka: 'Orthodox Metrics ეხმარება ამ ისტორიის ცოცხლად, უსაფრთხოდ და ხელმისაწვდომად შენარჩუნებაში. სამრევლო მღვდლებს და დიაკვნებს შეუძლიათ მართონ საეკლესიო ჩანაწერები, გასცენ სიგელები და მიიღონ მნიშვნელოვანი შეხედულებები სამრევლოს მონაცემებიდან — მიმოფანტულ ცხრილებზე ან მყიფე ქაღალდის არქივებზე დაყრდნობის გარეშე.',
+      zh: 'Orthodox Metrics 致力於讓這段歷史保持活力、安全且易於存取。堂區神父和執事可以管理神聖記錄、生成證書並從教區數據中獲得有意義的洞察，而無需依賴零散的電子表格或脆弱的紙質檔案。',
     },
   },
   {
@@ -52,6 +54,7 @@ const SLIDES: Slide[] = [
       ru: 'ОДНА РЕГИСТРАЦИЯ. ДОЛГОСРОЧНАЯ ЦЕННОСТЬ.',
       ro: 'O SINGURĂ ÎNREGISTRARE. VALOARE DURABILĂ.',
       ka: 'ერთი რეგისტრაცია. მდგრადი ღირებულება.',
+      zh: '一次註冊，持久價值。',
     },
     desc: {
       en: 'When a parish joins Orthodox Metrics, it gains a secure records system, multilingual tools, searchable history, and analytics designed specifically for the Orthodox Church. These records are not just administrative data. They are part of the living memory of the parish.',
@@ -59,6 +62,7 @@ const SLIDES: Slide[] = [
       ru: 'Когда приход присоединяется к Orthodox Metrics, он получает защищённую систему хранения записей, многоязычные инструменты, возможность поиска по архиву и аналитику, разработанную специально для Православной Церкви. Эти записи — не просто административные данные. Они являются частью живой памяти прихода.',
       ro: 'Când o parohie se alătură Orthodox Metrics, dobândește un sistem securizat de evidență a registrelor, instrumente multilingve, un istoric căutabil și analize concepute special pentru Biserica Ortodoxă. Aceste înregistrări nu sunt doar date administrative. Ele fac parte din memoria vie a parohiei.',
       ka: 'როდესაც სამრევლო შემოუერთდება Orthodox Metrics-ს, იგი იძენს უსაფრთხო ჩანაწერების სისტემას, მრავალენოვან ხელსაწყოებს, მოძებნად ისტორიულ არქივს და ანალიტიკას, რომელიც სპეციალურად არის შექმნილი მართლმადიდებელი ეკლესიისთვის. ეს ჩანაწერები მხოლოდ ადმინისტრაციული მონაცემები არ არის. ისინი სამრევლოს ცოცხალი მეხსიერების ნაწილია.',
+      zh: '當一個教區加入 Orthodox Metrics，它將獲得一個安全的記錄系統、多語言工具、可搜索的歷史記錄以及專為東正教會設計的分析。這些記錄不僅僅是行政數據，它們是教區活生生記憶的一部分。',
     },
   },
   {
@@ -68,6 +72,7 @@ const SLIDES: Slide[] = [
       ru: 'ЗАЩИЩЁННО. ПРОЗРАЧНО. СОЗДАНО ДЛЯ ПРАВОСЛАВНЫХ ПРИХОДОВ.',
       ro: 'SECURIZAT. AUDITABIL. CONCEPUT PENTRU PAROHIILE ORTODOXE.',
       ka: 'უსაფრთხო. გადამოწმებადი. შექმნილია მართლმადიდებელი სამრევლოებისთვის.',
+      zh: '安全、可審計，專為東正教教區打造。',
     },
     desc: {
       en: 'Parish records remain protected, organized, and traceable inside a governed system designed around the real needs of Orthodox communities.',
@@ -75,12 +80,13 @@ const SLIDES: Slide[] = [
       ru: 'Приходские записи остаются защищёнными, упорядоченными и прослеживаемыми в рамках управляемой системы, созданной с учётом реальных потребностей православных общин.',
       ro: 'Registrele parohiale rămân protejate, organizate și trasabile într-un sistem guvernat, conceput în jurul nevoilor reale ale comunităților ortodoxe.',
       ka: 'სამრევლოს ჩანაწერები დაცული, მოწესრიგებული და თვალსადევნებელი რჩება მართვადი სისტემის ფარგლებში, რომელიც შექმნილია მართლმადიდებელი თემების რეალური საჭიროებების გარშემო.',
+      zh: '教區記錄在圍繞東正教社區實際需求設計的管理系統中，保持受保護、有組織且可追溯。',
     },
   },
 ];
 
 const SLIDE_DURATION_MS = 8000;
-const SUPPORTED: readonly Lang[] = ['en', 'el', 'ru', 'ro', 'ka'];
+const SUPPORTED: readonly Lang[] = ['en', 'el', 'ru', 'ro', 'ka', 'zh'];
 
 const WelcomeCarousel = () => {
   const { lang } = useLanguage();

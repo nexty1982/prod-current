@@ -72,7 +72,7 @@ const Maintenance = () => {
   const [lang, setLang] = useState<MaintenanceLang>(() => {
     if (typeof window === 'undefined') return 'en';
     const stored = localStorage.getItem('orthodoxmetrics-lang');
-    if (stored && ['en', 'el', 'ru', 'ro', 'ka'].includes(stored)) return stored as MaintenanceLang;
+    if (stored && ['en', 'el', 'ru', 'ro', 'ka', 'zh'].includes(stored)) return stored as MaintenanceLang;
     return 'en';
   });
 

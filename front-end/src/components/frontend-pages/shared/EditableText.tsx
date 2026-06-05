@@ -234,7 +234,7 @@ const EditableText: React.FC<EditableTextProps> = ({
             <div style={{ fontSize: 11, color: '#d4af37', fontWeight: 600, marginBottom: 6 }}>
               Translations
             </div>
-            {(['el', 'ru', 'ro', 'ka'] as const).map((lang) => {
+            {(['el', 'ru', 'ro', 'ka', 'zh'] as const).map((lang) => {
               const status = keyStatus?.[lang];
               const needsUpdate = status?.needs_update ?? false;
               return (

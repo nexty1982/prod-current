@@ -40,7 +40,7 @@ import { Link } from 'react-router-dom';
 
 // ── i18n ──────────────────────────────────────────────────────────────────────
 
-type Lang = 'en' | 'el' | 'ru' | 'ro' | 'ka';
+type Lang = 'en' | 'el' | 'ru' | 'ro' | 'ka' | 'zh';
 
 const LANGUAGES: { code: Lang; label: string; flag: string }[] = [
   { code: 'en', label: 'English', flag: '🇬🇧' },
@@ -48,6 +48,7 @@ const LANGUAGES: { code: Lang; label: string; flag: string }[] = [
   { code: 'ru', label: 'Русский', flag: '🇷🇺' },
   { code: 'ro', label: 'Română', flag: '🇷🇴' },
   { code: 'ka', label: 'ქართული', flag: '🇬🇪' },
+  { code: 'zh', label: '繁體中文', flag: '🇹🇼' },
 ];
 
 interface Translations {

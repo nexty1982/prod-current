@@ -49,6 +49,7 @@ const LANG_OPTIONS: { code: string; flag: string; label: string }[] = [
   { code: 'ru', flag: '🇷🇺', label: 'Русский' },
   { code: 'ro', flag: '🇷🇴', label: 'Română' },
   { code: 'ka', flag: '🇬🇪', label: 'ქართული' },
+  { code: 'zh', flag: '🇹🇼', label: '繁體中文' },
 ];
 
 interface MobileSidebarProps {

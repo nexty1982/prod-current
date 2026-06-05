@@ -4,7 +4,7 @@
  * unavailable during maintenance windows.
  */
 
-export type MaintenanceLang = 'en' | 'el' | 'ru' | 'ro' | 'ka';
+export type MaintenanceLang = 'en' | 'el' | 'ru' | 'ro' | 'ka' | 'zh';
 
 export interface MaintenanceTranslation {
   brandName: string;
@@ -23,6 +23,7 @@ export const MAINTENANCE_LANGUAGES: { code: MaintenanceLang; nativeName: string 
   { code: 'ru', nativeName: 'Русский' },
   { code: 'ro', nativeName: 'Română' },
   { code: 'ka', nativeName: 'ქართული' },
+  { code: 'zh', nativeName: '繁體中文' },
 ];
 
 export const maintenanceTranslations: Record<MaintenanceLang, MaintenanceTranslation> = {
@@ -85,5 +86,17 @@ export const maintenanceTranslations: Record<MaintenanceLang, MaintenanceTransla
     contactPrefix: 'კითხვები? დაგვიკავშირდით:',
     contactEmail: 'support@orthodoxmetrics.com',
     languageHint: 'ეს გვერდი ხელმისაწვდომია თქვენს სასურველ ენაზე',
+  },
+  zh: {
+    brandName: 'ORTHODOX METRICS',
+    pageTitle: '系統維護中',
+    description:
+      'Orthodox Metrics 目前正在進行新功能升級與系統優化。我們將很快恢復服務，感謝您的耐心等待。',
+    whatIsHappening: '發生了什麼事',
+    deploymentInfo:
+      '我們正在部署更新與新功能。此過程通常需要不到兩分鐘的時間。',
+    contactPrefix: '有任何問題？請聯絡我們：',
+    contactEmail: 'support@orthodoxmetrics.com',
+    languageHint: '本頁面提供您的首選語言版本',
   },
 };
