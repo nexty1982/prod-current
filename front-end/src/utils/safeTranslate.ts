@@ -38,6 +38,9 @@ const AUTH_FALLBACKS: Record<string, string> = {
   // Form labels
   'auth.label_email': 'Email Address',
   'auth.label_password': 'Password',
+  'auth.label_otp': 'Authenticator code',
+  'auth.otp_placeholder': 'Enter 6-digit code',
+  'auth.setup_authenticator': 'Set up authenticator app',
   'auth.remember_device': 'Remember this device',
   'auth.forgot_password': 'Forgot Password?',
 

@@ -94,7 +94,7 @@ export default function SsoLoginRedirect() {
         value={otp}
         onChange={(ev) => setOtp(ev.target.value.replace(/\D/g, '').slice(0, 6))}
         inputProps={{ inputMode: 'numeric', maxLength: 6, autoComplete: 'one-time-code' }}
-        placeholder="6-digit code (if enabled)"
+        placeholder="Enter 6-digit code"
       />
       {error ? <Typography color="error" variant="body2">{error}</Typography> : null}
       <Button type="submit" variant="contained" fullWidth disabled={busy}>
