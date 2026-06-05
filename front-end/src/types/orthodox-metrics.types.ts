@@ -61,6 +61,7 @@ export interface LoginCredentials {
   username: string;
   password: string;
   remember_me?: boolean;
+  otp?: string;
 }
 
 // ===== CHURCH MANAGEMENT =====

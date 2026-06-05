@@ -104,7 +104,7 @@ function AuthProvider({ children }: AuthProviderProps) {
     }
   }, []);
 
-  const login = async (username: string, password: string, rememberMe: boolean = false) => {
+  const login = async (username: string, password: string, rememberMe: boolean = false, otp?: string) => {
     let awaitingOidcRedirect = false;
     try {
       setLoading(true);
@@ -114,6 +114,7 @@ function AuthProvider({ children }: AuthProviderProps) {
         username: username,
         password,
         remember_me: rememberMe,
+        otp,
       });
 
       // Hard guard: Validate response structure before proceeding

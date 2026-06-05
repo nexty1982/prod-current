@@ -83,23 +83,90 @@ export class AuthService {
     }
   }
 
-  /** Redirect browser to Keycloak OIDC start (password + MFA/TOTP when enabled). */
-  static startOidcLogin(next?: string): void {
-    this.prepareForLogin();
-    const params = new URLSearchParams(window.location.search);
-    const raw = next || params.get('next') || '/portal';
-    const dest = raw.startsWith('/') ? raw : '/portal';
-    window.location.replace(
-      `/api/auth/oidc/orthodoxmetrics/start?next=${encodeURIComponent(dest)}`,
-    );
+  /** One-time authenticator enrollment (Keycloak QR setup). */
+  static mfaSetupUrl(next = '/portal'): string {
+    return `/api/auth/oidc/orthodoxmetrics/start?next=${encodeURIComponent(next)}`;
   }
 
   /**
-   * Begin sign-in — redirects to Keycloak (credentials are collected there, including MFA).
+   * Login with email, password, and optional authenticator code (direct grant + otp).
    */
-  static async login(_credentials?: LoginCredentials): Promise<AuthResponse> {
-    this.startOidcLogin();
-    return { success: true, pendingRedirect: true } as AuthResponse;
+  static async login(credentials: LoginCredentials): Promise<AuthResponse> {
+    try {
+      this.prepareForLogin();
+      const params = new URLSearchParams(window.location.search);
+      const rawNext = params.get('next') || '/portal';
+      const next = rawNext.startsWith('/') ? rawNext : '/portal';
+      const res = await fetch(
+        `/api/auth/oidc/orthodoxmetrics/credentials?next=${encodeURIComponent(next)}`,
+        {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify({
+            username: credentials.username,
+            password: credentials.password,
+            otp: credentials.otp?.trim() || undefined,
+          }),
+        },
+      );
+      const data = await res.json().catch(() => ({})) as {
+        message?: string;
+        error?: string;
+        setup_url?: string;
+        redirect_url?: string;
+      };
+      if (!res.ok) {
+        const err = new Error(data.message || 'Login failed') as Error & {
+          status?: number;
+          code?: string;
+          setupUrl?: string;
+        };
+        err.status = res.status;
+        err.code = data.error;
+        if (data.setup_url) err.setupUrl = data.setup_url;
+        throw err;
+      }
+      if (data.redirect_url) {
+        window.location.replace(data.redirect_url);
+        return { success: true, pendingRedirect: true } as AuthResponse;
+      }
+      throw new Error(data.message || 'Login failed');
+    } catch (error: any) {
+      let friendlyMessage = 'Something went wrong. Please try again.';
+
+      if (error.isNetworkError || error.code === 'NETWORK_ERROR' || !error.status) {
+        friendlyMessage = "We're having trouble connecting to the server. Please try again later.";
+      } else if (error.code === 'otp_required') {
+        friendlyMessage = error.message || 'Enter the 6-digit code from your authenticator app.';
+      } else if (error.code === 'invalid_otp') {
+        friendlyMessage = error.message || 'Invalid authenticator code.';
+      } else if (error.code === 'totp_setup_required') {
+        friendlyMessage = error.message || 'Set up your authenticator app before signing in.';
+      } else if (error.status === 401) {
+        friendlyMessage = error.message || 'Incorrect email or password.';
+      } else if (error.status && [502, 503, 504].includes(error.status)) {
+        friendlyMessage = 'The system is temporarily unavailable. Please try again shortly.';
+      } else if (error.status === 429) {
+        friendlyMessage = 'Too many login attempts. Please wait a moment and try again.';
+      } else if (error.message && !error.message.includes('status code') && !error.message.includes('Network Error')) {
+        friendlyMessage = error.message;
+      }
+
+      console.error('Login error details:', {
+        status: error.status,
+        code: error.code,
+        setupUrl: error.setupUrl,
+        originalMessage: error.message,
+        friendlyMessage,
+      });
+
+      const wrapped = new Error(friendlyMessage) as Error & { status?: number; code?: string; setupUrl?: string };
+      wrapped.status = error.status;
+      wrapped.code = error.code;
+      wrapped.setupUrl = error.setupUrl;
+      throw wrapped;
+    }
   }
 
   /**

@@ -43,6 +43,45 @@ const generateRefreshToken = () => {
   return crypto.randomBytes(32).toString('hex');
 };
 
+const verifyRecaptchaToken = async (token, ip) => {
+  const isLocal = ip === '127.0.0.1' || ip === '::1' || ip === '::ffff:127.0.0.1';
+  if (isLocal) {
+    console.log(`[RECAPTCHA] Bypassing verification for localhost request from IP: ${ip}`);
+    return true;
+  }
+  
+  const secret = process.env.RECAPTCHA_SECRET_KEY;
+  const isProd = process.env.NODE_ENV === 'production';
+  if (!isProd && !secret && !token) {
+    console.log('[RECAPTCHA] Bypassing in non-production since no key is set and no token provided');
+    return true;
+  }
+
+  const verifySecret = secret || '6LeIxAcTAAAAAGG-vFI1TnFTxWb0N-C026336z1N';
+  if (!token) {
+    console.warn('[RECAPTCHA] Verification failed: missing token');
+    return false;
+  }
+
+  try {
+    const response = await fetch('https://www.google.com/recaptcha/api/siteverify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        secret: verifySecret,
+        response: token,
+        remoteip: ip
+      })
+    });
+    const data = await response.json();
+    console.log('[RECAPTCHA] verification response success:', data.success);
+    return !!data.success;
+  } catch (err) {
+    console.error('[RECAPTCHA] verification error:', err);
+    return false;
+  }
+};
+
 // POST /api/auth/login - User login with JWT
 router.post('/login', async (req, res) => {
   try {
@@ -50,8 +89,17 @@ router.post('/login', async (req, res) => {
     console.log('[AUTH] Content-Type:', req.headers['content-type']);
     
     // Handle both 'email' and 'username' fields for compatibility
-    const { email, username, password } = req.body;
+    const { email, username, password, recaptchaToken } = req.body;
     const loginEmail = email || username;
+
+    // Verify Google reCAPTCHA
+    const isValidRecaptcha = await verifyRecaptchaToken(recaptchaToken, req.ip);
+    if (!isValidRecaptcha) {
+      return res.status(400).json({
+        success: false,
+        message: 'reCAPTCHA verification failed. Please try again.'
+      });
+    }
 
     if (!loginEmail || !password) {
       console.log('[AUTH] Missing credentials - email/username:', !!loginEmail, 'password:', !!password);
