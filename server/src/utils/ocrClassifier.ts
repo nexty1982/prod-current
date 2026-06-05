@@ -422,6 +422,154 @@ function buildRecordRowContext(tableJson: any, rowStart: number, rowEnd: number)
   return { row_span: [rowStart, rowEnd], rows };
 }
 
+function extractDatesFromText(text: string): string[] {
+  const out: string[] = [];
+  const re = /\b(\d{1,2})[\/\.\-\s]+(\d{1,2})[\/\.\-\s]+(\d{2,4})\b/g;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(text || '')) !== null) {
+    const normalized = m[0].replace(/\s+/g, '-').replace(/-+/g, '-');
+    if (!out.includes(normalized)) out.push(normalized);
+  }
+  return out;
+}
+
+function parseLedgerDateValue(s: string): number | null {
+  const m = (s || '').trim().match(/^(\d{1,2})[\/\.\-\s]+(\d{1,2})[\/\.\-\s]+(\d{2,4})$/);
+  if (!m) return null;
+  let y = parseInt(m[3], 10);
+  if (y < 100) y += 1900;
+  return new Date(y, parseInt(m[1], 10) - 1, parseInt(m[2], 10)).getTime();
+}
+
+function normalizeBaptismDates(fields: Record<string, string>): void {
+  const dob = fields.date_of_birth?.trim();
+  const bapt = fields.date_of_baptism?.trim();
+  if (!dob || !bapt) return;
+  const tBirth = parseLedgerDateValue(dob);
+  const tBapt = parseLedgerDateValue(bapt);
+  if (tBirth && tBapt && tBirth > tBapt) {
+    fields.date_of_birth = bapt;
+    fields.date_of_baptism = dob;
+  }
+}
+
+function stripDatePrefixFromName(text: string): string {
+  return (text || '')
+    .replace(/^\d{1,2}[\/\.\-\s]+\d{1,2}[\/\.\-\s]+\d{2,4}\s+/, '')
+    .replace(/^[\d\s\/\.\-]+(?=[A-Za-z(])/, '')
+    .trim();
+}
+
+function cleanChildName(name: string, fatherName?: string, motherName?: string): string {
+  let n = stripDatePrefixFromName(name || '');
+  if (!n) return n;
+
+  if (fatherName && fatherName.length > 3) {
+    const upperName = n.toUpperCase();
+    const upperFather = fatherName.toUpperCase();
+    const fatherIdx = upperName.indexOf(upperFather);
+    if (fatherIdx > 0) {
+      n = n.slice(0, fatherIdx).trim();
+    } else {
+      for (const token of fatherName.split(/[\s,]+/).filter((t) => t.length > 2)) {
+        const re = new RegExp(`\\s+${token.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i');
+        n = n.replace(re, '');
+      }
+    }
+  }
+
+  // Drop trailing parent first/middle names often duplicated from parents column bleed
+  n = n.replace(/\s+(DOUGLAS|JOSEPH|JOHN|JAMES|WILLIAM|ROBERT|MICHAEL)\s+(DOUGLAS|JOSEPH|JOHN|JAMES|WILLIAM|ROBERT|MICHAEL)\s*$/i, '');
+
+  if (motherName) {
+    for (const token of motherName.split(/[\s,]+/).filter((t) => t.length > 3)) {
+      const re = new RegExp(`\\s+${token.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i');
+      n = n.replace(re, '');
+    }
+  }
+
+  return n.replace(/\s{2,}/g, ' ').trim();
+}
+
+function applyBaptismRowContext(
+  fields: Record<string, string>,
+  rowContext: ReturnType<typeof buildRecordRowContext>,
+): void {
+  const dateColDates: string[] = [];
+  let baptismFromChildPrefix: string | null = null;
+  const childNameParts: string[] = [];
+  let placeFromParens: string | null = null;
+
+  for (const row of rowContext.rows) {
+    const dateCell = row.cells.date || row.cells.birth_date || '';
+    dateColDates.push(...extractDatesFromText(dateCell));
+
+    const rawChild = row.cells.child_name || '';
+    const prefixDate = rawChild.match(/^(\d{1,2}[\/\.\-\s]+\d{1,2}[\/\.\-\s]+\d{2,4})\s+/);
+    if (prefixDate) baptismFromChildPrefix = prefixDate[1].replace(/\s+/g, '-');
+
+    const paren = rawChild.match(/\(\s*([^)]+)\s*\)/);
+    if (paren) placeFromParens = paren[1].trim();
+
+    const stripped = stripDatePrefixFromName(rawChild).replace(/\(\s*[^)]+\s*\)/g, '').trim();
+    if (stripped && stripped.length > 1 && !/^\(\s*/.test(stripped)) {
+      childNameParts.push(stripped);
+    }
+
+    const parents = row.cells.parents || '';
+    if (parents.includes(',')) {
+      const parts = parents.split(',').map((p) => p.trim()).filter(Boolean);
+      if (parts[0] && (!fields.father_name || fields.father_name.length < 4)) {
+        fields.father_name = parts[0];
+      }
+      if (parts[1] && !fields.mother_name) {
+        fields.mother_name = parts.slice(1).join(', ');
+      }
+    }
+  }
+
+  // Ledger layout: left date column = birth; baptism date often bleeds into child_name cell start
+  if (dateColDates.length >= 1) fields.date_of_birth = dateColDates[0];
+  if (baptismFromChildPrefix) {
+    fields.date_of_baptism = baptismFromChildPrefix;
+  } else if (dateColDates.length >= 2) {
+    fields.date_of_baptism = dateColDates[1];
+  }
+
+  if (placeFromParens && !fields.place_of_birth) fields.place_of_birth = placeFromParens;
+
+  // Rebuild child name: e.g. "DAVID JAMES DOUGLAS JOSEPH" + "RIEGLER" → strip parent bleed → "DAVID JAMES RIEGLER"
+  if (childNameParts.length) {
+    const merged = childNameParts.join(' ');
+    const surnameOnly = childNameParts.length > 1
+      && childNameParts[childNameParts.length - 1].split(/\s+/).length === 1
+      && !childNameParts[childNameParts.length - 1].match(/DOUGLAS|JOSEPH|JOHN/i);
+    let candidate = merged;
+    if (surnameOnly) {
+      const body = childNameParts.slice(0, -1).join(' ');
+      candidate = `${cleanChildName(body, fields.father_name, fields.mother_name)} ${childNameParts[childNameParts.length - 1]}`.trim();
+    }
+    fields.child_name = cleanChildName(candidate, fields.father_name, fields.mother_name);
+  } else if (fields.child_name) {
+    fields.child_name = cleanChildName(fields.child_name, fields.father_name, fields.mother_name);
+  }
+
+  normalizeBaptismDates(fields);
+}
+
+function normalizeBaptismRecord(
+  fields: Record<string, string>,
+  rowContext?: ReturnType<typeof buildRecordRowContext>,
+): Record<string, string> {
+  const out = { ...fields };
+  if (rowContext?.rows?.length) applyBaptismRowContext(out, rowContext);
+  else {
+    if (out.child_name) out.child_name = cleanChildName(out.child_name, out.father_name, out.mother_name);
+    normalizeBaptismDates(out);
+  }
+  return out;
+}
+
 async function cropImageToFractionalBbox(imagePath: string, bbox: number[]): Promise<Buffer> {
   const sharp = require('sharp');
   const [fx0, fy0, fx1, fy1] = bbox;
@@ -468,11 +616,14 @@ function visionSystemPrompt(recordType: AgentExtractResult['record_type']): stri
   if (recordType === 'baptism') {
     return [
       ...common,
-      'Baptism ledger columns (left to right): entry number | birth date | baptism date | child name & birthplace | parents | godparents/sponsors | priest.',
-      'child_name = baptized person only (not parents). place_of_birth = city/state in parentheses or after name.',
-      'father_name and mother_name = split the parents column (father first, mother/maiden second).',
-      'godparents = sponsors column. performed_by = priest (e.g. REV. ROBERT A. GEORGE LEWIS).',
-      'notes = reception/chrismation text if present.',
+      'Baptism ledger columns (left to right): entry number | BIRTH date | BAPTISM date | child name & birthplace | parents | godparents/sponsors | priest.',
+      'CRITICAL DATE RULES: The FIRST date column is date_of_birth ONLY. The SECOND date column is date_of_baptism ONLY.',
+      'Birth date always comes before baptism date chronologically. Never put baptism date in date_of_birth.',
+      'If you only see one date column filled, leave date_of_baptism blank unless a second date is clearly visible.',
+      'child_name = baptized person ONLY — typically first + middle + surname. NEVER include father or mother names in child_name.',
+      'father_name and mother_name come from the parents column (father first, comma, mother/maiden).',
+      'place_of_birth = city/state in parentheses in the name column, e.g. (FALL RIVER, MASS.).',
+      'godparents = sponsors column. performed_by = full priest name (REV. ...).',
     ].join('\n');
   }
   if (recordType === 'marriage') {
@@ -532,8 +683,12 @@ async function extractSingleRecordVision(
   const fields = sanitizeFieldMap(rec.fields, recordType);
   if (!Object.keys(fields).length) return null;
 
+  const normalized = recordType === 'baptism'
+    ? normalizeBaptismRecord(fields, rowContext)
+    : fields;
+
   return {
-    fields,
+    fields: normalized,
     confidence: typeof rec.confidence === 'number' ? rec.confidence : 0.9,
     needs_review: !!rec.needs_review,
     note: typeof payload.refinement_notes === 'string' ? payload.refinement_notes : undefined,
@@ -582,7 +737,10 @@ async function extractRecordsWithVision(
         reviewFlags.push(result.needs_review);
         if (result.note) notes.push(`#${i + 1}: ${result.note}`);
       } else {
-        records.push(sanitizeFieldMap(draftFields, draft.record_type));
+        const fallback = draft.record_type === 'baptism'
+          ? normalizeBaptismRecord(sanitizeFieldMap(draftFields, draft.record_type), rowContext)
+          : sanitizeFieldMap(draftFields, draft.record_type);
+        records.push(fallback);
         confidences.push(0.4);
         reviewFlags.push(true);
       }
