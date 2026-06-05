@@ -7,6 +7,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import fs from 'fs';
 import path from 'path';
+import axios from 'axios';
 
 const OCR_AGENT_MODEL = process.env.OCR_AGENT_MODEL || 'claude-haiku-4-5';
 const OCR_AGENT_VISION_MODEL = process.env.OCR_AGENT_VISION_MODEL || 'claude-sonnet-4-20250514';
@@ -1098,6 +1099,302 @@ async function refineExtractWithLlm(
   }
 }
 
+function isGeminiEnabled(): boolean {
+  return !!process.env.GEMINI_API_KEY?.trim();
+}
+
+async function callGemini(
+  model: string,
+  systemPrompt: string,
+  contents: any[]
+): Promise<string> {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    throw new Error('GEMINI_API_KEY is not defined');
+  }
+
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+  const response = await axios.post(url, {
+    contents,
+    systemInstruction: {
+      parts: [{ text: systemPrompt }]
+    },
+    generationConfig: {
+      responseMimeType: 'application/json',
+      temperature: 0.1
+    }
+  }, {
+    timeout: 30000 // 30s timeout
+  });
+
+  const text = response.data?.candidates?.[0]?.content?.parts?.[0]?.text;
+  if (!text) {
+    throw new Error('Empty response from Gemini API');
+  }
+  return text;
+}
+
+async function extractSingleRecordGeminiVision(
+  model: string,
+  recordType: AgentExtractResult['record_type'],
+  imageBuffer: Buffer,
+  rowContext: ReturnType<typeof buildRecordRowContext>,
+  draftFields: Record<string, string>,
+  recordIndex: number,
+): Promise<{ fields: Record<string, string>; confidence: number; needs_review: boolean; note?: string } | null> {
+  if (imageBuffer.length > OCR_AGENT_VISION_MAX_BYTES) return null;
+
+  const userText = JSON.stringify({
+    task: 'Read this single ledger entry from the image and extract structured fields.',
+    record_index: recordIndex,
+    record_type: recordType,
+    ocr_row_hints: rowContext,
+    draft_fields_ignore_if_wrong: draftFields,
+  }, null, 2);
+
+  const systemPrompt = [
+    visionSystemPrompt(recordType),
+    'Respond ONLY in JSON format matching this schema:',
+    JSON.stringify({
+      record_type: recordType,
+      records: [
+        {
+          fields: { "[field_key]": "value" },
+          confidence: 0.95,
+          needs_review: false
+        }
+      ],
+      refinement_notes: "string context notes"
+    }, null, 2)
+  ].join('\n');
+
+  const contents = [
+    {
+      role: 'user',
+      parts: [
+        {
+          inlineData: {
+            mimeType: 'image/jpeg',
+            data: imageBuffer.toString('base64'),
+          }
+        },
+        { text: userText }
+      ]
+    }
+  ];
+
+  const jsonText = await callGemini(model, systemPrompt, contents);
+  let payload: any;
+  try {
+    payload = JSON.parse(jsonText);
+  } catch (e) {
+    const match = jsonText.match(/\{[\s\S]*\}/);
+    if (match) {
+      try {
+        payload = JSON.parse(match[0]);
+      } catch (_) {}
+    }
+  }
+
+  const rec = payload?.records?.[0];
+  if (!rec?.fields) return null;
+
+  const fields = sanitizeFieldMap(rec.fields, recordType);
+  if (!Object.keys(fields).length) return null;
+
+  let normalized = fields;
+  if (recordType === 'baptism') {
+    normalized = normalizeBaptismRecord(fields, rowContext);
+  } else if (recordType === 'funeral') {
+    normalized = normalizeFuneralRecord(fields, rowContext);
+  }
+
+  return {
+    fields: normalized,
+    confidence: typeof rec.confidence === 'number' ? rec.confidence : 0.9,
+    needs_review: !!rec.needs_review,
+    note: typeof payload.refinement_notes === 'string' ? payload.refinement_notes : undefined,
+  };
+}
+
+async function extractRecordsWithGeminiVision(
+  jobId: number,
+  draft: AgentExtractResult,
+): Promise<AgentExtractResult | null> {
+  const candidates = loadFeederRecordCandidates(jobId);
+  const tableJson = loadTableExtractionJson(jobId);
+  if (!candidates.length || !tableJson || !preprocessedImagePath(jobId)) return null;
+
+  const model = process.env.GEMINI_VISION_MODEL || 'gemini-1.5-pro';
+  const limit = Math.min(candidates.length, OCR_AGENT_MAX_RECORDS);
+  const records: Record<string, string>[] = [];
+  const confidences: number[] = [];
+  const reviewFlags: boolean[] = [];
+  const notes: string[] = [];
+
+  for (let i = 0; i < limit; i++) {
+    const cand = candidates[i];
+    const rowStart = cand.sourceRowIndex ?? 0;
+    const rowEnd = cand.sourceRowEnd ?? rowStart;
+    const imageBuffer = await prepareVisionImageBuffer(jobId, rowStart, rowEnd);
+    if (!imageBuffer) {
+      records.push(sanitizeFieldMap(draft.records[i] || {}, draft.record_type));
+      confidences.push(0.3);
+      reviewFlags.push(true);
+      continue;
+    }
+
+    try {
+      const rowContext = buildRecordRowContext(tableJson, rowStart, rowEnd);
+      const draftFields = draft.records[i] || cand.fields || {};
+      const result = await extractSingleRecordGeminiVision(
+        model, draft.record_type, imageBuffer, rowContext, draftFields, i,
+      );
+      if (result) {
+        records.push(result.fields);
+        confidences.push(result.confidence);
+        reviewFlags.push(result.needs_review);
+        if (result.note) notes.push(`#${i + 1}: ${result.note}`);
+      } else {
+        let fallback = sanitizeFieldMap(draftFields, draft.record_type);
+        if (draft.record_type === 'baptism') {
+          fallback = normalizeBaptismRecord(fallback, rowContext);
+        } else if (draft.record_type === 'funeral') {
+          fallback = normalizeFuneralRecord(fallback, rowContext);
+        }
+        records.push(fallback);
+        confidences.push(0.4);
+        reviewFlags.push(true);
+      }
+    } catch (err: any) {
+      console.warn(`[OCR Agent Gemini Vision] record ${i} failed job ${jobId}: ${err?.message}`);
+      records.push(sanitizeFieldMap(cand.fields || {}, draft.record_type));
+      confidences.push(0.35);
+      reviewFlags.push(true);
+    }
+  }
+
+  if (!records.some((r) => Object.keys(r).length > 0)) return null;
+
+  const picked = pickPrimaryCandidate(candidates);
+  const idx = Math.min(picked?.index ?? 0, records.length - 1);
+  const fields = { ...records[idx] };
+  const required = requiredFieldsForType(draft.record_type);
+
+  return {
+    record_type: draft.record_type,
+    fields,
+    records,
+    confidence: confidences[idx] ?? scoreFields(fields, required),
+    method: 'llm_vision',
+    candidate_index: idx,
+    total_candidates: records.length,
+    needs_review: reviewFlags[idx] ?? scoreFields(fields, required) < 0.6,
+    llm_model: model,
+    refinement_notes: `Gemini-read ${records.length} ledger entr${records.length === 1 ? 'y' : 'ies'} from scan.${notes.length ? ' ' + notes.join(' ').slice(0, 400) : ''}`,
+    draft_method: draft.method,
+  };
+}
+
+async function refineExtractWithGeminiLlm(
+  draft: AgentExtractResult,
+  ocrText: string
+): Promise<AgentExtractResult | null> {
+  const draftRecords = (draft.records?.length ? draft.records : [draft.fields])
+    .slice(0, OCR_AGENT_MAX_RECORDS)
+    .map((fields, index) => ({
+      index,
+      fields,
+    }));
+
+  const systemPrompt = [
+    'You clean Orthodox parish sacramental records extracted from OCR ledger pages.',
+    'The draft fields come from table layout assembly and may include OCR noise.',
+    'Rules:',
+    '- Map each record to the correct schema fields only; do not invent people, dates, or places.',
+    '- Remove header text, column labels, and Cyrillic boilerplate from field values.',
+    '- Fix date bleed into names (example: "-69 DAVID JAMES" → child_name "DAVID JAMES", date_of_birth "5-24-69").',
+    '- Fix date of death or burial date bleeding into deceased_name for funeral records (example: "9/28 Stephanie Kacher" → deceased_name "Stephanie Kacher", date_of_burial "9/28").',
+    '- For funeral records, make sure date_of_death is set (e.g. if the image or context shows "9/23" as death date and "9/28" as funeral/burial date, map "9/23" to date_of_death and "9/28" to date_of_burial).',
+    '- Extract age_at_death as a clean number (up to 3 digits) and nothing else. If it is merged into the cause of death (example: cause_of_death "88 hypertension" or age_at_death "88 years"), split them: age_at_death "88", cause_of_death "hypertension".',
+    '- Separate priest/officiant from godparents/sponsors when combined.',
+    '- Split father and mother names when they appear in one parents column.',
+    '- Keep dates in the source style (M-D-YY or M/D/YYYY). Leave blank when uncertain.',
+    '- Preserve record_number when present.',
+    '- Set needs_review=true when a required field is missing or highly ambiguous.',
+    '- Return one output record per input draft record, same order and count.',
+    'Respond ONLY in JSON format matching this schema:',
+    JSON.stringify({
+      record_type: draft.record_type,
+      records: [
+        {
+          fields: { "[field_key]": "value" },
+          confidence: 0.95,
+          needs_review: false
+        }
+      ],
+      refinement_notes: "string context notes"
+    }, null, 2)
+  ].join('\n');
+
+  const userPrompt = JSON.stringify({
+    record_type_hint: draft.record_type,
+    draft_records: draftRecords,
+    ocr_context: (ocrText || '').slice(0, OCR_AGENT_OCR_CONTEXT_CHARS),
+  }, null, 2);
+
+  const model = process.env.GEMINI_MODEL || 'gemini-1.5-pro';
+
+  try {
+    const jsonText = await callGemini(model, systemPrompt, [
+      { role: 'user', parts: [{ text: userPrompt }] }
+    ]);
+
+    let payload: any;
+    try {
+      payload = JSON.parse(jsonText);
+    } catch (e) {
+      const match = jsonText.match(/\{[\s\S]*\}/);
+      if (match) {
+        try {
+          payload = JSON.parse(match[0]);
+        } catch (_) {}
+      }
+    }
+
+    if (!payload?.records || !Array.isArray(payload.records) || !payload.records.length) {
+      return null;
+    }
+
+    const record_type = (payload.record_type && payload.record_type !== 'custom')
+      ? payload.record_type as AgentExtractResult['record_type']
+      : draft.record_type;
+
+    const records = payload.records.map((r: any) => sanitizeFieldMap(r.fields, record_type));
+    const picked = pickPrimaryCandidate(loadFeederRecordCandidates(draft.records?.[0]?.jobId ? Number(draft.records[0].jobId) : 0));
+    const idx = Math.min(picked?.index ?? draft.candidate_index ?? 0, records.length - 1);
+    const fields = { ...records[idx] };
+    const required = requiredFieldsForType(record_type);
+
+    return {
+      record_type,
+      fields,
+      records,
+      confidence: payload.records[idx]?.confidence ?? scoreFields(fields, required),
+      method: 'llm',
+      candidate_index: idx,
+      total_candidates: records.length,
+      needs_review: payload.records[idx]?.needs_review ?? scoreFields(fields, required) < 0.6,
+      llm_model: model,
+      refinement_notes: payload.refinement_notes || 'Cleaned via Gemini text refinement.',
+      draft_method: draft.method,
+    };
+  } catch (err: any) {
+    console.warn(`[OCR Agent Gemini Refine] failed: ${err?.message}`);
+    return null;
+  }
+}
+
 /** Prefer table assembly → vision LLM read → text LLM cleanup → heuristics. */
 export async function extractAgentFieldsForJob(
   jobId: number,
@@ -1106,6 +1403,14 @@ export async function extractAgentFieldsForJob(
 ): Promise<AgentExtractResult> {
   const draft = buildAssemblerDraft(jobId, ocrText, recordTypeHint)
     || extractAgentFields(ocrText, recordTypeHint);
+
+  if (isGeminiEnabled()) {
+    const vision = await extractRecordsWithGeminiVision(jobId, draft);
+    if (vision) return vision;
+
+    const refined = await refineExtractWithGeminiLlm(draft, ocrText);
+    return refined || draft;
+  }
 
   const vision = await extractRecordsWithVision(jobId, draft);
   if (vision) return vision;
