@@ -69,6 +69,7 @@ export function mapFieldsToDbColumns(recordType: string, f: Record<string, any>)
       parents: [f.father_name, f.mother_name].filter(Boolean).join(', ') || null,
       sponsors: f.godparents || null,
       clergy: f.performed_by || null,
+      notes: f.notes || null,
     };
   }
 
@@ -84,8 +85,9 @@ export function mapFieldsToDbColumns(recordType: string, f: Record<string, any>)
       lname_bride: bride.last,
       parentsb: f.bride_parents || null,
       witness: f.witnesses || null,
-      mlicense: f.license || f.notes || null,
+      mlicense: f.marriage_license || f.mlicense || f.license || null,
       clergy: f.officiant || f.priest || null,
+      notes: f.notes || null,
     };
   }
 
@@ -99,6 +101,7 @@ export function mapFieldsToDbColumns(recordType: string, f: Record<string, any>)
       age: f.age_at_death ? parseInt(f.age_at_death) || null : null,
       clergy: f.officiant || null,
       burial_location: f.place_of_burial || null,
+      notes: f.notes || null,
     };
   }
 

@@ -21,8 +21,9 @@ const RECORD_FIELD_KEYS: Record<string, string[]> = {
     'performed_by', 'church', 'notes',
   ],
   marriage: [
-    'record_number', 'groom_name', 'bride_name', 'date_of_marriage', 'place_of_marriage',
-    'witnesses', 'best_man', 'maid_of_honor', 'officiant', 'church', 'notes',
+    'record_number', 'groom_name', 'groom_parents', 'bride_name', 'bride_parents',
+    'date_of_marriage', 'marriage_license', 'witnesses', 'best_man', 'maid_of_honor',
+    'officiant', 'church', 'notes',
   ],
   funeral: [
     'record_number', 'deceased_name', 'date_of_death', 'date_of_funeral', 'date_of_burial',
@@ -227,8 +228,11 @@ const LABEL_PATTERNS: Record<string, RegExp[]> = {
   godparents: [/god\s*parent[s]?[:\s]+(.+)/i, /sponsor[s]?[:\s]+(.+)/i, /νονό[ςσ][:\s]+(.+)/i],
   performed_by: [/performed\s+by[:\s]+(.+)/i, /priest[:\s]+(.+)/i, /officiant[:\s]+(.+)/i, /clergy[:\s]+(.+)/i],
   groom_name: [/groom[:\s]+(.+)/i, /bridegroom[:\s]+(.+)/i],
+  groom_parents: [/groom(?:'s)?\s*parents?[:\s]+(.+)/i, /parents\s+of\s+groom[:\s]+(.+)/i],
   bride_name: [/bride[:\s]+(.+)/i],
+  bride_parents: [/bride(?:'s)?\s*parents?[:\s]+(.+)/i, /parents\s+of\s+bride[:\s]+(.+)/i],
   date_of_marriage: [/date\s+of\s+marriage[:\s]+(.+)/i, /married[:\s]+(.+)/i],
+  marriage_license: [/marriage\s*license\s*(?:#|num|no)?[:\s]+(.+)/i, /license\s*(?:#|num|no)?[:\s]+(.+)/i],
   witnesses: [/witness(?:es)?[:\s]+(.+)/i],
   deceased_name: [/deceased[:\s]+(.+)/i, /name\s+of\s+deceased[:\s]+(.+)/i],
   date_of_death: [/date\s+of\s+death[:\s]+(.+)/i, /died[:\s]+(.+)/i],
@@ -283,7 +287,7 @@ function extractBaptismFields(text: string): Record<string, string> {
 
 function extractMarriageFields(text: string): Record<string, string> {
   const fields: Record<string, string> = {};
-  for (const k of ['groom_name', 'bride_name', 'date_of_marriage', 'witnesses', 'performed_by']) {
+  for (const k of ['groom_name', 'groom_parents', 'bride_name', 'bride_parents', 'date_of_marriage', 'marriage_license', 'witnesses', 'performed_by', 'notes']) {
     const v = pickLabelValue(text, k);
     if (v) fields[k] = v;
   }
