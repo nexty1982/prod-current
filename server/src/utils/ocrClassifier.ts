@@ -9,8 +9,10 @@ import fs from 'fs';
 import path from 'path';
 
 const OCR_AGENT_MODEL = process.env.OCR_AGENT_MODEL || 'claude-haiku-4-5';
+const OCR_AGENT_VISION_MODEL = process.env.OCR_AGENT_VISION_MODEL || 'claude-sonnet-4-20250514';
 const OCR_AGENT_MAX_RECORDS = 12;
 const OCR_AGENT_OCR_CONTEXT_CHARS = 3500;
+const OCR_AGENT_VISION_MAX_BYTES = 4 * 1024 * 1024;
 
 const RECORD_FIELD_KEYS: Record<string, string[]> = {
   baptism: [
@@ -204,13 +206,13 @@ export interface AgentExtractResult {
   fields: Record<string, string>;
   records: Array<Record<string, string>>;
   confidence: number;
-  method: 'assembler' | 'heuristic' | 'llm';
+  method: 'assembler' | 'heuristic' | 'llm' | 'llm_vision';
   candidate_index?: number;
   total_candidates?: number;
   needs_review?: boolean;
   llm_model?: string;
   refinement_notes?: string;
-  draft_method?: 'assembler' | 'heuristic';
+  draft_method?: 'assembler' | 'heuristic' | 'llm' | 'llm_vision';
 }
 
 const DATE_RE = /\b(\d{1,2}[\/\.\-]\d{1,2}[\/\.\-]\d{2,4}|\d{4}[\/\.\-]\d{1,2}[\/\.\-]\d{1,2}|(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+\d{1,2},?\s+\d{4})\b/gi;
@@ -343,12 +345,275 @@ function pickPrimaryCandidate(candidates: any[]): { candidate: any; index: numbe
   if (!candidates.length) return null;
   const scored = candidates.map((c, index) => {
     const conf = typeof c.confidence === 'number' ? c.confidence : 0;
-    const reviewPenalty = c.needsReview ? 0.15 : 0;
+    const reviewPenalty = c.needsReview ? 0.2 : 0;
     const fieldBonus = Object.keys(c.fields || {}).filter((k) => c.fields[k]?.trim()).length * 0.02;
-    return { c, index, score: conf - reviewPenalty + fieldBonus };
+    const rowStart = c.sourceRowIndex ?? 0;
+    const rowEnd = c.sourceRowEnd ?? rowStart;
+    const span = Math.max(0, rowEnd - rowStart);
+    const spanPenalty = span > 8 ? 0.5 : span > 5 ? 0.25 : span > 3 ? 0.1 : 0;
+    const childName = String(c.fields?.child_name || c.fields?.deceased_name || '');
+    const namePenalty = childName.length > 80 ? 0.45 : childName.length > 50 ? 0.25 : 0;
+    const numberBonus = c.fields?.record_number ? 0.12 : 0;
+    return {
+      c,
+      index,
+      score: conf - reviewPenalty - spanPenalty - namePenalty + fieldBonus + numberBonus,
+    };
   });
   scored.sort((a, b) => b.score - a.score);
   return { candidate: scored[0].c, index: scored[0].index };
+}
+
+function loadTableExtractionJson(jobId: number): any | null {
+  const jsonPath = path.join(feederJobDir(jobId), 'page_0', 'table_extraction.json');
+  if (!fs.existsSync(jsonPath)) return null;
+  try {
+    return JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
+  } catch {
+    return null;
+  }
+}
+
+function preprocessedImagePath(jobId: number): string | null {
+  const p = path.join(feederJobDir(jobId), 'page_0', 'preprocessed.jpg');
+  return fs.existsSync(p) ? p : null;
+}
+
+function unionRowBbox(tableJson: any, rowStart: number, rowEnd: number, pad = 0.008): number[] | null {
+  const tables = tableJson?.tables || [];
+  const parts: number[][] = [];
+  for (const table of tables) {
+    for (const row of table.rows || []) {
+      if (row.type === 'header') continue;
+      if (row.row_index < rowStart || row.row_index > rowEnd) continue;
+      for (const cell of row.cells || []) {
+        if (cell.bbox?.length === 4) parts.push(cell.bbox);
+      }
+    }
+  }
+  if (!parts.length) return null;
+  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+  for (const [a, b, c, d] of parts) {
+    x0 = Math.min(x0, a); y0 = Math.min(y0, b); x1 = Math.max(x1, c); y1 = Math.max(y1, d);
+  }
+  return [
+    Math.max(0, x0 - pad),
+    Math.max(0, y0 - pad),
+    Math.min(1, x1 + pad),
+    Math.min(1, y1 + pad),
+  ];
+}
+
+function buildRecordRowContext(tableJson: any, rowStart: number, rowEnd: number) {
+  const rows: Array<{ row_index: number; cells: Record<string, string> }> = [];
+  for (const table of tableJson?.tables || []) {
+    for (const row of table.rows || []) {
+      if (row.type === 'header') continue;
+      if (row.row_index < rowStart || row.row_index > rowEnd) continue;
+      const cells: Record<string, string> = {};
+      for (const cell of row.cells || []) {
+        const key = cell.column_key || `col_${cell.column_index}`;
+        const val = (cell.content || '').trim();
+        if (val) cells[key] = val;
+      }
+      if (Object.keys(cells).length) rows.push({ row_index: row.row_index, cells });
+    }
+  }
+  return { row_span: [rowStart, rowEnd], rows };
+}
+
+async function cropImageToFractionalBbox(imagePath: string, bbox: number[]): Promise<Buffer> {
+  const sharp = require('sharp');
+  const [fx0, fy0, fx1, fy1] = bbox;
+  const meta = await sharp(imagePath).metadata();
+  const imgW = meta.width || 1;
+  const imgH = meta.height || 1;
+  const left = Math.max(0, Math.floor(fx0 * imgW));
+  const top = Math.max(0, Math.floor(fy0 * imgH));
+  const width = Math.max(1, Math.min(imgW - left, Math.ceil((fx1 - fx0) * imgW)));
+  const height = Math.max(1, Math.min(imgH - top, Math.ceil((fy1 - fy0) * imgH)));
+  let pipeline = sharp(imagePath).extract({ left, top, width, height });
+  if (width > 1800) pipeline = pipeline.resize({ width: 1800 });
+  return pipeline.jpeg({ quality: 88 }).toBuffer();
+}
+
+async function prepareVisionImageBuffer(jobId: number, rowStart: number, rowEnd: number): Promise<Buffer | null> {
+  const imagePath = preprocessedImagePath(jobId);
+  if (!imagePath) return null;
+  const tableJson = loadTableExtractionJson(jobId);
+  try {
+    if (tableJson) {
+      const bbox = unionRowBbox(tableJson, rowStart, rowEnd);
+      if (bbox) return await cropImageToFractionalBbox(imagePath, bbox);
+    }
+    const full = fs.readFileSync(imagePath);
+    if (full.length <= OCR_AGENT_VISION_MAX_BYTES) return full;
+    const sharp = require('sharp');
+    return sharp(full).resize({ width: 1800 }).jpeg({ quality: 88 }).toBuffer();
+  } catch (err: any) {
+    console.warn(`[OCR Agent Vision] image prep failed job ${jobId}: ${err?.message}`);
+    return null;
+  }
+}
+
+function visionSystemPrompt(recordType: AgentExtractResult['record_type']): string {
+  const common = [
+    'You read handwritten Orthodox parish ledger scans like an experienced church registrar.',
+    'Trust the IMAGE over noisy OCR hints when they conflict.',
+    'Extract exactly ONE ledger entry from the image crop — never merge adjacent entries.',
+    'Use uppercase names as written. Dates in M-D-YY or M/D/YY as shown.',
+    'Leave fields blank when not visible — do not guess.',
+    'Respond only via submit_record_fields with exactly one record in the records array.',
+  ];
+  if (recordType === 'baptism') {
+    return [
+      ...common,
+      'Baptism ledger columns (left to right): entry number | birth date | baptism date | child name & birthplace | parents | godparents/sponsors | priest.',
+      'child_name = baptized person only (not parents). place_of_birth = city/state in parentheses or after name.',
+      'father_name and mother_name = split the parents column (father first, mother/maiden second).',
+      'godparents = sponsors column. performed_by = priest (e.g. REV. ROBERT A. GEORGE LEWIS).',
+      'notes = reception/chrismation text if present.',
+    ].join('\n');
+  }
+  if (recordType === 'marriage') {
+    return [...common, 'Marriage ledger: groom, bride, date, witnesses, officiant.'].join('\n');
+  }
+  if (recordType === 'funeral') {
+    return [...common, 'Funeral ledger: deceased name, death date, burial, age, cause, officiant.'].join('\n');
+  }
+  return common.join('\n');
+}
+
+async function extractSingleRecordVision(
+  client: Anthropic,
+  model: string,
+  recordType: AgentExtractResult['record_type'],
+  imageBuffer: Buffer,
+  rowContext: ReturnType<typeof buildRecordRowContext>,
+  draftFields: Record<string, string>,
+  recordIndex: number,
+): Promise<{ fields: Record<string, string>; confidence: number; needs_review: boolean; note?: string } | null> {
+  if (imageBuffer.length > OCR_AGENT_VISION_MAX_BYTES) return null;
+
+  const userText = JSON.stringify({
+    task: 'Read this single ledger entry from the image and extract structured fields.',
+    record_index: recordIndex,
+    record_type: recordType,
+    ocr_row_hints: rowContext,
+    draft_fields_ignore_if_wrong: draftFields,
+  }, null, 2);
+
+  const message = await client.messages.create({
+    model,
+    max_tokens: 2048,
+    system: visionSystemPrompt(recordType),
+    tools: [SUBMIT_RECORD_FIELDS_TOOL],
+    tool_choice: { type: 'tool', name: 'submit_record_fields' },
+    messages: [{
+      role: 'user',
+      content: [
+        {
+          type: 'image',
+          source: {
+            type: 'base64',
+            media_type: 'image/jpeg',
+            data: imageBuffer.toString('base64'),
+          },
+        },
+        { type: 'text', text: userText },
+      ],
+    }],
+  });
+
+  const payload = parseLlmToolPayload(message);
+  const rec = payload?.records?.[0];
+  if (!rec?.fields) return null;
+
+  const fields = sanitizeFieldMap(rec.fields, recordType);
+  if (!Object.keys(fields).length) return null;
+
+  return {
+    fields,
+    confidence: typeof rec.confidence === 'number' ? rec.confidence : 0.9,
+    needs_review: !!rec.needs_review,
+    note: typeof payload.refinement_notes === 'string' ? payload.refinement_notes : undefined,
+  };
+}
+
+async function extractRecordsWithVision(
+  jobId: number,
+  draft: AgentExtractResult,
+): Promise<AgentExtractResult | null> {
+  if (!isOcrAgentEnabled() || process.env.OCR_AGENT_VISION_ENABLED === 'false') return null;
+
+  const candidates = loadFeederRecordCandidates(jobId);
+  const tableJson = loadTableExtractionJson(jobId);
+  if (!candidates.length || !tableJson || !preprocessedImagePath(jobId)) return null;
+
+  const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  const model = OCR_AGENT_VISION_MODEL;
+  const limit = Math.min(candidates.length, OCR_AGENT_MAX_RECORDS);
+  const records: Record<string, string>[] = [];
+  const confidences: number[] = [];
+  const reviewFlags: boolean[] = [];
+  const notes: string[] = [];
+
+  for (let i = 0; i < limit; i++) {
+    const cand = candidates[i];
+    const rowStart = cand.sourceRowIndex ?? 0;
+    const rowEnd = cand.sourceRowEnd ?? rowStart;
+    const imageBuffer = await prepareVisionImageBuffer(jobId, rowStart, rowEnd);
+    if (!imageBuffer) {
+      records.push(sanitizeFieldMap(draft.records[i] || {}, draft.record_type));
+      confidences.push(0.3);
+      reviewFlags.push(true);
+      continue;
+    }
+
+    try {
+      const rowContext = buildRecordRowContext(tableJson, rowStart, rowEnd);
+      const draftFields = draft.records[i] || cand.fields || {};
+      const result = await extractSingleRecordVision(
+        client, model, draft.record_type, imageBuffer, rowContext, draftFields, i,
+      );
+      if (result) {
+        records.push(result.fields);
+        confidences.push(result.confidence);
+        reviewFlags.push(result.needs_review);
+        if (result.note) notes.push(`#${i + 1}: ${result.note}`);
+      } else {
+        records.push(sanitizeFieldMap(draftFields, draft.record_type));
+        confidences.push(0.4);
+        reviewFlags.push(true);
+      }
+    } catch (err: any) {
+      console.warn(`[OCR Agent Vision] record ${i} failed job ${jobId}: ${err?.message}`);
+      records.push(sanitizeFieldMap(cand.fields || {}, draft.record_type));
+      confidences.push(0.35);
+      reviewFlags.push(true);
+    }
+  }
+
+  if (!records.some((r) => Object.keys(r).length > 0)) return null;
+
+  const picked = pickPrimaryCandidate(candidates);
+  const idx = Math.min(picked?.index ?? 0, records.length - 1);
+  const fields = { ...records[idx] };
+  const required = requiredFieldsForType(draft.record_type);
+
+  return {
+    record_type: draft.record_type,
+    fields,
+    records,
+    confidence: confidences[idx] ?? scoreFields(fields, required),
+    method: 'llm_vision',
+    candidate_index: idx,
+    total_candidates: records.length,
+    needs_review: reviewFlags[idx] ?? scoreFields(fields, required) < 0.6,
+    llm_model: model,
+    refinement_notes: `Vision-read ${records.length} ledger entr${records.length === 1 ? 'y' : 'ies'} from scan.${notes.length ? ' ' + notes.join(' ').slice(0, 400) : ''}`,
+    draft_method: draft.method,
+  };
 }
 
 function requiredFieldsForType(record_type: AgentExtractResult['record_type']): string[] {
@@ -519,7 +784,7 @@ async function refineExtractWithLlm(
       refinement_notes: typeof payload.refinement_notes === 'string'
         ? payload.refinement_notes.slice(0, 500)
         : undefined,
-      draft_method: draft.method === 'llm' ? draft.draft_method : draft.method,
+      draft_method: (draft.method === 'llm' || draft.method === 'llm_vision') ? draft.draft_method : draft.method,
     };
   } catch (err: any) {
     console.warn(`[OCR Agent LLM] refinement failed: ${err?.message || err}`);
@@ -527,7 +792,7 @@ async function refineExtractWithLlm(
   }
 }
 
-/** Prefer table assembly, optionally refine with LLM, then fall back to heuristics. */
+/** Prefer table assembly → vision LLM read → text LLM cleanup → heuristics. */
 export async function extractAgentFieldsForJob(
   jobId: number,
   ocrText: string,
@@ -535,6 +800,9 @@ export async function extractAgentFieldsForJob(
 ): Promise<AgentExtractResult> {
   const draft = buildAssemblerDraft(jobId, ocrText, recordTypeHint)
     || extractAgentFields(ocrText, recordTypeHint);
+
+  const vision = await extractRecordsWithVision(jobId, draft);
+  if (vision) return vision;
 
   const refined = await refineExtractWithLlm(draft, ocrText);
   return refined || draft;

@@ -388,9 +388,9 @@ const OcrReviewPage: React.FC = () => {
                 <Chip label={recordType} size="small" variant="outlined" />
                 {extractMethod && (
                   <Chip
-                    label={extractMethod === 'assembler' ? 'Table assembly' : extractMethod === 'llm' ? 'AI agent' : 'Heuristic'}
+                    label={extractMethod === 'assembler' ? 'Table assembly' : extractMethod === 'llm_vision' ? 'AI vision' : extractMethod === 'llm' ? 'AI agent' : 'Heuristic'}
                     size="small"
-                    color={extractMethod === 'assembler' ? 'success' : extractMethod === 'llm' ? 'primary' : 'default'}
+                    color={extractMethod === 'assembler' ? 'success' : (extractMethod === 'llm' || extractMethod === 'llm_vision') ? 'primary' : 'default'}
                     variant="outlined"
                   />
                 )}
@@ -429,9 +429,9 @@ const OcrReviewPage: React.FC = () => {
                 </Alert>
               )}
 
-              {extractMethod === 'llm' && refinementNotes && (
+              {(extractMethod === 'llm' || extractMethod === 'llm_vision') && refinementNotes && (
                 <Alert severity="success">
-                  AI agent refinements: {refinementNotes}
+                  {refinementNotes}
                 </Alert>
               )}
 
