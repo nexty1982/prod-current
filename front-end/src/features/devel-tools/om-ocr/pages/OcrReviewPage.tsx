@@ -14,10 +14,16 @@ import type { ChurchRecordFieldConfig } from '@/features/devel-tools/om-ocr/conf
 import FusionOverlay from '@/features/devel-tools/om-ocr/components/FusionOverlay';
 import {
   adjustHighlightBoxesForCrop,
+  cellBboxToVision,
+  columnBoundaryEdges,
+  computeCellTokens,
+  computeFieldRegions,
   computeReviewCropBbox,
-  computeReviewFieldHighlightBoxes,
   cropVisionPageSize,
+  fieldRegionsToBoxes,
+  moveColumnBoundary,
   REVIEW_FIELD_COLORS,
+  type ColumnBands,
 } from '@/features/devel-tools/om-ocr/utils/recordHighlightBoxes';
 import { apiClient } from '@/shared/lib/axiosInstance';
 import {
@@ -49,9 +55,12 @@ import {
   IconCheck,
   IconChevronDown,
   IconChevronUp,
+  IconColumns,
   IconDatabase,
+  IconHandFinger,
   IconMaximize,
   IconRefresh,
+  IconRestore,
   IconRobot,
   IconZoomIn,
   IconZoomOut,
@@ -125,7 +134,18 @@ const OcrReviewPage: React.FC = () => {
   const [churchFieldConfig, setChurchFieldConfig] = useState<ChurchRecordFieldConfig | null>(null);
   const [showDetailedInfo, setShowDetailedInfo] = useState(false);
   const [useFullPageImage, setUseFullPageImage] = useState(false);
+  const [columnBandsOverride, setColumnBandsOverride] = useState<ColumnBands | null>(null);
+  const [confirmedIndexes, setConfirmedIndexes] = useState<Set<number>>(new Set());
+  const [showColumnGuides, setShowColumnGuides] = useState(true);
+  const [mapHint, setMapHint] = useState<string | null>(null);
   const imageRef = useRef<HTMLImageElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const panRef = useRef<{ active: boolean; startX: number; startY: number; left: number; top: number; moved: boolean }>(
+    { active: false, startX: 0, startY: 0, left: 0, top: 0, moved: false },
+  );
+  const dragBoundaryRef = useRef<{ leftKey: string; rightKey: string } | null>(null);
+
+  const mapMode = focusedField !== null;
 
   const backPath = isPortal ? '/portal/upload' : '/devel/ocr-studio/upload';
   const reviewBase = churchId
@@ -149,13 +169,11 @@ const OcrReviewPage: React.FC = () => {
 
   const useRecordSnippet = !!reviewCropBbox && !useFullPageImage;
 
+  // Full-page view shows the ORIGINAL uploaded scan (before record splitting).
   const fullPageImageUrl = useMemo(() => {
     if (!churchId || !selectedJobId) return null;
-    if (tableExtractionJson?.page_dimensions) {
-      return `/api/church/${churchId}/ocr/jobs/${selectedJobId}/image`;
-    }
     return `/api/church/${churchId}/ocr/jobs/${selectedJobId}/image?original=true`;
-  }, [churchId, selectedJobId, tableExtractionJson]);
+  }, [churchId, selectedJobId]);
 
   const jobImageUrl = useMemo(() => {
     if (!churchId || !selectedJobId) return null;
@@ -184,22 +202,54 @@ const OcrReviewPage: React.FC = () => {
     }
   }, [churchId]);
 
+  const effectiveBands: ColumnBands | null = useMemo(
+    () => columnBandsOverride || tableExtractionJson?.column_bands || null,
+    [columnBandsOverride, tableExtractionJson],
+  );
+
+  const activeCropBbox = useRecordSnippet ? reviewCropBbox : null;
+
   const fieldHighlightBoxes = useMemo(() => {
     if (!tableExtractionJson || !recordCandidates) return [];
     const pageDims = tableExtractionJson.page_dimensions;
-    const raw = computeReviewFieldHighlightBoxes({
+    if (!pageDims?.width || !pageDims?.height) return [];
+    const regions = computeFieldRegions({
       tableExtractionJson,
       recordCandidates,
-      scoringV2,
       selectedRecordIndex,
-      focusedField,
       fieldKeys: fieldDefs.map((d) => d.name),
+      columnBands: effectiveBands,
     });
-    if (useRecordSnippet && reviewCropBbox && pageDims?.width && pageDims?.height) {
-      return adjustHighlightBoxesForCrop(raw, pageDims, reviewCropBbox);
-    }
-    return raw;
-  }, [tableExtractionJson, recordCandidates, scoringV2, selectedRecordIndex, focusedField, fieldDefs, useRecordSnippet, reviewCropBbox]);
+    return fieldRegionsToBoxes(regions, pageDims, focusedField, activeCropBbox);
+  }, [tableExtractionJson, recordCandidates, selectedRecordIndex, focusedField, fieldDefs, effectiveBands, activeCropBbox]);
+
+  // Clickable per-cell tokens (only meaningful while a field is focused = map mode)
+  const cellTokenOverlays = useMemo(() => {
+    if (!mapMode || !tableExtractionJson?.page_dimensions) return [];
+    const pageDims = tableExtractionJson.page_dimensions;
+    const tokens = computeCellTokens({ tableExtractionJson, recordCandidates, selectedRecordIndex });
+    let boxes = tokens.map((t) => ({
+      bbox: cellBboxToVision(t.frac, pageDims),
+      color: '#1976d2',
+      label: t.text,
+    }));
+    if (activeCropBbox) boxes = adjustHighlightBoxesForCrop(boxes, pageDims, activeCropBbox);
+    return boxes.map((b, i) => ({ id: `tok-${i}`, text: b.label as string, bbox: b.bbox }));
+  }, [mapMode, tableExtractionJson, recordCandidates, selectedRecordIndex, activeCropBbox]);
+
+  // Column guides live on the snippet (preprocessed crop). Band edges are
+  // full-page fractions, so convert them into snippet-relative x.
+  const columnEdges = useMemo(() => {
+    if (!useRecordSnippet) return [] as Array<{ x: number; sx: number; leftKey: string; rightKey: string }>;
+    const edges = columnBoundaryEdges(effectiveBands);
+    if (!reviewCropBbox) return edges.map((e) => ({ ...e, sx: e.x }));
+    const cx0 = reviewCropBbox[0];
+    const span = reviewCropBbox[2] - reviewCropBbox[0];
+    if (span <= 0) return [];
+    return edges
+      .map((e) => ({ ...e, sx: (e.x - cx0) / span }))
+      .filter((e) => e.sx > 0.01 && e.sx < 0.99);
+  }, [effectiveBands, useRecordSnippet, reviewCropBbox]);
 
   const visionPageSize = useMemo(() => {
     const pageDims = tableExtractionJson?.page_dimensions;
@@ -252,6 +302,7 @@ const OcrReviewPage: React.FC = () => {
       setNeedsReviewFlag(!!extract?.needs_review);
       setRefinementNotes(extract?.refinement_notes || null);
       setFields({ ...(records[idx] || extract?.fields || {}) });
+      setConfirmedIndexes(new Set<number>(Array.isArray(extract?.confirmed_indexes) ? extract.confirmed_indexes : []));
     } catch (err: any) {
       setError(err?.response?.data?.error || err?.message || 'Failed to load extraction');
       setFields({});
@@ -284,9 +335,106 @@ const OcrReviewPage: React.FC = () => {
     setUseFullPageImage(false);
   }, [selectedJobId, selectedRecordIndex, jobImageUrl]);
 
+  // Column overrides are page-scoped — reset only when switching jobs.
+  useEffect(() => {
+    setColumnBandsOverride(null);
+    setMapHint(null);
+  }, [selectedJobId]);
+
+  // Mapping only works on the aligned snippet — drop back from full-page view.
+  useEffect(() => {
+    if (focusedField && useFullPageImage && reviewCropBbox) setUseFullPageImage(false);
+  }, [focusedField, useFullPageImage, reviewCropBbox]);
+
+  // Ctrl/⌘ + wheel = zoom the scan (native listener so preventDefault works).
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const onWheel = (e: WheelEvent) => {
+      if (!(e.ctrlKey || e.metaKey)) return;
+      e.preventDefault();
+      setImageZoom((z) => Math.min(400, Math.max(25, z - Math.sign(e.deltaY) * 15)));
+    };
+    el.addEventListener('wheel', onWheel, { passive: false });
+    return () => el.removeEventListener('wheel', onWheel);
+  }, [selectedJobId, jobImageUrl, imageLoadFailed]);
+
   useEffect(() => {
     if (churchId && selectedJobId) loadJobArtifacts(selectedJobId);
   }, [churchId, selectedJobId, loadJobArtifacts]);
+
+  // ── Image interaction: drag-to-pan, ctrl+wheel zoom ────────────────────────
+  const onImageMouseDown = (e: React.MouseEvent) => {
+    if (e.button !== 0 || dragBoundaryRef.current) return;
+    const sc = scrollRef.current;
+    if (!sc) return;
+    panRef.current = { active: true, startX: e.clientX, startY: e.clientY, left: sc.scrollLeft, top: sc.scrollTop, moved: false };
+  };
+
+  const onBoundaryMouseDown = (e: React.MouseEvent, leftKey: string, rightKey: string) => {
+    e.stopPropagation();
+    e.preventDefault();
+    dragBoundaryRef.current = { leftKey, rightKey };
+  };
+
+  const onContainerMouseMove = (e: React.MouseEvent) => {
+    const boundary = dragBoundaryRef.current;
+    if (boundary) {
+      const img = imageRef.current;
+      if (!img) return;
+      const rect = img.getBoundingClientRect();
+      let s = (e.clientX - rect.left) / rect.width;
+      s = Math.max(0.01, Math.min(0.99, s));
+      // Convert snippet-relative x back to full-page fraction
+      let fullX = s;
+      if (useRecordSnippet && reviewCropBbox) {
+        fullX = reviewCropBbox[0] + s * (reviewCropBbox[2] - reviewCropBbox[0]);
+      }
+      fullX = Math.max(0.01, Math.min(0.99, fullX));
+      setColumnBandsOverride((prev) => {
+        const base = prev || (tableExtractionJson?.column_bands as ColumnBands | undefined);
+        if (!base) return prev;
+        return moveColumnBoundary(base, boundary.leftKey, boundary.rightKey, fullX);
+      });
+      return;
+    }
+    const p = panRef.current;
+    if (!p.active) return;
+    const sc = scrollRef.current;
+    if (!sc) return;
+    const dx = e.clientX - p.startX;
+    const dy = e.clientY - p.startY;
+    if (Math.abs(dx) > 3 || Math.abs(dy) > 3) p.moved = true;
+    sc.scrollLeft = p.left - dx;
+    sc.scrollTop = p.top - dy;
+  };
+
+  const onContainerMouseUp = () => {
+    dragBoundaryRef.current = null;
+    panRef.current.active = false;
+  };
+
+  // ── Click-to-map: clicking a source token fills the focused field ──────────
+  const handleTokenClick = (_id: string, _bbox: any, text: string) => {
+    if (!focusedField || !text) return;
+    setFields((prev) => {
+      const cur = (prev[focusedField] || '').trim();
+      const next = cur ? `${cur} ${text}` : text;
+      return { ...prev, [focusedField]: next };
+    });
+    setMapHint(`Added “${text.slice(0, 32)}${text.length > 32 ? '…' : ''}” → ${focusedField.replace(/_/g, ' ')}`);
+  };
+
+  // ── Record navigation (persists current edits before switching) ────────────
+  const goToRecord = (idx: number) => {
+    if (idx === selectedRecordIndex) return;
+    const updated = [...allRecords];
+    if (updated.length) updated[selectedRecordIndex] = { ...fields };
+    setAllRecords(updated);
+    setFields({ ...(updated[idx] || {}) });
+    setSelectedRecordIndex(idx);
+    setFocusedField(null);
+  };
 
   const runAgentExtract = async () => {
     if (!churchId || !selectedJobId) return;
@@ -306,6 +454,8 @@ const OcrReviewPage: React.FC = () => {
       setNeedsReviewFlag(!!extract?.needs_review);
       setRefinementNotes(extract?.refinement_notes || null);
       setFields({ ...(records[idx] || extract?.fields || {}) });
+      setConfirmedIndexes(new Set<number>());
+      setColumnBandsOverride(null);
       setReviewStatus('agent_extracted');
       await loadJobs();
     } catch (err: any) {
@@ -317,14 +467,43 @@ const OcrReviewPage: React.FC = () => {
 
   const confirmFields = async () => {
     if (!churchId || !selectedJobId) return;
+    const updated = [...allRecords];
+    if (updated.length) updated[selectedRecordIndex] = { ...fields };
+    else updated.push({ ...fields });
+
+    const newConfirmed = new Set(confirmedIndexes);
+    newConfirmed.add(selectedRecordIndex);
+    const total = updated.length;
+    const allDone = newConfirmed.size >= total;
+
     setConfirmLoading(true);
     setError(null);
     try {
       await apiClient.post(`/api/church/${churchId}/ocr/jobs/${selectedJobId}/confirm-extract`, {
         record_type: recordType,
-        fields,
+        records: updated,
+        confirmed_indexes: Array.from(newConfirmed),
+        finalize: allDone,
       });
-      setReviewStatus('ready_to_seed');
+      setAllRecords(updated);
+      setConfirmedIndexes(newConfirmed);
+
+      if (allDone) {
+        setReviewStatus('ready_to_seed');
+        setMapHint('All records confirmed — ready to seed.');
+      } else {
+        let next = -1;
+        for (let step = 1; step <= total; step++) {
+          const cand = (selectedRecordIndex + step) % total;
+          if (!newConfirmed.has(cand)) { next = cand; break; }
+        }
+        if (next >= 0) {
+          setSelectedRecordIndex(next);
+          setFields({ ...(updated[next] || {}) });
+          setFocusedField(null);
+          setMapHint(`Record confirmed — now reviewing record ${next + 1} of ${total}.`);
+        }
+      }
       await loadJobs();
     } catch (err: any) {
       setError(err?.response?.data?.error || 'Confirm failed');
@@ -449,24 +628,28 @@ const OcrReviewPage: React.FC = () => {
               </Stack>
 
               {allRecords.length > 1 && (
-                <FormControl size="small" sx={{ maxWidth: 360 }}>
-                  <InputLabel>Record on this page</InputLabel>
-                  <Select
-                    label="Record on this page"
-                    value={selectedRecordIndex}
-                    onChange={(e) => {
-                      const idx = Number(e.target.value);
-                      setSelectedRecordIndex(idx);
-                      setFields({ ...(allRecords[idx] || {}) });
-                    }}
-                  >
-                    {allRecords.map((rec, i) => (
-                      <MenuItem key={i} value={i}>
-                        #{rec.record_number || i + 1} — {rec.child_name || rec.groom_name || rec.deceased_name || `Record ${i + 1}`}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
+                <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
+                  <FormControl size="small" sx={{ minWidth: 320, flex: 1 }}>
+                    <InputLabel>Record on this page</InputLabel>
+                    <Select
+                      label="Record on this page"
+                      value={selectedRecordIndex}
+                      onChange={(e) => goToRecord(Number(e.target.value))}
+                    >
+                      {allRecords.map((rec, i) => (
+                        <MenuItem key={i} value={i}>
+                          {confirmedIndexes.has(i) ? '✓ ' : ''}
+                          #{rec.record_number || i + 1} — {rec.child_name || rec.groom_name || rec.deceased_name || `Record ${i + 1}`}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                  <Chip
+                    size="small"
+                    color={confirmedIndexes.size >= allRecords.length ? 'success' : 'default'}
+                    label={`${confirmedIndexes.size}/${allRecords.length} confirmed`}
+                  />
+                </Stack>
               )}
 
               {needsReviewFlag && (
@@ -597,7 +780,13 @@ const OcrReviewPage: React.FC = () => {
                       onClick={confirmFields}
                       disabled={confirmLoading || reviewStatus === 'seeded'}
                     >
-                      {confirmLoading ? 'Confirming…' : 'Confirm Fields'}
+                      {confirmLoading
+                        ? 'Confirming…'
+                        : allRecords.length > 1
+                          ? (confirmedIndexes.size + (confirmedIndexes.has(selectedRecordIndex) ? 0 : 1) >= allRecords.length
+                            ? 'Confirm Last Record'
+                            : 'Confirm Record & Next')
+                          : 'Confirm Fields'}
                     </Button>
                     <Button
                       variant="contained"
@@ -640,25 +829,45 @@ const OcrReviewPage: React.FC = () => {
                 <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={1}>
                   <Box sx={{ minWidth: 0 }}>
                     <Typography variant="subtitle2" fontWeight={700}>
-                      {useRecordSnippet ? 'Record snippet' : 'Source document'}
+                      {useRecordSnippet ? 'Record snippet' : 'Original source image'}
                     </Typography>
                     <Typography variant="caption" color="text.secondary" noWrap title={selectedJob?.filename}>
                       {useRecordSnippet && allRecords.length > 1
                         ? `Record ${selectedRecordIndex + 1} of ${allRecords.length} · headers + row`
                         : selectedJob?.filename || `Job #${selectedJobId}`}
-                      {useRecordSnippet && fieldHighlightBoxes.length ? ' · field highlights' : ''}
+                      {useRecordSnippet ? ' · drag to pan · Ctrl+wheel zoom' : reviewCropBbox ? ' · original upload (overlays in record view)' : ' · drag to pan · Ctrl+wheel zoom'}
                     </Typography>
                   </Box>
-                  {reviewCropBbox && (
-                    <Button
-                      size="small"
-                      variant="outlined"
-                      sx={{ textTransform: 'none', flexShrink: 0 }}
-                      onClick={() => setUseFullPageImage((v) => !v)}
-                    >
-                      {useFullPageImage ? 'Record snippet' : 'Full page'}
-                    </Button>
-                  )}
+                  <Stack direction="row" spacing={0.5} alignItems="center" sx={{ flexShrink: 0 }}>
+                    {useRecordSnippet && columnEdges.length > 0 && (
+                      <Tooltip title="Toggle resizable column guides">
+                        <IconButton
+                          size="small"
+                          color={showColumnGuides ? 'error' : 'default'}
+                          onClick={() => setShowColumnGuides((v) => !v)}
+                        >
+                          <IconColumns size={18} />
+                        </IconButton>
+                      </Tooltip>
+                    )}
+                    {columnBandsOverride && useRecordSnippet && (
+                      <Tooltip title="Reset column guides">
+                        <IconButton size="small" onClick={() => setColumnBandsOverride(null)}>
+                          <IconRestore size={18} />
+                        </IconButton>
+                      </Tooltip>
+                    )}
+                    {reviewCropBbox && (
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        sx={{ textTransform: 'none' }}
+                        onClick={() => setUseFullPageImage((v) => !v)}
+                      >
+                        {useFullPageImage ? 'Record snippet' : 'Full page'}
+                      </Button>
+                    )}
+                  </Stack>
                 </Stack>
               </Box>
 
@@ -687,12 +896,28 @@ const OcrReviewPage: React.FC = () => {
                 </Box>
               )}
 
+              {(mapMode || mapHint) && (
+                <Box sx={{ px: 1.5, py: 0.75, borderBottom: '1px solid', borderColor: 'divider', bgcolor: mapMode ? 'action.hover' : 'background.paper' }}>
+                  <Stack direction="row" spacing={1} alignItems="center">
+                    <IconHandFinger size={16} />
+                    <Typography variant="caption" sx={{ flex: 1 }}>
+                      {mapMode
+                        ? `Map mode — click a region on the scan to add it to “${focusedField?.replace(/_/g, ' ')}”.`
+                        : mapHint}
+                    </Typography>
+                    {mapMode && (
+                      <Button size="small" sx={{ textTransform: 'none' }} onClick={() => setFocusedField(null)}>Done</Button>
+                    )}
+                  </Stack>
+                </Box>
+              )}
+
               <Box
                 sx={{
                   position: 'absolute',
-                  top: fieldHighlightBoxes.length > 0 ? 96 : 56,
+                  top: 8,
                   right: 8,
-                  zIndex: 5,
+                  zIndex: 7,
                   display: 'flex',
                   alignItems: 'center',
                   gap: 0.5,
@@ -711,13 +936,13 @@ const OcrReviewPage: React.FC = () => {
                   value={imageZoom}
                   onChange={(_, v) => setImageZoom(v as number)}
                   min={25}
-                  max={300}
+                  max={400}
                   step={5}
                   sx={{ width: 90 }}
                   size="small"
                 />
                 <Tooltip title="Zoom in">
-                  <IconButton size="small" onClick={() => setImageZoom((z) => Math.min(300, z + 25))}>
+                  <IconButton size="small" onClick={() => setImageZoom((z) => Math.min(400, z + 25))}>
                     <IconZoomIn size={16} />
                   </IconButton>
                 </Tooltip>
@@ -729,69 +954,118 @@ const OcrReviewPage: React.FC = () => {
                 <Typography variant="caption" sx={{ minWidth: 36, textAlign: 'right' }}>{imageZoom}%</Typography>
               </Box>
 
-              <Box sx={{ flex: 1, overflow: 'auto', p: 1.5, pt: 6 }}>
+              <Box
+                ref={scrollRef}
+                onMouseMove={onContainerMouseMove}
+                onMouseUp={onContainerMouseUp}
+                onMouseLeave={onContainerMouseUp}
+                sx={{
+                  flex: 1,
+                  overflow: 'auto',
+                  p: 1.5,
+                  pt: 6,
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'flex-start',
+                  cursor: 'grab',
+                  '&:active': { cursor: 'grabbing' },
+                }}
+              >
                 {artifactsLoading && (
-                  <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}><CircularProgress size={22} /></Box>
+                  <Box sx={{ position: 'absolute', top: 60, left: 0, right: 0, display: 'flex', justifyContent: 'center' }}>
+                    <CircularProgress size={22} />
+                  </Box>
                 )}
                 {!imageLoadFailed ? (
-                  <Box sx={{ display: 'flex', justifyContent: 'center', minHeight: '100%' }}>
-                    <Box sx={{ position: 'relative', display: 'inline-block' }}>
+                  <Box
+                    onMouseDown={onImageMouseDown}
+                    sx={{
+                      position: 'relative',
+                      width: `${imageZoom}%`,
+                      maxWidth: 'none',
+                      flexShrink: 0,
+                    }}
+                  >
+                    <Box
+                      component="img"
+                      ref={imageRef}
+                      src={jobImageUrl}
+                      alt={selectedJob?.filename || `OCR job ${selectedJobId}`}
+                      draggable={false}
+                      onError={() => {
+                        if (!useFullPageImage && reviewCropBbox) {
+                          setUseFullPageImage(true);
+                        } else {
+                          setImageLoadFailed(true);
+                        }
+                      }}
+                      onLoad={(e) => {
+                        const img = e.currentTarget;
+                        setImageDimensions({
+                          width: img.clientWidth,
+                          height: img.clientHeight,
+                          naturalWidth: img.naturalWidth,
+                          naturalHeight: img.naturalHeight,
+                        });
+                        setImageReady(true);
+                      }}
+                      sx={{
+                        width: '100%',
+                        height: 'auto',
+                        display: 'block',
+                        borderRadius: 1,
+                        boxShadow: 2,
+                        bgcolor: 'background.paper',
+                        userSelect: 'none',
+                      }}
+                    />
+
+                    {imageReady && useRecordSnippet && visionPageSize.width > 0 && (fieldHighlightBoxes.length > 0 || cellTokenOverlays.length > 0) && (
+                      <FusionOverlay
+                        key={`${selectedJobId}-${selectedRecordIndex}-${imageZoom}-${focusedField}-${columnBandsOverride ? 'ov' : 'def'}`}
+                        boxes={fieldHighlightBoxes}
+                        ocrTokens={mapMode ? cellTokenOverlays : []}
+                        onTokenClick={handleTokenClick}
+                        imageElement={imageRef.current}
+                        visionWidth={visionPageSize.width}
+                        visionHeight={visionPageSize.height}
+                        showLabels
+                      />
+                    )}
+
+                    {/* Draggable red column guides (snippet) */}
+                    {imageReady && showColumnGuides && useRecordSnippet && columnEdges.map((edge, i) => (
                       <Box
-                        component="img"
-                        ref={imageRef}
-                        src={jobImageUrl}
-                        alt={selectedJob?.filename || `OCR job ${selectedJobId}`}
-                        onError={() => {
-                          if (!useFullPageImage && reviewCropBbox) {
-                            setUseFullPageImage(true);
-                          } else {
-                            setImageLoadFailed(true);
-                          }
-                        }}
-                        onLoad={(e) => {
-                          const img = e.currentTarget;
-                          setImageDimensions({
-                            width: img.clientWidth,
-                            height: img.clientHeight,
-                            naturalWidth: img.naturalWidth,
-                            naturalHeight: img.naturalHeight,
-                          });
-                          setImageReady(true);
-                        }}
+                        key={`${edge.leftKey}-${edge.rightKey}-${i}`}
+                        onMouseDown={(e) => onBoundaryMouseDown(e, edge.leftKey, edge.rightKey)}
                         sx={{
-                          maxWidth: '100%',
-                          width: 'auto',
-                          height: 'auto',
-                          objectFit: 'contain',
-                          display: 'block',
-                          borderRadius: 1,
-                          boxShadow: 2,
-                          bgcolor: 'background.paper',
-                          transform: `scale(${imageZoom / 100})`,
-                          transformOrigin: 'top left',
+                          position: 'absolute',
+                          top: 0,
+                          bottom: 0,
+                          left: `${edge.sx * 100}%`,
+                          width: 0,
+                          borderLeft: '2px solid',
+                          borderColor: 'error.main',
+                          opacity: 0.7,
+                          cursor: 'col-resize',
+                          zIndex: 8,
+                          '&::after': {
+                            content: '""',
+                            position: 'absolute',
+                            top: 0,
+                            bottom: 0,
+                            left: -5,
+                            width: 12,
+                          },
+                          '&:hover': { opacity: 1, borderColor: 'error.dark' },
                         }}
                       />
-                      {imageReady && visionPageSize.width > 0 && fieldHighlightBoxes.length > 0 && (
-                        <FusionOverlay
-                          key={`${selectedJobId}-${selectedRecordIndex}-${imageZoom}-${focusedField}`}
-                          boxes={fieldHighlightBoxes}
-                          imageElement={imageRef.current}
-                          visionWidth={visionPageSize.width}
-                          visionHeight={visionPageSize.height}
-                          showLabels
-                        />
-                      )}
-                    </Box>
+                    ))}
                   </Box>
                 ) : (
                   <Alert severity="warning" sx={{ m: 1 }}>
                     Could not load the document image for this job.
                   </Alert>
-                )}
-                {!artifactsLoading && !fieldHighlightBoxes.length && !imageLoadFailed && (
-                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block', textAlign: 'center', mt: 1 }}>
-                    No field mapping overlays available for this job. Use zoom to inspect the scan manually.
-                  </Typography>
                 )}
               </Box>
             </Box>

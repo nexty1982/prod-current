@@ -389,11 +389,10 @@ export const FusionOverlay: React.FC<FusionOverlayProps> = ({
         }
 
         const screenBbox = toScreenBBox(token.bbox);
-        const offsetX = containerOffsetRef.current?.x ?? 0;
-        const offsetY = containerOffsetRef.current?.y ?? 0;
+        // Convert viewport-space to overlay-container-relative coords (match box path).
         const adjustedBbox = {
-          x: screenBbox.x - offsetX,
-          y: screenBbox.y - offsetY,
+          x: screenBbox.x - (metrics?.left ?? 0),
+          y: screenBbox.y - (metrics?.top ?? 0),
           w: screenBbox.w,
           h: screenBbox.h,
         };

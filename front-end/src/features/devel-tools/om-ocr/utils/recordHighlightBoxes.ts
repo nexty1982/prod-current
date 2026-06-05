@@ -437,3 +437,215 @@ export function cropVisionPageSize(
     height: Math.max(1, (cy1 - cy0) * pageDims.height),
   };
 }
+
+// ── Column-based review model ────────────────────────────────────────────────
+// Highlights and click-to-map regions derive from the table's column bands
+// (x ranges) intersected with the selected record's row y-span. This keeps the
+// overlay aligned with the (user-adjustable) column dividers.
+
+export type ColumnBands = Record<string, number[]>;
+
+export interface OrderedBand {
+  key: string;
+  x0: number;
+  x1: number;
+}
+
+/** Bands sorted left-to-right. */
+export function orderColumnBands(bands: ColumnBands | null | undefined): OrderedBand[] {
+  if (!bands) return [];
+  return Object.entries(bands)
+    .filter(([, v]) => Array.isArray(v) && v.length === 2)
+    .map(([key, v]) => ({ key, x0: v[0], x1: v[1] }))
+    .sort((a, b) => a.x0 - b.x0);
+}
+
+/** Interior boundary x positions (shared edges between adjacent columns). */
+export function columnBoundaryEdges(bands: ColumnBands | null | undefined): Array<{ x: number; leftKey: string; rightKey: string }> {
+  const ordered = orderColumnBands(bands);
+  const edges: Array<{ x: number; leftKey: string; rightKey: string }> = [];
+  for (let i = 0; i < ordered.length - 1; i++) {
+    edges.push({ x: ordered[i].x1, leftKey: ordered[i].key, rightKey: ordered[i + 1].key });
+  }
+  return edges;
+}
+
+/** Move a shared boundary, returning a new bands object. */
+export function moveColumnBoundary(
+  bands: ColumnBands,
+  leftKey: string,
+  rightKey: string,
+  newX: number,
+): ColumnBands {
+  const next: ColumnBands = {};
+  for (const [k, v] of Object.entries(bands)) next[k] = [v[0], v[1]];
+  if (next[leftKey]) next[leftKey][1] = newX;
+  if (next[rightKey]) next[rightKey][0] = newX;
+  return next;
+}
+
+function recordRowCells(tableExtractionJson: any, rowStart: number, rowEnd: number): any[] {
+  const cells: any[] = [];
+  for (const table of tableExtractionJson.tables || []) {
+    for (const row of table.rows || []) {
+      if (row.type === 'header') continue;
+      if (row.row_index < rowStart || row.row_index > rowEnd) continue;
+      for (const cell of row.cells || []) cells.push(cell);
+    }
+  }
+  return cells;
+}
+
+export interface ColumnRegion {
+  columnKey: string;
+  frac: [number, number, number, number];
+  text: string;
+}
+
+/** One clickable region per column for the selected record (text = column cells joined). */
+export function computeColumnTokens({
+  tableExtractionJson,
+  recordCandidates,
+  selectedRecordIndex,
+  columnBands,
+}: {
+  tableExtractionJson: any;
+  recordCandidates: any;
+  selectedRecordIndex: number;
+  columnBands?: ColumnBands | null;
+}): ColumnRegion[] {
+  if (!tableExtractionJson?.tables?.length || !recordCandidates?.candidates?.length) return [];
+  const cand = recordCandidates.candidates[selectedRecordIndex];
+  if (!cand) return [];
+  const rowStart = cand.sourceRowIndex;
+  const rowEnd = cand.sourceRowEnd ?? rowStart;
+  if (typeof rowStart !== 'number' || rowStart < 0) return [];
+
+  const bands = columnBands || tableExtractionJson.column_bands || {};
+  const cells = recordRowCells(tableExtractionJson, rowStart, rowEnd);
+
+  let recY0 = Infinity, recY1 = -Infinity;
+  for (const c of cells) {
+    if (c.bbox?.length === 4) { recY0 = Math.min(recY0, c.bbox[1]); recY1 = Math.max(recY1, c.bbox[3]); }
+  }
+  if (!Number.isFinite(recY0)) { recY0 = 0; recY1 = 1; }
+
+  const regions: ColumnRegion[] = [];
+  for (const { key, x0, x1 } of orderColumnBands(bands)) {
+    let y0 = Infinity, y1 = -Infinity;
+    const texts: string[] = [];
+    for (const c of cells) {
+      if (c.column_key !== key) continue;
+      if (c.content?.trim()) texts.push(c.content.trim());
+      if (c.bbox?.length === 4) { y0 = Math.min(y0, c.bbox[1]); y1 = Math.max(y1, c.bbox[3]); }
+    }
+    if (!Number.isFinite(y0)) { y0 = recY0; y1 = recY1; }
+    regions.push({ columnKey: key, frac: [x0, y0, x1, y1], text: texts.join(' ').replace(/\s+/g, ' ').trim() });
+  }
+  return regions;
+}
+
+/** One clickable token per OCR cell (precise text fragments) for the record. */
+export function computeCellTokens({
+  tableExtractionJson,
+  recordCandidates,
+  selectedRecordIndex,
+}: {
+  tableExtractionJson: any;
+  recordCandidates: any;
+  selectedRecordIndex: number;
+}): ColumnRegion[] {
+  if (!tableExtractionJson?.tables?.length || !recordCandidates?.candidates?.length) return [];
+  const cand = recordCandidates.candidates[selectedRecordIndex];
+  if (!cand) return [];
+  const rowStart = cand.sourceRowIndex;
+  const rowEnd = cand.sourceRowEnd ?? rowStart;
+  if (typeof rowStart !== 'number' || rowStart < 0) return [];
+
+  const out: ColumnRegion[] = [];
+  for (const c of recordRowCells(tableExtractionJson, rowStart, rowEnd)) {
+    if (!c.content?.trim() || c.bbox?.length !== 4) continue;
+    out.push({
+      columnKey: c.column_key || `col_${c.column_index}`,
+      frac: [c.bbox[0], c.bbox[1], c.bbox[2], c.bbox[3]],
+      text: c.content.replace(/\s+/g, ' ').trim(),
+    });
+  }
+  return out;
+}
+
+export interface FieldRegion {
+  fieldName: string;
+  frac: [number, number, number, number];
+  text: string;
+}
+
+/** Column-aligned highlight region per field (x from band, y from field's cells). */
+export function computeFieldRegions({
+  tableExtractionJson,
+  recordCandidates,
+  selectedRecordIndex,
+  fieldKeys = [],
+  columnBands,
+}: {
+  tableExtractionJson: any;
+  recordCandidates: any;
+  selectedRecordIndex: number;
+  fieldKeys?: string[];
+  columnBands?: ColumnBands | null;
+}): FieldRegion[] {
+  if (!tableExtractionJson?.tables?.length || !recordCandidates?.candidates?.length) return [];
+  const cand = recordCandidates.candidates[selectedRecordIndex];
+  if (!cand) return [];
+  const rowStart = cand.sourceRowIndex;
+  const rowEnd = cand.sourceRowEnd ?? rowStart;
+  if (typeof rowStart !== 'number' || rowStart < 0) return [];
+
+  const bands = columnBands || tableExtractionJson.column_bands || {};
+  const columnMapping = recordCandidates.columnMapping || {};
+  const cells = recordRowCells(tableExtractionJson, rowStart, rowEnd);
+
+  let recY0 = Infinity, recY1 = -Infinity;
+  for (const c of cells) {
+    if (c.bbox?.length === 4) { recY0 = Math.min(recY0, c.bbox[1]); recY1 = Math.max(recY1, c.bbox[3]); }
+  }
+  if (!Number.isFinite(recY0)) { recY0 = 0; recY1 = 1; }
+
+  const keys = fieldKeys.length ? fieldKeys : Array.from(new Set(Object.values(columnMapping))) as string[];
+  const regions: FieldRegion[] = [];
+  for (const fieldName of keys) {
+    const colKeys = fieldColumnKeys(fieldName, columnMapping).filter((k) => bands[k]);
+    if (!colKeys.length) continue;
+    const band = bands[colKeys[0]];
+    let y0 = Infinity, y1 = -Infinity;
+    const texts: string[] = [];
+    for (const c of cells) {
+      if (!colKeys.includes(c.column_key)) continue;
+      if (c.content?.trim()) texts.push(c.content.trim());
+      if (c.bbox?.length === 4) { y0 = Math.min(y0, c.bbox[1]); y1 = Math.max(y1, c.bbox[3]); }
+    }
+    if (!Number.isFinite(y0)) { y0 = recY0; y1 = recY1; }
+    regions.push({ fieldName, frac: [band[0], y0, band[1], y1], text: texts.join(' ').replace(/\s+/g, ' ').trim() });
+  }
+  return regions;
+}
+
+/** Convert a fractional region to an OverlayBox (vision space, crop-adjusted). */
+export function fieldRegionsToBoxes(
+  regions: FieldRegion[],
+  pageDims: { width: number; height: number },
+  focusedField: string | null,
+  cropBbox?: number[] | null,
+): OverlayBox[] {
+  const boxes: OverlayBox[] = regions.map((r) => ({
+    bbox: cellBboxToVision(r.frac, pageDims),
+    color: REVIEW_FIELD_COLORS[r.fieldName] || '#1976d2',
+    label: r.fieldName.replace(/_/g, ' '),
+    selected: focusedField === r.fieldName,
+    emphasized: focusedField === r.fieldName,
+  }));
+  if (cropBbox && pageDims.width && pageDims.height) {
+    return adjustHighlightBoxesForCrop(boxes, pageDims, cropBbox);
+  }
+  return boxes;
+}

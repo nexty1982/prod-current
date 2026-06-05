@@ -522,7 +522,7 @@ router.post('/jobs/:jobId/confirm-extract', async (req: any, res: any) => {
   try {
     const churchId = parseInt(req.params.churchId);
     const jobId = parseInt(req.params.jobId);
-    const { fields, records, record_type } = req.body || {};
+    const { fields, records, record_type, finalize, confirmed_indexes } = req.body || {};
 
     const job = await loadPlatformJob(churchId, jobId);
     if (!job) return res.status(404).json({ error: 'Job not found' });
@@ -542,11 +542,16 @@ router.post('/jobs/:jobId/confirm-extract', async (req: any, res: any) => {
       return res.status(400).json({ error: 'fields or records array is required' });
     }
 
+    // finalize defaults to true for backward compatibility. When false, the job
+    // stays in review (per-record progress save) and is NOT yet seedable.
+    const isFinal = finalize !== false;
+
     const payload = {
       record_type: recordType,
       fields: confirmedRecords[0],
       records: confirmedRecords,
-      confirmed: true,
+      confirmed: isFinal,
+      confirmed_indexes: Array.isArray(confirmed_indexes) ? confirmed_indexes : undefined,
       confirmed_at: new Date().toISOString(),
       confirmed_by: req.session?.user?.email || req.user?.email || 'system',
       method: 'human_confirmed',
@@ -555,13 +560,19 @@ router.post('/jobs/:jobId/confirm-extract', async (req: any, res: any) => {
     await promisePool.query(
       `UPDATE ocr_jobs SET
          agent_extract_json = ?,
-         review_status = 'ready_to_seed',
-         ready_to_seed = 1
+         review_status = ?,
+         ready_to_seed = ?
        WHERE id = ?`,
-      [JSON.stringify(payload), jobId]
+      [JSON.stringify(payload), isFinal ? 'ready_to_seed' : 'agent_extracted', isFinal ? 1 : 0, jobId]
     );
 
-    res.json({ ok: true, jobId, review_status: 'ready_to_seed', extract: payload });
+    res.json({
+      ok: true,
+      jobId,
+      review_status: isFinal ? 'ready_to_seed' : 'agent_extracted',
+      finalized: isFinal,
+      extract: payload,
+    });
   } catch (err: any) {
     console.error('[OCR Agent] confirm error:', err);
     res.status(500).json({ error: err.message || 'Failed to confirm extraction' });
