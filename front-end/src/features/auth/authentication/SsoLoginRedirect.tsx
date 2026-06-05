@@ -6,7 +6,7 @@ import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 
-/** Branded parish-app sign-in (credentials API + optional TOTP). */
+/** Branded parish-app sign-in (credentials API). */
 export default function SsoLoginRedirect() {
   const [params] = useSearchParams();
   const signedOut = params.get('logged_out') === '1'
@@ -15,9 +15,7 @@ export default function SsoLoginRedirect() {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [otp, setOtp] = useState('');
   const [error, setError] = useState('');
-  const [setupUrl, setSetupUrl] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
   const next = params.get('next') || '/portal';
@@ -38,7 +36,6 @@ export default function SsoLoginRedirect() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    setSetupUrl(null);
     setBusy(true);
     try {
       AuthService.prepareForLogin();
@@ -48,12 +45,11 @@ export default function SsoLoginRedirect() {
           method: 'POST',
           credentials: 'include',
           headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-          body: JSON.stringify({ username: email.trim(), password, otp: otp.trim() || undefined }),
+          body: JSON.stringify({ username: email.trim(), password }),
         },
       );
-      const data = await res.json().catch(() => ({})) as { message?: string; setup_url?: string; redirect_url?: string };
+      const data = await res.json().catch(() => ({})) as { message?: string; redirect_url?: string };
       if (!res.ok) {
-        if (data.setup_url) setSetupUrl(data.setup_url);
         setError(data.message || 'Invalid email or password.');
         return;
       }
@@ -76,8 +72,6 @@ export default function SsoLoginRedirect() {
     );
   }
 
-  const enrollHref = setupUrl || AuthService.mfaSetupUrl(safeNext);
-
   return (
     <Box
       component="form"
@@ -88,19 +82,10 @@ export default function SsoLoginRedirect() {
       <Typography color="text.secondary">Sign in with your om.internal account.</Typography>
       <TextField label="Email" type="email" fullWidth required value={email} onChange={(ev) => setEmail(ev.target.value)} autoComplete="username" />
       <TextField label="Password" type="password" fullWidth required value={password} onChange={(ev) => setPassword(ev.target.value)} autoComplete="current-password" />
-      <TextField
-        label="Authenticator code"
-        fullWidth
-        value={otp}
-        onChange={(ev) => setOtp(ev.target.value.replace(/\D/g, '').slice(0, 6))}
-        inputProps={{ inputMode: 'numeric', maxLength: 6, autoComplete: 'one-time-code' }}
-        placeholder="Enter 6-digit code"
-      />
       {error ? <Typography color="error" variant="body2">{error}</Typography> : null}
       <Button type="submit" variant="contained" fullWidth disabled={busy}>
         {busy ? 'Signing in…' : 'Sign in'}
       </Button>
-      <Button variant="text" href={enrollHref}>Set up authenticator app</Button>
       <Button variant="text" href={`/auth/login2?next=${encodeURIComponent(safeNext)}`}>Use platform sign-in page</Button>
     </Box>
   );

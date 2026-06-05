@@ -6,7 +6,6 @@ import CustomTextField from '@/components/forms/theme-elements/CustomTextField';
 import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { loginType } from '@/types/auth/auth';
-import AuthService from '@/shared/lib/authService';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import {
     Alert,
@@ -29,10 +28,8 @@ const AuthLogin = ({ subtitle, subtext }: loginType) => {
   const [formData, setFormData] = useState({
     username: '',
     password: '',
-    otp: '',
     rememberMe: false,
   });
-  const [setupUrl, setSetupUrl] = useState<string | null>(null);
   const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
 
   const handleInputChange = (field: string) => (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -45,7 +42,6 @@ const AuthLogin = ({ subtitle, subtext }: loginType) => {
       setFormErrors((prev) => ({ ...prev, [field]: '' }));
     }
     if (error) clearError();
-    if (setupUrl) setSetupUrl(null);
   };
 
   const handleRememberMeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -65,12 +61,10 @@ const AuthLogin = ({ subtitle, subtext }: loginType) => {
     if (!validateForm()) return;
 
     try {
-      setSetupUrl(null);
       const result = await login(
         formData.username,
         formData.password,
         formData.rememberMe,
-        formData.otp.trim() || undefined,
       );
       if (result && typeof result === 'object' && 'pendingRedirect' in result && (result as { pendingRedirect?: boolean }).pendingRedirect) {
         return;
@@ -87,13 +81,9 @@ const AuthLogin = ({ subtitle, subtext }: loginType) => {
         }
       }
     } catch (err: unknown) {
-      const e = err as { setupUrl?: string };
-      if (e.setupUrl) setSetupUrl(e.setupUrl);
       console.error('Login failed:', err);
     }
   };
-
-  const enrollHref = setupUrl || AuthService.mfaSetupUrl('/portal');
 
   return (
     <>
@@ -105,13 +95,6 @@ const AuthLogin = ({ subtitle, subtext }: loginType) => {
             <Typography variant="body1" component="div" sx={{ mb: 1 }}>
               {error}
             </Typography>
-            {(error.includes('authenticator') || setupUrl) && (
-              <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.875rem' }}>
-                <Typography component="a" href={enrollHref} sx={{ color: 'primary.main', textDecoration: 'underline' }}>
-                  {t('auth.setup_authenticator')}
-                </Typography>
-              </Typography>
-            )}
             {error.includes('connecting to the server') && (
               <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.875rem' }}>
                 {t('auth.error_still_trouble')}{' '}
@@ -164,19 +147,6 @@ const AuthLogin = ({ subtitle, subtext }: loginType) => {
               autoComplete="current-password"
             />
           </Box>
-          <Box>
-            <CustomFormLabel htmlFor="otp">{t('auth.label_otp')}</CustomFormLabel>
-            <CustomTextField
-              id="otp"
-              variant="outlined"
-              fullWidth
-              value={formData.otp}
-              onChange={handleInputChange('otp')}
-              disabled={loading}
-              inputProps={{ inputMode: 'numeric', pattern: '[0-9]*', maxLength: 6, autoComplete: 'one-time-code' }}
-              placeholder={t('auth.otp_placeholder')}
-            />
-          </Box>
           <Stack justifyContent="space-between" direction="row" alignItems="center" my={2}>
             <FormGroup>
               <FormControlLabel
@@ -208,11 +178,6 @@ const AuthLogin = ({ subtitle, subtext }: loginType) => {
             {loading ? t('auth.btn_signing_in') : t('auth.btn_sign_in')}
           </Button>
         </Box>
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 2, textAlign: 'center' }}>
-          <Typography component="a" href={AuthService.mfaSetupUrl('/portal')} sx={{ color: 'primary.main', textDecoration: 'underline' }}>
-            {t('auth.setup_authenticator')}
-          </Typography>
-        </Typography>
       </Box>
       {subtitle}
     </>
