@@ -1,8 +1,16 @@
 /**
- * Field Configuration — localStorage-based field label/visibility overrides.
- * Merges user overrides onto default fields from recordFields.ts.
+ * Field Configuration — church-level record field labels/headers/visibility.
+ * Falls back to localStorage overrides for legacy OCR workbench flows.
  */
 
+import { apiClient } from '@/shared/lib/axiosInstance';
+import {
+  type ChurchRecordFieldConfig,
+  type RecordTypeKey,
+  resolveRecordFields,
+  resolveAllRecordFieldRows,
+  type FieldDefinition,
+} from '../config/recordFields';
 import { getFieldsForType, type RecordField } from './recordFields';
 
 export interface FieldOverride {
@@ -16,9 +24,6 @@ function storageKey(recordType: string): string {
   return `${STORAGE_PREFIX}${recordType}`;
 }
 
-/**
- * Get user overrides for a record type from localStorage.
- */
 export function getFieldOverrides(recordType: string): Record<string, FieldOverride> {
   try {
     const raw = localStorage.getItem(storageKey(recordType));
@@ -27,24 +32,44 @@ export function getFieldOverrides(recordType: string): Record<string, FieldOverr
   return {};
 }
 
-/**
- * Save field overrides to localStorage.
- */
 export function saveFieldOverrides(recordType: string, overrides: Record<string, FieldOverride>): void {
   localStorage.setItem(storageKey(recordType), JSON.stringify(overrides));
 }
 
-/**
- * Reset overrides back to defaults (clears localStorage key).
- */
 export function resetFieldOverrides(recordType: string): void {
   localStorage.removeItem(storageKey(recordType));
 }
 
-/**
- * Get customized fields for a record type — merges overrides onto defaults,
- * filters out hidden fields.
- */
+export async function fetchChurchRecordFields(churchId: number): Promise<ChurchRecordFieldConfig> {
+  const res: any = await apiClient.get(`/api/church/${churchId}/ocr/record-fields`);
+  const data = res?.data ?? res;
+  return data?.fields || {};
+}
+
+export async function saveChurchRecordFields(
+  churchId: number,
+  recordFieldConfig: ChurchRecordFieldConfig,
+): Promise<ChurchRecordFieldConfig> {
+  const res: any = await apiClient.put(`/api/church/${churchId}/ocr/record-fields`, { recordFieldConfig });
+  const data = res?.data ?? res;
+  return data?.fields || {};
+}
+
+export function getReviewFieldsForType(
+  recordType: string,
+  churchConfig?: ChurchRecordFieldConfig | null,
+): FieldDefinition[] {
+  return resolveRecordFields(recordType, churchConfig);
+}
+
+export function getEditableRowsForType(
+  recordType: RecordTypeKey,
+  churchConfig?: ChurchRecordFieldConfig | null,
+) {
+  return resolveAllRecordFieldRows(recordType, churchConfig);
+}
+
+/** Legacy workbench helper — prefers church config, then localStorage overrides. */
 export function getCustomFieldsForType(recordType: string): RecordField[] {
   const defaults = getFieldsForType(recordType);
   const overrides = getFieldOverrides(recordType);

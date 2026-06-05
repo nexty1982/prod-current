@@ -209,6 +209,10 @@ const OCRSettingsPage: React.FC = () => {
 
       {/* Tabs */}
       <Paper sx={{ mb: 3 }}>
+        <Alert severity="info" sx={{ m: 2, mb: 0 }}>
+          Configure baptism, marriage, and funeral ledger column headers on the{' '}
+          <a href="/devel/ocr-studio/record-fields">Record Headers</a> page.
+        </Alert>
         <Tabs
           value={activeTab}
           onChange={handleTabChange}

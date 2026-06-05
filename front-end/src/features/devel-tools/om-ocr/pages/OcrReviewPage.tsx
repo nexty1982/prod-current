@@ -6,7 +6,11 @@
  */
 
 import { useAuth } from '@/context/AuthContext';
-import { RECORD_FIELDS } from '@/features/devel-tools/om-ocr/config/recordFields';
+import {
+  fetchChurchRecordFields,
+  getReviewFieldsForType,
+} from '@/features/devel-tools/om-ocr/utils/fieldConfig';
+import type { ChurchRecordFieldConfig } from '@/features/devel-tools/om-ocr/config/recordFields';
 import FusionOverlay from '@/features/devel-tools/om-ocr/components/FusionOverlay';
 import {
   computeReviewFieldHighlightBoxes,
@@ -112,6 +116,7 @@ const OcrReviewPage: React.FC = () => {
   const [imageZoom, setImageZoom] = useState(100);
   const [imageDimensions, setImageDimensions] = useState({ width: 0, height: 0, naturalWidth: 0, naturalHeight: 0 });
   const [imageReady, setImageReady] = useState(false);
+  const [churchFieldConfig, setChurchFieldConfig] = useState<ChurchRecordFieldConfig | null>(null);
   const imageRef = useRef<HTMLImageElement>(null);
 
   const backPath = isPortal ? '/portal/upload' : '/devel/ocr-studio/upload';
@@ -119,7 +124,10 @@ const OcrReviewPage: React.FC = () => {
     ? (isPortal ? `/portal/ocr/review/${churchId}` : `/devel/ocr-studio/review/${churchId}`)
     : backPath;
 
-  const fieldDefs = RECORD_FIELDS[recordType] || RECORD_FIELDS.baptism;
+  const fieldDefs = useMemo(
+    () => getReviewFieldsForType(recordType, churchFieldConfig),
+    [recordType, churchFieldConfig],
+  );
 
   const selectedJob = useMemo(
     () => jobs.find((j) => Number(j.id) === selectedJobId) ?? null,
@@ -220,6 +228,16 @@ const OcrReviewPage: React.FC = () => {
   }, [churchId]);
 
   useEffect(() => { loadJobs(); }, [loadJobs]);
+
+  useEffect(() => {
+    if (!churchId) {
+      setChurchFieldConfig(null);
+      return;
+    }
+    fetchChurchRecordFields(churchId)
+      .then(setChurchFieldConfig)
+      .catch(() => setChurchFieldConfig(null));
+  }, [churchId]);
 
   useEffect(() => {
     if (churchId && selectedJobId) loadExtract(selectedJobId);

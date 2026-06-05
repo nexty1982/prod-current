@@ -56,7 +56,7 @@ const NAV_GROUPS: NavGroup[] = [
     sectionKey: 'parish.data_configuration',
     items: [
       { labelKey: 'parish.database_mapping', path: `${BASE}/database-mapping`, icon: <StorageOutlinedIcon fontSize="small" /> },
-      { labelKey: 'parish.record_settings', path: `${BASE}/record-settings`, icon: <DescriptionOutlinedIcon fontSize="small" />, hidden: true },
+      { labelKey: 'parish.record_settings', path: `${BASE}/record-settings`, icon: <DescriptionOutlinedIcon fontSize="small" /> },
     ],
   },
   {

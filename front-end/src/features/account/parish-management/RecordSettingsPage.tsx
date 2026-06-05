@@ -1,169 +1,291 @@
 /**
- * RecordSettingsPage — Per-record-type toggle settings.
+ * RecordSettingsPage — Configure ledger table headers and visible fields
+ * for baptism, marriage, and funeral records (per church).
  */
 
-import React, { useState } from 'react';
-import { Box, Paper, Typography, Switch, useTheme } from '@mui/material';
-import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
-import FavoriteOutlinedIcon from '@mui/icons-material/FavoriteOutlined';
-import { useLanguage } from '@/context/LanguageContext';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  Alert,
+  Box,
+  Button,
+  Chip,
+  CircularProgress,
+  IconButton,
+  Paper,
+  Stack,
+  Switch,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tabs,
+  TextField,
+  Typography,
+  useTheme,
+} from '@mui/material';
+import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
+import RestartAltIcon from '@mui/icons-material/RestartAlt';
+import SaveOutlinedIcon from '@mui/icons-material/SaveOutlined';
+import { useLocation } from 'react-router-dom';
+import { useChurch } from '@/context/ChurchContext';
+import OcrStudioNav from '@/features/devel-tools/om-ocr/components/OcrStudioNav';
+import {
+  type ChurchRecordFieldConfig,
+  type ChurchRecordFieldRow,
+  type RecordTypeKey,
+} from '@/features/devel-tools/om-ocr/config/recordFields';
+import {
+  fetchChurchRecordFields,
+  saveChurchRecordFields,
+} from '@/features/devel-tools/om-ocr/utils/fieldConfig';
 import PreviewBanner from './PreviewBanner';
 
-interface RecordTypeConfig {
-  nameKey: string;
-  icon: React.ElementType;
-  count: number;
-  settings: { labelKey: string; enabled: boolean }[];
-}
-
-const initialRecordTypes: RecordTypeConfig[] = [
-  {
-    nameKey: 'parish.baptism_records',
-    icon: DescriptionOutlinedIcon,
-    count: 1248,
-    settings: [
-      { labelKey: 'parish.require_godparent', enabled: true },
-      { labelKey: 'parish.auto_certificate', enabled: true },
-      { labelKey: 'parish.send_notifications', enabled: false },
-    ],
-  },
-  {
-    nameKey: 'parish.marriage_records',
-    icon: FavoriteOutlinedIcon,
-    count: 456,
-    settings: [
-      { labelKey: 'parish.require_witness', enabled: true },
-      { labelKey: 'parish.track_premarital', enabled: true },
-      { labelKey: 'parish.generate_marriage_cert', enabled: true },
-    ],
-  },
-  {
-    nameKey: 'parish.funeral_records',
-    icon: DescriptionOutlinedIcon,
-    count: 892,
-    settings: [
-      { labelKey: 'parish.record_burial', enabled: true },
-      { labelKey: 'parish.track_memorial', enabled: false },
-      { labelKey: 'parish.link_family', enabled: true },
-    ],
-  },
+const RECORD_TYPES: Array<{ key: RecordTypeKey; label: string }> = [
+  { key: 'baptism', label: 'Baptism' },
+  { key: 'marriage', label: 'Marriage' },
+  { key: 'funeral', label: 'Funeral' },
 ];
+
+function reorderRows(rows: ChurchRecordFieldRow[], from: number, dir: -1 | 1): ChurchRecordFieldRow[] {
+  const to = from + dir;
+  if (to < 0 || to >= rows.length) return rows;
+  const next = [...rows];
+  const [item] = next.splice(from, 1);
+  next.splice(to, 0, item);
+  return next.map((r, idx) => ({ ...r, sortOrder: idx }));
+}
 
 const RecordSettingsPage: React.FC = () => {
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
-  const { t } = useLanguage();
-  const [recordTypes, setRecordTypes] = useState(initialRecordTypes);
+  const { selectedChurch } = useChurch();
+  const location = useLocation();
+  const isOcrStudio = location.pathname.includes('/devel/ocr-studio');
 
-  const toggleSetting = (rtIdx: number, settingIdx: number) => {
-    setRecordTypes((prev) =>
-      prev.map((rt, i) =>
-        i === rtIdx
-          ? {
-              ...rt,
-              settings: rt.settings.map((s, j) =>
-                j === settingIdx ? { ...s, enabled: !s.enabled } : s,
-              ),
-            }
-          : rt,
-      ),
-    );
+  const churchId = selectedChurch?.church_id ? Number(selectedChurch.church_id) : null;
+
+  const [activeType, setActiveType] = useState<RecordTypeKey>('baptism');
+  const [config, setConfig] = useState<ChurchRecordFieldConfig>({});
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+  const [dirty, setDirty] = useState(false);
+
+  const loadConfig = useCallback(async () => {
+    if (!churchId) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const fields = await fetchChurchRecordFields(churchId);
+      setConfig(fields);
+      setDirty(false);
+    } catch (err: any) {
+      setError(err?.response?.data?.error || err?.message || 'Failed to load configuration');
+    } finally {
+      setLoading(false);
+    }
+  }, [churchId]);
+
+  useEffect(() => { loadConfig(); }, [loadConfig]);
+
+  const rows = useMemo(
+    () => config[activeType] || [],
+    [config, activeType],
+  );
+
+  const updateRow = (index: number, patch: Partial<ChurchRecordFieldRow>) => {
+    setConfig((prev) => {
+      const current = [...(prev[activeType] || [])];
+      current[index] = { ...current[index], ...patch };
+      return { ...prev, [activeType]: current };
+    });
+    setDirty(true);
+    setSuccess(false);
   };
+
+  const moveRow = (index: number, dir: -1 | 1) => {
+    setConfig((prev) => ({
+      ...prev,
+      [activeType]: reorderRows(prev[activeType] || [], index, dir),
+    }));
+    setDirty(true);
+    setSuccess(false);
+  };
+
+  const handleSave = async () => {
+    if (!churchId) return;
+    setSaving(true);
+    setError(null);
+    try {
+      const saved = await saveChurchRecordFields(churchId, config);
+      setConfig(saved);
+      setDirty(false);
+      setSuccess(true);
+    } catch (err: any) {
+      setError(err?.response?.data?.error || err?.message || 'Failed to save configuration');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleReset = () => {
+    loadConfig();
+  };
+
+  if (!churchId) {
+    return (
+      <Box>
+        {isOcrStudio && <OcrStudioNav />}
+        <Alert severity="info">Select a church to configure record table headers.</Alert>
+      </Box>
+    );
+  }
 
   return (
     <Box>
+      {isOcrStudio && <OcrStudioNav />}
+
       <Box sx={{ mb: 3 }}>
         <Typography sx={{ fontFamily: "'Inter'", fontSize: '1.25rem', fontWeight: 600, color: isDark ? '#f3f4f6' : '#111827', mb: 0.5 }}>
-          {t('parish.record_settings')}
+          Record table headers
         </Typography>
         <Typography sx={{ fontFamily: "'Inter'", fontSize: '0.8125rem', color: isDark ? '#9ca3af' : '#6b7280' }}>
-          {t('parish.record_settings_desc')}
+          Match your parish ledger columns for baptism, marriage, and funeral books.
+          Set the printed header text, display labels, and which fields appear during OCR review.
+          Fields like &ldquo;Parents Name&rdquo; are omitted by default — use separate father and mother columns instead.
         </Typography>
+        {selectedChurch?.church_name && (
+          <Chip size="small" label={selectedChurch.church_name} sx={{ mt: 1.5 }} />
+        )}
       </Box>
 
-      <PreviewBanner />
+      {!isOcrStudio && <PreviewBanner />}
 
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-        {recordTypes.map((rt, rtIdx) => {
-          const Icon = rt.icon;
-          return (
-            <Paper
-              key={rt.nameKey}
-              variant="outlined"
-              sx={{
-                borderRadius: 2,
-                borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.08)',
-                overflow: 'hidden',
-              }}
-            >
-              <Box
-                sx={{
-                  px: 2.5,
-                  py: 1.5,
-                  borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`,
-                  bgcolor: isDark ? 'rgba(255,255,255,0.03)' : '#f9fafb',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                }}
-              >
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                  <Box sx={{ p: 0.75, borderRadius: 1.5, bgcolor: isDark ? 'rgba(45,27,78,0.3)' : 'rgba(45,27,78,0.08)' }}>
-                    <Icon sx={{ fontSize: 18, color: isDark ? '#d4af37' : '#2d1b4e' }} />
-                  </Box>
-                  <Box>
-                    <Typography sx={{ fontFamily: "'Inter'", fontSize: '0.875rem', fontWeight: 600, color: isDark ? '#f3f4f6' : '#111827' }}>
-                      {t(rt.nameKey)}
-                    </Typography>
-                    <Typography sx={{ fontFamily: "'Inter'", fontSize: '0.6875rem', color: isDark ? '#9ca3af' : '#6b7280' }}>
-                      {rt.count.toLocaleString()} {t('parish.records_count')}
-                    </Typography>
-                  </Box>
-                </Box>
-                <Typography
-                  component="span"
-                  role="button"
-                  tabIndex={0}
-                  aria-label={`Configure ${t(rt.nameKey)}`}
-                  sx={{
-                    fontFamily: "'Inter'",
-                    fontSize: '0.75rem',
-                    fontWeight: 500,
-                    color: isDark ? '#d4af37' : '#2d1b4e',
-                    cursor: 'pointer',
-                    '&:hover': { textDecoration: 'underline' },
-                  }}
-                >
-                  {t('parish.configure')}
-                </Typography>
-              </Box>
-              <Box sx={{ px: 2.5 }}>
-                {rt.settings.map((setting, sIdx) => (
-                  <Box
-                    key={setting.labelKey}
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      py: 1.5,
-                      borderBottom: sIdx < rt.settings.length - 1 ? `1px solid ${isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)'}` : 'none',
-                    }}
-                  >
-                    <Typography sx={{ fontFamily: "'Inter'", fontSize: '0.8125rem', color: isDark ? '#f3f4f6' : '#111827' }}>
-                      {t(setting.labelKey)}
-                    </Typography>
-                    <Switch
-                      size="small"
-                      checked={setting.enabled}
-                      onChange={() => toggleSetting(rtIdx, sIdx)}
-                    />
-                  </Box>
+      <Paper variant="outlined" sx={{ borderRadius: 2, overflow: 'hidden', mb: 2 }}>
+        <Tabs
+          value={activeType}
+          onChange={(_, v) => setActiveType(v)}
+          sx={{ px: 2, borderBottom: 1, borderColor: 'divider' }}
+        >
+          {RECORD_TYPES.map((rt) => (
+            <Tab key={rt.key} value={rt.key} label={rt.label} sx={{ textTransform: 'none' }} />
+          ))}
+        </Tabs>
+
+        {loading ? (
+          <Box sx={{ py: 6, display: 'flex', justifyContent: 'center' }}>
+            <CircularProgress size={28} />
+          </Box>
+        ) : (
+          <TableContainer>
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell sx={{ width: 48 }} />
+                  <TableCell sx={{ fontWeight: 600, width: 160 }}>Field key</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>Display label</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>Ledger header (as printed)</TableCell>
+                  <TableCell sx={{ fontWeight: 600, width: 90 }} align="center">Required</TableCell>
+                  <TableCell sx={{ fontWeight: 600, width: 90 }} align="center">Visible</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {rows.map((row, idx) => (
+                  <TableRow key={row.key} sx={{ opacity: row.visible ? 1 : 0.55 }}>
+                    <TableCell>
+                      <Stack direction="row" spacing={0}>
+                        <IconButton size="small" disabled={idx === 0} onClick={() => moveRow(idx, -1)}>
+                          <ArrowUpwardIcon fontSize="small" />
+                        </IconButton>
+                        <IconButton size="small" disabled={idx === rows.length - 1} onClick={() => moveRow(idx, 1)}>
+                          <ArrowDownwardIcon fontSize="small" />
+                        </IconButton>
+                      </Stack>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="caption" sx={{ fontFamily: 'monospace' }}>{row.key}</Typography>
+                    </TableCell>
+                    <TableCell>
+                      <TextField
+                        size="small"
+                        fullWidth
+                        value={row.label}
+                        onChange={(e) => updateRow(idx, { label: e.target.value })}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <TextField
+                        size="small"
+                        fullWidth
+                        value={row.headerLabel}
+                        onChange={(e) => updateRow(idx, { headerLabel: e.target.value })}
+                        placeholder="Column heading on ledger"
+                      />
+                    </TableCell>
+                    <TableCell align="center">
+                      <Switch
+                        size="small"
+                        checked={row.required}
+                        onChange={(e) => updateRow(idx, { required: e.target.checked })}
+                      />
+                    </TableCell>
+                    <TableCell align="center">
+                      <Switch
+                        size="small"
+                        checked={row.visible}
+                        onChange={(e) => updateRow(idx, { visible: e.target.checked })}
+                      />
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </Box>
-            </Paper>
-          );
-        })}
-      </Box>
+              </TableBody>
+            </Table>
+          </TableContainer>
+        )}
+      </Paper>
+
+      <Stack direction="row" spacing={1.5} alignItems="center">
+        <Button
+          variant="contained"
+          startIcon={saving ? <CircularProgress size={16} color="inherit" /> : <SaveOutlinedIcon />}
+          disabled={saving || loading || !dirty}
+          onClick={handleSave}
+        >
+          Save configuration
+        </Button>
+        <Button
+          variant="outlined"
+          startIcon={<RestartAltIcon />}
+          disabled={loading}
+          onClick={handleReset}
+        >
+          Reset
+        </Button>
+        {dirty && (
+          <Typography variant="caption" color="text.secondary">Unsaved changes</Typography>
+        )}
+      </Stack>
+
+      {success && (
+        <Alert severity="success" sx={{ mt: 2 }} onClose={() => setSuccess(false)}>
+          Record field configuration saved.
+        </Alert>
+      )}
+      {error && (
+        <Alert severity="error" sx={{ mt: 2 }} onClose={() => setError(null)}>
+          {error}
+        </Alert>
+      )}
+
+      <Alert severity="info" sx={{ mt: 3 }}>
+        These settings apply to OCR review, agent extraction labels, and field highlights.
+        Re-run the agent on existing jobs after changing headers so labels stay in sync.
+      </Alert>
     </Box>
   );
 };

@@ -10,6 +10,7 @@ import {
   Settings as SettingsIcon,
   CloudUpload as UploadIcon,
   ViewColumn as ViewColumnIcon,
+  TableRows as TableRowsIcon,
 } from '@mui/icons-material';
 import { alpha, Box, Button, Stack, useTheme } from '@mui/material';
 import React from 'react';
@@ -25,6 +26,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'Hub',              path: '/devel/ocr-studio',                 icon: <HomeIcon fontSize="small" /> },
   { label: 'Upload',           path: '/devel/ocr-studio/upload',          icon: <UploadIcon fontSize="small" /> },
   { label: 'Job History',      path: '/devel/ocr-studio/jobs',            icon: <HistoryIcon fontSize="small" /> },
+  { label: 'Record Headers',   path: '/devel/ocr-studio/record-fields',   icon: <TableRowsIcon fontSize="small" /> },
   { label: 'Settings',         path: '/devel/ocr-studio/settings',        icon: <SettingsIcon fontSize="small" /> },
   { label: 'Table Extractor',  path: '/devel/ocr-studio/table-extractor', icon: <AssessmentIcon fontSize="small" /> },
   { label: 'Layout Templates', path: '/devel/ocr-studio/layout-templates', icon: <ViewColumnIcon fontSize="small" /> },

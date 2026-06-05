@@ -17,7 +17,7 @@ const OCR_AGENT_VISION_MAX_BYTES = 4 * 1024 * 1024;
 const RECORD_FIELD_KEYS: Record<string, string[]> = {
   baptism: [
     'record_number', 'child_name', 'date_of_birth', 'place_of_birth', 'father_name',
-    'mother_name', 'parents_name', 'address', 'date_of_baptism', 'godparents',
+    'mother_name', 'address', 'date_of_baptism', 'godparents',
     'performed_by', 'church', 'notes',
   ],
   marriage: [

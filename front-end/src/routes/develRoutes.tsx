@@ -19,6 +19,7 @@ import {
 const WorkSessionAdmin = Loadable(lazy(() => import('../features/devel-tools/work-sessions/WorkSessionAdminPage')));
 const BadgeStateManagerPage = Loadable(lazy(() => import('../features/devel-tools/badge-state-manager/BadgeStateManagerPage')));
 const OCRSettingsPage = Loadable(lazy(() => import('../features/devel-tools/om-ocr/pages/OCRSettingsPage')));
+const PMRecordSettingsPage = Loadable(lazy(() => import('../features/account/parish-management/RecordSettingsPage')));
 const OcrSetupWizardPage = Loadable(lazy(() => import('../features/devel-tools/om-ocr/pages/OcrSetupWizardPage')));
 const OcrReviewPage = Loadable(lazy(() => import('../features/devel-tools/om-ocr/pages/OcrReviewPage')));
 const OcrTableExtractorPage = Loadable(lazy(() => import('../features/devel-tools/om-ocr/pages/OcrTableExtractorPage')));
@@ -44,6 +45,7 @@ export const develRoutes = [
   guardedRoute('/devel/ocr-studio/jobs', <OcrActivityMonitor />, ROLE_SUPER),
   guardedRoute('/devel/ocr-studio/table-extractor', <OcrTableExtractorPage />, ROLE_SUPER),
   guardedRoute('/devel/ocr-studio/layout-templates', <LayoutTemplateEditorPage />, ROLE_SUPER),
+  guardedRoute('/devel/ocr-studio/record-fields', <PMRecordSettingsPage />, ROLE_STAFF),
   guardedRoute('/devel/ocr-studio/settings', <OCRSettingsPage />, ROLE_STAFF),
   // Legacy OCR routes → canonical OCR Studio paths
   redirectRoute('/devel/enhanced-ocr-uploader', '/devel/ocr-studio/upload'),

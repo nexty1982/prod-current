@@ -66,6 +66,9 @@ router.get(['/', '/settings'], async (req: any, res: any) => {
             if (jsonSettings.documentDeletion) {
               loadedSettings.documentDeletion = jsonSettings.documentDeletion;
             }
+            if (jsonSettings.recordFieldConfig) {
+              loadedSettings.recordFieldConfig = jsonSettings.recordFieldConfig;
+            }
           } catch (e) {
             console.warn('[OCR Settings] Failed to parse settings_json:', e);
           }
@@ -259,11 +262,25 @@ router.put(['/', '/settings'], async (req: any, res: any) => {
     }
 
     // Store document processing and deletion settings in JSON column
-    if (settings.documentProcessing || settings.documentDeletion) {
+    if (settings.documentProcessing || settings.documentDeletion || settings.recordFieldConfig) {
       try {
+        let existingJson: any = {};
+        try {
+          const [rows] = await db.query(
+            `SELECT settings_json FROM ocr_settings WHERE church_id = ? LIMIT 1`,
+            [churchId],
+          );
+          if (rows?.[0]?.settings_json) {
+            existingJson = typeof rows[0].settings_json === 'string'
+              ? JSON.parse(rows[0].settings_json)
+              : rows[0].settings_json;
+          }
+        } catch { /* ignore */ }
+
         const settingsJson = JSON.stringify({
-          documentProcessing: settings.documentProcessing,
-          documentDeletion: settings.documentDeletion,
+          documentProcessing: settings.documentProcessing ?? existingJson.documentProcessing,
+          documentDeletion: settings.documentDeletion ?? existingJson.documentDeletion,
+          recordFieldConfig: settings.recordFieldConfig ?? existingJson.recordFieldConfig,
         });
 
         try {
@@ -293,6 +310,182 @@ router.put(['/', '/settings'], async (req: any, res: any) => {
   } catch (error: any) {
     console.error('Error saving church OCR settings:', error);
     res.status(500).json({ error: 'Failed to save OCR settings', message: error.message });
+  }
+});
+
+const RECORD_TYPES = ['baptism', 'marriage', 'funeral'];
+
+const DEFAULT_RECORD_FIELD_CONFIG: Record<string, Array<{
+  key: string;
+  label: string;
+  headerLabel: string;
+  required: boolean;
+  visible: boolean;
+  sortOrder: number;
+  type: string;
+}>> = {
+  baptism: [
+    { key: 'record_number', label: 'Record #', headerLabel: 'NUMBER', required: false, visible: true, sortOrder: 0, type: 'text' },
+    { key: 'date_of_birth', label: 'Date of Birth', headerLabel: 'BIRTH', required: false, visible: true, sortOrder: 1, type: 'date' },
+    { key: 'date_of_baptism', label: 'Date of Baptism', headerLabel: 'BAPTISM', required: true, visible: true, sortOrder: 2, type: 'date' },
+    { key: 'child_name', label: 'Name of Child', headerLabel: 'NAME OF CHILD', required: true, visible: true, sortOrder: 3, type: 'text' },
+    { key: 'place_of_birth', label: 'City of Birth', headerLabel: 'CITY OF BIRTH', required: false, visible: true, sortOrder: 4, type: 'text' },
+    { key: 'father_name', label: "Father's Full Name", headerLabel: "FATHER'S FULL NAME", required: false, visible: true, sortOrder: 5, type: 'text' },
+    { key: 'mother_name', label: "Mother's Maiden Name", headerLabel: "MOTHER'S MAIDEN NAME", required: false, visible: true, sortOrder: 6, type: 'text' },
+    { key: 'godparents', label: 'Sponsors', headerLabel: 'FULL NAMES OF SPONSORS', required: false, visible: true, sortOrder: 7, type: 'text' },
+    { key: 'performed_by', label: "Priest's Name", headerLabel: "PRIEST'S NAME", required: false, visible: true, sortOrder: 8, type: 'text' },
+    { key: 'address', label: 'Address', headerLabel: 'ADDRESS', required: false, visible: false, sortOrder: 9, type: 'text' },
+    { key: 'church', label: 'Church', headerLabel: 'CHURCH', required: false, visible: false, sortOrder: 10, type: 'text' },
+    { key: 'notes', label: 'Notes', headerLabel: 'NOTES', required: false, visible: false, sortOrder: 11, type: 'textarea' },
+  ],
+  marriage: [
+    { key: 'record_number', label: 'Record #', headerLabel: 'NUMBER', required: false, visible: true, sortOrder: 0, type: 'text' },
+    { key: 'groom_name', label: 'Groom Name', headerLabel: 'GROOM', required: true, visible: true, sortOrder: 1, type: 'text' },
+    { key: 'bride_name', label: 'Bride Name', headerLabel: 'BRIDE', required: true, visible: true, sortOrder: 2, type: 'text' },
+    { key: 'date_of_marriage', label: 'Date of Marriage', headerLabel: 'DATE OF MARRIAGE', required: true, visible: true, sortOrder: 3, type: 'date' },
+    { key: 'place_of_marriage', label: 'Place of Marriage', headerLabel: 'PLACE OF MARRIAGE', required: false, visible: true, sortOrder: 4, type: 'text' },
+    { key: 'witnesses', label: 'Witnesses', headerLabel: 'WITNESSES', required: false, visible: true, sortOrder: 5, type: 'text' },
+    { key: 'best_man', label: 'Best Man', headerLabel: 'BEST MAN', required: false, visible: false, sortOrder: 6, type: 'text' },
+    { key: 'maid_of_honor', label: 'Maid of Honor', headerLabel: 'MAID OF HONOR', required: false, visible: false, sortOrder: 7, type: 'text' },
+    { key: 'officiant', label: 'Officiant', headerLabel: "PRIEST'S NAME", required: false, visible: true, sortOrder: 8, type: 'text' },
+    { key: 'church', label: 'Church', headerLabel: 'CHURCH', required: false, visible: false, sortOrder: 9, type: 'text' },
+    { key: 'notes', label: 'Notes', headerLabel: 'NOTES', required: false, visible: false, sortOrder: 10, type: 'textarea' },
+  ],
+  funeral: [
+    { key: 'record_number', label: 'Record #', headerLabel: 'NUMBER', required: false, visible: true, sortOrder: 0, type: 'text' },
+    { key: 'deceased_name', label: 'Name of Deceased', headerLabel: 'NAME OF DECEASED', required: true, visible: true, sortOrder: 1, type: 'text' },
+    { key: 'date_of_death', label: 'Date of Death', headerLabel: 'DATE OF DEATH', required: false, visible: true, sortOrder: 2, type: 'date' },
+    { key: 'date_of_funeral', label: 'Date of Funeral', headerLabel: 'DATE OF FUNERAL', required: false, visible: true, sortOrder: 3, type: 'date' },
+    { key: 'date_of_burial', label: 'Date of Burial', headerLabel: 'DATE OF BURIAL', required: false, visible: true, sortOrder: 4, type: 'date' },
+    { key: 'place_of_burial', label: 'Place of Burial', headerLabel: 'PLACE OF BURIAL', required: false, visible: true, sortOrder: 5, type: 'text' },
+    { key: 'age_at_death', label: 'Age at Death', headerLabel: 'AGE', required: false, visible: true, sortOrder: 6, type: 'text' },
+    { key: 'cause_of_death', label: 'Cause of Death', headerLabel: 'CAUSE OF DEATH', required: false, visible: false, sortOrder: 7, type: 'text' },
+    { key: 'next_of_kin', label: 'Next of Kin', headerLabel: 'NEXT OF KIN', required: false, visible: true, sortOrder: 8, type: 'text' },
+    { key: 'officiant', label: 'Officiant', headerLabel: "PRIEST'S NAME", required: false, visible: true, sortOrder: 9, type: 'text' },
+    { key: 'church', label: 'Church', headerLabel: 'CHURCH', required: false, visible: false, sortOrder: 10, type: 'text' },
+    { key: 'notes', label: 'Notes', headerLabel: 'NOTES', required: false, visible: false, sortOrder: 11, type: 'textarea' },
+  ],
+};
+
+function mergeRecordFieldConfig(saved: any): Record<string, any[]> {
+  const out: Record<string, any[]> = {};
+  for (const rt of RECORD_TYPES) {
+    const defaults = DEFAULT_RECORD_FIELD_CONFIG[rt] || [];
+    const savedRows = Array.isArray(saved?.[rt]) ? saved[rt] : [];
+    const savedByKey = new Map(savedRows.map((r: any) => [r.key, r]));
+    const merged = defaults.map((def) => {
+      const ovr = savedByKey.get(def.key) || {};
+      return {
+        ...def,
+        label: ovr.label ?? def.label,
+        headerLabel: ovr.headerLabel ?? def.headerLabel,
+        required: ovr.required ?? def.required,
+        visible: ovr.visible ?? def.visible,
+        sortOrder: ovr.sortOrder ?? def.sortOrder,
+      };
+    });
+    merged.sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+    out[rt] = merged;
+  }
+  return out;
+}
+
+async function loadSettingsJson(db: any, churchId: number): Promise<any> {
+  try {
+    const [rows] = await db.query(
+      `SELECT settings_json FROM ocr_settings WHERE church_id = ? LIMIT 1`,
+      [churchId],
+    );
+    if (!rows?.[0]?.settings_json) return {};
+    return typeof rows[0].settings_json === 'string'
+      ? JSON.parse(rows[0].settings_json)
+      : rows[0].settings_json;
+  } catch {
+    return {};
+  }
+}
+
+async function saveSettingsJson(db: any, churchId: number, patch: any): Promise<void> {
+  const existing = await loadSettingsJson(db, churchId);
+  const next = { ...existing, ...patch };
+  const settingsJson = JSON.stringify(next);
+  try {
+    await db.query(
+      `UPDATE ocr_settings SET settings_json = ?, updated_at = NOW() WHERE church_id = ?`,
+      [settingsJson, churchId],
+    );
+  } catch (jsonError: any) {
+    if (jsonError.code === 'ER_BAD_FIELD_ERROR') {
+      await db.query(`ALTER TABLE ocr_settings ADD COLUMN settings_json JSON NULL`);
+      await db.query(
+        `UPDATE ocr_settings SET settings_json = ?, updated_at = NOW() WHERE church_id = ?`,
+        [settingsJson, churchId],
+      );
+    } else {
+      throw jsonError;
+    }
+  }
+}
+
+// GET /api/church/:churchId/ocr/record-fields
+router.get('/record-fields', async (req: any, res: any) => {
+  try {
+    const churchId = parseInt(req.params.churchId, 10);
+    const resolved = await resolveChurchDb(churchId);
+    if (!resolved) return res.status(404).json({ error: 'Church not found' });
+    const { db } = resolved;
+    const json = await loadSettingsJson(db, churchId);
+    const fields = mergeRecordFieldConfig(json.recordFieldConfig);
+    res.json({ fields, defaults: DEFAULT_RECORD_FIELD_CONFIG });
+  } catch (error: any) {
+    console.error('[OCR Record Fields] GET failed:', error);
+    res.status(500).json({ error: 'Failed to load record field configuration', message: error.message });
+  }
+});
+
+// PUT /api/church/:churchId/ocr/record-fields
+router.put('/record-fields', async (req: any, res: any) => {
+  try {
+    const churchId = parseInt(req.params.churchId, 10);
+    const { recordFieldConfig } = req.body || {};
+    if (!recordFieldConfig || typeof recordFieldConfig !== 'object') {
+      return res.status(400).json({ error: 'recordFieldConfig object is required' });
+    }
+
+    const resolved = await resolveChurchDb(churchId);
+    if (!resolved) return res.status(404).json({ error: 'Church not found' });
+    const { db } = resolved;
+
+    // Ensure base ocr_settings row exists
+    await db.query(`
+      INSERT INTO ocr_settings (church_id, updated_at)
+      VALUES (?, NOW())
+      ON DUPLICATE KEY UPDATE updated_at = NOW()
+    `, [churchId]);
+
+    const sanitized: Record<string, any[]> = {};
+    for (const rt of RECORD_TYPES) {
+      const rows = Array.isArray(recordFieldConfig[rt]) ? recordFieldConfig[rt] : [];
+      const defaults = DEFAULT_RECORD_FIELD_CONFIG[rt] || [];
+      const defaultKeys = new Set(defaults.map((d) => d.key));
+      sanitized[rt] = rows
+        .filter((r: any) => r?.key && defaultKeys.has(r.key))
+        .map((r: any, idx: number) => ({
+          key: r.key,
+          label: String(r.label || '').slice(0, 120) || undefined,
+          headerLabel: String(r.headerLabel || '').slice(0, 160) || undefined,
+          required: !!r.required,
+          visible: r.visible !== false,
+          sortOrder: typeof r.sortOrder === 'number' ? r.sortOrder : idx,
+        }));
+    }
+
+    await saveSettingsJson(db, churchId, { recordFieldConfig: sanitized });
+    const fields = mergeRecordFieldConfig(sanitized);
+    res.json({ success: true, fields });
+  } catch (error: any) {
+    console.error('[OCR Record Fields] PUT failed:', error);
+    res.status(500).json({ error: 'Failed to save record field configuration', message: error.message });
   }
 });
 
