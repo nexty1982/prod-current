@@ -826,12 +826,12 @@ export function assembleRecords(structuredTableOutput: any): AssemblyResult {
       }
     }
 
-    // Corroboration: this row or the NEXT 1-2 rows have content in key columns.
+    // Corroboration: this row or the NEXT 1-4 rows have content in key columns.
     // If it's the last row and we have a parsed number, force corroborate to prevent it merging into previous.
     const hasContent = config.corroborationColumns.some(col => !!cells[col]);
     let lookaheadCorroboration = false;
     if (!hasContent) {
-      for (let la = 1; la <= 2 && ri + la < dataRows.length; la++) {
+      for (let la = 1; la <= 4 && ri + la < dataRows.length; la++) {
         const laCells = getNormalizedCells(dataRows[ri + la]);
         if (config.corroborationColumns.some(col => !!laCells[col])) {
           lookaheadCorroboration = true;
