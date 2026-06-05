@@ -1,3 +1,4 @@
+import { useAuth } from '@/context/AuthContext';
 import { apiClient } from '@/shared/lib/axiosInstance';
 import { Settings } from '@mui/icons-material';
 import { Alert, Box, Button, CircularProgress, Typography } from '@mui/material';
@@ -15,37 +16,45 @@ interface OcrSetupGateProps {
  */
 const OcrSetupGate: React.FC<OcrSetupGateProps> = ({ children, churchId: churchIdProp }) => {
   const navigate = useNavigate();
+  const { isSuperAdmin } = useAuth();
   const [searchParams] = useSearchParams();
   const urlChurchId = parseInt(searchParams.get('church_id') || '', 10);
   const churchId = churchIdProp ?? (Number.isFinite(urlChurchId) && urlChurchId > 0 ? urlChurchId : null);
-  
+  const bypassGate = isSuperAdmin();
+
   const [setupComplete, setSetupComplete] = useState<boolean | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!bypassGate);
   const [percentComplete, setPercentComplete] = useState(0);
 
   useEffect(() => {
+    if (bypassGate) return;
     if (!churchId) {
       setSetupComplete(true);
       setLoading(false);
       return;
     }
     checkSetupStatus();
-  }, [churchId]);
+  }, [churchId, bypassGate]);
 
   const checkSetupStatus = async () => {
     if (!churchId) return;
     try {
       const res: any = await apiClient.get(`/api/church/${churchId}/ocr/setup-state`);
-      const data = res?.data ?? res;
-      setSetupComplete(data.isComplete);
-      setPercentComplete(data.percentComplete || 0);
+      const body = res?.data?.isComplete !== undefined ? res.data : res;
+      setSetupComplete(Boolean(body?.isComplete));
+      setPercentComplete(body?.percentComplete || 0);
     } catch (err) {
       console.error('Failed to check setup status:', err);
-      setSetupComplete(false);
+      // Don't hard-block on transient API errors — upload can still proceed
+      setSetupComplete(true);
     } finally {
       setLoading(false);
     }
   };
+
+  if (bypassGate) {
+    return <>{children}</>;
+  }
 
   if (loading) {
     return (
