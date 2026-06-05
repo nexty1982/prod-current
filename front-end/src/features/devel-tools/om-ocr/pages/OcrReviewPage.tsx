@@ -57,7 +57,10 @@ import {
   IconChevronUp,
   IconColumns,
   IconDatabase,
+  IconGripVertical,
   IconHandFinger,
+  IconLayoutSidebarLeftCollapse,
+  IconLayoutSidebarLeftExpand,
   IconMaximize,
   IconRefresh,
   IconRestore,
@@ -138,6 +141,9 @@ const OcrReviewPage: React.FC = () => {
   const [confirmedIndexes, setConfirmedIndexes] = useState<Set<number>>(new Set());
   const [showColumnGuides, setShowColumnGuides] = useState(true);
   const [mapHint, setMapHint] = useState<string | null>(null);
+  const [jobsCollapsed, setJobsCollapsed] = useState(false);
+  const [imagePanelWidth, setImagePanelWidth] = useState(560);
+  const contentRowRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const panRef = useRef<{ active: boolean; startX: number; startY: number; left: number; top: number; moved: boolean }>(
@@ -414,6 +420,27 @@ const OcrReviewPage: React.FC = () => {
     panRef.current.active = false;
   };
 
+  // ── Resize the image panel via the splitter ────────────────────────────────
+  const startImagePanelResize = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const row = contentRowRef.current;
+    if (!row) return;
+    const rect = row.getBoundingClientRect();
+    const onMove = (ev: MouseEvent) => {
+      let w = rect.right - ev.clientX;
+      w = Math.max(320, Math.min(rect.width - 320, w));
+      setImagePanelWidth(w);
+    };
+    const onUp = () => {
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+      document.body.style.userSelect = '';
+    };
+    document.body.style.userSelect = 'none';
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+  };
+
   // ── Click-to-map: clicking a source token fills the focused field ──────────
   const handleTokenClick = (_id: string, _bbox: any, text: string) => {
     if (!focusedField || !text) return;
@@ -543,7 +570,12 @@ const OcrReviewPage: React.FC = () => {
 
   return (
     <Box sx={{ height: 'calc(100vh - 64px)', display: 'flex', flexDirection: 'column' }}>
-      <Box sx={{ px: 2, py: 1.5, borderBottom: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center', gap: 2 }}>
+      <Box sx={{ px: 2, py: 1.5, borderBottom: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Tooltip title={jobsCollapsed ? 'Show jobs list' : 'Hide jobs list'}>
+          <IconButton size="small" onClick={() => setJobsCollapsed((v) => !v)}>
+            {jobsCollapsed ? <IconLayoutSidebarLeftExpand size={20} /> : <IconLayoutSidebarLeftCollapse size={20} />}
+          </IconButton>
+        </Tooltip>
         <Button component={Link} to={backPath} startIcon={<IconArrowLeft size={16} />} size="small" sx={{ textTransform: 'none' }}>
           Upload
         </Button>
@@ -560,7 +592,34 @@ const OcrReviewPage: React.FC = () => {
           minHeight: 0,
         }}
       >
-        {/* Job queue */}
+        {/* Job queue (collapsible) */}
+        {jobsCollapsed ? (
+          <Box
+            sx={{
+              width: 40,
+              flexShrink: 0,
+              borderRight: { md: '1px solid' },
+              borderBottom: { xs: '1px solid', md: 'none' },
+              borderColor: 'divider',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              py: 1,
+            }}
+          >
+            <Tooltip title="Show jobs list">
+              <IconButton size="small" onClick={() => setJobsCollapsed(false)}>
+                <IconLayoutSidebarLeftExpand size={20} />
+              </IconButton>
+            </Tooltip>
+            <Typography
+              variant="caption"
+              sx={{ mt: 1, writingMode: 'vertical-rl', color: 'text.secondary', userSelect: 'none' }}
+            >
+              Jobs ({jobs.length})
+            </Typography>
+          </Box>
+        ) : (
         <Box
           sx={{
             width: { xs: '100%', md: '33.333%' },
@@ -575,7 +634,14 @@ const OcrReviewPage: React.FC = () => {
           }}
         >
           <Box sx={{ p: 2 }}>
-            <Typography variant="subtitle2" fontWeight={700} sx={{ mb: 1 }}>Jobs awaiting review</Typography>
+            <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
+              <Typography variant="subtitle2" fontWeight={700}>Jobs awaiting review</Typography>
+              <Tooltip title="Hide jobs list">
+                <IconButton size="small" onClick={() => setJobsCollapsed(true)}>
+                  <IconLayoutSidebarLeftCollapse size={18} />
+                </IconButton>
+              </Tooltip>
+            </Stack>
             {jobsLoading && <CircularProgress size={24} />}
             {!jobsLoading && jobs.length === 0 && (
               <Alert severity="info">No jobs in the pipeline. Upload images first.</Alert>
@@ -603,9 +669,10 @@ const OcrReviewPage: React.FC = () => {
             </List>
           </Box>
         </Box>
+        )}
 
         {/* Confirm panel + source image */}
-        <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: { xs: 'column', lg: 'row' }, overflow: 'hidden' }}>
+        <Box ref={contentRowRef} sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: { xs: 'column', lg: 'row' }, overflow: 'hidden' }}>
           <Box sx={{ flex: 1, minWidth: 0, overflow: 'auto', p: 2 }}>
           {!selectedJobId ? (
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
@@ -810,12 +877,28 @@ const OcrReviewPage: React.FC = () => {
 
           {selectedJobId && jobImageUrl && (
             <Box
+              onMouseDown={startImagePanelResize}
               sx={{
-                width: { xs: '100%', lg: '48%' },
-                minWidth: { lg: 360 },
-                maxWidth: { lg: 720 },
+                display: { xs: 'none', lg: 'flex' },
+                width: '7px',
                 flexShrink: 0,
-                borderLeft: { lg: '1px solid' },
+                cursor: 'col-resize',
+                alignItems: 'center',
+                justifyContent: 'center',
+                bgcolor: 'divider',
+                '&:hover': { bgcolor: 'primary.main' },
+                color: 'background.paper',
+              }}
+            >
+              <IconGripVertical size={14} />
+            </Box>
+          )}
+
+          {selectedJobId && jobImageUrl && (
+            <Box
+              sx={{
+                width: { xs: '100%', lg: imagePanelWidth },
+                flexShrink: 0,
                 borderTop: { xs: '1px solid', lg: 'none' },
                 borderColor: 'divider',
                 bgcolor: 'grey.100',
