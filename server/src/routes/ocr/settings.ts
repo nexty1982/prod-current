@@ -7,8 +7,8 @@ const express = require('express');
 const router = express.Router({ mergeParams: true });
 import { resolveChurchDb } from './helpers';
 
-// GET /api/church/:churchId/ocr/settings
-router.get('/', async (req: any, res: any) => {
+// GET /api/church/:churchId/ocr/settings (also served at /ocr root for legacy clients)
+router.get(['/', '/settings'], async (req: any, res: any) => {
   try {
     const churchId = parseInt(req.params.churchId);
     console.log(`[OCR Settings] GET /api/church/${churchId}/ocr/settings`);
@@ -114,8 +114,8 @@ router.get('/', async (req: any, res: any) => {
   }
 });
 
-// PUT /api/church/:churchId/ocr/settings
-router.put('/', async (req: any, res: any) => {
+// PUT /api/church/:churchId/ocr/settings (also served at /ocr root for legacy clients)
+router.put(['/', '/settings'], async (req: any, res: any) => {
   try {
     const churchId = parseInt(req.params.churchId);
     const settings = req.body;

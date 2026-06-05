@@ -15,7 +15,6 @@ import {
   Chip,
   CircularProgress,
   Divider,
-  Grid,
   List,
   ListItemButton,
   ListItemText,
@@ -204,9 +203,29 @@ const OcrReviewPage: React.FC = () => {
         <Button size="small" startIcon={<IconRefresh size={16} />} onClick={loadJobs} disabled={jobsLoading}>Refresh</Button>
       </Box>
 
-      <Grid container sx={{ flex: 1, overflow: 'hidden' }}>
+      <Box
+        sx={{
+          flex: 1,
+          display: 'flex',
+          flexDirection: { xs: 'column', md: 'row' },
+          overflow: 'hidden',
+          minHeight: 0,
+        }}
+      >
         {/* Job queue */}
-        <Grid item xs={12} md={4} sx={{ borderRight: '1px solid', borderColor: 'divider', overflow: 'auto', height: '100%' }}>
+        <Box
+          sx={{
+            width: { xs: '100%', md: '33.333%' },
+            minWidth: { md: 280 },
+            maxWidth: { md: 400 },
+            maxHeight: { xs: '40vh', md: 'none' },
+            flexShrink: 0,
+            borderRight: { md: '1px solid' },
+            borderBottom: { xs: '1px solid', md: 'none' },
+            borderColor: 'divider',
+            overflow: 'auto',
+          }}
+        >
           <Box sx={{ p: 2 }}>
             <Typography variant="subtitle2" fontWeight={700} sx={{ mb: 1 }}>Jobs awaiting review</Typography>
             {jobsLoading && <CircularProgress size={24} />}
@@ -235,10 +254,10 @@ const OcrReviewPage: React.FC = () => {
               })}
             </List>
           </Box>
-        </Grid>
+        </Box>
 
         {/* Confirm panel */}
-        <Grid item xs={12} md={8} sx={{ overflow: 'auto', height: '100%', p: 2 }}>
+        <Box sx={{ flex: 1, minWidth: 0, overflow: 'auto', p: 2 }}>
           {!selectedJobId ? (
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
               <Typography color="text.secondary">Select a job from the queue to review extracted fields.</Typography>
@@ -267,26 +286,34 @@ const OcrReviewPage: React.FC = () => {
                   )}
 
                   <Paper variant="outlined" sx={{ p: 2 }}>
-                    <Typography variant="subtitle2" fontWeight={700} sx={{ mb: 2 }}>
-                      <IconRobot size={16} style={{ verticalAlign: 'middle', marginRight: 6 }} />
-                      Agent-extracted fields — edit and confirm
-                    </Typography>
-                    <Grid container spacing={2}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                      <IconRobot size={16} />
+                      <Typography variant="subtitle2" fontWeight={700}>
+                        Agent-extracted fields — edit and confirm
+                      </Typography>
+                    </Box>
+                    <Box
+                      sx={{
+                        display: 'grid',
+                        gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' },
+                        gap: 2,
+                      }}
+                    >
                       {fieldDefs.map((def) => (
-                        <Grid item xs={12} sm={6} key={def.name}>
-                          <TextField
-                            fullWidth
-                            size="small"
-                            label={def.label}
-                            required={def.required}
-                            value={fields[def.name] || ''}
-                            onChange={(e) => setFields((prev) => ({ ...prev, [def.name]: e.target.value }))}
-                            multiline={def.type === 'textarea'}
-                            minRows={def.type === 'textarea' ? 2 : 1}
-                          />
-                        </Grid>
+                        <TextField
+                          key={def.name}
+                          fullWidth
+                          size="small"
+                          label={def.label}
+                          required={def.required}
+                          value={fields[def.name] || ''}
+                          onChange={(e) => setFields((prev) => ({ ...prev, [def.name]: e.target.value }))}
+                          multiline={def.type === 'textarea'}
+                          minRows={def.type === 'textarea' ? 2 : 1}
+                          sx={def.type === 'textarea' ? { gridColumn: { sm: '1 / -1' } } : undefined}
+                        />
                       ))}
-                    </Grid>
+                    </Box>
                   </Paper>
 
                   <Divider />
@@ -327,8 +354,8 @@ const OcrReviewPage: React.FC = () => {
               )}
             </Stack>
           )}
-        </Grid>
-      </Grid>
+        </Box>
+      </Box>
     </Box>
   );
 };
