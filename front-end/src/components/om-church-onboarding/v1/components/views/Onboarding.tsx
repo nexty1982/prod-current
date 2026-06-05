@@ -9,14 +9,16 @@ import {
     FileText,
     Flame,
     HeartHandshake,
+    Home,
     Loader2,
     Mail,
     MapPin,
-    PartyPopper,
+    Phone,
     Search,
     ShieldCheck,
     X
 } from "lucide-react";
+import { motion } from "framer-motion";
 import SiteFooter from '@/components/frontend-pages/shared/footer/SiteFooter';
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import type { ParishGeoJSON } from "@/features/devel-tools/us-church-map/ParishDetailMap";
@@ -411,6 +413,17 @@ export function Onboarding({ onCancel, onComplete, theme, onToggleTheme }: Props
       </header>
 
       <div className="flex-1 max-w-7xl mx-auto px-6 py-6 lg:py-10 w-full">
+        {step === "confirm" ? (
+          <ConfirmStep
+            profile={profile}
+            modules={selectedModules}
+            importMethod={importMethod}
+            startTimeline={startTimeline}
+            reference={confirmation?.reference ?? ""}
+            onHome={onCancel}
+          />
+        ) : (
+        <>
         {showWizardSteps && (
         <nav
           className="lg:hidden -mx-6 px-4 mb-6 overflow-x-auto overscroll-x-contain"
@@ -524,17 +537,6 @@ export function Onboarding({ onCancel, onComplete, theme, onToggleTheme }: Props
               onBackToWizardStep={goBack}
             />
           )}
-          {step === "confirm" && (
-            <ConfirmStep
-              profile={profile}
-              modules={selectedModules}
-              importMethod={importMethod}
-              startTimeline={startTimeline}
-              reference={confirmation?.reference ?? ""}
-              onHome={onCancel}
-            />
-          )}
-
           {submitError && step === "modules" && (
             <div className="flex items-start gap-2 p-3 rounded-md border border-destructive/40 bg-destructive/5 text-sm text-destructive">
               <CircleAlert className="h-4 w-4 mt-0.5 shrink-0" />
@@ -585,6 +587,8 @@ export function Onboarding({ onCancel, onComplete, theme, onToggleTheme }: Props
           )}
         </div>
         </div>
+        </>
+        )}
       </div>
       <SiteFooter />
     </div>
@@ -1476,6 +1480,33 @@ function ModulesStep({
   );
 }
 
+const CONFIRM_NEXT_STEPS = [
+  {
+    title: "Enrollment Request Reviewed",
+    description:
+      "We review the information you submitted and assess your parish's record-management needs.",
+    icon: Check,
+  },
+  {
+    title: "Personal Follow-Up",
+    description:
+      "A member of our team will contact you within 48 hours to discuss your parish, answer questions, and confirm next steps.",
+    icon: Phone,
+  },
+  {
+    title: "Planning & Preparation",
+    description:
+      "We help determine your records, onboarding approach, and the best setup for your parish.",
+    icon: Mail,
+  },
+  {
+    title: "Onboarding Begins",
+    description:
+      "Once everything is confirmed, we begin the setup and onboarding process with your parish.",
+    icon: ArrowRight,
+  },
+] as const;
+
 function ConfirmStep({
   profile,
   modules,
@@ -1492,6 +1523,7 @@ function ConfirmStep({
   onHome: () => void;
 }) {
   const [copied, setCopied] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
   const requestId = reference || "—";
 
   function copyReference() {
@@ -1503,89 +1535,291 @@ function ConfirmStep({
   }
 
   return (
-    <SectionCard
-      number={5}
-      title="Submission Confirmation"
-      description="Your enrollment request has been received."
-    >
-      <div className="flex flex-col items-center text-center py-6 space-y-4">
-        <div className="h-16 w-16 rounded-full bg-[#2d1b4e] dark:bg-[#1e2a3a] dark:ring-2 dark:ring-[#d4af37]/40 text-[#d4af37] flex items-center justify-center">
-          <PartyPopper className="h-7 w-7" />
-        </div>
-        <h2 className="text-2xl">Thank you, {profile.firstName}.</h2>
-        <p className="text-muted-foreground max-w-md">
-          We've received your request for {profile.churchName}. Our staff will review it shortly.
-        </p>
-        <div className="flex items-center gap-2 px-4 py-2 rounded-md bg-muted">
-          <span className="text-sm text-muted-foreground">Reference:</span>
-          <code className="text-sm">{requestId}</code>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-7 w-7"
-            onClick={copyReference}
-            disabled={!reference}
-            title="Copy reference"
+    <div className="relative overflow-hidden rounded-2xl bg-[#fdfcf9] dark:bg-background -mx-2 sm:mx-0">
+      <ConfirmManuscriptPattern />
+      <ConfirmCandleGlow />
+
+      <motion.div
+        className="absolute top-16 left-4 sm:left-10 opacity-5 pointer-events-none"
+        animate={{ y: [0, -20, 0] }}
+        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+      >
+        <ConfirmChurchDome className="w-24 h-28 sm:w-32 sm:h-36" />
+      </motion.div>
+
+      <motion.div
+        className="absolute bottom-32 right-6 sm:right-16 opacity-5 pointer-events-none"
+        animate={{ y: [0, 15, 0] }}
+        transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+      >
+        <ConfirmOrthodoxCross className="w-20 h-28 sm:w-24 sm:h-32" />
+      </motion.div>
+
+      <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 py-10 md:py-16">
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-10"
+        >
+          <div className="inline-flex items-center gap-3 mb-2">
+            <ConfirmOrthodoxCross className="w-7 h-9 text-[#d4af37]" />
+            <h3 className="text-[#1a2e52] dark:text-[#d4af37] tracking-wide text-sm font-medium">
+              ORTHODOX METRICS
+            </h3>
+          </div>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 0.2 }}
+          className="relative bg-white dark:bg-card rounded-2xl shadow-xl overflow-hidden mb-12"
+        >
+          <motion.div
+            className="h-1.5 bg-gradient-to-r from-[#1a2e52] via-[#d4af37] to-[#1a2e52]"
+            initial={{ scaleX: 0 }}
+            animate={{ scaleX: 1 }}
+            transition={{ duration: 1, delay: 0.5 }}
+          />
+
+          <div className="p-6 md:p-12 relative">
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
+              <ConfirmArchDecoration className="w-48 h-24 md:w-64 md:h-32" />
+            </div>
+
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", stiffness: 200, delay: 0.6 }}
+              className="w-20 h-20 mx-auto mb-8 relative"
+            >
+              <div className="w-20 h-20 bg-[#d4af37]/10 rounded-full flex items-center justify-center">
+                <motion.div
+                  animate={{
+                    boxShadow: [
+                      "0 0 0 0 rgba(212, 175, 55, 0.4)",
+                      "0 0 0 20px rgba(212, 175, 55, 0)",
+                    ],
+                  }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                  className="w-14 h-14 bg-[#d4af37] rounded-full flex items-center justify-center"
+                >
+                  <Check className="w-8 h-8 text-white" strokeWidth={3} />
+                </motion.div>
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.8 }}
+              className="text-center max-w-2xl mx-auto space-y-4"
+            >
+              <h1 className="font-['Georgia'] text-2xl md:text-3xl text-[#1a2e52] dark:text-foreground" style={{ fontWeight: 400 }}>
+                We&apos;ve Received Your Enrollment Request
+              </h1>
+              <p className="text-[#1a2e52]/80 dark:text-muted-foreground leading-relaxed">
+                Thank you{profile.firstName ? `, ${profile.firstName}` : ""} for your interest in Orthodox Metrics.
+                Your enrollment request for <strong>{profile.churchName}</strong> has been submitted successfully.
+                Our team will review your information and you can expect to hear from us within the next 48 hours.
+              </p>
+              {reference && (
+                <div className="inline-flex flex-wrap items-center justify-center gap-2 px-4 py-2 rounded-lg bg-[#f5f3ef] dark:bg-muted border border-[#1a2e52]/10">
+                  <span className="text-sm text-[#1a2e52]/70 dark:text-muted-foreground">Reference:</span>
+                  <code className="text-sm font-medium text-[#1a2e52] dark:text-foreground">{requestId}</code>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7"
+                    onClick={copyReference}
+                    title="Copy reference"
+                  >
+                    <Copy className="h-3.5 w-3.5" />
+                  </Button>
+                  {copied && <span className="text-xs text-muted-foreground">Copied</span>}
+                </div>
+              )}
+            </motion.div>
+          </div>
+        </motion.div>
+
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1 }}>
+          <h2 className="text-center font-['Georgia'] text-xl text-[#1a2e52] dark:text-foreground mb-8" style={{ fontWeight: 400 }}>
+            What Happens Next
+          </h2>
+
+          <div className="grid sm:grid-cols-2 gap-4 md:gap-6 mb-12">
+            {CONFIRM_NEXT_STEPS.map((stepItem, index) => (
+              <motion.div
+                key={stepItem.title}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 1.2 + index * 0.15 }}
+                className="bg-white dark:bg-card rounded-xl p-5 md:p-6 shadow-md hover:shadow-lg transition-shadow border border-[#1a2e52]/5"
+              >
+                <div className="flex gap-4">
+                  <div className="shrink-0">
+                    <div className="w-12 h-12 bg-[#1a2e52]/5 rounded-lg flex items-center justify-center">
+                      <stepItem.icon className="w-6 h-6 text-[#d4af37]" />
+                    </div>
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-6 h-6 bg-[#d4af37]/20 rounded-full flex items-center justify-center shrink-0">
+                        <span className="text-sm text-[#1a2e52] dark:text-foreground">{index + 1}</span>
+                      </div>
+                      <h4 className="text-[#1a2e52] dark:text-foreground font-medium">{stepItem.title}</h4>
+                    </div>
+                    <p className="text-sm text-[#1a2e52]/70 dark:text-muted-foreground leading-relaxed">
+                      {stepItem.description}
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
+
+        {showDetails && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            className="bg-white dark:bg-card rounded-xl p-6 mb-8 border border-[#1a2e52]/10 shadow-sm"
           >
-            <Copy className="h-3.5 w-3.5" />
-          </Button>
-          {copied && <span className="text-xs text-muted-foreground">Copied</span>}
-        </div>
-      </div>
+            <h3 className="text-[#1a2e52] dark:text-foreground font-medium mb-4">Your submission</h3>
+            <dl className="space-y-3 text-sm">
+              {[
+                ["Church", profile.churchName],
+                ["Contact email", profile.email],
+                ["Modules", modules.join(", ") || "None"],
+                ["Import approach", formatImportMethod(importMethod)],
+                ["Getting started", formatStartTimeline(startTimeline)],
+              ].map(([label, value]) => (
+                <div key={label} className="flex flex-col sm:flex-row sm:gap-4">
+                  <dt className="sm:w-36 shrink-0 text-muted-foreground">{label}</dt>
+                  <dd className="text-[#1a2e52] dark:text-foreground break-words">{value}</dd>
+                </div>
+              ))}
+            </dl>
+          </motion.div>
+        )}
 
-      <div className="grid md:grid-cols-2 gap-4">
-        <SummaryCard title="Submitted details" icon={Building2}>
-          <Row k="Church" v={profile.churchName} />
-          <Row k="Contact email" v={profile.email} />
-          <Row k="Modules" v={modules.join(", ") || "None"} />
-          <Row k="Import approach" v={formatImportMethod(importMethod)} />
-          <Row k="Getting started" v={formatStartTimeline(startTimeline)} />
-        </SummaryCard>
-        <SummaryCard title="What happens next" icon={ShieldCheck}>
-          <ul className="text-sm space-y-2 text-muted-foreground">
-            <li>1. OM staff verifies your church and contact details.</li>
-            <li>2. We review your module selections and import preferences.</li>
-            <li>3. You receive a follow-up email to schedule onboarding.</li>
-            <li>4. Your workspace is provisioned when you're ready to begin.</li>
-          </ul>
-        </SummaryCard>
-      </div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.8 }}
+          className="bg-[#f5f3ef] dark:bg-muted/40 rounded-xl p-6 md:p-8 mb-10 text-center border border-[#d4af37]/20"
+        >
+          <h3 className="text-[#1a2e52] dark:text-foreground font-medium mb-3">Need help before then?</h3>
+          <p className="text-[#1a2e52]/80 dark:text-muted-foreground mb-6 max-w-xl mx-auto">
+            If you have questions or would like to share additional details, our team is happy to help.
+          </p>
 
-      <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
-        <Button variant="outline" onClick={onHome}>Return Home</Button>
-        <Button asChild className="bg-[#d4af37] hover:bg-[#c29d2f] text-[#2d1b4e] font-medium">
-          <a href="/auth/login">Sign in when your account is ready</a>
-        </Button>
-      </div>
-    </SectionCard>
-  );
-}
+          <div className="flex flex-wrap justify-center gap-3">
+            <Button
+              onClick={onHome}
+              className="bg-[#1a2e52] hover:bg-[#0f1a2e] text-white px-6"
+            >
+              <Home className="w-4 h-4 mr-2" />
+              Return to Homepage
+            </Button>
 
-function SummaryCard({
-  title,
-  icon: Icon,
-  children,
-}: {
-  title: string;
-  icon: any;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="rounded-md border border-border p-4 space-y-3">
-      <div className="flex items-center gap-2 text-sm">
-        <Icon className="h-4 w-4 text-[#2d1b4e] dark:text-[#d4af37]" />
-        <span>{title}</span>
+            <Button
+              variant="outline"
+              asChild
+              className="border-2 border-[#1a2e52] text-[#1a2e52] dark:text-foreground hover:bg-[#f5f3ef] dark:hover:bg-muted px-6"
+            >
+              <a href="/contact">
+                <Mail className="w-4 h-4 mr-2" />
+                Contact Us
+              </a>
+            </Button>
+
+            <Button
+              variant="outline"
+              onClick={() => setShowDetails((v) => !v)}
+              className="border border-[#1a2e52]/30 text-[#1a2e52] dark:text-foreground hover:bg-[#f5f3ef] dark:hover:bg-muted"
+            >
+              {showDetails ? "Hide Enrollment Details" : "View Enrollment Details"}
+            </Button>
+          </div>
+        </motion.div>
+
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 2 }}
+          className="text-center text-sm text-[#1a2e52]/60 dark:text-muted-foreground"
+        >
+          © {new Date().getFullYear()} Orthodox Metrics. Preserving parish records with care and precision.
+        </motion.p>
       </div>
-      <div className="space-y-1.5">{children}</div>
     </div>
   );
 }
 
-function Row({ k, v }: { k: string; v: string }) {
+function ConfirmOrthodoxCross({ className = "" }: { className?: string }) {
   return (
-    <div className="grid grid-cols-[140px_1fr] gap-2 text-sm">
-      <div className="text-muted-foreground">{k}</div>
-      <div className="break-words">{v}</div>
-    </div>
+    <svg viewBox="0 0 60 80" className={className} fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+      <rect x="27" y="5" width="6" height="70" fill="#d4af37" />
+      <rect x="15" y="18" width="30" height="5" fill="#d4af37" />
+      <rect x="10" y="35" width="40" height="6" fill="#d4af37" />
+      <rect x="12" y="55" width="36" height="4" fill="#d4af37" transform="rotate(-15 30 57)" />
+    </svg>
+  );
+}
+
+function ConfirmChurchDome({ className = "" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 120 140" className={className} fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+      <g opacity="0.9">
+        <rect x="57" y="8" width="6" height="18" fill="#d4af37" />
+        <rect x="51" y="14" width="18" height="6" fill="#d4af37" />
+      </g>
+      <path d="M60 30 C40 30, 30 40, 30 55 L30 70 L90 70 L90 55 C90 40, 80 30, 60 30Z" fill="#1a2e52" opacity="0.15" />
+      <rect x="40" y="70" width="40" height="50" fill="#1a2e52" opacity="0.1" />
+      <path d="M50 85 L50 105 L70 105 L70 85 C70 77, 50 77, 50 85Z" fill="#d4af37" opacity="0.2" />
+    </svg>
+  );
+}
+
+function ConfirmArchDecoration({ className = "" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 200 120" className={className} fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+      <path d="M10 120 L10 60 Q10 10, 60 10 L140 10 Q190 10, 190 60 L190 120" stroke="#d4af37" strokeWidth="1.5" fill="none" opacity="0.3" />
+      <path d="M20 120 L20 65 Q20 20, 65 20 L135 20 Q180 20, 180 65 L180 120" stroke="#d4af37" strokeWidth="1" fill="none" opacity="0.2" />
+    </svg>
+  );
+}
+
+function ConfirmCandleGlow() {
+  return (
+    <motion.div
+      className="absolute inset-0 pointer-events-none"
+      initial={{ opacity: 0.4 }}
+      animate={{ opacity: [0.4, 0.7, 0.5, 0.6, 0.4] }}
+      transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+    >
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full bg-[#ffd89b] opacity-10 blur-3xl" />
+    </motion.div>
+  );
+}
+
+function ConfirmManuscriptPattern() {
+  return (
+    <svg className="absolute inset-0 w-full h-full opacity-[0.02] pointer-events-none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+      <defs>
+        <pattern id="confirm-manuscript" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse">
+          <path
+            d="M20 20 Q30 10, 40 20 T60 20 M20 40 L60 40 M20 50 L50 50 M20 60 L55 60"
+            stroke="#1a2e52"
+            strokeWidth="0.5"
+            fill="none"
+          />
+        </pattern>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#confirm-manuscript)" />
+    </svg>
   );
 }

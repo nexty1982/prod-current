@@ -1289,6 +1289,28 @@ const sendPriestSummary = async ({ to, reportTitle, submittedBy, patchCount, chu
 // ────────────────────────────────────────────────────────────────────────
 const ENROLLMENT_RECIPIENT = process.env.ENROLLMENT_EMAIL || 'info@orthodoxmetrics.com';
 
+const escapeHtml = (value) =>
+  String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+
+const ORTHODOX_CROSS_SVG = `
+<svg width="24" height="32" viewBox="0 0 60 80" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle;">
+  <rect x="27" y="5" width="6" height="70" fill="#d4af37"/>
+  <rect x="15" y="18" width="30" height="5" fill="#d4af37"/>
+  <rect x="10" y="35" width="40" height="6" fill="#d4af37"/>
+  <rect x="12" y="55" width="36" height="4" fill="#d4af37" transform="rotate(-15 30 57)"/>
+</svg>`;
+
+const ENROLLMENT_CONFIRM_STEPS = [
+  'We review your enrollment details',
+  'A team member reaches out to you personally',
+  "We discuss your parish's needs and onboarding approach",
+  'We begin planning your onboarding process',
+];
+
 const sendEnrollmentEmail = async ({ parishName, contactName, email, phone }) => {
   try {
     const transporter = await createTransporter();
@@ -1367,6 +1389,169 @@ const sendEnrollmentEmail = async ({ parishName, contactName, email, phone }) =>
   }
 };
 
+const sendEnrollmentConfirmationEmail = async ({
+  firstName,
+  email,
+  churchName,
+  reference,
+  modules = [],
+  recordImportMethod,
+  startTimeline,
+}) => {
+  try {
+    const transporter = await createTransporter();
+    const dbConfig = await getActiveEmailConfig();
+    const senderName = dbConfig?.sender_name || 'Orthodox Metrics';
+    const senderEmail = dbConfig?.sender_email || process.env.SMTP_USER || process.env.EMAIL_USER;
+    const contactUrl = 'https://orthodoxmetrics.com/contact';
+    const supportEmail = 'support@orthodoxmetrics.com';
+
+    const displayName = escapeHtml(firstName || 'there');
+    const safeChurch = escapeHtml(churchName || 'your parish');
+    const safeReference = escapeHtml(reference || '');
+    const safeModules = escapeHtml(modules.length ? modules.join(', ') : 'None selected');
+    const safeImport = escapeHtml(recordImportMethod || 'Not specified');
+    const safeTimeline = escapeHtml(startTimeline || 'Not specified');
+
+    const stepsHtml = ENROLLMENT_CONFIRM_STEPS.map(
+      (step, index) => `
+        <tr>
+          <td style="padding: 0 12px 16px 0; vertical-align: top; width: 28px;">
+            <div style="width: 24px; height: 24px; background: rgba(212,175,55,0.2); border-radius: 50%; text-align: center; line-height: 24px; font-size: 13px; color: #1a2e52;">${index + 1}</div>
+          </td>
+          <td style="padding: 0 0 16px 0; color: #1a2e52; opacity: 0.85; line-height: 1.6;">${escapeHtml(step)}</td>
+        </tr>`
+    ).join('');
+
+    const htmlContent = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Enrollment Confirmation</title>
+</head>
+<body style="margin:0;padding:0;background:#f3f4f6;font-family:Arial,Helvetica,sans-serif;color:#1a2e52;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f3f4f6;padding:24px 12px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 4px 24px rgba(26,46,82,0.08);">
+          <tr>
+            <td style="height:6px;background:linear-gradient(90deg,#1a2e52,#d4af37,#1a2e52);"></td>
+          </tr>
+          <tr>
+            <td style="background:#fdfcf9;padding:28px 32px;border-bottom:1px solid rgba(26,46,82,0.08);text-align:center;">
+              <div style="display:inline-block;">${ORTHODOX_CROSS_SVG}</div>
+              <div style="margin-top:8px;font-size:13px;letter-spacing:0.12em;font-weight:600;color:#1a2e52;">ORTHODOX METRICS</div>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:36px 32px 12px;text-align:center;">
+              <div style="width:64px;height:64px;margin:0 auto 20px;background:rgba(212,175,55,0.1);border-radius:50%;line-height:64px;text-align:center;">
+                <div style="display:inline-block;width:48px;height:48px;background:#d4af37;border-radius:50%;line-height:48px;color:#ffffff;font-size:24px;font-weight:bold;">&#10003;</div>
+              </div>
+              <h1 style="margin:0 0 16px;font-size:24px;font-weight:600;color:#1a2e52;">We've Received Your Enrollment Request</h1>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:0 32px 28px;color:#1a2e52;line-height:1.7;">
+              <p style="margin:0 0 16px;">Hello ${displayName},</p>
+              <p style="margin:0 0 16px;">
+                Thank you for contacting Orthodox Metrics. Your enrollment request for
+                <strong>${safeChurch}</strong> has been submitted successfully. Our team will review your
+                information and follow up within the next 48 hours.
+              </p>
+              ${safeReference ? `<p style="margin:0 0 16px;"><strong>Reference:</strong> ${safeReference}</p>` : ''}
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:0 32px 8px;">
+              <h2 style="margin:0 0 20px;font-size:18px;color:#1a2e52;">What happens next:</h2>
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0">${stepsHtml}</table>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:8px 32px 28px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f5f3ef;border:1px solid rgba(212,175,55,0.2);border-radius:8px;">
+                <tr>
+                  <td style="padding:20px;text-align:center;color:#1a2e52;line-height:1.6;">
+                    <p style="margin:0 0 12px;font-size:14px;font-weight:600;">Your submission summary</p>
+                    <p style="margin:4px 0;font-size:13px;"><strong>Modules:</strong> ${safeModules}</p>
+                    <p style="margin:4px 0;font-size:13px;"><strong>Import approach:</strong> ${safeImport}</p>
+                    <p style="margin:4px 0;font-size:13px;"><strong>Getting started:</strong> ${safeTimeline}</p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:0 32px 32px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f5f3ef;border:1px solid rgba(212,175,55,0.2);border-radius:8px;">
+                <tr>
+                  <td style="padding:24px;text-align:center;color:#1a2e52;line-height:1.6;">
+                    <p style="margin:0 0 16px;">
+                      If you have any questions in the meantime, please
+                      <a href="mailto:${supportEmail}" style="color:#d4af37;text-decoration:none;">contact us</a>
+                      or reply to this email.
+                    </p>
+                    <a href="${contactUrl}" style="display:inline-block;background:#1a2e52;color:#ffffff;text-decoration:none;padding:12px 24px;border-radius:8px;font-weight:600;">Contact Our Team</a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td style="background:#fdfcf9;padding:28px 32px;border-top:1px solid rgba(26,46,82,0.08);text-align:center;">
+              <p style="margin:0 0 8px;color:#1a2e52;font-weight:600;">Orthodox Metrics</p>
+              <p style="margin:0 0 12px;font-size:13px;color:#1a2e52;opacity:0.6;">Preserving parish records with care and precision.</p>
+              <p style="margin:0;font-size:11px;color:#1a2e52;opacity:0.5;">&copy; ${new Date().getFullYear()} Orthodox Metrics. All rights reserved.</p>
+              <p style="margin:12px 0 0;font-size:11px;color:#1a2e52;opacity:0.5;">
+                You received this email because you submitted an enrollment request at orthodoxmetrics.com
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+
+    const text = [
+      `Hello ${firstName || 'there'},`,
+      '',
+      `Thank you for contacting Orthodox Metrics. Your enrollment request for ${churchName || 'your parish'} has been submitted successfully.`,
+      reference ? `Reference: ${reference}` : '',
+      '',
+      'What happens next:',
+      ...ENROLLMENT_CONFIRM_STEPS.map((step, i) => `${i + 1}. ${step}`),
+      '',
+      `Modules: ${modules.length ? modules.join(', ') : 'None selected'}`,
+      `Import approach: ${recordImportMethod || 'Not specified'}`,
+      `Getting started: ${startTimeline || 'Not specified'}`,
+      '',
+      `Questions? Contact us at ${supportEmail} or visit ${contactUrl}`,
+      '',
+      `© ${new Date().getFullYear()} Orthodox Metrics`,
+    ].filter(Boolean).join('\n');
+
+    const mailOptions = {
+      from: `"${senderName}" <${senderEmail}>`,
+      to: email,
+      subject: `Enrollment received — ${churchName || 'Orthodox Metrics'}`,
+      html: htmlContent,
+      text,
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    console.log('✅ Enrollment confirmation email sent:', { messageId: info.messageId, to: email, reference });
+    return { success: true, messageId: info.messageId };
+  } catch (error) {
+    console.error('❌ Failed to send enrollment confirmation email:', error.message);
+    return { success: false, error: error.message };
+  }
+};
+
 module.exports = {
   sendOCRReceipt,
   sendSessionVerification,
@@ -1378,6 +1563,7 @@ module.exports = {
   sendBackupNotification,
   sendContactEmail,
   sendEnrollmentEmail,
+  sendEnrollmentConfirmationEmail,
   sendPasswordResetEmail,
   sendInviteEmail,
   sendVerificationEmail,

@@ -669,6 +669,21 @@ router.post('/enroll', async (req, res) => {
 
     console.log(`✅ CRM enrollment ${reference} from ${email} (church: ${churchName}, lead #${resolvedLeadId})`);
 
+    try {
+      const { sendEnrollmentConfirmationEmail } = require('../utils/emailService');
+      await sendEnrollmentConfirmationEmail({
+        firstName,
+        email,
+        churchName,
+        reference,
+        modules: moduleList,
+        recordImportMethod: importLabels[recordImportMethod] || recordImportMethod || null,
+        startTimeline: timelineLabels[startTimeline] || startTimeline || null,
+      });
+    } catch (confirmEmailErr) {
+      console.error('Enrollment confirmation email failed (enrollment still saved):', confirmEmailErr);
+    }
+
     res.json({
       success: true,
       inquiryId: result.insertId,
