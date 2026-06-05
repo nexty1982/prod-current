@@ -720,7 +720,6 @@ const AnalyticsDashboard: React.FC = () => {
                       display: 'flex',
                       flexDirection: 'column',
                       alignItems: 'center',
-                      justify',
                       justifyContent: 'center',
                       height: 420,
                       borderRadius: '8px',
