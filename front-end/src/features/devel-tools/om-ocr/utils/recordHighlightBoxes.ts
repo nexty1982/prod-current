@@ -191,3 +191,183 @@ export function computeRecordHighlightBoxes({
 
   return boxes;
 }
+
+// ── Review page: per-field color map (coordinated with confirm form) ─────────
+
+export const REVIEW_FIELD_COLORS: Record<string, string> = {
+  record_number: '#546e7a',
+  child_name: '#1565c0',
+  date_of_birth: '#2e7d32',
+  date_of_baptism: '#00838f',
+  place_of_birth: '#6a1b9a',
+  father_name: '#e65100',
+  mother_name: '#ad1457',
+  parents_name: '#bf360c',
+  address: '#5d4037',
+  godparents: '#7b1fa2',
+  performed_by: '#455a64',
+  church: '#3949ab',
+  notes: '#795548',
+  groom_name: '#1565c0',
+  bride_name: '#ad1457',
+  date_of_marriage: '#00838f',
+  place_of_marriage: '#6a1b9a',
+  witnesses: '#7b1fa2',
+  best_man: '#5e35b1',
+  maid_of_honor: '#8e24aa',
+  officiant: '#455a64',
+  deceased_name: '#1565c0',
+  date_of_death: '#c62828',
+  date_of_funeral: '#6d4c41',
+  date_of_burial: '#4e342e',
+  place_of_burial: '#6a1b9a',
+  age_at_death: '#ef6c00',
+  cause_of_death: '#5d4037',
+  next_of_kin: '#7b1fa2',
+};
+
+const FIELD_EXTRA_COLUMNS: Record<string, string[]> = {
+  mother_name: ['parents', 'mother'],
+  father_name: ['parents', 'father'],
+  parents_name: ['parents'],
+  date_of_baptism: ['date', 'baptism_date'],
+  date_of_birth: ['date', 'birth_date'],
+  groom_name: ['groom', 'bridegroom'],
+  bride_name: ['bride'],
+  deceased_name: ['deceased_name', 'deceased'],
+  godparents: ['sponsors', 'godparents'],
+  performed_by: ['priest', 'officiant', 'clergy'],
+  officiant: ['priest', 'officiant'],
+};
+
+function unionFractionalBboxes(bboxes: number[][]): number[] | null {
+  if (!bboxes.length) return null;
+  let xMin = Infinity, yMin = Infinity, xMax = -Infinity, yMax = -Infinity;
+  for (const b of bboxes) {
+    if (!b || b.length !== 4) continue;
+    xMin = Math.min(xMin, b[0]);
+    yMin = Math.min(yMin, b[1]);
+    xMax = Math.max(xMax, b[2]);
+    yMax = Math.max(yMax, b[3]);
+  }
+  if (!Number.isFinite(xMin)) return null;
+  return [xMin, yMin, xMax, yMax];
+}
+
+function fieldColumnKeys(fieldName: string, columnMapping: Record<string, string>): string[] {
+  const keys = new Set<string>();
+  for (const [colKey, mappedField] of Object.entries(columnMapping)) {
+    if (mappedField === fieldName) keys.add(colKey);
+  }
+  for (const alias of FIELD_EXTRA_COLUMNS[fieldName] || []) keys.add(alias);
+  return Array.from(keys);
+}
+
+function findFieldCellBboxes(
+  tables: any[],
+  rowIndex: number,
+  rowEnd: number,
+  columnKeys: string[],
+): number[][] {
+  const bboxes: number[][] = [];
+  for (const table of tables) {
+    for (const row of table.rows || []) {
+      if (row.type === 'header') continue;
+      if (row.row_index < rowIndex || row.row_index > rowEnd) continue;
+      for (const cell of row.cells || []) {
+        const colKey = cell.column_key || `col_${cell.column_index}`;
+        if (columnKeys.includes(colKey) && cell.bbox?.length === 4) {
+          bboxes.push(cell.bbox);
+        }
+      }
+    }
+  }
+  return bboxes;
+}
+
+export interface ReviewHighlightParams {
+  tableExtractionJson: any;
+  recordCandidates: any;
+  scoringV2?: any;
+  selectedRecordIndex: number;
+  focusedField?: string | null;
+  fieldKeys?: string[];
+}
+
+/** Field-level highlight boxes for the OCR review confirm page. */
+export function computeReviewFieldHighlightBoxes({
+  tableExtractionJson,
+  recordCandidates,
+  scoringV2,
+  selectedRecordIndex,
+  focusedField = null,
+  fieldKeys = [],
+}: ReviewHighlightParams): OverlayBox[] {
+  if (!tableExtractionJson || !recordCandidates?.candidates?.length) return [];
+
+  const pageDims = tableExtractionJson.page_dimensions;
+  if (!pageDims?.width || !pageDims?.height) return [];
+
+  const candidate = recordCandidates.candidates[selectedRecordIndex];
+  if (!candidate) return [];
+
+  const rowIndex = candidate.sourceRowIndex;
+  if (rowIndex < 0) return [];
+  const rowEnd = candidate.sourceRowEnd ?? rowIndex;
+  const tables = tableExtractionJson.tables || [];
+  const columnMapping = recordCandidates.columnMapping || {};
+  const boxes: OverlayBox[] = [];
+
+  // Faint record region outline
+  const recordCells = findFieldCellBboxes(tables, rowIndex, rowEnd, Object.keys(columnMapping));
+  const recordUnion = unionFractionalBboxes(recordCells);
+  if (recordUnion) {
+    boxes.push({
+      bbox: cellBboxToVision(recordUnion, pageDims),
+      color: '#90a4ae',
+      label: `Record ${selectedRecordIndex + 1}`,
+      selected: true,
+      emphasized: false,
+    });
+  }
+
+  const keysToShow = fieldKeys.length
+    ? fieldKeys
+    : Object.keys(candidate.fields || {}).filter((k) => candidate.fields[k]?.trim());
+
+  const scoringRow = scoringV2?.rows?.find((r: any) => r.candidate_index === selectedRecordIndex);
+
+  for (const fieldName of keysToShow) {
+    const color = REVIEW_FIELD_COLORS[fieldName] || '#1976d2';
+    const isFocused = focusedField === fieldName;
+    let visionBbox: BBox | null = null;
+
+    const scoringField = scoringRow?.fields?.find((sf: any) => sf.field_name === fieldName);
+    if (scoringField?.bbox_union?.length === 4) {
+      const [nx, ny, nw, nh] = scoringField.bbox_union;
+      visionBbox = {
+        x: nx * pageDims.width,
+        y: ny * pageDims.height,
+        w: nw * pageDims.width,
+        h: nh * pageDims.height,
+      };
+    } else {
+      const colKeys = fieldColumnKeys(fieldName, columnMapping);
+      const cellBboxes = findFieldCellBboxes(tables, rowIndex, rowEnd, colKeys);
+      const union = unionFractionalBboxes(cellBboxes);
+      if (union) visionBbox = cellBboxToVision(union, pageDims);
+    }
+
+    if (!visionBbox || visionBbox.w <= 0 || visionBbox.h <= 0) continue;
+
+    boxes.push({
+      bbox: visionBbox,
+      color,
+      label: fieldName.replace(/_/g, ' '),
+      selected: isFocused,
+      emphasized: isFocused,
+    });
+  }
+
+  return boxes;
+}

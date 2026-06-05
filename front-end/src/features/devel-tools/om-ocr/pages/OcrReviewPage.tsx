@@ -7,6 +7,11 @@
 
 import { useAuth } from '@/context/AuthContext';
 import { RECORD_FIELDS } from '@/features/devel-tools/om-ocr/config/recordFields';
+import FusionOverlay from '@/features/devel-tools/om-ocr/components/FusionOverlay';
+import {
+  computeReviewFieldHighlightBoxes,
+  REVIEW_FIELD_COLORS,
+} from '@/features/devel-tools/om-ocr/utils/recordHighlightBoxes';
 import { apiClient } from '@/shared/lib/axiosInstance';
 import {
   Alert,
@@ -16,19 +21,32 @@ import {
   CircularProgress,
   Divider,
   FormControl,
+  IconButton,
   InputLabel,
+  InputAdornment,
   List,
   MenuItem,
   Select,
   ListItemButton,
   ListItemText,
   Paper,
+  Slider,
   Stack,
   TextField,
+  Tooltip,
   Typography,
 } from '@mui/material';
-import { IconArrowLeft, IconCheck, IconDatabase, IconRefresh, IconRobot } from '@tabler/icons-react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  IconArrowLeft,
+  IconCheck,
+  IconDatabase,
+  IconMaximize,
+  IconRefresh,
+  IconRobot,
+  IconZoomIn,
+  IconZoomOut,
+} from '@tabler/icons-react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 
 type PipelineStatus =
@@ -86,6 +104,15 @@ const OcrReviewPage: React.FC = () => {
   const [needsReviewFlag, setNeedsReviewFlag] = useState(false);
   const [refinementNotes, setRefinementNotes] = useState<string | null>(null);
   const [imageLoadFailed, setImageLoadFailed] = useState(false);
+  const [tableExtractionJson, setTableExtractionJson] = useState<any>(null);
+  const [recordCandidates, setRecordCandidates] = useState<any>(null);
+  const [scoringV2, setScoringV2] = useState<any>(null);
+  const [artifactsLoading, setArtifactsLoading] = useState(false);
+  const [focusedField, setFocusedField] = useState<string | null>(null);
+  const [imageZoom, setImageZoom] = useState(100);
+  const [imageDimensions, setImageDimensions] = useState({ width: 0, height: 0, naturalWidth: 0, naturalHeight: 0 });
+  const [imageReady, setImageReady] = useState(false);
+  const imageRef = useRef<HTMLImageElement>(null);
 
   const backPath = isPortal ? '/portal/upload' : '/devel/ocr-studio/upload';
   const reviewBase = churchId
@@ -101,8 +128,48 @@ const OcrReviewPage: React.FC = () => {
 
   const jobImageUrl = useMemo(() => {
     if (!churchId || !selectedJobId) return null;
+    // Bboxes align to the preprocessed/canonical page used during table extraction
+    if (tableExtractionJson?.page_dimensions) {
+      return `/api/church/${churchId}/ocr/jobs/${selectedJobId}/image`;
+    }
     return `/api/church/${churchId}/ocr/jobs/${selectedJobId}/image?original=true`;
-  }, [churchId, selectedJobId]);
+  }, [churchId, selectedJobId, tableExtractionJson]);
+
+  const loadJobArtifacts = useCallback(async (jobId: number) => {
+    if (!churchId) return;
+    setArtifactsLoading(true);
+    try {
+      const res: any = await apiClient.get(`/api/church/${churchId}/ocr/jobs/${jobId}`);
+      const data = res?.data ?? res;
+      const page = data?.pages?.[0];
+      setTableExtractionJson(page?.tableExtractionJson ?? null);
+      setRecordCandidates(page?.recordCandidates ?? null);
+      setScoringV2(page?.scoringV2 ?? null);
+    } catch {
+      setTableExtractionJson(null);
+      setRecordCandidates(null);
+      setScoringV2(null);
+    } finally {
+      setArtifactsLoading(false);
+    }
+  }, [churchId]);
+
+  const fieldHighlightBoxes = useMemo(() => {
+    if (!tableExtractionJson || !recordCandidates) return [];
+    return computeReviewFieldHighlightBoxes({
+      tableExtractionJson,
+      recordCandidates,
+      scoringV2,
+      selectedRecordIndex,
+      focusedField,
+      fieldKeys: fieldDefs.map((d) => d.name),
+    });
+  }, [tableExtractionJson, recordCandidates, scoringV2, selectedRecordIndex, focusedField, fieldDefs]);
+
+  const visionPageSize = useMemo(() => ({
+    width: tableExtractionJson?.page_dimensions?.width || imageDimensions.naturalWidth || 0,
+    height: tableExtractionJson?.page_dimensions?.height || imageDimensions.naturalHeight || 0,
+  }), [tableExtractionJson, imageDimensions]);
 
   const loadJobs = useCallback(async () => {
     if (!churchId) return;
@@ -160,7 +227,14 @@ const OcrReviewPage: React.FC = () => {
 
   useEffect(() => {
     setImageLoadFailed(false);
+    setImageZoom(100);
+    setFocusedField(null);
+    setImageReady(false);
   }, [selectedJobId, jobImageUrl]);
+
+  useEffect(() => {
+    if (churchId && selectedJobId) loadJobArtifacts(selectedJobId);
+  }, [churchId, selectedJobId, loadJobArtifacts]);
 
   const runAgentExtract = async () => {
     if (!churchId || !selectedJobId) return;
@@ -390,20 +464,45 @@ const OcrReviewPage: React.FC = () => {
                         gap: 2,
                       }}
                     >
-                      {fieldDefs.map((def) => (
-                        <TextField
-                          key={def.name}
-                          fullWidth
-                          size="small"
-                          label={def.label}
-                          required={def.required}
-                          value={fields[def.name] || ''}
-                          onChange={(e) => setFields((prev) => ({ ...prev, [def.name]: e.target.value }))}
-                          multiline={def.type === 'textarea'}
-                          minRows={def.type === 'textarea' ? 2 : 1}
-                          sx={def.type === 'textarea' ? { gridColumn: { sm: '1 / -1' } } : undefined}
-                        />
-                      ))}
+                      {fieldDefs.map((def) => {
+                        const fieldColor = REVIEW_FIELD_COLORS[def.name];
+                        const isFocused = focusedField === def.name;
+                        return (
+                          <TextField
+                            key={def.name}
+                            fullWidth
+                            size="small"
+                            label={def.label}
+                            required={def.required}
+                            value={fields[def.name] || ''}
+                            onChange={(e) => setFields((prev) => ({ ...prev, [def.name]: e.target.value }))}
+                            onFocus={() => setFocusedField(def.name)}
+                            multiline={def.type === 'textarea'}
+                            minRows={def.type === 'textarea' ? 2 : 1}
+                            sx={{
+                              ...(def.type === 'textarea' ? { gridColumn: { sm: '1 / -1' } } : {}),
+                              ...(fieldColor ? {
+                                '& .MuiOutlinedInput-root': {
+                                  '& fieldset': {
+                                    borderColor: isFocused ? fieldColor : `${fieldColor}66`,
+                                    borderWidth: isFocused ? 2 : 1,
+                                  },
+                                },
+                                '& .MuiInputLabel-root': {
+                                  color: isFocused ? fieldColor : undefined,
+                                },
+                              } : {}),
+                            }}
+                            InputProps={fieldColor ? {
+                              startAdornment: (
+                                <InputAdornment position="start">
+                                  <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: fieldColor, flexShrink: 0 }} />
+                                </InputAdornment>
+                              ),
+                            } : undefined}
+                          />
+                        );
+                      })}
                     </Box>
                   </Paper>
 
@@ -450,56 +549,152 @@ const OcrReviewPage: React.FC = () => {
           {selectedJobId && jobImageUrl && (
             <Box
               sx={{
-                width: { xs: '100%', lg: '42%' },
-                minWidth: { lg: 300 },
-                maxWidth: { lg: 520 },
+                width: { xs: '100%', lg: '48%' },
+                minWidth: { lg: 360 },
+                maxWidth: { lg: 720 },
                 flexShrink: 0,
                 borderLeft: { lg: '1px solid' },
                 borderTop: { xs: '1px solid', lg: 'none' },
                 borderColor: 'divider',
-                bgcolor: 'grey.50',
+                bgcolor: 'grey.100',
                 display: 'flex',
                 flexDirection: 'column',
                 overflow: 'hidden',
+                position: 'relative',
               }}
             >
               <Box sx={{ px: 2, py: 1.25, borderBottom: '1px solid', borderColor: 'divider', bgcolor: 'background.paper' }}>
-                <Typography variant="subtitle2" fontWeight={700}>Uploaded image</Typography>
+                <Typography variant="subtitle2" fontWeight={700}>Source document</Typography>
                 <Typography variant="caption" color="text.secondary" noWrap title={selectedJob?.filename}>
                   {selectedJob?.filename || `Job #${selectedJobId}`}
+                  {tableExtractionJson ? ' · field highlights on scan' : ''}
                 </Typography>
               </Box>
+
+              {fieldHighlightBoxes.length > 0 && (
+                <Box sx={{ px: 1.5, py: 1, borderBottom: '1px solid', borderColor: 'divider', bgcolor: 'background.paper', display: 'flex', flexWrap: 'wrap', gap: 0.75 }}>
+                  {fieldDefs
+                    .filter((d) => fieldHighlightBoxes.some((b) => b.label === d.name.replace(/_/g, ' ')))
+                    .map((def) => {
+                      const color = REVIEW_FIELD_COLORS[def.name] || '#1976d2';
+                      const active = focusedField === def.name;
+                      return (
+                        <Chip
+                          key={def.name}
+                          size="small"
+                          label={def.label}
+                          onClick={() => setFocusedField(active ? null : def.name)}
+                          sx={{
+                            bgcolor: active ? color : `${color}22`,
+                            color: active ? '#fff' : 'text.primary',
+                            border: `1px solid ${color}`,
+                            fontWeight: active ? 700 : 500,
+                          }}
+                        />
+                      );
+                    })}
+                </Box>
+              )}
+
               <Box
                 sx={{
-                  flex: 1,
-                  overflow: 'auto',
-                  p: 1.5,
+                  position: 'absolute',
+                  top: fieldHighlightBoxes.length > 0 ? 96 : 56,
+                  right: 8,
+                  zIndex: 5,
                   display: 'flex',
-                  alignItems: 'flex-start',
-                  justifyContent: 'center',
+                  alignItems: 'center',
+                  gap: 0.5,
+                  bgcolor: 'background.paper',
+                  borderRadius: 1,
+                  boxShadow: 2,
+                  p: 0.75,
                 }}
               >
+                <Tooltip title="Zoom out">
+                  <IconButton size="small" onClick={() => setImageZoom((z) => Math.max(25, z - 25))}>
+                    <IconZoomOut size={16} />
+                  </IconButton>
+                </Tooltip>
+                <Slider
+                  value={imageZoom}
+                  onChange={(_, v) => setImageZoom(v as number)}
+                  min={25}
+                  max={300}
+                  step={5}
+                  sx={{ width: 90 }}
+                  size="small"
+                />
+                <Tooltip title="Zoom in">
+                  <IconButton size="small" onClick={() => setImageZoom((z) => Math.min(300, z + 25))}>
+                    <IconZoomIn size={16} />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title="Fit to panel">
+                  <IconButton size="small" onClick={() => setImageZoom(100)}>
+                    <IconMaximize size={16} />
+                  </IconButton>
+                </Tooltip>
+                <Typography variant="caption" sx={{ minWidth: 36, textAlign: 'right' }}>{imageZoom}%</Typography>
+              </Box>
+
+              <Box sx={{ flex: 1, overflow: 'auto', p: 1.5, pt: 6 }}>
+                {artifactsLoading && (
+                  <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}><CircularProgress size={22} /></Box>
+                )}
                 {!imageLoadFailed ? (
-                  <Box
-                    component="img"
-                    src={jobImageUrl}
-                    alt={selectedJob?.filename || `OCR job ${selectedJobId}`}
-                    onError={() => setImageLoadFailed(true)}
-                    sx={{
-                      maxWidth: '100%',
-                      width: 'auto',
-                      height: 'auto',
-                      objectFit: 'contain',
-                      display: 'block',
-                      borderRadius: 1,
-                      boxShadow: 1,
-                      bgcolor: 'background.paper',
-                    }}
-                  />
+                  <Box sx={{ display: 'flex', justifyContent: 'center', minHeight: '100%' }}>
+                    <Box sx={{ position: 'relative', display: 'inline-block' }}>
+                      <Box
+                        component="img"
+                        ref={imageRef}
+                        src={jobImageUrl}
+                        alt={selectedJob?.filename || `OCR job ${selectedJobId}`}
+                        onError={() => setImageLoadFailed(true)}
+                        onLoad={(e) => {
+                          const img = e.currentTarget;
+                          setImageDimensions({
+                            width: img.clientWidth,
+                            height: img.clientHeight,
+                            naturalWidth: img.naturalWidth,
+                            naturalHeight: img.naturalHeight,
+                          });
+                          setImageReady(true);
+                        }}
+                        sx={{
+                          maxWidth: '100%',
+                          width: 'auto',
+                          height: 'auto',
+                          objectFit: 'contain',
+                          display: 'block',
+                          borderRadius: 1,
+                          boxShadow: 2,
+                          bgcolor: 'background.paper',
+                          transform: `scale(${imageZoom / 100})`,
+                          transformOrigin: 'top left',
+                        }}
+                      />
+                      {imageReady && visionPageSize.width > 0 && fieldHighlightBoxes.length > 0 && (
+                        <FusionOverlay
+                          key={`${selectedJobId}-${selectedRecordIndex}-${imageZoom}-${focusedField}`}
+                          boxes={fieldHighlightBoxes}
+                          imageElement={imageRef.current}
+                          visionWidth={visionPageSize.width}
+                          visionHeight={visionPageSize.height}
+                          showLabels
+                        />
+                      )}
+                    </Box>
+                  </Box>
                 ) : (
                   <Alert severity="warning" sx={{ m: 1 }}>
-                    Could not load the uploaded image for this job.
+                    Could not load the document image for this job.
                   </Alert>
+                )}
+                {!artifactsLoading && !fieldHighlightBoxes.length && !imageLoadFailed && (
+                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block', textAlign: 'center', mt: 1 }}>
+                    No field mapping overlays available for this job. Use zoom to inspect the scan manually.
+                  </Typography>
                 )}
               </Box>
             </Box>
