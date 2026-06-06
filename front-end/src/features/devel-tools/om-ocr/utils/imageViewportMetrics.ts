@@ -26,8 +26,10 @@ export function getImageViewportMetrics(imgEl: HTMLImageElement | null): ImageVi
   const rect = imgEl.getBoundingClientRect();
   const naturalWidth = imgEl.naturalWidth || 0;
   const naturalHeight = imgEl.naturalHeight || 0;
-  const displayedWidth = rect.width;
-  const displayedHeight = rect.height;
+  
+  // Use layout dimensions to support CSS transforms like rotate
+  const displayedWidth = imgEl.clientWidth || rect.width;
+  const displayedHeight = imgEl.clientHeight || rect.height;
 
   // Calculate scale factors
   const scaleX = naturalWidth > 0 ? displayedWidth / naturalWidth : 1;

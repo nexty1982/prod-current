@@ -139,12 +139,9 @@ function EditableBBox({
       return { x: 0, y: 0, w: 0, h: 0 };
     }
     const screen = visionBboxToScreen(bbox, metrics);
-    // Adjust relative to overlay container
-    const containerRect = containerRef.current?.parentElement?.getBoundingClientRect();
-    if (!containerRect) return screen;
     return {
-      x: screen.x - (metrics.left - containerRect.left),
-      y: screen.y - (metrics.top - containerRect.top),
+      x: screen.x - metrics.left,
+      y: screen.y - metrics.top,
       w: screen.w,
       h: screen.h,
     };
@@ -180,17 +177,9 @@ function EditableBBox({
     const target = e.currentTarget as HTMLElement;
     target.setPointerCapture(e.pointerId);
 
-    // Get container rect for coordinate calculation
-    const containerRect = containerRef.current?.parentElement?.getBoundingClientRect();
-    if (!containerRect) return;
-
-    // Convert to container-relative coordinates
-    const containerX = e.clientX - containerRect.left;
-    const containerY = e.clientY - containerRect.top;
-    
-    // Adjust for overlay offset
-    const overlayX = containerX - (metrics.left - containerRect.left);
-    const overlayY = containerY - (metrics.top - containerRect.top);
+    // Convert to overlay-relative coordinates directly
+    const overlayX = e.clientX - metrics.left;
+    const overlayY = e.clientY - metrics.top;
 
     // Check if clicking on a resize handle
     const handles: ResizeHandle[] = ['nw', 'ne', 'sw', 'se', 'n', 's', 'e', 'w'];

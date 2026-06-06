@@ -357,7 +357,7 @@ function createRouters(upload: any) {
 
         // Get feeder pages for this job
         const [pageRows] = await tenantPool.query(
-          `SELECT id, page_index, input_path, status, ocr_confidence
+          `SELECT id, page_index, input_path, status, ocr_confidence, rotation
            FROM ocr_feeder_pages WHERE job_id = ? ORDER BY page_index ASC`,
           [jobId]
         );
@@ -459,6 +459,7 @@ function createRouters(upload: any) {
               meta,
               ocrConfidence: page.ocr_confidence,
               status: page.status,
+              rotation: page.rotation,
             });
           }
 
@@ -4804,8 +4805,8 @@ function createRouters(upload: any) {
     try {
       const jobId = parseInt(req.params.jobId);
       const userRole = req.session?.user?.role;
-      if (!['super_admin', 'admin'].includes(userRole)) {
-        return res.status(403).json({ error: 'Only admins can update review status' });
+      if (!['super_admin', 'admin', 'church_admin', 'priest'].includes(userRole)) {
+        return res.status(403).json({ error: 'Only authorized staff can update review status' });
       }
       const { review_status, review_notes } = req.body;
       const validStatuses = [

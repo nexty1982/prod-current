@@ -88,6 +88,8 @@ import {
   IconAlertTriangle,
   IconInfoCircle,
   IconX,
+  IconRotateClockwise,
+  IconRotateCounterClockwise,
 } from '@tabler/icons-react';
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
@@ -119,6 +121,60 @@ function isTimeoutError(err: any): boolean {
     || err?.originalError?.code === 'ECONNABORTED'
     || err?.status === 408
     || /timeout/i.test(err?.message || '');
+}
+
+function mapVisualToOrig(x: number, y: number, w: number, h: number, rot: number) {
+  const normRot = (rot % 360 + 360) % 360;
+  if (normRot === 90) {
+    return {
+      x: y,
+      y: 1 - (x + w),
+      width: h,
+      height: w
+    };
+  } else if (normRot === 180) {
+    return {
+      x: 1 - (x + w),
+      y: 1 - (y + h),
+      width: w,
+      height: h
+    };
+  } else if (normRot === 270) {
+    return {
+      x: 1 - (y + h),
+      y: x,
+      width: h,
+      height: w
+    };
+  }
+  return { x, y, width: w, height: h };
+}
+
+function mapOrigToVisual(x: number, y: number, w: number, h: number, rot: number) {
+  const normRot = (rot % 360 + 360) % 360;
+  if (normRot === 90) {
+    return {
+      x: 1 - (y + h),
+      y: x,
+      width: h,
+      height: w
+    };
+  } else if (normRot === 180) {
+    return {
+      x: 1 - (x + w),
+      y: 1 - (y + h),
+      width: w,
+      height: h
+    };
+  } else if (normRot === 270) {
+    return {
+      x: y,
+      y: 1 - (x + w),
+      width: h,
+      height: w
+    };
+  }
+  return { x, y, width: w, height: h };
 }
 
 type PipelineStatus =
@@ -315,6 +371,7 @@ const OcrReviewPage: React.FC = () => {
   const [recordBox, setRecordBox] = useState<{ x: number, y: number, width: number, height: number } | null>(null);
   const [confirmLayoutDialogOpen, setConfirmLayoutDialogOpen] = useState(false);
   const [saveLayoutLoading, setSaveLayoutLoading] = useState(false);
+  const [rotation, setRotation] = useState<number>(0);
   const [jobsCollapsed, setJobsCollapsed] = useState(false);
   const [imagePanelWidth, setImagePanelWidth] = useState(560);
   const contentRowRef = useRef<HTMLDivElement>(null);
@@ -481,11 +538,13 @@ const OcrReviewPage: React.FC = () => {
       setRecordCandidates(page?.recordCandidates ?? null);
       setScoringV2(page?.scoringV2 ?? null);
       setLayoutClassification(data?.layout_classification_json ?? null);
+      setRotation(page?.rotation || 0);
     } catch {
       setTableExtractionJson(null);
       setRecordCandidates(null);
       setScoringV2(null);
       setLayoutClassification(null);
+      setRotation(0);
     } finally {
       setArtifactsLoading(false);
     }
@@ -1174,8 +1233,9 @@ const OcrReviewPage: React.FC = () => {
     if (!churchId || !selectedJobId || !recordBox) return;
     setSaveLayoutLoading(true);
     try {
+      const mappedBox = mapVisualToOrig(recordBox.x, recordBox.y, recordBox.width, recordBox.height, rotation);
       await apiClient.post(`/api/church/${churchId}/ocr/jobs/${selectedJobId}/define-record-layout`, {
-        recordBox
+        recordBox: mappedBox
       });
       setConfirmLayoutDialogOpen(false);
       setDrawMode(false);
@@ -1420,7 +1480,45 @@ const OcrReviewPage: React.FC = () => {
             <Stack spacing={2}>
               <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
                 <Typography variant="h6" fontWeight={700}>Job #{selectedJobId}</Typography>
-                <Chip label={statusCfg.label} color={statusCfg.color} size="small" />
+                <FormControl size="small" sx={{ minWidth: 140 }}>
+                  <Select
+                    value={reviewStatus}
+                    onChange={async (e) => {
+                      const nextStatus = e.target.value;
+                      try {
+                        await apiClient.patch(`/api/church/${churchId}/ocr/jobs/${selectedJobId}/review-status`, {
+                          review_status: nextStatus
+                        });
+                        setReviewStatus(nextStatus as PipelineStatus);
+                        setJobs((prev) =>
+                          prev.map((j) =>
+                            Number(j.id) === selectedJobId ? { ...j, review_status: nextStatus as PipelineStatus } : j
+                          )
+                        );
+                        setMapHint(`Review status updated to ${nextStatus}.`);
+                      } catch (err: any) {
+                        console.error("Failed to update status:", err);
+                        alert("Failed to update status: " + (err.response?.data?.error || err.message));
+                      }
+                    }}
+                    size="small"
+                    variant="outlined"
+                    sx={{
+                      height: 28,
+                      fontSize: '0.75rem',
+                      fontWeight: 600,
+                      '.MuiOutlinedInput-notchedOutline': {
+                        borderColor: 'divider',
+                      },
+                    }}
+                  >
+                    {Object.entries(STATUS_LABELS).map(([status, cfg]) => (
+                      <MenuItem key={status} value={status} sx={{ fontSize: '0.75rem' }}>
+                        {cfg.label}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
                 <Select
                   value={recordType}
                   onChange={async (e) => {
@@ -2108,6 +2206,28 @@ const OcrReviewPage: React.FC = () => {
                         {drawMode ? 'Cancel Drawing' : 'Define Record Box'}
                       </Button>
                     )}
+                    {!useRecordSnippet && (
+                      <>
+                        <Tooltip title="Rotate counter-clockwise">
+                          <IconButton
+                            size="small"
+                            onClick={() => setRotation((r) => (r - 90 + 360) % 360)}
+                            color="primary"
+                          >
+                            <IconRotateCounterClockwise size={18} />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Rotate clockwise">
+                          <IconButton
+                            size="small"
+                            onClick={() => setRotation((r) => (r + 90) % 360)}
+                            color="primary"
+                          >
+                            <IconRotateClockwise size={18} />
+                          </IconButton>
+                        </Tooltip>
+                      </>
+                    )}
                     {reviewCropBbox && (
                       <Button
                         size="small"
@@ -2278,6 +2398,9 @@ const OcrReviewPage: React.FC = () => {
                       width: `${imageZoom}%`,
                       maxWidth: 'none',
                       mx: 'auto',
+                      transform: rotation ? `rotate(${rotation}deg)` : 'none',
+                      transformOrigin: 'center center',
+                      transition: 'transform 0.2s ease-in-out',
                     }}
                   >
                     <Box

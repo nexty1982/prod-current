@@ -174,15 +174,15 @@ export const FusionOverlay: React.FC<FusionOverlayProps> = ({
     }
     
     const newOffset = {
-      x: metrics.left - containerRect.left,
-      y: metrics.top - containerRect.top,
+      x: imageElement?.offsetLeft ?? 0,
+      y: imageElement?.offsetTop ?? 0,
     };
     
     // Only update if changed to avoid unnecessary work
     if (containerOffsetRef.current.x !== newOffset.x || containerOffsetRef.current.y !== newOffset.y) {
       containerOffsetRef.current = newOffset;
     }
-  }, [metrics]);
+  }, [imageElement]);
 
   // Calculate overlay position - MUST be called before conditional return
   const overlayStyle = useMemo(() => {
