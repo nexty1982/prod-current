@@ -348,6 +348,74 @@ function scoreFields(fields: Record<string, string>, required: string[]): number
   return Math.round((hit / required.length) * 1000) / 1000;
 }
 
+/** Post-extraction quality checks to flag common OCR errors. */
+function validateExtractedFields(
+  fields: Record<string, string>,
+  recordType: string,
+): { score: number; issues: string[] } {
+  const issues: string[] = [];
+  let penalty = 0;
+
+  // 1. Duplicate names across roles (common OCR misassignment)
+  if (recordType === 'baptism') {
+    if (fields.father_name && fields.mother_name && fields.father_name.trim() === fields.mother_name.trim()) {
+      issues.push('father_name === mother_name (likely OCR misassignment)');
+      penalty += 0.15;
+    }
+    if (fields.child_name && fields.performed_by && fields.child_name.trim() === fields.performed_by.trim()) {
+      issues.push('child_name === performed_by');
+      penalty += 0.2;
+    }
+  }
+  if (recordType === 'marriage') {
+    if (fields.groom_name && fields.bride_name && fields.groom_name.trim() === fields.bride_name.trim()) {
+      issues.push('groom_name === bride_name (likely OCR misassignment)');
+      penalty += 0.2;
+    }
+  }
+
+  // 2. Suspiciously short field values (likely OCR fragments)
+  const nameFields = ['child_name', 'child_first_name', 'father_name', 'mother_name',
+    'deceased_name', 'deceased_first_name', 'groom_name', 'bride_name'];
+  for (const field of nameFields) {
+    const val = fields[field]?.trim();
+    if (val && val.length === 1) {
+      issues.push(`${field} is only 1 character ("${val}")`);
+      penalty += 0.05;
+    }
+  }
+
+  // 3. Date format validation
+  const dateFields = ['date_of_birth', 'date_of_baptism', 'date_of_death', 'date_of_burial',
+    'date_of_funeral', 'date_of_marriage'];
+  const dateRegex = /^\d{1,2}[\/\.\-]\d{1,2}[\/\.\-]\d{2,4}$/;
+  const namedDateRegex = /^(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)/i;
+  for (const field of dateFields) {
+    const val = fields[field]?.trim();
+    if (val && !dateRegex.test(val) && !namedDateRegex.test(val) && !/^\d{4}$/.test(val)) {
+      // Check if it looks like a name leaked into a date field
+      if (/^[A-Z][a-z]+\s/.test(val) && !/jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec/i.test(val)) {
+        issues.push(`${field} contains name-like text: "${val.slice(0, 30)}"`);
+        penalty += 0.1;
+      }
+    }
+  }
+
+  // 4. Age validation (funeral)
+  if (recordType === 'funeral' && fields.age_at_death) {
+    const age = parseInt(fields.age_at_death, 10);
+    if (isNaN(age) || age < 0 || age > 150) {
+      issues.push(`age_at_death "${fields.age_at_death}" is invalid`);
+      penalty += 0.05;
+    }
+  }
+
+  return {
+    score: Math.max(0, 1 - penalty),
+    issues,
+  };
+}
+
 function feederJobDir(jobId: number): string {
   return path.join(__dirname, '../../storage/feeder', `job_${jobId}`);
 }
@@ -1403,24 +1471,46 @@ async function callGemini(
   }
 
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-  const response = await axios.post(url, {
-    contents,
-    systemInstruction: {
-      parts: [{ text: systemPrompt }]
-    },
-    generationConfig: {
-      responseMimeType: 'application/json',
-      temperature: 0.1
-    }
-  }, {
-    timeout: 30000 // 30s timeout
-  });
+  
+  const MAX_RETRIES = 3;
+  const BASE_DELAY_MS = 1000;
+  
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      const response = await axios.post(url, {
+        contents,
+        systemInstruction: {
+          parts: [{ text: systemPrompt }]
+        },
+        generationConfig: {
+          responseMimeType: 'application/json',
+          temperature: 0.1
+        }
+      }, {
+        timeout: 30000 // 30s timeout
+      });
 
-  const text = response.data?.candidates?.[0]?.content?.parts?.[0]?.text;
-  if (!text) {
-    throw new Error('Empty response from Gemini API');
+      const text = response.data?.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (!text) {
+        throw new Error('Empty response from Gemini API');
+      }
+      return text;
+    } catch (err: any) {
+      const status = err?.response?.status;
+      const code = err?.code;
+      const isRetryable = status === 429 || status === 503 || status === 500
+        || code === 'ECONNRESET' || code === 'ETIMEDOUT' || code === 'ECONNABORTED';
+      
+      if (!isRetryable || attempt >= MAX_RETRIES) {
+        throw err;
+      }
+      
+      const delay = BASE_DELAY_MS * Math.pow(2, attempt) + Math.random() * 500;
+      console.warn(`[Gemini] Retryable error (${status || code}), attempt ${attempt + 1}/${MAX_RETRIES}, waiting ${Math.round(delay)}ms`);
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
   }
-  return text;
+  throw new Error('Gemini API: max retries exceeded');
 }
 
 async function extractSingleRecordGeminiVision(
@@ -1728,6 +1818,16 @@ export async function extractAgentFieldsForJob(
       const refined = await refineExtractWithLlm(draft, ocrText);
       result = refined || draft;
     }
+  }
+  // Post-extraction quality validation
+  const primaryFields = result.records?.[0] || result.fields || {};
+  const validation = validateExtractedFields(primaryFields, result.record_type);
+  if (validation.issues.length > 0) {
+    console.log(`[OCR Agent] Job ${jobId}: validation issues: ${validation.issues.join('; ')}`);
+    result.confidence = Math.min(result.confidence, validation.score);
+    result.needs_review = (result.needs_review || validation.score < 0.8);
+    result.refinement_notes = [result.refinement_notes, `Validation: ${validation.issues.join('; ')}`]
+      .filter(Boolean).join(' | ');
   }
 
   return { ...result, agent: 'agent1' };
