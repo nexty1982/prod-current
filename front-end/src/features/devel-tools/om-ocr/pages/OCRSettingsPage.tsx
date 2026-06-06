@@ -659,14 +659,22 @@ const OCRSettingsPage: React.FC = () => {
             Tweak the rules applied to OCR/LLM extractions before records are finalized.
           </Typography>
           
-          {rulesLoading ? (
+           {rulesLoading ? (
             <Typography>Loading rules...</Typography>
+          ) : rules.length === 0 ? (
+            <Paper variant="outlined" sx={{ p: 4, textAlign: 'center' }}>
+              <Typography variant="h6" color="text.secondary" gutterBottom>No Validation Rules Configured</Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                Rules validate OCR-extracted records before they are finalized. Add rules to catch data errors, suggest values, and enforce consistency.
+              </Typography>
+            </Paper>
           ) : (
             <TableContainer component={Paper} variant="outlined">
               <Table size="small">
                 <TableHead>
                   <TableRow>
                     <TableCell>Rule Name & Description</TableCell>
+                    <TableCell>Scope</TableCell>
                     <TableCell>Record Type</TableCell>
                     <TableCell>Severity</TableCell>
                     <TableCell align="center">Enabled</TableCell>
@@ -678,6 +686,15 @@ const OCRSettingsPage: React.FC = () => {
                       <TableCell>
                         <Typography variant="subtitle2" fontWeight={600}>{rule.name}</Typography>
                         <Typography variant="caption" color="text.secondary">{rule.description}</Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Chip
+                          label={rule.scope || 'global'}
+                          size="small"
+                          color={rule.scope === 'global' ? 'primary' : rule.scope === 'diocesan' ? 'secondary' : 'default'}
+                          variant="filled"
+                          sx={{ textTransform: 'capitalize', fontSize: '0.7rem' }}
+                        />
                       </TableCell>
                       <TableCell sx={{ textTransform: 'capitalize' }}>{rule.record_type}</TableCell>
                       <TableCell>
