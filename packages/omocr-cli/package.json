@@ -1,0 +1,45 @@
+{
+  "name": "@orthodoxmetrics/omocr-cli",
+  "version": "0.1.0",
+  "description": "Versioned CLI for OCR Studio — query, process, test, and validate parish OCR jobs via the existing API",
+  "type": "module",
+  "bin": {
+    "omocr": "./dist/bin/omocr.js",
+    "omocr-query": "./dist/bin/aliases/omocr-query.js",
+    "omocr-test": "./dist/bin/aliases/omocr-test.js",
+    "omocr-process": "./dist/bin/aliases/omocr-process.js",
+    "omocr-status": "./dist/bin/aliases/omocr-status.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx src/bin/omocr.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prepublishOnly": "npm run build"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "commander": "^12.1.0",
+    "js-yaml": "^4.1.0",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^22.10.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "keywords": [
+    "ocr",
+    "orthodoxmetrics",
+    "cli"
+  ],
+  "license": "UNLICENSED"
+}

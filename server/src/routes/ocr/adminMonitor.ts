@@ -141,6 +141,91 @@ router.get('/ocr/global-corrections', requireRole('super_admin'), ocrLang.listGl
 router.get('/ocr/date-formats', requireRole('super_admin'), ocrLang.listDateFormats);
 router.get('/ocr/template-accuracy', requireRole('super_admin'), ocrLang.getTemplateAccuracy);
 
+// -------------------------------------------------------------------------
+// LlamaParse Platform (LlamaCloud) — admin parse / status
+// -------------------------------------------------------------------------
+router.get('/ocr/llamaparse/status', requireRole('super_admin'), (_req: any, res: any) => {
+  try {
+    const { getLlamaParseStatus } = require('../../services/llamaParseService');
+    res.json(getLlamaParseStatus());
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.post('/admin/ocr/jobs/:churchId/:jobId/llamaparse', requireRole('super_admin'), async (req: any, res: any) => {
+  try {
+    const jobId = parseInt(req.params.jobId, 10);
+    const pageIndex = parseInt(req.body?.pageIndex ?? req.query?.pageIndex ?? '0', 10);
+    const tier = req.body?.tier;
+
+    const {
+      isLlamaParseEnabled,
+      parseOcrJobPage,
+    } = require('../../services/llamaParseService');
+
+    if (!isLlamaParseEnabled()) {
+      return res.status(503).json({
+        error: 'LlamaParse is not enabled',
+        hint: 'Set LLAMA_CLOUD_API_KEY and ensure LLAMA_PARSE_ENABLED is not false',
+      });
+    }
+
+    const result = await parseOcrJobPage(jobId, pageIndex, tier ? { tier } : {});
+    res.json({ success: true, ...result });
+  } catch (error: any) {
+    console.error('[LlamaParse] Job parse error:', error);
+    res.status(500).json({ error: 'LlamaParse failed', message: error.message });
+  }
+});
+
+router.post('/ocr/jobs/:churchId/:jobId/llamaparse', requireRole('super_admin'), async (req: any, res: any) => {
+  try {
+    const jobId = parseInt(req.params.jobId, 10);
+    const pageIndex = parseInt(req.body?.pageIndex ?? '0', 10);
+    const tier = req.body?.tier;
+    const { isLlamaParseEnabled, parseOcrJobPage } = require('../../services/llamaParseService');
+    if (!isLlamaParseEnabled()) {
+      return res.status(503).json({ error: 'LlamaParse is not enabled' });
+    }
+    const result = await parseOcrJobPage(jobId, pageIndex, tier ? { tier } : {});
+    res.json({ success: true, ...result });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.post('/admin/ocr/llamaparse/parse-file', requireRole('super_admin'), async (req: any, res: any) => {
+  try {
+    const filePath = req.body?.filePath;
+    if (!filePath || typeof filePath !== 'string') {
+      return res.status(400).json({ error: 'filePath is required (absolute path on server)' });
+    }
+    const { isLlamaParseEnabled, parseLocalFile } = require('../../services/llamaParseService');
+    if (!isLlamaParseEnabled()) {
+      return res.status(503).json({ error: 'LlamaParse is not enabled' });
+    }
+    const tier = req.body?.tier;
+    const { summary, raw } = await parseLocalFile(filePath, tier ? { tier } : {});
+    res.json({ success: true, summary, job: raw.job });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.post('/ocr/llamaparse/parse-file', requireRole('super_admin'), async (req: any, res: any) => {
+  try {
+    const filePath = req.body?.filePath;
+    if (!filePath) return res.status(400).json({ error: 'filePath is required' });
+    const { isLlamaParseEnabled, parseLocalFile } = require('../../services/llamaParseService');
+    if (!isLlamaParseEnabled()) return res.status(503).json({ error: 'LlamaParse is not enabled' });
+    const { summary, raw } = await parseLocalFile(filePath, req.body?.tier ? { tier: req.body.tier } : {});
+    res.json({ success: true, summary, job: raw.job });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Start the stale job sweeper (every 30s, timeout 90s)
 ocrMonitor.startStaleSweeper(30000, 90);
 

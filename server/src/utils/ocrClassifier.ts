@@ -208,13 +208,14 @@ export interface AgentExtractResult {
   fields: Record<string, string>;
   records: Array<Record<string, string>>;
   confidence: number;
-  method: 'assembler' | 'heuristic' | 'llm' | 'llm_vision';
+  method: 'assembler' | 'heuristic' | 'llm' | 'llm_vision' | 'llamaparse' | 'llamaparse_llm';
+  agent?: 'agent1' | 'agent2';
   candidate_index?: number;
   total_candidates?: number;
   needs_review?: boolean;
   llm_model?: string;
   refinement_notes?: string;
-  draft_method?: 'assembler' | 'heuristic' | 'llm' | 'llm_vision';
+  draft_method?: 'assembler' | 'heuristic' | 'llm' | 'llm_vision' | 'llamaparse' | 'llamaparse_llm';
 }
 
 const DATE_RE = /\b(\d{1,2}[\/\.\-]\d{1,2}[\/\.\-]\d{2,4}|\d{4}[\/\.\-]\d{1,2}[\/\.\-]\d{1,2}|(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+\d{1,2},?\s+\d{4})\b/gi;
@@ -1404,19 +1405,164 @@ export async function extractAgentFieldsForJob(
   const draft = buildAssemblerDraft(jobId, ocrText, recordTypeHint)
     || extractAgentFields(ocrText, recordTypeHint);
 
+  let result: AgentExtractResult;
+
   if (isGeminiEnabled()) {
     const vision = await extractRecordsWithGeminiVision(jobId, draft);
-    if (vision) return vision;
-
-    const refined = await refineExtractWithGeminiLlm(draft, ocrText);
-    return refined || draft;
+    if (vision) result = vision;
+    else {
+      const refined = await refineExtractWithGeminiLlm(draft, ocrText);
+      result = refined || draft;
+    }
+  } else {
+    const vision = await extractRecordsWithVision(jobId, draft);
+    if (vision) result = vision;
+    else {
+      const refined = await refineExtractWithLlm(draft, ocrText);
+      result = refined || draft;
+    }
   }
 
-  const vision = await extractRecordsWithVision(jobId, draft);
-  if (vision) return vision;
+  return { ...result, agent: 'agent1' };
+}
 
-  const refined = await refineExtractWithLlm(draft, ocrText);
-  return refined || draft;
+export function compareAgentFieldDiffs(
+  agent1: AgentExtractResult | null | undefined,
+  agent2: AgentExtractResult | null | undefined,
+  recordIndex = 0,
+): Array<{ field: string; agent1: string; agent2: string; match: boolean }> {
+  if (!agent1 || !agent2) return [];
+  const r1 = agent1.records?.[recordIndex] || agent1.fields || {};
+  const r2 = agent2.records?.[recordIndex] || agent2.fields || {};
+  const norm = (s: string) => (s || '').trim().replace(/\s+/g, ' ').toLowerCase();
+  const keys = new Set([...Object.keys(r1), ...Object.keys(r2)]);
+  return [...keys]
+    .filter((k) => (r1[k] || r2[k] || '').trim())
+    .sort()
+    .map((field) => ({
+      field,
+      agent1: r1[field] || '',
+      agent2: r2[field] || '',
+      match: norm(r1[field] || '') === norm(r2[field] || ''),
+    }));
+}
+
+/** Agent 2 — map LlamaParse markdown tables/forms to sacramental field records. */
+export async function extractAgent2FieldsForJob(
+  jobId: number,
+  recordTypeHint?: string,
+  ocrText?: string,
+): Promise<AgentExtractResult | null> {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const llamaparse = require('../services/llamaParseService') as typeof import('../services/llamaParseService');
+  if (!llamaparse.isLlamaParseEnabled()) return null;
+
+  let markdown = llamaparse.readLlamaParseMarkdownForJob(jobId);
+  if (!markdown?.trim()) {
+    try {
+      await llamaparse.parseOcrJobPage(jobId, 0);
+      markdown = llamaparse.readLlamaParseMarkdownForJob(jobId);
+    } catch (err: any) {
+      console.warn(`[Agent2] LlamaParse unavailable for job ${jobId}: ${err.message}`);
+      return null;
+    }
+  }
+  if (!markdown?.trim()) return null;
+
+  const record_type = resolveRecordType(`${markdown}\n${ocrText || ''}`, recordTypeHint);
+  const required = requiredFieldsForType(record_type);
+
+  if (isGeminiEnabled()) {
+    const systemPrompt = [
+      'You extract Orthodox parish sacramental records from LlamaParse markdown output.',
+      'The markdown may be a table (| col |) or labeled form (* **FIELD**: value).',
+      'Rules:',
+      '- Return one record per logical ledger row or form entry.',
+      '- Map to schema fields only; use record_number when a row number is visible.',
+      '- For baptism: split father_name and mother_name when combined in one column.',
+      '- For baptism dates column with birth+baptism, map to date_of_birth and date_of_baptism.',
+      '- Keep dates in source style. Do not invent values.',
+      '- Set needs_review=true when required fields are missing.',
+      'Respond ONLY with JSON:',
+      JSON.stringify({
+        record_type: 'baptism|marriage|funeral|custom',
+        records: [{ fields: { child_name: '…' }, confidence: 0.9, needs_review: false }],
+        refinement_notes: 'string',
+      }, null, 2),
+    ].join('\n');
+
+    const userPrompt = JSON.stringify({
+      record_type_hint: recordTypeHint || record_type,
+      llamaparse_markdown: markdown.slice(0, 24000),
+      vision_ocr_context: (ocrText || '').slice(0, 2000),
+    }, null, 2);
+
+    const model = process.env.GEMINI_MODEL || 'gemini-2.5-pro';
+    try {
+      const jsonText = await callGemini(model, systemPrompt, [
+        { role: 'user', parts: [{ text: userPrompt }] },
+      ]);
+      let payload: any;
+      try {
+        payload = JSON.parse(jsonText);
+      } catch {
+        const match = jsonText.match(/\{[\s\S]*\}/);
+        if (!match) throw new Error('No JSON in Gemini response');
+        payload = JSON.parse(match[0]);
+      }
+
+      const records: Array<Record<string, string>> = (payload.records || [])
+        .slice(0, OCR_AGENT_MAX_RECORDS)
+        .map((r: any) => sanitizeFieldMap(r.fields || {}, payload.record_type || record_type));
+
+      if (!records.length) return null;
+
+      const idx = 0;
+      const fields = { ...records[idx] };
+      if (record_type === 'baptism') {
+        normalizeBaptismRecord(fields);
+      }
+
+      return {
+        record_type: payload.record_type || record_type,
+        fields,
+        records,
+        confidence: payload.records[idx]?.confidence ?? scoreFields(fields, required),
+        method: 'llamaparse_llm',
+        agent: 'agent2',
+        candidate_index: idx,
+        total_candidates: records.length,
+        needs_review: payload.records[idx]?.needs_review ?? scoreFields(fields, required) < 0.6,
+        llm_model: model,
+        refinement_notes: payload.refinement_notes || 'Extracted from LlamaParse markdown via Gemini.',
+        draft_method: 'llamaparse',
+      };
+    } catch (err: any) {
+      console.warn(`[Agent2] Gemini markdown extract failed job ${jobId}: ${err.message}`);
+    }
+  }
+
+  const fields: Record<string, string> = {};
+  if (record_type === 'baptism') {
+    Object.assign(fields, extractBaptismFields(markdown));
+  } else if (record_type === 'marriage') {
+    Object.assign(fields, extractMarriageFields(markdown));
+  } else if (record_type === 'funeral') {
+    Object.assign(fields, extractFuneralFields(markdown));
+  }
+
+  if (!Object.keys(fields).length) return null;
+
+  return {
+    record_type,
+    fields,
+    records: [fields],
+    confidence: scoreFields(fields, required),
+    method: 'llamaparse',
+    agent: 'agent2',
+    needs_review: scoreFields(fields, required) < 0.6,
+    refinement_notes: 'Heuristic parse of LlamaParse markdown (no Gemini).',
+  };
 }
 
 export function extractAgentFields(ocrText: string, recordTypeHint?: string): AgentExtractResult {

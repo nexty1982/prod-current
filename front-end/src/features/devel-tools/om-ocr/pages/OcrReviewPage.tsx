@@ -54,6 +54,13 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  ToggleButton,
+  ToggleButtonGroup,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
 } from '@mui/material';
 import {
   IconArrowLeft,
@@ -76,6 +83,24 @@ import {
 } from '@tabler/icons-react';
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
+
+type AgentView = 'agent1' | 'agent2' | 'compare';
+
+function formatExtractMethod(method: string | null): string {
+  if (!method) return 'Unknown';
+  if (method === 'assembler') return 'Table assembly';
+  if (method === 'llm_vision') return 'AI vision';
+  if (method === 'llm') return 'AI agent';
+  if (method === 'llamaparse_llm') return 'LlamaParse + AI';
+  if (method === 'llamaparse') return 'LlamaParse';
+  return 'Heuristic';
+}
+
+function recordsFromExtract(extract: any): Array<Record<string, string>> {
+  if (Array.isArray(extract?.records) && extract.records.length) return extract.records;
+  if (extract?.fields) return [extract.fields];
+  return [];
+}
 
 type PipelineStatus =
   | 'uploaded' | 'ocr_complete' | 'agent_extracted' | 'ready_to_seed' | 'seeded' | 'returned' | string;
@@ -220,6 +245,14 @@ const OcrReviewPage: React.FC = () => {
   const [reviewStatus, setReviewStatus] = useState<PipelineStatus>('uploaded');
   const [extractMethod, setExtractMethod] = useState<string | null>(null);
   const [allRecords, setAllRecords] = useState<Array<Record<string, string>>>([]);
+  const [agent1Snapshot, setAgent1Snapshot] = useState<Array<Record<string, string>>>([]);
+  const [agent2Records, setAgent2Records] = useState<Array<Record<string, string>>>([]);
+  const [agent2Method, setAgent2Method] = useState<string | null>(null);
+  const [agent2Notes, setAgent2Notes] = useState<string | null>(null);
+  const [agent2Status, setAgent2Status] = useState<string | null>(null);
+  const [agent2Available, setAgent2Available] = useState(false);
+  const [agentView, setAgentView] = useState<AgentView>('agent1');
+  const [llamaparsePreview, setLlamaparsePreview] = useState<string | null>(null);
   const [selectedRecordIndex, setSelectedRecordIndex] = useState(0);
   const [needsReviewFlag, setNeedsReviewFlag] = useState(false);
   const [refinementNotes, setRefinementNotes] = useState<string | null>(null);
@@ -409,6 +442,67 @@ const OcrReviewPage: React.FC = () => {
     };
   }, [tableExtractionJson, imageDimensions, useRecordSnippet, reviewCropBbox]);
 
+  const fieldDiffs = useMemo(() => {
+    const norm = (s: string) => (s || '').trim().replace(/\s+/g, ' ').toLowerCase();
+    const r1 = agent1Snapshot[selectedRecordIndex] || {};
+    const r2 = agent2Records[selectedRecordIndex] || {};
+    const keys = new Set([...Object.keys(r1), ...Object.keys(r2)]);
+    return [...keys]
+      .filter((k) => (r1[k] || r2[k] || '').trim())
+      .sort()
+      .map((field) => ({
+        field,
+        agent1: r1[field] || '',
+        agent2: r2[field] || '',
+        match: norm(r1[field] || '') === norm(r2[field] || ''),
+      }));
+  }, [agent1Snapshot, agent2Records, selectedRecordIndex]);
+
+  const diffMatchCount = useMemo(
+    () => fieldDiffs.filter((d) => d.match).length,
+    [fieldDiffs],
+  );
+
+  const applyAgentValues = (source: 'agent1' | 'agent2') => {
+    const src = source === 'agent1' ? agent1Snapshot : agent2Records;
+    const rec = src[selectedRecordIndex] || src[0] || {};
+    const updated = [...allRecords];
+    if (updated.length) updated[selectedRecordIndex] = { ...rec };
+    else updated.push({ ...rec });
+    setAllRecords(updated);
+    setFields({ ...rec });
+    setMapHint(`Applied ${source === 'agent1' ? 'Agent 1' : 'Agent 2'} values to the editor.`);
+  };
+
+  const hydrateExtractResponse = (data: any) => {
+    setReviewStatus(data.review_status || 'uploaded');
+    setOcrPreview(data.ocr_text_preview || null);
+    setAgent2Status(data.agent2_status || null);
+    setLlamaparsePreview(data.llamaparse_preview || null);
+
+    const extract = data.extract;
+    const agent2 = data.agent2_extract;
+    const rt = extract?.record_type || agent2?.record_type || 'baptism';
+    if (rt && rt !== 'custom') setRecordType(rt);
+
+    const records = recordsFromExtract(extract);
+    const a2records = recordsFromExtract(agent2);
+    const idx = typeof extract?.candidate_index === 'number' ? extract.candidate_index : 0;
+
+    setAgent1Snapshot(records.map((r) => ({ ...r })));
+    setAllRecords(records.map((r) => ({ ...r })));
+    setAgent2Records(a2records.map((r) => ({ ...r })));
+    setSelectedRecordIndex(Math.min(idx, Math.max(records.length - 1, 0)));
+    setExtractMethod(extract?.method || null);
+    setAgent2Method(agent2?.method || null);
+    setNeedsReviewFlag(!!extract?.needs_review);
+    setRefinementNotes(extract?.refinement_notes || null);
+    setAgent2Notes(agent2?.refinement_notes || null);
+    setFields({ ...(records[idx] || extract?.fields || {}) });
+    setAgent2Available(!!agent2 || !!data.llamaparse_available);
+    setConfirmedIndexes(new Set<number>(Array.isArray(extract?.confirmed_indexes) ? extract.confirmed_indexes : []));
+  };
+
   const loadJobs = useCallback(async () => {
     if (!churchId) return;
     setJobsLoading(true);
@@ -430,26 +524,7 @@ const OcrReviewPage: React.FC = () => {
     try {
       const res: any = await apiClient.get(`/api/church/${churchId}/ocr/jobs/${jobId}/agent-extract`);
       const data = res?.data ?? res;
-      setReviewStatus(data.review_status || 'uploaded');
-      setOcrPreview(data.ocr_text_preview || null);
-
-      const extract = data.extract;
-      const rt = extract?.record_type || 'baptism';
-      if (rt && rt !== 'custom') setRecordType(rt);
-
-      const records: Array<Record<string, string>> = Array.isArray(extract?.records) && extract.records.length
-        ? extract.records
-        : extract?.fields
-          ? [extract.fields]
-          : [];
-      const idx = typeof extract?.candidate_index === 'number' ? extract.candidate_index : 0;
-      setAllRecords(records);
-      setSelectedRecordIndex(Math.min(idx, Math.max(records.length - 1, 0)));
-      setExtractMethod(extract?.method || null);
-      setNeedsReviewFlag(!!extract?.needs_review);
-      setRefinementNotes(extract?.refinement_notes || null);
-      setFields({ ...(records[idx] || extract?.fields || {}) });
-      setConfirmedIndexes(new Set<number>(Array.isArray(extract?.confirmed_indexes) ? extract.confirmed_indexes : []));
+      hydrateExtractResponse(data);
     } catch (err: any) {
       setError(err?.response?.data?.error || err?.message || 'Failed to load extraction');
       setFields({});
@@ -642,18 +717,8 @@ const OcrReviewPage: React.FC = () => {
     setError(null);
     try {
       const res: any = await apiClient.post(`/api/church/${churchId}/ocr/jobs/${selectedJobId}/agent-extract`);
-      const extract = res?.data?.extract ?? res?.extract;
-      if (extract?.record_type && extract.record_type !== 'custom') setRecordType(extract.record_type);
-      const records: Array<Record<string, string>> = Array.isArray(extract?.records) && extract.records.length
-        ? extract.records
-        : extract?.fields ? [extract.fields] : [];
-      const idx = typeof extract?.candidate_index === 'number' ? extract.candidate_index : 0;
-      setAllRecords(records);
-      setSelectedRecordIndex(Math.min(idx, Math.max(records.length - 1, 0)));
-      setExtractMethod(extract?.method || null);
-      setNeedsReviewFlag(!!extract?.needs_review);
-      setRefinementNotes(extract?.refinement_notes || null);
-      setFields({ ...(records[idx] || extract?.fields || {}) });
+      const data = res?.data ?? res;
+      hydrateExtractResponse(data);
       setConfirmedIndexes(new Set<number>());
       setColumnBandsOverride(null);
       setReviewStatus('agent_extracted');
@@ -664,6 +729,36 @@ const OcrReviewPage: React.FC = () => {
       setExtractLoading(false);
     }
   };
+
+  const runAgent2Extract = async () => {
+    if (!churchId || !selectedJobId) return;
+    setExtractLoading(true);
+    setError(null);
+    try {
+      const res: any = await apiClient.post(`/api/church/${churchId}/ocr/jobs/${selectedJobId}/agent2-extract`);
+      const data = res?.data ?? res;
+      const agent2 = data.agent2_extract;
+      const a2records = recordsFromExtract(agent2);
+      setAgent2Records(a2records.map((r) => ({ ...r })));
+      setAgent2Method(agent2?.method || null);
+      setAgent2Notes(agent2?.refinement_notes || null);
+      setAgent2Status('complete');
+      setAgent2Available(true);
+      if (agent2?.record_type && agent2.record_type !== 'custom') setRecordType(agent2.record_type);
+      setMapHint('Agent 2 (LlamaParse) extraction complete — open Compare to see differences.');
+    } catch (err: any) {
+      setError(err?.response?.data?.error || 'Agent 2 extraction failed');
+    } finally {
+      setExtractLoading(false);
+    }
+  };
+
+  const agent2DisplayFields = useMemo(
+    () => agent2Records[selectedRecordIndex] || agent2Records[0] || {},
+    [agent2Records, selectedRecordIndex],
+  );
+
+  const editorReadOnly = agentView === 'agent2';
 
   const confirmFields = async () => {
     if (!churchId || !selectedJobId) return;
@@ -1116,13 +1211,107 @@ const OcrReviewPage: React.FC = () => {
                 </Select>
                 {extractMethod && (
                   <Chip
-                    label={extractMethod === 'assembler' ? 'Table assembly' : extractMethod === 'llm_vision' ? 'AI vision' : extractMethod === 'llm' ? 'AI agent' : 'Heuristic'}
+                    label={formatExtractMethod(extractMethod)}
                     size="small"
-                    color={extractMethod === 'assembler' ? 'success' : (extractMethod === 'llm' || extractMethod === 'llm_vision') ? 'primary' : 'default'}
+                    color={extractMethod === 'assembler' ? 'success' : (extractMethod === 'llm' || extractMethod === 'llm_vision' || extractMethod === 'llamaparse_llm') ? 'primary' : 'default'}
+                    variant="outlined"
+                  />
+                )}
+                {agent2Method && (
+                  <Chip
+                    label={`Agent 2: ${formatExtractMethod(agent2Method)}`}
+                    size="small"
+                    color={agent2Method === 'llamaparse_llm' ? 'secondary' : 'default'}
                     variant="outlined"
                   />
                 )}
               </Stack>
+
+              <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
+                <ToggleButtonGroup
+                  exclusive
+                  size="small"
+                  value={agentView}
+                  onChange={(_, v) => { if (v) setAgentView(v as AgentView); }}
+                >
+                  <ToggleButton value="agent1">
+                    Agent 1 · Vision/Table
+                  </ToggleButton>
+                  <ToggleButton value="agent2" disabled={!agent2Available && agent2Status !== 'running'}>
+                    Agent 2 · LlamaParse
+                  </ToggleButton>
+                  <ToggleButton value="compare" disabled={!agent2Records.length}>
+                    Compare
+                  </ToggleButton>
+                </ToggleButtonGroup>
+                {agent2Status && (
+                  <Chip
+                    size="small"
+                    label={`Agent 2: ${agent2Status}`}
+                    color={agent2Status === 'complete' ? 'success' : agent2Status === 'running' ? 'info' : 'default'}
+                    variant="outlined"
+                  />
+                )}
+                {!agent2Available && agent2Status !== 'complete' && (
+                  <Button size="small" variant="text" onClick={runAgent2Extract} disabled={extractLoading}>
+                    Run Agent 2
+                  </Button>
+                )}
+              </Stack>
+
+              {agentView === 'compare' && fieldDiffs.length > 0 && (
+                <Paper variant="outlined" sx={{ p: 2 }}>
+                  <Stack direction="row" spacing={1} alignItems="center" justifyContent="space-between" sx={{ mb: 1.5 }}>
+                    <Typography variant="subtitle2" fontWeight={700}>
+                      Agent comparison — record #{selectedRecordIndex + 1}
+                    </Typography>
+                    <Chip
+                      size="small"
+                      label={`${diffMatchCount}/${fieldDiffs.length} fields match`}
+                      color={diffMatchCount === fieldDiffs.length ? 'success' : 'warning'}
+                    />
+                  </Stack>
+                  <Table size="small">
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>Field</TableCell>
+                        <TableCell>Agent 1</TableCell>
+                        <TableCell>Agent 2</TableCell>
+                        <TableCell align="center">Match</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {fieldDiffs.map((row) => (
+                        <TableRow
+                          key={row.field}
+                          sx={{ bgcolor: row.match ? 'transparent' : 'warning.light', opacity: row.match ? 1 : 0.95 }}
+                        >
+                          <TableCell sx={{ fontWeight: 600, textTransform: 'capitalize' }}>
+                            {row.field.replace(/_/g, ' ')}
+                          </TableCell>
+                          <TableCell sx={{ fontFamily: 'monospace', fontSize: '0.8rem' }}>{row.agent1 || '—'}</TableCell>
+                          <TableCell sx={{ fontFamily: 'monospace', fontSize: '0.8rem' }}>{row.agent2 || '—'}</TableCell>
+                          <TableCell align="center">{row.match ? '✓' : '≠'}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                  <Stack direction="row" spacing={1} sx={{ mt: 1.5 }}>
+                    <Button size="small" variant="outlined" onClick={() => applyAgentValues('agent1')}>
+                      Use Agent 1 in editor
+                    </Button>
+                    <Button size="small" variant="outlined" onClick={() => applyAgentValues('agent2')}>
+                      Use Agent 2 in editor
+                    </Button>
+                  </Stack>
+                </Paper>
+              )}
+
+              {agentView === 'compare' && !fieldDiffs.length && agent2Available && (
+                <Alert severity="info">
+                  No field differences to show yet — run Agent 2 or wait for the worker to finish LlamaParse extraction.
+                </Alert>
+              )}
 
               {layoutClassification && (
                 <Paper variant="outlined" sx={{ p: 1.5, bgcolor: 'background.default', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1.5 }}>
@@ -1202,13 +1391,31 @@ const OcrReviewPage: React.FC = () => {
                     <Stack spacing={1.5}>
                       {extractMethod && (
                         <Typography variant="caption" color="text.secondary">
-                          Extraction method: {extractMethod === 'assembler' ? 'Table assembly' : extractMethod === 'llm_vision' ? 'AI vision' : extractMethod === 'llm' ? 'AI agent' : 'Heuristic'}
+                          Agent 1 method: {formatExtractMethod(extractMethod)}
+                        </Typography>
+                      )}
+                      {agent2Method && (
+                        <Typography variant="caption" color="text.secondary">
+                          Agent 2 method: {formatExtractMethod(agent2Method)}
                         </Typography>
                       )}
                       {(extractMethod === 'llm' || extractMethod === 'llm_vision') && refinementNotes && (
                         <Alert severity="info" sx={{ py: 0.5 }}>
-                          {refinementNotes}
+                          Agent 1: {refinementNotes}
                         </Alert>
+                      )}
+                      {agent2Notes && (
+                        <Alert severity="info" sx={{ py: 0.5 }}>
+                          Agent 2: {agent2Notes}
+                        </Alert>
+                      )}
+                      {llamaparsePreview && (
+                        <Paper variant="outlined" sx={{ p: 2, bgcolor: 'action.hover' }}>
+                          <Typography variant="caption" fontWeight={700} color="text.secondary">LlamaParse markdown preview</Typography>
+                          <Typography variant="body2" sx={{ mt: 0.5, fontFamily: 'monospace', whiteSpace: 'pre-wrap', fontSize: '0.75rem' }}>
+                            {llamaparsePreview}
+                          </Typography>
+                        </Paper>
                       )}
                       {ocrPreview && (
                         <Paper variant="outlined" sx={{ p: 2, bgcolor: 'action.hover' }}>
@@ -1231,8 +1438,15 @@ const OcrReviewPage: React.FC = () => {
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
                       <IconRobot size={16} />
                       <Typography variant="subtitle2" fontWeight={700}>
-                        Agent-extracted fields — edit and confirm
+                        {agentView === 'agent2'
+                          ? 'Agent 2 (LlamaParse) — reference output'
+                          : 'Agent-extracted fields — edit and confirm'}
                       </Typography>
+                      {agentView === 'agent2' && (
+                        <Button size="small" variant="text" onClick={() => applyAgentValues('agent2')}>
+                          Copy to editor
+                        </Button>
+                      )}
                     </Box>
                     <Box
                       sx={{
@@ -1244,6 +1458,9 @@ const OcrReviewPage: React.FC = () => {
                       {fieldDefs.map((def) => {
                         const fieldColor = REVIEW_FIELD_COLORS[def.name];
                         const isFocused = focusedField === def.name;
+                        const fieldValue = editorReadOnly
+                          ? (agent2DisplayFields[def.name] || '')
+                          : (fields[def.name] || '');
                         return (
                           <TextField
                             key={def.name}
@@ -1251,9 +1468,10 @@ const OcrReviewPage: React.FC = () => {
                             size="small"
                             label={def.label}
                             required={def.required}
-                            value={fields[def.name] || ''}
-                            onChange={(e) => setFields((prev) => ({ ...prev, [def.name]: e.target.value }))}
-                            onFocus={() => setFocusedField(def.name)}
+                            value={fieldValue}
+                            onChange={editorReadOnly ? undefined : (e) => setFields((prev) => ({ ...prev, [def.name]: e.target.value }))}
+                            onFocus={editorReadOnly ? undefined : () => setFocusedField(def.name)}
+                            disabled={editorReadOnly}
                             multiline={def.type === 'textarea'}
                             minRows={def.type === 'textarea' ? 2 : 1}
                             sx={{
@@ -1292,7 +1510,15 @@ const OcrReviewPage: React.FC = () => {
                       onClick={runAgentExtract}
                       disabled={extractLoading}
                     >
-                      Re-run Agent
+                      Re-run Agent 1
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      startIcon={<IconRefresh size={18} />}
+                      onClick={runAgent2Extract}
+                      disabled={extractLoading}
+                    >
+                      Re-run Agent 2
                     </Button>
                     <Button
                       variant="contained"
@@ -1321,7 +1547,7 @@ const OcrReviewPage: React.FC = () => {
                   </Stack>
 
                   <Typography variant="caption" color="text.secondary">
-                    Flow: Upload → OCR → Agent extract → Confirm → Seed → view in Records Management (AG Grid)
+                    Flow: Upload → OCR → Agent 1 (Vision/Table) + Agent 2 (LlamaParse) → Compare → Confirm → Seed
                   </Typography>
                 </>
               )}

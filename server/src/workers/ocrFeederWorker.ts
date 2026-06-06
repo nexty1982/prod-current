@@ -2395,6 +2395,22 @@ async function processPage(tenantPool: Pool, page: PageRow): Promise<void> {
     await parsePage(tenantPool, page, rawText);
     console.log(`  Parsed page ${page.id}`);
 
+    // LlamaParse shadow/supplement (non-blocking when pipeline mode enabled)
+    try {
+      const { runLlamaParseShadowIfEnabled } = require('../services/llamaParseService');
+      const lpSummary = await runLlamaParseShadowIfEnabled(page.job_id, page.page_index, {
+        tenantPool,
+        feederPageId: page.id,
+      });
+      if (lpSummary) {
+        console.log(
+          `  [LlamaParse] Shadow complete page ${page.id}: job=${lpSummary.parseJobId} pages=${lpSummary.pageCount} md=${lpSummary.markdownFull?.length ?? 0} chars`,
+        );
+      }
+    } catch (lpErr: any) {
+      console.warn(`  [LlamaParse] Page ${page.id}: shadow failed (non-blocking): ${lpErr.message}`);
+    }
+
     // Step 3.5: Per-record crop + extract (token-region isolation)
     // ONLY runs in record_crop mode. Structured table mode uses table rows directly.
     if (pipelineExtractionMode === 'structured_table') {
@@ -2816,6 +2832,7 @@ async function processJob(job: JobRow): Promise<void> {
         const extract = await extractAgentFieldsForJob(jobId, combinedText, hintType !== 'unknown' ? hintType : record_type);
         const payload = {
           ...extract,
+          agent: 'agent1',
           extracted_at: new Date().toISOString(),
           confirmed: false,
         };
@@ -2830,6 +2847,33 @@ async function processJob(job: JobRow): Promise<void> {
           [JSON.stringify(payload), resolvedType, jobId]
         );
         console.log(`OCR_AGENT_EXTRACT ${JSON.stringify({ jobId, recordType: resolvedType, fieldCount: Object.keys(extract.fields).length, confidence: extract.confidence })}`);
+
+        try {
+          const { extractAgent2FieldsForJob } = require('../utils/ocrClassifier');
+          await platformPool.query('ALTER TABLE ocr_jobs ADD COLUMN IF NOT EXISTS agent2_extract_json LONGTEXT NULL');
+          await platformPool.query('ALTER TABLE ocr_jobs ADD COLUMN IF NOT EXISTS agent2_status VARCHAR(32) NULL');
+          await platformPool.query(`UPDATE ocr_jobs SET agent2_status = 'running' WHERE id = ?`, [jobId]);
+          const agent2 = await extractAgent2FieldsForJob(jobId, resolvedType, combinedText);
+          if (agent2) {
+            const agent2Payload = {
+              ...agent2,
+              extracted_at: new Date().toISOString(),
+              confirmed: false,
+            };
+            await platformPool.query(
+              `UPDATE ocr_jobs SET agent2_status = 'complete', agent2_extract_json = ? WHERE id = ?`,
+              [JSON.stringify(agent2Payload), jobId],
+            );
+            console.log(`OCR_AGENT2_EXTRACT ${JSON.stringify({ jobId, recordType: agent2.record_type, method: agent2.method, confidence: agent2.confidence })}`);
+          } else {
+            await platformPool.query(`UPDATE ocr_jobs SET agent2_status = 'unavailable' WHERE id = ?`, [jobId]);
+          }
+        } catch (agent2Err: any) {
+          console.warn(`[OCR Worker] Agent2 extract failed for job ${jobId}: ${agent2Err.message}`);
+          try {
+            await platformPool.query(`UPDATE ocr_jobs SET agent2_status = 'failed' WHERE id = ?`, [jobId]);
+          } catch (_) { /* best effort */ }
+        }
       } catch (classErr: any) {
         console.warn(`[OCR Worker] Classifier/agent extract failed for job ${jobId}: ${classErr.message}`);
         try {

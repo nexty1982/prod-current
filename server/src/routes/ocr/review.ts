@@ -8,7 +8,30 @@
 const express = require('express');
 const router = express.Router({ mergeParams: true });
 import { resolveChurchDb, promisePool, mapFieldsToDbColumns, buildInsertQuery } from './helpers';
-import { extractAgentFieldsForJob, normalizeBaptismDates } from '../../utils/ocrClassifier';
+import {
+  extractAgentFieldsForJob,
+  extractAgent2FieldsForJob,
+  compareAgentFieldDiffs,
+  normalizeBaptismDates,
+} from '../../utils/ocrClassifier';
+
+let agent2SchemaReady = false;
+async function ensureAgent2Schema() {
+  if (agent2SchemaReady) return;
+  await promisePool.query('ALTER TABLE ocr_jobs ADD COLUMN IF NOT EXISTS agent2_extract_json LONGTEXT NULL');
+  await promisePool.query('ALTER TABLE ocr_jobs ADD COLUMN IF NOT EXISTS agent2_status VARCHAR(32) NULL');
+  agent2SchemaReady = true;
+}
+
+function parseJsonColumn(raw: unknown): any {
+  if (!raw) return null;
+  if (typeof raw === 'object') return raw;
+  try {
+    return JSON.parse(raw as string);
+  } catch {
+    return raw;
+  }
+}
 
 // ---------------------------------------------------------------------------
 // POST /jobs/:jobId/review/finalize
@@ -378,13 +401,34 @@ router.get('/finalize-history', async (req: any, res: any) => {
 // ---------------------------------------------------------------------------
 
 async function loadPlatformJob(churchId: number, jobId: number) {
+  await ensureAgent2Schema();
   const [rows]: any = await promisePool.query(
     `SELECT id, church_id, filename, status, review_status, record_type, language,
-            ocr_text, agent_status, agent_extract_json, ready_to_seed, seeded_at, variation_id
+            ocr_text, agent_status, agent_extract_json, agent2_extract_json, agent2_status,
+            ready_to_seed, seeded_at, variation_id
      FROM ocr_jobs WHERE id = ? AND church_id = ?`,
     [jobId, churchId]
   );
   return rows[0] || null;
+}
+
+async function runAndPersistAgent2(job: any, jobId: number) {
+  await promisePool.query(`UPDATE ocr_jobs SET agent2_status = 'running' WHERE id = ?`, [jobId]);
+  const agent2 = await extractAgent2FieldsForJob(jobId, job.record_type, job.ocr_text);
+  if (agent2) {
+    const payload = {
+      ...agent2,
+      extracted_at: new Date().toISOString(),
+      confirmed: false,
+    };
+    await promisePool.query(
+      `UPDATE ocr_jobs SET agent2_status = 'complete', agent2_extract_json = ? WHERE id = ?`,
+      [JSON.stringify(payload), jobId],
+    );
+    return payload;
+  }
+  await promisePool.query(`UPDATE ocr_jobs SET agent2_status = 'unavailable' WHERE id = ?`, [jobId]);
+  return null;
 }
 
 router.post('/jobs/:jobId/agent-extract', async (req: any, res: any) => {
@@ -405,6 +449,7 @@ router.post('/jobs/:jobId/agent-extract', async (req: any, res: any) => {
     const extract = await extractAgentFieldsForJob(jobId, job.ocr_text, job.record_type);
     const payload = {
       ...extract,
+      agent: 'agent1' as const,
       extracted_at: new Date().toISOString(),
       confirmed: false,
     };
@@ -419,10 +464,52 @@ router.post('/jobs/:jobId/agent-extract', async (req: any, res: any) => {
       [JSON.stringify(payload), extract.record_type !== 'custom' ? extract.record_type : job.record_type, jobId]
     );
 
-    res.json({ ok: true, jobId, extract: payload });
+    let agent2Extract = null;
+    try {
+      agent2Extract = await runAndPersistAgent2(job, jobId);
+    } catch (agent2Err: any) {
+      console.warn('[OCR Agent2] extract error:', agent2Err.message);
+    }
+
+    const recordIndex = typeof payload.candidate_index === 'number' ? payload.candidate_index : 0;
+    res.json({
+      ok: true,
+      jobId,
+      extract: payload,
+      agent2_extract: agent2Extract,
+      comparison: compareAgentFieldDiffs(payload, agent2Extract, recordIndex),
+    });
   } catch (err: any) {
     console.error('[OCR Agent] extract error:', err);
     res.status(500).json({ error: err.message || 'Agent extraction failed' });
+  }
+});
+
+router.post('/jobs/:jobId/agent2-extract', async (req: any, res: any) => {
+  try {
+    const churchId = parseInt(req.params.churchId);
+    const jobId = parseInt(req.params.jobId);
+    const job = await loadPlatformJob(churchId, jobId);
+    if (!job) return res.status(404).json({ error: 'Job not found' });
+
+    const agent2Extract = await runAndPersistAgent2(job, jobId);
+    if (!agent2Extract) {
+      return res.status(400).json({
+        error: 'Agent 2 extraction unavailable — enable LlamaParse and ensure OCR artifacts exist',
+      });
+    }
+
+    const extract = parseJsonColumn(job.agent_extract_json);
+    const recordIndex = parseInt(req.query.record_index as string, 10) || 0;
+    res.json({
+      ok: true,
+      jobId,
+      agent2_extract: agent2Extract,
+      comparison: compareAgentFieldDiffs(extract, agent2Extract, recordIndex),
+    });
+  } catch (err: any) {
+    console.error('[OCR Agent2] extract error:', err);
+    res.status(500).json({ error: err.message || 'Agent 2 extraction failed' });
   }
 });
 
@@ -433,24 +520,25 @@ router.get('/jobs/:jobId/agent-extract', async (req: any, res: any) => {
     const job = await loadPlatformJob(churchId, jobId);
     if (!job) return res.status(404).json({ error: 'Job not found' });
 
-    let extract = null;
-    if (job.agent_extract_json) {
-      try {
-        extract = typeof job.agent_extract_json === 'string'
-          ? JSON.parse(job.agent_extract_json)
-          : job.agent_extract_json;
-      } catch {
-        extract = job.agent_extract_json;
-      }
-    }
+    const extract = parseJsonColumn(job.agent_extract_json);
+    const agent2Extract = parseJsonColumn(job.agent2_extract_json);
+    const recordIndex = parseInt(req.query.record_index as string, 10) || 0;
+
+    const llamaparse = require('../../services/llamaParseService');
+    const llamaparseMarkdown = llamaparse.readLlamaParseMarkdownForJob(jobId);
 
     res.json({
       jobId,
       agent_status: job.agent_status,
+      agent2_status: job.agent2_status,
       review_status: job.review_status,
       ready_to_seed: !!job.ready_to_seed,
       seeded_at: job.seeded_at,
       extract,
+      agent2_extract: agent2Extract,
+      comparison: compareAgentFieldDiffs(extract, agent2Extract, recordIndex),
+      llamaparse_available: !!llamaparseMarkdown?.trim(),
+      llamaparse_preview: llamaparseMarkdown ? llamaparseMarkdown.slice(0, 800) : null,
       ocr_text_preview: job.ocr_text ? job.ocr_text.slice(0, 500) : null,
     });
   } catch (err: any) {
