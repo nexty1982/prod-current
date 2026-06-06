@@ -38,13 +38,13 @@ export const portalRoute = {
     // Records hub — all church staff
     protectedRoute('records', <PortalRecordsPage />, ROLE_ALL_CHURCH),
     // Legacy records list routes → redirect to unified records page
-    redirectRoute('records/baptism', '/portal/records'),
+    redirectRoute('records/baptism', '/portal/records?type=baptism'),
     protectedRoute('records/baptism/new', <BaptismRecordEntryPage />, ROLE_ALL_CHURCH),
     protectedRoute('records/baptism/edit/:id', <BaptismRecordEntryPage />, ROLE_ALL_CHURCH),
-    redirectRoute('records/marriage', '/portal/records'),
+    redirectRoute('records/marriage', '/portal/records?type=marriage'),
     protectedRoute('records/marriage/new', <MarriageRecordEntryPage />, ROLE_ALL_CHURCH),
     protectedRoute('records/marriage/edit/:id', <MarriageRecordEntryPage />, ROLE_ALL_CHURCH),
-    redirectRoute('records/funeral', '/portal/records'),
+    redirectRoute('records/funeral', '/portal/records?type=funeral'),
     protectedRoute('records/funeral/new', <FuneralRecordEntryPage />, ROLE_ALL_CHURCH),
     protectedRoute('records/funeral/edit/:id', <FuneralRecordEntryPage />, ROLE_ALL_CHURCH),
     // Upload Records (church_admin + priest)

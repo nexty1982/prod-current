@@ -1554,11 +1554,19 @@ const sendEnrollmentConfirmationEmail = async ({
 
 const ENROLLMENT_INTERNAL_EMAIL = process.env.ENROLLMENT_INTERNAL_EMAIL || 'info@orthodoxmetrics.com';
 const ENROLLMENT_FROM_EMAIL = process.env.ENROLLMENT_FROM_EMAIL || null;
-const OMAI_ADMIN_URL = process.env.OMAI_ADMIN_URL || 'https://orthodoxmetrics.com/admin/onboarding';
-const TEMP_ADMIN_LOGIN_URL = process.env.TEMP_ADMIN_LOGIN_URL || process.env.OM_PUBLIC_URL || 'https://orthodoxmetrics.com/login';
+const OMAI_PUBLIC_URL = (process.env.OMAI_PUBLIC_URL || 'https://orthodoxmetrics.com/omai').replace(/\/$/, '');
+const TEMP_ADMIN_LOGIN_URL = process.env.TEMP_ADMIN_LOGIN_URL || process.env.OM_PUBLIC_URL || 'https://orthodoxmetrics.com/auth/login2';
+
+function buildOmaiEnrollmentAdminLink(onboardingRequestId, crmRecordId) {
+  const accountPath = crmRecordId
+    ? `/omai/cp/ops/church-command-center/accounts/${crmRecordId}?ref=${encodeURIComponent(onboardingRequestId)}`
+    : `/omai/cp/pipelines?search=${encodeURIComponent(onboardingRequestId)}`;
+  return `${OMAI_PUBLIC_URL}/login?next=${encodeURIComponent(accountPath)}`;
+}
 
 const sendEnrollmentInternalNotificationEmail = async ({
   onboardingRequestId,
+  crmRecordId,
   parishName,
   submitterName,
   submitterEmail,
@@ -1574,7 +1582,7 @@ const sendEnrollmentInternalNotificationEmail = async ({
     const dbConfig = await getActiveEmailConfig();
     const senderName = dbConfig?.sender_name || 'Orthodox Metrics';
     const senderEmail = ENROLLMENT_FROM_EMAIL || dbConfig?.sender_email || process.env.SMTP_USER || process.env.EMAIL_USER;
-    const adminLink = `${OMAI_ADMIN_URL}/${encodeURIComponent(onboardingRequestId)}`;
+    const adminLink = buildOmaiEnrollmentAdminLink(onboardingRequestId, crmRecordId);
 
     const htmlContent = `
 <!DOCTYPE html><html><head><meta charset="utf-8"></head>

@@ -365,7 +365,7 @@ router.get('/churches/:id', requireAuth, async (req, res) => {
         `SELECT
           c.id, c.name, c.email, c.phone, c.address, c.city, c.state_province, c.country,
           c.jurisdiction, c.website, c.rector_name, c.calendar_type, c.is_active, c.setup_complete,
-          c.onboarding_phase, c.onboarding_stage, c.crm_lead_id, c.db_name, c.has_baptism_records,
+          c.onboarding_phase, c.crm_lead_id, c.db_name, c.has_baptism_records,
           c.has_marriage_records, c.has_funeral_records, c.created_at,
           COALESCE(tok.active_tokens, 0) AS active_token_count,
           COALESCE(usr.total_users, 0) AS total_users,
@@ -389,6 +389,19 @@ router.get('/churches/:id', requireAuth, async (req, res) => {
         [provisionedId]
       );
       provisionedClient = clientRows[0] || null;
+      if (provisionedClient) {
+        if (provisionedClient.setup_complete === 1) {
+          provisionedClient.onboarding_stage = 'setup_complete';
+        } else if (provisionedClient.active_users > 0) {
+          provisionedClient.onboarding_stage = 'active';
+        } else if (provisionedClient.pending_users > 0) {
+          provisionedClient.onboarding_stage = 'members_joining';
+        } else if (provisionedClient.active_token_count > 0) {
+          provisionedClient.onboarding_stage = 'token_issued';
+        } else {
+          provisionedClient.onboarding_stage = 'new';
+        }
+      }
     }
 
     res.json({

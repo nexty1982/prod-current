@@ -290,7 +290,12 @@ const DatabaseMappingPage: React.FC = () => {
   // Cache live columns per record type, plus a one-shot guard so the saved
   // config is merged on first load only (not on every settings refresh).
   const columnsCache = useRef<Record<string, ColumnInfo[]>>({});
-  const initializedRef = useRef(false);
+  const lastInitializedChurchIdRef = useRef<number | null>(null);
+
+  // Clear column cache when churchId changes
+  useEffect(() => {
+    columnsCache.current = {};
+  }, [churchId]);
 
   // Fetch the real column list for a record type (cached after first fetch).
   const fetchColumns = useCallback(async (type: string): Promise<ColumnInfo[]> => {
@@ -306,10 +311,10 @@ const DatabaseMappingPage: React.FC = () => {
 
   // First load: discover the live columns for the saved (or default) record
   // type, build the field list from the real schema, and overlay any saved
-  // customizations. Runs once — later type switches go through
+  // customizations. Runs once per churchId — later type switches go through
   // handleSelectRecord.
   useEffect(() => {
-    if (settingsLoading || !churchId || initializedRef.current) return;
+    if (settingsLoading || !churchId || lastInitializedChurchIdRef.current === churchId) return;
     let cancelled = false;
     (async () => {
       setColumnsLoading(true);
@@ -321,7 +326,7 @@ const DatabaseMappingPage: React.FC = () => {
         if (cancelled) return;
         const merged = mergeSavedFields(buildFieldsFromColumns(type, cols), saved?.fields);
         const validCols = new Set(merged.map((f) => f.column));
-        initializedRef.current = true;
+        lastInitializedChurchIdRef.current = churchId;
         setSelectedRecord(type);
         setFields(merged);
         setDefaultSort(

@@ -755,6 +755,7 @@ async function handlePublicEnroll(req, res) {
         const { getAppPool } = require('../config/db');
         const internalResult = await sendEnrollmentInternalNotificationEmail({
           onboardingRequestId,
+          crmRecordId: resolvedLeadId,
           parishName: churchName,
           submitterName: `${firstName} ${lastName || ''}`.trim(),
           submitterEmail: email,

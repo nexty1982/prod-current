@@ -4,6 +4,7 @@ import { useChurch } from "@/context/ChurchContext";
 import { useParishSettings } from "@/features/account/parish-management/useParishSettings";
 import { Alert, Box, CircularProgress, Snackbar } from "@mui/material";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { AddRecordModal } from "./components/AddRecordModal";
 import { AnalyticsView } from "./components/AnalyticsView";
 import { CardsView } from "./components/CardsView";
@@ -117,7 +118,32 @@ const RecordsManagement: React.FC = () => {
   const churchName = churchMetadata?.church_name_display || churchMetadata?.church_name || "St. Peter & Paul";
   const churchId = activeChurchId || churchMetadata?.church_id || 46;
 
-  const [recordType, setRecordType] = useState<RecordType>("baptism");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const typeParam = searchParams.get("type");
+  const initialType = (typeParam === "baptism" || typeParam === "marriage" || typeParam === "funeral") ? typeParam : "baptism";
+  const [recordType, setRecordTypeState] = useState<RecordType>(initialType);
+
+  const setRecordType = useCallback((newType: RecordType) => {
+    setRecordTypeState(newType);
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        next.set("type", newType);
+        return next;
+      },
+      { replace: true }
+    );
+  }, [setSearchParams]);
+
+  // Sync state if search parameter changes externally
+  useEffect(() => {
+    const typeParam = searchParams.get("type");
+    if (typeParam === "baptism" || typeParam === "marriage" || typeParam === "funeral") {
+      if (typeParam !== recordType) {
+        setRecordTypeState(typeParam);
+      }
+    }
+  }, [searchParams, recordType]);
   const [view, setView] = useState<ViewMode>("table");
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");

@@ -759,7 +759,7 @@ const ChurchPortalHub: React.FC = () => {
                   iconColor="bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400"
                   records={recentBaptism.slice(0, 3)}
                   loading={recordsLoading}
-                  onViewAll={() => navigate('/portal/records/baptism')}
+                  onViewAll={() => navigate('/portal/records?type=baptism')}
                   onAddNew={() => navigate('/portal/records/baptism/new')}
                 />
                 <RecordCard
@@ -769,7 +769,7 @@ const ChurchPortalHub: React.FC = () => {
                   iconColor="bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400"
                   records={recentMarriage.slice(0, 3)}
                   loading={recordsLoading}
-                  onViewAll={() => navigate('/portal/records/marriage')}
+                  onViewAll={() => navigate('/portal/records?type=marriage')}
                   onAddNew={() => navigate('/portal/records/marriage/new')}
                 />
                 <RecordCard
@@ -779,7 +779,7 @@ const ChurchPortalHub: React.FC = () => {
                   iconColor="bg-violet-50 dark:bg-violet-900/20 text-violet-600 dark:text-violet-400"
                   records={recentFuneral.slice(0, 3)}
                   loading={recordsLoading}
-                  onViewAll={() => navigate('/portal/records/funeral')}
+                  onViewAll={() => navigate('/portal/records?type=funeral')}
                   onAddNew={() => navigate('/portal/records/funeral/new')}
                 />
               </div>
