@@ -266,6 +266,13 @@ const OCRSettingsPage: React.FC = () => {
     loadSettings();
   }, [loadSettings]);
 
+  // Auto-dismiss mapHint after 3 seconds
+  useEffect(() => {
+    if (!mapHint) return;
+    const timer = setTimeout(() => setMapHint(null), 3000);
+    return () => clearTimeout(timer);
+  }, [mapHint]);
+
   useEffect(() => {
     if (activeTab === 3) {
       loadRules();
