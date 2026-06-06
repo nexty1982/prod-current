@@ -941,9 +941,8 @@ export function assembleRecords(structuredTableOutput: any): AssemblyResult {
           const stolenCount = ri - newGroupStartIdx;
           const stolenRows = currentGroup.rows.slice(currentGroup.rows.length - stolenCount);
           currentGroup.rows = currentGroup.rows.slice(0, currentGroup.rows.length - stolenCount);
-          currentGroup.endIndex = currentGroup.rows[currentGroup.rows.length - 1].row_index;
-          
           if (currentGroup.rows.length > 0) {
+            currentGroup.endIndex = currentGroup.rows[currentGroup.rows.length - 1].row_index;
             groups.push(currentGroup);
           }
           currentGroup = { rows: [...stolenRows, row], startIndex: stolenRows[0].row_index, endIndex: row.row_index };
