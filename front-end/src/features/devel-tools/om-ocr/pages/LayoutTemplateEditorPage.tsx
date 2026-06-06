@@ -45,13 +45,15 @@ import {
     IconPlus,
     IconTrash,
 } from '@tabler/icons-react';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import AnchorFieldEditor, { type AnchorFieldConfig } from '../components/AnchorFieldEditor';
 import ColumnBoundaryEditor, {
     type ColumnBand,
     type FractionalBBox
 } from '../components/ColumnBoundaryEditor';
 import OcrStudioNav from '../components/OcrStudioNav';
+import { useSearchParams } from 'react-router-dom';
+import { useAuth } from '@/context/AuthContext';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -116,6 +118,15 @@ const EXTRACTION_MODES: Array<{ value: ExtractionMode; label: string; desc: stri
 
 const LayoutTemplateEditorPage: React.FC = () => {
   const theme = useTheme();
+  const [searchParams] = useSearchParams();
+  const { user } = useAuth();
+
+  // Derive effective church ID from URL param (set by OcrStudioNav) or user's own church
+  const effectiveChurchId = useMemo(() => {
+    const urlChurch = searchParams.get('church');
+    if (urlChurch) return Number(urlChurch);
+    return user?.church_id ?? null;
+  }, [searchParams, user?.church_id]);
 
   // setFields uses updater fn pattern — keep standalone
   const [fields, setFields] = useState<TemplateField[]>([]);
@@ -204,7 +215,9 @@ const LayoutTemplateEditorPage: React.FC = () => {
   const fetchTemplates = useCallback(async () => {
     setLoading(true);
     try {
-      const res: any = await apiClient.get('/api/ocr/layout-templates');
+      const p = new URLSearchParams();
+      if (effectiveChurchId) p.set('church_id', String(effectiveChurchId));
+      const res: any = await apiClient.get(`/api/ocr/layout-templates?${p.toString()}`);
       const data = res?.data ?? res;
       setTemplates(data.templates || []);
     } catch (e: any) {
@@ -212,7 +225,7 @@ const LayoutTemplateEditorPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [effectiveChurchId]);
 
   useEffect(() => { fetchTemplates(); }, [fetchTemplates]);
 

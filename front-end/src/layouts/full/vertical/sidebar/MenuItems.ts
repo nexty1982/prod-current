@@ -57,6 +57,12 @@ const Menuitems: MenuitemsType[] = [
   },
   {
     id: uniqueId(),
+    title: 'Studio Hub',
+    icon: IconFileDescription,
+    href: '/devel/ocr-studio',
+  },
+  {
+    id: uniqueId(),
     title: 'OM Berryops',
     icon: IconLayoutDashboard,
     href: '/omai/dashboard/default',
@@ -93,102 +99,6 @@ const Menuitems: MenuitemsType[] = [
         title: 'Records Branding',
         icon: IconPoint,
         href: '/admin/church-branding/records-landing',
-      },
-    ],
-  },
-  // ========================================================================
-  // RECORDS & OCR (matches Control Panel category 2)
-  // ========================================================================
-  {
-    navlabel: true,
-    subheader: '📋 Records & OCR',
-  },
-  {
-    id: uniqueId(),
-    title: 'Upload Records',
-    icon: IconUpload,
-    href: '/apps/upload-records',
-  },
-  {
-    id: uniqueId(),
-    title: 'Records Systems',
-    icon: IconFileDescription,
-    href: '#',
-    children: [
-      {
-        id: uniqueId(),
-        title: 'Church Metric Records',
-        icon: IconDatabase,
-        href: '/apps/records/baptism',
-      },
-      {
-        id: uniqueId(),
-        title: 'Editable Records',
-        icon: IconEdit,
-        href: '/apps/records/editable',
-      },
-      {
-        id: uniqueId(),
-        title: 'Live Table Builder',
-        icon: IconBorderAll,
-        href: '/devel-tools/live-table-builder',
-      },
-    ],
-  },
-  {
-    id: uniqueId(),
-    title: 'OM Charts',
-    icon: IconChartBar,
-    href: '/apps/om-charts',
-    badgeKey: 'om-charts',
-  },
-  {
-    id: uniqueId(),
-    title: 'OCR Studio',
-    icon: IconFileDescription,
-    href: '#',
-    children: [
-      {
-        id: uniqueId(),
-        title: 'OCR Studio',
-        icon: IconFileDescription,
-        href: '/devel/ocr-studio',
-      },
-      {
-        id: uniqueId(),
-        title: 'Upload',
-        icon: IconFileDescription,
-        href: '/devel/ocr-studio/upload',
-      },
-      {
-        id: uniqueId(),
-        title: 'Job Monitor',
-        icon: IconActivity,
-        href: '/devel/ocr-studio/jobs',
-      },
-      {
-        id: uniqueId(),
-        title: 'Table Extractor',
-        icon: IconBorderAll,
-        href: '/devel/ocr-studio/table-extractor',
-      },
-      {
-        id: uniqueId(),
-        title: 'Layout Templates',
-        icon: IconLayout,
-        href: '/devel/ocr-studio/layout-templates',
-      },
-      {
-        id: uniqueId(),
-        title: 'Record Headers',
-        icon: IconLayout,
-        href: '/devel/ocr-studio/record-fields',
-      },
-      {
-        id: uniqueId(),
-        title: 'OCR Settings',
-        icon: IconSettings,
-        href: '/devel/ocr-studio/settings',
       },
     ],
   },

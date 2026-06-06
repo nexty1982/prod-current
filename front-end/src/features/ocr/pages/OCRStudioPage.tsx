@@ -10,19 +10,14 @@ import {
   TableChart as GridIcon,
   AutoAwesome as AgentIcon,
 } from '@mui/icons-material';
-import { alpha, Box, Button, Card, CardContent, Grid, Paper, Stack, Typography, useTheme } from '@mui/material';
+import { Box, Button, Card, CardContent, Grid, Typography, useTheme } from '@mui/material';
 import React, { useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import OcrPipelineOverview from '../components/OcrPipelineOverview';
+import OcrStudioNav from '@/features/devel-tools/om-ocr/components/OcrStudioNav';
 
-const STEPS = [
-  { n: 1, title: 'Upload', desc: 'Scan images (JPG, PNG, TIFF)', path: 'upload' },
-  { n: 2, title: 'OCR', desc: 'Automatic text recognition', path: null },
-  { n: 3, title: 'Agent Extract', desc: 'AI maps fields from OCR text', path: null },
-  { n: 4, title: 'Confirm', desc: 'Quick human review of fields', path: 'review' },
-  { n: 5, title: 'Seed', desc: 'Insert into baptism/marriage/funeral tables', path: null },
-  { n: 6, title: 'AG Grid', desc: 'View in Records Management', path: 'records' },
-];
+
+
 
 const OCRStudioPage: React.FC = () => {
   const navigate = useNavigate();
@@ -48,14 +43,9 @@ const OCRStudioPage: React.FC = () => {
     };
   }, [isPortal, effectiveChurchId]);
 
-  const go = (key: string | null) => {
-    if (!key) return;
-    const path = (routes as Record<string, string>)[key];
-    if (path) navigate(path);
-  };
-
   return (
     <Box sx={{ py: 3, px: { xs: 2, md: 3 } }}>
+      <OcrStudioNav />
       <Typography variant="h4" fontWeight={700} sx={{ mb: 0.5 }}>
         OCR Studio
       </Typography>
@@ -63,51 +53,7 @@ const OCRStudioPage: React.FC = () => {
         Upload record images, let the agent extract fields, confirm, and seed into your parish database.
       </Typography>
 
-      {/* Pipeline steps */}
-      <Paper
-        variant="outlined"
-        sx={{
-          p: 2.5,
-          mb: 3,
-          background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.04)} 0%, ${alpha(theme.palette.success.main, 0.04)} 100%)`,
-        }}
-      >
-        <Grid container spacing={2}>
-          {STEPS.map((step) => (
-            <Grid item xs={6} sm={4} md={2} key={step.n}>
-              <Box
-                sx={{
-                  textAlign: 'center',
-                  cursor: step.path ? 'pointer' : 'default',
-                  '&:hover': step.path ? { opacity: 0.85 } : {},
-                }}
-                onClick={() => go(step.path)}
-              >
-                <Box
-                  sx={{
-                    width: 36,
-                    height: 36,
-                    borderRadius: '50%',
-                    bgcolor: step.path ? 'primary.main' : 'action.selected',
-                    color: step.path ? 'primary.contrastText' : 'text.secondary',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    mx: 'auto',
-                    mb: 1,
-                    fontWeight: 700,
-                    fontSize: '0.9rem',
-                  }}
-                >
-                  {step.n}
-                </Box>
-                <Typography variant="caption" fontWeight={700} display="block">{step.title}</Typography>
-                <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.65rem' }}>{step.desc}</Typography>
-              </Box>
-            </Grid>
-          ))}
-        </Grid>
-      </Paper>
+
 
       {/* Quick actions */}
       <Grid container spacing={2} sx={{ mb: 3 }}>
