@@ -717,7 +717,8 @@ function createRouters(upload: any) {
       const pageIndex = parseInt(req.query.page as string) || 0;
 
       // Require super_admin or admin role
-      if (!req.session?.user || !['super_admin', 'admin'].includes(req.session.user.role)) {
+      const user = req.session?.user || req.user;
+      if (!user || !['super_admin', 'admin'].includes(user.role)) {
         return res.status(403).json({ error: 'Insufficient permissions' });
       }
 
@@ -790,7 +791,8 @@ function createRouters(upload: any) {
       const pageIndex = parseInt(req.query.page as string) || 0;
 
       // Require super_admin
-      if (!req.session?.user || req.session.user.role !== 'super_admin') {
+      const user = req.session?.user || req.user;
+      if (!user || user.role !== 'super_admin') {
         return res.status(403).json({ error: 'super_admin required' });
       }
 
@@ -975,7 +977,7 @@ function createRouters(upload: any) {
   // -----------------------------------------------------------------------
   churchJobsRouter.post('/jobs/:jobId/retry', async (req: any, res: any) => {
     try {
-      const userRole = req.session?.user?.role;
+      const userRole = req.session?.user?.role || req.user?.role;
       if (!['super_admin', 'admin', 'church_admin', 'priest', 'deacon', 'editor'].includes(userRole)) {
         return res.status(403).json({ error: 'Only authorized staff can retry jobs' });
       }
@@ -1894,7 +1896,7 @@ function createRouters(upload: any) {
     try {
       const churchId = parseInt(req.params.churchId);
       const jobId = parseInt(req.params.jobId);
-      const user = req.session?.user;
+      const user = req.session?.user || req.user;
       if (!user || user.role !== 'super_admin') {
         return res.status(403).json({ error: 'super_admin required' });
       }
@@ -1998,7 +2000,7 @@ function createRouters(upload: any) {
     try {
       const churchId = parseInt(req.params.churchId);
       const jobId = parseInt(req.params.jobId);
-      const user = req.session?.user;
+      const user = req.session?.user || req.user;
       if (!user || user.role !== 'super_admin') {
         return res.status(403).json({ error: 'super_admin required' });
       }
@@ -4019,7 +4021,7 @@ function createRouters(upload: any) {
           const fileStats = fs.statSync(finalPath);
           const fileMimeType = file.mimetype || 'image/jpeg';
 
-          const uploadedBy = req.session?.user?.id || null;
+          const uploadedBy = req.session?.user?.id || req.user?.id || null;
           const insertParams = [
             churchId,
             uploadedBy,
@@ -4808,7 +4810,7 @@ function createRouters(upload: any) {
   churchJobsRouter.patch('/jobs/:jobId/review-status', async (req: any, res: any) => {
     try {
       const jobId = parseInt(req.params.jobId);
-      const userRole = req.session?.user?.role;
+      const userRole = req.session?.user?.role || req.user?.role;
       if (!['super_admin', 'admin', 'church_admin', 'priest', 'deacon', 'editor'].includes(userRole)) {
         return res.status(403).json({ error: 'Only authorized staff can update review status' });
       }
