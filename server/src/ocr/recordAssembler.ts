@@ -775,6 +775,24 @@ function extractMarriageRecord(rows: any[]): Record<string, string> {
   return fields;
 }
 
+function isValidNameString(val: string | null | undefined): boolean {
+  if (!val) return false;
+  const clean = val.trim();
+  if (!clean) return false;
+
+  // 1. Must contain at least one alphabetical letter (English or Cyrillic)
+  if (!/[a-zA-Z\u0400-\u04FF]/.test(clean)) {
+    return false;
+  }
+
+  // 2. If it is purely a date, e.g. "12-28-90" or "10/05/1990"
+  if (/^\s*\d{1,2}[-/.]\d{1,2}[-/.]\d{2,4}\s*$/.test(clean)) {
+    return false;
+  }
+
+  return true;
+}
+
 // ── Main assembler ───────────────────────────────────────────────────────────
 
 export function assembleRecords(structuredTableOutput: any): AssemblyResult {
@@ -926,7 +944,7 @@ export function assembleRecords(structuredTableOutput: any): AssemblyResult {
             break;
           }
           
-          const hasName = !!rjCells[config.nameColumn];
+          const hasName = isValidNameString(rjCells[config.nameColumn]);
           if (hasName) {
             foundName = true;
             newGroupStartIdx = rj;
@@ -936,10 +954,10 @@ export function assembleRecords(structuredTableOutput: any): AssemblyResult {
         }
 
         if (newGroupStartIdx < ri) {
-          const nameRowsBefore = currentGroup.rows.filter(r => !!getNormalizedCells(r)[config.nameColumn]).length;
+          const nameRowsBefore = currentGroup.rows.filter(r => isValidNameString(getNormalizedCells(r)[config.nameColumn])).length;
           const stolenCount = ri - newGroupStartIdx;
           const stolenRows = currentGroup.rows.slice(currentGroup.rows.length - stolenCount);
-          const nameRowsStolen = stolenRows.filter(r => !!getNormalizedCells(r)[config.nameColumn]).length;
+          const nameRowsStolen = stolenRows.filter(r => isValidNameString(getNormalizedCells(r)[config.nameColumn])).length;
 
           if (nameRowsBefore > 0 && nameRowsBefore === nameRowsStolen) {
             console.log(`  [RecordAssembler]   → shift cancelled: would leave preceding group with no name rows`);
