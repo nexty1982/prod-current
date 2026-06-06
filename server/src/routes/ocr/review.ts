@@ -659,13 +659,14 @@ router.post('/jobs/:jobId/seed', async (req: any, res: any) => {
 
       // Fetch valid columns for the target table
       const [columnRows] = await conn.query(
-        `SELECT COLUMN_NAME FROM information_schema.COLUMNS
+        `SELECT COLUMN_NAME, DATA_TYPE FROM information_schema.COLUMNS
          WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ?`,
         [table]
       );
-      const validColumns = new Set(
-        (columnRows as any[]).map((row) => row.COLUMN_NAME.toLowerCase())
-      );
+      const validColumns = new Map<string, string>();
+      for (const row of columnRows as any[]) {
+        validColumns.set(row.COLUMN_NAME.toLowerCase(), row.DATA_TYPE.toLowerCase());
+      }
 
       for (const rec of records) {
         const mapped = mapFieldsToDbColumns(recordType, rec);
@@ -678,7 +679,12 @@ router.post('/jobs/:jobId/seed', async (req: any, res: any) => {
           extra.status = 'active';
         }
         if (validColumns.has('seed_run_id')) {
-          extra.seed_run_id = seedRunId;
+          const dataType = validColumns.get('seed_run_id');
+          if (dataType && (dataType.includes('int') || dataType === 'number' || dataType === 'decimal')) {
+            extra.seed_run_id = jobId;
+          } else {
+            extra.seed_run_id = seedRunId;
+          }
         }
 
         const merged = { ...mapped, ...extra };
