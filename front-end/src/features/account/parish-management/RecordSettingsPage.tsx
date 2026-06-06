@@ -10,8 +10,12 @@ import {
   Button,
   Chip,
   CircularProgress,
+  FormControl,
   IconButton,
+  InputLabel,
+  MenuItem,
   Paper,
+  Select,
   Stack,
   Switch,
   Tab,
@@ -30,8 +34,10 @@ import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import SaveOutlinedIcon from '@mui/icons-material/SaveOutlined';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useSearchParams } from 'react-router-dom';
+import { useAuth } from '@/context/AuthContext';
 import { useChurch } from '@/context/ChurchContext';
+import { apiClient } from '@/shared/lib/axiosInstance';
 import OcrStudioNav from '@/features/devel-tools/om-ocr/components/OcrStudioNav';
 import {
   type ChurchRecordFieldConfig,
@@ -62,11 +68,44 @@ function reorderRows(rows: ChurchRecordFieldRow[], from: number, dir: -1 | 1): C
 const RecordSettingsPage: React.FC = () => {
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
-  const { selectedChurch } = useChurch();
+  const { activeChurchId, churchMetadata, setActiveChurchId } = useChurch();
+  const { user, isSuperAdmin } = useAuth();
   const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
   const isOcrStudio = location.pathname.includes('/devel/ocr-studio');
 
-  const churchId = selectedChurch?.church_id ? Number(selectedChurch.church_id) : null;
+  // Church selector for super_admin
+  const [churches, setChurches] = useState<Array<{ id: number; name: string }>>([]);
+  const churchParam = searchParams.get('church');
+
+  useEffect(() => {
+    if (!isSuperAdmin()) return;
+    (async () => {
+      try {
+        const res: any = await apiClient.get('/api/churches');
+        const list = res.data?.churches || res.churches || res.data || [];
+        const sorted = (Array.isArray(list) ? list : []).sort((a: any, b: any) =>
+          (a.name || '').localeCompare(b.name || '')
+        );
+        setChurches(sorted);
+        // Auto-select first church if none is selected
+        if (!activeChurchId && sorted.length > 0) {
+          const firstId = churchParam ? Number(churchParam) : sorted[0].id;
+          setActiveChurchId(firstId);
+          setSearchParams({ church: String(firstId) });
+        }
+      } catch (err) {
+        console.error('Failed to load churches:', err);
+      }
+    })();
+  }, [isSuperAdmin]);
+
+  const churchId = activeChurchId;
+  const churchName = useMemo(() => {
+    if (churchMetadata?.church_name) return churchMetadata.church_name;
+    const found = churches.find(c => c.id === activeChurchId);
+    return found?.name || null;
+  }, [churchMetadata, activeChurchId, churches]);
 
   const [activeType, setActiveType] = useState<RecordTypeKey>('baptism');
   const [config, setConfig] = useState<ChurchRecordFieldConfig>({});
@@ -141,7 +180,27 @@ const RecordSettingsPage: React.FC = () => {
     return (
       <Box>
         {isOcrStudio && <OcrStudioNav />}
-        <Alert severity="info">Select a church to configure record table headers.</Alert>
+        <Alert severity="info" sx={{ mb: 2 }}>Select a church to configure record table headers.</Alert>
+        {isSuperAdmin() && churches.length > 0 && (
+          <FormControl size="small" sx={{ minWidth: 300 }}>
+            <InputLabel>Church</InputLabel>
+            <Select
+              value={activeChurchId || ''}
+              label="Church"
+              onChange={(e) => {
+                const newId = Number(e.target.value);
+                setActiveChurchId(newId);
+                setSearchParams({ church: String(newId) });
+              }}
+            >
+              {churches.map((c: any) => (
+                <MenuItem key={c.id} value={c.id}>
+                  {c.name} (#{c.id})
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        )}
       </Box>
     );
   }
@@ -151,17 +210,41 @@ const RecordSettingsPage: React.FC = () => {
       {isOcrStudio && <OcrStudioNav />}
 
       <Box sx={{ mb: 3 }}>
-        <Typography sx={{ fontFamily: "'Inter'", fontSize: '1.25rem', fontWeight: 600, color: isDark ? '#f3f4f6' : '#111827', mb: 0.5 }}>
-          Record table headers
-        </Typography>
-        <Typography sx={{ fontFamily: "'Inter'", fontSize: '0.8125rem', color: isDark ? '#9ca3af' : '#6b7280' }}>
-          Match your parish ledger columns for baptism, marriage, and funeral books.
-          Set the printed header text, display labels, and which fields appear during OCR review.
-          Fields like &ldquo;Parents Name&rdquo; are omitted by default — use separate father and mother columns instead.
-        </Typography>
-        {selectedChurch?.church_name && (
-          <Chip size="small" label={selectedChurch.church_name} sx={{ mt: 1.5 }} />
-        )}
+        <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
+          <Box>
+            <Typography sx={{ fontFamily: "'Inter'", fontSize: '1.25rem', fontWeight: 600, color: isDark ? '#f3f4f6' : '#111827', mb: 0.5 }}>
+              Record table headers
+            </Typography>
+            <Typography sx={{ fontFamily: "'Inter'", fontSize: '0.8125rem', color: isDark ? '#9ca3af' : '#6b7280' }}>
+              Match your parish ledger columns for baptism, marriage, and funeral books.
+              Set the printed header text, display labels, and which fields appear during OCR review.
+              Fields like &ldquo;Parents Name&rdquo; are omitted by default — use separate father and mother columns instead.
+            </Typography>
+            {churchName && (
+              <Chip size="small" label={churchName} color="primary" variant="outlined" sx={{ mt: 1.5 }} />
+            )}
+          </Box>
+          {isSuperAdmin() && churches.length > 0 && (
+            <FormControl size="small" sx={{ minWidth: 260, ml: 2 }}>
+              <InputLabel>Church</InputLabel>
+              <Select
+                value={activeChurchId || ''}
+                label="Church"
+                onChange={(e) => {
+                  const newId = Number(e.target.value);
+                  setActiveChurchId(newId);
+                  setSearchParams({ church: String(newId) });
+                }}
+              >
+                {churches.map((c: any) => (
+                  <MenuItem key={c.id} value={c.id}>
+                    {c.name} (#{c.id})
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          )}
+        </Stack>
       </Box>
 
       {!isOcrStudio && <PreviewBanner />}
