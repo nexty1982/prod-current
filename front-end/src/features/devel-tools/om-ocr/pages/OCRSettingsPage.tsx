@@ -180,6 +180,26 @@ const OCRSettingsPage: React.FC = () => {
     source_notes: ''
   });
 
+  // Add Rule Dialog State
+  const [ruleDialogOpen, setRuleDialogOpen] = useState(false);
+  const [ruleForm, setRuleForm] = useState({
+    name: '',
+    description: '',
+    record_type: 'baptism' as string,
+    severity: 'suggestion' as string,
+    rule_template: 'default_value' as string,
+    condition_field: '',
+    action_field: '',
+    action_value: '',
+    priority: 50,
+  });
+
+  const RULE_TEMPLATES = [
+    { key: 'default_value', label: 'Default value when empty', description: 'Set a field to a default value when it is empty' },
+    { key: 'validate_not_empty', label: 'Require field is not empty', description: 'Block completion if a field is empty' },
+    { key: 'validate_format', label: 'Validate field format (regex)', description: 'Warn if a field does not match a pattern' },
+  ];
+
   // Load Settings
   const loadSettings = useCallback(async () => {
     if (!effectiveChurchId) return;
@@ -385,6 +405,76 @@ const OCRSettingsPage: React.FC = () => {
     } catch (err: any) {
       console.error(err);
       setError(err.response?.data?.error || "Failed to toggle rule");
+    }
+  };
+
+  // Create Rule from Template
+  const handleCreateRule = async () => {
+    try {
+      const { rule_template, condition_field, action_field, action_value, name, description, record_type, severity, priority } = ruleForm;
+      const field = action_field || condition_field;
+
+      let conditions_json: any;
+      let actions_json: any;
+
+      if (rule_template === 'default_value') {
+        conditions_json = { all: [{ field, operator: 'is_empty' }] };
+        actions_json = [{
+          type: 'suggest_value',
+          field,
+          resolver: 'literal_value',
+          resolver_args: { value: action_value },
+          auto_apply: true,
+          explanation_template: `Defaulted ${field} to "${action_value}". Change during review if needed.`
+        }];
+      } else if (rule_template === 'validate_not_empty') {
+        conditions_json = { all: [{ field: condition_field, operator: 'is_empty' }] };
+        actions_json = [{
+          type: 'block_record_completion',
+          field: condition_field,
+          explanation_template: `${condition_field} must not be empty.`
+        }];
+      } else if (rule_template === 'validate_format') {
+        conditions_json = { all: [{ field: condition_field, operator: 'regex_matches', value: action_value }] };
+        actions_json = [{
+          type: 'flag_warning',
+          field: condition_field,
+          explanation_template: `${condition_field} does not match expected format.`
+        }];
+      } else {
+        setError('Unknown rule template');
+        return;
+      }
+
+      await apiClient.post(`/api/church/${effectiveChurchId}/ocr/rules`, {
+        name,
+        description,
+        record_type,
+        conditions_json,
+        actions_json,
+        severity,
+        priority,
+        scope: 'church',
+      });
+
+      setMapHint(`Rule "${name}" created successfully.`);
+      setRuleDialogOpen(false);
+      setRuleForm({ name: '', description: '', record_type: 'baptism', severity: 'suggestion', rule_template: 'default_value', condition_field: '', action_field: '', action_value: '', priority: 50 });
+      loadRules();
+    } catch (err: any) {
+      setError(err.response?.data?.error || err.message || 'Failed to create rule');
+    }
+  };
+
+  // Delete Rule
+  const handleDeleteRule = async (rule: any) => {
+    if (!window.confirm(`Delete rule "${rule.name}"?`)) return;
+    try {
+      await apiClient.delete(`/api/church/${effectiveChurchId}/ocr/rules/${rule.id}`);
+      setMapHint(`Rule "${rule.name}" deleted.`);
+      loadRules();
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Failed to delete rule');
     }
   };
 
@@ -721,10 +811,17 @@ const OCRSettingsPage: React.FC = () => {
 
         {/* Rules Engine Tab */}
         <TabPanel value={activeTab} index={3}>
-          <Typography variant="h6" fontWeight={600} gutterBottom>Parish Validation & Inference Rules</Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-            Tweak the rules applied to OCR/LLM extractions before records are finalized.
-          </Typography>
+          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
+            <Box>
+              <Typography variant="h6" fontWeight={600} gutterBottom>Parish Validation & Inference Rules</Typography>
+              <Typography variant="body2" color="text.secondary">
+                Tweak the rules applied to OCR/LLM extractions before records are finalized.
+              </Typography>
+            </Box>
+            <Button variant="contained" startIcon={<IconPlus size={18} />} onClick={() => setRuleDialogOpen(true)}>
+              Add Rule
+            </Button>
+          </Stack>
           
            {rulesLoading ? (
             <Typography>Loading rules...</Typography>
@@ -734,9 +831,12 @@ const OCRSettingsPage: React.FC = () => {
               <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                 Rules validate OCR-extracted records before they are finalized. Add rules to catch data errors, suggest values, and enforce consistency.
               </Typography>
+              <Button variant="outlined" startIcon={<IconPlus size={18} />} onClick={() => setRuleDialogOpen(true)}>
+                Create your first rule
+              </Button>
             </Paper>
           ) : (
-            <TableContainer component={Paper} variant="outlined">
+            <TableContainer component={Paper} variant="outlined" sx={{ mt: 2 }}>
               <Table size="small">
                 <TableHead>
                   <TableRow>
@@ -745,11 +845,12 @@ const OCRSettingsPage: React.FC = () => {
                     <TableCell>Record Type</TableCell>
                     <TableCell>Severity</TableCell>
                     <TableCell align="center">Enabled</TableCell>
+                    <TableCell align="center" sx={{ width: 48 }} />
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {rules.map((rule) => (
-                    <TableRow key={rule.name}>
+                    <TableRow key={rule.id || rule.name}>
                       <TableCell>
                         <Typography variant="subtitle2" fontWeight={600}>{rule.name}</Typography>
                         <Typography variant="caption" color="text.secondary">{rule.description}</Typography>
@@ -778,12 +879,95 @@ const OCRSettingsPage: React.FC = () => {
                           onChange={() => handleToggleRule(rule)}
                         />
                       </TableCell>
+                      <TableCell align="center">
+                        {rule.id > 0 && rule.scope !== 'global' && (
+                          <IconButton size="small" color="error" onClick={() => handleDeleteRule(rule)}>
+                            <IconTrash size={16} />
+                          </IconButton>
+                        )}
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
               </Table>
             </TableContainer>
           )}
+
+          {/* Add Rule Dialog */}
+          <Dialog open={ruleDialogOpen} onClose={() => setRuleDialogOpen(false)} maxWidth="sm" fullWidth>
+            <DialogTitle>Add Validation Rule</DialogTitle>
+            <DialogContent>
+              <Stack spacing={2.5} sx={{ mt: 1 }}>
+                <FormControl fullWidth size="small">
+                  <InputLabel>Rule Template</InputLabel>
+                  <Select
+                    value={ruleForm.rule_template}
+                    label="Rule Template"
+                    onChange={(e) => setRuleForm(prev => ({ ...prev, rule_template: e.target.value }))}
+                  >
+                    {RULE_TEMPLATES.map(t => (
+                      <MenuItem key={t.key} value={t.key}>{t.label}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                <Typography variant="caption" color="text.secondary" sx={{ mt: -1.5 }}>
+                  {RULE_TEMPLATES.find(t => t.key === ruleForm.rule_template)?.description}
+                </Typography>
+                <TextField size="small" label="Rule Name" fullWidth required
+                  value={ruleForm.name} onChange={(e) => setRuleForm(prev => ({ ...prev, name: e.target.value }))} />
+                <TextField size="small" label="Description" fullWidth multiline rows={2}
+                  value={ruleForm.description} onChange={(e) => setRuleForm(prev => ({ ...prev, description: e.target.value }))} />
+                <Stack direction="row" spacing={2}>
+                  <FormControl size="small" sx={{ flex: 1 }}>
+                    <InputLabel>Record Type</InputLabel>
+                    <Select value={ruleForm.record_type} label="Record Type"
+                      onChange={(e) => setRuleForm(prev => ({ ...prev, record_type: e.target.value }))}>
+                      <MenuItem value="baptism">Baptism</MenuItem>
+                      <MenuItem value="marriage">Marriage</MenuItem>
+                      <MenuItem value="funeral">Funeral</MenuItem>
+                      <MenuItem value="all">All</MenuItem>
+                    </Select>
+                  </FormControl>
+                  <FormControl size="small" sx={{ flex: 1 }}>
+                    <InputLabel>Severity</InputLabel>
+                    <Select value={ruleForm.severity} label="Severity"
+                      onChange={(e) => setRuleForm(prev => ({ ...prev, severity: e.target.value }))}>
+                      <MenuItem value="suggestion">Suggestion</MenuItem>
+                      <MenuItem value="warning">Warning</MenuItem>
+                      <MenuItem value="blocker">Blocker</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Stack>
+                <Divider />
+                {ruleForm.rule_template === 'default_value' && (
+                  <>
+                    <TextField size="small" label="Field name (e.g. entry_type)" fullWidth required
+                      value={ruleForm.action_field} onChange={(e) => setRuleForm(prev => ({ ...prev, action_field: e.target.value, condition_field: e.target.value }))} />
+                    <TextField size="small" label="Default value (e.g. Baptism)" fullWidth required
+                      value={ruleForm.action_value} onChange={(e) => setRuleForm(prev => ({ ...prev, action_value: e.target.value }))} />
+                  </>
+                )}
+                {ruleForm.rule_template === 'validate_not_empty' && (
+                  <TextField size="small" label="Field name (e.g. first_name)" fullWidth required
+                    value={ruleForm.condition_field} onChange={(e) => setRuleForm(prev => ({ ...prev, condition_field: e.target.value }))} />
+                )}
+                {ruleForm.rule_template === 'validate_format' && (
+                  <>
+                    <TextField size="small" label="Field name" fullWidth required
+                      value={ruleForm.condition_field} onChange={(e) => setRuleForm(prev => ({ ...prev, condition_field: e.target.value }))} />
+                    <TextField size="small" label="Regex pattern" fullWidth required
+                      value={ruleForm.action_value} onChange={(e) => setRuleForm(prev => ({ ...prev, action_value: e.target.value }))} />
+                  </>
+                )}
+              </Stack>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setRuleDialogOpen(false)}>Cancel</Button>
+              <Button variant="contained" onClick={handleCreateRule} disabled={!ruleForm.name}>
+                Create Rule
+              </Button>
+            </DialogActions>
+          </Dialog>
         </TabPanel>
 
         {/* Parish Clergy Tab */}
