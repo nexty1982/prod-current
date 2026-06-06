@@ -73,6 +73,64 @@ function composeNotes(entryType?: string, notes?: string): string | null {
 }
 
 /**
+ * Helper to convert various date string formats to database-friendly YYYY-MM-DD
+ */
+export function formatDbDate(value: any): string | null {
+  if (value == null || value === '') return null;
+  if (typeof value !== 'string') return value;
+
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+
+  // If already YYYY-MM-DD, return as-is
+  if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+    return trimmed;
+  }
+
+  // Native Date parsing
+  const d = new Date(trimmed);
+  if (!Number.isNaN(d.getTime())) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    if (y >= 1800 && y <= 2100) {
+      return `${y}-${m}-${day}`;
+    }
+  }
+
+  // Regex-based fallbacks for common layouts
+  const m1 = trimmed.match(/^(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})$/);
+  if (m1) {
+    const year = parseInt(m1[1], 10);
+    const month = String(parseInt(m1[2], 10)).padStart(2, '0');
+    const day = String(parseInt(m1[3], 10)).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  const m2 = trimmed.match(/^(\d{1,2})[-\/](\d{1,2})[-\/](\d{2,4})$/);
+  if (m2) {
+    const first = parseInt(m2[1], 10);
+    const second = parseInt(m2[2], 10);
+    let year = parseInt(m2[3], 10);
+    if (year < 100) {
+      year = year < 50 ? 2000 + year : 1900 + year;
+    }
+    let month = first;
+    let day = second;
+    if (first > 12 && second <= 12) {
+      day = first;
+      month = second;
+    } else if (second > 12 && first <= 12) {
+      month = first;
+      day = second;
+    }
+    return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+  }
+
+  return null;
+}
+
+/**
  * Map OCR field names (from recordFields.ts) to actual DB column names.
  * Handles name splitting for compound name fields.
  */
@@ -82,8 +140,8 @@ export function mapFieldsToDbColumns(recordType: string, f: Record<string, any>)
     return {
       first_name: child.first,
       last_name: child.last,
-      birth_date: f.date_of_birth || null,
-      reception_date: f.date_of_baptism || null,
+      birth_date: formatDbDate(f.date_of_birth),
+      reception_date: formatDbDate(f.date_of_baptism),
       birthplace: f.place_of_birth || null,
       parents: f.parents || [f.father_name, f.mother_name].filter(Boolean).join(', ') || null,
       sponsors: f.godparents || null,
@@ -96,7 +154,7 @@ export function mapFieldsToDbColumns(recordType: string, f: Record<string, any>)
     const groom = resolvePersonName(f.groom_name, f.groom_first_name, f.groom_last_name);
     const bride = resolvePersonName(f.bride_name, f.bride_first_name, f.bride_last_name);
     return {
-      mdate: f.date_of_marriage || null,
+      mdate: formatDbDate(f.date_of_marriage),
       fname_groom: groom.first,
       lname_groom: groom.last,
       parentsg: f.groom_parents || null,
@@ -115,8 +173,8 @@ export function mapFieldsToDbColumns(recordType: string, f: Record<string, any>)
     return {
       name: deceased.first,
       lastname: deceased.last,
-      deceased_date: f.date_of_death || null,
-      burial_date: f.date_of_burial || f.date_of_funeral || null,
+      deceased_date: formatDbDate(f.date_of_death),
+      burial_date: formatDbDate(f.date_of_burial || f.date_of_funeral),
       age: f.age_at_death ? parseInt(f.age_at_death, 10) || null : null,
       clergy: f.officiant || f.performed_by || null,
       burial_location: f.place_of_burial || null,
