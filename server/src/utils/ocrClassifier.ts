@@ -1593,7 +1593,8 @@ async function extractRecordsWithGeminiVision(
 
 async function refineExtractWithGeminiLlm(
   draft: AgentExtractResult,
-  ocrText: string
+  ocrText: string,
+  layoutType?: 'tabular' | 'form' | 'narrative',
 ): Promise<AgentExtractResult | null> {
   const draftRecords = (draft.records?.length ? draft.records : [draft.fields])
     .slice(0, OCR_AGENT_MAX_RECORDS)
@@ -1602,9 +1603,20 @@ async function refineExtractWithGeminiLlm(
       fields,
     }));
 
+  const layoutDesc = layoutType === 'form'
+    ? 'pre-printed form or certificate with labeled fields'
+    : layoutType === 'narrative'
+    ? 'narrative journal or prose entry'
+    : 'tabular ledger page with data arranged in columns';
+  const sourceDesc = layoutType === 'form'
+    ? 'form field extraction'
+    : layoutType === 'narrative'
+    ? 'narrative text parsing'
+    : 'table layout assembly';
+
   const systemPrompt = [
-    'You clean Orthodox parish sacramental records extracted from OCR ledger pages.',
-    'The draft fields come from table layout assembly and may include OCR noise.',
+    `You clean Orthodox parish sacramental records extracted from a ${layoutDesc}.`,
+    `The draft fields come from ${sourceDesc} and may include OCR noise.`,
     'Rules:',
     '- Map each record to the correct schema fields only; do not invent people, dates, or places.',
     '- Remove header text, column labels, and Cyrillic boilerplate from field values.',
@@ -1706,7 +1718,7 @@ export async function extractAgentFieldsForJob(
     const vision = await extractRecordsWithGeminiVision(jobId, draft, layoutType);
     if (vision) result = vision;
     else {
-      const refined = await refineExtractWithGeminiLlm(draft, ocrText);
+      const refined = await refineExtractWithGeminiLlm(draft, ocrText, layoutType);
       result = refined || draft;
     }
   } else {
