@@ -569,13 +569,15 @@ const OcrReviewPage: React.FC = () => {
 
   const applyAgentValues = (source: 'agent1' | 'agent2') => {
     const src = source === 'agent1' ? agent1Snapshot : agent2Records;
-    const rec = src[selectedRecordIndex] || src[0] || {};
-    const updated = [...allRecords];
-    if (updated.length) updated[selectedRecordIndex] = { ...rec };
-    else updated.push({ ...rec });
-    setAllRecords(updated);
-    setFields({ ...rec });
-    setMapHint(`Applied ${source === 'agent1' ? 'Agent 1' : 'Agent 2'} values to the editor.`);
+    if (!src || !src.length) return;
+    const newRecords = src.map((r) => ({ ...r }));
+    setAllRecords(newRecords);
+    const nextIdx = Math.min(selectedRecordIndex, newRecords.length - 1);
+    const finalIdx = Math.max(0, nextIdx);
+    setSelectedRecordIndex(finalIdx);
+    setFields({ ...(newRecords[finalIdx] || {}) });
+    setConfirmedIndexes(new Set<number>());
+    setMapHint(`Applied all ${source === 'agent1' ? 'Agent 1' : 'Agent 2'} records to the editor.`);
   };
 
   const hydrateExtractResponse = (data: any) => {
