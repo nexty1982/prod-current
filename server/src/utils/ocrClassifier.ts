@@ -76,70 +76,102 @@ function ub(pattern: string): RegExp {
   return new RegExp(`${UB_START}${pattern}${UB_END}`, 'iu');
 }
 
-const KEYWORD_PATTERNS: Record<string, RegExp[]> = {
+// Weighted keyword patterns: { pattern, weight }
+// weight 4 = highly specific (Greek/Cyrillic), 3 = core type term, 2 = column header, 1 = general
+interface WeightedPattern { pattern: RegExp; weight: number; }
+
+const WEIGHTED_KEYWORD_PATTERNS: Record<string, WeightedPattern[]> = {
   baptism: [
-    ub('baptis[me]'),
-    ub('baptiz[\\p{L}\\p{N}]*'),
-    ub('christening'),
-    ub('godparent'),
-    ub('godmother'),
-    ub('godfather'),
-    ub('sponsor[\\p{L}\\p{N}]*'),
-    ub('chrismat[\\p{L}\\p{N}]*'),
-    ub('baptism'),
-    ub('βάπτισ[\\p{L}\\p{N}]*'),
-    ub('βαπτιστ[\\p{L}\\p{N}]*'),
-    ub('νονό[ςσ]'),
-    ub('νονά'),
-    ub('крещен[\\p{L}\\p{N}]*'),
-    ub('крёстн[\\p{L}\\p{N}]*'),
-    ub('child.?name'),
-    ub('date.?of.?birth'),
-    ub('place.?of.?birth'),
-    ub('infant'),
+    // Core terms (3×)
+    { pattern: ub('baptis[me]'), weight: 3 },
+    { pattern: ub('baptiz[\\p{L}\\p{N}]*'), weight: 3 },
+    { pattern: ub('christening'), weight: 3 },
+    { pattern: ub('chrismat[\\p{L}\\p{N}]*'), weight: 3 },
+    { pattern: ub('baptism'), weight: 3 },
+    // Sponsors (2×)
+    { pattern: ub('godparent'), weight: 2 },
+    { pattern: ub('godmother'), weight: 2 },
+    { pattern: ub('godfather'), weight: 2 },
+    { pattern: ub('sponsor[\\p{L}\\p{N}]*'), weight: 2 },
+    // Column headers (2×)
+    { pattern: ub('child.?name'), weight: 2 },
+    { pattern: ub('date.?of.?birth'), weight: 2 },
+    { pattern: ub('place.?of.?birth'), weight: 2 },
+    { pattern: ub('infant'), weight: 1 },
+    // Greek/Cyrillic (4×)
+    { pattern: ub('βάπτισ[\\p{L}\\p{N}]*'), weight: 4 },
+    { pattern: ub('βαπτιστ[\\p{L}\\p{N}]*'), weight: 4 },
+    { pattern: ub('νονό[ςσ]'), weight: 4 },
+    { pattern: ub('νονά'), weight: 4 },
+    { pattern: ub('крещен[\\p{L}\\p{N}]*'), weight: 4 },
+    { pattern: ub('крёстн[\\p{L}\\p{N}]*'), weight: 4 },
   ],
   marriage: [
-    ub('marriag[\\p{L}\\p{N}]*'),
-    ub('wedding'),
-    ub('matrimon[\\p{L}\\p{N}]*'),
-    ub('bride'),
-    ub('groom'),
-    ub('crowning'),
-    ub('στεφάνωση'),
-    ub('στέφαν[\\p{L}\\p{N}]*'),
-    ub('γάμο[υς]'),
-    ub('νυμφίο[\\p{L}\\p{N}]*'),
-    ub('νύφη'),
-    ub('бракосочетан[\\p{L}\\p{N}]*'),
-    ub('венчан[\\p{L}\\p{N}]*'),
-    ub('женатый'),
-    ub('witness'),
-    ub('date.?of.?marriage'),
-    ub('best.?man'),
-    ub('maid.?of.?honor'),
-    ub('nuptial'),
+    // Core terms (3×)
+    { pattern: ub('marriag[\\p{L}\\p{N}]*'), weight: 3 },
+    { pattern: ub('wedding'), weight: 3 },
+    { pattern: ub('matrimon[\\p{L}\\p{N}]*'), weight: 3 },
+    { pattern: ub('nuptial'), weight: 3 },
+    { pattern: ub('crowning'), weight: 3 },
+    { pattern: ub('betrothed'), weight: 3 },
+    // Participants (2×)
+    { pattern: ub('bride'), weight: 2 },
+    { pattern: ub('groom'), weight: 2 },
+    { pattern: ub('bridegroom'), weight: 2 },
+    { pattern: ub('witness'), weight: 1 },
+    // Column headers (2×)
+    { pattern: ub('date.?of.?marriage'), weight: 2 },
+    { pattern: ub('best.?man'), weight: 2 },
+    { pattern: ub('maid.?of.?honor'), weight: 2 },
+    { pattern: ub('marriage.?license'), weight: 2 },
+    { pattern: ub('marriage.?certificate'), weight: 3 },
+    // General (1×)
+    { pattern: ub('engagement'), weight: 1 },
+    { pattern: ub('ceremony'), weight: 1 },
+    { pattern: ub('couple'), weight: 1 },
+    // Greek/Cyrillic (4×)
+    { pattern: ub('στεφάνωση'), weight: 4 },
+    { pattern: ub('στέφαν[\\p{L}\\p{N}]*'), weight: 4 },
+    { pattern: ub('γάμο[υς]'), weight: 4 },
+    { pattern: ub('γαμήλι[\\p{L}\\p{N}]*'), weight: 4 },
+    { pattern: ub('νυμφίο[\\p{L}\\p{N}]*'), weight: 4 },
+    { pattern: ub('νύφη'), weight: 4 },
+    { pattern: ub('αρραβών[\\p{L}\\p{N}]*'), weight: 4 },
+    { pattern: ub('бракосочетан[\\p{L}\\p{N}]*'), weight: 4 },
+    { pattern: ub('венчан[\\p{L}\\p{N}]*'), weight: 4 },
+    { pattern: ub('женатый'), weight: 4 },
   ],
   funeral: [
-    ub('funeral'),
-    ub('death'),
-    ub('burial'),
-    ub('deceased'),
-    ub('repose'),
-    ub('κηδεία'),
-    ub('θάνατο[\\p{L}\\p{N}]*'),
-    ub('ταφ[ήη]'),
-    ub('отпеван[\\p{L}\\p{N}]*'),
-    ub('похорон[\\p{L}\\p{N}]*'),
-    ub('смерт[\\p{L}\\p{N}]*'),
-    ub('date.?of.?death'),
-    ub('date.?of.?burial'),
-    ub('cause.?of.?death'),
-    ub('age.?at.?death'),
-    ub('next.?of.?kin'),
-    ub('interment'),
-    ub('obitu[\\p{L}\\p{N}]*'),
+    // Core terms (3×)
+    { pattern: ub('funeral'), weight: 3 },
+    { pattern: ub('burial'), weight: 3 },
+    { pattern: ub('deceased'), weight: 3 },
+    { pattern: ub('repose'), weight: 3 },
+    { pattern: ub('interment'), weight: 3 },
+    { pattern: ub('obitu[\\p{L}\\p{N}]*'), weight: 3 },
+    // General (1×) — 'death' can appear in other contexts
+    { pattern: ub('death'), weight: 1 },
+    // Column headers (2×)
+    { pattern: ub('date.?of.?death'), weight: 2 },
+    { pattern: ub('date.?of.?burial'), weight: 2 },
+    { pattern: ub('cause.?of.?death'), weight: 2 },
+    { pattern: ub('age.?at.?death'), weight: 2 },
+    { pattern: ub('next.?of.?kin'), weight: 2 },
+    // Greek/Cyrillic (4×)
+    { pattern: ub('κηδεία'), weight: 4 },
+    { pattern: ub('θάνατο[\\p{L}\\p{N}]*'), weight: 4 },
+    { pattern: ub('ταφ[ήη]'), weight: 4 },
+    { pattern: ub('отпеван[\\p{L}\\p{N}]*'), weight: 4 },
+    { pattern: ub('похорон[\\p{L}\\p{N}]*'), weight: 4 },
+    { pattern: ub('смерт[\\p{L}\\p{N}]*'), weight: 4 },
   ],
 };
+
+// Keep flat KEYWORD_PATTERNS for backward compatibility (used by hit reporting)
+const KEYWORD_PATTERNS: Record<string, RegExp[]> = {};
+for (const [type, wps] of Object.entries(WEIGHTED_KEYWORD_PATTERNS)) {
+  KEYWORD_PATTERNS[type] = wps.map(wp => wp.pattern);
+}
 
 const CONFIDENCE_THRESHOLD = 0.3;
 
@@ -152,18 +184,15 @@ export function classifyRecordType(ocrText: string): ClassifierResult {
   const scores: Record<string, number> = { baptism: 0, marriage: 0, funeral: 0 };
   const hits: Record<string, string[]> = { baptism: [], marriage: [], funeral: [] };
 
-  for (const [type, patterns] of Object.entries(KEYWORD_PATTERNS)) {
-    for (const pattern of patterns) {
-      // Preserve original pattern flags but force global so we can count hits.
-      // Patterns are built with iu (Unicode-aware boundaries), so we need 'u'
-      // to correctly evaluate the \p{L} lookarounds for non-ASCII text.
+  for (const [type, weightedPatterns] of Object.entries(WEIGHTED_KEYWORD_PATTERNS)) {
+    for (const { pattern, weight } of weightedPatterns) {
       const globalPattern = new RegExp(pattern.source, 'giu');
       const matches = text.match(globalPattern);
       if (matches) {
-        scores[type] += matches.length;
+        scores[type] += matches.length * weight;
         hits[type].push(
           pattern.source
-            .replace(/\(\?<!\[\\p\{L\}\\p\{N\}\]\)/g, '')
+            .replace(/\(\?\<!\[\\p\{L\}\\p\{N\}\]\)/g, '')
             .replace(/\(\?!\[\\p\{L\}\\p\{N\}\]\)/g, '')
             .replace(/\[.*?\]/g, '?')
         );
