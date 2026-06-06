@@ -1225,7 +1225,7 @@ async function extractRecordsWithGeminiVision(
   const tableJson = loadTableExtractionJson(jobId);
   if (!candidates.length || !tableJson || !preprocessedImagePath(jobId)) return null;
 
-  const model = process.env.GEMINI_VISION_MODEL || 'gemini-1.5-pro';
+  const model = process.env.GEMINI_VISION_MODEL || 'gemini-2.5-pro';
   const limit = Math.min(candidates.length, OCR_AGENT_MAX_RECORDS);
   const records: Record<string, string>[] = [];
   const confidences: number[] = [];
@@ -1343,7 +1343,7 @@ async function refineExtractWithGeminiLlm(
     ocr_context: (ocrText || '').slice(0, OCR_AGENT_OCR_CONTEXT_CHARS),
   }, null, 2);
 
-  const model = process.env.GEMINI_MODEL || 'gemini-1.5-pro';
+  const model = process.env.GEMINI_MODEL || 'gemini-2.5-pro';
 
   try {
     const jsonText = await callGemini(model, systemPrompt, [
