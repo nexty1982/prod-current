@@ -53,7 +53,8 @@ router.get(['/', '/settings'], async (req: any, res: any) => {
           removeNoise: s.remove_noise !== undefined ? Boolean(s.remove_noise) : (s.noise_reduction !== undefined ? Boolean(s.noise_reduction) : defaultSettings.removeNoise),
           preprocessImages: s.preprocess_images !== undefined ? Boolean(s.preprocess_images) : (s.preprocessing_enabled !== undefined ? Boolean(s.preprocessing_enabled) : defaultSettings.preprocessImages),
           outputFormat: s.output_format || defaultSettings.outputFormat,
-          confidenceThreshold: s.confidence_threshold !== null && s.confidence_threshold !== undefined ? Math.round(Number(s.confidence_threshold) * 100) : defaultSettings.confidenceThreshold
+          confidenceThreshold: s.confidence_threshold !== null && s.confidence_threshold !== undefined ? Math.round(Number(s.confidence_threshold) * 100) : defaultSettings.confidenceThreshold,
+          useRecordSnippets: defaultSettings.useRecordSnippets
         };
 
         if (s.settings_json) {
@@ -208,49 +209,88 @@ router.put(['/', '/settings'], async (req: any, res: any) => {
       return mapping[lang] || lang.substring(0, 2) || 'en';
     };
 
-    const defaultLanguage = settings.defaultLanguage
-      ? languageToDefaultLanguage(settings.defaultLanguage)
-      : (settings.language ? languageToDefaultLanguage(settings.language) : 'en');
-
-    const languageValue = settings.language !== undefined ? settings.language : null;
-
-    await db.query(`
-      INSERT INTO ocr_settings (
-        church_id, engine, language, dpi, deskew, remove_noise,
-        preprocess_images, output_format, confidence_threshold,
-        default_language, preprocessing_enabled, auto_contrast, auto_rotate, noise_reduction,
-        updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
-      ON DUPLICATE KEY UPDATE
-        engine = COALESCE(VALUES(engine), engine),
-        language = COALESCE(IFNULL(VALUES(language), language), language),
-        dpi = COALESCE(VALUES(dpi), dpi),
-        deskew = COALESCE(VALUES(deskew), deskew),
-        remove_noise = COALESCE(VALUES(remove_noise), remove_noise),
-        preprocess_images = COALESCE(VALUES(preprocess_images), preprocess_images),
-        output_format = COALESCE(VALUES(output_format), output_format),
-        confidence_threshold = COALESCE(VALUES(confidence_threshold), confidence_threshold),
-        default_language = COALESCE(VALUES(default_language), default_language),
-        preprocessing_enabled = COALESCE(VALUES(preprocess_images), preprocessing_enabled),
-        auto_rotate = COALESCE(VALUES(deskew), auto_rotate),
-        noise_reduction = COALESCE(VALUES(remove_noise), noise_reduction),
-        updated_at = NOW()
-    `, [
-      churchId,
-      settings.engine || 'google-vision',
-      languageValue || 'eng',
-      settings.dpi || 300,
-      settings.deskew !== undefined ? (settings.deskew ? 1 : 0) : 1,
-      settings.removeNoise !== undefined ? (settings.removeNoise ? 1 : 0) : 1,
-      settings.preprocessImages !== undefined ? (settings.preprocessImages ? 1 : 0) : 1,
-      settings.outputFormat || 'json',
-      confidenceThresholdFraction,
-      defaultLanguage,
-      settings.preprocessImages !== undefined ? (settings.preprocessImages ? 1 : 0) : 1,
-      1,
-      settings.deskew !== undefined ? (settings.deskew ? 1 : 0) : 1,
-      settings.removeNoise !== undefined ? (settings.removeNoise ? 1 : 0) : 1
-    ]);
+    // Check if row exists
+    const [existing] = await db.query('SELECT id FROM ocr_settings WHERE church_id = ?', [churchId]);
+    if (existing.length > 0) {
+      // Build dynamic UPDATE query
+      const updates: string[] = ['updated_at = NOW()'];
+      const params: any[] = [];
+      
+      if (settings.engine !== undefined) {
+        updates.push('engine = ?');
+        params.push(settings.engine);
+      }
+      if (settings.language !== undefined) {
+        updates.push('language = ?');
+        params.push(settings.language);
+        updates.push('default_language = ?');
+        params.push(languageToDefaultLanguage(settings.language));
+      } else if (settings.defaultLanguage !== undefined) {
+        updates.push('default_language = ?');
+        params.push(languageToDefaultLanguage(settings.defaultLanguage));
+      }
+      if (settings.dpi !== undefined) {
+        updates.push('dpi = ?');
+        params.push(settings.dpi);
+      }
+      if (settings.deskew !== undefined) {
+        const val = settings.deskew ? 1 : 0;
+        updates.push('deskew = ?', 'auto_rotate = ?');
+        params.push(val, val);
+      }
+      if (settings.removeNoise !== undefined) {
+        const val = settings.removeNoise ? 1 : 0;
+        updates.push('remove_noise = ?', 'noise_reduction = ?');
+        params.push(val, val);
+      }
+      if (settings.preprocessImages !== undefined) {
+        const val = settings.preprocessImages ? 1 : 0;
+        updates.push('preprocess_images = ?', 'preprocessing_enabled = ?');
+        params.push(val, val);
+      }
+      if (settings.outputFormat !== undefined) {
+        updates.push('output_format = ?');
+        params.push(settings.outputFormat);
+      }
+      if (settings.confidenceThreshold !== undefined) {
+        updates.push('confidence_threshold = ?');
+        params.push(Number(settings.confidenceThreshold) / 100);
+      }
+      
+      if (updates.length > 1) {
+        params.push(churchId);
+        await db.query(`UPDATE ocr_settings SET ${updates.join(', ')} WHERE church_id = ?`, params);
+      }
+    } else {
+      // Insert new row with defaults + provided values
+      const defaultLanguage = settings.defaultLanguage
+        ? languageToDefaultLanguage(settings.defaultLanguage)
+        : (settings.language ? languageToDefaultLanguage(settings.language) : 'en');
+        
+      await db.query(`
+        INSERT INTO ocr_settings (
+          church_id, engine, language, dpi, deskew, remove_noise,
+          preprocess_images, output_format, confidence_threshold,
+          default_language, preprocessing_enabled, auto_contrast, auto_rotate, noise_reduction,
+          updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+      `, [
+        churchId,
+        settings.engine || 'google-vision',
+        settings.language || 'eng',
+        settings.dpi || 300,
+        settings.deskew !== undefined ? (settings.deskew ? 1 : 0) : 1,
+        settings.removeNoise !== undefined ? (settings.removeNoise ? 1 : 0) : 1,
+        settings.preprocessImages !== undefined ? (settings.preprocessImages ? 1 : 0) : 1,
+        settings.outputFormat || 'json',
+        settings.confidenceThreshold !== undefined ? Number(settings.confidenceThreshold) / 100 : 0.75,
+        defaultLanguage,
+        settings.preprocessImages !== undefined ? (settings.preprocessImages ? 1 : 0) : 1,
+        1,
+        settings.deskew !== undefined ? (settings.deskew ? 1 : 0) : 1,
+        settings.removeNoise !== undefined ? (settings.removeNoise ? 1 : 0) : 1
+      ]);
+    }
 
     // Verify the settings were saved
     const [verifyRows] = await db.query(`

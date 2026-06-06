@@ -148,8 +148,8 @@ const OCRSettingsPage: React.FC = () => {
     if (!effectiveChurchId) return;
     setLoading(true);
     try {
-      const response = await apiClient.get(`/api/church/${effectiveChurchId}/ocr/settings`);
-      const data = response.data?.settings || response.data;
+      const response: any = await apiClient.get(`/api/church/${effectiveChurchId}/ocr/settings`);
+      const data = response?.settings || response;
       if (data) {
         setSettings({
           useRecordSnippets: data.useRecordSnippets !== undefined ? Boolean(data.useRecordSnippets) : true,
