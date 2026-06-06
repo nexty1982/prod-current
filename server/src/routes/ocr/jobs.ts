@@ -4805,7 +4805,7 @@ function createRouters(upload: any) {
     try {
       const jobId = parseInt(req.params.jobId);
       const userRole = req.session?.user?.role;
-      if (!['super_admin', 'admin', 'church_admin', 'priest'].includes(userRole)) {
+      if (!['super_admin', 'admin', 'church_admin', 'priest', 'deacon', 'editor'].includes(userRole)) {
         return res.status(403).json({ error: 'Only authorized staff can update review status' });
       }
       const { review_status, review_notes } = req.body;

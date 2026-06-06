@@ -2206,28 +2206,24 @@ const OcrReviewPage: React.FC = () => {
                         {drawMode ? 'Cancel Drawing' : 'Define Record Box'}
                       </Button>
                     )}
-                    {!useRecordSnippet && (
-                      <>
-                        <Tooltip title="Rotate counter-clockwise">
-                          <IconButton
-                            size="small"
-                            onClick={() => setRotation((r) => (r - 90 + 360) % 360)}
-                            color="primary"
-                          >
-                            <IconRotate size={18} />
-                          </IconButton>
-                        </Tooltip>
-                        <Tooltip title="Rotate clockwise">
-                          <IconButton
-                            size="small"
-                            onClick={() => setRotation((r) => (r + 90) % 360)}
-                            color="primary"
-                          >
-                            <IconRotateClockwise size={18} />
-                          </IconButton>
-                        </Tooltip>
-                      </>
-                    )}
+                    <Tooltip title="Rotate counter-clockwise">
+                      <IconButton
+                        size="small"
+                        onClick={() => setRotation((r) => (r - 90 + 360) % 360)}
+                        color="primary"
+                      >
+                        <IconRotate size={18} />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Rotate clockwise">
+                      <IconButton
+                        size="small"
+                        onClick={() => setRotation((r) => (r + 90) % 360)}
+                        color="primary"
+                      >
+                        <IconRotateClockwise size={18} />
+                      </IconButton>
+                    </Tooltip>
                     {reviewCropBbox && (
                       <Button
                         size="small"
