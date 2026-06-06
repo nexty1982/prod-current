@@ -146,10 +146,19 @@ router.delete('/rules/config/entities/:id', async (req: any, res: any) => {
 router.get('/rules', async (req: any, res: any) => {
   try {
     const churchId = parseInt(req.params.churchId, 10);
-    const [rows] = await promisePool.query(
-      `SELECT * FROM ocr_parish_rules WHERE (church_id IS NULL OR church_id = ?) ORDER BY priority ASC`,
-      [churchId]
-    );
+    const scopeFilter = req.query.scope as string | undefined;
+
+    let sql = `SELECT * FROM ocr_parish_rules WHERE (church_id IS NULL OR church_id = ?)`;
+    const params: any[] = [churchId];
+
+    if (scopeFilter && ['global', 'church', 'diocesan'].includes(scopeFilter)) {
+      sql += ` AND scope = ?`;
+      params.push(scopeFilter);
+    }
+
+    sql += ` ORDER BY priority ASC`;
+
+    const [rows] = await promisePool.query(sql, params);
     res.json({ ok: true, rules: rows });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
@@ -180,13 +189,16 @@ router.post('/rules', async (req: any, res: any) => {
     }
 
     const userEmail = req.session?.user?.email || req.user?.email || 'system';
+    const ruleScope = req.body.scope || 'church';
+    const ruleChurchId = ruleScope === 'global' ? null : churchId;
 
     const [result]: any = await promisePool.query(
       `INSERT INTO ocr_parish_rules 
        (church_id, scope, name, description, record_type, conditions_json, actions_json, severity, priority, created_by)
-       VALUES (?, 'church', ?, ?, ?, ?, ?, ?, ?, ?)`,
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
-        churchId,
+        ruleChurchId,
+        ruleScope,
         name,
         description || null,
         record_type,

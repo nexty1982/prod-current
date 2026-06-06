@@ -58,6 +58,7 @@ async function listTemplates(req, res) {
     let sql = `
       SELECT e.id, e.name, e.description, e.record_type, e.extraction_mode,
              e.column_bands, e.header_y_threshold, e.preview_job_id, e.is_default,
+             e.status, e.approved_by, e.approved_at, e.created_by, e.sample_job_id, e.last_used_at,
              e.church_id, e.record_regions, e.created_at, e.updated_at,
              (SELECT COUNT(*) FROM ocr_extractor_fields f WHERE f.extractor_id = e.id) AS field_count
       FROM ocr_extractors e
@@ -72,6 +73,13 @@ async function listTemplates(req, res) {
     if (churchId) {
       sql += ' AND (e.church_id = ? OR e.church_id IS NULL)';
       params.push(churchId);
+    }
+
+    // Filter by status (default: show all)
+    const statusFilter = req.query.status;
+    if (statusFilter) {
+      sql += ' AND e.status = ?';
+      params.push(statusFilter);
     }
 
     sql += ' ORDER BY e.is_default DESC, e.name ASC';
@@ -106,6 +114,7 @@ async function getTemplate(req, res) {
     const [rows] = await pool.query(`
       SELECT e.id, e.name, e.description, e.record_type, e.extraction_mode,
              e.column_bands, e.header_y_threshold, e.preview_job_id, e.is_default,
+             e.status, e.approved_by, e.approved_at, e.created_by, e.sample_job_id, e.last_used_at,
              e.church_id, e.page_mode, e.record_regions, e.learned_params,
              e.created_at, e.updated_at
       FROM ocr_extractors e
@@ -186,11 +195,15 @@ async function createTemplate(req, res) {
       );
     }
 
+    // Determine who is creating this template
+    const createdBy = req.user?.email || req.user?.username || null;
+
     const [result] = await pool.query(`
       INSERT INTO ocr_extractors
         (name, description, record_type, extraction_mode, column_bands,
-         header_y_threshold, preview_job_id, is_default, church_id, record_regions)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+         header_y_threshold, preview_job_id, is_default, church_id, record_regions,
+         status, created_by, sample_job_id)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'candidate', ?, ?)
     `, [
       name,
       description || null,
@@ -202,6 +215,8 @@ async function createTemplate(req, res) {
       is_default ? 1 : 0,
       church_id || null,
       record_regions ? JSON.stringify(record_regions) : null,
+      createdBy,
+      preview_job_id || null,
     ]);
 
     const templateId = result.insertId;
@@ -534,6 +549,84 @@ async function learningStats(req, res) {
   }
 }
 
+// ── POST /api/ocr/layout-templates/:id/approve ──────────────────────────────
+
+async function approveTemplate(req, res) {
+  try {
+    const id = parseInt(req.params.id);
+    if (!id) return res.status(400).json({ error: 'Template ID required' });
+
+    const pool = getPool();
+    const [existing] = await pool.query('SELECT id, status FROM ocr_extractors WHERE id = ?', [id]);
+    if (!existing.length) return res.status(404).json({ error: 'Template not found' });
+
+    if (existing[0].status === 'approved') {
+      return res.json({ success: true, message: 'Already approved', status: 'approved' });
+    }
+
+    const approvedBy = req.user?.email || req.user?.username || 'system';
+    await pool.query(
+      `UPDATE ocr_extractors SET status = 'approved', approved_by = ?, approved_at = NOW() WHERE id = ?`,
+      [approvedBy, id]
+    );
+
+    console.log(`[LayoutTemplate] Approved template ${id} by ${approvedBy}`);
+    res.json({ success: true, status: 'approved', approved_by: approvedBy });
+  } catch (error) {
+    console.error('[LayoutTemplate] approveTemplate error:', error);
+    res.status(500).json({ error: 'Failed to approve template', message: error.message });
+  }
+}
+
+// ── POST /api/ocr/layout-templates/:id/reject ────────────────────────────────
+
+async function rejectTemplate(req, res) {
+  try {
+    const id = parseInt(req.params.id);
+    if (!id) return res.status(400).json({ error: 'Template ID required' });
+
+    const pool = getPool();
+    const [existing] = await pool.query('SELECT id, status FROM ocr_extractors WHERE id = ?', [id]);
+    if (!existing.length) return res.status(404).json({ error: 'Template not found' });
+
+    const reason = req.body.reason || null;
+    await pool.query(
+      `UPDATE ocr_extractors SET status = 'rejected' WHERE id = ?`,
+      [id]
+    );
+
+    console.log(`[LayoutTemplate] Rejected template ${id}${reason ? ': ' + reason : ''}`);
+    res.json({ success: true, status: 'rejected' });
+  } catch (error) {
+    console.error('[LayoutTemplate] rejectTemplate error:', error);
+    res.status(500).json({ error: 'Failed to reject template', message: error.message });
+  }
+}
+
+// ── POST /api/ocr/layout-templates/:id/archive ───────────────────────────────
+
+async function archiveTemplate(req, res) {
+  try {
+    const id = parseInt(req.params.id);
+    if (!id) return res.status(400).json({ error: 'Template ID required' });
+
+    const pool = getPool();
+    const [existing] = await pool.query('SELECT id, status FROM ocr_extractors WHERE id = ?', [id]);
+    if (!existing.length) return res.status(404).json({ error: 'Template not found' });
+
+    await pool.query(
+      `UPDATE ocr_extractors SET status = 'archived', is_default = 0 WHERE id = ?`,
+      [id]
+    );
+
+    console.log(`[LayoutTemplate] Archived template ${id}`);
+    res.json({ success: true, status: 'archived' });
+  } catch (error) {
+    console.error('[LayoutTemplate] archiveTemplate error:', error);
+    res.status(500).json({ error: 'Failed to archive template', message: error.message });
+  }
+}
+
 module.exports = {
   listTemplates,
   getTemplate,
@@ -543,4 +636,7 @@ module.exports = {
   previewExtraction,
   previewInline,
   learningStats,
+  approveTemplate,
+  rejectTemplate,
+  archiveTemplate,
 };

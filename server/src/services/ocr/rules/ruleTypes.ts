@@ -28,7 +28,10 @@ export type OperatorType =
   | 'has_shared_parent_surname'
   | 'has_low_confidence'
   | 'date_exists'
-  | 'date_missing';
+  | 'date_missing'
+  | 'equals_field'
+  | 'greater_than'
+  | 'less_than';
 
 export type ResolverType =
   | 'literal_value'

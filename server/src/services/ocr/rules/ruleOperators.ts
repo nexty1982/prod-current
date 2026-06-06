@@ -179,6 +179,26 @@ export const ruleOperators = {
     return score < 0.85;
   },
 
+  equals_field: (val: any, condVal: any, ctx: OperatorContext): boolean => {
+    const otherVal = ctx.fields[condVal];
+    if (val == null || otherVal == null) return false;
+    return String(val).trim().toLowerCase() === String(otherVal).trim().toLowerCase();
+  },
+
+  greater_than: (val: any, condVal: any): boolean => {
+    const num = parseFloat(val);
+    const threshold = parseFloat(condVal);
+    if (isNaN(num) || isNaN(threshold)) return false;
+    return num > threshold;
+  },
+
+  less_than: (val: any, condVal: any): boolean => {
+    const num = parseFloat(val);
+    const threshold = parseFloat(condVal);
+    if (isNaN(num) || isNaN(threshold)) return false;
+    return num < threshold;
+  },
+
   date_exists: (val: any): boolean => {
     return formatDbDate(val) != null;
   },

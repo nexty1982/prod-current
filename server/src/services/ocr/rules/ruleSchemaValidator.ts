@@ -17,7 +17,10 @@ const ALLOWED_OPERATORS: Set<OperatorType> = new Set([
   'has_shared_parent_surname',
   'has_low_confidence',
   'date_exists',
-  'date_missing'
+  'date_missing',
+  'equals_field',
+  'greater_than',
+  'less_than'
 ]);
 
 const ALLOWED_RESOLVERS: Set<ResolverType> = new Set([
@@ -154,7 +157,8 @@ function validateCondition(cond: any, recordType: RecordType) {
     (operator === 'is_before_field' ||
       operator === 'is_after_field' ||
       operator === 'is_same_or_after_field' ||
-      operator === 'is_same_or_before_field') &&
+      operator === 'is_same_or_before_field' ||
+      operator === 'equals_field') &&
     typeof value === 'string'
   ) {
     if (allowedFields && !allowedFields.has(value)) {
