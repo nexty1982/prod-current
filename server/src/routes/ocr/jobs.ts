@@ -3092,6 +3092,110 @@ function createRouters(upload: any) {
   });
 
   // -----------------------------------------------------------------------
+  // POST /jobs/:jobId/define-record-layout — Save drawn coordinates as template and re-process
+  // -----------------------------------------------------------------------
+  churchJobsRouter.post('/jobs/:jobId/define-record-layout', async (req: any, res: any) => {
+    try {
+      const churchId = parseInt(req.params.churchId);
+      const jobId = parseInt(req.params.jobId);
+      const { recordBox } = req.body; // { x, y, width, height } - fractional 0..1
+
+      if (!jobId || !churchId) return res.status(400).json({ error: 'churchId and jobId required' });
+      if (!recordBox || typeof recordBox.x !== 'number' || typeof recordBox.y !== 'number'
+        || typeof recordBox.width !== 'number' || typeof recordBox.height !== 'number') {
+        return res.status(400).json({ error: 'recordBox with x, y, width, height (fractional 0..1) required' });
+      }
+
+      // 1. Get record type from current job
+      const [jobRows] = await promisePool.query('SELECT record_type FROM ocr_jobs WHERE id = ?', [jobId]);
+      if (!(jobRows as any[]).length) return res.status(404).json({ error: 'Job not found' });
+      const recordType = (jobRows as any[])[0].record_type || 'baptism';
+
+      // 2. Setup record_regions array
+      const recordRegions = [
+        {
+          id: 'entry_0',
+          x: recordBox.x,
+          y: recordBox.y,
+          width: recordBox.width,
+          height: recordBox.height
+        }
+      ];
+
+      const templateName = `Drawn Layout #${jobId} (${recordType})`;
+      console.log(`[DefineRecordLayout] Job ${jobId}: creating template "${templateName}" with region ${JSON.stringify(recordBox)}...`);
+
+      // 3. Reset is_default flag for existing templates of same record type and church
+      await promisePool.query(
+        `UPDATE ocr_extractors SET is_default = 0 
+         WHERE record_type = ? AND church_id = ?`,
+        [recordType, churchId]
+      );
+
+      // 4. Insert new auto-detected template
+      const [insResult] = await promisePool.query(
+        `INSERT INTO ocr_extractors (name, description, record_type, page_mode, extraction_mode, record_regions, is_default, church_id, created_at, updated_at)
+         VALUES (?, ?, ?, 'single', 'multi_form', ?, 1, ?, NOW(), NOW())`,
+        [
+          templateName,
+          `Automatically created from user manual box drawing on Job #${jobId}`,
+          recordType,
+          JSON.stringify(recordRegions),
+          churchId
+        ]
+      );
+
+      const templateId = insResult.insertId;
+      console.log(`[DefineRecordLayout] Saved template #${templateId}`);
+
+      // 5. Update ocr_jobs for this jobId to set template, status to pending, and reset review
+      await promisePool.query(
+        `UPDATE ocr_jobs SET 
+          layout_template_id = ?, 
+          status = 'pending', 
+          review_status = 'uploaded',
+          agent_status = NULL,
+          agent_extract_json = NULL,
+          agent2_status = NULL,
+          agent2_extract_json = NULL,
+          ready_to_seed = 0
+         WHERE id = ?`,
+        [templateId, jobId]
+      );
+
+      // 6. Update ocr_feeder_pages status to queued in tenant DB
+      const resolvedTenant = await resolveChurchDb(churchId);
+      if (!resolvedTenant) return res.status(404).json({ error: 'Church database not found' });
+      const tenantPool = resolvedTenant.db;
+
+      await tenantPool.query(
+        `UPDATE ocr_feeder_pages SET status = 'queued', updated_at = NOW()
+         WHERE job_id = ?`,
+        [jobId]
+      );
+
+      // Clear any table_extraction, record_candidates, ocr_input_plan, or ocr_profile_plan artifacts
+      await tenantPool.query(
+        `DELETE a FROM ocr_feeder_artifacts a
+         JOIN ocr_feeder_pages p ON a.page_id = p.id
+         WHERE p.job_id = ? AND a.type IN ('table_extraction', 'record_candidates', 'ocr_input_plan', 'ocr_profile_plan')`,
+        [jobId]
+      );
+
+      console.log(`[DefineRecordLayout] Job #${jobId} reset to pending. Background worker will pick it up.`);
+
+      res.json({
+        success: true,
+        templateId,
+        message: 'Record region layout registered and job scheduled for re-processing.'
+      });
+    } catch (error: any) {
+      console.error('[DefineRecordLayout] Error:', error);
+      res.status(500).json({ error: 'Failed to define layout', message: error.message });
+    }
+  });
+
+  // -----------------------------------------------------------------------
   // POST /jobs/:jobId/crop-reocr — Crop a region and re-OCR with Vision API
   // -----------------------------------------------------------------------
   churchJobsRouter.post('/jobs/:jobId/crop-reocr', async (req: any, res: any) => {

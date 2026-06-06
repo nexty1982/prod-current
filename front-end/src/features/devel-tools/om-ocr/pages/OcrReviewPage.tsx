@@ -310,6 +310,11 @@ const OcrReviewPage: React.FC = () => {
   const [saveTemplateDialogOpen, setSaveTemplateDialogOpen] = useState(false);
   const [templateName, setTemplateName] = useState('');
   const [mapHint, setMapHint] = useState<string | null>(null);
+  const [drawMode, setDrawMode] = useState(false);
+  const [drawingBox, setDrawingBox] = useState({ x0: 0, y0: 0, x1: 0, y1: 0, active: false });
+  const [recordBox, setRecordBox] = useState<{ x: number, y: number, width: number, height: number } | null>(null);
+  const [confirmLayoutDialogOpen, setConfirmLayoutDialogOpen] = useState(false);
+  const [saveLayoutLoading, setSaveLayoutLoading] = useState(false);
   const [jobsCollapsed, setJobsCollapsed] = useState(false);
   const [imagePanelWidth, setImagePanelWidth] = useState(560);
   const contentRowRef = useRef<HTMLDivElement>(null);
@@ -737,6 +742,21 @@ const OcrReviewPage: React.FC = () => {
   // ── Image interaction: drag-to-pan, ctrl+wheel zoom ────────────────────────
   const onImageMouseDown = (e: React.MouseEvent) => {
     if (e.button !== 0 || dragBoundaryRef.current) return;
+    if (drawMode) {
+      const img = imageRef.current;
+      if (!img) return;
+      const rect = img.getBoundingClientRect();
+      const startX = (e.clientX - rect.left) / rect.width;
+      const startY = (e.clientY - rect.top) / rect.height;
+      setDrawingBox({
+        x0: startX,
+        y0: startY,
+        x1: startX,
+        y1: startY,
+        active: true
+      });
+      return;
+    }
     const sc = scrollRef.current;
     if (!sc) return;
     panRef.current = { active: true, startX: e.clientX, startY: e.clientY, left: sc.scrollLeft, top: sc.scrollTop, moved: false };
@@ -749,6 +769,19 @@ const OcrReviewPage: React.FC = () => {
   };
 
   const onContainerMouseMove = (e: React.MouseEvent) => {
+    if (drawMode && drawingBox.active) {
+      const img = imageRef.current;
+      if (!img) return;
+      const rect = img.getBoundingClientRect();
+      const curX = (e.clientX - rect.left) / rect.width;
+      const curY = (e.clientY - rect.top) / rect.height;
+      setDrawingBox((prev) => ({
+        ...prev,
+        x1: Math.max(0, Math.min(1, curX)),
+        y1: Math.max(0, Math.min(1, curY)),
+      }));
+      return;
+    }
     const boundary = dragBoundaryRef.current;
     if (boundary) {
       const img = imageRef.current;
@@ -781,6 +814,20 @@ const OcrReviewPage: React.FC = () => {
   };
 
   const onContainerMouseUp = () => {
+    if (drawMode && drawingBox.active) {
+      setDrawingBox((prev) => ({ ...prev, active: false }));
+      const x_min = Math.min(drawingBox.x0, drawingBox.x1);
+      const y_min = Math.min(drawingBox.y0, drawingBox.y1);
+      const x_max = Math.max(drawingBox.x0, drawingBox.x1);
+      const y_max = Math.max(drawingBox.y0, drawingBox.y1);
+      const w = x_max - x_min;
+      const h = y_max - y_min;
+      if (w > 0.01 && h > 0.01) {
+        setRecordBox({ x: x_min, y: y_min, width: w, height: h });
+        setConfirmLayoutDialogOpen(true);
+      }
+      return;
+    }
     dragBoundaryRef.current = null;
     panRef.current.active = false;
   };
@@ -1120,6 +1167,27 @@ const OcrReviewPage: React.FC = () => {
       setError(err?.response?.data?.error || err?.message || 'Failed to save template');
     } finally {
       setSaveTemplateLoading(false);
+    }
+  };
+
+  const handleSaveDefinedLayout = async () => {
+    if (!churchId || !selectedJobId || !recordBox) return;
+    setSaveLayoutLoading(true);
+    try {
+      await apiClient.post(`/api/church/${churchId}/ocr/jobs/${selectedJobId}/define-record-layout`, {
+        recordBox
+      });
+      setConfirmLayoutDialogOpen(false);
+      setDrawMode(false);
+      setRecordBox(null);
+      setMapHint('Custom record region template registered! Re-processing has been scheduled...');
+      await loadJobs();
+      navigate(`${reviewBase}`);
+    } catch (err: any) {
+      console.error("Failed to define layout:", err);
+      alert("Failed to define layout: " + (err.response?.data?.error || err.message));
+    } finally {
+      setSaveLayoutLoading(false);
     }
   };
 
@@ -2023,6 +2091,23 @@ const OcrReviewPage: React.FC = () => {
                         </IconButton>
                       </Tooltip>
                     )}
+                    {!useRecordSnippet && (
+                      <Button
+                        size="small"
+                        variant={drawMode ? "contained" : "outlined"}
+                        color={drawMode ? "error" : "primary"}
+                        sx={{ textTransform: 'none' }}
+                        onClick={() => {
+                          setDrawMode((v) => !v);
+                          if (!drawMode) {
+                            setRecordBox(null);
+                            setDrawingBox({ x0: 0, y0: 0, x1: 0, y1: 0, active: false });
+                          }
+                        }}
+                      >
+                        {drawMode ? 'Cancel Drawing' : 'Define Record Box'}
+                      </Button>
+                    )}
                     {reviewCropBbox && (
                       <Button
                         size="small"
@@ -2102,15 +2187,20 @@ const OcrReviewPage: React.FC = () => {
                 </Box>
               )}
 
-              {(mapMode || mapHint) && (
-                <Box sx={{ px: 1.5, py: 0.75, borderBottom: '1px solid', borderColor: 'divider', bgcolor: mapMode ? 'action.hover' : 'background.paper' }}>
+              {(drawMode || mapMode || mapHint) && (
+                <Box sx={{ px: 1.5, py: 0.75, borderBottom: '1px solid', borderColor: 'divider', bgcolor: (drawMode || mapMode) ? 'action.hover' : 'background.paper' }}>
                   <Stack direction="row" spacing={1} alignItems="center">
                     <IconHandFinger size={16} />
                     <Typography variant="caption" sx={{ flex: 1 }}>
-                      {mapMode
+                      {drawMode
+                        ? "Draw mode — Click and drag on the image scan to draw a box around the records."
+                        : mapMode
                         ? `Map mode — click a region on the scan to add it to “${focusedField?.replace(/_/g, ' ')}”.`
                         : mapHint}
                     </Typography>
+                    {drawMode && (
+                      <Button size="small" sx={{ textTransform: 'none' }} onClick={() => { setDrawMode(false); setRecordBox(null); }}>Cancel</Button>
+                    )}
                     {mapMode && (
                       <Button size="small" sx={{ textTransform: 'none' }} onClick={() => setFocusedField(null)}>Done</Button>
                     )}
@@ -2224,6 +2314,23 @@ const OcrReviewPage: React.FC = () => {
                       }}
                     />
 
+                    {/* Visual selection box while drawing or drawn */}
+                    {drawMode && (drawingBox.active || recordBox) && (
+                      <Box
+                        sx={{
+                          position: 'absolute',
+                          left: `${Math.min(drawingBox.x0, drawingBox.x1) * 100}%`,
+                          top: `${Math.min(drawingBox.y0, drawingBox.y1) * 100}%`,
+                          width: `${Math.abs(drawingBox.x1 - drawingBox.x0) * 100}%`,
+                          height: `${Math.abs(drawingBox.y1 - drawingBox.y0) * 100}%`,
+                          border: '3px dashed #e53935',
+                          backgroundColor: 'rgba(229, 57, 53, 0.15)',
+                          pointerEvents: 'none',
+                          zIndex: 9,
+                        }}
+                      />
+                    )}
+
                     {imageReady && useRecordSnippet && visionPageSize.width > 0 && (fieldHighlightBoxes.length > 0 || cellTokenOverlays.length > 0) && (
                       <FusionOverlay
                         key={`${selectedJobId}-${candidateIndex}-${imageZoom}-${focusedField}-${columnBandsOverride ? 'ov' : 'def'}`}
@@ -2294,6 +2401,26 @@ const OcrReviewPage: React.FC = () => {
           <Button onClick={() => setSaveTemplateDialogOpen(false)} disabled={saveTemplateLoading}>Cancel</Button>
           <Button onClick={handleSaveTemplate} variant="contained" disabled={saveTemplateLoading || !templateName.trim()}>
             {saveTemplateLoading ? <CircularProgress size={24} /> : 'Save'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={confirmLayoutDialogOpen} onClose={() => setConfirmLayoutDialogOpen(false)}>
+        <DialogTitle>Define Record Region Layout</DialogTitle>
+        <DialogContent>
+          <Typography>
+            You have outlined a record region within the scan:
+            <br />
+            <strong>Coordinates:</strong> X: {Math.round((recordBox?.x || 0) * 100)}%, Y: {Math.round((recordBox?.y || 0) * 100)}%, Width: {Math.round((recordBox?.width || 0) * 100)}%, Height: {Math.round((recordBox?.height || 0) * 100)}%
+          </Typography>
+          <Typography sx={{ mt: 2 }} color="text.secondary">
+            Creating a template from this region will set it as the new default layout for this record type. The job will be restarted to extract records from this region.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => { setRecordBox(null); setConfirmLayoutDialogOpen(false); }} disabled={saveLayoutLoading}>Cancel</Button>
+          <Button onClick={handleSaveDefinedLayout} color="primary" variant="contained" disabled={saveLayoutLoading}>
+            {saveLayoutLoading ? <CircularProgress size={24} color="inherit" /> : 'Create Template & Re-process'}
           </Button>
         </DialogActions>
       </Dialog>
