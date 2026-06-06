@@ -2917,6 +2917,7 @@ async function processJob(job: JobRow): Promise<void> {
             [jobId]
           );
           const visionPages: any[] = [];
+          let visionRawText = '';
           for (const row of visionArtifacts) {
             if (fs.existsSync(row.storage_path)) {
               const fileContent = fs.readFileSync(row.storage_path, 'utf8');
@@ -2924,11 +2925,14 @@ async function processJob(job: JobRow): Promise<void> {
               if (parsed && Array.isArray(parsed.pages)) {
                 visionPages.push(...parsed.pages);
               }
+              if (parsed && parsed.text) {
+                visionRawText += (visionRawText ? '\n' : '') + parsed.text;
+              }
             }
           }
           if (visionPages.length > 0) {
             const { classifyLayout } = require('../utils/ocrClassifier');
-            layoutClassification = classifyLayout(visionPages);
+            layoutClassification = classifyLayout(visionPages, visionRawText || combinedText);
           }
         } catch (layoutErr: any) {
           console.warn(`[OCR Worker] Layout classification failed for job ${jobId}: ${layoutErr.message}`);

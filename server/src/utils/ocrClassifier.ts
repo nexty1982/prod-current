@@ -1613,14 +1613,15 @@ export interface LayoutClassification {
   userOverridden: boolean;
 }
 
-export function classifyLayout(visionPages: any[]): LayoutClassification {
+export function classifyLayout(visionPages: any[], rawText?: string): LayoutClassification {
   let totalWords = 0;
   let alignedWords = 0;
   let totalLines = 0;
   let totalLineSpan = 0;
   let formLabelMatches = 0;
+  let allWords: any[] = [];
 
-  const formLabelRegex = /\b(name of|date of|place of|born at|baptized on|father|mother|godparent|sponsor|witness|priest|repose|deceased|age at|cause of|informant|signature|residence|occupation|street|baptis[me]|christening|godparent|godmother|godfather|sponsor|wedding|bride|groom|crowning|funeral|death|burial|deceased|repose|age|cause|signature|address|born|baptized)\b/i;
+  const formLabelRegex = /\b(name of|date of|place of|born at|baptized on|father|mother|godparent|sponsor|witness|priest|repose|deceased|age at|cause of|informant|signature|residence|occupation|street|baptis[me]|christening|godmother|godfather|wedding|bride|groom|crowning|funeral|death|burial|age|cause|address|born|baptized)\b/i;
 
   for (const page of visionPages) {
     if (!page || !page.width || !page.height) continue;
@@ -1634,10 +1635,8 @@ export function classifyLayout(visionPages: any[]): LayoutClassification {
           for (const paragraph of block.paragraphs) {
             if (paragraph.words) {
               for (const word of paragraph.words) {
-                // Get word bounding box
                 const box = word.boundingBox;
                 if (!box || !box.vertices || box.vertices.length < 4) continue;
-                // Compute bounding box extents
                 const xs = box.vertices.map((v: any) => v.x ?? 0);
                 const ys = box.vertices.map((v: any) => v.y ?? 0);
                 const minX = Math.min(...xs);
@@ -1650,13 +1649,7 @@ export function classifyLayout(visionPages: any[]): LayoutClassification {
 
                 words.push({
                   text: word.text || '',
-                  minX,
-                  maxX,
-                  minY,
-                  maxY,
-                  cy,
-                  h,
-                  w
+                  minX, maxX, minY, maxY, cy, h, w
                 });
               }
             }
@@ -1667,20 +1660,19 @@ export function classifyLayout(visionPages: any[]): LayoutClassification {
 
     if (words.length === 0) continue;
     totalWords += words.length;
+    allWords = allWords.concat(words);
 
     // Compute average word height
-    const avgWordHeight = words.reduce((sum, w) => sum + w.h, 0) / words.length;
+    const avgWordHeight = words.reduce((sum: number, w: any) => sum + w.h, 0) / words.length;
 
-    // Group words into lines using Y-clustering (tolerance = avgWordHeight * 0.75)
-    // Sort words by Y-center
-    words.sort((a, b) => a.cy - b.cy);
+    // Group words into lines using Y-clustering
+    words.sort((a: any, b: any) => a.cy - b.cy);
     const lines: any[][] = [];
     for (const word of words) {
       let added = false;
       const tol = Math.max(avgWordHeight, word.h) * 0.75;
       for (const line of lines) {
-        // Compute average cy of the line
-        const lineCy = line.reduce((sum, w) => sum + w.cy, 0) / line.length;
+        const lineCy = line.reduce((sum: number, w: any) => sum + w.cy, 0) / line.length;
         if (Math.abs(word.cy - lineCy) <= tol) {
           line.push(word);
           added = true;
@@ -1694,21 +1686,18 @@ export function classifyLayout(visionPages: any[]): LayoutClassification {
 
     totalLines += lines.length;
 
-    // For horizontal alignment score: count words in lines with at least 3 words
     for (const line of lines) {
       if (line.length >= 3) {
         alignedWords += line.length;
       }
 
-      // Compute line horizontal span
-      const xs = line.map(w => w.minX).concat(line.map(w => w.maxX));
+      const xs = line.map((w: any) => w.minX).concat(line.map((w: any) => w.maxX));
       const minX = Math.min(...xs);
       const maxX = Math.max(...xs);
       const span = (maxX - minX) / pageWidth;
       totalLineSpan += span;
 
-      // Check form labels in line text
-      const lineText = line.map(w => w.text).join(' ');
+      const lineText = line.map((w: any) => w.text).join(' ');
       if (formLabelRegex.test(lineText)) {
         formLabelMatches++;
       }
@@ -1720,27 +1709,180 @@ export function classifyLayout(visionPages: any[]): LayoutClassification {
   const narrativeContinuityScore = totalLines > 0 ? totalLineSpan / totalLines : 0;
   const wordsPerLine = totalLines > 0 ? totalWords / totalLines : 0;
 
-  // Let's make sure scores are bounded [0, 1]
-  const clamp = (val: number) => Math.min(Math.max(val, 0), 1);
-
-  // Classification heuristics
-  let detectedLayoutType: 'tabular' | 'form' | 'narrative' = 'tabular';
-  let layoutConfidence = 0.5;
-
-  // 1. Form layout has short scattered lines (low continuity score) and/or high density of label words
-  if (formLabelDensity > 0.25 || (formLabelDensity > 0.12 && narrativeContinuityScore < 0.55)) {
-    detectedLayoutType = 'form';
-    layoutConfidence = clamp(0.5 + (formLabelDensity * 2));
+  // Column-distribution histogram
+  const histPageWidth = visionPages[0]?.width || 1;
+  const bins = new Array(40).fill(0);
+  for (const w of allWords) {
+    const startBin = Math.max(0, Math.floor((w.minX / histPageWidth) * 40));
+    const endBin = Math.min(39, Math.ceil((w.maxX / histPageWidth) * 40));
+    for (let b = startBin; b <= endBin; b++) {
+      bins[b]++;
+    }
   }
-  // 2. Narrative layout has very high continuity (lines span the page), high words per line, and few form labels
-  else if (narrativeContinuityScore > 0.7 && wordsPerLine > 6 && formLabelDensity < 0.12) {
-    detectedLayoutType = 'narrative';
-    layoutConfidence = clamp(0.5 + (narrativeContinuityScore - 0.5));
+  const avgBinVal = bins.reduce((sum: number, v: number) => sum + v, 0) / 40;
+  let peaks = 0;
+  for (let b = 1; b < 39; b++) {
+    if (bins[b] > bins[b - 1] && bins[b] > bins[b + 1] && bins[b] > avgBinVal * 0.4) {
+      const leftValley = bins[b - 1] < bins[b] * 0.7;
+      const rightValley = bins[b + 1] < bins[b] * 0.7;
+      if (leftValley || rightValley) peaks++;
+    }
   }
-  // 3. Tabular layout is default, has moderate to high continuity but low label density, and high words per line
-  else {
+
+  // ── Weighted keyword scoring ──────────────────────────────────────────
+  const wordText = allWords.map((w: any) => w.text).join(' ').toLowerCase();
+  const rtLower = (rawText || '').toLowerCase();
+
+  // Test against both raw text and word-joined text
+  const rx = (re: RegExp) => re.test(rtLower) || re.test(wordText);
+
+  let tabScore = 0;
+  let formScore = 0;
+  let narrScore = 0;
+
+  // ─── TABULAR-EXCLUSIVE keywords ──────────────────────────────────────
+  if (rx(/счет[ьъ]?\s/i)) tabScore += 6;
+  if (rx(/родившихся|родившагося/i)) tabScore += 5;
+  if (rx(/бракосочетавшихся/i)) tabScore += 5;
+  if (rx(/умерших/i)) tabScore += 5;
+  if (rx(/мужеска|мужескій/i)) tabScore += 5;
+  if (rx(/женска|женскій/i)) tabScore += 5;
+  if (rx(/number\s+male\s+female/i)) tabScore += 6;
+  if (rx(/full\s+names?\s+of\s+sponsors/i)) tabScore += 5;
+  if (rx(/воспр[іи]емник/i)) tabScore += 4;
+
+  // ─── TABULAR/FORM AMBIGUOUS keywords ─────────────────────────────────
+  if (rx(/priest'?s\s+name/i)) { tabScore += 3; formScore += 2; }
+  if (rx(/officiant'?s\s+name/i)) { tabScore += 3; formScore += 2; }
+  if (rx(/full\s+name\s+of\s+groom/i)) { tabScore += 3; formScore += 3; }
+  if (rx(/full\s+name\s+of\s+bride/i)) { tabScore += 3; formScore += 3; }
+  if (rx(/witnesses?\s+names?/i)) { tabScore += 3; formScore += 2; }
+  if (rx(/father'?s\s+full\s+name/i)) { tabScore += 2; formScore += 3; }
+  if (rx(/mother'?s\s+maiden/i)) { tabScore += 2; formScore += 3; }
+  if (rx(/date\s+and\s+number\s+of\s+license/i)) { tabScore += 3; formScore += 2; }
+
+  // ─── FORM-EXCLUSIVE keywords ─────────────────────────────────────────
+  if (rx(/parish\s+record/i)) formScore += 6;
+  if (rx(/certificate\s+of/i)) formScore += 6;
+  if (rx(/residence\s*\(number/i)) formScore += 5;
+  if (rx(/previous\s+marriages/i)) formScore += 5;
+  if (rx(/groom'?s\s+parents/i)) formScore += 4;
+  if (rx(/bride'?s\s+parents/i)) formScore += 4;
+  if (rx(/signature\s+of/i)) formScore += 4;
+  if (rx(/справка|свид[ѣе]тельство/i)) formScore += 5;
+
+  // ─── NARRATIVE-EXCLUSIVE keywords ────────────────────────────────────
+  if (rx(/was\s+baptized/i)) narrScore += 5;
+  if (rx(/baptized\s+on/i)) narrScore += 5;
+  if (rx(/united\s+in\s+(holy\s+)?matri?mony/i)) narrScore += 6;
+  if (rx(/sacrament\s+of\s+holy\s+matri?mony/i)) narrScore += 6;
+  if (rx(/died[\s,.]+/i)) narrScore += 4;
+  if (rx(/died\s+(on|at|in)/i)) narrScore += 5;
+  if (rx(/buried\s+(on|at|in)/i)) narrScore += 5;
+  if (rx(/was\s+buried/i)) narrScore += 5;
+  if (rx(/sponsors?\s+were/i)) narrScore += 5;
+  if (rx(/witnesses?\s+were/i)) narrScore += 5;
+  if (rx(/confessed/i)) narrScore += 3;
+  if (rx(/thrombosis|coronary|myocardial|carcinoma|arterioscler/i)) narrScore += 4;
+  if (rx(/death\s+record/i)) narrScore += 5;
+  if (rx(/крещен|крещена|крестил/i)) narrScore += 4;
+  if (rx(/погребен/i)) narrScore += 4;
+  if (rx(/повѣнчаны|повенчаны/i)) narrScore += 4;
+
+  // ─── NARRATIVE journal-structure indicators ──────────────────────────
+  const hasBaptismsHeader = rx(/\bbaptisms\b/i) && !rx(/part\s+\d+[\s-]*baptisms/i);
+  if (hasBaptismsHeader) narrScore += 3;
+  if (rx(/\bno\.?\s+\d{1,3}\b/i) && !rx(/n°\s*\d{4,}/i)) narrScore += 3;
+  if (rx(/sacraments?\s+administered/i)) narrScore += 4;
+  if (rx(/name\s+of\s+parents/i) && rx(/godparents?/i) && rx(/date\s+of\s+baptism/i)
+      && !rx(/parish\s+record/i)) {
+    narrScore += 5;
+  }
+  if (rx(/were\s+married/i)) narrScore += 5;
+  if (rx(/sacrament/i) && rx(/groom/i) && rx(/bride/i) && !rx(/parish\s+record/i)) {
+    narrScore += 4;
+  }
+  if (rx(/civil\s+ceremony/i)) narrScore += 3;
+  if (rx(/convert\s+from/i)) narrScore += 3;
+
+  // ─── Ledger-structure disambiguation ─────────────────────────────────
+  const hasCyrillicLedger = rx(/счет|мѣсяца|день|вѣроисповѣданіе|поручител/i);
+  const hasColumnarLayout = rx(/number/i) && rx(/date/i) && (
+    rx(/full\s+name/i) || rx(/name\s+of/i)
+  );
+  if (hasCyrillicLedger && hasColumnarLayout) {
+    tabScore += 8;
+  }
+
+  // ── Geometric adjustments ─────────────────────────────────────────────
+  if (peaks >= 4) {
+    tabScore += 8;
+  } else if (peaks >= 3) {
+    tabScore += 5;
+  }
+
+  if (formLabelDensity > 0.35) {
+    formScore += 6;
+  } else if (formLabelDensity > 0.22) {
+    formScore += 4;
+  }
+
+  if (narrativeContinuityScore > 0.7 && wordsPerLine > 6 && wordsPerLine <= 20) {
+    narrScore += 8;
+  } else if (narrativeContinuityScore > 0.68 && wordsPerLine > 6 && wordsPerLine <= 20) {
+    narrScore += 5;
+  }
+
+  if (narrativeContinuityScore < 0.45 && formLabelDensity > 0.12) {
+    formScore += 4;
+  }
+
+  // Multiple PARISH RECORD instances → strong form boost
+  const parishRecordCount = (rtLower.match(/parish\s+record/gi) || []).length;
+  if (parishRecordCount >= 2) {
+    formScore += parishRecordCount * 4;
+  }
+
+  if (totalWords < 80 && narrativeContinuityScore < 0.5) {
+    formScore += 3;
+  }
+
+  // ── Decision ──────────────────────────────────────────────────────────
+  let detectedLayoutType: 'tabular' | 'form' | 'narrative' = 'form';
+  const maxScore = Math.max(tabScore, formScore, narrScore);
+
+  if (maxScore === 0) {
+    if (peaks >= 3) {
+      detectedLayoutType = 'tabular';
+    } else if (narrativeContinuityScore > 0.75 && wordsPerLine > 8) {
+      detectedLayoutType = 'narrative';
+    } else {
+      detectedLayoutType = 'form';
+    }
+  } else if (tabScore > formScore && tabScore > narrScore) {
     detectedLayoutType = 'tabular';
-    layoutConfidence = clamp(0.6 + (horizontalAlignmentScore * 0.3));
+  } else if (narrScore > formScore && narrScore > tabScore) {
+    detectedLayoutType = 'narrative';
+  } else if (formScore > tabScore && formScore > narrScore) {
+    detectedLayoutType = 'form';
+  } else {
+    // Tie-breaking
+    if (tabScore === narrScore && tabScore > formScore) {
+      detectedLayoutType = peaks >= 3 ? 'tabular' : 'narrative';
+    } else if (tabScore === formScore && tabScore > narrScore) {
+      detectedLayoutType = peaks >= 3 ? 'tabular' : 'form';
+    } else if (formScore === narrScore && formScore > tabScore) {
+      detectedLayoutType = formLabelDensity > 0.2 ? 'form' : 'narrative';
+    } else {
+      detectedLayoutType = 'form';
+    }
+  }
+
+  const clamp = (val: number) => Math.min(Math.max(val, 0), 1);
+  let layoutConfidence = 0.5;
+  if (maxScore > 0) {
+    const secondMax = [tabScore, formScore, narrScore].sort((a, b) => b - a)[1];
+    layoutConfidence = clamp(0.5 + ((maxScore - secondMax) / maxScore) * 0.5);
   }
 
   return {
@@ -1749,8 +1891,9 @@ export function classifyLayout(visionPages: any[]): LayoutClassification {
     classificationSignals: {
       horizontalAlignmentScore: parseFloat(horizontalAlignmentScore.toFixed(2)),
       formLabelDensity: parseFloat(formLabelDensity.toFixed(2)),
-      narrativeContinuityScore: parseFloat(narrativeContinuityScore.toFixed(2))
+      narrativeContinuityScore: parseFloat(narrativeContinuityScore.toFixed(2)),
     },
-    userOverridden: false
+    userOverridden: false,
   };
 }
+
