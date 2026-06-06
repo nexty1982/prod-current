@@ -13,6 +13,7 @@ import {
     Chip,
     Divider,
     FormControl,
+    FormControlLabel,
     InputLabel,
     MenuItem,
     Paper,
@@ -83,6 +84,7 @@ interface DocumentDeletionSettings {
 }
 
 interface OCRSettingsData {
+  useRecordSnippets: boolean;
   documentProcessing: DocumentProcessingSettings;
   documentDeletion: DocumentDeletionSettings;
 }
@@ -102,6 +104,7 @@ const OCRSettingsPage: React.FC = () => {
   const [mapHint, setMapHint] = useState<string | null>(null);
   
   const [settings, setSettings] = useState<OCRSettingsData>({
+    useRecordSnippets: true,
     documentProcessing: {
       spellingCorrection: 'fix',
       extractAllText: 'yes',
@@ -149,6 +152,7 @@ const OCRSettingsPage: React.FC = () => {
       const data = response.data?.settings || response.data;
       if (data) {
         setSettings({
+          useRecordSnippets: data.useRecordSnippets !== undefined ? Boolean(data.useRecordSnippets) : true,
           documentProcessing: {
             spellingCorrection: data.documentProcessing?.spellingCorrection || 'fix',
             extractAllText: data.documentProcessing?.extractAllText || 'yes',
@@ -294,6 +298,7 @@ const OCRSettingsPage: React.FC = () => {
       }
 
       await apiClient.put(`/api/church/${effectiveChurchId}/ocr/settings`, {
+        useRecordSnippets: settings.useRecordSnippets,
         documentProcessing: settings.documentProcessing,
         documentDeletion: settings.documentDeletion,
       });
@@ -551,6 +556,29 @@ const OCRSettingsPage: React.FC = () => {
                   <MenuItem value="no">No</MenuItem>
                 </Select>
               </FormControl>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={settings.useRecordSnippets}
+                    onChange={(e) =>
+                      setSettings((prev) => ({
+                        ...prev,
+                        useRecordSnippets: e.target.checked,
+                      }))
+                    }
+                    size="small"
+                  />
+                }
+                label={
+                  <Box>
+                    <Typography variant="body2">Use Record Snippets</Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      Split pages into individual record snippets. If disabled, the entire page is processed as one image record.
+                    </Typography>
+                  </Box>
+                }
+                sx={{ mt: 1.5 }}
+              />
             </Stack>
 
             <Button variant="outlined" onClick={handleSaveSettings} disabled={saving || loading} sx={{ mt: 3 }}>

@@ -26,7 +26,8 @@ router.get(['/', '/settings'], async (req: any, res: any) => {
       removeNoise: true,
       preprocessImages: true,
       outputFormat: 'json',
-      confidenceThreshold: 75
+      confidenceThreshold: 75,
+      useRecordSnippets: true
     };
 
     try {
@@ -68,6 +69,9 @@ router.get(['/', '/settings'], async (req: any, res: any) => {
             }
             if (jsonSettings.recordFieldConfig) {
               loadedSettings.recordFieldConfig = jsonSettings.recordFieldConfig;
+            }
+            if (jsonSettings.useRecordSnippets !== undefined) {
+              loadedSettings.useRecordSnippets = Boolean(jsonSettings.useRecordSnippets);
             }
           } catch (e) {
             console.warn('[OCR Settings] Failed to parse settings_json:', e);
@@ -262,7 +266,7 @@ router.put(['/', '/settings'], async (req: any, res: any) => {
     }
 
     // Store document processing and deletion settings in JSON column
-    if (settings.documentProcessing || settings.documentDeletion || settings.recordFieldConfig) {
+    if (settings.documentProcessing || settings.documentDeletion || settings.recordFieldConfig || settings.useRecordSnippets !== undefined) {
       try {
         let existingJson: any = {};
         try {
@@ -281,6 +285,7 @@ router.put(['/', '/settings'], async (req: any, res: any) => {
           documentProcessing: settings.documentProcessing ?? existingJson.documentProcessing,
           documentDeletion: settings.documentDeletion ?? existingJson.documentDeletion,
           recordFieldConfig: settings.recordFieldConfig ?? existingJson.recordFieldConfig,
+          useRecordSnippets: settings.useRecordSnippets !== undefined ? Boolean(settings.useRecordSnippets) : existingJson.useRecordSnippets,
         });
 
         try {

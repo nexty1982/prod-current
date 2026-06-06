@@ -1287,7 +1287,8 @@ function offsetBoundingBox(bb: any, dx: number, dy: number): any {
 async function parsePage(
   tenantPool: Pool,
   page: PageRow,
-  rawText: string
+  rawText: string,
+  churchId: number
 ): Promise<any> {
   const pageDir = getPageStorageDir(page.job_id, page.page_index);
   mkdirp(pageDir);
@@ -1352,6 +1353,52 @@ async function parsePage(
       unmappedColumns: [],
       parsedAt: new Date().toISOString(),
     };
+  }
+
+  // Load useRecordSnippets setting for this church
+  let useRecordSnippets = true;
+  try {
+    const [settingsRows] = await tenantPool.query(
+      `SELECT settings_json FROM ocr_settings WHERE church_id = ? LIMIT 1`,
+      [churchId]
+    ) as any[];
+    if (settingsRows.length > 0 && settingsRows[0].settings_json) {
+      const json = typeof settingsRows[0].settings_json === 'string'
+        ? JSON.parse(settingsRows[0].settings_json)
+        : settingsRows[0].settings_json;
+      if (json.useRecordSnippets !== undefined) {
+        useRecordSnippets = Boolean(json.useRecordSnippets);
+      }
+    }
+  } catch (dbErr: any) {
+    console.warn(`[ParsePage] Failed to load ocr_settings for church ${churchId}: ${dbErr.message}`);
+  }
+
+  // Collapse candidates if useRecordSnippets is false
+  if (!useRecordSnippets && recordCandidates && recordCandidates.candidates && recordCandidates.candidates.length > 0) {
+    console.log(`  [ParsePage] Collapsing ${recordCandidates.candidates.length} record candidate(s) into a single page-level candidate because useRecordSnippets is false`);
+    const mergedFields: Record<string, string> = {};
+    for (const cand of recordCandidates.candidates) {
+      for (const [key, val] of Object.entries(cand.fields)) {
+        if (val && String(val).trim()) {
+          const trimmedVal = String(val).trim();
+          if (mergedFields[key]) {
+            if (!mergedFields[key].includes(trimmedVal)) {
+              mergedFields[key] = mergedFields[key] + '; ' + trimmedVal;
+            }
+          } else {
+            mergedFields[key] = trimmedVal;
+          }
+        }
+      }
+    }
+    recordCandidates.candidates = [{
+      recordType: recordCandidates.candidates[0].recordType || jobRecordType,
+      confidence: Math.max(...recordCandidates.candidates.map((c: any) => c.confidence || 0.7)),
+      fields: mergedFields,
+      sourceRowIndex: -1, // treat as full-page view
+      needsReview: recordCandidates.candidates.some((c: any) => c.needsReview),
+    }];
   }
 
   await writeFile(artifactPath, JSON.stringify(recordCandidates, null, 2));
@@ -1608,11 +1655,30 @@ async function scoreAndRoute(page: PageRow, ocrConfidence: number, qualityScore:
 
 // ── Process a single page through the pipeline ─────────────────────────────
 
-async function processPage(tenantPool: Pool, page: PageRow): Promise<void> {
+async function processPage(tenantPool: Pool, page: PageRow, churchId: number): Promise<void> {
   let splitPaths: { left: string; right: string } | undefined;
   // Pipeline extraction mode: "structured_table" when template-locked extraction succeeds,
   // "record_crop" for all other paths (generic table, marriage ledger, form, etc.)
   let pipelineExtractionMode: 'structured_table' | 'record_crop' = 'record_crop';
+
+  // Load useRecordSnippets setting for this church
+  let useRecordSnippets = true;
+  try {
+    const [settingsRows] = await tenantPool.query(
+      `SELECT settings_json FROM ocr_settings WHERE church_id = ? LIMIT 1`,
+      [churchId]
+    ) as any[];
+    if (settingsRows.length > 0 && settingsRows[0].settings_json) {
+      const json = typeof settingsRows[0].settings_json === 'string'
+        ? JSON.parse(settingsRows[0].settings_json)
+        : settingsRows[0].settings_json;
+      if (json.useRecordSnippets !== undefined) {
+        useRecordSnippets = Boolean(json.useRecordSnippets);
+      }
+    }
+  } catch (dbErr: any) {
+    console.warn(`[ProcessPage] Failed to load ocr_settings for church ${churchId}: ${dbErr.message}`);
+  }
 
   if (page.status === 'queued' || page.status === 'preprocessing') {
     if (!(await updatePageStatus(tenantPool, page.id, 'preprocessing', page.status))) return;
@@ -2392,7 +2458,7 @@ async function processPage(tenantPool: Pool, page: PageRow): Promise<void> {
     if (artifacts.length > 0 && fs.existsSync(artifacts[0].storage_path)) {
       rawText = (await readFile(artifacts[0].storage_path)).toString();
     }
-    await parsePage(tenantPool, page, rawText);
+    await parsePage(tenantPool, page, rawText, churchId);
     console.log(`  Parsed page ${page.id}`);
 
     // LlamaParse shadow/supplement (non-blocking when pipeline mode enabled)
@@ -2412,9 +2478,11 @@ async function processPage(tenantPool: Pool, page: PageRow): Promise<void> {
     }
 
     // Step 3.5: Per-record crop + extract (token-region isolation)
-    // ONLY runs in record_crop mode. Structured table mode uses table rows directly.
+    // ONLY runs in record_crop mode when useRecordSnippets is enabled. Structured table mode uses table rows directly.
     if (pipelineExtractionMode === 'structured_table') {
       console.log(`  [PerRecord] Page ${page.id}: SKIPPED — structured_table mode (template-locked), using table rows as canonical records`);
+    } else if (!useRecordSnippets) {
+      console.log(`  [PerRecord] Page ${page.id}: SKIPPED — useRecordSnippets is disabled for this church`);
     } else {
       try {
         // visionResultJson is loaded from disk inside cropAndExtractRecords
@@ -2645,7 +2713,7 @@ async function processJob(job: JobRow): Promise<void> {
 
   for (const page of pages) {
     try {
-      await processPage(tenantPool, page);
+      await processPage(tenantPool, page, churchId);
       pagesCompleted++;
     } catch (pageError: any) {
       console.error(`  Page ${page.id} failed:`, pageError.message);

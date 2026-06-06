@@ -161,6 +161,7 @@ export interface OcrPreferences {
   deskew: boolean;
   removeNoise: boolean;
   preprocessImages: boolean;
+  useRecordSnippets: boolean;
   documentProcessing: {
     spellingCorrection: string;
     extractAllText: string;

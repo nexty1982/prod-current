@@ -1490,6 +1490,8 @@ const ENGLISH_DEFAULTS = {
   'account.ocr_improve_formatting': 'Improve Formatting',
   'account.ocr_yes': 'Yes',
   'account.ocr_no': 'No',
+  'account.ocr_use_record_snippets': 'Use Record Snippets',
+  'account.ocr_use_record_snippets_desc': 'Split pages into individual record snippets. If disabled, the entire page is processed as one image record.',
   'account.ocr_document_retention': 'Document Retention',
   'account.ocr_retention_desc': 'How long uploaded document images are retained after processing.',
   'account.ocr_delete_after': 'Delete After',

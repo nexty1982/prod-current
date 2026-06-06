@@ -26,6 +26,7 @@ const DEFAULTS = {
   deskew: true,
   removeNoise: true,
   preprocessImages: true,
+  useRecordSnippets: true,
   documentProcessing: {
     spellingCorrection: 'fix',
     extractAllText: 'yes',
@@ -100,6 +101,7 @@ router.get('/', requireAuth, async (req, res) => {
             const json = typeof s.settings_json === 'string' ? JSON.parse(s.settings_json) : s.settings_json;
             if (json.documentProcessing) settings.documentProcessing = json.documentProcessing;
             if (json.documentDeletion) settings.documentDeletion = json.documentDeletion;
+            if (json.useRecordSnippets !== undefined) settings.useRecordSnippets = Boolean(json.useRecordSnippets);
           } catch { /* ignore parse errors */ }
         }
       }
@@ -216,9 +218,9 @@ router.put('/', requireAuth, async (req, res) => {
       params.push(body.preprocessImages ? 1 : 0, body.preprocessImages ? 1 : 0);
     }
 
-    // Handle settings_json (documentProcessing + documentDeletion)
+    // Handle settings_json (documentProcessing + documentDeletion + useRecordSnippets)
     let settingsJsonUpdate = null;
-    if (body.documentProcessing || body.documentDeletion) {
+    if (body.documentProcessing || body.documentDeletion || body.useRecordSnippets !== undefined) {
       // Read current settings_json first
       let current = {};
       try {
@@ -231,6 +233,7 @@ router.put('/', requireAuth, async (req, res) => {
 
       if (body.documentProcessing) current.documentProcessing = body.documentProcessing;
       if (body.documentDeletion) current.documentDeletion = body.documentDeletion;
+      if (body.useRecordSnippets !== undefined) current.useRecordSnippets = Boolean(body.useRecordSnippets);
       settingsJsonUpdate = JSON.stringify(current);
     }
 

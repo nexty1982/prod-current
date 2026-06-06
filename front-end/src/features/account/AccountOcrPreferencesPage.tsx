@@ -61,6 +61,7 @@ interface OcrPreferences {
   deskew: boolean;
   removeNoise: boolean;
   preprocessImages: boolean;
+  useRecordSnippets: boolean;
   documentProcessing: {
     spellingCorrection: string;
     extractAllText: string;
@@ -79,6 +80,7 @@ const DEFAULT_PREFS: OcrPreferences = {
   deskew: true,
   removeNoise: true,
   preprocessImages: true,
+  useRecordSnippets: true,
   documentProcessing: {
     spellingCorrection: 'fix',
     extractAllText: 'yes',
@@ -412,6 +414,24 @@ const AccountOcrPreferencesPage: React.FC = () => {
                   <MenuItem value="no">{t('account.ocr_no')}</MenuItem>
                 </Select>
               </FormControl>
+              <Divider sx={{ my: 1 }} />
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={prefs.useRecordSnippets}
+                    onChange={(e) => updateField('useRecordSnippets', e.target.checked)}
+                    size="small"
+                  />
+                }
+                label={
+                  <Box>
+                    <Typography variant="body2">{t('account.ocr_use_record_snippets')}</Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {t('account.ocr_use_record_snippets_desc')}
+                    </Typography>
+                  </Box>
+                }
+              />
             </Stack>
           </CardContent>
         </Card>
