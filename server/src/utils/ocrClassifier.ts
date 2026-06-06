@@ -78,7 +78,19 @@ function ub(pattern: string): RegExp {
 
 // Weighted keyword patterns: { pattern, weight }
 // weight 4 = highly specific (Greek/Cyrillic), 3 = core type term, 2 = column header, 1 = general
-interface WeightedPattern { pattern: RegExp; weight: number; }
+interface WeightedPattern {
+  pattern: RegExp;
+  weight: number;
+  globalPattern?: RegExp;   // Precompiled global version for matching (set during init)
+  displayName?: string;     // Human-readable name for hit reporting (set during init)
+}
+
+function cleanDisplayName(source: string): string {
+  return source
+    .replace(/\(\?\<!\[\\p\{L\}\\p\{N\}\]\)/g, '')
+    .replace(/\(\?!\[\\p\{L\}\\p\{N\}\]\)/g, '')
+    .replace(/\[.*?\]/g, '?');
+}
 
 const WEIGHTED_KEYWORD_PATTERNS: Record<string, WeightedPattern[]> = {
   baptism: [
@@ -168,9 +180,14 @@ const WEIGHTED_KEYWORD_PATTERNS: Record<string, WeightedPattern[]> = {
 };
 
 // Keep flat KEYWORD_PATTERNS for backward compatibility (used by hit reporting)
+// Also precompile globalPattern + displayName for each weighted pattern
 const KEYWORD_PATTERNS: Record<string, RegExp[]> = {};
 for (const [type, wps] of Object.entries(WEIGHTED_KEYWORD_PATTERNS)) {
   KEYWORD_PATTERNS[type] = wps.map(wp => wp.pattern);
+  for (const wp of wps) {
+    wp.globalPattern = new RegExp(wp.pattern.source, 'giu');
+    wp.displayName = cleanDisplayName(wp.pattern.source);
+  }
 }
 
 const CONFIDENCE_THRESHOLD = 0.3;
@@ -185,17 +202,13 @@ export function classifyRecordType(ocrText: string): ClassifierResult {
   const hits: Record<string, string[]> = { baptism: [], marriage: [], funeral: [] };
 
   for (const [type, weightedPatterns] of Object.entries(WEIGHTED_KEYWORD_PATTERNS)) {
-    for (const { pattern, weight } of weightedPatterns) {
-      const globalPattern = new RegExp(pattern.source, 'giu');
-      const matches = text.match(globalPattern);
+    for (const wp of weightedPatterns) {
+      // Reset lastIndex for global regex reuse
+      wp.globalPattern!.lastIndex = 0;
+      const matches = text.match(wp.globalPattern!);
       if (matches) {
-        scores[type] += matches.length * weight;
-        hits[type].push(
-          pattern.source
-            .replace(/\(\?\<!\[\\p\{L\}\\p\{N\}\]\)/g, '')
-            .replace(/\(\?!\[\\p\{L\}\\p\{N\}\]\)/g, '')
-            .replace(/\[.*?\]/g, '?')
-        );
+        scores[type] += matches.length * wp.weight;
+        hits[type].push(wp.displayName!);
       }
     }
   }
