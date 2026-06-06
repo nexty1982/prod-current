@@ -315,12 +315,67 @@ async function preprocessPage(
         ]
       );
 
-      // ── Step 1A.2: Deskew ──────────────────────────────────────────────
+      // ── Step 1A.1.5: Orientation Detection (90°/180°/270°) ──────────────
       const postBorderInput = borderResult.applied && borderResult.croppedBuffer
         ? borderResult.croppedBuffer
         : imageBuffer;
+      let postOrientationInput = postBorderInput;
+      const manualRotation = page.rotation || 0;
 
-      const deskewResult = await detectAndCorrectSkew(postBorderInput);
+      if (manualRotation !== 0 && [90, 180, 270].includes(manualRotation)) {
+        // Manual rotation takes priority — apply it
+        try {
+          const sharp = require('sharp');
+          postOrientationInput = await sharp(postBorderInput)
+            .rotate(manualRotation)
+            .toBuffer();
+          console.log(
+            `[OCR Preprocess] Job ${page.job_id} page ${page.page_index}: ` +
+            `applied manual rotation ${manualRotation}°`
+          );
+          mergeMetrics(metricsPath, {
+            orientation_source: 'manual',
+            orientation_degrees: manualRotation,
+          });
+        } catch (orientErr: any) {
+          console.warn(
+            `[OCR Preprocess] Job ${page.job_id} page ${page.page_index}: ` +
+            `manual rotation failed: ${orientErr.message}`
+          );
+        }
+      } else {
+        // Try auto-orientation from EXIF
+        try {
+          const { detectAndCorrectOrientation } = require('../ocr/preprocessing/orientation');
+          const orientResult = await detectAndCorrectOrientation(postBorderInput);
+          if (orientResult.applied && orientResult.correctedBuffer) {
+            postOrientationInput = orientResult.correctedBuffer;
+            console.log(
+              `[OCR Preprocess] Job ${page.job_id} page ${page.page_index}: ` +
+              `auto-rotated ${orientResult.detectedDegrees}° (method=${orientResult.method}, conf=${orientResult.confidence.toFixed(3)})`
+            );
+            // Store the detected rotation in the page record
+            await tenantPool.execute(
+              `UPDATE ocr_feeder_pages SET rotation = ? WHERE id = ?`,
+              [orientResult.detectedDegrees, page.id]
+            );
+            mergeMetrics(metricsPath, {
+              orientation_source: 'auto',
+              orientation_degrees: orientResult.detectedDegrees,
+              orientation_confidence: orientResult.confidence,
+              orientation_method: orientResult.method,
+            });
+          }
+        } catch (orientErr: any) {
+          console.warn(
+            `[OCR Preprocess] Job ${page.job_id} page ${page.page_index}: ` +
+            `auto-orientation skipped: ${orientErr.message}`
+          );
+        }
+      }
+
+      // ── Step 1A.2: Deskew ──────────────────────────────────────────────
+      const deskewResult = await detectAndCorrectSkew(postOrientationInput);
 
       // Write deskew_geometry.json (always, atomic)
       const deskewGeometryPath = path.join(pageDir, 'deskew_geometry.json');
@@ -385,7 +440,7 @@ async function preprocessPage(
       // ── Step 1A.3: Ledger ROI crop ────────────────────────────────────
       const postDeskewInput = deskewResult.applied && deskewResult.deskewedBuffer
         ? deskewResult.deskewedBuffer
-        : postBorderInput;
+        : postOrientationInput;
 
       const roiResult = await detectAndCropROI(postDeskewInput);
 
