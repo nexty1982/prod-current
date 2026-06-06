@@ -2209,7 +2209,16 @@ const OcrReviewPage: React.FC = () => {
                     <Tooltip title="Rotate counter-clockwise">
                       <IconButton
                         size="small"
-                        onClick={() => setRotation((r) => (r - 90 + 360) % 360)}
+                        onClick={async () => {
+                          const newRot = (rotation - 90 + 360) % 360;
+                          setRotation(newRot);
+                          const page = jobDetail?.pages?.[0];
+                          if (page?.pageId && churchId && selectedJobId) {
+                            try {
+                              await apiClient.post(`/api/church/${churchId}/ocr/jobs/${selectedJobId}/pages/${page.pageId}/rotate`, { rotation: newRot });
+                            } catch (e) { console.warn('Failed to persist rotation', e); }
+                          }
+                        }}
                         color="primary"
                       >
                         <IconRotate size={18} />
@@ -2218,12 +2227,42 @@ const OcrReviewPage: React.FC = () => {
                     <Tooltip title="Rotate clockwise">
                       <IconButton
                         size="small"
-                        onClick={() => setRotation((r) => (r + 90) % 360)}
+                        onClick={async () => {
+                          const newRot = (rotation + 90) % 360;
+                          setRotation(newRot);
+                          const page = jobDetail?.pages?.[0];
+                          if (page?.pageId && churchId && selectedJobId) {
+                            try {
+                              await apiClient.post(`/api/church/${churchId}/ocr/jobs/${selectedJobId}/pages/${page.pageId}/rotate`, { rotation: newRot });
+                            } catch (e) { console.warn('Failed to persist rotation', e); }
+                          }
+                        }}
                         color="primary"
                       >
                         <IconRotateClockwise size={18} />
                       </IconButton>
                     </Tooltip>
+                    {rotation !== 0 && (
+                      <Tooltip title="Reprocess image with this rotation applied">
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          color="warning"
+                          sx={{ textTransform: 'none', ml: 0.5 }}
+                          onClick={async () => {
+                            const page = jobDetail?.pages?.[0];
+                            if (page?.pageId && churchId && selectedJobId) {
+                              try {
+                                await apiClient.post(`/api/church/${churchId}/ocr/jobs/${selectedJobId}/pages/${page.pageId}/rotate`, { rotation, reprocess: true });
+                                setMapHint(`Reprocessing job with ${rotation}° rotation applied.`);
+                              } catch (e) { console.warn('Failed to trigger reprocessing', e); }
+                            }
+                          }}
+                        >
+                          Reprocess ({rotation}°)
+                        </Button>
+                      </Tooltip>
+                    )}
                     {reviewCropBbox && (
                       <Button
                         size="small"

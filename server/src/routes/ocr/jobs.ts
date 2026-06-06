@@ -1069,6 +1069,56 @@ function createRouters(upload: any) {
   });
 
   // -----------------------------------------------------------------------
+  // 6a. POST /jobs/:jobId/pages/:pageId/rotate — Persist manual rotation
+  // -----------------------------------------------------------------------
+  churchJobsRouter.post('/jobs/:jobId/pages/:pageId/rotate', async (req: any, res: any) => {
+    try {
+      const churchId = parseInt(req.params.churchId);
+      const jobId = parseInt(req.params.jobId);
+      const pageId = parseInt(req.params.pageId);
+      const { rotation, reprocess } = req.body || {};
+
+      if (rotation === undefined || ![0, 90, 180, 270].includes(rotation)) {
+        return res.status(400).json({ error: 'rotation must be 0, 90, 180, or 270' });
+      }
+
+      // Verify job belongs to this church
+      const [jobs]: any = await promisePool.query(
+        `SELECT id FROM ocr_jobs WHERE id = ? AND church_id = ?`, [jobId, churchId]
+      );
+      if (!jobs.length) {
+        return res.status(404).json({ error: 'Job not found' });
+      }
+
+      // Get tenant pool for page update
+      const { getTenantPool } = require('../../config/db');
+      const tenantPool = getTenantPool(churchId);
+
+      // Update page rotation
+      await tenantPool.query(
+        `UPDATE ocr_feeder_pages SET rotation = ? WHERE id = ? AND ocr_job_id = ?`,
+        [rotation, pageId, jobId]
+      );
+
+      console.log(`[OCR Rotation] Job ${jobId} page ${pageId}: rotation set to ${rotation}°`);
+
+      // If reprocess requested, reset job status to trigger re-extraction
+      if (reprocess) {
+        await promisePool.query(
+          `UPDATE ocr_jobs SET status = 'pending', agent_status = 'pending', current_stage = 'manual_rotation_reprocess' WHERE id = ? AND church_id = ?`,
+          [jobId, churchId]
+        );
+        console.log(`[OCR Rotation] Job ${jobId}: reprocessing triggered after manual rotation`);
+      }
+
+      res.json({ ok: true, rotation, reprocessing: !!reprocess, message: `Rotation set to ${rotation}°` });
+    } catch (error: any) {
+      console.error('[OCR Rotation] Error:', error);
+      res.status(500).json({ error: 'Failed to update rotation', message: error.message });
+    }
+  });
+
+  // -----------------------------------------------------------------------
   // 6b. GET /jobs/:jobId/history — Job pipeline stage history
   // -----------------------------------------------------------------------
   churchJobsRouter.get('/jobs/:jobId/history', async (req: any, res: any) => {
