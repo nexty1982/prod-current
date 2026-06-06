@@ -597,6 +597,117 @@ function cleanChildName(name: string, fatherName?: string, motherName?: string):
   return n.replace(/\s{2,}/g, ' ').trim();
 }
 
+// ── Cycle 3: Shared field-level normalization helpers ─────────────────────────
+
+/** Standardize date strings: strip leading zeros from month/day, normalize separators. */
+function normalizeDate(dateStr: string): string {
+  if (!dateStr) return '';
+  let s = dateStr.trim();
+  // Already cleaned via cleanDateString for trailing digit issues; now strip leading zeros
+  // Match M/D/YY or M-D-YYYY patterns and strip leading zeros from month and day
+  s = s.replace(/\b0+(\d)(?=[\/\.\-\s])/g, '$1'); // 01/02/2020 → 1/2/2020
+  return s;
+}
+
+/** Remove trailing commas, periods, parenthetical annotations, numeric prefixes from names. */
+function cleanNameField(name: string): string {
+  if (!name) return '';
+  let n = name.trim();
+  // Remove numeric prefixes that leaked from record numbers (e.g. "123 John Smith")
+  n = n.replace(/^\d+[\.\)\s]+\s*/, '');
+  // Remove parenthetical annotations (e.g. "John Smith (see also #5)")
+  n = n.replace(/\s*\([^)]*\)\s*/g, ' ');
+  // Remove trailing commas, periods, semicolons
+  n = n.replace(/[,\.;:]+\s*$/, '');
+  // Collapse whitespace
+  n = n.replace(/\s{2,}/g, ' ').trim();
+  return n;
+}
+
+/** Extract just the number from a record_number field. "No. 42 (baptism)" → "42" */
+function extractRecordNumber(raw: string): string {
+  if (!raw) return '';
+  const s = raw.trim();
+  // Try to find a standalone number, possibly prefixed by No., #, etc.
+  const m = s.match(/(?:No\.?\s*|#\s*|Record\s*)?\s*(\d+)/i);
+  return m ? m[1] : s;
+}
+
+/** Validate and clean age_at_death: must be integer 0-150. Strips units like 'years', 'yrs', 'y.o.' */
+function normalizeAge(ageStr: string): string {
+  if (!ageStr) return '';
+  let s = ageStr.trim();
+  // Strip common suffixes: "88 years", "88 yrs", "88 y.o.", "88yo", "88 years old"
+  s = s.replace(/\s*(years?\s*old|years?|yrs?\.?|y\.?o\.?|y\s*\.\s*o\s*\.?)\s*$/i, '').trim();
+  // Strip common prefixes: "age 88", "Age: 88"
+  s = s.replace(/^\s*age[:\s]+/i, '').trim();
+  // Extract the first number
+  const m = s.match(/^(\d{1,3})/);
+  if (!m) return '';
+  const age = parseInt(m[1], 10);
+  if (age < 0 || age > 150) return '';
+  return String(age);
+}
+
+/** If cause_of_death contains age (e.g. '88 hypertension'), split into { age, cause }. */
+function separateAgeFromCause(
+  fields: Record<string, string>
+): void {
+  // Case 1: age_at_death contains text beyond a number (e.g. "88 years")
+  const ageRaw = fields.age_at_death || '';
+  if (ageRaw) {
+    const cleaned = normalizeAge(ageRaw);
+    if (cleaned) {
+      fields.age_at_death = cleaned;
+    }
+  }
+
+  // Case 2: cause_of_death starts with a number (e.g. "88 hypertension")
+  const cause = fields.cause_of_death || '';
+  if (cause) {
+    const m = cause.match(/^\s*(\d{1,3})\s+(.+)$/s);
+    if (m) {
+      const potentialAge = parseInt(m[1], 10);
+      if (potentialAge >= 0 && potentialAge <= 150) {
+        if (!fields.age_at_death) {
+          fields.age_at_death = String(potentialAge);
+        }
+        fields.cause_of_death = m[2].trim();
+      }
+    }
+  }
+
+  // Case 3: age_at_death contains cause text (e.g. "88 hypertension")
+  if (ageRaw && !fields.cause_of_death) {
+    const m = ageRaw.match(/^\s*(\d{1,3})\s+([A-Za-z].+)$/s);
+    if (m) {
+      const potentialAge = parseInt(m[1], 10);
+      if (potentialAge >= 0 && potentialAge <= 150) {
+        fields.age_at_death = String(potentialAge);
+        fields.cause_of_death = m[2].trim();
+      }
+    }
+  }
+}
+
+/** Apply shared normalizations to all date fields in a record. */
+function normalizeDateFields(fields: Record<string, string>, dateKeys: string[]): void {
+  for (const key of dateKeys) {
+    if (fields[key]) {
+      fields[key] = normalizeDate(cleanDateString(fields[key]));
+    }
+  }
+}
+
+/** Apply shared normalizations to all name fields in a record. */
+function normalizeNameFields(fields: Record<string, string>, nameKeys: string[]): void {
+  for (const key of nameKeys) {
+    if (fields[key]) {
+      fields[key] = cleanNameField(fields[key]);
+    }
+  }
+}
+
 function applyBaptismRowContext(
   fields: Record<string, string>,
   rowContext: ReturnType<typeof buildRecordRowContext>,
@@ -673,6 +784,15 @@ function normalizeBaptismRecord(
     if (out.child_name) out.child_name = cleanChildName(out.child_name, out.father_name, out.mother_name);
     normalizeBaptismDates(out);
   }
+
+  // Cycle 3: Apply shared field normalizations
+  normalizeDateFields(out, ['date_of_birth', 'date_of_baptism']);
+  normalizeNameFields(out, [
+    'child_name', 'child_first_name', 'child_last_name',
+    'father_name', 'mother_name', 'godparents', 'performed_by',
+  ]);
+  if (out.record_number) out.record_number = extractRecordNumber(out.record_number);
+
   return out;
 }
 
@@ -697,6 +817,78 @@ function normalizeFuneralRecord(
 ): Record<string, string> {
   const out = { ...fields };
   normalizeFuneralDates(out);
+
+  // Cycle 3: Apply shared field normalizations
+  normalizeDateFields(out, ['date_of_death', 'date_of_funeral', 'date_of_burial']);
+  normalizeNameFields(out, [
+    'deceased_name', 'deceased_first_name', 'deceased_last_name', 'officiant',
+  ]);
+  if (out.record_number) out.record_number = extractRecordNumber(out.record_number);
+
+  // Age validation and cause-of-death separation
+  separateAgeFromCause(out);
+  if (out.age_at_death) out.age_at_death = normalizeAge(out.age_at_death);
+
+  return out;
+}
+
+/** Normalize marriage records: split full names, clean witness names, normalize license numbers. */
+function normalizeMarriageRecord(
+  fields: Record<string, string>,
+  _rowContext?: ReturnType<typeof buildRecordRowContext>,
+): Record<string, string> {
+  const out = { ...fields };
+
+  // ── Split groom full name into first/last if only groom_name is provided ──
+  if (out.groom_name && !out.groom_first_name && !out.groom_last_name) {
+    const cleaned = cleanNameField(out.groom_name);
+    const parts = cleaned.split(/\s+/).filter(Boolean);
+    if (parts.length >= 2) {
+      out.groom_last_name = parts[parts.length - 1];
+      out.groom_first_name = parts.slice(0, -1).join(' ');
+    } else if (parts.length === 1) {
+      out.groom_first_name = parts[0];
+    }
+  }
+
+  // ── Split bride full name into first/last if only bride_name is provided ──
+  if (out.bride_name && !out.bride_first_name && !out.bride_last_name) {
+    const cleaned = cleanNameField(out.bride_name);
+    const parts = cleaned.split(/\s+/).filter(Boolean);
+    if (parts.length >= 2) {
+      out.bride_last_name = parts[parts.length - 1];
+      out.bride_first_name = parts.slice(0, -1).join(' ');
+    } else if (parts.length === 1) {
+      out.bride_first_name = parts[0];
+    }
+  }
+
+  // ── Apply shared field normalizations ──
+  normalizeDateFields(out, ['date_of_marriage']);
+  normalizeNameFields(out, [
+    'groom_name', 'groom_first_name', 'groom_last_name', 'groom_parents',
+    'bride_name', 'bride_first_name', 'bride_last_name', 'bride_parents',
+    'best_man', 'maid_of_honor', 'officiant',
+  ]);
+
+  // ── Clean witness names (may be semicolon or comma-separated list) ──
+  if (out.witnesses) {
+    const parts = out.witnesses.split(/[;,]/).map((w) => cleanNameField(w)).filter(Boolean);
+    out.witnesses = parts.join(', ');
+  }
+
+  // ── Normalize marriage license number ──
+  if (out.marriage_license) {
+    let lic = out.marriage_license.trim();
+    // Remove common prefixes: "License No.", "#", "Lic."
+    lic = lic.replace(/^\s*(License|Lic\.?|Marriage\s+License)\s*(No\.?|#|Number)?\s*[:\s]*/i, '').trim();
+    // Remove trailing punctuation
+    lic = lic.replace(/[,\.;]+\s*$/, '').trim();
+    out.marriage_license = lic;
+  }
+
+  if (out.record_number) out.record_number = extractRecordNumber(out.record_number);
+
   return out;
 }
 
@@ -890,6 +1082,8 @@ async function extractSingleRecordVision(
     normalized = normalizeBaptismRecord(fields, rowContext);
   } else if (recordType === 'funeral') {
     normalized = normalizeFuneralRecord(fields, rowContext);
+  } else if (recordType === 'marriage') {
+    normalized = normalizeMarriageRecord(fields, rowContext);
   }
 
   return {
@@ -947,6 +1141,8 @@ async function extractRecordsWithVision(
           fallback = normalizeBaptismRecord(fallback, rowContext);
         } else if (draft.record_type === 'funeral') {
           fallback = normalizeFuneralRecord(fallback, rowContext);
+        } else if (draft.record_type === 'marriage') {
+          fallback = normalizeMarriageRecord(fallback, rowContext);
         }
         records.push(fallback);
         confidences.push(0.4);
@@ -1272,6 +1468,8 @@ async function extractSingleRecordGeminiVision(
     normalized = normalizeBaptismRecord(fields, rowContext);
   } else if (recordType === 'funeral') {
     normalized = normalizeFuneralRecord(fields, rowContext);
+  } else if (recordType === 'marriage') {
+    normalized = normalizeMarriageRecord(fields, rowContext);
   }
 
   return {
@@ -1327,6 +1525,8 @@ async function extractRecordsWithGeminiVision(
           fallback = normalizeBaptismRecord(fallback, rowContext);
         } else if (draft.record_type === 'funeral') {
           fallback = normalizeFuneralRecord(fallback, rowContext);
+        } else if (draft.record_type === 'marriage') {
+          fallback = normalizeMarriageRecord(fallback, rowContext);
         }
         records.push(fallback);
         confidences.push(0.4);
@@ -1590,6 +1790,10 @@ export async function extractAgent2FieldsForJob(
       const fields = { ...records[idx] };
       if (record_type === 'baptism') {
         normalizeBaptismRecord(fields);
+      } else if (record_type === 'funeral') {
+        normalizeFuneralRecord(fields);
+      } else if (record_type === 'marriage') {
+        normalizeMarriageRecord(fields);
       }
 
       return {
