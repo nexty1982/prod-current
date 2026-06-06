@@ -1096,7 +1096,7 @@ function createRouters(upload: any) {
 
       // Update page rotation
       await tenantPool.query(
-        `UPDATE ocr_feeder_pages SET rotation = ? WHERE id = ? AND ocr_job_id = ?`,
+        `UPDATE ocr_feeder_pages SET rotation = ? WHERE id = ? AND job_id = ?`,
         [rotation, pageId, jobId]
       );
 
