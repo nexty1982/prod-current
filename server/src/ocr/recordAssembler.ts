@@ -936,16 +936,24 @@ export function assembleRecords(structuredTableOutput: any): AssemblyResult {
         }
 
         if (newGroupStartIdx < ri) {
-          console.log(`  [RecordAssembler]   → shifting new group start back from row ${ri} to ${newGroupStartIdx} (aligning name)`);
-          
+          const nameRowsBefore = currentGroup.rows.filter(r => !!getNormalizedCells(r)[config.nameColumn]).length;
           const stolenCount = ri - newGroupStartIdx;
           const stolenRows = currentGroup.rows.slice(currentGroup.rows.length - stolenCount);
-          currentGroup.rows = currentGroup.rows.slice(0, currentGroup.rows.length - stolenCount);
-          if (currentGroup.rows.length > 0) {
-            currentGroup.endIndex = currentGroup.rows[currentGroup.rows.length - 1].row_index;
+          const nameRowsStolen = stolenRows.filter(r => !!getNormalizedCells(r)[config.nameColumn]).length;
+
+          if (nameRowsBefore > 0 && nameRowsBefore === nameRowsStolen) {
+            console.log(`  [RecordAssembler]   → shift cancelled: would leave preceding group with no name rows`);
             groups.push(currentGroup);
+            currentGroup = { rows: [row], startIndex: row.row_index, endIndex: row.row_index };
+          } else {
+            console.log(`  [RecordAssembler]   → shifting new group start back from row ${ri} to ${newGroupStartIdx} (aligning name)`);
+            currentGroup.rows = currentGroup.rows.slice(0, currentGroup.rows.length - stolenCount);
+            if (currentGroup.rows.length > 0) {
+              currentGroup.endIndex = currentGroup.rows[currentGroup.rows.length - 1].row_index;
+              groups.push(currentGroup);
+            }
+            currentGroup = { rows: [...stolenRows, row], startIndex: stolenRows[0].row_index, endIndex: row.row_index };
           }
-          currentGroup = { rows: [...stolenRows, row], startIndex: stolenRows[0].row_index, endIndex: row.row_index };
         } else {
           groups.push(currentGroup);
           currentGroup = { rows: [row], startIndex: row.row_index, endIndex: row.row_index };
