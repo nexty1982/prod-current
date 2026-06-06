@@ -13,29 +13,38 @@ import {
   TableRows as TableRowsIcon,
 } from '@mui/icons-material';
 import { alpha, Box, Button, Stack, useTheme } from '@mui/material';
-import React from 'react';
+import { useAuth } from '@/context/AuthContext';
+import React, { useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 interface NavItem {
   label: string;
   path: string;
   icon: React.ReactElement;
+  /** When true, only super_admin sees this link (matches backend requireRole guards). */
+  superAdminOnly?: boolean;
 }
 
 const NAV_ITEMS: NavItem[] = [
   { label: 'Hub',              path: '/devel/ocr-studio',                 icon: <HomeIcon fontSize="small" /> },
   { label: 'Upload',           path: '/devel/ocr-studio/upload',          icon: <UploadIcon fontSize="small" /> },
-  { label: 'Job History',      path: '/devel/ocr-studio/jobs',            icon: <HistoryIcon fontSize="small" /> },
+  { label: 'Job History',      path: '/devel/ocr-studio/jobs',            icon: <HistoryIcon fontSize="small" />, superAdminOnly: true },
   { label: 'Record Headers',   path: '/devel/ocr-studio/record-fields',   icon: <TableRowsIcon fontSize="small" /> },
   { label: 'Settings',         path: '/devel/ocr-studio/settings',        icon: <SettingsIcon fontSize="small" /> },
-  { label: 'Table Extractor',  path: '/devel/ocr-studio/table-extractor', icon: <AssessmentIcon fontSize="small" /> },
-  { label: 'Layout Templates', path: '/devel/ocr-studio/layout-templates', icon: <ViewColumnIcon fontSize="small" /> },
+  { label: 'Table Extractor',  path: '/devel/ocr-studio/table-extractor', icon: <AssessmentIcon fontSize="small" />, superAdminOnly: true },
+  { label: 'Layout Templates', path: '/devel/ocr-studio/layout-templates', icon: <ViewColumnIcon fontSize="small" />, superAdminOnly: true },
 ];
 
 const OcrStudioNav: React.FC = () => {
   const theme = useTheme();
   const navigate = useNavigate();
   const { pathname } = useLocation();
+  const { isSuperAdmin } = useAuth();
+
+  const visibleItems = useMemo(
+    () => NAV_ITEMS.filter((item) => !item.superAdminOnly || isSuperAdmin()),
+    [isSuperAdmin],
+  );
 
   return (
     <Box
@@ -49,7 +58,7 @@ const OcrStudioNav: React.FC = () => {
       }}
     >
       <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap>
-        {NAV_ITEMS.map((item) => {
+        {visibleItems.map((item) => {
           const isActive = pathname === item.path;
           return (
             <Button

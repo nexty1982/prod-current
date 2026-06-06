@@ -1,7 +1,7 @@
 /**
  * OCR Operations Console — Super Admin OCR Ops Dashboard
  *
- * Route:        /devel/ocr-activity-monitor
+ * Route:        /devel/ocr-studio/jobs  (legacy: /devel/ocr-activity-monitor)
  * Component:    front-end/src/features/admin/OcrActivityMonitor.tsx
  *
  * Backend API (all super_admin protected):

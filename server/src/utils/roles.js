@@ -251,25 +251,52 @@ const canPerformSacraments = (user) => hasRole(user, 'priest');
 const canAssistSacraments = (user) => hasRole(user, 'deacon');
 
 /**
+ * Resolve authenticated user from session, req.user, or Bearer JWT.
+ * Matches requireAuth.js so OIDC/JWT logins work on requireRole-protected routes.
+ */
+function resolveRequestUser(req) {
+  if (req.session?.user) return req.session.user;
+  if (req.user?.id) return req.user;
+
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    try {
+      const jwt = require('jsonwebtoken');
+      const JWT_ACCESS_SECRET = process.env.JWT_ACCESS_SECRET || 'change_me_access_256bit';
+      const decoded = jwt.verify(authHeader.substring(7), JWT_ACCESS_SECRET);
+      return {
+        id: decoded.userId,
+        email: decoded.email,
+        role: decoded.role,
+        church_id: decoded.churchId ?? decoded.church_id,
+      };
+    } catch {
+      /* invalid token */
+    }
+  }
+  return null;
+}
+
+/**
  * Express middleware factory for role-based access control
  * @param {string|string[]} requiredRoles - Required role(s) for access
  * @returns {Function} - Express middleware function
  */
 function requireRole(requiredRoles) {
   return (req, res, next) => {
-    console.log('🔄 Role check - User role:', req.session?.user?.role);
+    const user = resolveRequestUser(req);
+    console.log('🔄 Role check - User role:', user?.role);
     console.log('🔄 Role check - Required roles:', requiredRoles);
-    
-    // First check if user is authenticated
-    if (!req.session || !req.session.user) {
-      console.log('❌ No valid session found for role check');
-      return res.status(401).json({ 
+
+    if (!user) {
+      console.log('❌ No valid session or JWT found for role check');
+      return res.status(401).json({
         error: 'Authentication required',
         code: 'NO_SESSION'
       });
     }
 
-    const user = req.session.user;
+    if (!req.user) req.user = user;
     
     // Check if user's role meets requirements
     const hasRequiredRole = Array.isArray(requiredRoles) 

@@ -50,4 +50,5 @@ export const develRoutes = [
   // Legacy OCR routes → canonical OCR Studio paths
   redirectRoute('/devel/enhanced-ocr-uploader', '/devel/ocr-studio/upload'),
   redirectRoute('/devel/om-ocr-studio', '/devel/ocr-studio'),
+  redirectRoute('/devel/ocr-activity-monitor', '/devel/ocr-studio/jobs'),
 ];

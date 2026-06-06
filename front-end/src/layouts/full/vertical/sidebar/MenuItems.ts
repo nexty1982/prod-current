@@ -180,9 +180,9 @@ const Menuitems: MenuitemsType[] = [
       },
       {
         id: uniqueId(),
-        title: 'Activity Monitor',
-        icon: IconActivity,
-        href: '/devel/ocr-activity-monitor',
+        title: 'Record Headers',
+        icon: IconLayout,
+        href: '/devel/ocr-studio/record-fields',
       },
       {
         id: uniqueId(),

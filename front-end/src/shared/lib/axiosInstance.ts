@@ -40,6 +40,13 @@ class ApiClient {
           config.url = `/api${config.url}`;
         }
 
+        // OIDC/JWT login stores access_token in localStorage — attach for requireRole routes
+        const authToken = localStorage.getItem('access_token');
+        if (authToken && !config.headers?.Authorization) {
+          config.headers = config.headers || {};
+          config.headers.Authorization = `Bearer ${authToken}`;
+        }
+
         // When sending FormData, remove Content-Type so the browser
         // sets multipart/form-data with the correct boundary automatically
         if (config.data instanceof FormData) {
