@@ -51,9 +51,8 @@ const verifyRecaptchaToken = async (token, ip) => {
   }
   
   const secret = process.env.RECAPTCHA_SECRET_KEY;
-  const isProd = process.env.NODE_ENV === 'production';
-  if (!isProd && !secret && !token) {
-    console.log('[RECAPTCHA] Bypassing in non-production since no key is set and no token provided');
+  if (!secret && !token) {
+    console.log('[RECAPTCHA] Bypassing verification since no secret key is set and no token provided');
     return true;
   }
 
