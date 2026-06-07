@@ -26,7 +26,6 @@ import {
     IconCheck,
     IconChevronDown,
     IconChevronUp,
-    IconDatabase,
     IconLoader2,
     IconLock,
     IconRefresh,
@@ -129,19 +128,6 @@ const PIPELINE_STAGES: StageConfig[] = [
       'Flag low-confidence fields for human review',
       'Cross-reference against existing records',
       'Validation rules for dates and name formats',
-    ],
-  },
-  {
-    key: 'committing',
-    icon: IconDatabase,
-    title: 'TENANT DATABASE COMMIT',
-    bullets: ['Insert into Baptism', 'Marriage', 'Funeral Tables'],
-    details: [
-      'Insert validated records into church database',
-      'Link to source image for provenance',
-      'Generate audit trail entries',
-      'Update record counts and statistics',
-      'Notify church admin of new records',
     ],
   },
 ];
@@ -291,14 +277,6 @@ const OcrPipelineOverview: React.FC<OcrPipelineOverviewProps> = ({
               label={`${totalCounts.failed} failed`}
               size="small"
               sx={{ bgcolor: alpha(theme.palette.error.main, 0.12), color: theme.palette.error.main }}
-            />
-          )}
-          {totalCounts.completed > 0 && (
-            <Chip
-              icon={<IconCheck size={14} />}
-              label={`${totalCounts.completed} completed`}
-              size="small"
-              sx={{ bgcolor: alpha(theme.palette.success.main, 0.12), color: theme.palette.success.main }}
             />
           )}
         </Stack>
