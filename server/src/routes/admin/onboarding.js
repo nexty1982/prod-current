@@ -217,12 +217,13 @@ router.post('/:onboarding_request_id/actions/:action', async (req, res) => {
     const id = req.params.onboarding_request_id;
     const notes = req.body?.notes;
     let request;
+    const adminOverride = true;
     if (action.type === 'status') {
-      request = await onboarding.updateStatus(id, action.value, req, notes);
+      request = await onboarding.updateStatus(id, action.value, req, notes, { adminOverride });
     } else if (action.type === 'payment') {
-      request = await onboarding.updatePayment(id, action.value, req, notes);
+      request = await onboarding.updatePayment(id, action.value, req, notes, { adminOverride });
     } else {
-      request = await onboarding.updateProvisioning(id, action.value, req, notes);
+      request = await onboarding.updateProvisioning(id, action.value, req, notes, { adminOverride });
     }
     res.json({ success: true, request });
   } catch (err) {

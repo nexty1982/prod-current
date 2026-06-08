@@ -9,8 +9,10 @@ import {
   Box,
   Button,
   Chip,
+  Alert,
   CircularProgress,
   Paper,
+  Snackbar,
   Stack,
   Table,
   TableBody,
@@ -112,6 +114,7 @@ export const OnboardingRequestDetailPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [notes, setNotes] = useState('');
   const [busy, setBusy] = useState('');
+  const [toast, setToast] = useState<{ severity: 'success' | 'error'; message: string } | null>(null);
 
   const load = useCallback(async () => {
     if (!id) return;
@@ -127,14 +130,17 @@ export const OnboardingRequestDetailPage: React.FC = () => {
 
   useEffect(() => { load(); }, [load]);
 
-  async function action(path: string, method = 'POST') {
+  async function action(path: string, method = 'POST', confirmMessage?: string) {
+    if (confirmMessage && !window.confirm(confirmMessage)) return;
     setBusy(path);
     try {
       if (method === 'POST') await apiClient.post(`/api/admin/onboarding/${id}${path}`);
       else if (method === 'PATCH') await apiClient.patch(`/api/admin/onboarding/${id}${path}`, {});
       await load();
+      setToast({ severity: 'success', message: 'Action completed successfully.' });
     } catch (e: any) {
-      alert(e?.response?.data?.message || e.message || 'Action failed');
+      const message = e?.response?.data?.message || e?.message || 'Action failed';
+      setToast({ severity: 'error', message });
     } finally {
       setBusy('');
     }
@@ -147,6 +153,7 @@ export const OnboardingRequestDetailPage: React.FC = () => {
   const req = data.request;
   const progress = data.progress || [];
   const payload = req.submitted_payload_json || {};
+  const isTerminal = req.status === 'rejected' || req.status === 'cancelled';
 
   return (
     <PageContainer title={req.parish_name} description={req.onboarding_request_id}>
@@ -196,23 +203,26 @@ export const OnboardingRequestDetailPage: React.FC = () => {
         <Paper sx={{ p: 2, flex: 1 }}>
           <Typography variant="h6" gutterBottom>Actions</Typography>
           <Stack spacing={1}>
-            <Button disabled={!!busy} size="small" variant="outlined" onClick={() => action('/actions/mark-reviewing')}>Mark reviewing</Button>
-            <Button disabled={!!busy} size="small" variant="outlined" onClick={() => action('/actions/payment-pending')}>Move to payment pending</Button>
-            <Button disabled={!!busy} size="small" variant="outlined" onClick={() => action('/actions/invoice-sent')}>Mark invoice sent</Button>
-            <Button disabled={!!busy} size="small" variant="outlined" onClick={() => action('/actions/payment-received')}>Mark payment received</Button>
-            <Button disabled={!!busy} size="small" variant="outlined" onClick={() => action('/actions/payment-waived')}>Mark payment waived</Button>
-            <Button disabled={!!busy} size="small" variant="contained" sx={{ bgcolor: NAVY }} onClick={() => action('/actions/queue-provisioning')}>Queue provisioning</Button>
-            <Button disabled={!!busy} size="small" variant="contained" color="secondary" onClick={() => action('/create-temporary-admin')}>Create temporary admin</Button>
-            <Button disabled={!!busy} size="small" variant="outlined" onClick={() => action('/resend-admin-instructions')}>Resend login instructions</Button>
-            <Button disabled={!!busy} size="small" color="error" variant="outlined" onClick={() => action('/actions/reject')}>Reject</Button>
-            <Button disabled={!!busy} size="small" color="warning" variant="outlined" onClick={() => action('/actions/cancel')}>Cancel</Button>
+            <Button disabled={!!busy || isTerminal} size="small" variant="outlined" onClick={() => action('/actions/mark-reviewing')}>Mark reviewing</Button>
+            <Button disabled={!!busy || isTerminal} size="small" variant="outlined" onClick={() => action('/actions/payment-pending')}>Move to payment pending</Button>
+            <Button disabled={!!busy || isTerminal} size="small" variant="outlined" onClick={() => action('/actions/invoice-sent')}>Mark invoice sent</Button>
+            <Button disabled={!!busy || isTerminal} size="small" variant="outlined" onClick={() => action('/actions/payment-received')}>Mark payment received</Button>
+            <Button disabled={!!busy || isTerminal} size="small" variant="outlined" onClick={() => action('/actions/payment-waived')}>Mark payment waived</Button>
+            <Button disabled={!!busy || isTerminal} size="small" variant="contained" sx={{ bgcolor: NAVY }} onClick={() => action('/actions/queue-provisioning')}>Queue provisioning</Button>
+            <Button disabled={!!busy || isTerminal} size="small" variant="contained" color="secondary" onClick={() => action('/create-temporary-admin')}>Create temporary admin</Button>
+            <Button disabled={!!busy || isTerminal} size="small" variant="outlined" onClick={() => action('/resend-admin-instructions')}>Resend login instructions</Button>
+            <Button disabled={!!busy || isTerminal} size="small" color="error" variant="outlined" onClick={() => action('/actions/reject', 'POST', 'Reject this enrollment request?')}>Reject</Button>
+            <Button disabled={!!busy || isTerminal} size="small" color="warning" variant="outlined" onClick={() => action('/actions/cancel', 'POST', 'Cancel this enrollment request?')}>Cancel</Button>
           </Stack>
           <TextField multiline minRows={3} fullWidth label="Admin notes" value={notes} onChange={(e) => setNotes(e.target.value)} sx={{ mt: 2 }} />
-          <Button sx={{ mt: 1 }} size="small" disabled={!!busy} onClick={async () => {
+          <Button sx={{ mt: 1 }} size="small" disabled={!!busy || isTerminal} onClick={async () => {
             setBusy('notes');
             try {
               await apiClient.patch(`/api/admin/onboarding/${id}/notes`, { notes });
               await load();
+              setToast({ severity: 'success', message: 'Notes saved.' });
+            } catch (e: any) {
+              setToast({ severity: 'error', message: e?.message || 'Failed to save notes' });
             } finally { setBusy(''); }
           }}>Save notes</Button>
         </Paper>
@@ -228,6 +238,19 @@ export const OnboardingRequestDetailPage: React.FC = () => {
           </Box>
         ))}
       </Paper>
+
+      <Snackbar
+        open={!!toast}
+        autoHideDuration={6000}
+        onClose={() => setToast(null)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        {toast ? (
+          <Alert severity={toast.severity} onClose={() => setToast(null)} sx={{ width: '100%' }}>
+            {toast.message}
+          </Alert>
+        ) : undefined}
+      </Snackbar>
     </PageContainer>
   );
 };

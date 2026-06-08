@@ -271,7 +271,8 @@ function assertTransition(map, current, next, label) {
   }
 }
 
-async function updateStatus(onboardingRequestId, newStatus, req, notes) {
+async function updateStatus(onboardingRequestId, newStatus, req, notes, options = {}) {
+  const { adminOverride = false } = options;
   const pool = getAppPool();
   const row = await getByPublicId(onboardingRequestId);
   if (!row) throw new Error('Onboarding request not found');
@@ -281,7 +282,10 @@ async function updateStatus(onboardingRequestId, newStatus, req, notes) {
   if (newStatus === 'active' && !row.table_configuration_completed) {
     throw new Error('Cannot activate before table configuration is complete');
   }
-  assertTransition(STATUS_TRANSITIONS, row.status, newStatus, 'status');
+  const isTerminalDecision = ['rejected', 'cancelled'].includes(newStatus);
+  if (!isTerminalDecision && !adminOverride) {
+    assertTransition(STATUS_TRANSITIONS, row.status, newStatus, 'status');
+  }
 
   const { actorUserId, actorRole } = getActor(req);
   await pool.query(
@@ -298,14 +302,17 @@ async function updateStatus(onboardingRequestId, newStatus, req, notes) {
   return getByPublicId(onboardingRequestId);
 }
 
-async function updatePayment(onboardingRequestId, newPaymentStatus, req, notes) {
+async function updatePayment(onboardingRequestId, newPaymentStatus, req, notes, options = {}) {
+  const { adminOverride = false } = options;
   const pool = getAppPool();
   const row = await getByPublicId(onboardingRequestId);
   if (!row) throw new Error('Onboarding request not found');
   if (['rejected', 'cancelled'].includes(row.status)) {
     throw new Error('Cannot update payment on a rejected or cancelled request');
   }
-  assertTransition(PAYMENT_TRANSITIONS, row.payment_status, newPaymentStatus, 'payment');
+  if (!adminOverride) {
+    assertTransition(PAYMENT_TRANSITIONS, row.payment_status, newPaymentStatus, 'payment');
+  }
 
   const { actorUserId, actorRole } = getActor(req);
   let statusUpdate = null;
@@ -346,11 +353,17 @@ async function updatePayment(onboardingRequestId, newPaymentStatus, req, notes) 
   return getByPublicId(onboardingRequestId);
 }
 
-async function updateProvisioning(onboardingRequestId, newProvStatus, req, notes) {
+async function updateProvisioning(onboardingRequestId, newProvStatus, req, notes, options = {}) {
+  const { adminOverride = false } = options;
   const pool = getAppPool();
   const row = await getByPublicId(onboardingRequestId);
   if (!row) throw new Error('Onboarding request not found');
-  assertTransition(PROVISIONING_TRANSITIONS, row.provisioning_status, newProvStatus, 'provisioning');
+  if (['rejected', 'cancelled'].includes(row.status)) {
+    throw new Error('Cannot update provisioning on a rejected or cancelled request');
+  }
+  if (!adminOverride) {
+    assertTransition(PROVISIONING_TRANSITIONS, row.provisioning_status, newProvStatus, 'provisioning');
+  }
 
   const { actorUserId, actorRole } = getActor(req);
   let statusUpdate = null;
