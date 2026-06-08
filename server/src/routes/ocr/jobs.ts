@@ -78,6 +78,29 @@ function createRouters(upload: any) {
         console.log(`[OCR Jobs GET] Bundle check skipped (non-blocking):`, bundleError.message);
       }
 
+      // Attach feeder last_error for failed jobs (e.g. Vision API billing)
+      const feederErrorByJobId = new Map<number, string>();
+      const errorJobIds = jobs.filter((j: any) => j.status === 'error').map((j: any) => j.id);
+      if (errorJobIds.length > 0) {
+        try {
+          const { getTenantPool } = require('../../config/db');
+          const tenantPool = getTenantPool(churchId);
+          const [feederRows] = await tenantPool.query(
+            `SELECT job_id, last_error FROM ocr_feeder_pages
+             WHERE job_id IN (?) AND last_error IS NOT NULL
+             ORDER BY id DESC`,
+            [errorJobIds],
+          );
+          for (const row of feederRows as any[]) {
+            if (!feederErrorByJobId.has(row.job_id)) {
+              feederErrorByJobId.set(row.job_id, row.last_error);
+            }
+          }
+        } catch (feederErr: any) {
+          console.log(`[OCR Jobs GET] Feeder error lookup skipped: ${feederErr.message}`);
+        }
+      }
+
       // Map to API response format - DB is source of truth
       const mappedJobs = jobs.map((job: any) => {
         // DB status is canonical
@@ -129,7 +152,7 @@ function createRouters(upload: any) {
           review_status: job.review_status || 'uploaded',
           review_notes: job.review_notes || null,
           confidence_score: job.confidence_score || 0,
-          error_message: job.error || null,
+          error_message: feederErrorByJobId.get(job.id) || job.error_regions || job.error || null,
           created_at: job.created_at || new Date().toISOString(),
           updated_at: job.updated_at || new Date().toISOString(),
           record_type: job.record_type || null,
