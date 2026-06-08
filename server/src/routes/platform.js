@@ -124,6 +124,154 @@ router.get('/workflow-refs', requireRole(['super_admin', 'admin']), async (req, 
 
 router.use(requireServiceToken);
 
+const OM_SERVER_KEY = process.env.OM_SERVER_KEY || 'om-prod-01';
+
+function requireOmstudioSource(req, res) {
+  const sourceSystem = (req.serviceCaller && req.serviceCaller.sourceSystem)
+    || req.get('X-Source-System')
+    || '';
+  if ((sourceSystem || '').toLowerCase() !== 'omstudio') {
+    res.status(403).json({
+      ok: false,
+      error: 'source_system_not_allowed',
+      message: 'X-Source-System: omstudio header is required for this endpoint.',
+    });
+    return false;
+  }
+  return true;
+}
+
+async function loadActiveComponentVersions(pool) {
+  try {
+    const [rows] = await pool.query(
+      `SELECT component_key, target_app, semantic_version, workshop_build_number,
+              full_version, source_path, deployment_status
+       FROM app_component_versions
+       WHERE deployment_status = 'active'`
+    );
+    const map = new Map();
+    for (const r of rows) {
+      map.set(`${r.component_key}:${r.target_app}`, r);
+    }
+    return map;
+  } catch (err) {
+    if (err && (err.code === 'ER_NO_SUCH_TABLE' || err.errno === 1146)) return new Map();
+    throw err;
+  }
+}
+
+function shapeMetadataComponent(component, versionMap) {
+  const targetApp = component.source_app || 'om';
+  const ver = versionMap.get(`${component.component_key}:${targetApp}`);
+  return {
+    component_key: component.component_key,
+    component_type: component.component_type,
+    component_sequence: component.component_sequence,
+    source_app: component.source_app,
+    source_path: component.source_path,
+    implementation_state: component.implementation_state,
+    active_version: ver ? ver.semantic_version : '1.0.0',
+    full_version: ver ? ver.full_version : '1.0.0_1',
+    deployment_status: ver ? ver.deployment_status : 'staged',
+  };
+}
+
+async function buildWorkflowMetadata(pool) {
+  const versionMap = await loadActiveComponentVersions(pool);
+  const [levels] = await pool.query(
+    `SELECT level_key, level_name, system_level, workflow_group_sequence, parent_level_key
+     FROM app_workflow_system_levels
+     ORDER BY workflow_group_sequence, level_key`
+  );
+  const [workflowRows] = await pool.query(
+    `SELECT w.workflow_key, w.workflow_name, w.description, w.primary_app, w.entry_type,
+            w.system_level_key, w.workflow_sequence, w.lifecycle_status, w.completion_state,
+            v.version AS active_version
+     FROM app_workflows w
+     LEFT JOIN app_workflow_versions v ON v.id = w.active_version_id
+     ORDER BY w.workflow_sequence, w.workflow_name`
+  );
+
+  const workflows = [];
+  for (const wf of workflowRows) {
+    const [wfFull] = await pool.query(
+      `SELECT w.id, v.id AS version_id
+       FROM app_workflows w
+       LEFT JOIN app_workflow_versions v ON v.id = w.active_version_id
+       WHERE w.workflow_key = ?`,
+      [wf.workflow_key]
+    );
+    const versionId = wfFull[0]?.version_id;
+    let steps = [];
+    if (versionId) {
+      const [stepRows] = await pool.query(
+        `SELECT id, step_key, step_name, step_sequence, step_kind, pipeline_key
+         FROM app_workflow_steps
+         WHERE workflow_version_id = ?
+         ORDER BY step_sequence`,
+        [versionId]
+      );
+      const stepIds = stepRows.map((s) => s.id);
+      let components = [];
+      if (stepIds.length) {
+        const [compRows] = await pool.query(
+          'SELECT * FROM app_workflow_step_components WHERE workflow_step_id IN (?) ORDER BY workflow_step_id, component_sequence',
+          [stepIds]
+        );
+        components = compRows;
+      }
+      const byStep = new Map();
+      for (const c of components) {
+        if (!byStep.has(c.workflow_step_id)) byStep.set(c.workflow_step_id, []);
+        byStep.get(c.workflow_step_id).push(shapeMetadataComponent(c, versionMap));
+      }
+      steps = stepRows.map((s) => ({
+        step_key: s.step_key,
+        step_name: s.step_name,
+        step_sequence: s.step_sequence,
+        step_kind: s.step_kind,
+        pipeline_key: s.pipeline_key,
+        required_components: byStep.get(s.id) || [],
+      }));
+    }
+    workflows.push({
+      workflow_key: wf.workflow_key,
+      workflow_name: wf.workflow_name,
+      description: wf.description,
+      primary_app: wf.primary_app,
+      entry_type: wf.entry_type,
+      system_level_key: wf.system_level_key,
+      workflow_sequence: wf.workflow_sequence,
+      lifecycle_status: wf.lifecycle_status,
+      completion_state: wf.completion_state,
+      active_version: wf.active_version,
+      steps,
+    });
+  }
+
+  return {
+    app_key: 'om',
+    server_key: OM_SERVER_KEY,
+    database: 'orthodoxmetrics_db',
+    generated_at: new Date().toISOString(),
+    workflow_system_levels: levels,
+    workflows,
+  };
+}
+
+// Runbook v2 §17.6 — OMStudio metadata contract (service token + omstudio source)
+router.get('/__omstudio/workflows/metadata', async (req, res) => {
+  try {
+    if (!requireOmstudioSource(req, res)) return;
+    const pool = getAppPool();
+    const metadata = await buildWorkflowMetadata(pool);
+    res.json(metadata);
+  } catch (err) {
+    console.error('[platform] __omstudio/workflows/metadata failed:', err.message);
+    res.status(500).json({ ok: false, error: 'workflow_metadata_failed' });
+  }
+});
+
 const DEFAULT_LIMIT = 200;
 const MAX_LIMIT = 500;
 
