@@ -1557,14 +1557,22 @@ const ENROLLMENT_FROM_EMAIL = process.env.ENROLLMENT_FROM_EMAIL || null;
 const OMAI_PUBLIC_URL = (process.env.OMAI_PUBLIC_URL || 'https://orthodoxmetrics.com/omai').replace(/\/$/, '');
 const TEMP_ADMIN_LOGIN_URL = process.env.TEMP_ADMIN_LOGIN_URL || process.env.OM_PUBLIC_URL || 'https://orthodoxmetrics.com/auth/login2';
 
-function buildOmaiEnrollmentAdminLink(onboardingRequestId, crmRecordId) {
+function buildOmaiEnrollmentAdminLink(enrollmentReference, crmRecordId) {
+  const ref = enrollmentReference || '';
   const accountPath = crmRecordId
-    ? `/omai/cp/ops/church-command-center/accounts/${crmRecordId}?ref=${encodeURIComponent(onboardingRequestId)}`
-    : `/omai/cp/pipelines?search=${encodeURIComponent(onboardingRequestId)}`;
+    ? `/cp/ops/church-command-center/accounts/${crmRecordId}?ref=${encodeURIComponent(ref)}`
+    : `/cp/ops/church-command-center/crm?tab=followups&search=${encodeURIComponent(ref)}`;
   return `${OMAI_PUBLIC_URL}/login?next=${encodeURIComponent(accountPath)}`;
 }
 
+function buildOmOnboardingAdminLink(enrollmentReference) {
+  if (!enrollmentReference || !String(enrollmentReference).startsWith('ONB_')) return null;
+  const omBase = (process.env.OM_PUBLIC_URL || 'https://orthodoxmetrics.com').replace(/\/$/, '');
+  return `${omBase}/admin/onboarding/${encodeURIComponent(enrollmentReference)}`;
+}
+
 const sendEnrollmentInternalNotificationEmail = async ({
+  enrollmentReference,
   onboardingRequestId,
   crmRecordId,
   parishName,
@@ -1578,11 +1586,23 @@ const sendEnrollmentInternalNotificationEmail = async ({
   notes,
 }) => {
   try {
+    const reference = enrollmentReference || onboardingRequestId;
+    if (!reference) {
+      throw new Error('Enrollment reference is required for internal notification');
+    }
+
     const transporter = await createTransporter();
     const dbConfig = await getActiveEmailConfig();
     const senderName = dbConfig?.sender_name || 'Orthodox Metrics';
     const senderEmail = ENROLLMENT_FROM_EMAIL || dbConfig?.sender_email || process.env.SMTP_USER || process.env.EMAIL_USER;
-    const adminLink = buildOmaiEnrollmentAdminLink(onboardingRequestId, crmRecordId);
+    const omaiLink = buildOmaiEnrollmentAdminLink(reference, crmRecordId);
+    const omOnboardingLink = buildOmOnboardingAdminLink(reference);
+    const reviewLinksHtml = omOnboardingLink
+      ? `<p style="margin-top:24px;">
+           <a href="${omOnboardingLink}" style="background:#1a2e52;color:#fff;padding:12px 20px;text-decoration:none;border-radius:6px;margin-right:12px;">Review in OM Admin</a>
+           <a href="${omaiLink}" style="background:#d4af37;color:#1a2e52;padding:12px 20px;text-decoration:none;border-radius:6px;">View in OMAI</a>
+         </p>`
+      : `<p style="margin-top:24px;"><a href="${omaiLink}" style="background:#1a2e52;color:#fff;padding:12px 20px;text-decoration:none;border-radius:6px;">View in OMAI</a></p>`;
 
     const htmlContent = `
 <!DOCTYPE html><html><head><meta charset="utf-8"></head>
@@ -1590,7 +1610,7 @@ const sendEnrollmentInternalNotificationEmail = async ({
   <div style="background:linear-gradient(90deg,#1a2e52,#d4af37,#1a2e52);height:4px;"></div>
   <div style="padding:24px;max-width:640px;">
     <h1 style="color:#1a2e52;">New Enrollment Request</h1>
-    <p><strong>Enrollment Reference:</strong> ${escapeHtml(onboardingRequestId)}</p>
+    <p><strong>Enrollment Reference:</strong> ${escapeHtml(reference)}</p>
     <p><strong>Parish:</strong> ${escapeHtml(parishName)}</p>
     <p><strong>Submitter:</strong> ${escapeHtml(submitterName)} &lt;${escapeHtml(submitterEmail)}&gt;</p>
     <p><strong>Phone:</strong> ${escapeHtml(submitterPhone || '(not provided)')}</p>
@@ -1598,12 +1618,12 @@ const sendEnrollmentInternalNotificationEmail = async ({
     <p><strong>Record tables:</strong> ${escapeHtml(recordTables.join(', ') || 'None')}</p>
     <p><strong>Modules/features:</strong> ${escapeHtml((modules.length ? modules : features).join(', ') || 'None')}</p>
     ${notes ? `<p><strong>Notes:</strong><br/>${escapeHtml(notes).replace(/\n/g, '<br/>')}</p>` : ''}
-    <p style="margin-top:24px;"><a href="${adminLink}" style="background:#1a2e52;color:#fff;padding:12px 20px;text-decoration:none;border-radius:6px;">View in OMAI</a></p>
+    ${reviewLinksHtml}
   </div>
 </body></html>`;
 
     const text = [
-      `New Enrollment Request — ${onboardingRequestId}`,
+      `New Enrollment Request — ${reference}`,
       `Parish: ${parishName}`,
       `Submitter: ${submitterName} <${submitterEmail}>`,
       `Phone: ${submitterPhone || '(not provided)'}`,
@@ -1611,14 +1631,15 @@ const sendEnrollmentInternalNotificationEmail = async ({
       `Record tables: ${recordTables.join(', ') || 'None'}`,
       `Modules: ${(modules.length ? modules : features).join(', ') || 'None'}`,
       notes ? `Notes:\n${notes}` : '',
-      `Admin link: ${adminLink}`,
+      omOnboardingLink ? `OM Admin: ${omOnboardingLink}` : null,
+      `OMAI: ${omaiLink}`,
     ].filter(Boolean).join('\n');
 
     const info = await transporter.sendMail({
       from: `"${senderName}" <${senderEmail}>`,
       to: ENROLLMENT_INTERNAL_EMAIL,
       replyTo: submitterEmail,
-      subject: `New Enrollment Request - ${onboardingRequestId} - ${parishName}`,
+      subject: `New Enrollment Request - ${reference} - ${parishName}`,
       html: htmlContent,
       text,
     });

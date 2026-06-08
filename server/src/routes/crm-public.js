@@ -641,6 +641,7 @@ async function handlePublicEnroll(req, res) {
 
     // Create onboarding request (ONB_<ULID>) — source of truth for enrollment lifecycle
     let onboardingRequestId = null;
+    let onboardingCreateError = null;
     try {
       const onboardingService = require('../services/onboardingService');
       const { request: obReq } = await onboardingService.createFromEnrollment(
@@ -681,6 +682,7 @@ async function handlePublicEnroll(req, res) {
         );
       }
     } catch (obErr) {
+      onboardingCreateError = obErr.message || String(obErr);
       console.error('Onboarding request creation failed (CRM enrollment still saved):', obErr);
     }
 
@@ -717,10 +719,13 @@ async function handlePublicEnroll(req, res) {
 
     const moduleListForEmail = moduleList;
     const locationParts = [city, effectiveState, country].filter(Boolean).join(', ');
+    const publicRef = onboardingRequestId || reference;
+    const internalNotes = onboardingCreateError
+      ? `${enrollmentNote}\n\n⚠️ Onboarding request (ONB) creation failed: ${onboardingCreateError}`
+      : enrollmentNote;
 
     try {
       const { sendEnrollmentConfirmationEmail, sendEnrollmentInternalNotificationEmail } = require('../utils/emailService');
-      const publicRef = onboardingRequestId || reference;
       const confirmResult = await sendEnrollmentConfirmationEmail({
         firstName,
         email,
@@ -748,23 +753,24 @@ async function handlePublicEnroll(req, res) {
       console.error('Enrollment confirmation email failed (enrollment still saved):', confirmEmailErr);
     }
 
-    if (onboardingRequestId) {
-      try {
-        const { sendEnrollmentInternalNotificationEmail } = require('../utils/emailService');
-        const onboardingService = require('../services/onboardingService');
-        const { getAppPool } = require('../config/db');
-        const internalResult = await sendEnrollmentInternalNotificationEmail({
-          onboardingRequestId,
-          crmRecordId: resolvedLeadId,
-          parishName: churchName,
-          submitterName: `${firstName} ${lastName || ''}`.trim(),
-          submitterEmail: email,
-          submitterPhone: phone,
-          location: locationParts,
-          recordTables: moduleListForEmail,
-          modules: moduleListForEmail,
-          notes: enrollmentNote,
-        });
+    try {
+      const { sendEnrollmentInternalNotificationEmail } = require('../utils/emailService');
+      const onboardingService = require('../services/onboardingService');
+      const { getAppPool } = require('../config/db');
+      const internalResult = await sendEnrollmentInternalNotificationEmail({
+        enrollmentReference: publicRef,
+        onboardingRequestId: publicRef,
+        crmRecordId: resolvedLeadId,
+        parishName: churchName,
+        submitterName: `${firstName} ${lastName || ''}`.trim(),
+        submitterEmail: email,
+        submitterPhone: phone,
+        location: locationParts,
+        recordTables: moduleListForEmail,
+        modules: moduleListForEmail,
+        notes: internalNotes,
+      });
+      if (onboardingRequestId) {
         const obPool = getAppPool();
         if (internalResult.success) {
           await onboardingService.recordEvent(obPool, onboardingRequestId, 'internal_email_sent', {
@@ -775,9 +781,11 @@ async function handlePublicEnroll(req, res) {
             notes: internalResult.error,
           });
         }
-      } catch (internalEmailErr) {
-        console.error('Internal enrollment notification failed:', internalEmailErr);
+      } else if (!internalResult.success) {
+        console.error('Internal enrollment notification failed:', internalResult.error);
       }
+    } catch (internalEmailErr) {
+      console.error('Internal enrollment notification failed:', internalEmailErr);
     }
 
     res.json({
