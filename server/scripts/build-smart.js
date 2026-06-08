@@ -580,15 +580,25 @@ async function buildFrontendSmart(changes, classification, presenter, progress, 
 }
 
 /**
- * Restart PM2 service
+ * Restart backend (systemd orthodox-backend.service when present, else PM2).
  */
-async function restartPM2(presenter, progress, stepIndex, stageResults) {
-  const result = await runCommand('pm2 restart orthodox-backend', SERVER_DIR, 'PM2 Restart', presenter, stageResults);
-  
+function backendUsesSystemd() {
+  if (process.env.OM_BACKEND_RUNTIME === 'systemd') return true;
+  if (process.env.OM_BACKEND_RUNTIME === 'pm2') return false;
+  return fs.existsSync('/etc/systemd/system/orthodox-backend.service');
+}
+
+async function restartBackend(presenter, progress, stepIndex, stageResults) {
+  const cmd = backendUsesSystemd()
+    ? 'systemctl restart orthodox-backend'
+    : 'pm2 restart orthodox-backend';
+  const label = backendUsesSystemd() ? 'Systemd Restart' : 'PM2 Restart';
+  const result = await runCommand(cmd, SERVER_DIR, label, presenter, stageResults);
+
   if (progress && stepIndex !== undefined) {
     progress.updateStep(stepIndex, true);
   }
-  
+
   return result;
 }
 
@@ -719,7 +729,7 @@ async function main() {
     // Restart PM2 if requested and backend was rebuilt
     let pm2Result = null;
     if (args.restart && backendResult && backendResult.success) {
-      pm2Result = await restartPM2(presenter, progress, pm2Index, stageResults);
+      pm2Result = await restartBackend(presenter, progress, pm2Index, stageResults);
       
       // Give backend a moment to fully start
       await new Promise(resolve => setTimeout(resolve, 2000));
