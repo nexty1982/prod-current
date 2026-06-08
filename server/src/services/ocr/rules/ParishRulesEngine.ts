@@ -30,7 +30,7 @@ export class ParishRulesEngine {
     const [ruleRows]: any = await promisePool.query(
       `SELECT * FROM ocr_parish_rules 
        WHERE (church_id IS NULL OR church_id = ?) AND is_active = 1
-       ORDER BY priority ASC`,
+       ORDER BY FIELD(scope, 'global', 'diocesan', 'church'), priority ASC`,
       [this.churchId]
     );
 

@@ -156,7 +156,7 @@ router.get('/rules', async (req: any, res: any) => {
       params.push(scopeFilter);
     }
 
-    sql += ` ORDER BY priority ASC`;
+    sql += ` ORDER BY FIELD(scope, 'global', 'diocesan', 'church'), priority ASC`;
 
     const [rows] = await promisePool.query(sql, params);
     res.json({ ok: true, rules: rows });
@@ -487,6 +487,51 @@ router.post('/rules/revalidate-record', async (req: any, res: any) => {
 
     res.json({ ok: true, ...evalResult });
   } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /rules/seed-defaults — idempotent global rule seed (super_admin only)
+router.post('/rules/seed-defaults', async (req: any, res: any) => {
+  try {
+    const role = req.session?.user?.role || req.user?.role;
+    if (role !== 'super_admin') {
+      return res.status(403).json({ error: 'super_admin required' });
+    }
+
+    const [countRows]: any = await promisePool.query(
+      `SELECT COUNT(*) AS cnt FROM ocr_parish_rules WHERE scope = 'global' AND church_id IS NULL`
+    );
+    const existing = countRows[0]?.cnt || 0;
+    if (existing > 0) {
+      return res.json({ ok: true, skipped: true, message: `Global rules already present (${existing})`, count: existing });
+    }
+
+    const fs = require('fs');
+    const path = require('path');
+    const migrationPath = path.join(__dirname, '../../../database/migrations/2026_06_06_seed_default_rules.sql');
+    if (!fs.existsSync(migrationPath)) {
+      return res.status(500).json({ error: 'Seed migration file not found' });
+    }
+
+    const sql = fs.readFileSync(migrationPath, 'utf8');
+    const statements = sql
+      .split(';')
+      .map((s: string) => s.trim())
+      .filter((s: string) => s.startsWith('INSERT'));
+
+    let inserted = 0;
+    for (const stmt of statements) {
+      const [result]: any = await promisePool.query(stmt);
+      inserted += result.affectedRows || 0;
+    }
+
+    const userEmail = req.session?.user?.email || req.user?.email || 'system';
+    console.log(`[OCR Rules] seed-defaults invoked by ${userEmail}: inserted=${inserted}`);
+
+    res.json({ ok: true, inserted, message: 'Default global OCR rules seeded' });
+  } catch (err: any) {
+    console.error('[OCR Rules] seed-defaults failed:', err.message);
     res.status(500).json({ error: err.message });
   }
 });

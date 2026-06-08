@@ -1917,6 +1917,31 @@ const OcrReviewPage: React.FC = () => {
                                 ),
                               } : undefined}
                             />
+
+                            {!editorReadOnly && def.name === 'clergy' && !String(fieldValue || '').trim() && (
+                              <Button
+                                size="small"
+                                variant="outlined"
+                                sx={{ alignSelf: 'flex-start', textTransform: 'none' }}
+                                onClick={async () => {
+                                  const raw = window.prompt('Enter clergy name to add to parish roster:');
+                                  if (!raw || !raw.trim()) return;
+                                  try {
+                                    await apiClient.post(`/api/church/${churchId}/ocr/rules/config/entities`, {
+                                      entity_type: 'clergy',
+                                      canonical_value: raw.trim(),
+                                      display_label: raw.trim(),
+                                      source_notes: 'Added from OCR review — unknown clergy',
+                                    });
+                                    triggerRevalidation(fields);
+                                  } catch (err: any) {
+                                    alert('Failed to add clergy: ' + (err.response?.data?.error || err.message));
+                                  }
+                                }}
+                              >
+                                Add to Parish Clergy
+                              </Button>
+                            )}
                             
                             {!editorReadOnly && fieldRules.map((outcome: any) => {
                               if (outcome.reviewer_decision !== 'pending') return null;
