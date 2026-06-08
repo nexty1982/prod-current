@@ -462,6 +462,16 @@ async function createTemporaryAdmin(onboardingRequestId, req) {
   const { actorUserId, actorRole } = getActor(req);
   const churchId = await ensureChurch(pool, row);
 
+  const { provisionTenantDb } = require('./tenantProvisioning');
+  const provResult = await provisionTenantDb(churchId, pool, {
+    source: 'onboarding',
+    initiatedBy: actorUserId,
+    allowExisting: true,
+  });
+  if (!provResult?.success) {
+    throw new Error(provResult?.error || 'Tenant database provisioning failed');
+  }
+
   await pool.query(
     'UPDATE onboarding_requests SET provisioning_status = ? WHERE onboarding_request_id = ?',
     ['in_progress', onboardingRequestId]
@@ -483,7 +493,7 @@ async function createTemporaryAdmin(onboardingRequestId, req) {
   const [userIns] = await pool.query(
     `INSERT INTO users (email, first_name, last_name, role, church_id, onboarding_request_id,
       password_hash, must_change_password, is_active, created_at, updated_at)
-     VALUES (?, ?, ?, 'church_admin', ?, ?, ?, 1, 1, NOW(), NOW())`,
+     VALUES (?, ?, ?, 'manager', ?, ?, ?, 1, 1, NOW(), NOW())`,
     [email, firstName, lastName, churchId, onboardingRequestId, passwordHash]
   );
   const userId = userIns.insertId;
