@@ -46,12 +46,15 @@ router.get('/dashboard', requireAuth, async (req, res) => {
       `SELECT COUNT(*) as count FROM omai_crm_followups WHERE status = 'pending' AND due_date = CURDATE()`
     );
 
+    const commandCenter = req.query.command_center === '1' || req.query.command_center === 'true';
+    const snoozeFilter = commandCenter ? ' AND (f.ccc_snooze_until IS NULL OR f.ccc_snooze_until <= NOW())' : '';
+
     // Upcoming follow-ups (next 7 days)
     const [upcoming] = await pool.query(
       `SELECT f.*, uc.name as church_name, uc.state_code, uc.city
        FROM omai_crm_followups f
        JOIN omai_crm_leads uc ON f.church_id = uc.id
-       WHERE f.status = 'pending' AND f.due_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7 DAY)
+       WHERE f.status = 'pending' AND f.due_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7 DAY)${snoozeFilter}
        ORDER BY f.due_date ASC
        LIMIT 20`
     );
@@ -626,9 +629,17 @@ router.post('/churches/:churchId/activities', requireAuth, async (req, res) => {
 // FOLLOW-UPS — CRUD
 // ═══════════════════════════════════════════════════════════════
 
+const CCC_DISMISS_DURATIONS_MS = {
+  '1h': 60 * 60 * 1000,
+  '3h': 3 * 60 * 60 * 1000,
+  '8h': 8 * 60 * 60 * 1000,
+  '24h': 24 * 60 * 60 * 1000,
+  '3d': 3 * 24 * 60 * 60 * 1000,
+};
+
 router.get('/follow-ups', requireAuth, async (req, res) => {
   try {
-    const { status = 'pending', limit = 50, assigned_to = '' } = req.query;
+    const { status = 'pending', limit = 50, assigned_to = '', command_center = '' } = req.query;
     let sql = `SELECT f.*, uc.name as church_name, uc.state_code, uc.city, uc.pipeline_stage
                FROM omai_crm_followups f
                JOIN omai_crm_leads uc ON f.church_id = uc.id`;
@@ -638,6 +649,9 @@ router.get('/follow-ups', requireAuth, async (req, res) => {
     if (status && status !== 'all') {
       where.push('f.status = ?');
       params.push(status);
+    }
+    if (command_center === '1' || command_center === 'true') {
+      where.push('(f.ccc_snooze_until IS NULL OR f.ccc_snooze_until <= NOW())');
     }
     if (assigned_to === 'me') {
       const uid = req.session?.user?.id;
@@ -706,6 +720,36 @@ router.post('/churches/:churchId/follow-ups', requireAuth, async (req, res) => {
   } catch (err) {
     console.error('CRM follow-up create error:', err);
     res.status(500).json({ error: 'Failed to create follow-up' });
+  }
+});
+
+router.post('/follow-ups/:id/dismiss', requireAuth, async (req, res) => {
+  try {
+    const pool = getPool();
+    const { id } = req.params;
+    const { duration } = req.body || {};
+    const ms = CCC_DISMISS_DURATIONS_MS[duration];
+    if (!ms) {
+      return res.status(400).json({ error: 'Invalid dismiss duration. Use 1h, 3h, 8h, 24h, or 3d.' });
+    }
+
+    const [existing] = await pool.query('SELECT * FROM omai_crm_followups WHERE id = ?', [id]);
+    if (!existing.length) return res.status(404).json({ error: 'Follow-up not found' });
+    if (existing[0].status !== 'pending') {
+      return res.status(400).json({ error: 'Only pending follow-ups can be dismissed' });
+    }
+
+    const snoozeUntil = new Date(Date.now() + ms);
+    await pool.query(
+      'UPDATE omai_crm_followups SET ccc_snooze_until = ? WHERE id = ?',
+      [snoozeUntil, id]
+    );
+
+    const [updated] = await pool.query('SELECT * FROM omai_crm_followups WHERE id = ?', [id]);
+    res.json({ followUp: updated[0], snoozedUntil: snoozeUntil.toISOString() });
+  } catch (err) {
+    console.error('CRM follow-up dismiss error:', err);
+    res.status(500).json({ error: 'Failed to dismiss follow-up' });
   }
 });
 
