@@ -394,6 +394,68 @@ function generateTempPassword() {
   return pwd;
 }
 
+const KEYCLOAK_BOOTSTRAP_PATH =
+  process.env.KEYCLOAK_BOOTSTRAP_SCRIPT || '/var/www/omai/_runtime/server/scripts/keycloak-bootstrap.js';
+
+const PARISH_ONBOARD_REALM = 'orthodoxmetrics';
+
+/**
+ * Parish onboard accounts authenticate via Keycloak (orthodoxmetrics realm only).
+ * AD federation is READ_ONLY — federated users keep AD passwords; others get a KC temp password.
+ */
+async function provisionAdminIdentity({ email, first_name, last_name, role, password }) {
+  const kc = require(KEYCLOAK_BOOTSTRAP_PATH);
+  const onboardRealms = kc.PARISH_ONBOARD_KC_REALMS || [PARISH_ONBOARD_REALM];
+
+  const kcResult = await kc.provisionOmUserInKeycloak({
+    email,
+    first_name,
+    last_name,
+    role,
+    password,
+    enabled: true,
+    realms: onboardRealms,
+  });
+
+  const ldapSyncResults = [];
+  const merged = kc.loadMergedEnv();
+  if (merged.KC_LDAP_AD_CONNECTION_URL) {
+    for (const realm of onboardRealms) {
+      try {
+        const { componentId } = await kc.ensureLdapFederation(realm, merged);
+        if (componentId) {
+          await kc.triggerLdapSync(realm, componentId);
+          ldapSyncResults.push({ realm, synced: true });
+        }
+      } catch (err) {
+        console.warn(`[onboarding] AD/LDAP sync (${realm}):`, err.message);
+        ldapSyncResults.push({ realm, synced: false, error: err.message });
+      }
+    }
+  }
+
+  const federatedRealms = (kcResult.results || []).filter((r) => r.federated).map((r) => r.realm);
+  return { kcResult, ldapSyncResults, federatedRealms };
+}
+
+/** Explicit grant: parish enrollments may only enter orthodoxmetrics.com. */
+async function ensureParishOnboardRealmAccess(pool, userId, actorUserId) {
+  try {
+    await pool.query(
+      `INSERT INTO user_realm_access (user_id, realm_key, role, enabled, granted_by, notes)
+       VALUES (?, ?, 'church_admin', 1, ?, 'Parish enrollment — orthodoxmetrics.com only')
+       ON DUPLICATE KEY UPDATE enabled = 1, revoked_at = NULL, notes = VALUES(notes)`,
+      [userId, PARISH_ONBOARD_REALM, actorUserId || null]
+    );
+  } catch (err) {
+    if (err && err.code === 'ER_NO_SUCH_TABLE') {
+      console.warn('[onboarding] user_realm_access missing — realm lock uses onboarding_request_id');
+      return;
+    }
+    throw err;
+  }
+}
+
 async function ensureChurch(pool, row) {
   if (row.church_id) {
     const [ch] = await pool.query('SELECT id FROM churches WHERE id = ?', [row.church_id]);
@@ -498,6 +560,26 @@ async function createTemporaryAdmin(onboardingRequestId, req) {
   );
   const userId = userIns.insertId;
 
+  let identityProvision;
+  try {
+    identityProvision = await provisionAdminIdentity({
+      email,
+      first_name: firstName,
+      last_name: lastName,
+      role: 'manager',
+      password: tempPassword,
+    });
+    await ensureParishOnboardRealmAccess(pool, userId, actorUserId);
+  } catch (err) {
+    await recordEvent(pool, onboardingRequestId, 'identity_provision_failed', {
+      actorUserId,
+      actorRole,
+      notes: err.message,
+      metadata: { userId, churchId, provider: 'keycloak' },
+    });
+    throw new Error(`Local admin created but Keycloak/AD provisioning failed: ${err.message}`);
+  }
+
   await pool.query(
     `UPDATE onboarding_requests SET
       temporary_admin_user_id = ?, status = 'awaiting_first_login',
@@ -510,7 +592,13 @@ async function createTemporaryAdmin(onboardingRequestId, req) {
     actorUserId,
     actorRole,
     newStatus: 'awaiting_first_login',
-    metadata: { userId, churchId },
+    metadata: {
+      userId,
+      churchId,
+      keycloak: identityProvision.kcResult,
+      adFederated: identityProvision.federatedRealms,
+      ldapSync: identityProvision.ldapSyncResults,
+    },
   });
 
   await pool.query(
@@ -524,6 +612,71 @@ async function createTemporaryAdmin(onboardingRequestId, req) {
     loginEmail: email,
     churchId,
     userId,
+    identityProvision,
+  };
+}
+
+/**
+ * Reset temporary admin password in OM DB and sync Keycloak + AD federation.
+ */
+async function resetTemporaryAdminCredentials(onboardingRequestId, req) {
+  const pool = getAppPool();
+  const row = await getByPublicId(onboardingRequestId);
+  if (!row?.temporary_admin_user_id) {
+    throw new Error('No temporary admin exists');
+  }
+
+  const [users] = await pool.query(
+    'SELECT id, email, first_name, last_name, role FROM users WHERE id = ?',
+    [row.temporary_admin_user_id]
+  );
+  if (!users.length) throw new Error('Temporary admin user not found');
+
+  const user = users[0];
+  const tempPassword = generateTempPassword();
+  const passwordHash = await bcrypt.hash(tempPassword, 12);
+
+  await pool.query(
+    'UPDATE users SET password_hash = ?, must_change_password = 1, updated_at = NOW() WHERE id = ?',
+    [passwordHash, user.id]
+  );
+
+  const { actorUserId, actorRole } = getActor(req);
+  let identityProvision;
+  try {
+    identityProvision = await provisionAdminIdentity({
+      email: user.email,
+      first_name: user.first_name,
+      last_name: user.last_name,
+      role: user.role || 'manager',
+      password: tempPassword,
+    });
+    await ensureParishOnboardRealmAccess(pool, user.id, actorUserId);
+  } catch (err) {
+    await recordEvent(pool, onboardingRequestId, 'identity_provision_failed', {
+      actorUserId,
+      actorRole,
+      notes: err.message,
+      metadata: { userId: user.id, provider: 'keycloak', context: 'resend' },
+    });
+    throw new Error(`Password reset in OM DB but Keycloak/AD sync failed: ${err.message}`);
+  }
+
+  await recordEvent(pool, onboardingRequestId, 'temporary_admin_credentials_reset', {
+    actorUserId,
+    actorRole,
+    metadata: {
+      userId: user.id,
+      keycloak: identityProvision.kcResult,
+      adFederated: identityProvision.federatedRealms,
+    },
+  });
+
+  return {
+    request: row,
+    tempPassword,
+    loginEmail: user.email,
+    identityProvision,
   };
 }
 
@@ -767,6 +920,8 @@ module.exports = {
   updatePayment,
   updateProvisioning,
   createTemporaryAdmin,
+  resetTemporaryAdminCredentials,
+  provisionAdminIdentity,
   getForUser,
   getRecordTableDraft,
   saveRecordTables,

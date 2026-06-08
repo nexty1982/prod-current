@@ -121,6 +121,15 @@ router.post('/login', async (req, res) => {
       });
     }
 
+    // Parish onboard accounts authenticate via Keycloak (orthodoxmetrics realm).
+    if (user.onboarding_request_id) {
+      return res.status(403).json({
+        success: false,
+        message: 'Parish accounts must sign in at orthodoxmetrics.com/auth/login2 using your organization credentials.',
+        keycloak_required: true,
+      });
+    }
+
     // Verify password
     const isPasswordValid = await bcrypt.compare(password, user.password_hash);
     if (!isPasswordValid) {

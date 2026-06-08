@@ -135,29 +135,16 @@ router.post('/:onboarding_request_id/create-temporary-admin', async (req, res) =
 
 router.post('/:onboarding_request_id/resend-admin-instructions', async (req, res) => {
   try {
-    const request = await onboarding.getByPublicId(req.params.onboarding_request_id);
-    if (!request?.temporary_admin_user_id) {
-      return res.status(400).json({ success: false, message: 'No temporary admin exists' });
-    }
-
-    const bcrypt = require('bcryptjs');
-    const crypto = require('crypto');
     const { getAppPool } = require('../../config/db');
     const pool = getAppPool();
 
-    const charset = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789!@#$%';
-    const bytes = crypto.randomBytes(16);
-    let tempPassword = '';
-    for (let i = 0; i < 16; i++) tempPassword += charset[bytes[i] % charset.length];
-    const passwordHash = await bcrypt.hash(tempPassword, 12);
-
-    await pool.query(
-      'UPDATE users SET password_hash = ?, must_change_password = 1, updated_at = NOW() WHERE id = ?',
-      [passwordHash, request.temporary_admin_user_id]
+    const { request, tempPassword, loginEmail } = await onboarding.resetTemporaryAdminCredentials(
+      req.params.onboarding_request_id,
+      req
     );
 
     const emailResult = await sendTemporaryAdminInstructionsEmail({
-      email: request.submitted_by_email,
+      email: loginEmail,
       firstName: request.submitted_payload_json?.firstName || request.submitted_by_name,
       churchName: request.parish_name,
       onboardingRequestId: request.onboarding_request_id,

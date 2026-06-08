@@ -1654,6 +1654,7 @@ const sendTemporaryAdminInstructionsEmail = async ({
           <h1 style="margin:0 0 16px;">Your Orthodox Metrics Admin Account</h1>
           <p>Hello ${escapeHtml(firstName || 'there')},</p>
           <p>Your temporary admin account for <strong>${escapeHtml(churchName)}</strong> is ready.</p>
+          <p>Sign in with your organization credentials at Orthodox Metrics (orthodoxmetrics.com). Your account is provisioned through our secure identity service.</p>
           <table style="background:#f5f3ef;border-left:4px solid #d4af37;padding:16px;margin:16px 0;width:100%;">
             <tr><td><strong>Login URL:</strong> <a href="${loginUrl}">${loginUrl}</a></td></tr>
             <tr><td><strong>Username:</strong> ${escapeHtml(email)}</td></tr>
@@ -1671,6 +1672,7 @@ const sendTemporaryAdminInstructionsEmail = async ({
 
     const text = [
       `Your Orthodox Metrics admin account for ${churchName} is ready.`,
+      'Sign in at orthodoxmetrics.com using your organization credentials (Keycloak identity).',
       `Login URL: ${loginUrl}`,
       `Username: ${email}`,
       `Temporary password: ${tempPassword}`,
