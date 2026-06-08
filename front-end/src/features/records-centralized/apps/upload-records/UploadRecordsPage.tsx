@@ -326,7 +326,12 @@ const UploadRecordsPage: React.FC = () => {
         const jobs: any[] = res?.data?.jobs || res?.data || res?.jobs || [];
         if (jobs.length === 0) return;
         const statusMap = new Map<string, { status: string; error?: string }>();
-        for (const j of jobs) statusMap.set(String(j.id), { status: j.status, error: j.error_message || undefined });
+        for (const j of jobs) {
+          statusMap.set(String(j.id), {
+            status: j.status,
+            error: j.error_message || j.error_regions || undefined,
+          });
+        }
         setQueue((prev) => prev.map((f) => {
           if (!f.jobId) return f;
           const remote = statusMap.get(f.jobId);
@@ -385,9 +390,7 @@ const UploadRecordsPage: React.FC = () => {
         const jobs = response?.jobs || response?.data?.jobs || [];
         const jobId = jobs.length > 0 ? String(jobs[0].id) : undefined;
         if (jobId) {
-          setQueue((q) => q.map((f) => (f.id === item.id ? { ...f, status: 'uploading' as const, progress: 80, jobId } : f)));
-          try { await apiClient.post(`/api/church/${effectiveChurchId}/ocr/jobs/${jobId}/retry`); } catch { /* worker picks up */ }
-          setQueue((q) => q.map((f) => (f.id === item.id ? { ...f, status: 'queued' as const, progress: 100 } : f)));
+          setQueue((q) => q.map((f) => (f.id === item.id ? { ...f, status: 'queued' as const, progress: 100, jobId } : f)));
         } else {
           setQueue((q) => q.map((f) => (f.id === item.id ? { ...f, status: 'error', progress: 100, error: 'Upload OK but no job created' } : f)));
         }
@@ -642,8 +645,16 @@ const UploadRecordsPage: React.FC = () => {
                     {failedCount === 0
                       ? 'Images submitted. OCR and agent extraction run automatically — track progress in My Uploads, then confirm fields in Review.'
                       : failedCount === queue.length
-                        ? (queue.find((f) => f.error)?.error
-                          || 'All uploads failed. Please check your files and try again.')
+                        ? (() => {
+                            const err = queue.find((f) => f.error)?.error || '';
+                            if (err.includes('billing') || err.includes('PERMISSION_DENIED')) {
+                              return 'Images uploaded but OCR processing failed: Google Vision API billing is disabled on the server. Contact your administrator to enable billing, then re-upload or use Reprocess in My Uploads.';
+                            }
+                            if (err.includes('All') && err.includes('pages failed')) {
+                              return 'Images uploaded but OCR processing failed. Check My Uploads for details or contact your administrator.';
+                            }
+                            return err || 'Upload or OCR processing failed. Please check your files and try again.';
+                          })()
                         : `${completedCount} of ${queue.length} files uploaded. ${failedCount} failed.`}
                   </Alert>
                   <Stack direction="row" spacing={2}>
