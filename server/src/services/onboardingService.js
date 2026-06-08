@@ -905,6 +905,93 @@ function getProgressSteps(request, events) {
   }));
 }
 
+const PROVISIONING_CHECKLIST_STEPS = [
+  { step_key: 'church_profile', step_name: 'Preparing Church Profile', step_order: 1 },
+  { step_key: 'database_storage', step_name: 'Provisioning Database & Storage', step_order: 2 },
+  { step_key: 'users_roles', step_name: 'Configuring Users, Roles & Permissions', step_order: 3 },
+  { step_key: 'branding_portal', step_name: 'Applying Branding & Portal Template', step_order: 4 },
+  { step_key: 'records_certificates', step_name: 'Importing Records & Enabling Certificates', step_order: 5 },
+  { step_key: 'final_validation', step_name: 'Running Final Validation', step_order: 6 },
+];
+
+const CHECKLIST_STATUSES = new Set(['not_started', 'in_progress', 'blocked', 'failed', 'passed', 'skipped']);
+
+async function ensureChecklistRows(pool, onboardingRequestId) {
+  for (const step of PROVISIONING_CHECKLIST_STEPS) {
+    await pool.query(
+      `INSERT IGNORE INTO onboarding_provisioning_steps
+         (onboarding_request_id, step_key, step_name, step_order, status)
+       VALUES (?, ?, ?, ?, 'not_started')`,
+      [onboardingRequestId, step.step_key, step.step_name, step.step_order]
+    );
+  }
+}
+
+async function getProvisioningChecklist(onboardingRequestId) {
+  const pool = getAppPool();
+  await ensureChecklistRows(pool, onboardingRequestId);
+  const [rows] = await pool.query(
+    `SELECT step_key, step_name, step_order, status, details_json, error_message,
+            started_at, completed_at, actor_type, actor_id, retry_count
+     FROM onboarding_provisioning_steps
+     WHERE onboarding_request_id = ?
+     ORDER BY step_order`,
+    [onboardingRequestId]
+  );
+  const checklist = rows.map((r) => ({
+    ...r,
+    details_json: r.details_json && typeof r.details_json === 'string'
+      ? JSON.parse(r.details_json)
+      : r.details_json,
+  }));
+  const summary = checklist.reduce((acc, s) => {
+    acc[s.status] = (acc[s.status] || 0) + 1;
+    return acc;
+  }, {});
+  return { checklist, summary };
+}
+
+async function updateChecklistStep(onboardingRequestId, stepKey, payload, req) {
+  const pool = getAppPool();
+  const step = PROVISIONING_CHECKLIST_STEPS.find((s) => s.step_key === stepKey);
+  if (!step) throw new Error(`Unknown checklist step: ${stepKey}`);
+  const status = payload.status;
+  if (!CHECKLIST_STATUSES.has(status)) throw new Error(`Invalid checklist status: ${status}`);
+
+  await ensureChecklistRows(pool, onboardingRequestId);
+  const actorId = req?.session?.userId || req?.session?.user?.id || null;
+  const nowFields = [];
+  if (status === 'in_progress') nowFields.push('started_at = COALESCE(started_at, NOW())');
+  if (['passed', 'skipped', 'failed', 'blocked'].includes(status)) nowFields.push('completed_at = NOW()');
+  if (status === 'failed' && payload.retry) {
+    await pool.query(
+      `UPDATE onboarding_provisioning_steps SET retry_count = retry_count + 1
+       WHERE onboarding_request_id = ? AND step_key = ?`,
+      [onboardingRequestId, stepKey]
+    );
+  }
+
+  await pool.query(
+    `UPDATE onboarding_provisioning_steps
+     SET status = ?,
+         error_message = ?,
+         details_json = ?,
+         actor_type = 'admin',
+         actor_id = ?
+         ${nowFields.length ? `, ${nowFields.join(', ')}` : ''}
+     WHERE onboarding_request_id = ? AND step_key = ?`,
+    [
+      status,
+      payload.error_message || null,
+      payload.details_json ? JSON.stringify(payload.details_json) : null,
+      actorId,
+      onboardingRequestId,
+      stepKey,
+    ]
+  );
+  return getProvisioningChecklist(onboardingRequestId);
+}
+
 module.exports = {
   VALID_RECORD_TYPES,
   DEFAULT_COLUMNS,
@@ -931,4 +1018,7 @@ module.exports = {
   linkCrm,
   getProgressSteps,
   recordEvent,
+  PROVISIONING_CHECKLIST_STEPS,
+  getProvisioningChecklist,
+  updateChecklistStep,
 };

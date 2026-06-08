@@ -30,6 +30,34 @@ router.get('/', async (req, res) => {
   }
 });
 
+router.get('/:onboarding_request_id/checklist', async (req, res) => {
+  try {
+    const id = req.params.onboarding_request_id;
+    const request = await onboarding.getByPublicId(id);
+    if (!request) return res.status(404).json({ success: false, message: 'Not found' });
+    const { checklist, summary } = await onboarding.getProvisioningChecklist(id);
+    res.json({ success: true, onboarding_request_id: id, checklist, summary });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+router.patch('/:onboarding_request_id/checklist/:step_key', async (req, res) => {
+  try {
+    const { status, error_message, details_json, retry } = req.body || {};
+    if (!status) return res.status(400).json({ success: false, message: 'status required' });
+    const result = await onboarding.updateChecklistStep(
+      req.params.onboarding_request_id,
+      req.params.step_key,
+      { status, error_message, details_json, retry },
+      req
+    );
+    res.json({ success: true, ...result });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+});
+
 router.get('/:onboarding_request_id', async (req, res) => {
   try {
     const id = req.params.onboarding_request_id;
