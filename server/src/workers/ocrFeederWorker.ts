@@ -2013,7 +2013,7 @@ async function processPage(tenantPool: Pool, page: PageRow, churchId: number): P
           const [tplRows] = await platformPool.query(
             `SELECT id, extraction_mode, column_bands, header_y_threshold, record_regions, learned_params, status
              FROM ocr_extractors WHERE id = ?
-               AND (status = 'approved' OR status IS NULL)`,
+               AND (status = 'approved' OR status IS NULL OR status = 'candidate')`,
             [templateId]
           ) as any[];
           if (tplRows.length > 0) {

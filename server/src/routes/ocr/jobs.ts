@@ -4071,6 +4071,25 @@ function createRouters(upload: any) {
       const createdJobs: any[] = [];
       let lastSqlError: any = null;
 
+      let uploadLayoutTemplateId: number | null = null;
+      if (recordType !== 'custom') {
+        try {
+          const onboardingLayoutExtractor = require('../../services/onboardingLayoutExtractorService');
+          const ensured = await onboardingLayoutExtractor.ensureOnboardingLayoutCandidates(churchId, recordType);
+          uploadLayoutTemplateId = await onboardingLayoutExtractor.resolveUploadLayoutTemplateId(churchId, recordType);
+          console.log(`ONBOARDING_LAYOUT_WIRED ${JSON.stringify({
+            churchId,
+            recordType,
+            created: ensured.created,
+            existing: ensured.existing,
+            catalogLayoutIds: ensured.catalogLayoutIds,
+            jobLayoutTemplateId: uploadLayoutTemplateId,
+          })}`);
+        } catch (onbErr: any) {
+          console.warn(`[OCR Upload] Onboarding layout wiring failed (non-blocking): ${onbErr.message}`);
+        }
+      }
+
       for (const file of files) {
         try {
           const timestamp = Date.now();
@@ -4105,10 +4124,19 @@ function createRouters(upload: any) {
 
           // Priority: 1=urgent, 5=normal (default), 9=low
           const jobPriority = Math.min(9, Math.max(1, parseInt(req.body.priority) || 5));
-          const insertSql = `INSERT INTO ocr_jobs (church_id, uploaded_by, filename, status, priority, review_status, record_type, language, created_at, source_pipeline) VALUES (?, ?, ?, 'pending', ?, 'uploaded', ?, ?, NOW(), 'uploader')`;
           insertParams.splice(3, 0, jobPriority); // insert priority after filename
+          let insertSql = `INSERT INTO ocr_jobs (church_id, uploaded_by, filename, status, priority, review_status, record_type, language, created_at, source_pipeline`;
+          if (uploadLayoutTemplateId) {
+            insertSql += `, layout_template_id`;
+            insertParams.push(uploadLayoutTemplateId);
+          }
+          insertSql += `) VALUES (?, ?, ?, 'pending', ?, 'uploaded', ?, ?, NOW(), 'uploader'`;
+          if (uploadLayoutTemplateId) {
+            insertSql += `, ?`;
+          }
+          insertSql += `)`;
 
-          console.log(`OCR_INSERT_PRE ${JSON.stringify({ pool: 'platformPool', db: currentDb, file: file.originalname, storedFilename: uniqueFilename, paramCount: insertParams.length })}`);
+          console.log(`OCR_INSERT_PRE ${JSON.stringify({ pool: 'platformPool', db: currentDb, file: file.originalname, storedFilename: uniqueFilename, paramCount: insertParams.length, layoutTemplateId: uploadLayoutTemplateId })}`);
 
           // Insert job into PLATFORM DB (global queue)
           const [result] = await platformPool.query(insertSql, insertParams);
@@ -4266,15 +4294,39 @@ function createRouters(upload: any) {
       const tenantPool = getTenantPool(churchId);
       const createdJobIds: number[] = [];
 
+      let batchLayoutTemplateId: number | null = null;
+      if (recordType !== 'custom') {
+        try {
+          const onboardingLayoutExtractor = require('../../services/onboardingLayoutExtractorService');
+          const ensured = await onboardingLayoutExtractor.ensureOnboardingLayoutCandidates(churchId, recordType);
+          batchLayoutTemplateId = await onboardingLayoutExtractor.resolveUploadLayoutTemplateId(churchId, recordType);
+          console.log(`ONBOARDING_LAYOUT_WIRED ${JSON.stringify({
+            churchId,
+            recordType,
+            source: 'batch_import',
+            created: ensured.created,
+            existing: ensured.existing,
+            catalogLayoutIds: ensured.catalogLayoutIds,
+            jobLayoutTemplateId: batchLayoutTemplateId,
+          })}`);
+        } catch (onbErr: any) {
+          console.warn(`[Batch Import] Onboarding layout wiring failed (non-blocking): ${onbErr.message}`);
+        }
+      }
+
       for (const filename of imageFiles) {
         const absPath = path.join(directory, filename);
 
         // Platform DB: create ocr_jobs row
-        const [result] = await platformPool.query(
-          `INSERT INTO ocr_jobs (church_id, filename, status, record_type, language, created_at, source_pipeline)
-           VALUES (?, ?, 'pending', ?, ?, NOW(), 'batch_import')`,
-          [churchId, absPath, recordType, language]
-        );
+        const batchInsertSql = batchLayoutTemplateId
+          ? `INSERT INTO ocr_jobs (church_id, filename, status, record_type, language, layout_template_id, created_at, source_pipeline)
+             VALUES (?, ?, 'pending', ?, ?, ?, NOW(), 'batch_import')`
+          : `INSERT INTO ocr_jobs (church_id, filename, status, record_type, language, created_at, source_pipeline)
+             VALUES (?, ?, 'pending', ?, ?, NOW(), 'batch_import')`;
+        const batchInsertParams = batchLayoutTemplateId
+          ? [churchId, absPath, recordType, language, batchLayoutTemplateId]
+          : [churchId, absPath, recordType, language];
+        const [result] = await platformPool.query(batchInsertSql, batchInsertParams);
         const jobId = (result as any).insertId;
 
         // Tenant DB: create feeder page
