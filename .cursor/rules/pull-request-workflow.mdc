@@ -1,0 +1,36 @@
+---
+description: GitHub PR creation workflow using gh CLI
+alwaysApply: true
+---
+
+# Pull Request Workflow
+
+Use `gh` for all GitHub tasks (issues, PRs, checks, releases).
+
+## Before creating a PR
+
+Run in parallel:
+- `git status`
+- `git diff`
+- Remote tracking / up-to-date check
+- `git log` and `git diff [base]...HEAD` for full branch history
+
+## Create PR
+
+1. Push branch with `-u` if needed
+2. `gh pr create` with HEREDOC body:
+
+```markdown
+## Summary
+- ...
+
+## Test plan
+- [ ] ...
+```
+
+## Rules
+
+- Never update git config
+- Do not use TodoWrite or Task tools for PR creation
+- Return the PR URL when done
+- Analyze **all** commits on the branch, not just the latest

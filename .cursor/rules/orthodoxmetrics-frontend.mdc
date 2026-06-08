@@ -1,0 +1,13 @@
+---
+description: Orthodox Metrics front-end constraints (prod/front-end)
+globs: prod/front-end/**/*.{ts,tsx,js,jsx}
+alwaysApply: false
+---
+
+# Orthodox Metrics Front-End
+
+## Grid layout
+
+**Do NOT use `Unstable_Grid2`.**
+
+Known layout and style conflicts prohibit `Unstable_Grid2` across all components under `orthodoxmetrics/prod/front-end`. Use standard MUI `Grid` or existing layout patterns in the codebase.

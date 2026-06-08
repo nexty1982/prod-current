@@ -1,0 +1,37 @@
+---
+description: Git commit safety protocol — when and how to commit
+alwaysApply: true
+---
+
+# Git Commit Protocol
+
+**Only create commits when requested by the user** unless direct-development workflow is active.
+
+## Before committing
+
+Run in parallel:
+- `git status`
+- `git diff` (staged and unstaged)
+- `git log` (recent messages for style)
+
+## Commit message
+
+- 1–2 sentences focused on **why**, not just what
+- Accurately label the change (add / update / fix / refactor / test / docs)
+- Use HEREDOC for the message
+
+## Safety (never)
+
+- Update git config
+- Destructive git commands (force push, hard reset) unless explicitly requested
+- Skip hooks unless explicitly requested
+- Force push to `main`/`master`
+- Commit secrets (`.env`, credentials)
+- `git commit --amend` unless all apply: user requested OR hook auto-modified after your commit AND HEAD is yours AND not pushed
+- If commit **failed** or was **rejected by hook**, fix and create a **new** commit — never amend
+- Interactive git (`-i` flags)
+- Empty commits when nothing changed
+
+## After commit
+
+Verify with `git status`. Do not push unless asked (except direct-development / deploy rules).

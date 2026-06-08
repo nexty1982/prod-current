@@ -1,0 +1,45 @@
+---
+description: Direct development — commit, push, and merge OM app work on a 30-minute or phase-complete cadence (active when the user says "direct development")
+alwaysApply: true
+---
+
+# Direct Development Workflow
+
+**Active only when the user says `direct development`** (or clearly invokes this workflow). Otherwise follow normal commit rules (commits only when explicitly requested).
+
+## Repositories in scope
+
+Any OM application the session touches:
+
+- `omai`
+- `om` / `orthodoxmetrics`
+- `omstudio`
+- `om-workshop`
+
+Work in the repo that matches the task; apply the same cadence per repo with changes.
+
+## Cadence
+
+After each meaningful batch of changes, and **at least**:
+
+1. **Every 30 minutes** while direct development is active, or
+2. **Immediately after a complete phase** — when Phase 1, Phase 2, and Phase 3 for the current initiative are all done (not after a single phase alone).
+
+## Required steps (per repo with uncommitted work)
+
+1. **Commit** — clear message: what changed and why; one logical unit per commit when possible.
+2. **Push** to `origin` on the working branch.
+3. **Merge into `main`** — open or update a PR and merge when checks pass, or merge locally and push `main` per team convention; never force-push `main`.
+
+If push or merge is blocked (CI, conflicts, permissions), report the blocker and the exact next command; do not leave changes only local past the cadence deadline.
+
+## Safety
+
+- Do not commit secrets (`.env`, keys, credentials).
+- Do not skip hooks unless the user explicitly allows it.
+- Do not force-push `main`/`master`.
+- If the user later says to stop direct development, revert to commits-only-when-asked.
+
+## Phase completion
+
+Treat "phase complete" as all numbered phases in the **current** plan (e.g. 1+2+3), not an arbitrary subtask. Announce phase completion before the merge step.

@@ -1,0 +1,48 @@
+---
+description: Deploy scripts, commit/push/deploy cadence for OM and OMAI production
+alwaysApply: true
+---
+
+# Deploy Operations
+
+## Deploy scripts (canonical paths)
+
+- **Orthodox Metrics:** `/var/omai-ops/om-deploy.sh`
+- **OMAI:** `/var/omai-ops/omai-deploy.sh`
+
+Examples:
+- `om-deploy.sh be` — OM backend only
+- `om-deploy.sh fe` — OM frontend only
+- `omai-deploy.sh fe` — OMAI frontend only
+
+## When to commit, push, and deploy
+
+After changes to OM or OMAI environments:
+
+1. **Commit** (when explicitly requested, or under direct-development workflow)
+2. **Push** to `origin`
+3. **Deploy** the affected stack (`om-deploy.sh` and/or `omai-deploy.sh`)
+
+Use PRs for larger multi-step work; merge PRs in order — do not let several PRs pile up without merging and deploying.
+
+## OMAI production deploy (branch enforcement)
+
+From `/var/www/omai`, detach onto `origin/main` before deploying — branch checks run before sync:
+
+```bash
+cd /var/www/omai
+git fetch origin main
+git checkout --detach origin/main
+/var/omai-ops/omai-deploy.sh fe
+```
+
+Task branches must match: `<type>/<work-item-id>/<yyyy-mm-dd>/<slug>` (e.g. `fix/omd-413/2026-06-08/header-layout`).
+
+## OM production deploy
+
+Run from the OM repo root, not from inside OMAI paths:
+
+```bash
+cd /var/www/orthodoxmetrics/prod
+/var/omai-ops/om-deploy.sh be   # or fe / full deploy
+```

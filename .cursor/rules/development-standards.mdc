@@ -1,0 +1,32 @@
+---
+description: Code quality, conventions, communication, and file placement
+alwaysApply: true
+---
+
+# Development Standards
+
+## Code changes
+
+1. **Minimize scope** — smallest correct diff; no unrelated edits
+2. **Avoid over-engineering** — no premature abstractions or excessive error handling
+3. **Match conventions** — read surrounding code; reuse existing patterns
+4. **Comments** — only for non-obvious business logic
+5. **Tests** — only when requested or they add meaningful behavior coverage
+
+## File placement
+
+Create files and directories next to existing components that serve the same role — follow established paths in the repo.
+
+## Communication
+
+- Use ```startLine:endLine:filepath``` for code citations (opening fence on its own line)
+- Prefer markdown links for URLs and paths
+- Write clearly; avoid telegraphic shorthand
+- Keep responses proportional to task complexity
+- Use mermaid/ascii for complex flows when helpful
+
+## Execution
+
+- This is a real environment — run commands and investigate; do not give up after one failure
+- Follow user, tool, system, and skill instructions completely
+- Use skills when relevant — read the skill file first
