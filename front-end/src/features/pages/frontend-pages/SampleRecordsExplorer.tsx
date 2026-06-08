@@ -846,19 +846,21 @@ function AnalyticsView({
       {/* Decade distribution */}
       <div className="om-card p-6">
         <h3 className="om-heading-tertiary mb-4">{t('explorer.analytics_records_by_decade')}</h3>
-        <div className="flex items-end gap-1 h-48">
+        <div className="flex items-end gap-0.5 sm:gap-1 h-40 sm:h-48 overflow-x-auto pb-1">
           {decadeCounts.map((s) => {
             const maxVal = Math.max(...decadeCounts.map((d) => d.value));
             const pct = maxVal > 0 ? (s.value / maxVal) * 100 : 0;
+            const shortLabel = s.label.replace(/(\d{3})(\d0s)/, '$2');
             return (
-              <div key={s.label} className="flex-1 flex flex-col items-center gap-1">
-                <span className="text-[11px] om-text-tertiary">{s.value}</span>
+              <div key={s.label} className="flex-1 min-w-[28px] flex flex-col items-center gap-1">
+                <span className="text-[10px] sm:text-[11px] om-text-tertiary">{s.value}</span>
                 <div
                   className="w-full bg-[#d4af37] rounded-t-sm transition-all"
                   style={{ height: `${Math.max(pct, 4)}%` }}
                 />
-                <span className="text-[10px] om-text-tertiary -rotate-45 origin-top-left mt-1 whitespace-nowrap">
-                  {s.label}
+                <span className="text-[9px] sm:text-[10px] om-text-tertiary mt-1 text-center w-full truncate px-0.5 sm:-rotate-45 sm:origin-top-left sm:whitespace-nowrap">
+                  <span className="sm:hidden">{shortLabel}</span>
+                  <span className="hidden sm:inline">{s.label}</span>
                 </span>
               </div>
             );

@@ -1,3 +1,7 @@
+/**
+ * @deprecated Legacy public-site left nav — not mounted in Router (2026-06-08 audit).
+ * Kept for reference; do not wire without a responsive/theme pass.
+ */
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {

@@ -88,6 +88,24 @@ export interface OmaiLogPattern {
 
 // ─── Styled Component ────────────────────────────────────────────
 
+export const HUD_VIEWPORT_MARGIN = 8;
+
+/** Keep a dragged HUD panel fully inside the viewport. */
+export function clampHudPosition(
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  margin = HUD_VIEWPORT_MARGIN,
+): { x: number; y: number } {
+  const maxX = Math.max(margin, window.innerWidth - width - margin);
+  const maxY = Math.max(margin, window.innerHeight - height - margin);
+  return {
+    x: Math.min(Math.max(margin, x), maxX),
+    y: Math.min(Math.max(margin, y), maxY),
+  };
+}
+
 export const DraggableHUD = styled(Paper)(({ theme }) => ({
   position: 'fixed',
   top: 80,
@@ -96,8 +114,9 @@ export const DraggableHUD = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(2),
   cursor: 'move',
   userSelect: 'none',
-  backgroundColor: theme.palette.mode === 'dark' ? '#1a1a2e' : '#ffffff',
-  color: theme.palette.mode === 'dark' ? '#ffffff' : '#1e293b',
+  maxWidth: `calc(100vw - ${theme.spacing(2)})`,
+  backgroundColor: theme.palette.background.paper,
+  color: theme.palette.text.primary,
   boxShadow: theme.palette.mode === 'dark'
     ? '0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2)'
     : '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',

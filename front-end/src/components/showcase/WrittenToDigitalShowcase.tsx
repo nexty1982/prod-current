@@ -215,7 +215,7 @@ export default function WrittenToDigitalShowcase({
       )}
 
       {/* Transformation Display Panel */}
-      <div className="relative rounded-2xl overflow-hidden border border-white/10 shadow-2xl shadow-purple-900/30 bg-black/20 backdrop-blur w-full h-[460px] sm:h-[500px] md:h-[540px] lg:h-auto lg:aspect-[16/10]">
+      <div className="relative rounded-2xl overflow-hidden border border-white/10 shadow-2xl shadow-purple-900/30 bg-black/20 backdrop-blur w-full min-h-[280px] h-[min(70vh,460px)] sm:h-[min(70vh,500px)] md:h-[min(70vh,540px)] lg:h-auto lg:min-h-0 lg:aspect-[16/10] lg:max-h-none">
         {/* LAYER 1: Ledger Image */}
         <motion.div className="absolute inset-0" animate={{ opacity: imageOpacity }} transition={{ duration: 0.6, ease: 'easeInOut' }}>
           <AnimatePresence mode="wait">
@@ -344,7 +344,7 @@ export default function WrittenToDigitalShowcase({
 
         {/* LAYER 4: Enhanced Record Viewer */}
         <motion.div
-          className="absolute inset-0 bg-white dark:bg-gray-900 overflow-auto"
+          className="absolute inset-0 bg-white dark:bg-gray-900 overflow-hidden"
           animate={{ opacity: tableOpacity }}
           transition={{ duration: 0.5, ease: 'easeInOut' }}
           style={{ pointerEvents: state === 'digital' ? 'auto' : 'none' }}

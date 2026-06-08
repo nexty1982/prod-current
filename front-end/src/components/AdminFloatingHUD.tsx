@@ -14,7 +14,7 @@ import type {
   OmaiHealth, OmaiBriefing, OmaiTaskItem, OmaiTaskStats,
   OmaiLogsSummary, OmaiLogPattern,
 } from './adminHudTypes';
-import { DraggableHUD, LEAK_THRESHOLD } from './adminHudTypes';
+import { DraggableHUD, LEAK_THRESHOLD, clampHudPosition } from './adminHudTypes';
 import HudOmaiPanel from './HudOmaiPanel';
 import HudStatusBody from './HudStatusBody';
 
@@ -360,12 +360,13 @@ const AdminFloatingHUD: React.FC = () => {
   };
 
   const handleMouseMove = (e: MouseEvent) => {
-    if (!isDragging) return;
+    if (!isDragging || !hudRef.current) return;
 
-    const newX = e.clientX - offset.x;
-    const newY = e.clientY - offset.y;
+    const { offsetWidth, offsetHeight } = hudRef.current;
+    const rawX = e.clientX - offset.x;
+    const rawY = e.clientY - offset.y;
 
-    setPosition({ x: newX, y: newY });
+    setPosition(clampHudPosition(rawX, rawY, offsetWidth, offsetHeight));
   };
 
   const handleMouseUp = () => {
@@ -388,6 +389,19 @@ const AdminFloatingHUD: React.FC = () => {
       document.removeEventListener('mouseup', handleMouseUp);
     };
   }, [isDragging, offset]);
+
+  useEffect(() => {
+    const onResize = () => {
+      if (!hudRef.current) return;
+      const { offsetWidth, offsetHeight } = hudRef.current;
+      setPosition((prev) => {
+        if (prev.x === 0 && prev.y === 0) return prev;
+        return clampHudPosition(prev.x, prev.y, offsetWidth, offsetHeight);
+      });
+    };
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, [isExpanded]);
 
   const handleSyncTasks = async () => {
     try {
@@ -472,12 +486,12 @@ const AdminFloatingHUD: React.FC = () => {
       onMouseDown={handleMouseDown}
       sx={{
         ...hudStyle,
-        width: isExpanded ? 560 : 280,
+        width: isExpanded
+          ? { xs: 'calc(100vw - 16px)', sm: 560 }
+          : { xs: 'calc(100vw - 16px)', sm: 280 },
         border: (theme) => status.version_mismatch
-          ? '2px solid #ef4444'
-          : `2px solid ${theme.palette.mode === 'dark' ? '#3b82f6' : '#60a5fa'}`,
-        backgroundColor: (theme) => theme.palette.mode === 'dark' ? '#1a1a2e' : '#ffffff',
-        color: (theme) => theme.palette.mode === 'dark' ? '#ffffff' : '#1e293b',
+          ? `2px solid ${theme.palette.error.main}`
+          : `2px solid ${theme.palette.primary.main}`,
       }}
     >
       {/* Header */}
