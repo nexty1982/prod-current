@@ -1378,39 +1378,46 @@ const OcrReviewPage: React.FC = () => {
                 const active = selectedJobId === Number(j.id);
                 const countStr = typeof j.records_count === 'number' ? `${j.confirmed_count || 0}/${j.records_count} ` : '';
                 return (
-                  <ListItem
-                    key={j.id}
-                    disablePadding
-                    secondaryAction={
-                      <Stack direction="row" spacing={0.5} alignItems="center">
-                        <Chip label={cfg.label} size="small" color={cfg.color} variant="outlined" />
-                        <Tooltip title="Delete job completely">
-                          <IconButton
-                            edge="end"
-                            size="small"
-                            color="error"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setDeleteConfirmJobId(Number(j.id));
-                            }}
-                          >
-                            <IconTrash size={16} />
-                          </IconButton>
-                        </Tooltip>
-                      </Stack>
-                    }
-                    sx={{ mb: 0.5 }}
-                  >
+                  <ListItem key={j.id} disablePadding sx={{ mb: 0.5 }}>
                     <ListItemButton
                       selected={active}
                       onClick={() => navigate(`${reviewBase}/${j.id}`)}
-                      sx={{ borderRadius: 1, pr: 12 }}
+                      sx={{
+                        borderRadius: 1,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 0.75,
+                        py: 0.75,
+                        pr: 1,
+                      }}
                     >
                       <ListItemText
                         primary={`${countStr}${j.filename || `Job #${j.id}`}`}
                         secondary={new Date(j.created_at).toLocaleString()}
+                        sx={{ flex: 1, minWidth: 0, my: 0 }}
                         primaryTypographyProps={{ noWrap: true, fontSize: '0.85rem', fontWeight: active ? 700 : 500 }}
+                        secondaryTypographyProps={{ noWrap: true }}
                       />
+                      <Chip
+                        label={cfg.label}
+                        size="small"
+                        color={cfg.color}
+                        variant="outlined"
+                        sx={{ flexShrink: 0 }}
+                      />
+                      <Tooltip title="Delete job completely">
+                        <IconButton
+                          size="small"
+                          color="error"
+                          sx={{ flexShrink: 0 }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDeleteConfirmJobId(Number(j.id));
+                          }}
+                        >
+                          <IconTrash size={16} />
+                        </IconButton>
+                      </Tooltip>
                     </ListItemButton>
                   </ListItem>
                 );
@@ -1427,39 +1434,46 @@ const OcrReviewPage: React.FC = () => {
                 const active = selectedJobId === Number(j.id);
                 const countStr = typeof j.records_count === 'number' ? `${j.confirmed_count || 0}/${j.records_count} ` : '';
                 return (
-                  <ListItem
-                    key={j.id}
-                    disablePadding
-                    secondaryAction={
-                      <Stack direction="row" spacing={0.5} alignItems="center">
-                        <Chip label={cfg.label} size="small" color={cfg.color} variant="outlined" />
-                        <Tooltip title="Delete job completely">
-                          <IconButton
-                            edge="end"
-                            size="small"
-                            color="error"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setDeleteConfirmJobId(Number(j.id));
-                            }}
-                          >
-                            <IconTrash size={16} />
-                          </IconButton>
-                        </Tooltip>
-                      </Stack>
-                    }
-                    sx={{ mb: 0.5 }}
-                  >
+                  <ListItem key={j.id} disablePadding sx={{ mb: 0.5 }}>
                     <ListItemButton
                       selected={active}
                       onClick={() => navigate(`${reviewBase}/${j.id}`)}
-                      sx={{ borderRadius: 1, pr: 12 }}
+                      sx={{
+                        borderRadius: 1,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 0.75,
+                        py: 0.75,
+                        pr: 1,
+                      }}
                     >
                       <ListItemText
                         primary={`${countStr}${j.filename || `Job #${j.id}`}`}
                         secondary={new Date(j.created_at).toLocaleString()}
+                        sx={{ flex: 1, minWidth: 0, my: 0 }}
                         primaryTypographyProps={{ noWrap: true, fontSize: '0.85rem', fontWeight: active ? 700 : 500 }}
+                        secondaryTypographyProps={{ noWrap: true }}
                       />
+                      <Chip
+                        label={cfg.label}
+                        size="small"
+                        color={cfg.color}
+                        variant="outlined"
+                        sx={{ flexShrink: 0 }}
+                      />
+                      <Tooltip title="Delete job completely">
+                        <IconButton
+                          size="small"
+                          color="error"
+                          sx={{ flexShrink: 0 }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDeleteConfirmJobId(Number(j.id));
+                          }}
+                        >
+                          <IconTrash size={16} />
+                        </IconButton>
+                      </Tooltip>
                     </ListItemButton>
                   </ListItem>
                 );
