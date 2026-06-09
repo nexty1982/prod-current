@@ -9,110 +9,183 @@ export interface ContentCropResult {
   cropBox: { x: number; y: number; width: number; height: number };
 }
 
-function loadImageFromFile(file: File): Promise<HTMLImageElement> {
-  return new Promise((resolve, reject) => {
-    const url = URL.createObjectURL(file);
-    const img = new Image();
-    img.onload = () => {
-      URL.revokeObjectURL(url);
-      resolve(img);
-    };
-    img.onerror = () => {
-      URL.revokeObjectURL(url);
-      reject(new Error('Failed to load image'));
-    };
-    img.src = url;
-  });
+const CONTENT_LUM = 48;
+const EDGE_DENSITY = 0.04;
+const ANALYSIS_MAX = 1200;
+
+function luminance(r: number, g: number, b: number): number {
+  return 0.299 * r + 0.587 * g + 0.114 * b;
 }
 
-/**
- * Trim uniform dark margins (e.g. black background around index cards).
- */
-export async function cropImageContentBorders(
+async function loadOrientedSource(
   file: File,
-  brightnessThreshold = 42,
-): Promise<ContentCropResult> {
-  const img = await loadImageFromFile(file);
-  const width = img.naturalWidth;
-  const height = img.naturalHeight;
+): Promise<{ source: CanvasImageSource; width: number; height: number; close?: () => void }> {
+  try {
+    const bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' });
+    return {
+      source: bitmap,
+      width: bitmap.width,
+      height: bitmap.height,
+      close: () => bitmap.close(),
+    };
+  } catch {
+    const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+      const url = URL.createObjectURL(file);
+      const el = new Image();
+      el.onload = () => {
+        URL.revokeObjectURL(url);
+        resolve(el);
+      };
+      el.onerror = () => {
+        URL.revokeObjectURL(url);
+        reject(new Error('Failed to load image'));
+      };
+      el.src = url;
+    });
+    return { source: img, width: img.naturalWidth, height: img.naturalHeight };
+  }
+}
 
+function drawToCanvas(source: CanvasImageSource, width: number, height: number): HTMLCanvasElement {
   const canvas = document.createElement('canvas');
   canvas.width = width;
   canvas.height = height;
   const ctx = canvas.getContext('2d');
-  if (!ctx) {
-    const url = URL.createObjectURL(file);
-    return {
-      blob: file,
-      url,
-      cropped: false,
-      cropBox: { x: 0, y: 0, width, height },
-    };
-  }
+  if (!ctx) throw new Error('Canvas unavailable');
+  ctx.drawImage(source, 0, 0, width, height);
+  return canvas;
+}
 
-  ctx.drawImage(img, 0, 0);
-  const { data } = ctx.getImageData(0, 0, width, height);
+function findContentBounds(
+  data: Uint8ClampedArray,
+  width: number,
+  height: number,
+): { minX: number; minY: number; maxX: number; maxY: number } | null {
+  const colDensity = new Float64Array(width);
+  const rowDensity = new Float64Array(height);
 
-  let minX = width;
-  let minY = height;
-  let maxX = 0;
-  let maxY = 0;
-  let brightPixels = 0;
-
-  const step = width * height > 2_000_000 ? 2 : 1;
-  for (let y = 0; y < height; y += step) {
-    for (let x = 0; x < width; x += step) {
+  for (let y = 0; y < height; y += 1) {
+    for (let x = 0; x < width; x += 1) {
       const i = (y * width + x) * 4;
-      const lum = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
-      if (lum > brightnessThreshold) {
-        brightPixels += 1;
-        minX = Math.min(minX, x);
-        maxX = Math.max(maxX, x);
-        minY = Math.min(minY, y);
-        maxY = Math.max(maxY, y);
+      if (luminance(data[i], data[i + 1], data[i + 2]) > CONTENT_LUM) {
+        colDensity[x] += 1;
+        rowDensity[y] += 1;
       }
     }
   }
 
+  for (let x = 0; x < width; x += 1) colDensity[x] /= height;
+  for (let y = 0; y < height; y += 1) rowDensity[y] /= width;
+
+  let minX = 0;
+  while (minX < width && colDensity[minX] < EDGE_DENSITY) minX += 1;
+  let maxX = width - 1;
+  while (maxX > minX && colDensity[maxX] < EDGE_DENSITY) maxX -= 1;
+
+  let minY = 0;
+  while (minY < height && rowDensity[minY] < EDGE_DENSITY) minY += 1;
+  let maxY = height - 1;
+  while (maxY > minY && rowDensity[maxY] < EDGE_DENSITY) maxY -= 1;
+
+  if (maxX <= minX || maxY <= minY) return null;
+  return { minX, minY, maxX, maxY };
+}
+
+function mapBoundsToFull(
+  bounds: { minX: number; minY: number; maxX: number; maxY: number },
+  analysisW: number,
+  analysisH: number,
+  fullW: number,
+  fullH: number,
+) {
+  const scaleX = fullW / analysisW;
+  const scaleY = fullH / analysisH;
+  const pad = Math.max(2, Math.round(Math.min(fullW, fullH) * 0.006));
+  const minX = Math.max(0, Math.floor(bounds.minX * scaleX) - pad);
+  const minY = Math.max(0, Math.floor(bounds.minY * scaleY) - pad);
+  const maxX = Math.min(fullW - 1, Math.ceil(bounds.maxX * scaleX) + pad);
+  const maxY = Math.min(fullH - 1, Math.ceil(bounds.maxY * scaleY) + pad);
+  return {
+    x: minX,
+    y: minY,
+    width: maxX - minX + 1,
+    height: maxY - minY + 1,
+  };
+}
+
+/**
+ * Trim dark margins (e.g. black background around index cards).
+ */
+export async function cropImageContentBorders(file: File): Promise<ContentCropResult> {
+  const { source, width, height, close } = await loadOrientedSource(file);
+  const fullCanvas = drawToCanvas(source, width, height);
+  close?.();
+
   const fullBox = { x: 0, y: 0, width, height };
-  if (brightPixels === 0 || maxX <= minX || maxY <= minY) {
+
+  const scale = Math.min(1, ANALYSIS_MAX / Math.max(width, height));
+  const analysisW = Math.max(1, Math.round(width * scale));
+  const analysisH = Math.max(1, Math.round(height * scale));
+
+  const analysisCanvas = document.createElement('canvas');
+  analysisCanvas.width = analysisW;
+  analysisCanvas.height = analysisH;
+  const analysisCtx = analysisCanvas.getContext('2d');
+  if (!analysisCtx) {
     const url = URL.createObjectURL(file);
     return { blob: file, url, cropped: false, cropBox: fullBox };
   }
 
-  const pad = Math.max(2, Math.round(Math.min(width, height) * 0.008));
-  minX = Math.max(0, minX - pad);
-  minY = Math.max(0, minY - pad);
-  maxX = Math.min(width - 1, maxX + pad);
-  maxY = Math.min(height - 1, maxY + pad);
+  analysisCtx.drawImage(fullCanvas, 0, 0, analysisW, analysisH);
+  const { data } = analysisCtx.getImageData(0, 0, analysisW, analysisH);
+  const bounds = findContentBounds(data, analysisW, analysisH);
 
-  const cropW = maxX - minX + 1;
-  const cropH = maxY - minY + 1;
-  const trimmedFraction = 1 - (cropW * cropH) / (width * height);
+  if (!bounds) {
+    const url = URL.createObjectURL(file);
+    return { blob: file, url, cropped: false, cropBox: fullBox };
+  }
 
-  if (trimmedFraction < 0.02) {
+  const cropBox = mapBoundsToFull(bounds, analysisW, analysisH, width, height);
+  const trimmedFraction = 1 - (cropBox.width * cropBox.height) / (width * height);
+
+  if (trimmedFraction < 0.005) {
     const url = URL.createObjectURL(file);
     return { blob: file, url, cropped: false, cropBox: fullBox };
   }
 
   const out = document.createElement('canvas');
-  out.width = cropW;
-  out.height = cropH;
+  out.width = cropBox.width;
+  out.height = cropBox.height;
   const outCtx = out.getContext('2d');
   if (!outCtx) {
     const url = URL.createObjectURL(file);
     return { blob: file, url, cropped: false, cropBox: fullBox };
   }
 
-  outCtx.drawImage(canvas, minX, minY, cropW, cropH, 0, 0, cropW, cropH);
+  outCtx.drawImage(
+    fullCanvas,
+    cropBox.x,
+    cropBox.y,
+    cropBox.width,
+    cropBox.height,
+    0,
+    0,
+    cropBox.width,
+    cropBox.height,
+  );
+
   const blob = await new Promise<Blob>((resolve, reject) => {
-    out.toBlob((b) => (b ? resolve(b) : reject(new Error('Crop export failed'))), file.type || 'image/png');
+    out.toBlob(
+      (b) => (b ? resolve(b) : reject(new Error('Crop export failed'))),
+      file.type === 'image/jpeg' ? 'image/jpeg' : 'image/png',
+      0.92,
+    );
   });
 
   return {
     blob,
     url: URL.createObjectURL(blob),
     cropped: true,
-    cropBox: { x: minX, y: minY, width: cropW, height: cropH },
+    cropBox,
   };
 }

@@ -60,6 +60,8 @@ interface ColumnBoundaryEditorProps {
   recordRegions?: FractionalBBox[];
   /** Called when record regions change */
   onRecordRegionsChange?: (regions: FractionalBBox[]) => void;
+  /** When true, default to record-region drawing and hide column controls */
+  regionMode?: boolean;
 }
 
 /** Convert boundary positions (sorted X fractions) to column bands */
@@ -103,6 +105,7 @@ const ColumnBoundaryEditor: React.FC<ColumnBoundaryEditorProps> = ({
   onHeaderYChange,
   recordRegions = [],
   onRecordRegionsChange,
+  regionMode = false,
 }) => {
   const theme = useTheme();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -115,9 +118,13 @@ const ColumnBoundaryEditor: React.FC<ColumnBoundaryEditorProps> = ({
     type: 'boundary' | 'headerY';
     index?: number;
   } | null>(null);
-  const [drawingMode, setDrawingMode] = useState<'columns' | 'records'>('columns');
+  const [drawingMode, setDrawingMode] = useState<'columns' | 'records'>(regionMode ? 'records' : 'columns');
   const [regionDragStart, setRegionDragStart] = useState<{ x: number; y: number } | null>(null);
   const [regionDragEnd, setRegionDragEnd] = useState<{ x: number; y: number } | null>(null);
+
+  useEffect(() => {
+    if (regionMode) setDrawingMode('records');
+  }, [regionMode]);
 
   // Boundary positions (inner edges between columns)
   const [positions, setPositions] = useState<number[]>(() => bandsToPositions(columnBands));
@@ -141,18 +148,33 @@ const ColumnBoundaryEditor: React.FC<ColumnBoundaryEditorProps> = ({
     setImgSize({ width: img.naturalWidth, height: img.naturalHeight });
   }, []);
 
-  useEffect(() => {
-    if (fitZoomApplied || imgSize.width <= 0 || !scrollRef.current) return;
-    const availableW = scrollRef.current.clientWidth - 8;
-    const availableH = scrollRef.current.clientHeight - 8;
+  const applyFitZoom = useCallback(() => {
+    if (imgSize.width <= 0 || !scrollRef.current) return;
+    const availableW = scrollRef.current.clientWidth - 16;
+    const availableH = scrollRef.current.clientHeight - 16;
     if (availableW <= 0 || availableH <= 0) return;
 
     const zoomW = (availableW / imgSize.width) * 100;
     const zoomH = (availableH / imgSize.height) * 100;
-    const fitZoom = Math.floor(Math.min(zoomW, zoomH, 100));
-    setZoom(Math.max(25, Math.min(100, fitZoom)));
+    const fitZoom = Math.floor(Math.min(zoomW, zoomH));
+    setZoom(Math.max(10, Math.min(200, fitZoom)));
     setFitZoomApplied(true);
-  }, [imgSize, fitZoomApplied]);
+  }, [imgSize]);
+
+  useEffect(() => {
+    if (fitZoomApplied || imgSize.width <= 0 || !scrollRef.current) return;
+    applyFitZoom();
+  }, [imgSize, fitZoomApplied, applyFitZoom]);
+
+  useEffect(() => {
+    if (!scrollRef.current || imgSize.width <= 0) return undefined;
+    const el = scrollRef.current;
+    const observer = new ResizeObserver(() => {
+      if (!fitZoomApplied) applyFitZoom();
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [imgSize.width, fitZoomApplied, applyFitZoom]);
 
   // Emit bands when positions change (after drag end)
   const emitBands = useCallback(
@@ -292,7 +314,7 @@ const ColumnBoundaryEditor: React.FC<ColumnBoundaryEditorProps> = ({
     <Box sx={{ height: '100%', minHeight: 0, minWidth: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
       {/* Toolbar */}
       <Stack direction="row" spacing={1} sx={{ p: 1, borderBottom: '1px solid', borderColor: 'divider' }} alignItems="center">
-        {onRecordRegionsChange && (
+        {onRecordRegionsChange && !regionMode && (
           <ToggleButtonGroup
             value={drawingMode}
             exclusive
@@ -311,19 +333,21 @@ const ColumnBoundaryEditor: React.FC<ColumnBoundaryEditorProps> = ({
             </ToggleButton>
           </ToggleButtonGroup>
         )}
-        {drawingMode === 'columns' && (
+        {drawingMode === 'columns' && !regionMode && (
           <Tooltip title="Add Column Boundary">
             <Button size="small" startIcon={<IconPlus size={16} />} onClick={handleAddBoundary} variant="outlined">
               Add Column
             </Button>
           </Tooltip>
         )}
-        <Chip
-          label={`${displayBands.length} columns`}
-          size="small"
-          color="primary"
-          variant="outlined"
-        />
+        {!regionMode && (
+          <Chip
+            label={`${displayBands.length} columns`}
+            size="small"
+            color="primary"
+            variant="outlined"
+          />
+        )}
         {recordRegions.length > 0 && (
           <Chip
             label={`${recordRegions.length} regions`}
@@ -332,11 +356,13 @@ const ColumnBoundaryEditor: React.FC<ColumnBoundaryEditorProps> = ({
             variant="outlined"
           />
         )}
-        <Chip
-          label={`Header Y: ${(headerY * 100).toFixed(1)}%`}
-          size="small"
-          variant="outlined"
-        />
+        {!regionMode && (
+          <Chip
+            label={`Header Y: ${(headerY * 100).toFixed(1)}%`}
+            size="small"
+            variant="outlined"
+          />
+        )}
         <Box sx={{ flex: 1 }} />
         <IconButton size="small" onClick={() => setZoom((z) => Math.max(25, z - 25))}>
           <IconZoomOut size={18} />
@@ -355,7 +381,7 @@ const ColumnBoundaryEditor: React.FC<ColumnBoundaryEditorProps> = ({
         </IconButton>
         <IconButton
           size="small"
-          onClick={() => setFitZoomApplied(false)}
+          onClick={() => applyFitZoom()}
           title="Fit to panel"
         >
           <IconMaximize size={18} />
@@ -368,7 +394,18 @@ const ColumnBoundaryEditor: React.FC<ColumnBoundaryEditorProps> = ({
       {/* Image + overlays */}
       <Box
         ref={scrollRef}
-        sx={{ flex: 1, minHeight: 0, minWidth: 0, overflow: 'auto', position: 'relative', width: '100%' }}
+        sx={{
+          flex: 1,
+          minHeight: 0,
+          minWidth: 0,
+          overflow: 'auto',
+          position: 'relative',
+          width: '100%',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'flex-start',
+          bgcolor: alpha(theme.palette.action.hover, 0.04),
+        }}
         onMouseDown={drawingMode === 'records' ? handleRegionMouseDown : undefined}
         onMouseMove={drawingMode === 'records' ? handleRegionMouseMove : handleMouseMove}
         onMouseUp={drawingMode === 'records' ? handleRegionMouseUp : handleMouseUp}

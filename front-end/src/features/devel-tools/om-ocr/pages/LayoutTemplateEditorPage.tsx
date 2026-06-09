@@ -688,6 +688,7 @@ const LayoutTemplateEditorPage: React.FC = () => {
                     onHeaderYChange={handleHeaderYChange}
                     recordRegions={recordRegions}
                     onRecordRegionsChange={handleRecordRegionsChange}
+                    regionMode={extractionMode === 'multi_form' || extractionMode === 'form' || extractionMode === 'auto'}
                   />
                 </Box>
               ) : (
