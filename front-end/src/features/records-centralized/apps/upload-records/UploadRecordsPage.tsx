@@ -11,7 +11,6 @@
  */
 
 import { useAuth } from '@/context/AuthContext';
-import { CustomizerContext } from '@/context/CustomizerContext';
 import OcrChurchSelector from '@/features/devel-tools/om-ocr/components/OcrChurchSelector';
 import OcrSetupGate from '@/features/devel-tools/om-ocr/components/OcrSetupGate';
 import OcrStudioNav from '@/features/devel-tools/om-ocr/components/OcrStudioNav';
@@ -50,7 +49,7 @@ import {
   IconUpload,
   IconX,
 } from '@tabler/icons-react';
-import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
@@ -204,8 +203,6 @@ const UploadRecordsPage: React.FC = () => {
   const isOcrStudioUpload = location.pathname.includes('/devel/ocr-studio');
   const isPortalUpload = location.pathname.startsWith('/portal');
   const { selectedChurchId: studioChurchId } = useOcrChurchSelector();
-  const { isLayout, setIsLayout } = useContext(CustomizerContext);
-  const previousLayoutRef = useRef<string | null>(null);
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
   const { user, isSuperAdmin } = useAuth();
@@ -248,23 +245,6 @@ const UploadRecordsPage: React.FC = () => {
   const completedCount = queue.filter((f) => f.status === 'completed').length;
   const failedCount = queue.filter((f) => f.status === 'failed' || f.status === 'error').length;
   const pendingCount = queue.filter((f) => f.status === 'pending').length;
-
-  // OCR Studio upload uses full-width container layout
-  useEffect(() => {
-    if (!isOcrStudioUpload) return;
-    previousLayoutRef.current = isLayout;
-    if (isLayout !== 'full') {
-      setIsLayout('full');
-    }
-    return () => {
-      const prev = previousLayoutRef.current;
-      if (prev && prev !== 'full') {
-        setIsLayout(prev);
-      }
-      previousLayoutRef.current = null;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOcrStudioUpload, setIsLayout]);
 
   // ─── Load churches for admin / manager church picker ──
   useEffect(() => {
