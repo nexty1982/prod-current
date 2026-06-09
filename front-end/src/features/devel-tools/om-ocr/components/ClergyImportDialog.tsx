@@ -85,10 +85,14 @@ export const ClergyImportDialog: React.FC<ClergyImportDialogProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<string | null>(null);
 
-  const resetPreview = () => {
+  const clearPreview = () => {
     setRows([]);
-    setError(null);
     setStatus(null);
+  };
+
+  const resetPreview = () => {
+    clearPreview();
+    setError(null);
   };
 
   const setPreviewRows = (parsed: ClergyImportRow[], source: string) => {
@@ -106,7 +110,7 @@ export const ClergyImportDialog: React.FC<ClergyImportDialogProps> = ({
       setPreviewRows(parsed, file.name);
     } catch (err: any) {
       setError(err.message || 'Failed to parse file');
-      resetPreview();
+      clearPreview();
     } finally {
       setLoading(false);
     }
@@ -134,14 +138,16 @@ export const ClergyImportDialog: React.FC<ClergyImportDialogProps> = ({
       }
       setPreviewRows(parsed, 'OCR image');
     } catch (err: any) {
-      const status = err.response?.status;
+      const status = err.response?.status ?? err.status;
       const msg = err.response?.data?.error || err.message || 'OCR extraction failed';
       if (status === 403) {
         setError('Access denied for this parish. Select a church you manage, or sign in as an admin.');
+      } else if (status === 401) {
+        setError('Session expired — refresh the page and sign in again.');
       } else {
         setError(msg);
       }
-      resetPreview();
+      clearPreview();
     } finally {
       setLoading(false);
     }
@@ -166,7 +172,7 @@ export const ClergyImportDialog: React.FC<ClergyImportDialogProps> = ({
       setPreviewRows(parsed, 'pasted text');
     } catch (err: any) {
       setError(err.response?.data?.error || err.message || 'Failed to parse text');
-      resetPreview();
+      clearPreview();
     } finally {
       setLoading(false);
     }
@@ -372,6 +378,12 @@ export const ClergyImportDialog: React.FC<ClergyImportDialogProps> = ({
           </Stack>
         </TabPanel>
 
+        {error && (
+          <Alert severity="error" sx={{ mt: 2 }} onClose={() => setError(null)}>
+            {error}
+          </Alert>
+        )}
+
         {loading && (
           <Stack direction="row" alignItems="center" spacing={1} sx={{ mt: 2 }}>
             <CircularProgress size={20} />
@@ -379,7 +391,6 @@ export const ClergyImportDialog: React.FC<ClergyImportDialogProps> = ({
           </Stack>
         )}
 
-        {error && <Alert severity="error" sx={{ mt: 2 }} onClose={() => setError(null)}>{error}</Alert>}
         {status && <Alert severity={rows.length ? 'success' : 'warning'} sx={{ mt: 2 }}>{status}</Alert>}
 
         {rows.length > 0 && (

@@ -203,8 +203,10 @@ export const OcrStudioSettingsPanel: React.FC = () => {
       const res = await apiClient.get(`/api/church/${effectiveChurchId}/ocr/rules/config/entities`);
       const data = res.data?.entities || res.entities || [];
       setEntities(data);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to load entities:", err);
+      const msg = err?.message || 'Failed to load parish configuration';
+      setError(msg);
     } finally {
       setEntitiesLoading(false);
     }

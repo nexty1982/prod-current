@@ -11,6 +11,8 @@ import {
   type ClergyImportRow,
 } from '../../services/ocr/parseClergyListText';
 
+const { requireAuth } = require('../../middleware/requireAuth');
+
 const clergyImageUpload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 20 * 1024 * 1024 },
@@ -18,7 +20,9 @@ const clergyImageUpload = multer({
 
 const router = Router({ mergeParams: true });
 
-// Middleware to verify church access
+// Authenticate first (JWT or session), then verify parish access.
+router.use(requireAuth);
+
 const checkAccess = (req: any, res: any, next: any) => {
   const churchId = parseInt(req.params.churchId, 10);
   if (!validateChurchAccess(req, churchId)) {
