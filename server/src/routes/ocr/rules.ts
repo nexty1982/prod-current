@@ -1,8 +1,20 @@
 import { Router } from 'express';
+import multer from 'multer';
 import { promisePool } from '../../config/db';
 import { validateChurchAccess, resolveChurchDb } from './helpers';
 import { validateRuleSchema } from '../../services/ocr/rules/ruleSchemaValidator';
 import { ParishRulesEngine } from '../../services/ocr/rules/ParishRulesEngine';
+import {
+  parseClergyListText,
+  parseClergyStructuredRows,
+  normalizeClergyImportRow,
+  type ClergyImportRow,
+} from '../../services/ocr/parseClergyListText';
+
+const clergyImageUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 20 * 1024 * 1024 },
+});
 
 const router = Router({ mergeParams: true });
 
@@ -137,6 +149,150 @@ router.delete('/rules/config/entities/:id', async (req: any, res: any) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+// POST /rules/config/entities/parse — preview clergy rows from text or structured data
+router.post('/rules/config/entities/parse', async (req: any, res: any) => {
+  try {
+    const { text, rows, headers, default_role } = req.body || {};
+    const defaultRole = String(default_role || 'Rector').trim() || 'Rector';
+
+    let parsed: ClergyImportRow[] = [];
+    if (typeof text === 'string' && text.trim()) {
+      parsed = parseClergyListText(text, defaultRole);
+    } else if (Array.isArray(rows) && rows.length > 0) {
+      parsed = parseClergyStructuredRows(rows, Array.isArray(headers) ? headers : undefined, defaultRole);
+    } else {
+      return res.status(400).json({ error: 'Provide text or rows to parse' });
+    }
+
+    res.json({ ok: true, rows: parsed, count: parsed.length });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /rules/config/entities/bulk — import multiple clergy configuration entities
+router.post('/rules/config/entities/bulk', async (req: any, res: any) => {
+  try {
+    const churchId = parseInt(req.params.churchId, 10);
+    const { entities, skip_duplicates, default_role } = req.body || {};
+    const defaultRole = String(default_role || 'Rector').trim() || 'Rector';
+    const skipDuplicates = skip_duplicates !== false;
+
+    if (!Array.isArray(entities) || entities.length === 0) {
+      return res.status(400).json({ error: 'entities array is required' });
+    }
+    if (entities.length > 500) {
+      return res.status(400).json({ error: 'Maximum 500 entities per import' });
+    }
+
+    const userEmail = req.session?.user?.email || req.user?.email || 'system';
+    const existing = new Set<string>();
+
+    if (skipDuplicates) {
+      const [existingRows]: any = await promisePool.query(
+        `SELECT canonical_value FROM ocr_parish_configuration_entities
+         WHERE church_id = ? AND entity_type = 'clergy' AND is_active = 1`,
+        [churchId],
+      );
+      for (const row of existingRows) {
+        existing.add(String(row.canonical_value || '').trim().toLowerCase());
+      }
+    }
+
+    let created = 0;
+    let skipped = 0;
+    const errors: string[] = [];
+
+    for (let i = 0; i < entities.length; i++) {
+      const normalized = normalizeClergyImportRow(entities[i], defaultRole);
+      if (!normalized) {
+        errors.push(`Row ${i + 1}: missing canonical name`);
+        continue;
+      }
+
+      const key = normalized.canonical_value.toLowerCase();
+      if (skipDuplicates && existing.has(key)) {
+        skipped += 1;
+        continue;
+      }
+
+      try {
+        await promisePool.query(
+          `INSERT INTO ocr_parish_configuration_entities
+           (church_id, entity_type, canonical_value, display_label, role, active_from, active_to, variants_json, source_notes, created_by)
+           VALUES (?, 'clergy', ?, ?, ?, ?, ?, ?, ?, ?)`,
+          [
+            churchId,
+            normalized.canonical_value,
+            normalized.canonical_value,
+            normalized.role,
+            normalized.active_from,
+            normalized.active_to,
+            normalized.variants_json.length ? JSON.stringify(normalized.variants_json) : null,
+            normalized.source_notes,
+            userEmail,
+          ],
+        );
+        existing.add(key);
+        created += 1;
+      } catch (insertErr: any) {
+        errors.push(`Row ${i + 1} (${normalized.canonical_value}): ${insertErr.message}`);
+      }
+    }
+
+    res.json({
+      ok: true,
+      created,
+      skipped,
+      errors,
+      message: `Imported ${created} clergy record${created === 1 ? '' : 's'}${skipped ? `, skipped ${skipped} duplicate${skipped === 1 ? '' : 's'}` : ''}.`,
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /rules/config/entities/ocr-extract — OCR a clergy roster image and return parsed rows
+router.post(
+  '/rules/config/entities/ocr-extract',
+  clergyImageUpload.single('file'),
+  async (req: any, res: any) => {
+    try {
+      if (!req.file?.buffer?.length) {
+        return res.status(400).json({ error: 'Image file is required (field: file)' });
+      }
+
+      const defaultRole = String(req.body?.default_role || 'Rector').trim() || 'Rector';
+      const vision = require('@google-cloud/vision');
+      const visionConfig: any = { projectId: process.env.GOOGLE_CLOUD_PROJECT_ID };
+      if (process.env.GOOGLE_VISION_KEY_PATH) visionConfig.keyFilename = process.env.GOOGLE_VISION_KEY_PATH;
+      else if (process.env.GOOGLE_APPLICATION_CREDENTIALS) visionConfig.keyFilename = process.env.GOOGLE_APPLICATION_CREDENTIALS;
+
+      const client = new vision.ImageAnnotatorClient(visionConfig);
+      const [visionResult] = await client.annotateImage({
+        image: { content: req.file.buffer },
+        imageContext: { languageHints: ['en'] },
+        features: [{ type: 'DOCUMENT_TEXT_DETECTION' }],
+      });
+
+      const fullText = visionResult?.fullTextAnnotation?.text || '';
+      if (!fullText.trim()) {
+        return res.status(422).json({ error: 'No text detected in image' });
+      }
+
+      const rows = parseClergyListText(fullText, defaultRole);
+      res.json({
+        ok: true,
+        text: fullText,
+        rows,
+        count: rows.length,
+      });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message || 'OCR extraction failed' });
+    }
+  },
+);
 
 // -------------------------------------------------------------------------
 // Rules Configuration APIs

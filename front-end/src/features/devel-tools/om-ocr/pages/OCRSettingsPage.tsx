@@ -45,7 +45,9 @@ import {
     IconPlus,
     IconTrash,
     IconEdit,
+    IconFileUpload,
 } from '@tabler/icons-react';
+import { ClergyImportDialog } from '../components/ClergyImportDialog';
 import React, { useCallback, useEffect, useState } from 'react';
 import { Navigate, useSearchParams } from 'react-router-dom';
 
@@ -124,6 +126,7 @@ export const OcrStudioSettingsPanel: React.FC = () => {
 
   // Dialog & Form States
   const [clergyDialogOpen, setClergyDialogOpen] = useState(false);
+  const [clergyImportOpen, setClergyImportOpen] = useState(false);
   const [editingClergy, setEditingClergy] = useState<any>(null);
   const [clergyForm, setClergyForm] = useState({
     canonical_value: '',
@@ -932,24 +935,33 @@ export const OcrStudioSettingsPanel: React.FC = () => {
                 Configure clergy canonical names, spellings, active date ranges, and OCR variants.
               </Typography>
             </Box>
-            <Button
-              variant="contained"
-              startIcon={<IconPlus size={16} />}
-              onClick={() => {
-                setEditingClergy(null);
-                setClergyForm({
-                  canonical_value: '',
-                  role: 'Rector',
-                  active_from: '',
-                  active_to: '',
-                  variants_json: '',
-                  source_notes: ''
-                });
-                setClergyDialogOpen(true);
-              }}
-            >
-              Add Clergy
-            </Button>
+            <Stack direction="row" spacing={1}>
+              <Button
+                variant="outlined"
+                startIcon={<IconFileUpload size={16} />}
+                onClick={() => setClergyImportOpen(true)}
+              >
+                Import
+              </Button>
+              <Button
+                variant="contained"
+                startIcon={<IconPlus size={16} />}
+                onClick={() => {
+                  setEditingClergy(null);
+                  setClergyForm({
+                    canonical_value: '',
+                    role: 'Rector',
+                    active_from: '',
+                    active_to: '',
+                    variants_json: '',
+                    source_notes: ''
+                  });
+                  setClergyDialogOpen(true);
+                }}
+              >
+                Add Clergy
+              </Button>
+            </Stack>
           </Stack>
 
           {entitiesLoading ? (
@@ -1129,6 +1141,18 @@ export const OcrStudioSettingsPanel: React.FC = () => {
           )}
         </TabPanel>
       </Paper>
+
+      {effectiveChurchId && (
+        <ClergyImportDialog
+          open={clergyImportOpen}
+          onClose={() => setClergyImportOpen(false)}
+          churchId={effectiveChurchId}
+          onImported={() => {
+            loadEntities();
+            setMapHint('Clergy import completed.');
+          }}
+        />
+      )}
 
       {/* Clergy Dialog */}
       <Dialog open={clergyDialogOpen} onClose={() => setClergyDialogOpen(false)} maxWidth="sm" fullWidth>
