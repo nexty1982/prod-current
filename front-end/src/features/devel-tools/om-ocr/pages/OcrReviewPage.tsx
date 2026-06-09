@@ -1582,8 +1582,11 @@ const OcrReviewPage: React.FC = () => {
   };
 
   const [selectedAwaitingJobIds, setSelectedAwaitingJobIds] = useState<Set<number>>(new Set());
+  const [selectedCompletedJobIds, setSelectedCompletedJobIds] = useState<Set<number>>(new Set());
   const [pendingDeleteJobIds, setPendingDeleteJobIds] = useState<number[] | null>(null);
+  const [pendingSeedJobIds, setPendingSeedJobIds] = useState<number[] | null>(null);
   const [deletingJobs, setDeletingJobs] = useState(false);
+  const [bulkSeeding, setBulkSeeding] = useState(false);
 
   const toggleAwaitingJobSelection = useCallback((jobId: number) => {
     setSelectedAwaitingJobIds((prev) => {
@@ -1594,6 +1597,63 @@ const OcrReviewPage: React.FC = () => {
     });
   }, []);
 
+  const toggleCompletedJobSelection = useCallback((jobId: number) => {
+    setSelectedCompletedJobIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(jobId)) next.delete(jobId);
+      else next.add(jobId);
+      return next;
+    });
+  }, []);
+
+  useEffect(() => {
+    const visibleIds = new Set(completedJobs.map((j) => Number(j.id)));
+    setSelectedCompletedJobIds((prev) => {
+      const next = new Set([...prev].filter((id) => visibleIds.has(id)));
+      return next.size === prev.size ? prev : next;
+    });
+  }, [completedJobs]);
+
+  const handleBulkSeedJobs = useCallback(async (jobIds: number[]) => {
+    if (!churchId || jobIds.length === 0) return;
+    const seedable = jobIds.filter((id) => {
+      const job = jobs.find((j) => Number(j.id) === id);
+      return job?.review_status === 'ready_to_seed';
+    });
+    if (seedable.length === 0) return;
+
+    setBulkSeeding(true);
+    let success = 0;
+    const errors: string[] = [];
+    try {
+      for (const jobId of seedable) {
+        try {
+          await apiClient.post(`/api/church/${churchId}/ocr/jobs/${jobId}/seed`);
+          success += 1;
+        } catch (err: any) {
+          errors.push(`Job #${jobId}: ${err?.response?.data?.error || err?.message || 'Seed failed'}`);
+        }
+      }
+      await loadJobs();
+      setSelectedCompletedJobIds((prev) => {
+        const next = new Set(prev);
+        seedable.forEach((id) => next.delete(id));
+        return next;
+      });
+      if (selectedJobId && seedable.includes(selectedJobId)) {
+        navigate(reviewBase);
+      }
+      if (errors.length > 0) {
+        alert(`Seeded ${success} job(s). Failed:\n${errors.join('\n')}`);
+      } else {
+        alert(`Seeded ${success} record batch(es) successfully.`);
+      }
+    } finally {
+      setBulkSeeding(false);
+      setPendingSeedJobIds(null);
+    }
+  }, [churchId, jobs, loadJobs, selectedJobId, navigate, reviewBase]);
+
   const handleDeleteJobs = useCallback(async (jobIds: number[]) => {
     if (!churchId || jobIds.length === 0) return;
     setDeletingJobs(true);
@@ -1602,6 +1662,11 @@ const OcrReviewPage: React.FC = () => {
       const idSet = new Set(jobIds);
       setJobs((prevJobs) => prevJobs.filter((j) => !idSet.has(Number(j.id))));
       setSelectedAwaitingJobIds((prev) => {
+        const next = new Set(prev);
+        jobIds.forEach((id) => next.delete(id));
+        return next;
+      });
+      setSelectedCompletedJobIds((prev) => {
         const next = new Set(prev);
         jobIds.forEach((id) => next.delete(id));
         return next;
@@ -1631,6 +1696,13 @@ const OcrReviewPage: React.FC = () => {
   const allAwaitingSelected = awaitingJobs.length > 0
     && awaitingJobs.every((j) => selectedAwaitingJobIds.has(Number(j.id)));
   const someAwaitingSelected = selectedAwaitingJobIds.size > 0 && !allAwaitingSelected;
+
+  const allCompletedSelected = completedJobs.length > 0
+    && completedJobs.every((j) => selectedCompletedJobIds.has(Number(j.id)));
+  const someCompletedSelected = selectedCompletedJobIds.size > 0 && !allCompletedSelected;
+  const seedableCompletedCount = completedJobs.filter(
+    (j) => selectedCompletedJobIds.has(Number(j.id)) && j.review_status === 'ready_to_seed',
+  ).length;
 
   return (
     <Box sx={{ height: 'calc(100vh - 64px)', display: 'flex', flexDirection: 'column' }}>
@@ -1861,57 +1933,128 @@ const OcrReviewPage: React.FC = () => {
               })}
             </List>
 
-            <Typography variant="subtitle2" fontWeight={700} sx={{ mb: 1 }}>Jobs complete</Typography>
+            <Stack direction="row" alignItems="center" spacing={0.5} sx={{ mb: 1 }}>
+              <Checkbox
+                size="small"
+                checked={allCompletedSelected}
+                indeterminate={someCompletedSelected}
+                disabled={completedJobs.length === 0}
+                onChange={(_, checked) => {
+                  if (checked) {
+                    setSelectedCompletedJobIds(new Set(completedJobs.map((j) => Number(j.id))));
+                  } else {
+                    setSelectedCompletedJobIds(new Set());
+                  }
+                }}
+                sx={{ p: 0.5 }}
+              />
+              <Typography variant="subtitle2" fontWeight={700} noWrap>
+                Jobs complete
+                {selectedCompletedJobIds.size > 0 ? ` (${selectedCompletedJobIds.size})` : ''}
+              </Typography>
+            </Stack>
+            {selectedCompletedJobIds.size > 0 && (
+              <Stack direction="row" spacing={1} sx={{ mb: 1, flexWrap: 'wrap' }}>
+                {seedableCompletedCount > 0 && (
+                  <Button
+                    size="small"
+                    color="success"
+                    variant="outlined"
+                    startIcon={<IconDatabase size={14} />}
+                    sx={{ textTransform: 'none' }}
+                    disabled={bulkSeeding}
+                    onClick={() => {
+                      const ids = completedJobs
+                        .filter((j) => selectedCompletedJobIds.has(Number(j.id)) && j.review_status === 'ready_to_seed')
+                        .map((j) => Number(j.id));
+                      setPendingSeedJobIds(ids);
+                    }}
+                  >
+                    Seed selected ({seedableCompletedCount})
+                  </Button>
+                )}
+                <Button
+                  size="small"
+                  color="error"
+                  variant="outlined"
+                  startIcon={<IconTrash size={14} />}
+                  sx={{ textTransform: 'none' }}
+                  onClick={() => setPendingDeleteJobIds(Array.from(selectedCompletedJobIds))}
+                >
+                  Delete selected ({selectedCompletedJobIds.size})
+                </Button>
+              </Stack>
+            )}
             {!jobsLoading && completedJobs.length === 0 && (
               <Alert severity="info" sx={{ py: 0.5, px: 1, fontSize: '0.75rem' }}>No completed jobs.</Alert>
             )}
             <List dense disablePadding>
               {completedJobs.map((j) => {
+                const jobId = Number(j.id);
                 const cfg = STATUS_LABELS[j.review_status] || { label: j.review_status, color: 'default' as const };
-                const active = selectedJobId === Number(j.id);
+                const active = selectedJobId === jobId;
+                const checked = selectedCompletedJobIds.has(jobId);
                 const countStr = typeof j.records_count === 'number' ? `${j.confirmed_count || 0}/${j.records_count} ` : '';
                 return (
-                  <ListItem key={j.id} disablePadding sx={{ mb: 0.5 }}>
-                    <ListItemButton
-                      selected={active}
-                      onClick={() => navigate(`${reviewBase}/${j.id}`)}
+                  <ListItem key={j.id} disablePadding sx={{ mb: 0.75 }}>
+                    <Paper
+                      variant="outlined"
                       sx={{
+                        width: '100%',
                         borderRadius: 1,
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 0.75,
-                        py: 0.75,
-                        pr: 1,
+                        overflow: 'hidden',
+                        ...(active && { borderColor: 'primary.main', borderWidth: 2 }),
                       }}
                     >
-                      <ListItemText
-                        primary={`${countStr}${j.filename || `Job #${j.id}`}`}
-                        secondary={new Date(j.created_at).toLocaleString()}
-                        sx={{ flex: 1, minWidth: 0, my: 0 }}
-                        primaryTypographyProps={{ noWrap: true, fontSize: '0.85rem', fontWeight: active ? 700 : 500 }}
-                        secondaryTypographyProps={{ noWrap: true }}
-                      />
-                      <Chip
-                        label={cfg.label}
-                        size="small"
-                        color={cfg.color}
-                        variant="outlined"
-                        sx={{ flexShrink: 0 }}
-                      />
-                      <Tooltip title="Delete job completely">
-                        <IconButton
+                      <ListItemButton
+                        selected={active}
+                        onClick={() => navigate(`${reviewBase}/${j.id}`)}
+                        sx={{
+                          borderRadius: 0,
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 0.75,
+                          py: 0.75,
+                          pr: 1,
+                        }}
+                      >
+                        <Checkbox
                           size="small"
-                          color="error"
+                          checked={checked}
+                          onClick={(e) => e.stopPropagation()}
+                          onChange={() => toggleCompletedJobSelection(jobId)}
+                          sx={{ p: 0.25, flexShrink: 0 }}
+                        />
+                        {churchId && <JobListThumb churchId={churchId} jobId={jobId} />}
+                        <ListItemText
+                          primary={`${countStr}${j.filename || `Job #${j.id}`}`}
+                          secondary={new Date(j.created_at).toLocaleString()}
+                          sx={{ flex: 1, minWidth: 0, my: 0 }}
+                          primaryTypographyProps={{ noWrap: true, fontSize: '0.85rem', fontWeight: active ? 700 : 500 }}
+                          secondaryTypographyProps={{ noWrap: true }}
+                        />
+                        <Chip
+                          label={cfg.label}
+                          size="small"
+                          color={cfg.color}
+                          variant="outlined"
                           sx={{ flexShrink: 0 }}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setPendingDeleteJobIds([Number(j.id)]);
-                          }}
-                        >
-                          <IconTrash size={16} />
-                        </IconButton>
-                      </Tooltip>
-                    </ListItemButton>
+                        />
+                        <Tooltip title="Delete job completely">
+                          <IconButton
+                            size="small"
+                            color="error"
+                            sx={{ flexShrink: 0 }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setPendingDeleteJobIds([jobId]);
+                            }}
+                          >
+                            <IconTrash size={16} />
+                          </IconButton>
+                        </Tooltip>
+                      </ListItemButton>
+                    </Paper>
                   </ListItem>
                 );
               })}
@@ -3062,6 +3205,33 @@ const OcrReviewPage: React.FC = () => {
           <Button onClick={() => { setRecordBox(null); setConfirmLayoutDialogOpen(false); }} disabled={saveLayoutLoading}>Cancel</Button>
           <Button onClick={handleSaveDefinedLayout} color="primary" variant="contained" disabled={saveLayoutLoading}>
             {saveLayoutLoading ? <CircularProgress size={24} color="inherit" /> : 'Create Template & Re-process'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={pendingSeedJobIds !== null} onClose={() => !bulkSeeding && setPendingSeedJobIds(null)}>
+        <DialogTitle>
+          {pendingSeedJobIds && pendingSeedJobIds.length > 1
+            ? `Seed ${pendingSeedJobIds.length} Jobs`
+            : 'Seed Job to Records'}
+        </DialogTitle>
+        <DialogContent>
+          <Typography>
+            {pendingSeedJobIds && pendingSeedJobIds.length > 1
+              ? `Seed ${pendingSeedJobIds.length} reviewed jobs into church records?`
+              : `Seed Job #${pendingSeedJobIds?.[0]} into church records?`}
+            {' '}Only jobs marked Ready to Seed will be written to the records database.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setPendingSeedJobIds(null)} disabled={bulkSeeding}>Cancel</Button>
+          <Button
+            onClick={() => pendingSeedJobIds && handleBulkSeedJobs(pendingSeedJobIds)}
+            color="success"
+            variant="contained"
+            disabled={bulkSeeding}
+          >
+            {bulkSeeding ? <CircularProgress size={24} color="inherit" /> : 'Seed to Records'}
           </Button>
         </DialogActions>
       </Dialog>

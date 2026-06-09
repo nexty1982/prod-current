@@ -51,6 +51,7 @@ import {
 } from '@mui/material';
 import {
   IconCloudUpload,
+  IconDatabase,
   IconFile,
   IconLayoutGrid,
   IconList,
@@ -321,7 +322,9 @@ const UploadRecordsPage: React.FC = () => {
   const [historyViewMode, setHistoryViewMode] = useState<HistoryViewMode>('list');
   const [selectedHistoryJobIds, setSelectedHistoryJobIds] = useState<Set<string>>(new Set());
   const [pendingDeleteHistoryIds, setPendingDeleteHistoryIds] = useState<string[] | null>(null);
+  const [pendingSeedHistoryIds, setPendingSeedHistoryIds] = useState<string[] | null>(null);
   const [deletingHistoryJobs, setDeletingHistoryJobs] = useState(false);
+  const [seedingHistoryJobs, setSeedingHistoryJobs] = useState(false);
 
   // Church OCR settings (language + record type for uploads)
   const [ocrLanguage, setOcrLanguage] = useState('en');
@@ -594,6 +597,46 @@ const UploadRecordsPage: React.FC = () => {
   const allHistorySelected = filteredHistory.length > 0
     && filteredHistory.every((j) => selectedHistoryJobIds.has(j.id));
   const someHistorySelected = selectedHistoryJobIds.size > 0 && !allHistorySelected;
+  const seedableHistoryCount = filteredHistory.filter(
+    (j) => selectedHistoryJobIds.has(j.id) && j.review_status === 'ready_to_seed',
+  ).length;
+
+  const handleSeedHistoryJobs = useCallback(async (jobIds: string[]) => {
+    if (!effectiveChurchId || jobIds.length === 0) return;
+    const seedable = jobIds.filter((id) => {
+      const job = history.find((j) => j.id === id);
+      return job?.review_status === 'ready_to_seed';
+    });
+    if (seedable.length === 0) return;
+
+    setSeedingHistoryJobs(true);
+    let success = 0;
+    const errors: string[] = [];
+    try {
+      for (const jobId of seedable) {
+        try {
+          await apiClient.post(`/api/church/${effectiveChurchId}/ocr/jobs/${jobId}/seed`);
+          success += 1;
+        } catch (err: any) {
+          errors.push(`Job #${jobId}: ${err?.response?.data?.error || err?.message || 'Seed failed'}`);
+        }
+      }
+      await fetchHistory();
+      setSelectedHistoryJobIds((prev) => {
+        const next = new Set(prev);
+        seedable.forEach((id) => next.delete(id));
+        return next;
+      });
+      if (errors.length > 0) {
+        toast.warn(`Seeded ${success} upload(s). ${errors.length} failed.`);
+      } else {
+        toast.success(success === 1 ? 'Record seeded successfully' : `Seeded ${success} records successfully`);
+      }
+    } finally {
+      setSeedingHistoryJobs(false);
+      setPendingSeedHistoryIds(null);
+    }
+  }, [effectiveChurchId, history, fetchHistory]);
 
   const openReviewForJob = useCallback((jobId: string) => {
     if (!effectiveChurchId) return;
@@ -955,16 +998,36 @@ const UploadRecordsPage: React.FC = () => {
                       : 'Select all'}
                   </Typography>
                   {selectedHistoryJobIds.size > 0 && (
-                    <Button
-                      size="small"
-                      color="error"
-                      variant="outlined"
-                      startIcon={<IconTrash size={14} />}
-                      sx={{ textTransform: 'none', ml: 'auto' }}
-                      onClick={() => setPendingDeleteHistoryIds(Array.from(selectedHistoryJobIds))}
-                    >
-                      Delete selected ({selectedHistoryJobIds.size})
-                    </Button>
+                    <Stack direction="row" spacing={1} sx={{ ml: 'auto' }}>
+                      {seedableHistoryCount > 0 && (
+                        <Button
+                          size="small"
+                          color="success"
+                          variant="outlined"
+                          startIcon={<IconDatabase size={14} />}
+                          sx={{ textTransform: 'none' }}
+                          disabled={seedingHistoryJobs}
+                          onClick={() => {
+                            const ids = filteredHistory
+                              .filter((j) => selectedHistoryJobIds.has(j.id) && j.review_status === 'ready_to_seed')
+                              .map((j) => j.id);
+                            setPendingSeedHistoryIds(ids);
+                          }}
+                        >
+                          Seed selected ({seedableHistoryCount})
+                        </Button>
+                      )}
+                      <Button
+                        size="small"
+                        color="error"
+                        variant="outlined"
+                        startIcon={<IconTrash size={14} />}
+                        sx={{ textTransform: 'none' }}
+                        onClick={() => setPendingDeleteHistoryIds(Array.from(selectedHistoryJobIds))}
+                      >
+                        Delete selected ({selectedHistoryJobIds.size})
+                      </Button>
+                    </Stack>
                   )}
                 </Stack>
               )}
@@ -1173,6 +1236,38 @@ const UploadRecordsPage: React.FC = () => {
         </>
       )}
     </Box>
+
+      <Dialog open={pendingSeedHistoryIds !== null} onClose={() => !seedingHistoryJobs && setPendingSeedHistoryIds(null)}>
+        <DialogTitle>
+          {pendingSeedHistoryIds && pendingSeedHistoryIds.length > 1
+            ? `Seed ${pendingSeedHistoryIds.length} uploads`
+            : 'Seed upload to records'}
+        </DialogTitle>
+        <DialogContent>
+          <Typography variant="body2">
+            {pendingSeedHistoryIds && pendingSeedHistoryIds.length > 1
+              ? `Seed ${pendingSeedHistoryIds.length} reviewed uploads into church records?`
+              : (() => {
+                  const job = history.find((j) => j.id === pendingSeedHistoryIds?.[0]);
+                  const label = job ? jobDisplayName(job) : `Job #${pendingSeedHistoryIds?.[0]}`;
+                  return `Seed "${label}" into church records?`;
+                })()}
+            {' '}Only uploads marked Ready to Seed will be written to the records database.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setPendingSeedHistoryIds(null)} disabled={seedingHistoryJobs}>Cancel</Button>
+          <Button
+            onClick={() => pendingSeedHistoryIds && handleSeedHistoryJobs(pendingSeedHistoryIds)}
+            color="success"
+            variant="contained"
+            disabled={seedingHistoryJobs}
+            sx={{ textTransform: 'none' }}
+          >
+            {seedingHistoryJobs ? <CircularProgress size={22} color="inherit" /> : 'Seed to Records'}
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       <Dialog open={pendingDeleteHistoryIds !== null} onClose={() => !deletingHistoryJobs && setPendingDeleteHistoryIds(null)}>
         <DialogTitle>
