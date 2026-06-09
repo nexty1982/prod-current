@@ -18,6 +18,7 @@ import type { ChurchRecordFieldConfig } from '@/features/devel-tools/om-ocr/conf
 import FusionOverlay from '@/features/devel-tools/om-ocr/components/FusionOverlay';
 import {
   buildPipelineState,
+  isJobInFlight,
   OcrReviewDropZone,
   OcrReviewPipelinePanel,
   type ReviewUploadQueueItem,
@@ -754,13 +755,24 @@ const OcrReviewPage: React.FC = () => {
     try {
       const res: any = await apiClient.get(`/api/church/${churchId}/ocr/jobs?limit=100`);
       const list: OcrJobRow[] = res?.data?.jobs || res?.jobs || [];
-      setJobs(list);
+      setJobs((prev) => {
+        if (prev.length === list.length && prev.every((p, i) => {
+          const n = list[i];
+          return n
+            && String(p.id) === String(n.id)
+            && p.status === n.status
+            && p.review_status === n.review_status;
+        })) {
+          return prev;
+        }
+        return list;
+      });
     } catch {
       setJobs([]);
     } finally {
       setJobsLoading(false);
     }
-  }, [churchId, selectedJobId]);
+  }, [churchId]);
 
   const loadExtract = useCallback(async (jobId: number) => {
     if (!churchId) return;
@@ -847,11 +859,15 @@ const OcrReviewPage: React.FC = () => {
     handleReviewFiles(e.dataTransfer.files);
   }, [handleReviewFiles]);
 
+  const uploadQueueRef = useRef(uploadQueue);
+  uploadQueueRef.current = uploadQueue;
+
   const startReviewUpload = useCallback(async () => {
-    if (!churchId || uploadQueue.length === 0) return;
+    if (!churchId) return;
+    const pending = uploadQueueRef.current.filter((f) => f.status === 'pending');
+    if (pending.length === 0) return;
     setIsUploadingFiles(true);
-    for (const item of uploadQueue) {
-      if (item.status !== 'pending') continue;
+    for (const item of pending) {
       setUploadQueue((q) => q.map((f) => (f.id === item.id ? { ...f, status: 'uploading', progress: 0 } : f)));
       try {
         const formData = new FormData();
@@ -875,76 +891,123 @@ const OcrReviewPage: React.FC = () => {
     }
     setIsUploadingFiles(false);
     loadJobs();
-  }, [churchId, uploadQueue, uploadRecordType, ocrLanguage, loadJobs]);
+  }, [churchId, uploadRecordType, ocrLanguage, loadJobs]);
+
+  const pendingUploadCount = useMemo(
+    () => uploadQueue.filter((f) => f.status === 'pending').length,
+    [uploadQueue],
+  );
 
   useEffect(() => {
-    if (!churchId || isUploadingFiles) return;
-    if (!uploadQueue.some((f) => f.status === 'pending')) return;
+    if (!churchId || isUploadingFiles || pendingUploadCount === 0) return;
     startReviewUpload();
-  }, [churchId, isUploadingFiles, uploadQueue, startReviewUpload]);
+  }, [churchId, isUploadingFiles, pendingUploadCount, startReviewUpload]);
+
+  const inFlightJobs = useMemo(
+    () => jobs.filter((j) => isJobInFlight(j)),
+    [jobs],
+  );
+
+  const hasActiveUploadPoll = useMemo(
+    () => uploadQueue.some(
+      (f) => f.status === 'pending'
+        || f.status === 'uploading'
+        || (f.jobId && !['completed', 'failed', 'error'].includes(f.status)),
+    ),
+    [uploadQueue],
+  );
+
+  const shouldPollJobs = hasActiveUploadPoll || inFlightJobs.length > 0;
+
+  const syncUploadQueueFromJobs = useCallback((list: OcrJobRow[]) => {
+    setUploadQueue((prev) => {
+      if (prev.length === 0) return prev;
+      let changed = false;
+      const statusMap = new Map(list.map((j) => [String(j.id), j]));
+      const next = prev.map((f) => {
+        if (!f.jobId) return f;
+        const job = statusMap.get(f.jobId);
+        if (!job) return f;
+        let uiStatus = f.status;
+        if (job.status === 'failed' || job.status === 'error') {
+          uiStatus = 'failed';
+        } else if (['agent_extracted', 'ready_to_seed', 'seeded'].includes(job.review_status)) {
+          uiStatus = 'completed';
+        } else if (job.status === 'processing') {
+          uiStatus = 'processing';
+        } else if (job.status === 'pending' || job.status === 'queued') {
+          uiStatus = 'queued';
+        } else if (job.status === 'completed' || job.status === 'complete') {
+          uiStatus = job.review_status === 'uploaded' ? 'queued' : 'processing';
+        }
+        if (uiStatus === f.status) return f;
+        changed = true;
+        return {
+          ...f,
+          status: uiStatus,
+          progress: uiStatus === 'completed' ? 100 : f.progress,
+          error: uiStatus === 'failed' ? (job as any).error_message || 'Processing failed' : f.error,
+        };
+      });
+      return changed ? next : prev;
+    });
+  }, []);
 
   useEffect(() => {
-    const hasActiveUploads = uploadQueue.some(
-      (f) => f.jobId && !['completed', 'failed', 'error'].includes(f.status),
-    );
-    if (!churchId || !hasActiveUploads) {
+    if (!churchId || !shouldPollJobs) {
       if (uploadPollRef.current) {
         clearInterval(uploadPollRef.current);
         uploadPollRef.current = null;
       }
       return;
     }
-    const pollUploadStatus = async () => {
+
+    const pollJobStatus = async () => {
       try {
         const res: any = await apiClient.get(`/api/church/${churchId}/ocr/jobs?limit=100`);
         const list: OcrJobRow[] = res?.data?.jobs || res?.jobs || [];
-        setJobs(list);
-        const statusMap = new Map(list.map((j) => [String(j.id), j]));
-        setUploadQueue((prev) => prev.map((f) => {
-          if (!f.jobId) return f;
-          const job = statusMap.get(f.jobId);
-          if (!job) return f;
-          let uiStatus = f.status;
-          if (job.status === 'failed' || job.status === 'error') {
-            uiStatus = 'failed';
-          } else if (['agent_extracted', 'ready_to_seed', 'seeded'].includes(job.review_status)) {
-            uiStatus = 'completed';
-          } else if (job.status === 'processing') {
-            uiStatus = 'processing';
-          } else if (job.status === 'pending' || job.status === 'queued') {
-            uiStatus = 'queued';
-          } else if (job.status === 'completed' || job.status === 'complete') {
-            uiStatus = job.review_status === 'uploaded' ? 'queued' : 'processing';
+        setJobs((prev) => {
+          if (prev.length === list.length && prev.every((p, i) => {
+            const n = list[i];
+            return n
+              && String(p.id) === String(n.id)
+              && p.status === n.status
+              && p.review_status === n.review_status;
+          })) {
+            return prev;
           }
-          if (uiStatus === f.status) return f;
-          return {
-            ...f,
-            status: uiStatus,
-            progress: uiStatus === 'completed' ? 100 : f.progress,
-            error: uiStatus === 'failed' ? (job as any).error_message || 'Processing failed' : f.error,
-          };
-        }));
+          return list;
+        });
+        syncUploadQueueFromJobs(list);
       } catch { /* non-fatal */ }
     };
-    pollUploadStatus();
-    uploadPollRef.current = setInterval(pollUploadStatus, 4000);
+
+    pollJobStatus();
+    uploadPollRef.current = setInterval(pollJobStatus, 10000);
     return () => {
       if (uploadPollRef.current) {
         clearInterval(uploadPollRef.current);
         uploadPollRef.current = null;
       }
     };
-  }, [churchId, uploadQueue]);
+  }, [churchId, shouldPollJobs, syncUploadQueueFromJobs]);
 
   useEffect(() => {
     if (uploadQueue.length === 0) return;
     if (!uploadQueue.every((f) => f.status === 'completed')) return;
     const timer = setTimeout(() => {
-      setUploadQueue([]);
-      loadJobs();
-    }, 2500);
+      setUploadQueue((prev) => (prev.every((f) => f.status === 'completed') ? [] : prev));
+    }, 2000);
     return () => clearTimeout(timer);
-  }, [uploadQueue, loadJobs]);
+  }, [uploadQueue]);
+
+  useEffect(() => {
+    if (!selectedJobId) return;
+    setUploadQueue((prev) => {
+      const next = prev.filter((f) => f.status !== 'completed');
+      return next.length === prev.length ? prev : next;
+    });
+  }, [selectedJobId]);
 
   const jobsById = useMemo(() => {
     const map = new Map<string, { status: string; review_status: string }>();
@@ -954,9 +1017,21 @@ const OcrReviewPage: React.FC = () => {
     return map;
   }, [jobs]);
 
+  const pipelineFocusJob = useMemo(() => {
+    const activeQueueItem = uploadQueue.find(
+      (f) => f.jobId && !['completed', 'failed', 'error', 'pending', 'uploading'].includes(f.status),
+    ) || uploadQueue.find((f) => ['uploading', 'queued', 'processing'].includes(f.status) && f.jobId);
+    if (activeQueueItem?.jobId) {
+      const job = jobs.find((j) => String(j.id) === activeQueueItem.jobId);
+      if (job) return job;
+    }
+    if (selectedJob && isJobInFlight(selectedJob)) return selectedJob;
+    return inFlightJobs[0] ?? null;
+  }, [uploadQueue, jobs, selectedJob, inFlightJobs]);
+
   const pipelineState = useMemo(
-    () => buildPipelineState(uploadQueue, jobsById),
-    [uploadQueue, jobsById],
+    () => buildPipelineState(uploadQueue, jobsById, pipelineFocusJob),
+    [uploadQueue, jobsById, pipelineFocusJob],
   );
 
   useEffect(() => {
@@ -1772,8 +1847,18 @@ const OcrReviewPage: React.FC = () => {
               })}
             </List>
           </Box>
-          <Box sx={{ flexShrink: 0, px: 2, pb: 2, pt: 0 }}>
-            <OcrReviewPipelinePanel state={pipelineState} />
+          <Box
+            sx={{
+              flexShrink: 0,
+              px: 2,
+              pb: 2,
+              pt: 1.5,
+              borderTop: '1px solid',
+              borderColor: 'divider',
+              bgcolor: 'background.paper',
+            }}
+          >
+            <OcrReviewPipelinePanel state={pipelineState} churchId={churchId} />
           </Box>
         </Box>
         )}
