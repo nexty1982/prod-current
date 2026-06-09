@@ -119,7 +119,14 @@ interface OcrJob {
   file_size_disk?: number | null;
 }
 
-interface ChurchOption { id: number; name: string; }
+interface ChurchOption {
+  id: number;
+  name: string;
+  church_name?: string;
+  city?: string;
+  state_province?: string;
+  country?: string;
+}
 interface Counts { queued: number; processing: number; completed: number; failed: number; stale: number; }
 interface ListResponse { rows: OcrJob[]; total: number; page: number; pageSize: number; counts: Counts; churches: ChurchOption[]; }
 

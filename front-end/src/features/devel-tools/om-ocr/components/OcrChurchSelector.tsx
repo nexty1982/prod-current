@@ -31,6 +31,9 @@ interface ChurchOption {
   id: number;
   church_name?: string;
   name?: string;
+  city?: string;
+  state_province?: string;
+  country?: string;
 }
 
 interface OcrChurchSelectorProps {

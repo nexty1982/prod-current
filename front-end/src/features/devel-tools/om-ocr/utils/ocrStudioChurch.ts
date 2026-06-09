@@ -35,13 +35,33 @@ export function setOcrStudioChurchParam(
   }, { replace: true });
 }
 
-export function formatOcrStudioChurchLabel(church: {
+export type OcrStudioChurchLabelFields = {
   id: number;
   church_name?: string;
   name?: string;
-}): string {
-  const name = church.church_name || church.name || `Church ${church.id}`;
-  return `${name} (#${church.id})`;
+  city?: string;
+  state_province?: string;
+  state_code?: string;
+  state?: string;
+  country?: string;
+};
+
+function formatOcrStudioChurchLocation(church: OcrStudioChurchLabelFields): string | null {
+  const city = (church.city || '').trim();
+  const state = (church.state_province || church.state_code || church.state || '').trim();
+  if (city && state) return `${city}, ${state}`;
+  if (city) return city;
+  if (state) return state;
+  const country = (church.country || '').trim();
+  if (country && !['US', 'USA', 'United States'].includes(country)) return country;
+  return null;
+}
+
+export function formatOcrStudioChurchLabel(church: OcrStudioChurchLabelFields): string {
+  const parishName = church.church_name || church.name || `Church ${church.id}`;
+  const location = formatOcrStudioChurchLocation(church);
+  if (location) return `${parishName} — ${location} (#${church.id})`;
+  return `${parishName} (#${church.id})`;
 }
 
 export function ocrStudioPathWithChurch(path: string, searchParams: URLSearchParams): string {

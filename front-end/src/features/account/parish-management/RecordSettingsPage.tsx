@@ -79,7 +79,14 @@ const RecordSettingsPage: React.FC = () => {
   const { selectedChurchId: studioChurchId } = useOcrChurchSelector();
 
   // Church selector for super_admin (non-OCR-studio routes)
-  const [churches, setChurches] = useState<Array<{ id: number; name: string }>>([]);
+  const [churches, setChurches] = useState<Array<{
+    id: number;
+    name: string;
+    church_name?: string;
+    city?: string;
+    state_province?: string;
+    country?: string;
+  }>>([]);
   const churchParam = searchParams.get('church') || searchParams.get('church_id');
 
   useEffect(() => {
@@ -118,9 +125,11 @@ const RecordSettingsPage: React.FC = () => {
   const churchName = useMemo(() => {
     const id = churchId;
     if (!id) return null;
-    if (churchMetadata?.church_name) return formatOcrStudioChurchLabel({ id, church_name: churchMetadata.church_name });
     const found = churches.find((c) => c.id === id);
-    if (found) return formatOcrStudioChurchLabel({ id: found.id, name: found.name });
+    if (found) return formatOcrStudioChurchLabel(found);
+    if (churchMetadata?.church_name) {
+      return formatOcrStudioChurchLabel({ id, church_name: churchMetadata.church_name });
+    }
     return `Church (#${id})`;
   }, [churchMetadata, churchId, churches]);
 

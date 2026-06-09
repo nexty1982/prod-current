@@ -69,7 +69,14 @@ interface TableJob {
   has_table_extraction: boolean;
 }
 
-interface ChurchOption { id: number; name: string; }
+interface ChurchOption {
+  id: number;
+  name: string;
+  church_name?: string;
+  city?: string;
+  state_province?: string;
+  country?: string;
+}
 
 interface ContractCell {
   row_index: number;

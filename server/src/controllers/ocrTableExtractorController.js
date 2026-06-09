@@ -103,7 +103,8 @@ async function listTableJobs(req, res) {
 
     // Churches dropdown
     const [churches] = await pool.query(
-      'SELECT id, name FROM churches WHERE database_name IS NOT NULL ORDER BY name ASC'
+      `SELECT id, name, church_name, city, state_province, country
+       FROM churches WHERE database_name IS NOT NULL ORDER BY name ASC`
     );
 
     res.json({ rows, total, page, pageSize, churches });

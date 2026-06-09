@@ -103,7 +103,11 @@ router.get('/my/churches', requireAuth, async (req, res) => {
       SELECT
         id,
         name,
+        church_name,
         email,
+        city,
+        state_province,
+        country,
         database_name,
         is_active
       FROM churches
@@ -392,6 +396,9 @@ router.get('/churches', requireAuth, async (req, res) => {
         name,
         church_name,
         email,
+        city,
+        state_province,
+        country,
         database_name,
         is_active
       FROM churches
@@ -458,6 +465,9 @@ router.get('/churches', requireAuth, async (req, res) => {
       church_name: church.church_name || church.name,
       name: church.name || church.church_name,
       email: church.email,
+      city: church.city,
+      state_province: church.state_province,
+      country: church.country,
       database_name: church.database_name,
       is_active: church.is_active,
       ...(includeRecordCounts && {
