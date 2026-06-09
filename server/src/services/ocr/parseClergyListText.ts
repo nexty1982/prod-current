@@ -132,6 +132,168 @@ function parseClergyLine(line: string, defaultRole = 'Rector'): ClergyImportRow 
   return null;
 }
 
+function isSkippedHeaderLine(line: string): boolean {
+  const lower = line.toLowerCase().trim();
+  return (
+    lower.includes('our parish') ||
+    lower.includes('parish rector') ||
+    lower.includes('parish president') ||
+    lower.startsWith('st. paul') ||
+    lower === 'rector' ||
+    lower === 'rectors' ||
+    lower === '-' ||
+    lower === '(+)'
+  );
+}
+
+function isNameSectionLine(line: string): boolean {
+  if (isSkippedHeaderLine(line)) return false;
+  if (/\d{4}/.test(line) && new RegExp(MONTH_PATTERN, 'i').test(line)) return false;
+  if (/^\d*\.?\s*(?:Fr\.|r\.)\s/i.test(line)) return true;
+  if (/^[A-Z][a-z]+(?:\s+[A-Z][().a-z]+)+$/.test(line)) return true;
+  if (/^[A-Z][a-z]{2,}$/.test(line)) return true;
+  return false;
+}
+
+function looksLikeSurnameContinuation(line: string, current: string): boolean {
+  if (!current) return false;
+  if (/^(?:Fr\.|r\.)\s+\S+\s+\S+/i.test(current)) return false;
+  return /^[A-Z][a-z]{2,}$/.test(line);
+}
+
+function isDateSectionLine(line: string): boolean {
+  if (isSkippedHeaderLine(line)) return false;
+  if (/^\(\+\)/.test(line)) return true;
+  if (new RegExp(`^${MONTH_PATTERN}`, 'i').test(line) && /\d{4}/.test(line)) return true;
+  if (new RegExp(`${MONTH_PATTERN}.*${MONTH_PATTERN}`, 'i').test(line) && /\d{4}/.test(line)) return true;
+  return false;
+}
+
+function extractColumnarNames(lines: string[]): string[] {
+  const names: string[] = [];
+  let current = '';
+
+  for (const raw of lines) {
+    const line = raw.trim();
+    if (!line) continue;
+    if (isDateSectionLine(line)) break;
+    if (!isNameSectionLine(line)) continue;
+
+    const numbered = line.replace(/^\d*\.?\s*/, '').trim();
+
+    if (looksLikeSurnameContinuation(numbered, current)) {
+      current += ` ${numbered}`;
+      continue;
+    }
+
+    if (/^(?:Fr\.|r\.)\s/i.test(numbered)) {
+      if (current) names.push(normalizeName(current.replace(/^r\./i, 'Fr.')));
+      current = numbered.replace(/^r\./i, 'Fr.');
+      continue;
+    }
+
+    if (/^[A-Z][a-z]+(?:\s+[A-Z][().a-z]+)+$/.test(numbered)) {
+      if (current) names.push(normalizeName(current.replace(/^r\./i, 'Fr.')));
+      current = numbered;
+    }
+  }
+
+  if (current) names.push(normalizeName(current.replace(/^r\./i, 'Fr.')));
+  return names.filter((n) => n.length >= 2);
+}
+
+function parseDateSectionLine(line: string): { active_from: string | null; active_to: string | null; death: string | null } {
+  let working = line.trim();
+  let death: string | null = null;
+  const deathMatch = working.match(/\(\+\)\s*([^,]*)/i);
+  if (deathMatch) {
+    death = deathMatch[1]?.trim() || '(+)';
+    working = working.replace(/\(\+\)\s*[^,]*/, ' ').trim();
+  }
+
+  const tokenRe = new RegExp(`${MONTH_PATTERN}\\.?\\s*(?:\\d{1,2},?\\s+)?\\d{4}`, 'gi');
+  const tokens = [...working.matchAll(tokenRe)].map((m) => m[0]);
+  if (tokens.length >= 2) {
+    return {
+      active_from: parseMonthDateToken(tokens[0]),
+      active_to: parseMonthDateToken(tokens[1]),
+      death,
+    };
+  }
+  if (tokens.length === 1) {
+    return {
+      active_from: parseMonthDateToken(tokens[0]),
+      active_to: null,
+      death,
+    };
+  }
+  return { active_from: null, active_to: null, death };
+}
+
+function extractColumnarDates(lines: string[]): Array<{ active_from: string | null; active_to: string | null; death: string | null }> {
+  const dates: Array<{ active_from: string | null; active_to: string | null; death: string | null }> = [];
+  let inDates = false;
+
+  for (const raw of lines) {
+    const line = raw.trim();
+    if (!line) continue;
+    if (!inDates) {
+      if (isDateSectionLine(line)) inDates = true;
+      else continue;
+    }
+    if (isSkippedHeaderLine(line) && line !== '-' && line !== '(+)') continue;
+    if (!isDateSectionLine(line) && line !== '-' && line !== '(+)') continue;
+
+    const parsed = parseDateSectionLine(line);
+    if (parsed.active_from || parsed.active_to) {
+      dates.push(parsed);
+    } else if (parsed.death && dates.length > 0) {
+      const prev = dates[dates.length - 1];
+      prev.death = prev.death ? `${prev.death}; ${parsed.death}` : parsed.death;
+    }
+  }
+
+  return dates;
+}
+
+function looksColumnarLayout(text: string, inlineRows: ClergyImportRow[]): boolean {
+  const frCount = (text.match(/\bFr\./gi) || []).length;
+  const datedRows = inlineRows.filter((r) => r.active_from || r.active_to).length;
+  return frCount >= 4 && datedRows < Math.max(2, Math.floor(frCount / 2));
+}
+
+function parseColumnarClergyRoster(text: string, defaultRole = 'Rector'): ClergyImportRow[] {
+  const lines = text.replace(/\r\n/g, '\n').split('\n').map((l) => l.trim()).filter(Boolean);
+  const names = extractColumnarNames(lines);
+  const dates = extractColumnarDates(lines);
+  if (names.length < 2) return [];
+
+  const rows: ClergyImportRow[] = [];
+  const pairCount = Math.min(names.length, dates.length || names.length);
+
+  for (let i = 0; i < pairCount; i++) {
+    const name = names[i];
+    const dateInfo = dates[i] || { active_from: null, active_to: null, death: null };
+    const warnings: string[] = [];
+    if (!dateInfo.active_from && !dateInfo.active_to) warnings.push('No service dates detected');
+    if (names.length !== dates.length && i === pairCount - 1 && names.length > dates.length) {
+      warnings.push('Date column count mismatch — verify service dates');
+    }
+
+    rows.push({
+      canonical_value: name,
+      role: defaultRole,
+      active_from: dateInfo.active_from,
+      active_to: dateInfo.active_to,
+      variants_json: [],
+      source_notes: dateInfo.death ? `Deceased: ${dateInfo.death}` : null,
+      warnings: warnings.length ? warnings : undefined,
+    });
+  }
+
+  return rows;
+}
+
 export function parseClergyListText(text: string, defaultRole = 'Rector'): ClergyImportRow[] {
   if (!text || !text.trim()) return [];
 
@@ -151,6 +313,13 @@ export function parseClergyListText(text: string, defaultRole = 'Rector'): Clerg
     if (seen.has(key)) continue;
     seen.add(key);
     rows.push(parsed);
+  }
+
+  if (looksColumnarLayout(text, rows)) {
+    const columnar = parseColumnarClergyRoster(text, defaultRole);
+    if (columnar.length > rows.filter((r) => r.active_from || r.active_to).length) {
+      return columnar;
+    }
   }
 
   return rows;

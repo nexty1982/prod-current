@@ -34,10 +34,11 @@ export async function resolveChurchDb(churchId: number): Promise<{ dbName: strin
 export function validateChurchAccess(req: any, churchId: number): boolean {
   const user = req.session?.user || req.user;
   if (!user) return false;
-  // SuperAdmin/admin roles can access all churches
-  if (user.role === 'superadmin' || user.role === 'admin') return true;
+  const role = String(user.role || '').toLowerCase();
+  // Platform admins can access all churches (support legacy + canonical role slugs)
+  if (['super_admin', 'superadmin', 'admin'].includes(role)) return true;
   // Regular users must match their assigned church
-  return user.church_id === churchId;
+  return Number(user.church_id) === churchId;
 }
 
 /**

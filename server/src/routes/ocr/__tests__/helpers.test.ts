@@ -58,6 +58,11 @@ assertEq(
   true,
   'superadmin → access any church'
 );
+assertEq(
+  validateChurchAccess({ session: { user: { role: 'super_admin', church_id: 99 } } }, 1),
+  true,
+  'super_admin → access any church'
+);
 
 // Admin: allowed for any church
 assertEq(

@@ -122,16 +122,25 @@ export const ClergyImportDialog: React.FC<ClergyImportDialogProps> = ({
       const res: any = await apiClient.post(
         `/api/church/${churchId}/ocr/rules/config/entities/ocr-extract`,
         formData,
-        { headers: { 'Content-Type': 'multipart/form-data' }, timeout: 120000 },
+        { timeout: 120000 },
       );
       const parsed: ClergyImportRow[] = (res?.rows || []).map((r: ClergyImportRow) => ({
         ...r,
         selected: true,
       }));
       setOcrText(res?.text || '');
+      if (!parsed.length && res?.text) {
+        setError('OCR text was extracted but no clergy rows were detected. Switch to Paste text to edit the extracted text, or try a clearer photo.');
+      }
       setPreviewRows(parsed, 'OCR image');
     } catch (err: any) {
-      setError(err.response?.data?.error || err.message || 'OCR extraction failed');
+      const status = err.response?.status;
+      const msg = err.response?.data?.error || err.message || 'OCR extraction failed';
+      if (status === 403) {
+        setError('Access denied for this parish. Select a church you manage, or sign in as an admin.');
+      } else {
+        setError(msg);
+      }
       resetPreview();
     } finally {
       setLoading(false);
