@@ -27,7 +27,6 @@ import PageContainer from '@/shared/ui/PageContainer';
 import {
     Alert,
     alpha,
-    Autocomplete,
     Box,
     Button,
     Card, CardContent,
@@ -82,7 +81,6 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import OcrChurchSelector from '../devel-tools/om-ocr/components/OcrChurchSelector';
 import OcrStudioNav from '../devel-tools/om-ocr/components/OcrStudioNav';
 import { useOcrChurchSelector } from '../devel-tools/om-ocr/hooks/useOcrChurchSelector';
-import { setOcrStudioChurchParam } from '../devel-tools/om-ocr/utils/ocrStudioChurch';
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -145,7 +143,7 @@ const isReprocessable = (s: string) => ['failed','error','queued','pending'].inc
 
 const OcrActivityMonitor: React.FC = () => {
   const theme = useTheme();
-  const { selectedChurchId, setSearchParams } = useOcrChurchSelector();
+  const { selectedChurchId } = useOcrChurchSelector();
 
   const pageSize = 50;
 
@@ -472,7 +470,6 @@ const OcrActivityMonitor: React.FC = () => {
   return (
     <PageContainer title="OCR Operations Console" description="Super Admin OCR job monitoring and operations">
       <OcrStudioNav />
-      <OcrChurchSelector />
       <Box sx={{ p: { xs: 1, sm: 2 } }}>
 
         {/* ═══ SUMMARY BAR ════════════════════════════════════════════════════ */}
@@ -516,20 +513,7 @@ const OcrActivityMonitor: React.FC = () => {
         <Card sx={{ mb: 2 }}>
           <CardContent sx={{ py: 1.5, '&:last-child': { pb: 1.5 } }}>
             <Stack direction="row" spacing={1.5} flexWrap="wrap" alignItems="center">
-              <Autocomplete
-                size="small"
-                options={churches}
-                getOptionLabel={(o) => `${o.name} (#${o.id})`}
-                value={churchFilter}
-                onChange={(_, v) => {
-                  setChurchFilter(v);
-                  setPage(1);
-                  if (v) setOcrStudioChurchParam(setSearchParams, v.id);
-                }}
-                renderInput={(params) => <TextField {...params} label="Church" placeholder="All churches" />}
-                sx={{ minWidth: 240 }}
-                isOptionEqualToValue={(o, v) => o.id === v.id}
-              />
+              <OcrChurchSelector variant="inline" />
               <FormControl size="small" sx={{ minWidth: 130 }}>
                 <InputLabel>Status</InputLabel>
                 <Select value={statusFilter} label="Status" onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}>

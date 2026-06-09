@@ -460,7 +460,6 @@ const UploadRecordsPage: React.FC = () => {
       }}
     >
       {isOcrStudioUpload && <OcrStudioNav />}
-      {isOcrStudioUpload && <OcrChurchSelector />}
       {/* Page header */}
       <Box sx={{ mb: 3 }}>
         <Typography variant="h5" fontWeight={700}>
@@ -469,6 +468,11 @@ const UploadRecordsPage: React.FC = () => {
         <Typography variant="body2" color="text.secondary">
           Upload scanned church records and track their processing status.
         </Typography>
+        {isOcrStudioUpload && (
+          <Stack direction="row" spacing={1.5} alignItems="center" flexWrap="wrap" sx={{ mt: 1.5 }}>
+            <OcrChurchSelector variant="inline" />
+          </Stack>
+        )}
       </Box>
 
       {/* Admin church selector (portal / non-OCR-studio routes) */}
