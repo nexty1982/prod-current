@@ -17,10 +17,11 @@ import {
 import type { ChurchRecordFieldConfig } from '@/features/devel-tools/om-ocr/config/recordFields';
 import FusionOverlay from '@/features/devel-tools/om-ocr/components/FusionOverlay';
 import {
-  buildPipelineState,
+  getJobPipelineState,
+  getUploadQueueItemState,
   isJobInFlight,
   OcrReviewDropZone,
-  OcrReviewPipelinePanel,
+  OcrReviewInlineProgress,
   type ReviewUploadQueueItem,
 } from '@/features/devel-tools/om-ocr/components/OcrReviewUploadWidgets';
 import {
@@ -77,6 +78,7 @@ import {
 import {
   IconArrowLeft,
   IconCheck,
+  IconCloudUpload,
   IconChevronDown,
   IconChevronUp,
   IconColumns,
@@ -908,6 +910,16 @@ const OcrReviewPage: React.FC = () => {
     [jobs],
   );
 
+  const awaitingJobs = useMemo(
+    () => jobs.filter((j) => j.review_status !== 'ready_to_seed' && j.review_status !== 'seeded'),
+    [jobs],
+  );
+
+  const completedJobs = useMemo(
+    () => jobs.filter((j) => j.review_status === 'ready_to_seed' || j.review_status === 'seeded'),
+    [jobs],
+  );
+
   const hasActiveUploadPoll = useMemo(
     () => uploadQueue.some(
       (f) => f.status === 'pending'
@@ -1009,30 +1021,32 @@ const OcrReviewPage: React.FC = () => {
     });
   }, [selectedJobId]);
 
-  const jobsById = useMemo(() => {
-    const map = new Map<string, { status: string; review_status: string }>();
-    for (const j of jobs) {
-      map.set(String(j.id), { status: j.status, review_status: j.review_status });
-    }
-    return map;
-  }, [jobs]);
-
-  const pipelineFocusJob = useMemo(() => {
-    const activeQueueItem = uploadQueue.find(
-      (f) => f.jobId && !['completed', 'failed', 'error', 'pending', 'uploading'].includes(f.status),
-    ) || uploadQueue.find((f) => ['uploading', 'queued', 'processing'].includes(f.status) && f.jobId);
-    if (activeQueueItem?.jobId) {
-      const job = jobs.find((j) => String(j.id) === activeQueueItem.jobId);
-      if (job) return job;
-    }
-    if (selectedJob && isJobInFlight(selectedJob)) return selectedJob;
-    return inFlightJobs[0] ?? null;
-  }, [uploadQueue, jobs, selectedJob, inFlightJobs]);
-
-  const pipelineState = useMemo(
-    () => buildPipelineState(uploadQueue, jobsById, pipelineFocusJob),
-    [uploadQueue, jobsById, pipelineFocusJob],
+  const pendingUploadRows = useMemo(
+    () => uploadQueue.filter((f) => f.status === 'pending' || f.status === 'uploading'),
+    [uploadQueue],
   );
+
+  const awaitingJobIds = useMemo(
+    () => new Set(awaitingJobs.map((j) => String(j.id))),
+    [awaitingJobs],
+  );
+
+  const queueOnlyRows = useMemo(
+    () => uploadQueue.filter(
+      (f) => f.jobId
+        && !awaitingJobIds.has(f.jobId)
+        && !['completed', 'failed', 'error', 'pending', 'uploading'].includes(f.status),
+    ),
+    [uploadQueue, awaitingJobIds],
+  );
+
+  useEffect(() => {
+    const awaitingIds = new Set(awaitingJobs.map((j) => Number(j.id)));
+    setSelectedAwaitingJobIds((prev) => {
+      const next = new Set([...prev].filter((id) => awaitingIds.has(id)));
+      return next.size === prev.size ? prev : next;
+    });
+  }, [awaitingJobs]);
 
   useEffect(() => {
     if (!churchId) {
@@ -1586,22 +1600,6 @@ const OcrReviewPage: React.FC = () => {
     }
   }, [churchId, selectedJobId, navigate, reviewBase]);
 
-  const awaitingJobs = useMemo(() => {
-    return jobs.filter((j) => j.review_status !== 'ready_to_seed' && j.review_status !== 'seeded');
-  }, [jobs]);
-
-  const completedJobs = useMemo(() => {
-    return jobs.filter((j) => j.review_status === 'ready_to_seed' || j.review_status === 'seeded');
-  }, [jobs]);
-
-  useEffect(() => {
-    const awaitingIds = new Set(awaitingJobs.map((j) => Number(j.id)));
-    setSelectedAwaitingJobIds((prev) => {
-      const next = new Set([...prev].filter((id) => awaitingIds.has(id)));
-      return next.size === prev.size ? prev : next;
-    });
-  }, [awaitingJobs]);
-
   if (!churchId) {
     return (
       <Box sx={{ p: 4, textAlign: 'center' }}>
@@ -1726,66 +1724,121 @@ const OcrReviewPage: React.FC = () => {
               </Button>
             )}
             {jobsLoading && <CircularProgress size={24} />}
-            {!jobsLoading && awaitingJobs.length === 0 && (
+            {!jobsLoading && awaitingJobs.length === 0 && pendingUploadRows.length === 0 && queueOnlyRows.length === 0 && (
               <Alert severity="info" sx={{ py: 0.5, px: 1, fontSize: '0.75rem' }}>No jobs awaiting review.</Alert>
             )}
             <List dense disablePadding sx={{ mb: 3 }}>
+              {[...pendingUploadRows, ...queueOnlyRows].map((f) => {
+                const pipeline = getUploadQueueItemState(f);
+                return (
+                  <ListItem key={f.id} disablePadding sx={{ mb: 0.75 }}>
+                    <Paper variant="outlined" sx={{ width: '100%', borderRadius: 1, overflow: 'hidden' }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, px: 1, py: 0.75, pr: 0.5 }}>
+                        {churchId && f.jobId ? (
+                          <JobListThumb churchId={churchId} jobId={Number(f.jobId)} />
+                        ) : (
+                          <Box
+                            sx={{
+                              width: 44,
+                              height: 44,
+                              flexShrink: 0,
+                              borderRadius: 1,
+                              bgcolor: 'action.hover',
+                              border: '1px solid',
+                              borderColor: 'divider',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              color: 'info.main',
+                            }}
+                          >
+                            <IconCloudUpload size={20} />
+                          </Box>
+                        )}
+                        <ListItemText
+                          primary={f.name}
+                          secondary={pipeline.label}
+                          sx={{ flex: 1, minWidth: 0, my: 0 }}
+                          primaryTypographyProps={{ noWrap: true, fontSize: '0.85rem', fontWeight: 500 }}
+                          secondaryTypographyProps={{ noWrap: true, fontSize: '0.75rem' }}
+                        />
+                        <Chip label={pipeline.label} size="small" color="info" variant="outlined" sx={{ flexShrink: 0 }} />
+                      </Box>
+                      <OcrReviewInlineProgress state={pipeline} />
+                    </Paper>
+                  </ListItem>
+                );
+              })}
               {awaitingJobs.map((j) => {
                 const jobId = Number(j.id);
                 const cfg = STATUS_LABELS[j.review_status] || { label: j.review_status, color: 'default' as const };
                 const active = selectedJobId === jobId;
                 const checked = selectedAwaitingJobIds.has(jobId);
+                const processing = isJobInFlight(j);
                 const countStr = typeof j.records_count === 'number' ? `${j.confirmed_count || 0}/${j.records_count} ` : '';
                 return (
-                  <ListItem key={j.id} disablePadding sx={{ mb: 0.5 }}>
-                    <ListItemButton
-                      selected={active}
-                      onClick={() => navigate(`${reviewBase}/${j.id}`)}
+                  <ListItem key={j.id} disablePadding sx={{ mb: 0.75 }}>
+                    <Paper
+                      variant="outlined"
                       sx={{
+                        width: '100%',
                         borderRadius: 1,
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 0.75,
-                        py: 0.75,
-                        pr: 1,
+                        overflow: 'hidden',
+                        ...(active && { borderColor: 'primary.main', borderWidth: 2 }),
                       }}
                     >
-                      <Checkbox
-                        size="small"
-                        checked={checked}
-                        onClick={(e) => e.stopPropagation()}
-                        onChange={() => toggleAwaitingJobSelection(jobId)}
-                        sx={{ p: 0.25, flexShrink: 0 }}
-                      />
-                      {churchId && <JobListThumb churchId={churchId} jobId={jobId} />}
-                      <ListItemText
-                        primary={`${countStr}${j.filename || `Job #${j.id}`}`}
-                        secondary={new Date(j.created_at).toLocaleString()}
-                        sx={{ flex: 1, minWidth: 0, my: 0 }}
-                        primaryTypographyProps={{ noWrap: true, fontSize: '0.85rem', fontWeight: active ? 700 : 500 }}
-                        secondaryTypographyProps={{ noWrap: true }}
-                      />
-                      <Chip
-                        label={cfg.label}
-                        size="small"
-                        color={cfg.color}
-                        variant="outlined"
-                        sx={{ flexShrink: 0 }}
-                      />
-                      <Tooltip title="Delete job completely">
-                        <IconButton
+                      <ListItemButton
+                        selected={active}
+                        onClick={() => navigate(`${reviewBase}/${j.id}`)}
+                        sx={{
+                          borderRadius: 0,
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 0.75,
+                          py: 0.75,
+                          pr: 1,
+                        }}
+                      >
+                        <Checkbox
                           size="small"
-                          color="error"
+                          checked={checked}
+                          onClick={(e) => e.stopPropagation()}
+                          onChange={() => toggleAwaitingJobSelection(jobId)}
+                          sx={{ p: 0.25, flexShrink: 0 }}
+                        />
+                        {churchId && <JobListThumb churchId={churchId} jobId={jobId} />}
+                        <ListItemText
+                          primary={`${countStr}${j.filename || `Job #${j.id}`}`}
+                          secondary={new Date(j.created_at).toLocaleString()}
+                          sx={{ flex: 1, minWidth: 0, my: 0 }}
+                          primaryTypographyProps={{ noWrap: true, fontSize: '0.85rem', fontWeight: active ? 700 : 500 }}
+                          secondaryTypographyProps={{ noWrap: true }}
+                        />
+                        <Chip
+                          label={cfg.label}
+                          size="small"
+                          color={cfg.color}
+                          variant="outlined"
                           sx={{ flexShrink: 0 }}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setPendingDeleteJobIds([jobId]);
-                          }}
-                        >
-                          <IconTrash size={16} />
-                        </IconButton>
-                      </Tooltip>
-                    </ListItemButton>
+                        />
+                        <Tooltip title="Delete job completely">
+                          <IconButton
+                            size="small"
+                            color="error"
+                            sx={{ flexShrink: 0 }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setPendingDeleteJobIds([jobId]);
+                            }}
+                          >
+                            <IconTrash size={16} />
+                          </IconButton>
+                        </Tooltip>
+                      </ListItemButton>
+                      {processing && (
+                        <OcrReviewInlineProgress state={getJobPipelineState(j)} />
+                      )}
+                    </Paper>
                   </ListItem>
                 );
               })}
@@ -1846,19 +1899,6 @@ const OcrReviewPage: React.FC = () => {
                 );
               })}
             </List>
-          </Box>
-          <Box
-            sx={{
-              flexShrink: 0,
-              px: 2,
-              pb: 2,
-              pt: 1.5,
-              borderTop: '1px solid',
-              borderColor: 'divider',
-              bgcolor: 'background.paper',
-            }}
-          >
-            <OcrReviewPipelinePanel state={pipelineState} churchId={churchId} />
           </Box>
         </Box>
         )}

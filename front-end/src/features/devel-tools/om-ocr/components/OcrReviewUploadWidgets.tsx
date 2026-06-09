@@ -12,7 +12,7 @@ import {
   IconScan,
   IconX,
 } from '@tabler/icons-react';
-import React, { useMemo, useState } from 'react';
+import React from 'react';
 
 export type ReviewUploadQueueItem = {
   id: string;
@@ -57,7 +57,7 @@ export function isJobInFlight(job: { status: string; review_status: string }): b
   return job.review_status === 'uploaded' || job.review_status === 'ocr_complete';
 }
 
-function pipelineFromJob(job: PipelineFocusJob): PipelineState {
+export function getJobPipelineState(job: PipelineFocusJob): PipelineState {
   const jobId = Number(job.id);
   const detail = job.filename || `Job #${job.id}`;
 
@@ -82,6 +82,39 @@ function pipelineFromJob(job: PipelineFocusJob): PipelineState {
     };
   }
   return { phase: 'queued', label: 'Queued', detail, progress: 20, indeterminate: true, jobId };
+}
+
+export function getUploadQueueItemState(item: ReviewUploadQueueItem): PipelineState {
+  if (item.status === 'failed' || item.status === 'error') {
+    return { phase: 'failed', label: 'Upload failed', detail: item.error || item.name, progress: 0 };
+  }
+  if (item.status === 'pending') {
+    return { phase: 'uploading', label: 'Preparing upload', detail: item.name, progress: 8, indeterminate: true };
+  }
+  if (item.status === 'uploading') {
+    return { phase: 'uploading', label: 'Uploading', detail: item.name, progress: Math.max(item.progress, 15), indeterminate: true };
+  }
+  if (item.status === 'queued') {
+    return {
+      phase: 'queued',
+      label: 'Queued for OCR',
+      detail: item.name,
+      progress: 28,
+      indeterminate: true,
+      jobId: item.jobId ? Number(item.jobId) : null,
+    };
+  }
+  if (item.status === 'processing') {
+    return {
+      phase: 'processing',
+      label: 'Processing OCR',
+      detail: item.name,
+      progress: 48,
+      indeterminate: true,
+      jobId: item.jobId ? Number(item.jobId) : null,
+    };
+  }
+  return { phase: 'complete', label: 'Complete', detail: item.name, progress: 100, jobId: item.jobId ? Number(item.jobId) : null };
 }
 
 const REVIEW_PIPELINE: Record<string, { label: string; progress: number; phase: PipelinePhase }> = {
@@ -123,163 +156,79 @@ function phaseIcon(phase: PipelinePhase, color: string) {
   }
 }
 
-export function buildPipelineState(
-  queue: ReviewUploadQueueItem[],
-  jobsById: Map<string, { status: string; review_status: string }>,
-  focusJob?: PipelineFocusJob | null,
-): PipelineState {
-  if (queue.length === 0) {
-    if (focusJob && isJobInFlight(focusJob)) {
-      return pipelineFromJob(focusJob);
-    }
-    return {
-      phase: 'idle',
-      label: 'Ready',
-      detail: 'Drop images in the center to upload',
-      progress: 0,
-      indeterminate: false,
-    };
+function phaseAccent(phase: PipelinePhase, theme: ReturnType<typeof useTheme>) {
+  switch (phase) {
+    case 'uploading':
+    case 'queued':
+      return theme.palette.info.main;
+    case 'processing':
+    case 'extracting':
+      return theme.palette.warning.main;
+    case 'ready':
+    case 'complete':
+      return theme.palette.success.main;
+    case 'failed':
+      return theme.palette.error.main;
+    default:
+      return theme.palette.text.secondary;
   }
-
-  const failed = queue.filter((f) => f.status === 'failed' || f.status === 'error');
-  const active = queue.filter((f) => !['completed', 'failed', 'error'].includes(f.status));
-
-  if (active.length === 0 && failed.length > 0) {
-    return {
-      phase: 'failed',
-      label: 'Upload failed',
-      detail: failed[0]?.error || failed[0]?.name,
-      progress: 0,
-    };
-  }
-
-  if (active.length === 0) {
-    return {
-      phase: 'complete',
-      label: 'Complete',
-      detail: `${queue.length} image${queue.length === 1 ? '' : 's'} processed`,
-      progress: 100,
-    };
-  }
-
-  const uploading = active.find((f) => f.status === 'uploading');
-  if (uploading) {
-    return {
-      phase: 'uploading',
-      label: 'Uploading',
-      detail: uploading.name,
-      progress: Math.max(uploading.progress, 12),
-      indeterminate: uploading.progress < 90,
-      jobId: uploading.jobId ? Number(uploading.jobId) : null,
-    };
-  }
-
-  const pending = active.filter((f) => f.status === 'pending');
-  if (pending.length > 0) {
-    return {
-      phase: 'uploading',
-      label: 'Preparing upload',
-      detail: `${pending.length} of ${queue.length} file${queue.length === 1 ? '' : 's'}`,
-      progress: 8,
-      indeterminate: true,
-    };
-  }
-
-  let best: PipelineState | null = null;
-  for (const item of active) {
-    if (!item.jobId) continue;
-    const job = jobsById.get(item.jobId);
-    if (!job) {
-      const candidate: PipelineState = {
-        phase: 'queued',
-        label: 'Queued',
-        detail: item.name,
-        progress: 22,
-        indeterminate: true,
-      };
-      if (!best || candidate.progress > best.progress) best = candidate;
-      continue;
-    }
-
-    if (job.status === 'processing' || job.status === 'pending') {
-      const candidate: PipelineState = {
-        phase: 'processing',
-        label: 'Processing OCR',
-        detail: item.name,
-        progress: 45,
-        indeterminate: true,
-      };
-      if (!best || candidate.progress > best.progress) best = candidate;
-      continue;
-    }
-
-    const mapped = REVIEW_PIPELINE[job.review_status];
-    if (mapped) {
-      const candidate: PipelineState = {
-        phase: mapped.phase,
-        label: mapped.label,
-        detail: item.name,
-        progress: mapped.progress,
-        indeterminate: mapped.phase !== 'ready',
-        jobId: Number(item.jobId),
-      };
-      if (!best || candidate.progress > best.progress) best = candidate;
-    }
-  }
-
-  if (best) {
-    const done = queue.filter((f) => f.status === 'completed').length;
-    if (queue.length > 1 && done > 0) {
-      return {
-        ...best,
-        detail: `${done + 1} of ${queue.length} — ${best.detail}`,
-      };
-    }
-    return best;
-  }
-
-  const fallback = active[0];
-  return {
-    phase: 'queued',
-    label: 'Queued',
-    detail: fallback?.name,
-    progress: 20,
-    indeterminate: true,
-    jobId: fallback?.jobId ? Number(fallback.jobId) : null,
-  };
 }
 
-function PipelinePreviewImage({ churchId, jobId }: { churchId: number; jobId: number }) {
-  const [failed, setFailed] = useState(false);
-
-  if (failed) {
-    return (
-      <Box
-        sx={{
-          width: '100%',
-          aspectRatio: '4 / 3',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          bgcolor: 'action.hover',
-          color: 'text.disabled',
-        }}
-      >
-        <IconPhoto size={28} />
-      </Box>
-    );
-  }
+/** Compact progress strip shown inside a job row in the awaiting-review list */
+export const OcrReviewInlineProgress: React.FC<{ state: PipelineState }> = ({ state }) => {
+  const theme = useTheme();
+  const accent = phaseAccent(state.phase, theme);
+  const animate = !['idle', 'complete', 'ready'].includes(state.phase);
 
   return (
     <Box
-      component="img"
-      src={`/api/church/${churchId}/ocr/jobs/${jobId}/image`}
-      alt=""
-      onError={() => setFailed(true)}
-      sx={{ width: '100%', aspectRatio: '4 / 3', objectFit: 'cover', display: 'block' }}
-    />
+      sx={{
+        px: 1.25,
+        pb: 1,
+        pt: 0.25,
+        borderTop: '1px solid',
+        borderColor: alpha(accent, 0.15),
+        bgcolor: alpha(accent, 0.04),
+        ...pulseKeyframes,
+      }}
+    >
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 0.5 }}>
+        <Box
+          sx={{
+            width: 22,
+            height: 22,
+            borderRadius: '50%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+            bgcolor: alpha(accent, 0.12),
+            animation: animate
+              ? state.phase === 'queued'
+                ? 'pipelineSpin 2.4s linear infinite'
+                : 'pipelinePulse 1.6s ease-in-out infinite'
+              : undefined,
+          }}
+        >
+          {phaseIcon(state.phase, accent)}
+        </Box>
+        <Typography variant="caption" fontWeight={600} noWrap sx={{ flex: 1, color: accent }}>
+          {state.label}
+        </Typography>
+      </Box>
+      <LinearProgress
+        variant={state.indeterminate ? 'indeterminate' : 'determinate'}
+        value={state.indeterminate ? undefined : state.progress}
+        sx={{
+          height: 4,
+          borderRadius: 2,
+          bgcolor: alpha(accent, 0.12),
+          '& .MuiLinearProgress-bar': { borderRadius: 2, bgcolor: accent },
+        }}
+      />
+    </Box>
   );
-}
+};
 
 type DropZoneProps = {
   dragActive: boolean;
@@ -372,117 +321,5 @@ export const OcrReviewDropZone: React.FC<DropZoneProps> = ({
         </Typography>
       </Paper>
     </Box>
-  );
-};
-
-type PipelinePanelProps = {
-  state: PipelineState;
-  churchId?: number | null;
-};
-
-export const OcrReviewPipelinePanel: React.FC<PipelinePanelProps> = ({ state, churchId }) => {
-  const theme = useTheme();
-  const showPreview = !!churchId && !!state.jobId && state.phase !== 'idle';
-  const showProgress = state.phase !== 'idle';
-
-  const accent = useMemo(() => {
-    switch (state.phase) {
-      case 'uploading':
-      case 'queued':
-        return theme.palette.info.main;
-      case 'processing':
-      case 'extracting':
-        return theme.palette.warning.main;
-      case 'ready':
-      case 'complete':
-        return theme.palette.success.main;
-      case 'failed':
-        return theme.palette.error.main;
-      default:
-        return theme.palette.text.secondary;
-    }
-  }, [state.phase, theme]);
-
-  const animate = state.phase !== 'idle' && state.phase !== 'complete';
-
-  return (
-    <Paper
-      variant="outlined"
-      sx={{
-        p: 1.5,
-        borderRadius: 2,
-        bgcolor: alpha(accent, 0.04),
-        borderColor: alpha(accent, 0.25),
-        position: 'relative',
-        ...pulseKeyframes,
-      }}
-    >
-      {showPreview && (
-        <Box
-          sx={{
-            mb: 1.25,
-            borderRadius: 1,
-            overflow: 'hidden',
-            border: '1px solid',
-            borderColor: alpha(accent, 0.2),
-          }}
-        >
-          <PipelinePreviewImage churchId={churchId!} jobId={state.jobId!} />
-        </Box>
-      )}
-      <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.25 }}>
-        <Box
-          sx={{
-            width: 40,
-            height: 40,
-            borderRadius: '50%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexShrink: 0,
-            bgcolor: alpha(accent, 0.12),
-            color: accent,
-            animation: animate
-              ? state.phase === 'queued'
-                ? 'pipelineSpin 2.4s linear infinite'
-                : 'pipelinePulse 1.6s ease-in-out infinite'
-              : undefined,
-          }}
-        >
-          {phaseIcon(state.phase, accent)}
-        </Box>
-        <Box sx={{ flex: 1, minWidth: 0 }}>
-          <Typography variant="subtitle2" fontWeight={700} noWrap>
-            {state.label}
-          </Typography>
-          {state.detail && (
-            <Typography variant="caption" color="text.secondary" noWrap title={state.detail} sx={{ display: 'block' }}>
-              {state.detail}
-            </Typography>
-          )}
-        </Box>
-      </Box>
-      {showProgress && (
-      <LinearProgress
-        variant={state.indeterminate ? 'indeterminate' : 'determinate'}
-        value={state.indeterminate ? undefined : state.progress}
-        sx={{
-          mt: 1.5,
-          height: 6,
-          borderRadius: 3,
-          bgcolor: alpha(accent, 0.12),
-          '& .MuiLinearProgress-bar': {
-            borderRadius: 3,
-            bgcolor: accent,
-          },
-        }}
-      />
-      )}
-      {!state.indeterminate && showProgress && (
-        <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block', textAlign: 'right' }}>
-          {Math.round(state.progress)}%
-        </Typography>
-      )}
-    </Paper>
   );
 };
