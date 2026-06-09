@@ -43,7 +43,11 @@ import { detectAndSplitSpread } from '../ocr/preprocessing/splitSpread';
 import { buildRetryPlan, computeStructureScore, extractSignals } from '../ocr/preprocessing/structureRetry';
 import type { TemplateMatchResult } from '../ocr/preprocessing/templateSpec';
 import { extractWithTemplate, resolveTemplate, selectTemplate } from '../ocr/preprocessing/templateSpec';
-import { classifyRecordType, extractAgentFieldsForJob } from '../utils/ocrClassifier';
+import { classifyRecordType } from '../utils/ocrClassifier';
+import {
+  buildAgentExtractPayload,
+  runConfiguredAgentExtraction,
+} from '../services/ocr/extractionAgentPipeline';
 
 const { dbLogger } = require('../utils/dbLogger');
 
@@ -3083,51 +3087,48 @@ async function processJob(job: JobRow): Promise<void> {
 
         const hintType = record_type && record_type !== 'custom' ? record_type : classResult.suggested_type;
         const detectedLayout = layoutClassification?.detectedLayoutType;
-        const extract = await extractAgentFieldsForJob(jobId, combinedText, hintType !== 'unknown' ? hintType : record_type, detectedLayout);
-        const payload = {
-          ...extract,
-          agent: 'agent1',
-          extracted_at: new Date().toISOString(),
-          confirmed: false,
-        };
+        await platformPool.query('ALTER TABLE ocr_jobs ADD COLUMN IF NOT EXISTS agent2_extract_json LONGTEXT NULL');
+        await platformPool.query('ALTER TABLE ocr_jobs ADD COLUMN IF NOT EXISTS agent2_status VARCHAR(32) NULL');
+
+        const extractionRun = await runConfiguredAgentExtraction({
+          jobId,
+          churchId,
+          ocrText: combinedText,
+          recordTypeHint: hintType !== 'unknown' ? hintType : record_type,
+          layoutType: detectedLayout,
+          settingsDb: tenantPool,
+        });
+        const payload = buildAgentExtractPayload(extractionRun);
+        const extract = extractionRun.primary;
         const resolvedType = extract.record_type !== 'custom' ? extract.record_type : (record_type || 'custom');
+        const agent2Status = extractionRun.skippedAgent === 'agent2'
+          ? 'skipped'
+          : extractionRun.primaryAgent === 'agent2'
+            ? 'complete'
+            : extractionRun.usedFallback
+              ? 'unavailable'
+              : 'skipped';
+
         await platformPool.query(
           `UPDATE ocr_jobs SET
              agent_status = 'complete',
              agent_extract_json = ?,
+             agent2_extract_json = NULL,
+             agent2_status = ?,
              review_status = 'agent_extracted',
              record_type = CASE WHEN record_type = 'custom' OR record_type IS NULL THEN ? ELSE record_type END
            WHERE id = ?`,
-          [JSON.stringify(payload), resolvedType, jobId]
+          [JSON.stringify(payload), agent2Status, resolvedType, jobId],
         );
-        console.log(`OCR_AGENT_EXTRACT ${JSON.stringify({ jobId, recordType: resolvedType, fieldCount: Object.keys(extract.fields).length, confidence: extract.confidence })}`);
-
-        try {
-          const { extractAgent2FieldsForJob } = require('../utils/ocrClassifier');
-          await platformPool.query('ALTER TABLE ocr_jobs ADD COLUMN IF NOT EXISTS agent2_extract_json LONGTEXT NULL');
-          await platformPool.query('ALTER TABLE ocr_jobs ADD COLUMN IF NOT EXISTS agent2_status VARCHAR(32) NULL');
-          await platformPool.query(`UPDATE ocr_jobs SET agent2_status = 'running' WHERE id = ?`, [jobId]);
-          const agent2 = await extractAgent2FieldsForJob(jobId, resolvedType, combinedText);
-          if (agent2) {
-            const agent2Payload = {
-              ...agent2,
-              extracted_at: new Date().toISOString(),
-              confirmed: false,
-            };
-            await platformPool.query(
-              `UPDATE ocr_jobs SET agent2_status = 'complete', agent2_extract_json = ? WHERE id = ?`,
-              [JSON.stringify(agent2Payload), jobId],
-            );
-            console.log(`OCR_AGENT2_EXTRACT ${JSON.stringify({ jobId, recordType: agent2.record_type, method: agent2.method, confidence: agent2.confidence })}`);
-          } else {
-            await platformPool.query(`UPDATE ocr_jobs SET agent2_status = 'unavailable' WHERE id = ?`, [jobId]);
-          }
-        } catch (agent2Err: any) {
-          console.warn(`[OCR Worker] Agent2 extract failed for job ${jobId}: ${agent2Err.message}`);
-          try {
-            await platformPool.query(`UPDATE ocr_jobs SET agent2_status = 'failed' WHERE id = ?`, [jobId]);
-          } catch (_) { /* best effort */ }
-        }
+        console.log(`OCR_AGENT_EXTRACT ${JSON.stringify({
+          jobId,
+          recordType: resolvedType,
+          agent: extractionRun.primaryAgent,
+          mode: extractionRun.mode,
+          usedFallback: extractionRun.usedFallback,
+          fieldCount: Object.keys(extract.fields || {}).length,
+          confidence: extract.confidence,
+        })}`);
       } catch (classErr: any) {
         console.warn(`[OCR Worker] Classifier/agent extract failed for job ${jobId}: ${classErr.message}`);
         try {

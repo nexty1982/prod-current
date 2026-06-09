@@ -85,9 +85,15 @@ router.get(['/', '/settings'], async (req: any, res: any) => {
             extractAllText: 'yes',
             improveFormatting: 'yes',
             recordLayoutMode: 'auto',
+            extractionAgentMode: 'agent2_fallback_agent1',
           };
-        } else if (!loadedSettings.documentProcessing.recordLayoutMode) {
-          loadedSettings.documentProcessing.recordLayoutMode = 'auto';
+        } else {
+          if (!loadedSettings.documentProcessing.recordLayoutMode) {
+            loadedSettings.documentProcessing.recordLayoutMode = 'auto';
+          }
+          if (!loadedSettings.documentProcessing.extractionAgentMode) {
+            loadedSettings.documentProcessing.extractionAgentMode = 'agent2_fallback_agent1';
+          }
         }
         if (!loadedSettings.documentDeletion) {
           loadedSettings.documentDeletion = {
@@ -146,6 +152,7 @@ router.get(['/', '/settings'], async (req: any, res: any) => {
         extractAllText: 'yes',
         improveFormatting: 'yes',
         recordLayoutMode: 'auto',
+        extractionAgentMode: 'agent2_fallback_agent1',
       },
       documentDeletion: {
         deleteAfter: 7,

@@ -75,11 +75,18 @@ function TabPanel(props: TabPanelProps) {
 
 export type RecordLayoutMode = 'auto' | 'single' | 'ledger' | 'multi_record_split' | 'multi_form_page';
 
+export type ExtractionAgentMode =
+  | 'agent2_fallback_agent1'
+  | 'agent2_only'
+  | 'agent1_only'
+  | 'agent1_fallback_agent2';
+
 interface DocumentProcessingSettings {
   spellingCorrection: 'exact' | 'fix';
   extractAllText: 'yes' | 'no';
   improveFormatting: 'yes' | 'no';
   recordLayoutMode: RecordLayoutMode;
+  extractionAgentMode: ExtractionAgentMode;
 }
 
 interface DocumentDeletionSettings {
@@ -112,6 +119,7 @@ export const OcrStudioSettingsPanel: React.FC = () => {
       extractAllText: 'yes',
       improveFormatting: 'yes',
       recordLayoutMode: 'auto',
+      extractionAgentMode: 'agent2_fallback_agent1',
     },
     documentDeletion: {
       deleteAfter: 7,
@@ -182,6 +190,7 @@ export const OcrStudioSettingsPanel: React.FC = () => {
             extractAllText: data.documentProcessing?.extractAllText || 'yes',
             improveFormatting: data.documentProcessing?.improveFormatting || 'yes',
             recordLayoutMode: data.documentProcessing?.recordLayoutMode || 'auto',
+            extractionAgentMode: data.documentProcessing?.extractionAgentMode || 'agent2_fallback_agent1',
           },
           documentDeletion: {
             deleteAfter: data.documentDeletion?.deleteAfter || 7,
@@ -644,6 +653,32 @@ export const OcrStudioSettingsPanel: React.FC = () => {
                   <MenuItem value="no">No</MenuItem>
                 </Select>
               </FormControl>
+              <FormControl fullWidth>
+                <InputLabel id="extraction-agent-mode-label">Field extraction agent</InputLabel>
+                <Select
+                  labelId="extraction-agent-mode-label"
+                  value={settings.documentProcessing.extractionAgentMode}
+                  label="Field extraction agent"
+                  onChange={(e) =>
+                    setSettings((prev) => ({
+                      ...prev,
+                      documentProcessing: {
+                        ...prev.documentProcessing,
+                        extractionAgentMode: e.target.value as ExtractionAgentMode,
+                      },
+                    }))
+                  }
+                >
+                  <MenuItem value="agent2_fallback_agent1">Agent 2 (LlamaParse), fallback to Agent 1</MenuItem>
+                  <MenuItem value="agent2_only">Agent 2 only</MenuItem>
+                  <MenuItem value="agent1_only">Agent 1 only</MenuItem>
+                  <MenuItem value="agent1_fallback_agent2">Agent 1, fallback to Agent 2</MenuItem>
+                </Select>
+                <Typography variant="caption" color="text.secondary" sx={{ mt: 0.75, display: 'block' }}>
+                  Only one agent runs per job. Agent 2 uses LlamaParse + LLM; Agent 1 uses Vision/Gemini assembly. Default tries Agent 2 first, then Agent 1 if unavailable.
+                </Typography>
+              </FormControl>
+
               <FormControl fullWidth sx={{ mt: 1.5 }}>
                 <InputLabel id="record-layout-mode-label">Record layout processing</InputLabel>
                 <Select

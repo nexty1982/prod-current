@@ -9,12 +9,16 @@ const express = require('express');
 const router = express.Router({ mergeParams: true });
 import { resolveChurchDb, promisePool, mapFieldsToDbColumns, buildInsertQuery } from './helpers';
 import {
-  extractAgentFieldsForJob,
   extractAgent2FieldsForJob,
   compareAgentFieldDiffs,
   normalizeBaptismDates,
 } from '../../utils/ocrClassifier';
 import { ParishRulesEngine } from '../../services/ocr/rules/ParishRulesEngine';
+import {
+  buildAgentExtractPayload,
+  loadExtractionAgentMode,
+  runConfiguredAgentExtraction,
+} from '../../services/ocr/extractionAgentPipeline';
 
 let agent2SchemaReady = false;
 async function ensureAgent2Schema() {
@@ -536,41 +540,50 @@ router.post('/jobs/:jobId/agent-extract', async (req: any, res: any) => {
       [jobId]
     );
 
-    const extract = await extractAgentFieldsForJob(jobId, job.ocr_text, job.record_type);
-    const payload: any = {
-      ...extract,
-      agent: 'agent1' as const,
-      extracted_at: new Date().toISOString(),
-      confirmed: false,
-    };
+    const resolved = await resolveChurchDb(churchId);
+    if (!resolved) return res.status(404).json({ error: 'Church not found' });
 
-    // Evaluate rules and persist outcomes
+    const extractionRun = await runConfiguredAgentExtraction({
+      jobId,
+      churchId,
+      ocrText: job.ocr_text,
+      recordTypeHint: job.record_type,
+      settingsDb: resolved.db,
+    });
+    const payload: any = buildAgentExtractPayload(extractionRun);
+    const extract = extractionRun.primary;
+
     await evaluateAndPersistRulesForJob(churchId, jobId, payload, extract.record_type !== 'custom' ? extract.record_type : job.record_type);
+
+    const agent2Status = extractionRun.skippedAgent === 'agent2'
+      ? 'skipped'
+      : extractionRun.usedFallback
+        ? 'unavailable'
+        : 'skipped';
 
     await promisePool.query(
       `UPDATE ocr_jobs SET
          agent_status = 'complete',
          agent_extract_json = ?,
+         agent2_extract_json = NULL,
+         agent2_status = ?,
          review_status = 'agent_extracted',
          record_type = CASE WHEN record_type = 'custom' OR record_type IS NULL THEN ? ELSE record_type END
        WHERE id = ?`,
-      [JSON.stringify(payload), extract.record_type !== 'custom' ? extract.record_type : job.record_type, jobId]
+      [JSON.stringify(payload), agent2Status, extract.record_type !== 'custom' ? extract.record_type : job.record_type, jobId],
     );
 
     const recordIndex = typeof payload.candidate_index === 'number' ? payload.candidate_index : 0;
-
-    // Agent 2 (LlamaParse + LLM) can take 30–90s — run in background so the UI is not blocked.
-    runAndPersistAgent2(job, jobId).catch((agent2Err: any) => {
-      console.warn('[OCR Agent2] background extract error:', agent2Err.message);
-    });
+    const mode = await loadExtractionAgentMode(resolved.db, churchId);
 
     res.json({
       ok: true,
       jobId,
       extract: payload,
-      agent2_status: 'running',
-      agent2_extract: parseJsonColumn(job.agent2_extract_json),
-      comparison: compareAgentFieldDiffs(payload, parseJsonColumn(job.agent2_extract_json), recordIndex),
+      extraction_agent_mode: mode,
+      agent2_status: agent2Status,
+      agent2_extract: null,
+      comparison: [],
     });
   } catch (err: any) {
     console.error('[OCR Agent] extract error:', err);
