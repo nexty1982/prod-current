@@ -17,6 +17,12 @@ import {
 import type { ChurchRecordFieldConfig } from '@/features/devel-tools/om-ocr/config/recordFields';
 import FusionOverlay from '@/features/devel-tools/om-ocr/components/FusionOverlay';
 import {
+  buildPipelineState,
+  OcrReviewDropZone,
+  OcrReviewPipelinePanel,
+  type ReviewUploadQueueItem,
+} from '@/features/devel-tools/om-ocr/components/OcrReviewUploadWidgets';
+import {
   adjustHighlightBoxesForCrop,
   cellBboxToVision,
   columnBoundaryEdges,
@@ -204,6 +210,20 @@ const STATUS_LABELS: Record<string, { label: string; color: 'default' | 'primary
   ready_to_seed: { label: 'Ready to Seed', color: 'primary' },
   seeded: { label: 'In Records DB', color: 'success' },
   returned: { label: 'Returned', color: 'default' },
+};
+
+const REVIEW_ACCEPTED_RE = /\.(jpe?g|png|tiff?)$/i;
+const REVIEW_ACCEPTED_TYPES = '.jpg,.jpeg,.png,.tif,.tiff';
+
+let _reviewUploadUid = 0;
+const reviewUploadUid = () => `oru_${++_reviewUploadUid}_${Date.now()}`;
+
+const normalizeReviewOcrLanguage = (raw?: string | null): string => {
+  if (!raw) return 'en';
+  const code = raw.toLowerCase().trim();
+  if (code.length === 2) return code;
+  const map: Record<string, string> = { eng: 'en', gre: 'el', ell: 'el', rus: 'ru', ara: 'ar', ron: 'ro' };
+  return map[code] || code.slice(0, 2);
 };
 
 function cleanDateString(s: string): string {
@@ -410,7 +430,14 @@ const OcrReviewPage: React.FC = () => {
   const [saveLayoutLoading, setSaveLayoutLoading] = useState(false);
   const [rotation, setRotation] = useState<number>(0);
   const [jobsCollapsed, setJobsCollapsed] = useState(false);
+  const [uploadQueue, setUploadQueue] = useState<ReviewUploadQueueItem[]>([]);
+  const [uploadDragActive, setUploadDragActive] = useState(false);
+  const [isUploadingFiles, setIsUploadingFiles] = useState(false);
+  const [ocrLanguage, setOcrLanguage] = useState('en');
+  const [uploadRecordType, setUploadRecordType] = useState('custom');
   const [imagePanelWidth, setImagePanelWidth] = useState(560);
+  const uploadFileInputRef = useRef<HTMLInputElement>(null);
+  const uploadPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const contentRowRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -771,6 +798,166 @@ const OcrReviewPage: React.FC = () => {
   }, [refreshExtractSnapshot]);
 
   useEffect(() => { loadJobs(); }, [loadJobs]);
+
+  useEffect(() => {
+    if (!churchId) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const res: any = await apiClient.get(`/api/church/${churchId}/ocr/settings`);
+        const data = res?.data ?? res;
+        if (cancelled) return;
+        setOcrLanguage(normalizeReviewOcrLanguage(data?.defaultLanguage || data?.language));
+        const savedType = data?.documentProcessing?.defaultRecordType;
+        if (savedType) setUploadRecordType(savedType);
+      } catch {
+        if (!cancelled) {
+          setOcrLanguage('en');
+          setUploadRecordType('custom');
+        }
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [churchId]);
+
+  const handleReviewFiles = useCallback((fileList: FileList | null) => {
+    if (!fileList || !churchId) return;
+    const newFiles: ReviewUploadQueueItem[] = Array.from(fileList)
+      .filter((f) => REVIEW_ACCEPTED_RE.test(f.name))
+      .map((f) => ({
+        id: reviewUploadUid(),
+        file: f,
+        name: f.name,
+        status: 'pending' as const,
+        progress: 0,
+      }));
+    if (newFiles.length > 0) setUploadQueue((prev) => [...prev, ...newFiles]);
+  }, [churchId]);
+
+  const handleReviewDrag = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setUploadDragActive(e.type === 'dragenter' || e.type === 'dragover');
+  }, []);
+
+  const handleReviewDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setUploadDragActive(false);
+    handleReviewFiles(e.dataTransfer.files);
+  }, [handleReviewFiles]);
+
+  const startReviewUpload = useCallback(async () => {
+    if (!churchId || uploadQueue.length === 0) return;
+    setIsUploadingFiles(true);
+    for (const item of uploadQueue) {
+      if (item.status !== 'pending') continue;
+      setUploadQueue((q) => q.map((f) => (f.id === item.id ? { ...f, status: 'uploading', progress: 0 } : f)));
+      try {
+        const formData = new FormData();
+        formData.append('files', item.file);
+        formData.append('churchId', churchId.toString());
+        formData.append('recordType', uploadRecordType);
+        formData.append('language', ocrLanguage);
+        const response: any = await apiClient.post('/api/ocr/jobs/upload', formData, { timeout: 120000 });
+        const uploadedJobs = response?.jobs || response?.data?.jobs || [];
+        const jobId = uploadedJobs.length > 0 ? String(uploadedJobs[0].id) : undefined;
+        if (jobId) {
+          setUploadQueue((q) => q.map((f) => (f.id === item.id ? { ...f, status: 'queued', progress: 100, jobId } : f)));
+        } else {
+          setUploadQueue((q) => q.map((f) => (f.id === item.id ? { ...f, status: 'error', progress: 100, error: 'Upload OK but no job created' } : f)));
+        }
+      } catch (err: any) {
+        const body = err?.originalError?.response?.data ?? err?.response?.data;
+        const serverMsg = body?.error || body?.message || err?.message || 'Upload failed';
+        setUploadQueue((q) => q.map((f) => (f.id === item.id ? { ...f, status: 'error', error: serverMsg } : f)));
+      }
+    }
+    setIsUploadingFiles(false);
+    loadJobs();
+  }, [churchId, uploadQueue, uploadRecordType, ocrLanguage, loadJobs]);
+
+  useEffect(() => {
+    if (!churchId || isUploadingFiles) return;
+    if (!uploadQueue.some((f) => f.status === 'pending')) return;
+    startReviewUpload();
+  }, [churchId, isUploadingFiles, uploadQueue, startReviewUpload]);
+
+  useEffect(() => {
+    const hasActiveUploads = uploadQueue.some(
+      (f) => f.jobId && !['completed', 'failed', 'error'].includes(f.status),
+    );
+    if (!churchId || !hasActiveUploads) {
+      if (uploadPollRef.current) {
+        clearInterval(uploadPollRef.current);
+        uploadPollRef.current = null;
+      }
+      return;
+    }
+    const pollUploadStatus = async () => {
+      try {
+        const res: any = await apiClient.get(`/api/church/${churchId}/ocr/jobs?limit=100`);
+        const list: OcrJobRow[] = res?.data?.jobs || res?.jobs || [];
+        setJobs(list);
+        const statusMap = new Map(list.map((j) => [String(j.id), j]));
+        setUploadQueue((prev) => prev.map((f) => {
+          if (!f.jobId) return f;
+          const job = statusMap.get(f.jobId);
+          if (!job) return f;
+          let uiStatus = f.status;
+          if (job.status === 'failed' || job.status === 'error') {
+            uiStatus = 'failed';
+          } else if (['agent_extracted', 'ready_to_seed', 'seeded'].includes(job.review_status)) {
+            uiStatus = 'completed';
+          } else if (job.status === 'processing') {
+            uiStatus = 'processing';
+          } else if (job.status === 'pending' || job.status === 'queued') {
+            uiStatus = 'queued';
+          } else if (job.status === 'completed' || job.status === 'complete') {
+            uiStatus = job.review_status === 'uploaded' ? 'queued' : 'processing';
+          }
+          if (uiStatus === f.status) return f;
+          return {
+            ...f,
+            status: uiStatus,
+            progress: uiStatus === 'completed' ? 100 : f.progress,
+            error: uiStatus === 'failed' ? (job as any).error_message || 'Processing failed' : f.error,
+          };
+        }));
+      } catch { /* non-fatal */ }
+    };
+    pollUploadStatus();
+    uploadPollRef.current = setInterval(pollUploadStatus, 4000);
+    return () => {
+      if (uploadPollRef.current) {
+        clearInterval(uploadPollRef.current);
+        uploadPollRef.current = null;
+      }
+    };
+  }, [churchId, uploadQueue]);
+
+  useEffect(() => {
+    if (uploadQueue.length === 0) return;
+    if (!uploadQueue.every((f) => f.status === 'completed')) return;
+    const timer = setTimeout(() => {
+      setUploadQueue([]);
+      loadJobs();
+    }, 2500);
+    return () => clearTimeout(timer);
+  }, [uploadQueue, loadJobs]);
+
+  const jobsById = useMemo(() => {
+    const map = new Map<string, { status: string; review_status: string }>();
+    for (const j of jobs) {
+      map.set(String(j.id), { status: j.status, review_status: j.review_status });
+    }
+    return map;
+  }, [jobs]);
+
+  const pipelineState = useMemo(
+    () => buildPipelineState(uploadQueue, jobsById),
+    [uploadQueue, jobsById],
+  );
 
   useEffect(() => {
     if (!churchId) {
@@ -1413,14 +1600,17 @@ const OcrReviewPage: React.FC = () => {
             minWidth: { md: 300 },
             maxWidth: { md: 460 },
             maxHeight: { xs: '40vh', md: 'none' },
+            height: { md: '100%' },
             flexShrink: 0,
             borderRight: { md: '1px solid' },
             borderBottom: { xs: '1px solid', md: 'none' },
             borderColor: 'divider',
-            overflow: 'auto',
+            display: 'flex',
+            flexDirection: 'column',
+            minHeight: 0,
           }}
         >
-          <Box sx={{ p: 2 }}>
+          <Box sx={{ flex: 1, overflow: 'auto', p: 2, minHeight: 0 }}>
             <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
               <Stack direction="row" alignItems="center" spacing={0.5} sx={{ minWidth: 0 }}>
                 <Checkbox
@@ -1582,6 +1772,9 @@ const OcrReviewPage: React.FC = () => {
               })}
             </List>
           </Box>
+          <Box sx={{ flexShrink: 0, px: 2, pb: 2, pt: 0 }}>
+            <OcrReviewPipelinePanel state={pipelineState} />
+          </Box>
         </Box>
         )}
 
@@ -1589,9 +1782,29 @@ const OcrReviewPage: React.FC = () => {
         <Box ref={contentRowRef} sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: { xs: 'column', lg: 'row' }, overflow: 'hidden' }}>
           <Box sx={{ flex: 1, minWidth: 0, overflow: 'auto', p: 2 }}>
           {!selectedJobId ? (
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-              <Typography color="text.secondary">Select a job from the queue to review extracted fields.</Typography>
-            </Box>
+            <OcrReviewDropZone
+              dragActive={uploadDragActive}
+              disabled={!churchId}
+              isUploading={isUploadingFiles || uploadQueue.some((f) => !['completed', 'failed', 'error', 'pending'].includes(f.status))}
+              onDragEnter={handleReviewDrag}
+              onDragLeave={handleReviewDrag}
+              onDragOver={handleReviewDrag}
+              onDrop={handleReviewDrop}
+              onBrowse={() => uploadFileInputRef.current?.click()}
+              fileInput={(
+                <input
+                  ref={uploadFileInputRef}
+                  type="file"
+                  accept={REVIEW_ACCEPTED_TYPES}
+                  multiple
+                  hidden
+                  onChange={(e) => {
+                    handleReviewFiles(e.target.files);
+                    e.target.value = '';
+                  }}
+                />
+              )}
+            />
           ) : (
             <Stack spacing={2}>
               <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
