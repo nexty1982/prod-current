@@ -77,6 +77,29 @@ interface QueuedFile {
   progress: number;
   error?: string;
   jobId?: string;
+  reviewStatus?: string;
+}
+
+function mapRemoteJobToQueueStatus(remote: { status: string; review_status?: string }): QueuedFile['status'] {
+  const reviewStatus = remote.review_status || 'uploaded';
+  if (remote.status === 'failed' || remote.status === 'error') return 'failed';
+  if (['agent_extracted', 'ready_to_seed', 'seeded'].includes(reviewStatus)) return 'completed';
+  if (remote.status === 'processing') return 'processing';
+  if (remote.status === 'complete' || remote.status === 'completed') return 'processing';
+  return 'queued';
+}
+
+function queueStatusLabel(file: QueuedFile): string {
+  switch (file.status) {
+    case 'uploading': return 'Uploading';
+    case 'queued': return 'In queue';
+    case 'processing':
+      return file.reviewStatus === 'ocr_complete' ? 'Extracting fields' : 'Processing OCR';
+    case 'completed': return 'Ready';
+    case 'failed':
+    case 'error': return 'Failed';
+    default: return 'Pending';
+  }
 }
 
 type Church = ChurchRecord;
@@ -288,6 +311,8 @@ const UploadRecordsPage: React.FC = () => {
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const queueRef = useRef<QueuedFile[]>([]);
+  queueRef.current = queue;
 
   // History state
   const [history, setHistory] = useState<OcrJob[]>([]);
@@ -304,7 +329,10 @@ const UploadRecordsPage: React.FC = () => {
   const [settingsLoading, setSettingsLoading] = useState(false);
 
   // Derived upload stats
-  const hasActiveJobs = queue.some((f) => ['queued', 'processing', 'uploading'].includes(f.status));
+  const shouldPollQueue = useMemo(
+    () => queue.some((f) => f.jobId && !['completed', 'failed', 'error'].includes(f.status)),
+    [queue],
+  );
   const allDone = queue.length > 0 && queue.every((f) => ['completed', 'failed', 'error'].includes(f.status));
   const completedCount = queue.filter((f) => f.status === 'completed').length;
   const failedCount = queue.filter((f) => f.status === 'failed' || f.status === 'error').length;
@@ -384,42 +412,48 @@ const UploadRecordsPage: React.FC = () => {
     if (activeTab === 1) fetchHistory();
   }, [activeTab, fetchHistory]);
 
+  const syncQueueFromServer = useCallback(async () => {
+    if (!effectiveChurchId) return;
+    try {
+      const res: any = await apiClient.get(`/api/church/${effectiveChurchId}/ocr/jobs?limit=200`);
+      const jobs: any[] = res?.jobs || res?.data?.jobs || [];
+      if (!Array.isArray(jobs)) return;
+      const statusMap = new Map(jobs.map((j) => [String(j.id), j]));
+      setQueue((prev) => {
+        let changed = false;
+        const next = prev.map((f) => {
+          if (!f.jobId) return f;
+          const remote = statusMap.get(String(f.jobId));
+          if (!remote) return f;
+          const uiStatus = mapRemoteJobToQueueStatus(remote);
+          const reviewStatus = remote.review_status || 'uploaded';
+          if (uiStatus === f.status && reviewStatus === f.reviewStatus) return f;
+          changed = true;
+          return {
+            ...f,
+            status: uiStatus,
+            reviewStatus,
+            progress: uiStatus === 'completed' ? 100 : f.progress,
+            error: uiStatus === 'failed'
+              ? (remote.error_message || remote.error || 'Processing failed')
+              : f.error,
+          };
+        });
+        return changed ? next : prev;
+      });
+    } catch { /* non-fatal */ }
+  }, [effectiveChurchId]);
+
   // ─── Poll for queue status updates ──
   useEffect(() => {
-    if (!effectiveChurchId || !hasActiveJobs) {
+    if (!effectiveChurchId || !shouldPollQueue) {
       if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
       return;
     }
-    const poll = async () => {
-      try {
-        const res: any = await apiClient.get(`/api/church/${effectiveChurchId}/ocr/jobs`);
-        const jobs: any[] = res?.data?.jobs || res?.data || res?.jobs || [];
-        if (jobs.length === 0) return;
-        const statusMap = new Map<string, { status: string; error?: string }>();
-        for (const j of jobs) {
-          statusMap.set(String(j.id), {
-            status: j.status,
-            error: j.error_message || j.error_regions || undefined,
-          });
-        }
-        setQueue((prev) => prev.map((f) => {
-          if (!f.jobId) return f;
-          const remote = statusMap.get(f.jobId);
-          if (!remote) return f;
-          let uiStatus = f.status;
-          if (remote.status === 'pending' || remote.status === 'queued') uiStatus = 'queued';
-          else if (remote.status === 'processing') uiStatus = 'processing';
-          else if (remote.status === 'completed' || remote.status === 'complete') uiStatus = 'completed';
-          else if (remote.status === 'failed' || remote.status === 'error') uiStatus = 'failed';
-          if (uiStatus === f.status) return f;
-          return { ...f, status: uiStatus, error: remote.error, progress: uiStatus === 'completed' ? 100 : f.progress };
-        }));
-      } catch { /* non-fatal */ }
-    };
-    poll();
-    pollRef.current = setInterval(poll, 5000);
+    syncQueueFromServer();
+    pollRef.current = setInterval(syncQueueFromServer, 4000);
     return () => { if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; } };
-  }, [effectiveChurchId, hasActiveJobs]);
+  }, [effectiveChurchId, shouldPollQueue, syncQueueFromServer]);
 
   // ─── File handlers ──
   const handleFiles = useCallback((fileList: FileList | null) => {
@@ -445,10 +479,11 @@ const UploadRecordsPage: React.FC = () => {
 
   // ─── Upload ──
   const startUpload = useCallback(async () => {
-    if (!effectiveChurchId || queue.length === 0) return;
+    if (!effectiveChurchId) return;
+    const pending = queueRef.current.filter((f) => f.status === 'pending');
+    if (pending.length === 0) return;
     setIsUploading(true);
-    for (const item of queue) {
-      if (item.status !== 'pending') continue;
+    for (const item of pending) {
       setQueue((q) => q.map((f) => (f.id === item.id ? { ...f, status: 'uploading', progress: 0 } : f)));
       try {
         const formData = new FormData();
@@ -460,7 +495,13 @@ const UploadRecordsPage: React.FC = () => {
         const jobs = response?.jobs || response?.data?.jobs || [];
         const jobId = jobs.length > 0 ? String(jobs[0].id) : undefined;
         if (jobId) {
-          setQueue((q) => q.map((f) => (f.id === item.id ? { ...f, status: 'queued' as const, progress: 100, jobId } : f)));
+          setQueue((q) => q.map((f) => (f.id === item.id ? {
+            ...f,
+            status: 'queued' as const,
+            progress: 100,
+            jobId,
+            reviewStatus: 'uploaded',
+          } : f)));
         } else {
           setQueue((q) => q.map((f) => (f.id === item.id ? { ...f, status: 'error', progress: 100, error: 'Upload OK but no job created' } : f)));
         }
@@ -471,7 +512,8 @@ const UploadRecordsPage: React.FC = () => {
       }
     }
     setIsUploading(false);
-  }, [effectiveChurchId, queue, recordType, ocrLanguage]);
+    await syncQueueFromServer();
+  }, [effectiveChurchId, recordType, ocrLanguage, syncQueueFromServer]);
 
   // ─── Admin: update review status ──
   const updateReviewStatus = useCallback(async (jobId: string, review_status: ReviewStatus, review_notes?: string) => {
@@ -743,7 +785,7 @@ const UploadRecordsPage: React.FC = () => {
                       Selected Files ({queue.length})
                     </Typography>
                     <Stack direction="row" spacing={0.5}>
-                      {completedCount > 0 && <Chip label={`${completedCount} uploaded`} color="success" size="small" />}
+                      {completedCount > 0 && <Chip label={`${completedCount} ready`} color="success" size="small" />}
                       {failedCount > 0 && <Chip label={`${failedCount} failed`} color="error" size="small" />}
                     </Stack>
                   </Box>
@@ -756,9 +798,16 @@ const UploadRecordsPage: React.FC = () => {
                           <Typography variant="caption" color="text.secondary">{fmtSize(f.size)}</Typography>
                         </Box>
                         {f.status === 'uploading' && <CircularProgress size={18} />}
-                        {f.status === 'queued' && <Chip label="Queued" color="primary" size="small" variant="outlined" sx={{ fontSize: '0.7rem' }} />}
-                        {f.status === 'processing' && <Chip label="Processing" color="warning" size="small" variant="outlined" sx={{ fontSize: '0.7rem' }} />}
-                        {f.status === 'completed' && <Chip label="Uploaded" color="success" size="small" sx={{ fontSize: '0.7rem' }} />}
+                        {['queued', 'processing'].includes(f.status) && (
+                          <Chip
+                            label={queueStatusLabel(f)}
+                            color={f.status === 'processing' ? 'warning' : 'primary'}
+                            size="small"
+                            variant="outlined"
+                            sx={{ fontSize: '0.7rem' }}
+                          />
+                        )}
+                        {f.status === 'completed' && <Chip label="Ready" color="success" size="small" sx={{ fontSize: '0.7rem' }} />}
                         {(f.status === 'failed' || f.status === 'error') && (
                           <Tooltip title={f.error || 'Failed'}>
                             <Chip label="Failed" color="error" size="small" sx={{ fontSize: '0.7rem' }} />
