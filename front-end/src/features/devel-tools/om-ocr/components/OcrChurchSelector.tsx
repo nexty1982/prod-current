@@ -22,6 +22,7 @@ import { useSearchParams } from 'react-router-dom';
 import {
   OCR_STUDIO_CHURCH_PARAM,
   OCR_STUDIO_CHURCH_PARAM_LEGACY,
+  formatOcrStudioChurchLabel,
   readOcrStudioChurchId,
   setOcrStudioChurchParam,
 } from '../utils/ocrStudioChurch';
@@ -97,7 +98,7 @@ const OcrChurchSelector: React.FC<OcrChurchSelectorProps> = ({ variant = 'full' 
       >
         {churches.map((c) => (
           <MenuItem key={c.id} value={c.id}>
-            {c.church_name || c.name || `Church ${c.id}`}
+            {formatOcrStudioChurchLabel(c)}
           </MenuItem>
         ))}
       </Select>

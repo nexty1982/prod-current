@@ -35,6 +35,15 @@ export function setOcrStudioChurchParam(
   }, { replace: true });
 }
 
+export function formatOcrStudioChurchLabel(church: {
+  id: number;
+  church_name?: string;
+  name?: string;
+}): string {
+  const name = church.church_name || church.name || `Church ${church.id}`;
+  return `${name} (#${church.id})`;
+}
+
 export function ocrStudioPathWithChurch(path: string, searchParams: URLSearchParams): string {
   const churchId = readOcrStudioChurchId(searchParams);
   if (!churchId) return path;

@@ -41,6 +41,7 @@ import { apiClient } from '@/shared/lib/axiosInstance';
 import churchService from '@/shared/lib/churchService';
 import OcrStudioNav from '@/features/devel-tools/om-ocr/components/OcrStudioNav';
 import { useOcrChurchSelector } from '@/features/devel-tools/om-ocr/hooks/useOcrChurchSelector';
+import { formatOcrStudioChurchLabel } from '@/features/devel-tools/om-ocr/utils/ocrStudioChurch';
 import {
   type ChurchRecordFieldConfig,
   type ChurchRecordFieldRow,
@@ -115,10 +116,13 @@ const RecordSettingsPage: React.FC = () => {
 
   const churchId = isOcrStudio ? (studioChurchId ?? activeChurchId) : activeChurchId;
   const churchName = useMemo(() => {
-    if (churchMetadata?.church_name) return churchMetadata.church_name;
-    const found = churches.find(c => c.id === activeChurchId);
-    return found?.name || null;
-  }, [churchMetadata, activeChurchId, churches]);
+    const id = churchId;
+    if (!id) return null;
+    if (churchMetadata?.church_name) return formatOcrStudioChurchLabel({ id, church_name: churchMetadata.church_name });
+    const found = churches.find((c) => c.id === id);
+    if (found) return formatOcrStudioChurchLabel({ id: found.id, name: found.name });
+    return `Church (#${id})`;
+  }, [churchMetadata, churchId, churches]);
 
   const [activeType, setActiveType] = useState<RecordTypeKey>('baptism');
   const [config, setConfig] = useState<ChurchRecordFieldConfig>({});
@@ -208,7 +212,7 @@ const RecordSettingsPage: React.FC = () => {
             >
               {churches.map((c: any) => (
                 <MenuItem key={c.id} value={c.id}>
-                  {c.church_name || c.name || `Church ${c.id}`}
+                  {formatOcrStudioChurchLabel(c)}
                 </MenuItem>
               ))}
             </Select>
@@ -250,7 +254,7 @@ const RecordSettingsPage: React.FC = () => {
                 >
                   {churches.map((c: any) => (
                     <MenuItem key={c.id} value={c.id}>
-                      {c.church_name || c.name || `Church ${c.id}`}
+                      {formatOcrStudioChurchLabel(c)}
                     </MenuItem>
                   ))}
                 </Select>

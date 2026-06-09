@@ -15,6 +15,7 @@ import OcrChurchSelector from '@/features/devel-tools/om-ocr/components/OcrChurc
 import OcrSetupGate from '@/features/devel-tools/om-ocr/components/OcrSetupGate';
 import OcrStudioNav from '@/features/devel-tools/om-ocr/components/OcrStudioNav';
 import { useOcrChurchSelector } from '@/features/devel-tools/om-ocr/hooks/useOcrChurchSelector';
+import { formatOcrStudioChurchLabel } from '@/features/devel-tools/om-ocr/utils/ocrStudioChurch';
 
 import churchService, { type Church as ChurchRecord } from '@/shared/lib/churchService';
 import { apiClient } from '@/shared/lib/axiosInstance';
@@ -481,7 +482,7 @@ const UploadRecordsPage: React.FC = () => {
               onChange={(e) => setSelectedChurchId(Number(e.target.value) || null)}
             >
               {churches.map((c) => (
-                <MenuItem key={c.id} value={c.id}>{c.church_name || c.name || `Church ${c.id}`}</MenuItem>
+                <MenuItem key={c.id} value={c.id}>{formatOcrStudioChurchLabel(c)}</MenuItem>
               ))}
             </Select>
           </FormControl>

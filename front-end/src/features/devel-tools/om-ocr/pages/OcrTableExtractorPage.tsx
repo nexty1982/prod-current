@@ -52,7 +52,7 @@ import {
 import React, { useCallback, useEffect, useState } from 'react';
 import OcrStudioNav from '../components/OcrStudioNav';
 import { useOcrChurchSelector } from '../hooks/useOcrChurchSelector';
-import { setOcrStudioChurchParam } from '../utils/ocrStudioChurch';
+import { formatOcrStudioChurchLabel, setOcrStudioChurchParam } from '../utils/ocrStudioChurch';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -353,7 +353,7 @@ const OcrTableExtractorPage: React.FC = () => {
               <Autocomplete
                 size="small"
                 options={churches}
-                getOptionLabel={(o) => `${o.name} (#${o.id})`}
+                getOptionLabel={(o) => formatOcrStudioChurchLabel(o)}
                 value={churchFilter}
                 onChange={(_, v) => {
                   setChurchFilter(v);
