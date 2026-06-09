@@ -39,7 +39,6 @@ import { useAuth } from '@/context/AuthContext';
 import { useChurch } from '@/context/ChurchContext';
 import { apiClient } from '@/shared/lib/axiosInstance';
 import churchService from '@/shared/lib/churchService';
-import OcrChurchSelector from '@/features/devel-tools/om-ocr/components/OcrChurchSelector';
 import OcrStudioNav from '@/features/devel-tools/om-ocr/components/OcrStudioNav';
 import { useOcrChurchSelector } from '@/features/devel-tools/om-ocr/hooks/useOcrChurchSelector';
 import {
@@ -194,9 +193,8 @@ const RecordSettingsPage: React.FC = () => {
     return (
       <Box>
         {isOcrStudio && <OcrStudioNav />}
-        {isOcrStudio && <OcrChurchSelector />}
         <Alert severity="info" sx={{ mb: 2 }}>Select a church to configure record table headers.</Alert>
-        {!isOcrStudio && isSuperAdmin() && churches.length > 0 && (
+        {isSuperAdmin() && churches.length > 0 && (
           <FormControl size="small" sx={{ minWidth: 300 }}>
             <InputLabel>Church</InputLabel>
             <Select
@@ -223,7 +221,6 @@ const RecordSettingsPage: React.FC = () => {
   return (
     <Box>
       {isOcrStudio && <OcrStudioNav />}
-      {isOcrStudio && <OcrChurchSelector />}
 
       <Box sx={{ mb: 3 }}>
         <Stack direction="row" justifyContent="space-between" alignItems="flex-start">

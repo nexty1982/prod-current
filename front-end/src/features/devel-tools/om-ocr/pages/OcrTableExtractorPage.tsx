@@ -50,7 +50,6 @@ import {
     IconTable,
 } from '@tabler/icons-react';
 import React, { useCallback, useEffect, useState } from 'react';
-import OcrChurchSelector from '../components/OcrChurchSelector';
 import OcrStudioNav from '../components/OcrStudioNav';
 import { useOcrChurchSelector } from '../hooks/useOcrChurchSelector';
 import { setOcrStudioChurchParam } from '../utils/ocrStudioChurch';
@@ -324,7 +323,6 @@ const OcrTableExtractorPage: React.FC = () => {
   return (
     <PageContainer title="OCR Table Extractor" description="Layout-first table extraction from OCR jobs">
       <OcrStudioNav />
-      <OcrChurchSelector />
       <Box sx={{ p: { xs: 1, sm: 2 } }}>
 
         {/* Header */}

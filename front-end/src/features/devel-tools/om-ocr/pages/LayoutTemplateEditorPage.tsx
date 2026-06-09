@@ -470,7 +470,6 @@ const LayoutTemplateEditorPage: React.FC = () => {
   return (
     <PageContainer title="Layout Template Editor" description="Visual editor for OCR layout templates">
       <OcrStudioNav />
-      <OcrChurchSelector />
       <Box sx={{ p: { xs: 1, sm: 2 } }}>
         {/* Header */}
         <Stack direction="row" alignItems="center" justifyContent="space-between" flexWrap="wrap" gap={1} sx={{ mb: 2 }}>
@@ -504,6 +503,8 @@ const LayoutTemplateEditorPage: React.FC = () => {
             )}
           </Stack>
         </Stack>
+
+        <OcrChurchSelector />
 
         {/* Template selector + metadata */}
         <Card sx={{ mb: 2 }}>
