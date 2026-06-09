@@ -104,7 +104,12 @@ import {
   IconRotate,
 } from '@tabler/icons-react';
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
+import {
+  ocrStudioPathWithChurch,
+  readOcrStudioChurchId,
+  setOcrStudioChurchParam,
+} from '@/features/devel-tools/om-ocr/utils/ocrStudioChurch';
+import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 
 type AgentView = 'agent1' | 'agent2' | 'compare';
 
@@ -369,6 +374,7 @@ function JobListThumb({ churchId, jobId }: { churchId: number; jobId: number }) 
 const OcrReviewPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
   const isPortal = location.pathname.startsWith('/portal');
   const { churchId: churchIdParam, jobId: jobIdParam } = useParams<{ churchId: string; jobId: string }>();
   const { user } = useAuth();
@@ -377,6 +383,14 @@ const OcrReviewPage: React.FC = () => {
     if (churchIdParam) return Number(churchIdParam);
     return user?.church_id ? Number(user.church_id) : null;
   }, [churchIdParam, user?.church_id]);
+
+  // Review routes use :churchId in the path; sync ?church= so Upload and OCR Studio nav keep selection.
+  useEffect(() => {
+    if (!churchId || isPortal) return;
+    const urlChurch = readOcrStudioChurchId(searchParams);
+    if (urlChurch === churchId) return;
+    setOcrStudioChurchParam(setSearchParams, churchId);
+  }, [churchId, isPortal, searchParams, setSearchParams]);
 
   const selectedJobId = jobIdParam ? Number(jobIdParam) : null;
 
@@ -456,6 +470,10 @@ const OcrReviewPage: React.FC = () => {
   const mapMode = focusedField !== null;
 
   const backPath = isPortal ? '/portal/upload' : '/devel/ocr-studio/upload';
+  const uploadPath = useMemo(
+    () => (isPortal ? backPath : ocrStudioPathWithChurch(backPath, searchParams, churchId)),
+    [isPortal, backPath, searchParams, churchId],
+  );
   const reviewBase = churchId
     ? (isPortal ? `/portal/ocr/review/${churchId}` : `/devel/ocr-studio/review/${churchId}`)
     : backPath;
@@ -1686,7 +1704,7 @@ const OcrReviewPage: React.FC = () => {
     return (
       <Box sx={{ p: 4, textAlign: 'center' }}>
         <Typography variant="h6" color="text.secondary" sx={{ mb: 2 }}>Missing church ID</Typography>
-        <Button component={Link} to={backPath} startIcon={<IconArrowLeft size={18} />}>Back to Upload</Button>
+        <Button component={Link} to={uploadPath} startIcon={<IconArrowLeft size={18} />}>Back to Upload</Button>
       </Box>
     );
   }
@@ -1712,7 +1730,7 @@ const OcrReviewPage: React.FC = () => {
             {jobsCollapsed ? <IconLayoutSidebarLeftExpand size={20} /> : <IconLayoutSidebarLeftCollapse size={20} />}
           </IconButton>
         </Tooltip>
-        <Button component={Link} to={backPath} startIcon={<IconArrowLeft size={16} />} size="small" sx={{ textTransform: 'none' }}>
+        <Button component={Link} to={uploadPath} startIcon={<IconArrowLeft size={16} />} size="small" sx={{ textTransform: 'none' }}>
           Upload
         </Button>
         <Typography variant="h6" fontWeight={700} sx={{ flex: 1 }}>Confirm & Seed</Typography>

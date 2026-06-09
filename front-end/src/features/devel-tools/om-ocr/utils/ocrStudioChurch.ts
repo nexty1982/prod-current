@@ -64,8 +64,14 @@ export function formatOcrStudioChurchLabel(church: OcrStudioChurchLabelFields): 
   return `${parishName} (#${church.id})`;
 }
 
-export function ocrStudioPathWithChurch(path: string, searchParams: URLSearchParams): string {
-  const churchId = readOcrStudioChurchId(searchParams);
+export function ocrStudioPathWithChurch(
+  path: string,
+  searchParams: URLSearchParams,
+  fallbackChurchId?: number | null,
+): string {
+  const churchId =
+    readOcrStudioChurchId(searchParams) ??
+    (fallbackChurchId && fallbackChurchId > 0 ? fallbackChurchId : null);
   if (!churchId) return path;
   const sep = path.includes('?') ? '&' : '?';
   return `${path}${sep}${OCR_STUDIO_CHURCH_PARAM}=${churchId}`;

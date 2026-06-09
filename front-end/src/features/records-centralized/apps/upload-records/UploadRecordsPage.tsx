@@ -15,7 +15,7 @@ import OcrChurchSelector from '@/features/devel-tools/om-ocr/components/OcrChurc
 import OcrSetupGate from '@/features/devel-tools/om-ocr/components/OcrSetupGate';
 import OcrStudioNav from '@/features/devel-tools/om-ocr/components/OcrStudioNav';
 import { useOcrChurchSelector } from '@/features/devel-tools/om-ocr/hooks/useOcrChurchSelector';
-import { formatOcrStudioChurchLabel } from '@/features/devel-tools/om-ocr/utils/ocrStudioChurch';
+import { formatOcrStudioChurchLabel, ocrStudioPathWithChurch } from '@/features/devel-tools/om-ocr/utils/ocrStudioChurch';
 
 import churchService, { type Church as ChurchRecord } from '@/shared/lib/churchService';
 import { apiClient } from '@/shared/lib/axiosInstance';
@@ -286,7 +286,7 @@ const UploadRecordsPage: React.FC = () => {
   const location = useLocation();
   const isOcrStudioUpload = location.pathname.includes('/devel/ocr-studio');
   const isPortalUpload = location.pathname.startsWith('/portal');
-  const { selectedChurchId: studioChurchId } = useOcrChurchSelector();
+  const { selectedChurchId: studioChurchId, searchParams: studioSearchParams } = useOcrChurchSelector();
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
   const { user, isSuperAdmin } = useAuth();
@@ -640,12 +640,16 @@ const UploadRecordsPage: React.FC = () => {
 
   const openReviewForJob = useCallback((jobId: string) => {
     if (!effectiveChurchId) return;
-    navigate(
-      isPortalUpload
-        ? `/portal/ocr/review/${effectiveChurchId}/${jobId}`
-        : `/devel/ocr-studio/review/${effectiveChurchId}/${jobId}`
-    );
-  }, [effectiveChurchId, isPortalUpload, navigate]);
+    if (isPortalUpload) {
+      navigate(`/portal/ocr/review/${effectiveChurchId}/${jobId}`);
+      return;
+    }
+    navigate(ocrStudioPathWithChurch(
+      `/devel/ocr-studio/review/${effectiveChurchId}/${jobId}`,
+      studioSearchParams,
+      effectiveChurchId,
+    ));
+  }, [effectiveChurchId, isPortalUpload, navigate, studioSearchParams]);
 
   // ═══════════════════════════════════════════════════════════════════════════
   // RENDER
@@ -919,11 +923,18 @@ const UploadRecordsPage: React.FC = () => {
                     {effectiveChurchId && (
                       <Button
                         variant="contained"
-                        onClick={() => navigate(
-                          isPortalUpload
-                            ? `/portal/ocr/review/${effectiveChurchId}`
-                            : `/devel/ocr-studio/review/${effectiveChurchId}`
-                        )}
+                        onClick={() => {
+                          if (!effectiveChurchId) return;
+                          if (isPortalUpload) {
+                            navigate(`/portal/ocr/review/${effectiveChurchId}`);
+                            return;
+                          }
+                          navigate(ocrStudioPathWithChurch(
+                            `/devel/ocr-studio/review/${effectiveChurchId}`,
+                            studioSearchParams,
+                            effectiveChurchId,
+                          ));
+                        }}
                         sx={{ textTransform: 'none' }}
                       >
                         Open Review
