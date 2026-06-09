@@ -495,13 +495,13 @@ const UploadRecordsPage: React.FC = () => {
       )}
 
       {isOcrStudioUpload && (
-        <Paper variant="outlined" sx={{ mb: 2.5, px: { xs: 1, sm: 2 } }}>
+        <Paper variant="outlined" sx={{ mb: 2.5, px: { xs: 1.5, sm: 2 }, py: 1.25 }}>
           <Stack
             direction="row"
             alignItems="center"
             flexWrap="wrap"
             gap={2}
-            sx={{ minHeight: 42 }}
+            sx={{ minHeight: 56 }}
           >
             <OcrChurchSelector variant="inline" />
             {effectiveChurchId && (
@@ -509,8 +509,8 @@ const UploadRecordsPage: React.FC = () => {
                 value={activeTab}
                 onChange={(_, v) => setActiveTab(v)}
                 sx={{
-                  minHeight: 42,
-                  '& .MuiTab-root': { minHeight: 42, textTransform: 'none', fontWeight: 600, fontSize: '0.875rem' },
+                  minHeight: 48,
+                  '& .MuiTab-root': { minHeight: 48, py: 1.25, textTransform: 'none', fontWeight: 600, fontSize: '0.875rem' },
                 }}
               >
                 <Tab label="Upload Images" />
