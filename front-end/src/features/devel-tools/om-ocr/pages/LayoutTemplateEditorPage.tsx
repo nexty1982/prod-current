@@ -504,13 +504,12 @@ const LayoutTemplateEditorPage: React.FC = () => {
           </Stack>
         </Stack>
 
-        <OcrChurchSelector />
-
         {/* Template selector + metadata */}
         <Card sx={{ mb: 2 }}>
           <CardContent sx={{ py: 1.5, '&:last-child': { pb: 1.5 } }}>
             <Stack spacing={1.5}>
               <Stack direction="row" spacing={1.5} alignItems="center" flexWrap="wrap" useFlexGap>
+                <OcrChurchSelector variant="inline" />
                 <TextField
                   select
                   size="small"

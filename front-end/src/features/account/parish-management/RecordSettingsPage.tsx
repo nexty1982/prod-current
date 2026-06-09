@@ -223,41 +223,41 @@ const RecordSettingsPage: React.FC = () => {
       {isOcrStudio && <OcrStudioNav />}
 
       <Box sx={{ mb: 3 }}>
-        <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
-          <Box>
-            <Typography sx={{ fontFamily: "'Inter'", fontSize: '1.25rem', fontWeight: 600, color: isDark ? '#f3f4f6' : '#111827', mb: 0.5 }}>
-              Record table headers
-            </Typography>
-            <Typography sx={{ fontFamily: "'Inter'", fontSize: '0.8125rem', color: isDark ? '#9ca3af' : '#6b7280' }}>
-              Match your parish ledger columns for baptism, marriage, and funeral books.
-              Set the printed header text, display labels, and which fields appear during OCR review.
-              Fields like &ldquo;Parents Name&rdquo; are omitted by default — use separate father and mother columns instead.
-            </Typography>
+        <Typography sx={{ fontFamily: "'Inter'", fontSize: '1.25rem', fontWeight: 600, color: isDark ? '#f3f4f6' : '#111827', mb: 0.5 }}>
+          Record table headers
+        </Typography>
+        <Typography sx={{ fontFamily: "'Inter'", fontSize: '0.8125rem', color: isDark ? '#9ca3af' : '#6b7280' }}>
+          Match your parish ledger columns for baptism, marriage, and funeral books.
+          Set the printed header text, display labels, and which fields appear during OCR review.
+          Fields like &ldquo;Parents Name&rdquo; are omitted by default — use separate father and mother columns instead.
+        </Typography>
+        {(churchName || (isSuperAdmin() && churches.length > 0)) && (
+          <Stack direction="row" spacing={1.5} alignItems="center" flexWrap="wrap" sx={{ mt: 1.5 }}>
             {churchName && (
-              <Chip size="small" label={churchName} color="primary" variant="outlined" sx={{ mt: 1.5 }} />
+              <Chip size="small" label={churchName} color="primary" variant="outlined" />
             )}
-          </Box>
-          {isSuperAdmin() && churches.length > 0 && (
-            <FormControl size="small" sx={{ minWidth: 260, ml: 2 }}>
-              <InputLabel>Church</InputLabel>
-              <Select
-                value={activeChurchId || ''}
-                label="Church"
-                onChange={(e) => {
-                  const newId = Number(e.target.value);
-                  setActiveChurchId(newId);
-                  setSearchParams({ church: String(newId) });
-                }}
-              >
-                {churches.map((c: any) => (
-                  <MenuItem key={c.id} value={c.id}>
-                    {c.church_name || c.name || `Church ${c.id}`}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          )}
-        </Stack>
+            {isSuperAdmin() && churches.length > 0 && (
+              <FormControl size="small" sx={{ minWidth: 260 }}>
+                <InputLabel>Church</InputLabel>
+                <Select
+                  value={activeChurchId || ''}
+                  label="Church"
+                  onChange={(e) => {
+                    const newId = Number(e.target.value);
+                    setActiveChurchId(newId);
+                    setSearchParams({ church: String(newId) });
+                  }}
+                >
+                  {churches.map((c: any) => (
+                    <MenuItem key={c.id} value={c.id}>
+                      {c.church_name || c.name || `Church ${c.id}`}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            )}
+          </Stack>
+        )}
       </Box>
 
       {!isOcrStudio && <PreviewBanner />}

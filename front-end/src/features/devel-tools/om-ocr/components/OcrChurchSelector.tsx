@@ -32,7 +32,12 @@ interface ChurchOption {
   name?: string;
 }
 
-const OcrChurchSelector: React.FC = () => {
+interface OcrChurchSelectorProps {
+  /** `full` = bordered block; `inline` = compact dropdown for toolbars */
+  variant?: 'full' | 'inline';
+}
+
+const OcrChurchSelector: React.FC<OcrChurchSelectorProps> = ({ variant = 'full' }) => {
   const { user, isSuperAdmin } = useAuth();
   const isAdmin = isSuperAdmin() || user?.role === 'admin' || user?.role === 'manager';
   const [searchParams, setSearchParams] = useSearchParams();
@@ -80,24 +85,30 @@ const OcrChurchSelector: React.FC = () => {
 
   if (!isAdmin || churches.length === 0) return null;
 
+  const select = (
+    <FormControl fullWidth={variant === 'full'} size="small" sx={variant === 'inline' ? { minWidth: 260 } : undefined}>
+      <InputLabel>Target Church</InputLabel>
+      <Select
+        value={selectedChurchId ?? ''}
+        label="Target Church"
+        onChange={(e) => {
+          setOcrStudioChurchParam(setSearchParams, Number(e.target.value));
+        }}
+      >
+        {churches.map((c) => (
+          <MenuItem key={c.id} value={c.id}>
+            {c.church_name || c.name || `Church ${c.id}`}
+          </MenuItem>
+        ))}
+      </Select>
+    </FormControl>
+  );
+
+  if (variant === 'inline') return select;
+
   return (
     <Paper variant="outlined" sx={{ p: 2, mb: 2.5 }}>
-      <FormControl fullWidth size="small">
-        <InputLabel>Target Church</InputLabel>
-        <Select
-          value={selectedChurchId ?? ''}
-          label="Target Church"
-          onChange={(e) => {
-            setOcrStudioChurchParam(setSearchParams, Number(e.target.value));
-          }}
-        >
-          {churches.map((c) => (
-            <MenuItem key={c.id} value={c.id}>
-              {c.church_name || c.name || `Church ${c.id}`}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+      {select}
     </Paper>
   );
 };
