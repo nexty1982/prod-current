@@ -1243,4 +1243,170 @@ router.get('/tenant-config/known-slots', async (req, res) => {
   }
 });
 
+// ── Workflow executions (Phase B) ──────────────────────────────────────────
+const workflowExecution = require('../services/workflowExecutionService');
+
+router.get('/workflow-executions', requireRole(['super_admin', 'admin']), async (req, res) => {
+  try {
+    const pool = getAppPool();
+    const limit = Math.min(parseInt(req.query.limit || '50', 10), 200);
+    const offset = parseInt(req.query.offset || '0', 10);
+    const conditions = [];
+    const params = [];
+
+    if (req.query.church_id) {
+      conditions.push('e.church_id = ?');
+      params.push(parseInt(req.query.church_id, 10));
+    }
+    if (req.query.workflow_key) {
+      conditions.push('e.workflow_key = ?');
+      params.push(req.query.workflow_key);
+    }
+    if (req.query.status) {
+      conditions.push('e.status = ?');
+      params.push(req.query.status);
+    }
+    if (req.query.current_step_key) {
+      conditions.push('e.current_step_key = ?');
+      params.push(req.query.current_step_key);
+    }
+
+    const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
+    const [rows] = await pool.query(
+      `SELECT e.*, w.workflow_name
+       FROM church_workflow_executions e
+       LEFT JOIN app_workflows w ON w.workflow_key = e.workflow_key
+       ${where}
+       ORDER BY e.updated_at DESC
+       LIMIT ? OFFSET ?`,
+      [...params, limit, offset]
+    );
+    const [[{ total }]] = await pool.query(
+      `SELECT COUNT(*) AS total FROM church_workflow_executions e ${where}`,
+      params
+    );
+    res.json({
+      executions: rows,
+      pagination: { total: Number(total), limit, offset },
+    });
+  } catch (err) {
+    console.error('[platform] workflow-executions list failed:', err.message);
+    res.status(500).json({ error: 'workflow_executions_failed' });
+  }
+});
+
+router.get('/workflow-executions/stuck', requireRole(['super_admin', 'admin']), async (req, res) => {
+  try {
+    const pool = getAppPool();
+    const hours = parseInt(req.query.hours || '48', 10);
+    const workflowKey = req.query.workflow_key || null;
+    const conditions = [
+      "e.status IN ('active', 'blocked')",
+      'e.updated_at < DATE_SUB(NOW(), INTERVAL ? HOUR)',
+    ];
+    const params = [hours];
+    if (workflowKey) {
+      conditions.push('e.workflow_key = ?');
+      params.push(workflowKey);
+    }
+    const [rows] = await pool.query(
+      `SELECT e.*, w.workflow_name FROM church_workflow_executions e
+       LEFT JOIN app_workflows w ON w.workflow_key = e.workflow_key
+       WHERE ${conditions.join(' AND ')}
+       ORDER BY e.updated_at ASC LIMIT 100`,
+      params
+    );
+    res.json({ stuck: rows, hours_threshold: hours });
+  } catch (err) {
+    console.error('[platform] workflow-executions stuck failed:', err.message);
+    res.status(500).json({ error: 'workflow_executions_stuck_failed' });
+  }
+});
+
+router.post('/workflow-executions/reconcile', requireRole(['super_admin']), async (req, res) => {
+  try {
+    const pool = getAppPool();
+    const sync = require('../services/workflowExecutionSync');
+    const { generateReconcileRunId } = require('../utils/executionId');
+    const workflowKey = req.body.workflow_key || null;
+    const churchId = req.body.church_id ? parseInt(req.body.church_id, 10) : null;
+    const runId = generateReconcileRunId();
+    let created = 0;
+    let updated = 0;
+
+    const workflowKeys = workflowKey
+      ? [workflowKey]
+      : Object.keys(require('../services/workflowExecutionReconcilers').RECONCILER_REGISTRY);
+
+    for (const wk of workflowKeys) {
+      let subjects = await require('../services/workflowExecutionReconcilers').discoverSubjects(pool, wk);
+      if (churchId) subjects = subjects.filter((s) => s.church_id === churchId);
+      for (const subject of subjects) {
+        const existing = await workflowExecution.findExecution(pool, {
+          churchId: subject.church_id,
+          workflowKey: wk,
+          subjectType: subject.subject_type,
+          subjectId: subject.subject_id,
+        });
+        await sync.syncFromReconcile(pool, wk, subject, { transitionSource: 'reconciliation', force: true });
+        if (existing) updated += 1;
+        else created += 1;
+      }
+    }
+
+    await workflowExecution.refreshExecutionSummary(pool, workflowKey);
+    await pool.query(
+      `INSERT INTO workflow_execution_reconcile_runs (
+         run_id, run_type, workflow_key, executions_created, executions_updated, completed_at
+       ) VALUES (?, 'manual', ?, ?, ?, NOW())`,
+      [runId, workflowKey, created, updated]
+    );
+    res.json({ success: true, run_id: runId, created, updated });
+  } catch (err) {
+    console.error('[platform] workflow-executions reconcile failed:', err.message);
+    res.status(500).json({ error: 'workflow_reconcile_failed' });
+  }
+});
+
+router.get('/workflow-executions/:executionId', requireRole(['super_admin', 'admin']), async (req, res) => {
+  try {
+    const pool = getAppPool();
+    const row = await workflowExecution.fetchExecutionRow(pool, req.params.executionId);
+    if (!row) return res.status(404).json({ error: 'not_found' });
+    const steps = await workflowExecution.fetchStepRows(pool, req.params.executionId);
+    res.json({ execution: row, steps });
+  } catch (err) {
+    console.error('[platform] workflow-executions detail failed:', err.message);
+    res.status(500).json({ error: 'workflow_execution_detail_failed' });
+  }
+});
+
+router.get('/workflow-executions/:executionId/timeline', requireRole(['super_admin', 'admin']), async (req, res) => {
+  try {
+    const pool = getAppPool();
+    const limit = Math.min(parseInt(req.query.limit || '50', 10), 200);
+    const [events] = await pool.query(
+      `SELECT * FROM workflow_execution_events
+       WHERE execution_id = ?
+       ORDER BY created_at DESC LIMIT ?`,
+      [req.params.executionId, limit]
+    );
+    res.json({ execution_id: req.params.executionId, events });
+  } catch (err) {
+    console.error('[platform] workflow-executions timeline failed:', err.message);
+    res.status(500).json({ error: 'workflow_execution_timeline_failed' });
+  }
+});
+
+router.get('/workflow-analytics/summary', requireRole(['super_admin', 'admin']), async (req, res) => {
+  try {
+    const pool = getAppPool();
+    const [rows] = await pool.query('SELECT * FROM workflow_execution_summary ORDER BY workflow_key');
+    res.json({ summaries: rows, generated_at: new Date().toISOString() });
+  } catch (err) {
+    console.error('[platform] workflow-analytics summary failed:', err.message);
+    res.status(500).json({ error: 'workflow_analytics_summary_failed' });
+  }
+});
+
 module.exports = router;

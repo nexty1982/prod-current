@@ -538,10 +538,102 @@ const RUNTIME_RESOLVERS = [
   },
 ];
 
+const EXECUTION_GOAL_PRIORITY = {
+  'church.enrollment': 10,
+  'church.ops.setup': 12,
+  'ocr.setup.wizard': 15,
+  'ocr.batch.review': 20,
+  'identity.user.admin': 25,
+  'records.certificate.generate': 30,
+};
+
+function goalFromExecutionRow(row, workflow, audience) {
+  const ctx = buildWorkflowContext(workflow, row.current_step_key, audience);
+  const priority = EXECUTION_GOAL_PRIORITY[row.workflow_key] || 50;
+  const base = {
+    workflow_key: row.workflow_key,
+    priority,
+    title: workflow.workflow_name,
+    summary: ctx.current_step?.step_name || 'In progress',
+    action_route: ctx.current_step?.action_route,
+    action_label: ctx.current_step?.action_label,
+    workflow: ctx,
+    meta: {
+      execution_id: row.execution_id,
+      subject_type: row.subject_type,
+      subject_id: row.subject_id,
+    },
+  };
+
+  if (row.workflow_key === 'ocr.batch.review') {
+    const jobId = String(row.subject_id || '').replace(/^job:/, '');
+    const filename = row.context_snapshot?.filename;
+    base.title = 'OCR review needed';
+    base.summary = filename || `Job #${jobId}`;
+    if (ctx.current_step && jobId) {
+      const reviewRoute = `/portal/ocr/review/${row.church_id}/${jobId}`;
+      base.action_route = reviewRoute;
+      base.action_label = ctx.current_step.action_label || 'Review batch';
+      base.workflow = {
+        ...ctx,
+        current_step: { ...ctx.current_step, action_route: reviewRoute, action_label: base.action_label },
+      };
+    }
+  }
+
+  if (row.workflow_key === 'ocr.setup.wizard' && ctx.current_step) {
+    const setupRoute = `/portal/ocr/setup?church_id=${row.church_id}`;
+    base.action_route = setupRoute;
+    base.workflow = {
+      ...ctx,
+      current_step: {
+        ...ctx.current_step,
+        action_route: setupRoute,
+        action_label: ctx.current_step.action_label || 'Continue OCR setup',
+      },
+    };
+  }
+
+  return base;
+}
+
+async function getGoalsFromExecutions(pool, churchId, { audience = 'parish' } = {}) {
+  const execution = require('./workflowExecutionService');
+  const rows = await execution.listOpenExecutionsForChurch(pool, churchId);
+  const goals = [];
+
+  for (const row of rows) {
+    if (!isWorkflowFeatureEnabled(row.workflow_key)) continue;
+    const workflow = await catalog.fetchWorkflowDetail(row.workflow_key);
+    if (!workflow || !row.current_step_key) continue;
+    const goal = goalFromExecutionRow(row, workflow, audience);
+    if (audience === 'parish' && goal.workflow?.current_step && !goal.action_route) continue;
+    goals.push(goal);
+  }
+
+  return goals.sort((a, b) => a.priority - b.priority);
+}
+
 async function getGoalsForChurch(churchId, { audience = 'parish' } = {}) {
   const { getAppPool } = require('../config/db');
   const pool = getAppPool();
-  const goals = [];
+  const execution = require('./workflowExecutionService');
+  const flags = execution.getExecutionFlags();
+  let goals = [];
+  let source = 'resolver';
+
+  if (flags.model_enabled && flags.read_primary) {
+    goals = await getGoalsFromExecutions(pool, churchId, { audience });
+    source = 'execution';
+    if (goals.length > 0 || !flags.fallback_inference) {
+      return {
+        church_id: churchId,
+        generated_at: new Date().toISOString(),
+        goals,
+        source,
+      };
+    }
+  }
 
   for (const resolver of RUNTIME_RESOLVERS.sort((a, b) => a.priority - b.priority)) {
     if (!isWorkflowFeatureEnabled(resolver.workflow_key)) continue;
@@ -558,6 +650,7 @@ async function getGoalsForChurch(churchId, { audience = 'parish' } = {}) {
     church_id: churchId,
     generated_at: new Date().toISOString(),
     goals,
+    source,
   };
 }
 

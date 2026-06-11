@@ -2,7 +2,7 @@
 
 **Last updated:** 2026-06-13  
 **Owners:** OM backend (`orthodoxmetrics/prod`), OMAI control panel (`omai/berry`), shared catalog in `orthodoxmetrics_db`  
-**Status:** Phase A shipped; **Phase B B-PR1–4 shipped** (schema + execution service + backfill); write-through B-PR5+ pending  
+**Status:** Phase B B-PR1–9 shipped (schema, service, write-through, goals dual-read, platform APIs); enable via env flags  
 **Implementation log:** [workflow-catalog-review-implementation.md](./workflow-catalog-review-implementation.md)  
 **Architecture review:** [workflow-catalog-architecture-gap-analysis.md](./workflow-catalog-architecture-gap-analysis.md)  
 **Phase A design:** [workflow-catalog-phase-a-hierarchy-design.md](./workflow-catalog-phase-a-hierarchy-design.md)  
