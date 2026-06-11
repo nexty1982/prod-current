@@ -24,6 +24,7 @@ const CertificateGeneratorPage = Loadable(lazy(() => import('../features/certifi
 const OrthodoxScheduleGuidelinesPage = Loadable(lazy(() => import('../features/admin/control-panel/OrthodoxScheduleGuidelinesPage')));
 const OCRStudioPage = Loadable(lazy(() => import('../features/ocr/pages/OCRStudioPage')));
 const OcrReviewPage = Loadable(lazy(() => import('../features/devel-tools/om-ocr/pages/OcrReviewPage')));
+const OcrSetupWizardPage = Loadable(lazy(() => import('../features/devel-tools/om-ocr/pages/OcrSetupWizardPage')));
 const UserGuide = Loadable(lazy(() => import('../features/help/UserGuide')));
 const SiteMapPage = Loadable(lazy(() => import('../features/admin/SiteMapPage')));
 
@@ -61,6 +62,7 @@ export const portalRoute = {
     protectedRoute('guide', <UserGuide />),
     // OCR Studio (portal version)
     protectedRoute('ocr', <OCRStudioPage />, ROLE_STAFF),
+    protectedRoute('ocr/setup', <OcrSetupWizardPage />, ROLE_STAFF),
     // Agent review & seed (portal)
     protectedRoute('ocr/review/:churchId', <OcrReviewPage />, ROLE_STAFF),
     protectedRoute('ocr/review/:churchId/:jobId', <OcrReviewPage />, ROLE_STAFF),

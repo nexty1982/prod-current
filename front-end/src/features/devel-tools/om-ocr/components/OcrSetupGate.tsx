@@ -84,7 +84,7 @@ const OcrSetupGate: React.FC<OcrSetupGateProps> = ({ children, churchId: churchI
         <Button
           variant="contained"
           startIcon={<Settings />}
-          onClick={() => navigate(`/devel/ocr-setup-wizard?church_id=${churchId}`)}
+          onClick={() => navigate(`/portal/ocr/setup?church_id=${churchId}`)}
           size="large"
         >
           Complete OCR Setup
