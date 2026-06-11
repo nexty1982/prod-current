@@ -541,3 +541,14 @@ html.dark {
     #6B21A8 100%    /* Purple - Complete cycle */
   );
 }
+
+/* Figma homepage hero — stack on mobile, side-by-side on desktop */
+.om-figma-hero-grid {
+  grid-template-columns: minmax(0, 1fr);
+}
+@media (min-width: 1024px) {
+  .om-figma-hero-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+    gap: 40px;
+  }
+}

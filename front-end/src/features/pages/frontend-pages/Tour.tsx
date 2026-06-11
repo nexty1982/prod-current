@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom';
 import { Shield, Users, FileText, Calendar } from '@/ui/icons';
 import { PUBLIC_ROUTES } from '@/config/publicRoutes';
+import HomepageDiocesanAnalyticsSection from '@/components/frontend-pages/homepage/HomepageDiocesanAnalyticsSection';
+import HomepageHero from '@/components/frontend-pages/homepage/HomepageHero';
 import { HeroSection } from '@/components/frontend-pages/shared/sections';
 import EditableText from '@/components/frontend-pages/shared/EditableText';
 import { TourInteractiveDemo } from '@/components/frontend-pages/tour';
@@ -55,6 +57,9 @@ const Tour = () => {
           </div>
         </div>
       </section>
+
+      <HomepageHero />
+      <HomepageDiocesanAnalyticsSection />
     </>
   );
 };
