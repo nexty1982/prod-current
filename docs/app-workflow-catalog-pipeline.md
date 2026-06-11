@@ -1,8 +1,9 @@
 # App Workflow Catalog Pipeline — Development Log & North Star
 
-**Last updated:** 2026-06-11  
+**Last updated:** 2026-06-12  
 **Owners:** OM backend (`orthodoxmetrics/prod`), OMAI control panel (`omai/berry`), shared catalog in `orthodoxmetrics_db`  
-**Status:** Phase 1–2 shipped; 5/5 filed workflows have runtime resolvers; governance Step 2 partially wired
+**Status:** Catalog review decisions shipped — 6/6 filed workflows; OMStudio governance consumer foundations live  
+**Implementation log:** [workflow-catalog-review-implementation.md](./workflow-catalog-review-implementation.md)
 
 ---
 
@@ -385,25 +386,42 @@ git fetch origin main && git checkout --detach origin/main
 
 ---
 
-## 13. Suggested next work (no input required to start)
+## 13. Catalog review decisions (2026-06-12) — shipped
 
-If proceeding autonomously again, logical order:
+See [workflow-catalog-review-implementation.md](./workflow-catalog-review-implementation.md) for full design. Summary:
 
-1. Fix `church-users` lock to set `is_locked`; align `PendingMembersPage` unlock path with `church-users` API.
-2. Wire CRM/overview enrollment funnel KPIs to `getWorkflowRuntimeSummary` totals.
-3. File workflow #6 candidate in migration once product picks from §12 Q1.
-4. Implement cached OCR setup summary for overview performance.
-5. Step 2 `s2-o1` design spike: artifact manifest table + optional filesystem deploy hook on approve.
+| Decision | Status |
+|----------|--------|
+| `church.ops.setup` filed as workflow #6 | Shipped |
+| Separate from `church.enrollment` | Shipped |
+| `church_users` authoritative for identity | Shipped |
+| Lock sets `is_locked` | Shipped |
+| Payment steps split | Shipped |
+| Feature-flag gates on goals | Shipped |
+| OCR runtime cache in platform DB | Shipped |
+| Parish OCR → portal routes | Shipped |
+| Governance history + queue + validation | Shipped |
+| OMStudio authority manifest API | Shipped |
+
+## 14. Suggested next work
+
+1. Run migration `20260612_workflow_catalog_review_decisions.sql` on all environments.
+2. Step 2 `s2-o1`: physical package deploy hook on approve.
+3. Auto-refresh OCR cache on `ocr_setup_state` writes (event hook).
+4. Align `church-onboarding.js` user counts to `church_users` junction.
 
 ---
 
-## 14. Related files (quick index)
+## 15. Related files (quick index)
 
 | Area | Path |
 |------|------|
 | Catalog migration | `server/database/migrations/20260608_app_workflow_catalog.sql` |
 | Catalog loader | `server/src/services/workflowCatalogService.js` |
 | Goals + resolvers | `server/src/services/workflowGoalsService.js` |
+| Runtime cache | `server/src/services/workflowRuntimeCacheService.js` |
+| Governance service | `server/src/services/workflowGovernanceService.js` |
+| Review migration | `server/database/migrations/20260612_workflow_catalog_review_decisions.sql` |
 | Filing checklist | `server/src/services/workflowRegistry.js` |
 | Parish goals API | `server/src/routes/workflow-goals.js` |
 | Enrollment API | `server/src/routes/admin/onboarding.js` |
