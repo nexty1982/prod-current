@@ -441,7 +441,7 @@ Use **Workflow Systems** (`APP_FAMILY`) containing **Domains** (`WORKFLOW_GROUP`
 
 | Phase | Name | Deliverables | Depends on |
 |-------|------|--------------|------------|
-| **A** | Hierarchy seed | Populate `APP_FAMILY` + `parent_level_key` tree; domain docs | — |
+| **A** | Hierarchy seed | Populate `APP_FAMILY` + `parent_level_key` tree; domain docs | [Phase A design package](./workflow-catalog-phase-a-hierarchy-design.md) |
 | **B** | Execution model | `church_workflow_executions` schema + write-through from existing resolvers | A |
 | **C** | Workshop loop closure | Approve → `app_component_versions` `_N`; rollback pointer; deprecate dual audit | Open Q C1–C6 |
 | **D** | OMStudio handoff | Native OMStudio consumer; OMAI approve read-only | C |

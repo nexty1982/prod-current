@@ -6,6 +6,7 @@
 - [app-workflow-catalog-pipeline.md](./app-workflow-catalog-pipeline.md) — architecture & work log
 - [workflow-catalog-review-implementation.md](./workflow-catalog-review-implementation.md) — shipped review decisions
 - [workflow-catalog-architecture-gap-analysis.md](./workflow-catalog-architecture-gap-analysis.md) — platform gap analysis & workflows #7–#15
+- [workflow-catalog-phase-a-hierarchy-design.md](./workflow-catalog-phase-a-hierarchy-design.md) — Phase A hierarchy implementation design (pending approval)
 
 **How to use this file:** Answer each open question inline (add your decision under the question) or reply in chat with question numbers. Do **not** treat resolved items as still open unless you want to change a shipped decision.
 
