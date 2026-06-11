@@ -792,11 +792,11 @@ router.get('/onboarding-dashboard', requireRole(ADMIN_ROLES), async (req, res) =
     res.json({
       success: true,
       phases: [
-        { phase: 1, label: 'Phase 1 — Infancy', description: 'Minimal info, no tenant DB or users', count: phaseMap[1], color: '#9e9e9e' },
-        { phase: 2, label: 'Phase 2 — Child', description: 'Info filled, tenant DB created, no users', count: phaseMap[2], color: '#42a5f5' },
-        { phase: 3, label: 'Phase 3 — Teenager', description: 'TBD', count: phaseMap[3], color: '#66bb6a' },
-        { phase: 4, label: 'Phase 4 — Adult', description: 'TBD', count: phaseMap[4], color: '#ffa726' },
-        { phase: 5, label: 'Phase 5 — Elder', description: 'TBD', count: phaseMap[5], color: '#ab47bc' },
+        { phase: 1, label: 'Phase 1 — Staged', description: PHASE_DESCRIPTIONS[1], count: phaseMap[1], color: PHASE_COLORS[1] },
+        { phase: 2, label: 'Phase 2 — Provisioned', description: PHASE_DESCRIPTIONS[2], count: phaseMap[2], color: PHASE_COLORS[2] },
+        { phase: 3, label: 'Phase 3 — Configuring', description: PHASE_DESCRIPTIONS[3], count: phaseMap[3], color: PHASE_COLORS[3] },
+        { phase: 4, label: 'Phase 4 — Live', description: PHASE_DESCRIPTIONS[4], count: phaseMap[4], color: PHASE_COLORS[4] },
+        { phase: 5, label: 'Phase 5 — Established', description: PHASE_DESCRIPTIONS[5], count: phaseMap[5], color: PHASE_COLORS[5] },
       ],
       total: total[0].count,
     });
@@ -913,11 +913,27 @@ router.get('/diocesan-dashboard', requireRole(ADMIN_ROLES), async (req, res) => 
 // ═══════════════════════════════════════════════════════════════
 
 const PHASE_LABELS = {
-  1: 'Infancy',
-  2: 'Child',
-  3: 'Teenager',
-  4: 'Adult',
-  5: 'Elder',
+  1: 'Staged',
+  2: 'Provisioned',
+  3: 'Configuring',
+  4: 'Live',
+  5: 'Established',
+};
+
+const PHASE_DESCRIPTIONS = {
+  1: 'Parish row created from directory — profile incomplete, no tenant database',
+  2: 'Profile filled and tenant database created — awaiting staff onboarding',
+  3: 'Staff onboarding and sacramental record tables being configured',
+  4: 'Active parish on orthodoxmetrics.com — full portal operation',
+  5: 'Mature long-term customer — stable operations and support rhythm',
+};
+
+const PHASE_COLORS = {
+  1: '#94a3b8',
+  2: '#3b82f6',
+  3: '#8b5cf6',
+  4: '#22c55e',
+  5: '#059669',
 };
 
 // POST /api/admin/church-onboarding/:churchId/promote — Promote church to next onboarding phase
