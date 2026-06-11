@@ -110,10 +110,10 @@ const About = () => {
               </div>
             </div>
 
-            <div className="bg-gradient-to-br from-[#f9fafb] to-[#f3f4f6] dark:from-gray-800 dark:to-gray-700 rounded-2xl p-12 border border-[rgba(45,27,78,0.1)] dark:border-gray-600">
+            <div className="om-public-panel rounded-2xl p-12">
               <div className="space-y-8">
                 {stats.map((stat, i) => (
-                  <div key={i} className="bg-white dark:bg-[#0d1117] rounded-xl p-6 shadow-sm">
+                  <div key={i} className="om-card rounded-xl p-6 shadow-sm">
                     <div className={`${i % 2 === 0 ? 'text-[#d4af37]' : 'text-[#2d1b4e] dark:text-[#d4af37]'} font-om-display text-5xl mb-2`}>
                       <EditableText contentKey={stat.valueKey} as="span">{t(stat.valueKey)}</EditableText>
                     </div>

@@ -62,7 +62,7 @@ function KPICard({ kpi, index, isActive }: { kpi: MockKPI; index: number; isActi
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, delay: index * 0.1 }}
-      className="p-3 bg-white dark:bg-gray-800 rounded-lg border border-[#f3f4f6] dark:border-gray-700 shadow-sm"
+      className="p-3 om-public-panel rounded-lg border border-[#f3f4f6] dark:border-gray-700 shadow-sm"
     >
       <p className="font-om-body text-[11px] text-[#6a7282] dark:text-gray-500 mb-1">{kpi.label}</p>
       <div className="flex items-end gap-2">
@@ -117,7 +117,7 @@ const DemoStepAnalytics = ({ isActive }: Props) => {
       </div>
 
       {/* Chart area */}
-      <div className="flex-1 bg-white dark:bg-gray-800 rounded-lg border border-[#f3f4f6] dark:border-gray-700 p-4 shadow-sm">
+      <div className="flex-1 om-public-panel rounded-lg border border-[#f3f4f6] dark:border-gray-700 p-4 shadow-sm">
         {/* Chart header */}
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-1.5">

@@ -114,10 +114,10 @@ const WelcomeCarousel = () => {
   };
 
   return (
-    <section className="bg-gradient-to-b from-white to-[#f9fafb] dark:from-gray-900 dark:to-gray-900">
+    <section className="om-section-base">
       <div className="max-w-5xl mx-auto px-6 py-16">
         <div
-          className="relative h-[260px] md:h-[220px] rounded-2xl bg-white dark:bg-gray-800 border border-[#f3f4f6] dark:border-gray-700 shadow-sm overflow-hidden"
+          className="relative h-[260px] md:h-[220px] rounded-2xl om-public-panel shadow-sm overflow-hidden"
           onMouseEnter={() => setPaused(true)}
           onMouseLeave={() => setPaused(false)}
           aria-roledescription="carousel"

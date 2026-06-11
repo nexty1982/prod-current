@@ -136,11 +136,11 @@ function HomepageHighlightCarousel() {
     }`;
 
   const arrowClass =
-    'absolute top-1/2 -translate-y-1/2 z-20 flex h-11 w-11 items-center justify-center rounded-full border border-[rgba(45,27,78,0.15)] dark:border-white/15 bg-white dark:bg-[#161b22] text-[#2d1b4e] dark:text-[#d4af37] shadow-md hover:bg-[#f9fafb] dark:hover:bg-[#1e2a3a] transition-colors';
+    'absolute top-1/2 -translate-y-1/2 z-20 flex h-11 w-11 items-center justify-center rounded-full om-public-panel text-[#2d1b4e] dark:text-[#d4af37] shadow-md hover:opacity-90 transition-opacity';
 
   return (
     <section
-      className="py-20 bg-[#f9fafb] dark:bg-[#0d1117] relative"
+      className="py-20 om-section-elevated relative"
       aria-roledescription="carousel"
       aria-label="What we do, process, and features"
     >

@@ -123,9 +123,7 @@ export function HeroCarousel({ embedded = false }: HeroCarouselProps) {
     return () => clearInterval(id);
   }, [advance, isPaused]);
 
-  const bg = isDark
-    ? "linear-gradient(145deg, #0E0625 0%, #180B40 35%, #2D1B69 75%, #1A0B38 100%)"
-    : "linear-gradient(145deg, #EDE7D5 0%, #F0EAD8 40%, #F6F1E8 75%, #EBE4D2 100%)";
+  const bg = "var(--om-public-bg)";
 
   const textPrimary  = isDark ? IV : PK;
   const textMuted    = isDark ? "rgba(246,241,232,0.5)" : "rgba(14,6,37,0.5)";

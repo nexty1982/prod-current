@@ -28,11 +28,11 @@ const CTASection = ({ title, subtitle, children, editKeyPrefix }: CTASectionProp
       )}
       {subtitle && (
         editKeyPrefix ? (
-          <EditableText contentKey={`${editKeyPrefix}.subtitle`} as="p" className="font-om-body text-xl text-[rgba(255,255,255,0.9)] mb-8">
+          <EditableText contentKey={`${editKeyPrefix}.subtitle`} as="p" className="font-om-body text-xl om-hero-subtitle mb-8">
             {subtitle}
           </EditableText>
         ) : (
-          <p className="font-om-body text-xl text-[rgba(255,255,255,0.9)] mb-8">{subtitle}</p>
+          <p className="font-om-body text-xl om-hero-subtitle mb-8">{subtitle}</p>
         )
       )}
       <div className="flex flex-col sm:flex-row gap-4 justify-center">{children}</div>
@@ -307,7 +307,7 @@ export function ParishRecordsAssessment() {
         <div
           ref={cardRef}
           tabIndex={-1}
-          className="bg-white dark:bg-[#161b22] rounded-2xl shadow-2xl border border-[rgba(255,255,255,0.12)] text-[#2d1b4e] dark:text-[#e8e6e1] p-6 sm:p-8 md:p-10 outline-none"
+          className="om-public-panel rounded-2xl shadow-2xl p-6 sm:p-8 md:p-10 outline-none"
         >
           {!isComplete && (
             <div className="mb-8">
@@ -346,7 +346,7 @@ export function ParishRecordsAssessment() {
                   </p>
                 </div>
                 <div
-                  className="rounded-xl border border-[rgba(45,27,78,0.12)] dark:border-white/10 bg-[#f9fafb] dark:bg-[#0d1117] p-5 sm:p-6"
+                  className="rounded-xl om-public-panel p-5 sm:p-6"
                   id={`${formId}-recommendation`}
                 >
                   <p className="font-om-body font-medium text-[#2d1b4e] dark:text-[#d4af37] mb-4">
@@ -409,7 +409,7 @@ export function ParishRecordsAssessment() {
                         className={`w-full text-left rounded-xl border-2 px-5 py-4 font-om-body text-[15px] sm:text-[16px] transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d4af37] focus-visible:ring-offset-2 ${
                           selected
                             ? 'border-[#d4af37] bg-[rgba(212,175,55,0.14)] text-[#2d1b4e] dark:text-white shadow-sm ring-1 ring-[#d4af37]/25'
-                            : 'border-[rgba(45,27,78,0.12)] dark:border-white/12 bg-white dark:bg-[#161b22] text-[#4a5565] dark:text-gray-300 hover:border-[#2d1b4e]/35 hover:bg-[#f9fafb] dark:hover:bg-[#1e2a3a]'
+                            : 'om-public-panel text-[#4a5565] dark:text-gray-300 hover:border-[#2d1b4e]/35 hover:opacity-90'
                         }`}
                       >
                         {opt.label}

@@ -142,7 +142,7 @@ const Login2 = () => {
 
               {/* Right: Login Card */}
               <div className="flex justify-center">
-                <div className="w-full max-w-[450px] bg-white dark:bg-gray-800 border border-[#f3f4f6] dark:border-gray-700 rounded-2xl p-8 shadow-xl text-[#2d1b4e] dark:text-white">
+                <div className="w-full max-w-[450px] om-public-panel rounded-2xl p-8 shadow-xl">
                   <h2 className="font-om-display text-2xl text-[#2d1b4e] dark:text-white text-center mb-1">
                     {t('auth.card_heading')}
                   </h2>

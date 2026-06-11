@@ -75,7 +75,7 @@ const DemoStepOrganize = ({ isActive }: Props) => {
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-om-body font-medium border transition-all duration-200 ${
                 active
                   ? `${colors.bg} ${colors.text} ${colors.border}`
-                  : 'bg-[#f9fafb] dark:bg-gray-800 text-[#6a7282] dark:text-gray-400 border-[#f3f4f6] dark:border-gray-700 hover:border-[#d1d5db] dark:hover:border-gray-600'
+                  : 'om-public-panel om-public-text-muted hover:opacity-90'
               }`}
             >
               {TYPE_ICONS[r.type]}

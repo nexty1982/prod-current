@@ -23,7 +23,7 @@ export function WhatWeDoPanel() {
       </div>
 
       <div className="grid md:grid-cols-3 gap-8">
-        <div className="bg-white dark:bg-gray-800 border border-[#f3f4f6] dark:border-gray-700 rounded-2xl p-8 shadow-sm hover:shadow-md transition-shadow">
+        <div className="om-card rounded-2xl p-8 shadow-sm hover:shadow-md transition-shadow">
           <div className="w-16 h-16 bg-gradient-to-br from-[#2d1b4e] to-[#4a2f74] dark:from-[#d4af37] dark:to-[#c29d2f] rounded-xl flex items-center justify-center mb-6">
             <BookOpen className="text-[#d4af37] dark:text-[#2d1b4e]" size={32} />
           </div>
@@ -35,7 +35,7 @@ export function WhatWeDoPanel() {
           </EditableText>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 border border-[#f3f4f6] dark:border-gray-700 rounded-2xl p-8 shadow-sm hover:shadow-md transition-shadow">
+        <div className="om-card rounded-2xl p-8 shadow-sm hover:shadow-md transition-shadow">
           <div className="w-16 h-16 bg-[#d4af37] rounded-xl flex items-center justify-center mb-6">
             <Search className="text-[#2d1b4e]" size={32} />
           </div>
@@ -47,7 +47,7 @@ export function WhatWeDoPanel() {
           </EditableText>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 border border-[#f3f4f6] dark:border-gray-700 rounded-2xl p-8 shadow-sm hover:shadow-md transition-shadow">
+        <div className="om-card rounded-2xl p-8 shadow-sm hover:shadow-md transition-shadow">
           <div className="w-16 h-16 bg-gradient-to-br from-[#2d1b4e] to-[#4a2f74] dark:from-[#d4af37] dark:to-[#c29d2f] rounded-xl flex items-center justify-center mb-6">
             <Shield className="text-[#d4af37] dark:text-[#2d1b4e]" size={32} />
           </div>

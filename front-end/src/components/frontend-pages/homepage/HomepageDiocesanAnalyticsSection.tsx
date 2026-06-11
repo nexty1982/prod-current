@@ -73,7 +73,7 @@ function HomepageDiocesanMapPanel() {
   return (
     <div className="grid lg:grid-cols-5 gap-6">
       {/* Map visualization */}
-      <div className="lg:col-span-3 rounded-xl border border-[rgba(26,54,93,0.12)] dark:border-white/10 bg-white dark:bg-[#161b22] p-5 shadow-sm flex flex-col justify-between min-h-[420px]">
+      <div className="lg:col-span-3 rounded-xl border border-[rgba(26,54,93,0.12)] dark:border-white/10 om-public-panel p-5 shadow-sm flex flex-col justify-between min-h-[420px]">
         <div>
           <h3 className="font-om-body font-semibold text-[#1a365d] dark:text-white">
             Interactive Diocesan Parish Map
@@ -183,7 +183,7 @@ function HomepageDiocesanMapPanel() {
 
           {/* Map Overlay tooltip */}
           {activeParish && (
-            <div className="absolute bottom-3 right-3 p-3 bg-white/95 dark:bg-[#161b22]/95 border border-[rgba(26,54,93,0.15)] dark:border-white/10 rounded-lg shadow-lg max-w-[200px] backdrop-blur font-om-body">
+            <div className="absolute bottom-3 right-3 p-3 bg-white/95 dark:opacity-95 border border-[rgba(26,54,93,0.15)] dark:border-white/10 rounded-lg shadow-lg max-w-[200px] backdrop-blur font-om-body">
               <h4 className="text-xs font-semibold text-[#1a365d] dark:text-white truncate">
                 {activeParish.name}
               </h4>
@@ -198,7 +198,7 @@ function HomepageDiocesanMapPanel() {
 
       {/* Map sidebar panel - detailed stats */}
       <div className="lg:col-span-2 flex flex-col gap-3 justify-between">
-        <div className="rounded-xl border border-[rgba(26,54,93,0.12)] dark:border-white/10 bg-white dark:bg-[#161b22] p-5 shadow-sm h-full flex flex-col justify-between">
+        <div className="rounded-xl border border-[rgba(26,54,93,0.12)] dark:border-white/10 om-public-panel p-5 shadow-sm h-full flex flex-col justify-between">
           <div>
             <h3 className="font-om-body font-semibold text-[#1a365d] dark:text-white mb-2">
               Geographic Registry Insights
@@ -242,7 +242,7 @@ function HomepageDiocesanStatsPanel() {
   return (
     <div className="grid lg:grid-cols-5 gap-6">
       {/* Sacramental Mix & Trends */}
-      <div className="lg:col-span-3 rounded-xl border border-[rgba(26,54,93,0.12)] dark:border-white/10 bg-white dark:bg-[#161b22] p-5 shadow-sm flex flex-col justify-between min-h-[420px]">
+      <div className="lg:col-span-3 rounded-xl border border-[rgba(26,54,93,0.12)] dark:border-white/10 om-public-panel p-5 shadow-sm flex flex-col justify-between min-h-[420px]">
         <div>
           <h3 className="font-om-body font-semibold text-[#1a365d] dark:text-white">
             Sacramental Registrations Mix & Growth
@@ -333,7 +333,7 @@ function HomepageDiocesanStatsPanel() {
       {/* Stats sidebar - demographic indices */}
       <div className="lg:col-span-2 flex flex-col gap-3">
         {/* Metric 1 */}
-        <div className="rounded-xl border border-[rgba(26,54,93,0.12)] dark:border-white/10 bg-white dark:bg-[#161b22] p-5 shadow-sm flex-1 flex flex-col justify-between">
+        <div className="rounded-xl border border-[rgba(26,54,93,0.12)] dark:border-white/10 om-public-panel p-5 shadow-sm flex-1 flex flex-col justify-between">
           <div>
             <div className="flex justify-between items-start">
               <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 block mb-1">
@@ -356,7 +356,7 @@ function HomepageDiocesanStatsPanel() {
         </div>
 
         {/* Metric 2 */}
-        <div className="rounded-xl border border-[rgba(26,54,93,0.12)] dark:border-white/10 bg-white dark:bg-[#161b22] p-5 shadow-sm flex-1 flex flex-col justify-between">
+        <div className="rounded-xl border border-[rgba(26,54,93,0.12)] dark:border-white/10 om-public-panel p-5 shadow-sm flex-1 flex flex-col justify-between">
           <div>
             <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 block mb-1">
               Data Completion Health
@@ -393,7 +393,7 @@ export default function HomepageDiocesanAnalyticsSection() {
 
   return (
     <section
-      className="py-16 md:py-20 border-b border-[rgba(26,54,93,0.1)] dark:border-white/10 bg-gradient-to-b from-[#f5f0e6] to-[#f9fafb] dark:from-[#0d1117] dark:to-[#161b22]"
+      className="py-16 md:py-20 border-b border-[var(--om-public-panel-border)] om-section-base"
       aria-label="Diocesan analytics preview"
     >
       <div className="max-w-7xl mx-auto px-6">
@@ -469,7 +469,7 @@ export default function HomepageDiocesanAnalyticsSection() {
                     ].map((stat) => (
                       <div
                         key={stat.labelKey}
-                        className="rounded-xl border border-[rgba(26,54,93,0.12)] dark:border-white/10 bg-white dark:bg-[#161b22] p-4 shadow-sm"
+                        className="rounded-xl border border-[rgba(26,54,93,0.12)] dark:border-white/10 om-public-panel p-4 shadow-sm"
                       >
                         <p className="font-om-body text-[11px] uppercase tracking-wide text-[#64748b] dark:text-gray-500 mb-1">
                           {t(stat.labelKey)}
@@ -479,7 +479,7 @@ export default function HomepageDiocesanAnalyticsSection() {
                     ))}
                   </div>
 
-                  <div className="rounded-xl border border-[rgba(26,54,93,0.12)] dark:border-white/10 bg-white dark:bg-[#161b22] p-5 shadow-sm">
+                  <div className="rounded-xl border border-[rgba(26,54,93,0.12)] dark:border-white/10 om-public-panel p-5 shadow-sm">
                     <h3 className="font-om-body font-medium text-[#1a365d] dark:text-white mb-1">
                       {t('home.diocesan_chart_title')}
                     </h3>
@@ -514,7 +514,7 @@ export default function HomepageDiocesanAnalyticsSection() {
                       <Link
                         key={link.to}
                         to={link.to}
-                        className="group rounded-xl border border-[rgba(26,54,93,0.12)] dark:border-white/10 bg-white dark:bg-[#161b22] p-4 hover:border-[#c9a14a]/50 hover:shadow-md transition-all"
+                        className="group rounded-xl border border-[rgba(26,54,93,0.12)] dark:border-white/10 om-public-panel p-4 hover:border-[#c9a14a]/50 hover:shadow-md transition-all"
                       >
                         <div className="flex items-start gap-3">
                           <div className="w-10 h-10 rounded-lg bg-[#1a365d]/10 dark:bg-[#c9a14a]/15 flex items-center justify-center flex-shrink-0 group-hover:bg-[#c9a14a]/20 transition-colors">

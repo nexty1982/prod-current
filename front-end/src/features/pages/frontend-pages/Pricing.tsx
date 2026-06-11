@@ -182,7 +182,7 @@ const PagePricing = () => {
           </div>
 
           {/* Enterprise */}
-          <div className="bg-[#f9fafb] dark:bg-gray-800 border border-[#e5e7eb] dark:border-gray-700 rounded-2xl p-12 text-center">
+          <div className="om-public-panel rounded-2xl p-12 text-center">
             <EditableText contentKey="pricing.enterprise.title" as="h3" className="font-om-display text-3xl text-[#2d1b4e] dark:text-white mb-4">
               {t('pricing.enterprise_title')}
             </EditableText>
@@ -236,7 +236,7 @@ const PagePricing = () => {
           </div>
           <div className="space-y-6">
             {[1, 2, 3, 4, 5].map((idx) => (
-              <div key={idx} className="bg-[#f9fafb] dark:bg-gray-800 rounded-xl p-6 border border-[#f3f4f6] dark:border-gray-700">
+              <div key={idx} className="om-public-panel rounded-xl p-6">
                 <div className="flex items-start gap-3">
                   <HelpCircle className="text-[#d4af37] flex-shrink-0 mt-1" size={20} />
                   <div>

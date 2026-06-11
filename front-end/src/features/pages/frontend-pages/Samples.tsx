@@ -65,7 +65,7 @@ const Samples = () => {
               </EditableText>
 
               <div className="om-card-elevated p-8">
-                <div className="bg-white dark:bg-[#0d1117] rounded-xl shadow-lg p-8">
+                <div className="om-card rounded-xl shadow-lg p-8">
                   <div className="border-l-4 border-[#d4af37] pl-6 mb-6">
                     <p className="font-om-display text-2xl om-text-primary mb-2">{t('samples.baptism_cert_title')}</p>
                     <p className="font-om-body text-[14px] om-text-secondary italic">

@@ -189,7 +189,7 @@ const TourInteractiveDemo = () => {
 
         {/* Main demo area */}
         <div
-          className="bg-[#f9fafb] dark:bg-[#0d1117] rounded-2xl border border-[rgba(45,27,78,0.08)] dark:border-gray-800 shadow-lg overflow-hidden"
+          className="om-public-panel rounded-2xl shadow-lg overflow-hidden"
           onKeyDown={handleKeyDown}
           tabIndex={0}
           role="region"
@@ -251,14 +251,14 @@ const TourInteractiveDemo = () => {
               </div>
 
               {/* Right: interactive panel */}
-              <div className="bg-white dark:bg-gray-800 p-6 md:p-8 border-t md:border-t-0 md:border-l border-[rgba(45,27,78,0.08)] dark:border-gray-700 h-[420px] md:h-[480px] overflow-hidden">
+              <div className="om-public-panel p-6 md:p-8 border-t md:border-t-0 md:border-l border-[rgba(45,27,78,0.08)] dark:border-gray-700 h-[420px] md:h-[480px] overflow-hidden">
                 <PanelComponent isActive={activeStep === STEPS.indexOf(step)} />
               </div>
             </motion.div>
           </AnimatePresence>
 
           {/* Navigation bar */}
-          <div className="flex items-center justify-between px-6 md:px-10 py-4 bg-white dark:bg-gray-800 border-t border-[rgba(45,27,78,0.06)] dark:border-gray-700">
+          <div className="flex items-center justify-between px-6 md:px-10 py-4 om-public-panel border-t border-[rgba(45,27,78,0.06)] dark:border-gray-700">
             <button
               onClick={() => handleUserNav(prev)}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] font-om-body font-medium text-[#4a5565] dark:text-gray-400 hover:bg-[#f3f4f6] dark:hover:bg-gray-700 transition-colors"

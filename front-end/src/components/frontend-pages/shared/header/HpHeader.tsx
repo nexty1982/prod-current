@@ -53,7 +53,7 @@ const HpHeader = () => {
   }, [langOpen]);
 
   return (
-    <nav className="bg-white dark:bg-[#0d1117] border-b border-[rgba(45,27,78,0.1)] dark:border-white/10 sticky top-0 z-50">
+    <nav className="om-public-header sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
@@ -108,7 +108,7 @@ const HpHeader = () => {
               </button>
 
               {langOpen && (
-                <div className="absolute right-0 top-full mt-1 w-44 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-[60]">
+                <div className="absolute right-0 top-full mt-1 w-44 om-public-panel rounded-lg shadow-lg py-1 z-[60]">
                   {LANG_OPTIONS.map((opt) => (
                     <button
                       key={opt.code}

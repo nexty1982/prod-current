@@ -77,7 +77,7 @@ const DemoStepSearch = ({ isActive }: Props) => {
       {/* Search bar */}
       <div className="relative mb-3">
         <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6a7282] dark:text-gray-500" />
-        <div className="w-full pl-9 pr-4 py-2.5 bg-[#f9fafb] dark:bg-gray-800 border-2 border-[#2d1b4e] dark:border-[#d4af37] rounded-lg font-om-body text-[14px] text-[#2d1b4e] dark:text-gray-100 min-h-[40px] flex items-center">
+        <div className="w-full pl-9 pr-4 py-2.5 om-public-panel border-2 border-[#2d1b4e] dark:border-[#d4af37] rounded-lg font-om-body text-[14px] min-h-[40px] flex items-center">
           {typedText}
           {typedText.length < SEARCH_QUERY.length && isActive && (
             <motion.span
@@ -138,7 +138,7 @@ const DemoStepSearch = ({ isActive }: Props) => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -6 }}
                 transition={{ duration: 0.25, ease: 'easeOut' }}
-                className="p-3 bg-white dark:bg-gray-800 rounded-lg border border-[#f3f4f6] dark:border-gray-700 hover:border-[#d4af37] dark:hover:border-[#d4af37] transition-colors cursor-pointer group"
+                className="p-3 om-public-panel rounded-lg hover:border-[#d4af37] dark:hover:border-[#d4af37] transition-colors cursor-pointer group"
               >
                 <div className="flex items-start justify-between gap-2 mb-1">
                   <p className="font-om-body text-[13px] font-medium text-[#2d1b4e] dark:text-gray-100 group-hover:text-[#4a2f74] dark:group-hover:text-[#d4af37] transition-colors">

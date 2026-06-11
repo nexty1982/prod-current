@@ -7,7 +7,7 @@ const SiteFooter = () => {
   const copyrightText = t('footer.copyright').replace('{year}', String(new Date().getFullYear()));
 
   return (
-    <footer className="bg-[#2d1b4e] dark:bg-[#0d1117] text-white">
+    <footer className="om-public-footer">
       <div className="max-w-7xl mx-auto px-6 py-8">
         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-x-6 gap-y-8">
           {/* Brand */}
@@ -18,7 +18,7 @@ const SiteFooter = () => {
               aria-label="Orthodox Metrics LLC"
             >
               <span
-                className="font-om-display text-[1.35rem] leading-tight tracking-[0.02em] text-white block"
+                className="font-om-display text-[1.35rem] leading-tight tracking-[0.02em] block"
                 style={{ fontWeight: 400 }}
               >
                 Orthodox Metrics
@@ -37,7 +37,7 @@ const SiteFooter = () => {
                 <li key={link.to}>
                   <Link
                     to={link.to}
-                    className="font-om-body text-[14px] text-[rgba(255,255,255,0.7)] hover:text-white transition-colors no-underline"
+                    className="font-om-body text-[14px] om-public-text-muted hover:opacity-100 transition-colors no-underline"
                   >
                     {t(link.tKey)}
                   </Link>
@@ -54,7 +54,7 @@ const SiteFooter = () => {
                 <li key={link.to}>
                   <Link
                     to={link.to}
-                    className="font-om-body text-[14px] text-[rgba(255,255,255,0.7)] hover:text-white transition-colors no-underline"
+                    className="font-om-body text-[14px] om-public-text-muted hover:opacity-100 transition-colors no-underline"
                   >
                     {t(link.tKey)}
                   </Link>
@@ -71,7 +71,7 @@ const SiteFooter = () => {
                 <li key={link.to}>
                   <Link
                     to={link.to}
-                    className="font-om-body text-[14px] text-[rgba(255,255,255,0.7)] hover:text-white transition-colors no-underline"
+                    className="font-om-body text-[14px] om-public-text-muted hover:opacity-100 transition-colors no-underline"
                   >
                     {t(link.tKey)}
                   </Link>
@@ -88,7 +88,7 @@ const SiteFooter = () => {
                 <li key={link.to}>
                   <Link
                     to={link.to}
-                    className="font-om-body text-[14px] text-[rgba(255,255,255,0.7)] hover:text-white transition-colors no-underline"
+                    className="font-om-body text-[14px] om-public-text-muted hover:opacity-100 transition-colors no-underline"
                   >
                     {t(link.tKey)}
                   </Link>
@@ -97,13 +97,13 @@ const SiteFooter = () => {
               <li>
                 <a
                   href="mailto:support@orthodoxmetrics.com"
-                  className="font-om-body text-[14px] text-[rgba(255,255,255,0.7)] hover:text-white transition-colors no-underline"
+                  className="font-om-body text-[14px] om-public-text-muted hover:opacity-100 transition-colors no-underline"
                 >
                   support@orthodoxmetrics.com
                 </a>
               </li>
               <li>
-                <span className="font-om-body text-[14px] text-[rgba(255,255,255,0.7)]">
+                <span className="font-om-body text-[14px] om-public-text-muted">
                   {t('footer.hours')}
                 </span>
               </li>
@@ -111,8 +111,8 @@ const SiteFooter = () => {
           </div>
         </div>
 
-        <div className="border-t border-[rgba(255,255,255,0.1)] mt-6 pt-4">
-          <p className="font-om-body text-[14px] text-[rgba(255,255,255,0.5)] text-center">
+        <div className="border-t border-[var(--om-public-panel-border)] mt-6 pt-4">
+          <p className="font-om-body text-[14px] om-public-text-muted text-center">
             {copyrightText}
           </p>
         </div>

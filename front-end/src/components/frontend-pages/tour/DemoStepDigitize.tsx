@@ -103,7 +103,7 @@ const DemoStepDigitize = ({ isActive }: Props) => {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -8 }}
                 transition={{ duration: 0.35, ease: 'easeOut' }}
-                className="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-lg border border-[#f3f4f6] dark:border-gray-700 shadow-sm"
+                className="flex items-center gap-3 p-3 om-public-panel rounded-lg shadow-sm"
               >
                 <div className="w-8 h-8 rounded-lg bg-[rgba(45,27,78,0.06)] dark:bg-[rgba(212,175,55,0.1)] flex items-center justify-center flex-shrink-0">
                   {FILE_ICONS[file.type]}

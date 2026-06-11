@@ -234,7 +234,7 @@ export function Landing({ onStart, onAdmin, theme, onToggleTheme }: Props) {
         </div>
       </section>
 
-      <section className="border-t border-border bg-white dark:bg-[#0d1117]">
+      <section className="border-t border-border om-section-base">
         <div className="max-w-6xl mx-auto px-6 py-16 pb-20 grid lg:grid-cols-[345px_1fr] gap-12 lg:gap-16 items-start">
           <SacramentIllustrationRotator onSlideChange={setActiveSacrament} />
           <div className="space-y-8 pt-4 lg:pt-8 min-h-[275px]">

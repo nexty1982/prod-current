@@ -875,7 +875,7 @@ function AnalyticsView({
           {clergyCounts.map((s, i) => (
             <div
               key={s.label}
-              className="flex items-center justify-between px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-800"
+              className="flex items-center justify-between px-3 py-2 rounded-lg om-public-panel"
             >
               <span className="text-[13px] om-text-primary truncate mr-2">
                 <span className="om-text-tertiary mr-2">#{i + 1}</span>

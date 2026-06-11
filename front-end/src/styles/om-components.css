@@ -3,7 +3,16 @@
  * Reusable component classes for public pages.
  * All prefixed with `om-` to avoid conflicts with MUI or existing styles.
  * Dark mode uses `.dark` ancestor selector.
+ *
+ * Surface palette matches the homepage hero (HeroCarousel):
+ *   Light — parchment gradient (#EDE7D5 → #F6F1E8)
+ *   Dark  — imperial purple gradient (#0E0625 → #2D1B69)
  */
+
+:root {
+  --om-public-bg-light: linear-gradient(145deg, #EDE7D5 0%, #F0EAD8 40%, #F6F1E8 75%, #EBE4D2 100%);
+  --om-public-bg-dark: linear-gradient(145deg, #0E0625 0%, #180B40 35%, #2D1B69 75%, #1A0B38 100%);
+}
 
 /* ========================================
    Page Containers
@@ -13,15 +22,51 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background-color: #fff;
   font-family: 'Crimson Pro', Georgia, 'Times New Roman', serif;
+  --om-public-bg: var(--om-public-bg-light);
+  --om-public-text: #14093A;
+  --om-public-text-muted: rgba(14, 6, 37, 0.55);
+  --om-public-panel: rgba(246, 241, 232, 0.88);
+  --om-public-panel-border: rgba(45, 27, 105, 0.12);
+  --om-public-panel-hover: rgba(237, 231, 213, 0.95);
+  background: var(--om-public-bg);
+  color: var(--om-public-text);
 }
 
 .om-page-container :where(h1, h2, h3, h4, h5, h6) {
   font-family: Cinzel, Georgia, 'Times New Roman', serif;
 }
+
 .dark .om-page-container {
-  background-color: #111827;
+  --om-public-bg: var(--om-public-bg-dark);
+  --om-public-text: #F6F1E8;
+  --om-public-text-muted: rgba(246, 241, 232, 0.55);
+  --om-public-panel: rgba(45, 27, 105, 0.4);
+  --om-public-panel-border: rgba(212, 175, 55, 0.18);
+  --om-public-panel-hover: rgba(45, 27, 105, 0.55);
+  background: var(--om-public-bg);
+  color: var(--om-public-text);
+}
+
+.om-public-header {
+  background: var(--om-public-bg);
+  border-bottom: 1px solid var(--om-public-panel-border);
+  backdrop-filter: blur(10px);
+}
+
+.om-public-footer {
+  background: var(--om-public-bg);
+  border-top: 1px solid var(--om-public-panel-border);
+  color: var(--om-public-text);
+}
+
+.om-public-panel {
+  background: var(--om-public-panel);
+  border: 1px solid var(--om-public-panel-border);
+}
+
+.om-public-text-muted {
+  color: var(--om-public-text-muted);
 }
 
 /* Public chrome: header + main grow + footer pinned to viewport bottom. */
@@ -58,11 +103,13 @@
    ======================================== */
 
 .om-hero-gradient {
-  background: linear-gradient(to bottom right, #2d1b4e, #3a2461, #4a2f74);
-  color: #fff;
+  background: var(--om-public-bg);
+  color: var(--om-public-text);
 }
-.dark .om-hero-gradient {
-  background: linear-gradient(to bottom right, #030712, #111827, #1f2937);
+
+.om-hero-gradient .om-hero-subtitle,
+.om-hero-gradient p.om-hero-subtitle {
+  color: var(--om-public-text-muted);
 }
 
 .om-hero-badge {
@@ -91,25 +138,11 @@
    Section Backgrounds
    ======================================== */
 
-.om-section-base {
-  background-color: #fff;
-}
-.dark .om-section-base {
-  background-color: #0d1117;
-}
-
-.om-section-elevated {
-  background-color: #f9fafb;
-}
-.dark .om-section-elevated {
-  background-color: #161b22;
-}
-
+.om-section-base,
+.om-section-elevated,
 .om-section-subtle {
-  background-color: #f3f4f6;
-}
-.dark .om-section-subtle {
-  background-color: #1c2128;
+  background: var(--om-public-bg);
+  color: var(--om-public-text);
 }
 
 /* ========================================
@@ -117,10 +150,10 @@
    ======================================== */
 
 .om-card {
-  background-color: #fff;
+  background: var(--om-public-panel);
   border-width: 1px;
   border-style: solid;
-  border-color: #f3f4f6;
+  border-color: var(--om-public-panel-border);
   border-radius: 1rem;
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   transition: box-shadow 0.15s ease;
@@ -128,45 +161,29 @@
 .om-card:hover {
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
 }
-.dark .om-card {
-  background-color: #1f2937;
-  border-color: #374151;
-}
 
 .om-card-compact {
-  background-color: #fff;
+  background: var(--om-public-panel);
   border-width: 1px;
   border-style: solid;
-  border-color: #f3f4f6;
+  border-color: var(--om-public-panel-border);
   border-radius: 0.75rem;
-}
-.dark .om-card-compact {
-  background-color: #1f2937;
-  border-color: #374151;
 }
 
 .om-card-subtle {
-  background-color: #f9fafb;
+  background: var(--om-public-panel);
   border-width: 1px;
   border-style: solid;
-  border-color: #e5e7eb;
+  border-color: var(--om-public-panel-border);
   border-radius: 0.75rem;
-}
-.dark .om-card-subtle {
-  background-color: #1f2937;
-  border-color: #374151;
 }
 
 .om-card-elevated {
-  background: linear-gradient(to bottom right, #f9fafb, #f3f4f6);
+  background: var(--om-public-panel);
   border-radius: 1rem;
   border-width: 1px;
   border-style: solid;
-  border-color: rgba(45, 27, 78, 0.1);
-}
-.dark .om-card-elevated {
-  background: linear-gradient(to bottom right, #1f2937, #374151);
-  border-color: #4b5563;
+  border-color: var(--om-public-panel-border);
 }
 
 /* ========================================
@@ -177,31 +194,27 @@
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  background-color: rgba(45, 27, 78, 0.05);
+  background: var(--om-public-panel);
+  border: 1px solid var(--om-public-panel-border);
   padding-left: 1rem;
   padding-right: 1rem;
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
   border-radius: 9999px;
-}
-.dark .om-badge-primary {
-  background-color: #1f2937;
 }
 
 .om-badge-secondary {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  background-color: #fff;
+  background: var(--om-public-panel);
+  border: 1px solid var(--om-public-panel-border);
   padding-left: 1rem;
   padding-right: 1rem;
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
   border-radius: 9999px;
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-}
-.dark .om-badge-secondary {
-  background-color: #374151;
 }
 
 .om-badge-accent {
