@@ -101,13 +101,13 @@ const Contact = () => {
           <div className="grid lg:grid-cols-3 gap-12">
             {/* Contact Form */}
             <div className="lg:col-span-2">
-              <h2 className="font-om-display text-3xl text-[#2d1b4e] dark:text-white mb-2">{t('contact.form_title')}</h2>
-              <p className="font-om-body text-[16px] text-[#4a5565] dark:text-gray-400 mb-4">
+              <h2 className="font-om-display om-text-h3 text-[var(--om-text-primary)] mb-2">{t('contact.form_title')}</h2>
+              <p className="font-om-body om-text-body text-[var(--om-text-secondary)] mb-4">
                 {t('contact.form_desc')}
               </p>
-              <p className="font-om-body text-[15px] text-[#4a5565] dark:text-gray-400 mb-8">
+              <p className="font-om-body om-text-small text-[var(--om-text-secondary)] mb-8">
                 {t('contact.enroll_hint')}{' '}
-                <Link to={PUBLIC_ROUTES.ENROLL} className="text-[#2d1b4e] dark:text-[#d4af37] font-medium no-underline hover:underline">
+                <Link to={PUBLIC_ROUTES.ENROLL} className="text-[var(--om-gold)] font-semibold no-underline hover:underline">
                   {t('common.enroll_parish')}
                 </Link>
               </p>
@@ -137,14 +137,14 @@ const Contact = () => {
                 </div>
 
                 <div>
-                  <label htmlFor="enquiry" className="block font-om-body text-[14px] font-medium text-[#2d1b4e] dark:text-white mb-2">
+                  <label htmlFor="enquiry" className="block font-om-body om-text-small font-medium text-[var(--om-text-primary)] mb-2">
                     {t('contact.label_enquiry_type')}
                   </label>
                   <select
                     id="enquiry"
                     value={form.enquiryType}
                     onChange={handleChange('enquiryType')}
-                    className="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-[#2d1b4e] dark:text-white font-om-body text-[15px] focus:outline-none focus:ring-2 focus:ring-[#2d1b4e] dark:focus:ring-[#d4af37] focus:border-transparent transition-colors appearance-none"
+                    className="om-ds-input appearance-none"
                   >
                     {ENQUIRY_TYPE_KEYS.map((opt) => (
                       <option key={opt.value} value={opt.value}>{t(opt.key)}</option>
@@ -153,7 +153,7 @@ const Contact = () => {
                 </div>
 
                 <div>
-                  <label htmlFor="message" className="block font-om-body text-[14px] font-medium text-[#2d1b4e] dark:text-white mb-2">
+                  <label htmlFor="message" className="block font-om-body om-text-small font-medium text-[var(--om-text-primary)] mb-2">
                     {t('contact.label_message')} <span className="text-red-500">*</span>
                   </label>
                   <textarea
@@ -163,14 +163,14 @@ const Contact = () => {
                     value={form.message}
                     onChange={handleChange('message')}
                     required
-                    className="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-[#2d1b4e] dark:text-white font-om-body text-[15px] focus:outline-none focus:ring-2 focus:ring-[#2d1b4e] dark:focus:ring-[#d4af37] focus:border-transparent transition-colors resize-vertical"
+                    className="om-ds-input resize-vertical min-h-[140px]"
                   />
                 </div>
 
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-[#2d1b4e] dark:bg-[#d4af37] text-white dark:text-[#2d1b4e] rounded-lg font-om-body font-medium text-[16px] hover:bg-[#3a2461] dark:hover:bg-[#c29d2f] transition-colors disabled:opacity-50 cursor-pointer border-0"
+                  className="om-ds-btn om-ds-btn-primary disabled:opacity-50"
                 >
                   {submitting ? (
                     <>
@@ -192,8 +192,8 @@ const Contact = () => {
 
             {/* Info Panel */}
             <div className="lg:col-span-1">
-              <div className="bg-gradient-to-br from-[#2d1b4e] via-[#3a2461] to-[#4a2f74] dark:from-gray-800 dark:via-gray-750 dark:to-gray-700 rounded-2xl p-8 text-white h-full">
-                <h3 className="font-om-display text-2xl mb-2">{t('contact.info_title')}</h3>
+              <div className="bg-gradient-to-br from-[#2d1b4e] via-[#3a2461] to-[#4a2f74] dark:from-[#1a1038] dark:via-[#24154a] dark:to-[#120a2a] rounded-2xl p-8 h-full">
+                <h3 className="font-om-display om-text-h4 !text-white mb-2">{t('contact.info_title')}</h3>
                 <p className="font-om-body text-[15px] text-[rgba(255,255,255,0.7)] mb-8 leading-relaxed">
                   {t('contact.info_desc')}
                 </p>
@@ -206,7 +206,7 @@ const Contact = () => {
                 </div>
 
                 <div className="mt-10 pt-8 border-t border-white/10">
-                  <h4 className="font-om-body font-medium text-[15px] text-[#d4af37] mb-3">{t('contact.register_heading')}</h4>
+                  <h4 className="font-om-body font-medium text-[15px] !text-[var(--om-gold)] mb-3">{t('contact.register_heading')}</h4>
                   <p className="font-om-body text-[14px] text-[rgba(255,255,255,0.6)] leading-relaxed mb-4">
                     {t('contact.register_desc')}
                   </p>
@@ -230,17 +230,11 @@ const Contact = () => {
         subtitle={t('contact.cta_subtitle')}
         editKeyPrefix="contact.cta"
       >
-        <Link
-          to={PUBLIC_ROUTES.TOUR}
-          className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-[#d4af37] text-[#2d1b4e] rounded-lg font-om-body font-medium text-[16px] hover:bg-[#c29d2f] transition-colors no-underline"
-        >
+        <Link to={PUBLIC_ROUTES.TOUR} className="om-ds-btn om-ds-btn-primary no-underline">
           {t('contact.cta_tour')}
           <ArrowRight size={20} />
         </Link>
-        <Link
-          to={PUBLIC_ROUTES.PRICING}
-          className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-sm border border-white/20 text-white rounded-lg font-om-body font-medium text-[16px] hover:bg-white/20 transition-colors no-underline"
-        >
+        <Link to={PUBLIC_ROUTES.PRICING} className="om-ds-btn om-ds-btn-secondary no-underline">
           {t('contact.cta_pricing')}
         </Link>
       </CTASection>
@@ -261,7 +255,7 @@ function FormField({ label, id, placeholder, value, onChange, type = 'text', req
 }) {
   return (
     <div>
-      <label htmlFor={id} className="block font-om-body text-[14px] font-medium text-[#2d1b4e] dark:text-white mb-2">
+      <label htmlFor={id} className="block font-om-body om-text-small font-medium text-[var(--om-text-primary)] mb-2">
         {label} {required && <span className="text-red-500">*</span>}
       </label>
       <input
@@ -271,7 +265,7 @@ function FormField({ label, id, placeholder, value, onChange, type = 'text', req
         value={value}
         onChange={onChange}
         required={required}
-        className="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-[#2d1b4e] dark:text-white font-om-body text-[15px] focus:outline-none focus:ring-2 focus:ring-[#2d1b4e] dark:focus:ring-[#d4af37] focus:border-transparent transition-colors"
+        className="om-ds-input"
       />
     </div>
   );
