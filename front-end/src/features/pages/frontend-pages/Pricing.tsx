@@ -273,7 +273,7 @@ function PricingCard({ name, description, price, perMonth, billingNote, features
       </div>
       <div className="mb-6">
         {HIDE_PRICES ? (
-          <p className="font-om-display text-3xl text-[#2d1b4e] dark:text-white">{t('pricing.btn_request_quote')}</p>
+          <p className="font-om-display text-3xl text-[#2d1b4e] dark:text-white">{btnLabel}</p>
         ) : (
           <>
             <div className="flex items-baseline gap-2">
