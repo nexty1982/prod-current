@@ -192,7 +192,8 @@ inner-orthodoxmetrics.com
 /scripts/
 
 # Docs live in /var/omai-ops/docs/orthodoxmetrics/ (outside repo)
-docs/
+docs/*
+!docs/app-workflow-catalog-pipeline.md
 
 # Berry frontend lives in /var/www/omai/berry/ (canonical copy)
 berry/
