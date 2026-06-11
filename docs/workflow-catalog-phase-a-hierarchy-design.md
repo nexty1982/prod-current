@@ -545,7 +545,7 @@ FROM app_workflow_system_levels ORDER BY workflow_group_sequence;
 |-------|------|-----------|
 | **A** | Hierarchy seed + API/UI additive | **Yes — this document** |
 | A.2 | WORKFLOW rows in system_levels (optional materialization) | Future |
-| B | `church_workflow_executions` | Gap analysis §8 |
+| B | `church_workflow_executions` | [Phase B design](./workflow-catalog-phase-b-execution-design.md) |
 | C | Workshop `_N` closed loop | Gap analysis §4.1 |
 | D | OMStudio authority transfer | Gap analysis §4.2 |
 | E | Workflows #7–#9 | Gap analysis §6 |

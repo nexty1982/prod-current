@@ -198,6 +198,7 @@ docs/*
 !docs/workflow-catalog-open-questions.md
 !docs/workflow-catalog-architecture-gap-analysis.md
 !docs/workflow-catalog-phase-a-hierarchy-design.md
+!docs/workflow-catalog-phase-b-execution-design.md
 
 # Berry frontend lives in /var/www/omai/berry/ (canonical copy)
 berry/
