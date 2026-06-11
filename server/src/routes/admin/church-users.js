@@ -24,12 +24,15 @@ function apiResponse(success, data = null, error = null, meta = null) {
  */
 async function validateChurchAccess(churchId) {
     const [churches] = await promisePool.query(
-        'SELECT id, name FROM churches WHERE id = ? AND is_active = 1',
+        'SELECT id, name, client_status, is_active FROM churches WHERE id = ?',
         [churchId]
     );
     
     if (churches.length === 0) {
-        throw new Error('Church not found or inactive');
+        throw new Error('Church not found');
+    }
+    if (churches[0].client_status === 'decommissioned') {
+        throw new Error('Church is decommissioned');
     }
     
     return churches[0];
