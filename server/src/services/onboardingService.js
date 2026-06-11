@@ -262,7 +262,21 @@ async function createFromEnrollment(payload, { crmRecordId = null, sourcePage = 
     });
   }
 
+  await syncEnrollmentExecution(pool, onboardingRequestId, null);
   return { request, internalId: result.insertId };
+}
+
+async function syncEnrollmentExecution(pool, onboardingRequestId, req) {
+  try {
+    const sync = require('./workflowExecutionSync');
+    const actor = req ? getActor(req) : { actorUserId: null };
+    await sync.syncEnrollment(pool, onboardingRequestId, {
+      actorUserId: actor.actorUserId,
+      actorType: req ? (actor.actorRole === 'admin' || actor.actorRole === 'super_admin' ? 'admin' : 'user') : 'system',
+    });
+  } catch (err) {
+    console.warn('[onboarding] execution sync:', err.message);
+  }
 }
 
 function assertTransition(map, current, next, label) {
@@ -300,6 +314,7 @@ async function updateStatus(onboardingRequestId, newStatus, req, notes, options 
     actorRole,
     notes,
   });
+  await syncEnrollmentExecution(pool, onboardingRequestId, req);
   return getByPublicId(onboardingRequestId);
 }
 
@@ -351,6 +366,7 @@ async function updatePayment(onboardingRequestId, newPaymentStatus, req, notes, 
     });
   }
 
+  await syncEnrollmentExecution(pool, onboardingRequestId, req);
   return getByPublicId(onboardingRequestId);
 }
 
@@ -397,6 +413,7 @@ async function updateProvisioning(onboardingRequestId, newProvStatus, req, notes
     });
   }
 
+  await syncEnrollmentExecution(pool, onboardingRequestId, req);
   return getByPublicId(onboardingRequestId);
 }
 
@@ -620,6 +637,14 @@ async function createTemporaryAdmin(onboardingRequestId, req) {
     [email, row.submitted_by_name, churchId]
   );
 
+  await syncEnrollmentExecution(pool, onboardingRequestId, req);
+  try {
+    const sync = require('./workflowExecutionSync');
+    await sync.syncChurchScopedWorkflows(pool, churchId, { actorUserId });
+  } catch (err) {
+    console.warn('[onboarding] church workflow sync:', err.message);
+  }
+
   return {
     request: await getByPublicId(onboardingRequestId),
     tempPassword,
@@ -837,6 +862,7 @@ async function completeRecordTables(userId) {
     newStatus: 'record_tables_review',
   });
 
+  await syncEnrollmentExecution(pool, onboardingRequestId, null);
   return getByPublicId(onboardingRequestId);
 }
 
@@ -924,6 +950,7 @@ async function completeRecordLayouts(userId) {
     newStatus: 'active',
   });
 
+  await syncEnrollmentExecution(pool, onboardingRequestId, null);
   return getByPublicId(onboardingRequestId);
 }
 
@@ -941,6 +968,7 @@ async function markFirstLoginComplete(userId) {
       actorUserId: userId,
       newStatus: 'record_tables_review',
     });
+    await syncEnrollmentExecution(pool, ctx.request.onboarding_request_id, null);
   }
   return getByPublicId(ctx.request.onboarding_request_id);
 }

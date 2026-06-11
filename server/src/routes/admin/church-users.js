@@ -168,6 +168,13 @@ router.post('/:churchId', requireAuth, requirePlatformAdmin, async (req, res) =>
 
         console.log(`✅ User created and assigned to church ${churchId}`);
 
+        try {
+            const sync = require('../../services/workflowExecutionSync');
+            await sync.syncIdentityAdmin(promisePool, churchId, { actorUserId: req.user?.id });
+        } catch (syncErr) {
+            console.warn('[church-users] execution sync:', syncErr.message);
+        }
+
         res.status(201).json(apiResponse(true, {
             user_id: newUserId,
             message: 'User created and assigned to church successfully'
@@ -345,6 +352,13 @@ router.post('/:churchId/:userId/lock', requireAuth, requirePlatformAdmin, async 
             [userId]
         );
 
+        try {
+            const sync = require('../../services/workflowExecutionSync');
+            await sync.syncIdentityAdmin(promisePool, churchId, { actorUserId: req.user?.id });
+        } catch (syncErr) {
+            console.warn('[church-users] execution sync:', syncErr.message);
+        }
+
         res.json(apiResponse(true, {
             message: 'User account locked successfully'
         }));
@@ -375,6 +389,13 @@ router.post('/:churchId/:userId/unlock', requireAuth, requirePlatformOrParishSta
              WHERE id = ?`,
             [userId]
         );
+
+        try {
+            const sync = require('../../services/workflowExecutionSync');
+            await sync.syncIdentityAdmin(promisePool, churchId, { actorUserId: req.user?.id });
+        } catch (syncErr) {
+            console.warn('[church-users] execution sync:', syncErr.message);
+        }
 
         res.json(apiResponse(true, {
             message: 'User account unlocked successfully'

@@ -331,6 +331,13 @@ router.post('/:churchId/toggle-setup', requireRole(ADMIN_ROLES), async (req, res
     const newValue = churches[0].setup_complete === 1 ? 0 : 1;
     await pool.query('UPDATE churches SET setup_complete = ? WHERE id = ?', [newValue, churchId]);
 
+    try {
+      const sync = require('../../services/workflowExecutionSync');
+      await sync.syncChurchOps(pool, churchId, { actorUserId: req.user?.id, actorType: 'admin' });
+    } catch (syncErr) {
+      console.warn('[church-onboarding] execution sync:', syncErr.message);
+    }
+
     res.json({ success: true, setup_complete: newValue });
   } catch (error) {
     console.error('Failed to toggle setup_complete:', error);
@@ -404,6 +411,13 @@ router.post('/promote', requireRole(ADMIN_ROLES), async (req, res) => {
 
     await pool.query('UPDATE churches SET onboarding_phase = ? WHERE id = ?', [to_phase, church.id]);
 
+    try {
+      const sync = require('../../services/workflowExecutionSync');
+      await sync.syncChurchOps(pool, church.id, { actorUserId: req.session?.user?.id, actorType: 'admin' });
+    } catch (syncErr) {
+      console.warn('[church-onboarding] execution sync:', syncErr.message);
+    }
+
     console.log(`[Onboarding] Church ${church.id} (${church.name}) promoted: phase ${from_phase} → ${to_phase}${dbCreated ? ' + tenant DB created' : ''}`);
     res.json({ success: true, church_id: church.id, from_phase, to_phase, db_created: dbCreated });
   } catch (error) {
@@ -454,6 +468,12 @@ router.post('/batch-promote', requireRole(ADMIN_ROLES), async (req, res) => {
         }
 
         await pool.query('UPDATE churches SET onboarding_phase = ? WHERE id = ?', [to_phase, church.id]);
+        try {
+          const sync = require('../../services/workflowExecutionSync');
+          await sync.syncChurchOps(pool, church.id, { actorType: 'admin' });
+        } catch (syncErr) {
+          console.warn('[church-onboarding] execution sync:', syncErr.message);
+        }
         results.push({ id: church.id, name: church.name, success: true, db_created: dbCreated });
       } catch (err) {
         console.error(`[Onboarding] Failed to promote church ${church.id}:`, err.message);

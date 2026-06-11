@@ -496,7 +496,6 @@ async function upsertExecutionFromDomain(pool, {
   });
 
   if (!existing) {
-    if (TERMINAL_STATUSES.has(status) && !currentStepKey) return null;
     return createExecution(pool, {
       churchId,
       workflowKey,

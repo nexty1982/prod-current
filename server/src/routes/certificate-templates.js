@@ -278,6 +278,13 @@ router.post('/generate', requireAuth, async (req, res) => {
        req.user.id, JSON.stringify({ fieldValues, resolution: resolved.resolution })]
     );
 
+    try {
+      const sync = require('../services/workflowExecutionSync');
+      await sync.syncCertificateGoal(pool, churchId, { actorUserId: req.user?.id, actorType: 'user' });
+    } catch (syncErr) {
+      console.warn('[certificate-templates] execution sync:', syncErr.message);
+    }
+
     res.json({
       success: true,
       certificateId: insertResult.insertId,

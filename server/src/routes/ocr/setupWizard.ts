@@ -132,6 +132,14 @@ router.put('/setup-state', async (req: any, res: any) => {
         updated_at = CURRENT_TIMESTAMP
     `, [churchId, stateJson, percent, complete, flowType]);
 
+    try {
+      const { getAppPool } = require('../../config/db');
+      const sync = require('../../services/workflowExecutionSync');
+      await sync.syncOcrSetup(getAppPool(), churchId, { actorType: 'user' });
+    } catch (syncErr: any) {
+      console.warn('[OCR Setup] execution sync:', syncErr?.message);
+    }
+
     res.json({ success: true, message: 'Setup state saved successfully' });
   } catch (error: any) {
     console.error('Error saving OCR setup state:', error);

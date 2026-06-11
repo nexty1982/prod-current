@@ -839,6 +839,13 @@ router.post('/jobs/:jobId/seed', async (req: any, res: any) => {
       [jobId]
     );
 
+    try {
+      const executionSync = require('../../services/workflowExecutionSync');
+      await executionSync.syncOcrJob(promisePool, jobId, { actorType: 'pipeline' });
+    } catch (syncErr: any) {
+      console.warn('[OCR Review] execution sync:', syncErr?.message);
+    }
+
     console.log(`OCR_SEED_OK ${JSON.stringify({ jobId, churchId, recordType, count: created.length, seedRunId, by: userEmail })}`);
     res.json({
       ok: true,

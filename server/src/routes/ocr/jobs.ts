@@ -5059,6 +5059,12 @@ function createRouters(upload: any) {
       }
       params.push(jobId);
       await promisePool.query(`UPDATE ocr_jobs SET ${updates.join(', ')} WHERE id = ?`, params);
+      try {
+        const executionSync = require('../../services/workflowExecutionSync');
+        await executionSync.syncOcrJob(promisePool, jobId, { actorType: 'user' });
+      } catch (syncErr: any) {
+        console.warn('[OCR] execution sync:', syncErr?.message);
+      }
       res.json({ success: true, jobId, review_status });
     } catch (error: any) {
       console.error('[OCR] Error updating review status:', error);
