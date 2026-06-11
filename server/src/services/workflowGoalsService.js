@@ -42,7 +42,62 @@ const STEP_ACTION_ROUTES = {
     human_review: { route: '/portal/ocr', label: 'Review OCR batch', audience: 'parish' },
     confirm_seed: { route: '/portal/ocr', label: 'Confirm and seed', audience: 'parish' },
   },
+  'ocr.setup.wizard': {
+    select_church: { route: '/devel/ocr-setup-wizard', label: 'Start OCR setup', audience: 'parish' },
+    record_types: { route: '/devel/ocr-setup-wizard', label: 'Configure record types', audience: 'parish' },
+    layout_template: { route: '/devel/ocr-setup-wizard', label: 'Set layout template', audience: 'parish' },
+    feeder_settings: { route: '/devel/ocr-setup-wizard', label: 'Finish feeder settings', audience: 'parish' },
+  },
+  'records.certificate.generate': {
+    select_record: { route: '/portal/certificates/generate', label: 'Generate certificate', audience: 'parish' },
+    choose_template: { route: '/portal/certificates/generate', label: 'Choose template', audience: 'parish' },
+    preview_certificate: { route: '/portal/certificates/generate', label: 'Preview certificate', audience: 'parish' },
+    print_or_download: { route: '/portal/certificates/generate', label: 'Download certificate', audience: 'parish' },
+  },
+  'identity.user.admin': {
+    list_users: { route: '/admin/users', label: 'Manage users', audience: 'admin' },
+    create_or_edit: { route: '/admin/users', label: 'Add parish staff', audience: 'parish' },
+    assign_roles: { route: '/admin/users', label: 'Assign roles', audience: 'parish' },
+    notify_user: { route: '/admin/control-panel/pending-members', label: 'Activate pending users', audience: 'parish' },
+  },
 };
+
+async function getChurchDbPool(churchId) {
+  const { getAppPool } = require('../config/db');
+  const pool = getAppPool();
+  const [rows] = await pool.query(
+    'SELECT database_name FROM churches WHERE id = ? LIMIT 1',
+    [churchId]
+  );
+  if (!rows.length || !rows[0].database_name) return null;
+  const { getChurchDbConnection } = require('../utils/dbSwitcher');
+  return getChurchDbConnection(rows[0].database_name);
+}
+
+async function countChurchRecords(churchDb) {
+  const tables = [
+    'baptism_records', 'marriage_records', 'funeral_records',
+    'baptism', 'marriage', 'funeral',
+  ];
+  let total = 0;
+  for (const table of tables) {
+    try {
+      const [rows] = await churchDb.query(`SELECT COUNT(*) AS cnt FROM \`${table}\``);
+      total += Number(rows[0]?.cnt || 0);
+    } catch {
+      // table may not exist in this tenant schema
+    }
+  }
+  return total;
+}
+
+function resolveOcrSetupStep(percentComplete, isComplete) {
+  if (isComplete || percentComplete >= 100) return null;
+  if (percentComplete >= 60) return 'feeder_settings';
+  if (percentComplete >= 40) return 'layout_template';
+  if (percentComplete >= 20) return 'record_types';
+  return 'select_church';
+}
 
 function resolveEnrollmentCurrentStep(request) {
   if (!request) return null;
@@ -150,6 +205,93 @@ function workflowStepsToLegacyProgress(workflowContext) {
   }));
 }
 
+async function resolveOcrSetupGoal(pool, churchId) {
+  const churchDb = await getChurchDbPool(churchId);
+  if (!churchDb) return null;
+
+  let percentComplete = 0;
+  let isComplete = false;
+  try {
+    const [rows] = await churchDb.query(
+      'SELECT percent_complete, is_complete FROM ocr_setup_state WHERE church_id = ?',
+      [churchId]
+    );
+    if (rows.length) {
+      percentComplete = Number(rows[0].percent_complete || 0);
+      isComplete = Boolean(rows[0].is_complete);
+    }
+  } catch {
+    // ocr_setup_state may not exist yet — treat as not started
+  }
+
+  const stepKey = resolveOcrSetupStep(percentComplete, isComplete);
+  if (!stepKey) return null;
+
+  const workflow = await catalog.fetchWorkflowDetail('ocr.setup.wizard');
+  if (!workflow) return null;
+
+  const ctx = buildWorkflowContext(workflow, stepKey, 'parish');
+  const setupRoute = `/devel/ocr-setup-wizard?church_id=${churchId}`;
+  if (ctx.current_step) {
+    ctx.current_step = {
+      ...ctx.current_step,
+      action_route: setupRoute,
+      action_label: ctx.current_step.action_label || 'Continue OCR setup',
+    };
+  }
+  return { percent_complete: percentComplete, workflow: ctx };
+}
+
+async function resolveCertificateGoal(pool, churchId) {
+  try {
+    const [genRows] = await pool.query(
+      'SELECT COUNT(*) AS cnt FROM generated_certificates WHERE church_id = ?',
+      [churchId]
+    );
+    if (Number(genRows[0]?.cnt || 0) > 0) return null;
+  } catch {
+    return null;
+  }
+
+  const churchDb = await getChurchDbPool(churchId);
+  if (!churchDb) return null;
+  const recordCount = await countChurchRecords(churchDb);
+  if (recordCount === 0) return null;
+
+  const workflow = await catalog.fetchWorkflowDetail('records.certificate.generate');
+  if (!workflow) return null;
+
+  const ctx = buildWorkflowContext(workflow, 'select_record', 'parish');
+  return { record_count: recordCount, workflow: ctx };
+}
+
+async function resolveIdentityAdminGoal(pool, churchId) {
+  const [lockedRows] = await pool.query(
+    'SELECT COUNT(*) AS cnt FROM users WHERE church_id = ? AND is_locked = 1',
+    [churchId]
+  );
+  const pendingCount = Number(lockedRows[0]?.cnt || 0);
+
+  let stepKey = 'create_or_edit';
+  let summary = 'Add parish staff accounts';
+  if (pendingCount > 0) {
+    stepKey = 'notify_user';
+    summary = `${pendingCount} user${pendingCount === 1 ? '' : 's'} awaiting activation`;
+  } else {
+    const [activeRows] = await pool.query(
+      'SELECT COUNT(*) AS cnt FROM users WHERE church_id = ? AND (is_locked = 0 OR is_locked IS NULL)',
+      [churchId]
+    );
+    if (Number(activeRows[0]?.cnt || 0) >= 2) return null;
+  }
+
+  const workflow = await catalog.fetchWorkflowDetail('identity.user.admin');
+  if (!workflow) return null;
+
+  const ctx = buildWorkflowContext(workflow, stepKey, 'parish');
+  return { pending_users: pendingCount, summary, workflow: ctx };
+}
+
 async function resolveOcrReviewGoals(pool, churchId) {
   const [rows] = await pool.query(
     `SELECT id, filename, review_status, status
@@ -217,6 +359,24 @@ const RUNTIME_RESOLVERS = [
     },
   },
   {
+    workflow_key: 'ocr.setup.wizard',
+    priority: 15,
+    resolve: async (pool, churchId) => {
+      const item = await resolveOcrSetupGoal(pool, churchId);
+      if (!item) return null;
+      return {
+        workflow_key: 'ocr.setup.wizard',
+        priority: 15,
+        title: item.workflow.workflow_name,
+        summary: item.workflow.current_step?.step_name || 'OCR setup in progress',
+        action_route: item.workflow.current_step?.action_route,
+        action_label: item.workflow.current_step?.action_label || 'Continue OCR setup',
+        workflow: item.workflow,
+        meta: { percent_complete: item.percent_complete },
+      };
+    },
+  },
+  {
     workflow_key: 'ocr.batch.review',
     priority: 20,
     resolve: async (pool, churchId) => {
@@ -231,6 +391,42 @@ const RUNTIME_RESOLVERS = [
         workflow: item.workflow,
         meta: { job_id: item.job_id, review_status: item.review_status },
       }));
+    },
+  },
+  {
+    workflow_key: 'identity.user.admin',
+    priority: 25,
+    resolve: async (pool, churchId) => {
+      const item = await resolveIdentityAdminGoal(pool, churchId);
+      if (!item) return null;
+      return {
+        workflow_key: 'identity.user.admin',
+        priority: 25,
+        title: item.workflow.workflow_name,
+        summary: item.workflow.current_step?.step_name || item.summary,
+        action_route: item.workflow.current_step?.action_route,
+        action_label: item.workflow.current_step?.action_label || 'Manage users',
+        workflow: item.workflow,
+        meta: { pending_users: item.pending_users },
+      };
+    },
+  },
+  {
+    workflow_key: 'records.certificate.generate',
+    priority: 30,
+    resolve: async (pool, churchId) => {
+      const item = await resolveCertificateGoal(pool, churchId);
+      if (!item) return null;
+      return {
+        workflow_key: 'records.certificate.generate',
+        priority: 30,
+        title: item.workflow.workflow_name,
+        summary: 'Generate your first sacramental certificate',
+        action_route: item.workflow.current_step?.action_route,
+        action_label: item.workflow.current_step?.action_label || 'Generate certificate',
+        workflow: item.workflow,
+        meta: { record_count: item.record_count },
+      };
     },
   },
 ];
@@ -261,6 +457,113 @@ async function getAdminEnrollmentWorkflow(onboardingRequestId) {
   return resolveEnrollmentByRequestId(onboardingRequestId);
 }
 
+/** Global runtime counters for OMAI workflow catalog /runtime endpoint. */
+async function getRuntimeStatsForCatalog(pool, workflowKey) {
+  if (workflowKey === 'church.enrollment') {
+    const [byStatus] = await pool.query(
+      'SELECT status, COUNT(*) AS count FROM onboarding_requests GROUP BY status ORDER BY count DESC'
+    );
+    const [byProv] = await pool.query(
+      'SELECT provisioning_status, COUNT(*) AS count FROM onboarding_requests GROUP BY provisioning_status ORDER BY count DESC'
+    );
+    return { source: 'onboarding_requests', by_status: byStatus, by_provisioning_status: byProv };
+  }
+  if (workflowKey === 'ocr.batch.review') {
+    const [byStatus] = await pool.query(
+      'SELECT status, COUNT(*) AS count FROM ocr_jobs GROUP BY status ORDER BY count DESC'
+    );
+    const [byReview] = await pool.query(
+      'SELECT review_status, COUNT(*) AS count FROM ocr_jobs GROUP BY review_status ORDER BY count DESC'
+    );
+    return { source: 'ocr_jobs', by_status: byStatus, by_review_status: byReview };
+  }
+  if (workflowKey === 'ocr.setup.wizard') {
+    const [churches] = await pool.query(
+      `SELECT c.id, c.database_name
+       FROM churches c
+       WHERE c.database_name IS NOT NULL AND c.is_active = 1
+       ORDER BY c.id`
+    );
+    let complete = 0;
+    let incomplete = 0;
+    let notStarted = 0;
+    for (const ch of churches) {
+      try {
+        const { getChurchDbConnection } = require('../utils/dbSwitcher');
+        const churchDb = await getChurchDbConnection(ch.database_name);
+        const [rows] = await churchDb.query(
+          'SELECT is_complete, percent_complete FROM ocr_setup_state WHERE church_id = ?',
+          [ch.id]
+        );
+        if (!rows.length) {
+          notStarted += 1;
+        } else if (rows[0].is_complete) {
+          complete += 1;
+        } else {
+          incomplete += 1;
+        }
+      } catch {
+        notStarted += 1;
+      }
+    }
+    return {
+      source: 'church_db.ocr_setup_state',
+      churches_total: churches.length,
+      setup_complete: complete,
+      setup_in_progress: incomplete,
+      setup_not_started: notStarted,
+    };
+  }
+  if (workflowKey === 'records.certificate.generate') {
+    const [byChurch] = await pool.query(
+      `SELECT church_id, COUNT(*) AS count
+       FROM generated_certificates
+       GROUP BY church_id
+       ORDER BY count DESC
+       LIMIT 50`
+    );
+    const [byType] = await pool.query(
+      `SELECT record_type, COUNT(*) AS count
+       FROM generated_certificates
+       GROUP BY record_type
+       ORDER BY count DESC`
+    );
+    const [total] = await pool.query('SELECT COUNT(*) AS count FROM generated_certificates');
+    return {
+      source: 'generated_certificates',
+      total_generated: Number(total[0]?.count || 0),
+      by_church: byChurch,
+      by_record_type: byType,
+    };
+  }
+  if (workflowKey === 'identity.user.admin') {
+    const [byChurch] = await pool.query(
+      `SELECT church_id,
+              SUM(CASE WHEN is_locked = 1 THEN 1 ELSE 0 END) AS pending_users,
+              SUM(CASE WHEN is_locked = 0 OR is_locked IS NULL THEN 1 ELSE 0 END) AS active_users
+       FROM users
+       WHERE church_id IS NOT NULL
+       GROUP BY church_id
+       ORDER BY pending_users DESC, active_users DESC
+       LIMIT 50`
+    );
+    const [totals] = await pool.query(
+      `SELECT
+         SUM(CASE WHEN is_locked = 1 THEN 1 ELSE 0 END) AS pending_users,
+         SUM(CASE WHEN is_locked = 0 OR is_locked IS NULL THEN 1 ELSE 0 END) AS active_users
+       FROM users
+       WHERE church_id IS NOT NULL`
+    );
+    return {
+      source: 'users',
+      pending_users: Number(totals[0]?.pending_users || 0),
+      active_users: Number(totals[0]?.active_users || 0),
+      by_church: byChurch,
+    };
+  }
+  return { source: null, note: 'No live runtime counters for this workflow yet' };
+}
+
 module.exports = {
   ENROLLMENT_STATUS_TO_STEP,
   STEP_ACTION_ROUTES,
@@ -272,4 +575,8 @@ module.exports = {
   getGoalsForChurch,
   getAdminEnrollmentWorkflow,
   resolveEnrollmentByRequestId,
+  getRuntimeStatsForCatalog,
+  resolveOcrSetupGoal,
+  resolveCertificateGoal,
+  resolveIdentityAdminGoal,
 };
