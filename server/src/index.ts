@@ -1720,6 +1720,35 @@ cron.schedule('0 3 * * 0', async () => {
 });
 console.log('OCR artifact cleanup cron scheduled (Sunday 3 AM, 90-day retention, draft-aware)');
 
+// --- WORKFLOW EXECUTION RECONCILE (Phase B) --------------------------
+if (process.env.EXECUTION_MODEL_ENABLED === 'true') {
+  cron.schedule('0 2 * * *', async () => {
+    try {
+      const pool = db.getAppPool ? db.getAppPool() : db.promisePool;
+      const { runNightlyMaintenance } = require('./services/workflowExecutionReconcileJob');
+      const result = await runNightlyMaintenance(pool);
+      console.log('[WorkflowExecution] Nightly reconcile:', JSON.stringify(result.reconcile));
+    } catch (err: any) {
+      console.error('[WorkflowExecution] Nightly reconcile error:', err.message);
+    }
+  });
+
+  cron.schedule('*/15 * * * *', async () => {
+    try {
+      const pool = db.getAppPool ? db.getAppPool() : db.promisePool;
+      const { retryOutbox } = require('./services/workflowExecutionReconcileJob');
+      const result = await retryOutbox(pool);
+      if (result.succeeded > 0) {
+        console.log(`[WorkflowExecution] Outbox retry: ${result.succeeded} succeeded`);
+      }
+    } catch (err: any) {
+      console.error('[WorkflowExecution] Outbox retry error:', err.message);
+    }
+  });
+
+  console.log('Workflow execution crons started (nightly reconcile 2 AM UTC, outbox retry every 15m)');
+}
+
 // --- WEBSOCKET INTEGRATION -----------------------------------------
 const websocketService = require('./services/websocketService');
 

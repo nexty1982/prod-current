@@ -345,7 +345,7 @@ async function resolveOcrReviewGoals(pool, churchId) {
      WHERE church_id = ?
        AND review_status IN ('uploaded','ocr_complete','agent_extracted','human_confirmed','in_review','ready_to_seed')
        AND (seeded_at IS NULL OR review_status != 'seeded')
-     ORDER BY updated_at DESC LIMIT 5`,
+     ORDER BY created_at DESC LIMIT 5`,
     [churchId]
   );
   if (!rows.length) return [];
@@ -658,8 +658,42 @@ async function getAdminEnrollmentWorkflow(onboardingRequestId) {
   return resolveEnrollmentByRequestId(onboardingRequestId);
 }
 
+async function getRuntimeStatsFromExecutionSummary(pool, workflowKey) {
+  const [rows] = await pool.query(
+    'SELECT * FROM workflow_execution_summary WHERE workflow_key = ? LIMIT 1',
+    [workflowKey]
+  );
+  if (!rows.length) return null;
+  const s = rows[0];
+  const stepDist = typeof s.step_distribution === 'object'
+    ? s.step_distribution
+    : JSON.parse(s.step_distribution || '{}');
+  const statusDist = typeof s.status_distribution === 'object'
+    ? s.status_distribution
+    : JSON.parse(s.status_distribution || '{}');
+  return {
+    source: 'workflow_execution_summary',
+    snapshot_at: s.snapshot_at,
+    stale: Boolean(s.stale),
+    executions_total: s.executions_total,
+    executions_active: s.executions_active,
+    executions_blocked: s.executions_blocked,
+    executions_pending: s.executions_pending,
+    executions_completed: s.executions_completed,
+    executions_failed: s.executions_failed,
+    step_distribution: stepDist,
+    status_distribution: statusDist,
+  };
+}
+
 /** Global runtime counters for OMAI workflow catalog /runtime endpoint. */
 async function getRuntimeStatsForCatalog(pool, workflowKey) {
+  const execution = require('./workflowExecutionService');
+  if (execution.getExecutionFlags().analytics_enabled) {
+    const summary = await getRuntimeStatsFromExecutionSummary(pool, workflowKey);
+    if (summary) return summary;
+  }
+
   if (workflowKey === 'church.enrollment') {
     const [byStatus] = await pool.query(
       'SELECT status, COUNT(*) AS count FROM onboarding_requests GROUP BY status ORDER BY count DESC'
@@ -778,6 +812,25 @@ const OCR_REVIEW_OPEN_STATUSES = new Set([
 ]);
 
 function deriveWorkflowKpi(workflowKey, stats) {
+  if (stats?.source === 'workflow_execution_summary') {
+    const active = Number(stats.executions_active || 0) + Number(stats.executions_blocked || 0)
+      + Number(stats.executions_pending || 0);
+    const labels = {
+      'church.enrollment': 'Open enrollments',
+      'church.ops.setup': 'Parishes need ops setup',
+      'ocr.setup.wizard': 'Churches need OCR setup',
+      'ocr.batch.review': 'Jobs needing review',
+      'identity.user.admin': 'Pending user activations',
+      'records.certificate.generate': 'Certificate goals active',
+    };
+    return {
+      label: labels[workflowKey] || 'Active executions',
+      value: active,
+      status: active > 0 ? 'attention' : 'healthy',
+      execution_summary: true,
+    };
+  }
+
   if (workflowKey === 'church.enrollment') {
     const open = (stats.by_status || [])
       .filter((r) => !['active', 'rejected', 'cancelled'].includes(r.status))

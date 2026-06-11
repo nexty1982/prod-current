@@ -1326,42 +1326,13 @@ router.get('/workflow-executions/stuck', requireRole(['super_admin', 'admin']), 
 router.post('/workflow-executions/reconcile', requireRole(['super_admin']), async (req, res) => {
   try {
     const pool = getAppPool();
-    const sync = require('../services/workflowExecutionSync');
-    const { generateReconcileRunId } = require('../utils/executionId');
-    const workflowKey = req.body.workflow_key || null;
-    const churchId = req.body.church_id ? parseInt(req.body.church_id, 10) : null;
-    const runId = generateReconcileRunId();
-    let created = 0;
-    let updated = 0;
-
-    const workflowKeys = workflowKey
-      ? [workflowKey]
-      : Object.keys(require('../services/workflowExecutionReconcilers').RECONCILER_REGISTRY);
-
-    for (const wk of workflowKeys) {
-      let subjects = await require('../services/workflowExecutionReconcilers').discoverSubjects(pool, wk);
-      if (churchId) subjects = subjects.filter((s) => s.church_id === churchId);
-      for (const subject of subjects) {
-        const existing = await workflowExecution.findExecution(pool, {
-          churchId: subject.church_id,
-          workflowKey: wk,
-          subjectType: subject.subject_type,
-          subjectId: subject.subject_id,
-        });
-        await sync.syncFromReconcile(pool, wk, subject, { transitionSource: 'reconciliation', force: true });
-        if (existing) updated += 1;
-        else created += 1;
-      }
-    }
-
-    await workflowExecution.refreshExecutionSummary(pool, workflowKey);
-    await pool.query(
-      `INSERT INTO workflow_execution_reconcile_runs (
-         run_id, run_type, workflow_key, executions_created, executions_updated, completed_at
-       ) VALUES (?, 'manual', ?, ?, ?, NOW())`,
-      [runId, workflowKey, created, updated]
-    );
-    res.json({ success: true, run_id: runId, created, updated });
+    const reconcileJob = require('../services/workflowExecutionReconcileJob');
+    const result = await reconcileJob.runScopedReconcile(pool, {
+      workflowKey: req.body.workflow_key || null,
+      churchId: req.body.church_id ? parseInt(req.body.church_id, 10) : null,
+      runType: 'manual',
+    });
+    res.json({ success: true, ...result });
   } catch (err) {
     console.error('[platform] workflow-executions reconcile failed:', err.message);
     res.status(500).json({ error: 'workflow_reconcile_failed' });
