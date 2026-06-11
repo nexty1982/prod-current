@@ -228,6 +228,7 @@ async function fetchWorkflowDetail(workflowKey) {
     hierarchy_path: `/${hierarchyPath}`,
     completion_state: wf.completion_state,
     active_version: wf.version,
+    version_id: versionId,
     route_entrypoints: parseJson(wf.route_entrypoints, []),
     runtime_state_source: wf.runtime_state_source,
     steps: steps.map((s) => ({

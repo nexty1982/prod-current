@@ -5,7 +5,7 @@
 const FILING_CHECKLIST = [
   '1. Seed app_workflows + app_workflow_versions + app_workflow_steps (+ components) in migration',
   '2. Set route_entrypoints JSON on active version',
-  '3. Register RUNTIME_RESOLVERS entry in workflowGoalsService.js',
+  '3. Register RUNTIME_RESOLVERS in workflowGoalsService.js + reconciler in workflowExecutionReconcilers.js',
   '4. Add STEP_ACTION_ROUTES for parish/admin deep links',
   '5. Extend getRuntimeStatsForCatalog() + deriveWorkflowKpi() for executive KPIs',
   '6. Optional: UI hook (Parish goal strip, CCC panel, or catalog-only)',
