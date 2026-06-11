@@ -3,7 +3,8 @@
 **Last updated:** 2026-06-12  
 **Owners:** OM backend (`orthodoxmetrics/prod`), OMAI control panel (`omai/berry`), shared catalog in `orthodoxmetrics_db`  
 **Status:** Catalog review decisions shipped — 6/6 filed workflows; OMStudio governance consumer foundations live  
-**Implementation log:** [workflow-catalog-review-implementation.md](./workflow-catalog-review-implementation.md)
+**Implementation log:** [workflow-catalog-review-implementation.md](./workflow-catalog-review-implementation.md)  
+**Architecture review:** [workflow-catalog-architecture-gap-analysis.md](./workflow-catalog-architecture-gap-analysis.md)
 
 ---
 
