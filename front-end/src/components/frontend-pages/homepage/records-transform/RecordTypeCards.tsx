@@ -50,13 +50,13 @@ export function RecordTypeCards({ activeType, onSelect, onHover }: RecordTypeCar
             `}
           >
             {card.badge && (
-              <span className="absolute top-2.5 right-2.5 md:top-3 md:right-3 text-[9px] md:text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-400/30 font-['Inter']">
+              <span className="absolute top-2.5 right-2.5 md:top-3 md:right-3 text-[9px] md:text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-400/30 font-om-body">
                 {card.badge}
               </span>
             )}
             <CardIcon type={card.type} className={`w-5 h-5 mb-3 ${isActive ? 'text-purple-300' : 'text-purple-400/60'}`} />
-            <div className={`text-sm mb-1 font-['Inter'] ${isActive ? 'text-white' : 'text-white/80'}`}>{card.label}</div>
-            <div className="text-xs text-purple-300/60 font-['Inter']">{card.year} &middot; {card.count} records</div>
+            <div className={`text-sm mb-1 font-om-body ${isActive ? 'text-white' : 'text-white/80'}`}>{card.label}</div>
+            <div className="text-xs text-purple-300/60 font-om-body">{card.year} &middot; {card.count} records</div>
             {isActive && (
               <motion.div layoutId="activeIndicator" className="absolute bottom-0 left-4 right-4 h-0.5 bg-purple-400 rounded-full" />
             )}

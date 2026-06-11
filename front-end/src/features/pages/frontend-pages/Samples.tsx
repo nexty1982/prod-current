@@ -67,8 +67,8 @@ const Samples = () => {
               <div className="om-card-elevated p-8">
                 <div className="bg-white dark:bg-[#0d1117] rounded-xl shadow-lg p-8">
                   <div className="border-l-4 border-[#d4af37] pl-6 mb-6">
-                    <p className="font-['Georgia'] text-2xl om-text-primary mb-2">{t('samples.baptism_cert_title')}</p>
-                    <p className="font-['Inter'] text-[14px] om-text-secondary italic">
+                    <p className="font-om-display text-2xl om-text-primary mb-2">{t('samples.baptism_cert_title')}</p>
+                    <p className="font-om-body text-[14px] om-text-secondary italic">
                       {baptism.parish} &bull; {baptism.city}
                     </p>
                   </div>
@@ -82,7 +82,7 @@ const Samples = () => {
                     <CertField label={t('samples.baptism_label_godparents')} value={baptism.godparents} />
                     <CertField label={t('samples.baptism_label_celebrant')} value={baptism.celebrant} />
                     <div className="mt-6 pt-6 om-divider">
-                      <p className="font-['Inter'] text-[12px] om-text-tertiary">
+                      <p className="font-om-body text-[12px] om-text-tertiary">
                         {t('samples.baptism_cert_record_no')} B-2023-042 &bull; {t('samples.baptism_cert_entered')}: {baptism.dateOfBaptism}
                       </p>
                     </div>
@@ -159,7 +159,7 @@ const Samples = () => {
                 <div className="mb-4">
                   <span className="om-badge-accent">{lang.language} ({lang.languageNative})</span>
                 </div>
-                <h3 className="font-['Georgia'] text-xl om-text-primary mb-4">{lang.sacrament}</h3>
+                <h3 className="font-om-display text-xl om-text-primary mb-4">{lang.sacrament}</h3>
                 <div className="space-y-3">
                   <LangField label={lang.language === 'Greek' ? 'Όνομα' : lang.language === 'Russian' ? 'Имя' : 'الاسم'} value={lang.name} rtl={lang.language === 'Arabic'} />
                   <LangField label={lang.language === 'Greek' ? 'Ημερομηνία' : lang.language === 'Russian' ? 'Дата' : 'التاريخ'} value={lang.date} rtl={lang.language === 'Arabic'} />
@@ -177,12 +177,12 @@ const Samples = () => {
           <SectionHeader badge={t('samples.search_badge')} title={t('samples.search_title')} subtitle={t('samples.search_subtitle')} editKeyPrefix="samples.search" />
           <div className="om-card p-8 max-w-4xl mx-auto">
             <div className="mb-8">
-              <label className="block font-['Inter'] font-medium text-[14px] om-text-primary mb-2">{t('samples.search_label')}</label>
+              <label className="block font-om-body font-medium text-[14px] om-text-primary mb-2">{t('samples.search_label')}</label>
               <input type="text" placeholder={t('samples.search_placeholder')} className="om-input" readOnly />
             </div>
             <div className="grid md:grid-cols-3 gap-6 mb-8">
               <div>
-                <label className="block font-['Inter'] font-medium text-[14px] om-text-primary mb-2">{t('samples.search_type_label')}</label>
+                <label className="block font-om-body font-medium text-[14px] om-text-primary mb-2">{t('samples.search_type_label')}</label>
                 <select className="om-select" defaultValue="">
                   <option value="">{t('samples.search_type_all')}</option>
                   <option>{t('samples.search_type_baptisms')}</option>
@@ -191,11 +191,11 @@ const Samples = () => {
                 </select>
               </div>
               <div>
-                <label className="block font-['Inter'] font-medium text-[14px] om-text-primary mb-2">{t('samples.search_date_from')}</label>
+                <label className="block font-om-body font-medium text-[14px] om-text-primary mb-2">{t('samples.search_date_from')}</label>
                 <input type="date" className="om-input" readOnly />
               </div>
               <div>
-                <label className="block font-['Inter'] font-medium text-[14px] om-text-primary mb-2">{t('samples.search_date_to')}</label>
+                <label className="block font-om-body font-medium text-[14px] om-text-primary mb-2">{t('samples.search_date_to')}</label>
                 <input type="date" className="om-input" readOnly />
               </div>
             </div>
@@ -204,15 +204,15 @@ const Samples = () => {
               <button className="om-btn-outline">{t('samples.search_btn_advanced')}</button>
             </div>
             <div className="mt-8 pt-8 om-divider">
-              <p className="font-['Inter'] text-[14px] om-text-secondary mb-4">{t('samples.search_showing').replace('{count}', String(searchResults.length))}</p>
+              <p className="font-om-body text-[14px] om-text-secondary mb-4">{t('samples.search_showing').replace('{count}', String(searchResults.length))}</p>
               <div className="space-y-3">
                 {searchResults.map((result, idx) => (
                   <div key={idx} className="om-card-compact p-4 hover:border-[#d4af37] dark:hover:border-[#d4af37] transition-colors cursor-pointer">
                     <div className="flex justify-between items-start mb-2">
-                      <p className="font-['Inter'] font-medium text-[15px] om-text-primary">{result.name}</p>
+                      <p className="font-om-body font-medium text-[15px] om-text-primary">{result.name}</p>
                       <span className="text-[12px] bg-[#d4af37] text-[#2d1b4e] px-2 py-1 rounded">{result.type}</span>
                     </div>
-                    <p className="font-['Inter'] text-[13px] om-text-secondary">{result.date} &bull; {result.parish}</p>
+                    <p className="font-om-body text-[13px] om-text-secondary">{result.date} &bull; {result.parish}</p>
                   </div>
                 ))}
               </div>
@@ -253,8 +253,8 @@ export default Samples;
 function CertField({ label, value }: { label: string; value: string }) {
   return (
     <div className="pb-3 om-divider">
-      <p className="font-['Inter'] text-[13px] om-text-tertiary mb-1">{label}</p>
-      <p className="font-['Inter'] text-[15px] om-text-primary">{value}</p>
+      <p className="font-om-body text-[13px] om-text-tertiary mb-1">{label}</p>
+      <p className="font-om-body text-[15px] om-text-primary">{value}</p>
     </div>
   );
 }
@@ -275,8 +275,8 @@ function DataField({ label, value, badgeLabel }: { label: string; value: string;
   return (
     <div className="flex items-start justify-between">
       <div className="flex-1">
-        <p className="font-['Inter'] text-[13px] om-text-tertiary mb-1">{label}</p>
-        <p className="font-['Inter'] text-[15px] om-text-primary">{value}</p>
+        <p className="font-om-body text-[13px] om-text-tertiary mb-1">{label}</p>
+        <p className="font-om-body text-[15px] om-text-primary">{value}</p>
       </div>
       {badgeLabel && (
         <span className="text-[11px] bg-[#d4af37]/20 text-[#d4af37] px-2 py-0.5 rounded whitespace-nowrap">{badgeLabel}</span>
@@ -289,10 +289,10 @@ function IndexedField({ label, value, badgeLabel }: { label: string; value: stri
   return (
     <div className="om-card-subtle p-4">
       <div className="flex items-center justify-between mb-2">
-        <span className="font-['Inter'] text-[14px] om-text-secondary">{label}</span>
+        <span className="font-om-body text-[14px] om-text-secondary">{label}</span>
         {badgeLabel && <span className="om-badge-accent whitespace-nowrap">{badgeLabel}</span>}
       </div>
-      <p className="font-['Inter'] text-[15px] om-text-primary">{value}</p>
+      <p className="font-om-body text-[15px] om-text-primary">{value}</p>
     </div>
   );
 }
@@ -300,8 +300,8 @@ function IndexedField({ label, value, badgeLabel }: { label: string; value: stri
 function LangField({ label, value, rtl = false }: { label: string; value: string; rtl?: boolean }) {
   return (
     <div>
-      <p className="font-['Inter'] text-[13px] om-text-tertiary">{label}</p>
-      <p className="font-['Inter'] text-[15px] om-text-primary" dir={rtl ? 'rtl' : undefined}>{value}</p>
+      <p className="font-om-body text-[13px] om-text-tertiary">{label}</p>
+      <p className="font-om-body text-[15px] om-text-primary" dir={rtl ? 'rtl' : undefined}>{value}</p>
     </div>
   );
 }

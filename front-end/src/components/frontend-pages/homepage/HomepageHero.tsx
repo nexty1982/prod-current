@@ -159,10 +159,10 @@ const HomepageHero = () => {
                     transform: i === slideIdx ? 'translateY(0)' : 'translateY(20px)',
                   }}
                 >
-                  <h1 className="font-['Georgia'] text-2xl md:text-4xl leading-tight mb-4 text-white tracking-wide">
+                  <h1 className="font-om-display text-2xl md:text-4xl leading-tight mb-4 text-white tracking-wide">
                     {slide.title}
                   </h1>
-                  <p className="font-['Inter'] text-[15px] md:text-[17px] text-[rgba(255,255,255,0.85)] leading-relaxed">
+                  <p className="font-om-body text-[15px] md:text-[17px] text-[rgba(255,255,255,0.85)] leading-relaxed">
                     {slide.description}
                   </p>
                 </div>
@@ -171,14 +171,14 @@ const HomepageHero = () => {
             <div className="relative z-10 flex flex-col sm:flex-row gap-4 mt-8">
               <Link
                 to={PUBLIC_ROUTES.ENROLL}
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-[#d4af37] text-[#2d1b4e] rounded-lg font-['Inter'] font-medium text-[16px] hover:bg-[#c29d2f] transition-colors no-underline"
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-[#d4af37] text-[#2d1b4e] rounded-lg font-om-body font-medium text-[16px] hover:bg-[#c29d2f] transition-colors no-underline"
               >
                 {t('home.hero_cta_enroll')}
                 <ArrowRight size={20} />
               </Link>
               <Link
                 to={PUBLIC_ROUTES.TOUR}
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-sm border border-white/20 text-white rounded-lg font-['Inter'] font-medium text-[16px] hover:bg-white/20 transition-colors no-underline"
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-sm border border-white/20 text-white rounded-lg font-om-body font-medium text-[16px] hover:bg-white/20 transition-colors no-underline"
               >
                 {t('home.hero_cta_tour')}
               </Link>
@@ -256,7 +256,7 @@ const HomepageHero = () => {
 
         {/* Dot indicators + counter */}
         <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3 z-10">
-          <span className="font-['Inter'] text-white/60 text-sm">
+          <span className="font-om-body text-white/60 text-sm">
             {lightboxIdx + 1} / {heroSlides.length}
           </span>
           <div className="flex gap-2">

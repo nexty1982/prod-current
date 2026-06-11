@@ -44,13 +44,13 @@ export function ImageComparisonPanel({ imageSrc, variant, delay = 0.1 }: ImageCo
           >
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-[10px] uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-2 font-['Inter']">Original — Raw Scan</p>
+                <p className="text-[10px] uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-2 font-om-body">Original — Raw Scan</p>
                 <div className="rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
                   <img src={imageSrc} alt="Original scan" className={`w-full ${imageHeight} object-cover`} loading="lazy" />
                 </div>
               </div>
               <div>
-                <p className="text-[10px] uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-2 font-['Inter']">Enhanced — AI Processed</p>
+                <p className="text-[10px] uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-2 font-om-body">Enhanced — AI Processed</p>
                 <div className="rounded-xl overflow-hidden border border-purple-200 dark:border-purple-800 bg-purple-50/30 dark:bg-purple-900/10">
                   <img
                     src={imageSrc}

@@ -24,18 +24,18 @@ const FeatureCard = ({ icon, title, description, layout = 'vertical', editKeyPre
           </div>
           <div className="flex-1">
             {editKeyPrefix ? (
-              <EditableText contentKey={`${editKeyPrefix}.title`} as="h3" className="font-['Inter'] font-medium text-xl text-[#2d1b4e] dark:text-white mb-3">
+              <EditableText contentKey={`${editKeyPrefix}.title`} as="h3" className="font-om-body font-medium text-xl text-[#2d1b4e] dark:text-white mb-3">
                 {title}
               </EditableText>
             ) : (
-              <h3 className="font-['Inter'] font-medium text-xl text-[#2d1b4e] dark:text-white mb-3">{title}</h3>
+              <h3 className="font-om-body font-medium text-xl text-[#2d1b4e] dark:text-white mb-3">{title}</h3>
             )}
             {editKeyPrefix ? (
-              <EditableText contentKey={`${editKeyPrefix}.description`} as="p" className="font-['Inter'] text-[15px] text-[#4a5565] dark:text-gray-400 leading-relaxed">
+              <EditableText contentKey={`${editKeyPrefix}.description`} as="p" className="font-om-body text-[15px] text-[#4a5565] dark:text-gray-400 leading-relaxed">
                 {description}
               </EditableText>
             ) : (
-              <p className="font-['Inter'] text-[15px] text-[#4a5565] dark:text-gray-400 leading-relaxed">{description}</p>
+              <p className="font-om-body text-[15px] text-[#4a5565] dark:text-gray-400 leading-relaxed">{description}</p>
             )}
           </div>
         </div>
@@ -49,18 +49,18 @@ const FeatureCard = ({ icon, title, description, layout = 'vertical', editKeyPre
         {icon}
       </div>
       {editKeyPrefix ? (
-        <EditableText contentKey={`${editKeyPrefix}.title`} as="h3" className="font-['Inter'] font-medium text-xl text-[#2d1b4e] dark:text-white mb-2">
+        <EditableText contentKey={`${editKeyPrefix}.title`} as="h3" className="font-om-body font-medium text-xl text-[#2d1b4e] dark:text-white mb-2">
           {title}
         </EditableText>
       ) : (
-        <h3 className="font-['Inter'] font-medium text-xl text-[#2d1b4e] dark:text-white mb-2">{title}</h3>
+        <h3 className="font-om-body font-medium text-xl text-[#2d1b4e] dark:text-white mb-2">{title}</h3>
       )}
       {editKeyPrefix ? (
-        <EditableText contentKey={`${editKeyPrefix}.description`} as="p" className="font-['Inter'] text-[15px] text-[#4a5565] dark:text-gray-400 leading-relaxed">
+        <EditableText contentKey={`${editKeyPrefix}.description`} as="p" className="font-om-body text-[15px] text-[#4a5565] dark:text-gray-400 leading-relaxed">
           {description}
         </EditableText>
       ) : (
-        <p className="font-['Inter'] text-[15px] text-[#4a5565] dark:text-gray-400 leading-relaxed">{description}</p>
+        <p className="font-om-body text-[15px] text-[#4a5565] dark:text-gray-400 leading-relaxed">{description}</p>
       )}
     </div>
   );

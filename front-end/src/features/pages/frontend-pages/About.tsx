@@ -94,17 +94,17 @@ const About = () => {
               <EditableText contentKey="about.mission_title" as="h2" className="om-heading-primary mb-6">
                 {t('about.mission_title')}
               </EditableText>
-              <EditableText contentKey="about.mission_p1" as="p" className="font-['Inter'] text-lg text-[#4a5565] dark:text-gray-400 leading-relaxed mb-8">
+              <EditableText contentKey="about.mission_p1" as="p" className="font-om-body text-lg text-[#4a5565] dark:text-gray-400 leading-relaxed mb-8">
                 {t('about.mission_p1')}
               </EditableText>
-              <EditableText contentKey="about.mission_p2" as="p" className="font-['Inter'] text-lg text-[#4a5565] dark:text-gray-400 leading-relaxed mb-8">
+              <EditableText contentKey="about.mission_p2" as="p" className="font-om-body text-lg text-[#4a5565] dark:text-gray-400 leading-relaxed mb-8">
                 {t('about.mission_p2')}
               </EditableText>
               <div className="space-y-4">
                 {missionPoints.map((item, i) => (
                   <div key={i} className="flex items-start gap-3">
                     <CheckCircle2 className="text-[#d4af37] flex-shrink-0 mt-1" size={20} />
-                    <EditableText contentKey={item} as="span" className="font-['Inter'] text-[16px] text-[#4a5565] dark:text-gray-400">{t(item)}</EditableText>
+                    <EditableText contentKey={item} as="span" className="font-om-body text-[16px] text-[#4a5565] dark:text-gray-400">{t(item)}</EditableText>
                   </div>
                 ))}
               </div>
@@ -114,10 +114,10 @@ const About = () => {
               <div className="space-y-8">
                 {stats.map((stat, i) => (
                   <div key={i} className="bg-white dark:bg-[#0d1117] rounded-xl p-6 shadow-sm">
-                    <div className={`${i % 2 === 0 ? 'text-[#d4af37]' : 'text-[#2d1b4e] dark:text-[#d4af37]'} font-['Georgia'] text-5xl mb-2`}>
+                    <div className={`${i % 2 === 0 ? 'text-[#d4af37]' : 'text-[#2d1b4e] dark:text-[#d4af37]'} font-om-display text-5xl mb-2`}>
                       <EditableText contentKey={stat.valueKey} as="span">{t(stat.valueKey)}</EditableText>
                     </div>
-                    <EditableText contentKey={stat.labelKey} as="p" className="font-['Inter'] text-[16px] text-[#4a5565] dark:text-gray-400">{t(stat.labelKey)}</EditableText>
+                    <EditableText contentKey={stat.labelKey} as="p" className="font-om-body text-[16px] text-[#4a5565] dark:text-gray-400">{t(stat.labelKey)}</EditableText>
                   </div>
                 ))}
               </div>
@@ -142,8 +142,8 @@ const About = () => {
                 <div className="om-icon-container-small mb-4">
                   <f.icon className="text-[#d4af37] dark:text-[#2d1b4e]" size={28} />
                 </div>
-                <EditableText contentKey={f.titleKey} as="h3" className="font-['Inter'] font-medium text-xl text-[#2d1b4e] dark:text-white mb-2">{t(f.titleKey)}</EditableText>
-                <EditableText contentKey={f.descriptionKey} as="p" className="font-['Inter'] text-[15px] text-[#4a5565] dark:text-gray-400 leading-relaxed">{t(f.descriptionKey)}</EditableText>
+                <EditableText contentKey={f.titleKey} as="h3" className="font-om-body font-medium text-xl text-[#2d1b4e] dark:text-white mb-2">{t(f.titleKey)}</EditableText>
+                <EditableText contentKey={f.descriptionKey} as="p" className="font-om-body text-[15px] text-[#4a5565] dark:text-gray-400 leading-relaxed">{t(f.descriptionKey)}</EditableText>
               </div>
             ))}
           </div>
@@ -168,12 +168,12 @@ const About = () => {
                     step.number === 3
                       ? 'bg-[#d4af37] text-[#2d1b4e]'
                       : 'bg-[#2d1b4e] dark:bg-[#d4af37] text-[#d4af37] dark:text-[#2d1b4e]'
-                  } rounded-full flex items-center justify-center font-['Georgia'] text-xl`}>
+                  } rounded-full flex items-center justify-center font-om-display text-xl`}>
                     {step.number}
                   </div>
                   <div>
-                    <EditableText contentKey={step.titleKey} as="h3" className="font-['Inter'] font-medium text-xl text-[#2d1b4e] dark:text-white mb-2">{t(step.titleKey)}</EditableText>
-                    <EditableText contentKey={step.descriptionKey} as="p" className="font-['Inter'] text-[16px] text-[#4a5565] dark:text-gray-400 leading-relaxed">{t(step.descriptionKey)}</EditableText>
+                    <EditableText contentKey={step.titleKey} as="h3" className="font-om-body font-medium text-xl text-[#2d1b4e] dark:text-white mb-2">{t(step.titleKey)}</EditableText>
+                    <EditableText contentKey={step.descriptionKey} as="p" className="font-om-body text-[16px] text-[#4a5565] dark:text-gray-400 leading-relaxed">{t(step.descriptionKey)}</EditableText>
                   </div>
                 </div>
               </div>
@@ -194,8 +194,8 @@ const About = () => {
                   className="w-full max-w-md object-cover rounded-2xl shadow-lg"
                 />
                 <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 bg-white dark:bg-gray-800 rounded-xl shadow-md px-6 py-3 text-center min-w-[200px]">
-                  <EditableText contentKey="about.founder_name" as="h4" className="font-['Inter'] font-semibold text-lg text-[#2d1b4e] dark:text-white">{t('about.founder_name')}</EditableText>
-                  <EditableText contentKey="about.founder_role" as="p" className="font-['Inter'] text-sm text-[#d4af37]">{t('about.founder_role')}</EditableText>
+                  <EditableText contentKey="about.founder_name" as="h4" className="font-om-body font-semibold text-lg text-[#2d1b4e] dark:text-white">{t('about.founder_name')}</EditableText>
+                  <EditableText contentKey="about.founder_role" as="p" className="font-om-body text-sm text-[#d4af37]">{t('about.founder_role')}</EditableText>
                 </div>
               </div>
             </div>
@@ -207,10 +207,10 @@ const About = () => {
               <EditableText contentKey="about.founder_title" as="h2" className="om-heading-primary mb-6">
                 {t('about.founder_title')}
               </EditableText>
-              <EditableText contentKey="about.founder_p1" as="p" className="font-['Inter'] text-lg text-[#4a5565] dark:text-gray-400 leading-relaxed mb-6">
+              <EditableText contentKey="about.founder_p1" as="p" className="font-om-body text-lg text-[#4a5565] dark:text-gray-400 leading-relaxed mb-6">
                 {t('about.founder_p1')}
               </EditableText>
-              <EditableText contentKey="about.founder_p2" as="p" className="font-['Inter'] text-lg text-[#4a5565] dark:text-gray-400 leading-relaxed">
+              <EditableText contentKey="about.founder_p2" as="p" className="font-om-body text-lg text-[#4a5565] dark:text-gray-400 leading-relaxed">
                 {t('about.founder_p2')}
               </EditableText>
             </div>
@@ -226,14 +226,14 @@ const About = () => {
       >
         <Link
           to={PUBLIC_ROUTES.ENROLL}
-          className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-[#d4af37] text-[#2d1b4e] rounded-lg font-['Inter'] font-medium text-[16px] hover:bg-[#c29d2f] transition-colors no-underline"
+          className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-[#d4af37] text-[#2d1b4e] rounded-lg font-om-body font-medium text-[16px] hover:bg-[#c29d2f] transition-colors no-underline"
         >
           {t('common.enroll_parish')}
           <ArrowRight size={20} />
         </Link>
         <Link
           to={PUBLIC_ROUTES.CONTACT}
-          className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-sm border border-white/20 text-white rounded-lg font-['Inter'] font-medium text-[16px] hover:bg-white/20 transition-colors no-underline"
+          className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-sm border border-white/20 text-white rounded-lg font-om-body font-medium text-[16px] hover:bg-white/20 transition-colors no-underline"
         >
           {t('common.contact_us')}
         </Link>

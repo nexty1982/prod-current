@@ -28,7 +28,7 @@ export function EnhancedRecordViewer({
         transition={{ duration: 0.3 }}
       >
         <div className="w-2 h-2 rounded-full bg-[#2d1b4e] dark:bg-[#d4af37]" />
-        <span className="text-gray-900 dark:text-gray-100 text-sm font-['Inter']">
+        <span className="text-gray-900 dark:text-gray-100 text-sm font-om-body">
           {label} — {year}
         </span>
         {badge && (
@@ -36,7 +36,7 @@ export function EnhancedRecordViewer({
             {badge}
           </span>
         )}
-        <span className="text-gray-400 dark:text-gray-500 text-xs ml-auto font-['Inter']">
+        <span className="text-gray-400 dark:text-gray-500 text-xs ml-auto font-om-body">
           {count} records extracted
         </span>
       </motion.div>
@@ -54,7 +54,7 @@ export function EnhancedRecordViewer({
       )}
 
       <motion.p
-        className="text-center text-gray-400 dark:text-gray-500 text-xs mt-4 font-['Inter']"
+        className="text-center text-gray-400 dark:text-gray-500 text-xs mt-4 font-om-body"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.6, duration: 0.4 }}

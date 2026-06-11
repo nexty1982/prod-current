@@ -41,10 +41,10 @@ const BlogPage = () => {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="bg-gradient-to-br from-[#2d1b4e] to-[#4a2f74] dark:from-gray-800 dark:to-gray-700 rounded-2xl p-12 text-white">
               <BookOpen className="text-[#d4af37] mb-6" size={48} />
-              <h3 className="font-['Georgia'] text-2xl mb-4">
+              <h3 className="font-om-display text-2xl mb-4">
                 {t('blog.featured_title')}
               </h3>
-              <p className="font-['Inter'] text-[15px] text-[rgba(255,255,255,0.8)] leading-relaxed">
+              <p className="font-om-body text-[15px] text-[rgba(255,255,255,0.8)] leading-relaxed">
                 {t('blog.featured_desc')}
               </p>
             </div>
@@ -62,7 +62,7 @@ const BlogPage = () => {
                 {[1, 2, 3, 4].map((n) => (
                   <li key={n} className="flex items-center gap-3">
                     <span className="om-bullet" />
-                    <span className="font-['Inter'] text-[15px] om-text-secondary">{t(`blog.featured_point${n}`)}</span>
+                    <span className="font-om-body text-[15px] om-text-secondary">{t(`blog.featured_point${n}`)}</span>
                   </li>
                 ))}
               </ul>
@@ -82,7 +82,7 @@ const BlogPage = () => {
             <EditableText contentKey="blog.recent.subtitle" as="p" className="om-text-body">{t('blog.recent_subtitle')}</EditableText>
           </div>
           {showContentNotice && (
-            <p className="text-center font-['Inter'] text-[14px] text-[#4a5565] dark:text-gray-400 italic mb-8">
+            <p className="text-center font-om-body text-[14px] text-[#4a5565] dark:text-gray-400 italic mb-8">
               {t('blog.content_english_only')}
             </p>
           )}
@@ -108,8 +108,8 @@ const BlogPage = () => {
                   <div className="om-icon-container-primary mx-auto mb-4">
                     {icon}
                   </div>
-                  <h3 className="font-['Inter'] font-medium text-lg text-[#2d1b4e] dark:text-white mb-2">{t(`blog.topic${n}_title`)}</h3>
-                  <p className="font-['Inter'] text-[14px] text-[#4a5565] dark:text-gray-400 leading-relaxed">{t(`blog.topic${n}_desc`)}</p>
+                  <h3 className="font-om-body font-medium text-lg text-[#2d1b4e] dark:text-white mb-2">{t(`blog.topic${n}_title`)}</h3>
+                  <p className="font-om-body text-[14px] text-[#4a5565] dark:text-gray-400 leading-relaxed">{t(`blog.topic${n}_desc`)}</p>
                 </div>
               );
             })}
@@ -133,7 +133,7 @@ const BlogPage = () => {
             />
             <button className="om-btn-primary whitespace-nowrap">{t('blog.newsletter_btn')}</button>
           </div>
-          <p className="font-['Inter'] text-[13px] om-text-tertiary mt-4">
+          <p className="font-om-body text-[13px] om-text-tertiary mt-4">
             {t('blog.newsletter_privacy')}
           </p>
         </div>
@@ -166,10 +166,10 @@ function BlogCard({ title, excerpt, category, date, t }: { title: string; excerp
       <div className="p-6">
         <div className="flex items-center gap-3 mb-3">
           <span className="om-badge-accent">{translatedCat}</span>
-          <span className="font-['Inter'] text-[13px] om-text-tertiary">{date}</span>
+          <span className="font-om-body text-[13px] om-text-tertiary">{date}</span>
         </div>
-        <h3 className="font-['Inter'] font-medium text-lg text-[#2d1b4e] dark:text-white mb-2 line-clamp-2">{title}</h3>
-        <p className="font-['Inter'] text-[14px] text-[#4a5565] dark:text-gray-400 leading-relaxed line-clamp-3">{excerpt}</p>
+        <h3 className="font-om-body font-medium text-lg text-[#2d1b4e] dark:text-white mb-2 line-clamp-2">{title}</h3>
+        <p className="font-om-body text-[14px] text-[#4a5565] dark:text-gray-400 leading-relaxed line-clamp-3">{excerpt}</p>
       </div>
     </div>
   );

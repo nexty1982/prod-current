@@ -28,19 +28,19 @@ const HeroSection = ({ badge, title, subtitle, children, editKeyPrefix }: HeroSe
         </div>
       )}
       {editKeyPrefix ? (
-        <EditableText contentKey={`${editKeyPrefix}.title`} as="h1" className="font-['Georgia'] text-5xl md:text-6xl leading-tight mb-6">
+        <EditableText contentKey={`${editKeyPrefix}.title`} as="h1" className="font-om-display text-5xl md:text-6xl leading-tight mb-6">
           {title}
         </EditableText>
       ) : (
-        <h1 className="font-['Georgia'] text-5xl md:text-6xl leading-tight mb-6">{title}</h1>
+        <h1 className="font-om-display text-5xl md:text-6xl leading-tight mb-6">{title}</h1>
       )}
       {subtitle && (
         editKeyPrefix ? (
-          <EditableText contentKey={`${editKeyPrefix}.subtitle`} as="p" className="font-['Inter'] text-xl text-[rgba(255,255,255,0.9)] max-w-3xl mx-auto mb-8">
+          <EditableText contentKey={`${editKeyPrefix}.subtitle`} as="p" className="font-om-body text-xl text-[rgba(255,255,255,0.9)] max-w-3xl mx-auto mb-8">
             {subtitle}
           </EditableText>
         ) : (
-          <p className="font-['Inter'] text-xl text-[rgba(255,255,255,0.9)] max-w-3xl mx-auto mb-8">
+          <p className="font-om-body text-xl text-[rgba(255,255,255,0.9)] max-w-3xl mx-auto mb-8">
             {subtitle}
           </p>
         )

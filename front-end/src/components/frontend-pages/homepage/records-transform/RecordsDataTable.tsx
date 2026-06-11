@@ -30,7 +30,7 @@ export function RecordsDataTable<T>({ columns, data, rowKey, delay = 0.1 }: Reco
               {columns.map((col) => (
                 <th
                   key={col.key}
-                  className={`text-left py-3 px-4 text-gray-500 dark:text-gray-400 text-xs tracking-wider uppercase font-['Inter'] ${col.className || ''}`}
+                  className={`text-left py-3 px-4 text-gray-500 dark:text-gray-400 text-xs tracking-wider uppercase font-om-body ${col.className || ''}`}
                 >
                   {col.label}
                 </th>
@@ -47,7 +47,7 @@ export function RecordsDataTable<T>({ columns, data, rowKey, delay = 0.1 }: Reco
                 className={i % 2 === 0 ? 'bg-gray-50/60 dark:bg-white/[0.02]' : ''}
               >
                 {columns.map((col) => (
-                  <td key={col.key} className={`py-3 px-4 text-sm font-['Inter'] ${col.className || ''}`}>
+                  <td key={col.key} className={`py-3 px-4 text-sm font-om-body ${col.className || ''}`}>
                     {col.render(row, i)}
                   </td>
                 ))}

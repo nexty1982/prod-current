@@ -73,7 +73,7 @@ const DemoStepDigitize = ({ isActive }: Props) => {
         transition={{ duration: 2, repeat: Infinity }}
       >
         <Upload className="mx-auto mb-2 text-[#6a7282] dark:text-gray-500" size={28} />
-        <p className="font-['Inter'] text-[14px] text-[#6a7282] dark:text-gray-400">
+        <p className="font-om-body text-[14px] text-[#6a7282] dark:text-gray-400">
           Drop scans, photos, or archives here
         </p>
         <div className="flex justify-center gap-3 mt-3">
@@ -82,7 +82,7 @@ const DemoStepDigitize = ({ isActive }: Props) => {
             { icon: <Camera size={13} />, label: 'Photo' },
             { icon: <FolderArchive size={13} />, label: 'Batch' },
           ].map(b => (
-            <span key={b.label} className="inline-flex items-center gap-1 text-[11px] font-['Inter'] font-medium text-[#4a5565] dark:text-gray-400 bg-[#f3f4f6] dark:bg-gray-700 px-2 py-1 rounded-full">
+            <span key={b.label} className="inline-flex items-center gap-1 text-[11px] font-om-body font-medium text-[#4a5565] dark:text-gray-400 bg-[#f3f4f6] dark:bg-gray-700 px-2 py-1 rounded-full">
               {b.icon} {b.label}
             </span>
           ))}
@@ -109,11 +109,11 @@ const DemoStepDigitize = ({ isActive }: Props) => {
                   {FILE_ICONS[file.type]}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-['Inter'] text-[13px] font-medium text-[#2d1b4e] dark:text-gray-100 truncate">{file.name}</p>
+                  <p className="font-om-body text-[13px] font-medium text-[#2d1b4e] dark:text-gray-100 truncate">{file.name}</p>
                   <div className="flex items-center gap-2 mt-1">
-                    <span className="text-[11px] font-['Inter'] text-[#6a7282] dark:text-gray-500">{file.size}</span>
+                    <span className="text-[11px] font-om-body text-[#6a7282] dark:text-gray-500">{file.size}</span>
                     {file.pages && (
-                      <span className="text-[11px] font-['Inter'] text-[#6a7282] dark:text-gray-500">{file.pages} pages</span>
+                      <span className="text-[11px] font-om-body text-[#6a7282] dark:text-gray-500">{file.pages} pages</span>
                     )}
                   </div>
                   {/* Progress bar */}
@@ -149,7 +149,7 @@ const DemoStepDigitize = ({ isActive }: Props) => {
             className="mt-4 flex items-center gap-2 justify-center p-3 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-lg"
           >
             <ScanLine size={16} className="text-emerald-600 dark:text-emerald-400" />
-            <span className="font-['Inter'] text-[13px] font-medium text-emerald-700 dark:text-emerald-300">
+            <span className="font-om-body text-[13px] font-medium text-emerald-700 dark:text-emerald-300">
               4 documents ready for OCR processing
             </span>
           </motion.div>

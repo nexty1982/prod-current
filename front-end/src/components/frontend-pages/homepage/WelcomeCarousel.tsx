@@ -126,13 +126,13 @@ const WelcomeCarousel = () => {
           {SLIDES.map((slide, i) => (
             <div key={i} className={slideClass(i)} aria-hidden={active !== i}>
               <h2
-                className="font-['Georgia'] text-2xl md:text-3xl text-[#2d1b4e] dark:text-white tracking-wide mb-3"
+                className="font-om-display text-2xl md:text-3xl text-[#2d1b4e] dark:text-white tracking-wide mb-3"
                 lang={activeLang}
               >
                 {slide.title[activeLang]}
               </h2>
               <p
-                className="font-['Inter'] text-[15px] md:text-[16px] text-[#4a5565] dark:text-gray-400 leading-relaxed max-w-3xl"
+                className="font-om-body text-[15px] md:text-[16px] text-[#4a5565] dark:text-gray-400 leading-relaxed max-w-3xl"
                 lang={activeLang}
               >
                 {slide.desc[activeLang]}

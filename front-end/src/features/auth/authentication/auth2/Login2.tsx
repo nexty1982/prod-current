@@ -42,10 +42,10 @@ const CanonicalDutyCarousel = () => {
     >
       <div className={slideClass(0)} aria-hidden={active !== 0}>
         <div className="flex h-full flex-col justify-center gap-6">
-          <p className="font-['Georgia'] italic text-2xl md:text-3xl leading-snug text-[#f4d77a]">
+          <p className="font-om-display italic text-2xl md:text-3xl leading-snug text-[#f4d77a]">
             &ldquo;He shall personally maintain the metrical book for all marriages, baptisms, chrismations, and funerals that take place at the Parish.&rdquo;
           </p>
-          <p className="font-['Inter'] text-[13px] text-white/60">
+          <p className="font-om-body text-[13px] text-white/60">
             &mdash; <a href="https://www.oca.org" target="_blank" rel="noopener noreferrer" className="underline decoration-white/30 hover:text-white">Guidelines for Clergy</a>, Orthodox Church in America (2023)
           </p>
         </div>
@@ -53,10 +53,10 @@ const CanonicalDutyCarousel = () => {
 
       <div className={slideClass(1)} aria-hidden={active !== 1}>
         <div className="flex h-full flex-col">
-          <p className="font-['Inter'] text-[15px] md:text-[16px] leading-relaxed text-white/90 mb-4">
+          <p className="font-om-body text-[15px] md:text-[16px] leading-relaxed text-white/90 mb-4">
             The parish priest is responsible for entering into the metrical book the required information for every sacrament served &mdash; an obligation set out across the OCA <em>Guidelines for Clergy</em>.
           </p>
-          <ul className="space-y-3 font-['Inter'] text-[14px] md:text-[15px] text-white/85 flex-1">
+          <ul className="space-y-3 font-om-body text-[14px] md:text-[15px] text-white/85 flex-1">
             <li className="flex gap-2">
               <span className="text-[#d4af37] mt-1">•</span>
               <span><strong className="text-white">Baptism:</strong> The priest must enter the required data in the parish metrical book after carefully ascertaining all necessary information, including facts and spellings. Certificates witnessing that data are available from oca.org.</span>
@@ -74,7 +74,7 @@ const CanonicalDutyCarousel = () => {
               <span><strong className="text-white">Burial:</strong> The parish priest is responsible for entering into the metrical book the required information about each burial.</span>
             </li>
           </ul>
-          <p className="font-['Inter'] text-[12px] text-white/50 mt-4">
+          <p className="font-om-body text-[12px] text-white/50 mt-4">
             Source: <a href="https://www.oca.org" target="_blank" rel="noopener noreferrer" className="underline decoration-white/30 hover:text-white">Guidelines for Clergy</a>, Orthodox Church in America (2023).
           </p>
         </div>
@@ -82,10 +82,10 @@ const CanonicalDutyCarousel = () => {
 
       <div className={slideClass(2)} aria-hidden={active !== 2}>
         <div className="flex h-full flex-col">
-          <p className="font-['Inter'] text-[15px] md:text-[16px] leading-relaxed text-white/90 mb-4">
+          <p className="font-om-body text-[15px] md:text-[16px] leading-relaxed text-white/90 mb-4">
             <strong className="text-white">Metrical Records &amp; other Ecclesiastical Reports</strong> &mdash; the parish priest&apos;s explicit responsibility under the OCA <em>Guidelines for Clergy</em>.
           </p>
-          <ul className="space-y-3 font-['Inter'] text-[14px] md:text-[15px] text-white/85 flex-1">
+          <ul className="space-y-3 font-om-body text-[14px] md:text-[15px] text-white/85 flex-1">
             <li className="flex gap-2">
               <span className="text-[#d4af37] mt-1">•</span>
               <span><strong className="text-white">Timely Completion:</strong> It is the parish priest&apos;s responsibility to complete in a timely fashion the parish metrical records and all other ecclesiastical forms or reports required by the Central Church Administration and the diocesan chancery.</span>
@@ -99,7 +99,7 @@ const CanonicalDutyCarousel = () => {
               <span><strong className="text-white">Transfer of Custody:</strong> When a priest transfers from the parish, he turns the church seal and records over to the district dean, who entrusts them to the newly assigned parish priest.</span>
             </li>
           </ul>
-          <p className="font-['Inter'] text-[12px] text-white/50 mt-4">
+          <p className="font-om-body text-[12px] text-white/50 mt-4">
             Source: <a href="https://www.oca.org" target="_blank" rel="noopener noreferrer" className="underline decoration-white/30 hover:text-white">Guidelines for Clergy</a>, Orthodox Church in America (2023).
           </p>
         </div>
@@ -143,22 +143,22 @@ const Login2 = () => {
               {/* Right: Login Card */}
               <div className="flex justify-center">
                 <div className="w-full max-w-[450px] bg-white dark:bg-gray-800 border border-[#f3f4f6] dark:border-gray-700 rounded-2xl p-8 shadow-xl text-[#2d1b4e] dark:text-white">
-                  <h2 className="font-['Georgia'] text-2xl text-[#2d1b4e] dark:text-white text-center mb-1">
+                  <h2 className="font-om-display text-2xl text-[#2d1b4e] dark:text-white text-center mb-1">
                     {t('auth.card_heading')}
                   </h2>
-                  <p className="font-['Inter'] text-[14px] text-[#4a5565] dark:text-gray-400 text-center mb-4">
+                  <p className="font-om-body text-[14px] text-[#4a5565] dark:text-gray-400 text-center mb-4">
                     {t('auth.card_subheading')}
                   </p>
 
                   <AuthLogin
                     subtitle={
                       <div className="flex items-center justify-center gap-2 mt-6">
-                        <span className="font-['Inter'] text-[15px] text-[#4a5565] dark:text-gray-400">
+                        <span className="font-om-body text-[15px] text-[#4a5565] dark:text-gray-400">
                           {t('auth.new_to_om')}
                         </span>
                         <Link
                           to="/get-started"
-                          className="font-['Inter'] text-[15px] font-medium text-[#2d1b4e] dark:text-[#d4af37] no-underline hover:underline"
+                          className="font-om-body text-[15px] font-medium text-[#2d1b4e] dark:text-[#d4af37] no-underline hover:underline"
                         >
                           {t('auth.create_account')}
                         </Link>

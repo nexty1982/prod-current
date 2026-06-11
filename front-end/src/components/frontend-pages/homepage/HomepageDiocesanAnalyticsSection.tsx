@@ -75,10 +75,10 @@ function HomepageDiocesanMapPanel() {
       {/* Map visualization */}
       <div className="lg:col-span-3 rounded-xl border border-[rgba(26,54,93,0.12)] dark:border-white/10 bg-white dark:bg-[#161b22] p-5 shadow-sm flex flex-col justify-between min-h-[420px]">
         <div>
-          <h3 className="font-['Inter'] font-semibold text-[#1a365d] dark:text-white">
+          <h3 className="font-om-body font-semibold text-[#1a365d] dark:text-white">
             Interactive Diocesan Parish Map
           </h3>
-          <p className="font-['Inter'] text-xs text-[#64748b] dark:text-gray-500 mb-4">
+          <p className="font-om-body text-xs text-[#64748b] dark:text-gray-500 mb-4">
             Click parish nodes to inspect localized registry volume and metrics.
           </p>
         </div>
@@ -172,7 +172,7 @@ function HomepageDiocesanMapPanel() {
                     x={p.x}
                     y={p.y - (isActive ? 18 : 12)}
                     textAnchor="middle"
-                    className="font-['Inter'] text-[9px] font-semibold fill-[#1a365d] dark:fill-[#e8d5a3] opacity-0 group-hover/node:opacity-100 transition-opacity"
+                    className="font-om-body text-[9px] font-semibold fill-[#1a365d] dark:fill-[#e8d5a3] opacity-0 group-hover/node:opacity-100 transition-opacity"
                   >
                     {p.city}
                   </text>
@@ -183,7 +183,7 @@ function HomepageDiocesanMapPanel() {
 
           {/* Map Overlay tooltip */}
           {activeParish && (
-            <div className="absolute bottom-3 right-3 p-3 bg-white/95 dark:bg-[#161b22]/95 border border-[rgba(26,54,93,0.15)] dark:border-white/10 rounded-lg shadow-lg max-w-[200px] backdrop-blur font-['Inter']">
+            <div className="absolute bottom-3 right-3 p-3 bg-white/95 dark:bg-[#161b22]/95 border border-[rgba(26,54,93,0.15)] dark:border-white/10 rounded-lg shadow-lg max-w-[200px] backdrop-blur font-om-body">
               <h4 className="text-xs font-semibold text-[#1a365d] dark:text-white truncate">
                 {activeParish.name}
               </h4>
@@ -200,10 +200,10 @@ function HomepageDiocesanMapPanel() {
       <div className="lg:col-span-2 flex flex-col gap-3 justify-between">
         <div className="rounded-xl border border-[rgba(26,54,93,0.12)] dark:border-white/10 bg-white dark:bg-[#161b22] p-5 shadow-sm h-full flex flex-col justify-between">
           <div>
-            <h3 className="font-['Inter'] font-semibold text-[#1a365d] dark:text-white mb-2">
+            <h3 className="font-om-body font-semibold text-[#1a365d] dark:text-white mb-2">
               Geographic Registry Insights
             </h3>
-            <p className="font-['Inter'] text-sm text-[#4a5565] dark:text-gray-400 leading-relaxed mb-4">
+            <p className="font-om-body text-sm text-[#4a5565] dark:text-gray-400 leading-relaxed mb-4">
               Our central ledger monitors registration density across 5 diocesan deaneries. Real-time geocoding enables local parish benchmarking.
             </p>
           </div>
@@ -244,10 +244,10 @@ function HomepageDiocesanStatsPanel() {
       {/* Sacramental Mix & Trends */}
       <div className="lg:col-span-3 rounded-xl border border-[rgba(26,54,93,0.12)] dark:border-white/10 bg-white dark:bg-[#161b22] p-5 shadow-sm flex flex-col justify-between min-h-[420px]">
         <div>
-          <h3 className="font-['Inter'] font-semibold text-[#1a365d] dark:text-white">
+          <h3 className="font-om-body font-semibold text-[#1a365d] dark:text-white">
             Sacramental Registrations Mix & Growth
           </h3>
-          <p className="font-['Inter'] text-xs text-[#64748b] dark:text-gray-500 mb-4">
+          <p className="font-om-body text-xs text-[#64748b] dark:text-gray-500 mb-4">
             Demographic trends across the diocese. Baptisms indicate replenishment; Funerals reflect mortality.
           </p>
         </div>
@@ -343,7 +343,7 @@ function HomepageDiocesanStatsPanel() {
                 Replenishing
               </span>
             </div>
-            <div className="text-3xl font-['Georgia'] text-[#1a365d] dark:text-[#e8d5a3] my-1 font-bold">
+            <div className="text-3xl font-om-display text-[#1a365d] dark:text-[#e8d5a3] my-1 font-bold">
               1.42x
             </div>
             <p className="text-xs text-slate-500 leading-snug">
@@ -361,7 +361,7 @@ function HomepageDiocesanStatsPanel() {
             <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 block mb-1">
               Data Completion Health
             </span>
-            <div className="text-3xl font-['Georgia'] text-[#1a365d] dark:text-[#e8d5a3] my-1 font-bold">
+            <div className="text-3xl font-om-display text-[#1a365d] dark:text-[#e8d5a3] my-1 font-bold">
               84.3%
             </div>
             <p className="text-xs text-slate-500 leading-snug">
@@ -401,28 +401,28 @@ export default function HomepageDiocesanAnalyticsSection() {
           <div className="max-w-2xl">
             <div className="inline-flex items-center gap-2 bg-[#1a365d]/10 dark:bg-[#c9a14a]/15 px-4 py-2 rounded-full mb-4">
               <TrendingUp className="text-[#c9a14a]" size={16} aria-hidden />
-              <EditableText contentKey="diocesan.badge" as="span" className="font-['Inter'] text-[13px] font-medium text-[#1a365d] dark:text-[#e8d5a3] tracking-wide uppercase">
+              <EditableText contentKey="diocesan.badge" as="span" className="font-om-body text-[13px] font-medium text-[#1a365d] dark:text-[#e8d5a3] tracking-wide uppercase">
                 {t('home.diocesan_badge')}
               </EditableText>
             </div>
-            <RichEditableText contentKey="diocesan.title" as="h2" className="font-['Georgia'] text-3xl md:text-4xl text-[#1a365d] dark:text-white mb-3 leading-tight">
+            <RichEditableText contentKey="diocesan.title" as="h2" className="font-om-display text-3xl md:text-4xl text-[#1a365d] dark:text-white mb-3 leading-tight">
               {t('home.diocesan_title')}
             </RichEditableText>
-            <RichEditableText contentKey="diocesan.subtitle" as="p" className="font-['Inter'] text-[16px] text-[#4a5565] dark:text-gray-400 leading-relaxed">
+            <RichEditableText contentKey="diocesan.subtitle" as="p" className="font-om-body text-[16px] text-[#4a5565] dark:text-gray-400 leading-relaxed">
               {t('home.diocesan_subtitle')}
             </RichEditableText>
           </div>
           <div className="flex flex-wrap gap-3">
             <Link
               to="/dashboards/analytics"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#1a365d] hover:bg-[#2c5282] text-white font-['Inter'] text-sm font-medium transition-colors"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#1a365d] hover:bg-[#2c5282] text-white font-om-body text-sm font-medium transition-colors"
             >
               {t('home.diocesan_cta_dashboard')}
               <ArrowRight size={16} />
             </Link>
             <Link
               to={PUBLIC_ROUTES.SAMPLES_EXPLORER}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg border border-[#c9a14a] text-[#1a365d] dark:text-[#e8d5a3] hover:bg-[#c9a14a]/10 font-['Inter'] text-sm font-medium transition-colors"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg border border-[#c9a14a] text-[#1a365d] dark:text-[#e8d5a3] hover:bg-[#c9a14a]/10 font-om-body text-sm font-medium transition-colors"
             >
               {t('home.diocesan_cta_explore')}
             </Link>
@@ -471,25 +471,25 @@ export default function HomepageDiocesanAnalyticsSection() {
                         key={stat.labelKey}
                         className="rounded-xl border border-[rgba(26,54,93,0.12)] dark:border-white/10 bg-white dark:bg-[#161b22] p-4 shadow-sm"
                       >
-                        <p className="font-['Inter'] text-[11px] uppercase tracking-wide text-[#64748b] dark:text-gray-500 mb-1">
+                        <p className="font-om-body text-[11px] uppercase tracking-wide text-[#64748b] dark:text-gray-500 mb-1">
                           {t(stat.labelKey)}
                         </p>
-                        <p className="font-['Georgia'] text-2xl text-[#1a365d] dark:text-[#e8d5a3] tabular-nums">{stat.value}</p>
+                        <p className="font-om-display text-2xl text-[#1a365d] dark:text-[#e8d5a3] tabular-nums">{stat.value}</p>
                       </div>
                     ))}
                   </div>
 
                   <div className="rounded-xl border border-[rgba(26,54,93,0.12)] dark:border-white/10 bg-white dark:bg-[#161b22] p-5 shadow-sm">
-                    <h3 className="font-['Inter'] font-medium text-[#1a365d] dark:text-white mb-1">
+                    <h3 className="font-om-body font-medium text-[#1a365d] dark:text-white mb-1">
                       {t('home.diocesan_chart_title')}
                     </h3>
-                    <p className="font-['Inter'] text-xs text-[#64748b] dark:text-gray-500 mb-4">{t('home.diocesan_chart_note')}</p>
+                    <p className="font-om-body text-xs text-[#64748b] dark:text-gray-500 mb-4">{t('home.diocesan_chart_note')}</p>
                     <ul className="space-y-3" aria-label="Sample parish record volumes">
                       {DIOCESAN_SAMPLE_STATS.topParishes.map((parish) => (
                         <li key={parish.name}>
                           <div className="flex justify-between gap-2 mb-1">
-                            <span className="font-['Inter'] text-sm text-[#334155] dark:text-gray-300 truncate">{parish.name}</span>
-                            <span className="font-['Inter'] text-xs text-[#64748b] dark:text-gray-500 tabular-nums flex-shrink-0">
+                            <span className="font-om-body text-sm text-[#334155] dark:text-gray-300 truncate">{parish.name}</span>
+                            <span className="font-om-body text-xs text-[#64748b] dark:text-gray-500 tabular-nums flex-shrink-0">
                               {parish.total.toLocaleString()}
                             </span>
                           </div>
@@ -499,7 +499,7 @@ export default function HomepageDiocesanAnalyticsSection() {
                               style={{ width: `${Math.round((parish.total / maxBar) * 100)}%` }}
                             />
                           </div>
-                          <span className="font-['Inter'] text-[11px] text-[#94a3b8] dark:text-gray-600">{parish.city}</span>
+                          <span className="font-om-body text-[11px] text-[#94a3b8] dark:text-gray-600">{parish.city}</span>
                         </li>
                       ))}
                     </ul>
@@ -521,10 +521,10 @@ export default function HomepageDiocesanAnalyticsSection() {
                             <Icon className="text-[#1a365d] dark:text-[#c9a14a]" size={20} />
                           </div>
                           <div className="min-w-0">
-                            <EditableText contentKey={`diocesan.link.${link.to}.title`} as="h3" className="font-['Inter'] font-medium text-[15px] text-[#1a365d] dark:text-white mb-1 group-hover:text-[#2c5282] dark:group-hover:text-[#e8d5a3]">
+                            <EditableText contentKey={`diocesan.link.${link.to}.title`} as="h3" className="font-om-body font-medium text-[15px] text-[#1a365d] dark:text-white mb-1 group-hover:text-[#2c5282] dark:group-hover:text-[#e8d5a3]">
                               {t(link.titleKey)}
                             </EditableText>
-                            <RichEditableText contentKey={`diocesan.link.${link.to}.desc`} as="p" className="font-['Inter'] text-[13px] text-[#64748b] dark:text-gray-500 leading-snug">
+                            <RichEditableText contentKey={`diocesan.link.${link.to}.desc`} as="p" className="font-om-body text-[13px] text-[#64748b] dark:text-gray-500 leading-snug">
                               {t(link.descKey)}
                             </RichEditableText>
                           </div>

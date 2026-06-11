@@ -173,7 +173,7 @@ const TourInteractiveDemo = () => {
                 aria-controls={`tour-panel-${s.id}`}
                 tabIndex={isActive ? 0 : -1}
                 onClick={() => handleUserNav(() => goTo(i))}
-                className={`flex items-center gap-2 px-4 py-2 rounded-full text-[13px] font-['Inter'] font-medium transition-all duration-300 ${
+                className={`flex items-center gap-2 px-4 py-2 rounded-full text-[13px] font-om-body font-medium transition-all duration-300 ${
                   isActive
                     ? 'bg-[#2d1b4e] dark:bg-[#d4af37] text-white dark:text-[#2d1b4e] shadow-md'
                     : 'bg-[#f3f4f6] dark:bg-gray-800 text-[#6a7282] dark:text-gray-400 hover:bg-[#e5e7eb] dark:hover:bg-gray-700'
@@ -216,20 +216,20 @@ const TourInteractiveDemo = () => {
                   <div className="w-10 h-10 rounded-xl bg-[#2d1b4e] dark:bg-[#d4af37] flex items-center justify-center">
                     <StepIcon size={20} className="text-[#d4af37] dark:text-[#2d1b4e]" />
                   </div>
-                  <span className="font-['Inter'] text-[12px] font-semibold tracking-wider uppercase text-[#6a7282] dark:text-gray-500">
+                  <span className="font-om-body text-[12px] font-semibold tracking-wider uppercase text-[#6a7282] dark:text-gray-500">
                     {tx(translations,step.subtitleKey, step.subtitleFallback)}
                   </span>
                 </div>
-                <EditableText contentKey={step.titleKey} as="h3" className="font-['Georgia'] text-2xl md:text-3xl text-[#2d1b4e] dark:text-white mb-4 leading-tight">
+                <EditableText contentKey={step.titleKey} as="h3" className="font-om-display text-2xl md:text-3xl text-[#2d1b4e] dark:text-white mb-4 leading-tight">
                   {tx(translations,step.titleKey, step.titleFallback)}
                 </EditableText>
-                <EditableText contentKey={step.descKey} as="p" className="font-['Inter'] text-[15px] md:text-[16px] text-[#4a5565] dark:text-gray-400 leading-relaxed" multiline>
+                <EditableText contentKey={step.descKey} as="p" className="font-om-body text-[15px] md:text-[16px] text-[#4a5565] dark:text-gray-400 leading-relaxed" multiline>
                   {tx(translations,step.descKey, step.descFallback)}
                 </EditableText>
 
                 {/* Step counter */}
                 <div className="mt-8 flex items-center gap-3">
-                  <span className="font-['Inter'] text-[13px] font-medium text-[#2d1b4e] dark:text-gray-300">
+                  <span className="font-om-body text-[13px] font-medium text-[#2d1b4e] dark:text-gray-300">
                     {activeStep + 1} / {STEPS.length}
                   </span>
                   {/* Progress dots */}
@@ -261,7 +261,7 @@ const TourInteractiveDemo = () => {
           <div className="flex items-center justify-between px-6 md:px-10 py-4 bg-white dark:bg-gray-800 border-t border-[rgba(45,27,78,0.06)] dark:border-gray-700">
             <button
               onClick={() => handleUserNav(prev)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] font-['Inter'] font-medium text-[#4a5565] dark:text-gray-400 hover:bg-[#f3f4f6] dark:hover:bg-gray-700 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] font-om-body font-medium text-[#4a5565] dark:text-gray-400 hover:bg-[#f3f4f6] dark:hover:bg-gray-700 transition-colors"
               aria-label="Previous step"
             >
               <ChevronLeft size={16} />
@@ -270,7 +270,7 @@ const TourInteractiveDemo = () => {
 
             <button
               onClick={() => setAutoplay(p => !p)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-['Inter'] font-medium text-[#6a7282] dark:text-gray-500 hover:bg-[#f3f4f6] dark:hover:bg-gray-700 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-om-body font-medium text-[#6a7282] dark:text-gray-500 hover:bg-[#f3f4f6] dark:hover:bg-gray-700 transition-colors"
               aria-label={autoplay ? 'Pause autoplay' : 'Start autoplay'}
             >
               {autoplay ? <Pause size={14} /> : <Play size={14} />}
@@ -279,7 +279,7 @@ const TourInteractiveDemo = () => {
 
             <button
               onClick={() => handleUserNav(next)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] font-['Inter'] font-medium text-[#4a5565] dark:text-gray-400 hover:bg-[#f3f4f6] dark:hover:bg-gray-700 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] font-om-body font-medium text-[#4a5565] dark:text-gray-400 hover:bg-[#f3f4f6] dark:hover:bg-gray-700 transition-colors"
               aria-label="Next step"
             >
               <span className="hidden sm:inline">Next</span>

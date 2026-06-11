@@ -18,11 +18,11 @@ const SiteFooter = () => {
               aria-label="Orthodox Metrics LLC"
             >
               <span
-                className="font-['Georgia'] text-[1.35rem] leading-tight tracking-[0.02em] text-white block"
+                className="font-om-display text-[1.35rem] leading-tight tracking-[0.02em] text-white block"
                 style={{ fontWeight: 400 }}
               >
                 Orthodox Metrics
-                <span className="text-[#d4af37] font-['Inter'] text-[0.7rem] uppercase tracking-[0.22em] ml-1.5 align-middle">
+                <span className="text-[#d4af37] font-om-body text-[0.7rem] uppercase tracking-[0.22em] ml-1.5 align-middle">
                   LLC
                 </span>
               </span>
@@ -31,13 +31,13 @@ const SiteFooter = () => {
 
           {/* Product */}
           <div>
-            <h3 className="font-['Inter'] font-medium text-[16px] mb-4">{t('footer.heading_product')}</h3>
+            <h3 className="font-om-body font-medium text-[16px] mb-4">{t('footer.heading_product')}</h3>
             <ul className="space-y-3 list-none p-0 m-0">
               {FOOTER_LINKS.product.map((link) => (
                 <li key={link.to}>
                   <Link
                     to={link.to}
-                    className="font-['Inter'] text-[14px] text-[rgba(255,255,255,0.7)] hover:text-white transition-colors no-underline"
+                    className="font-om-body text-[14px] text-[rgba(255,255,255,0.7)] hover:text-white transition-colors no-underline"
                   >
                     {t(link.tKey)}
                   </Link>
@@ -48,13 +48,13 @@ const SiteFooter = () => {
 
           {/* Company */}
           <div>
-            <h3 className="font-['Inter'] font-medium text-[16px] mb-4">{t('footer.heading_company')}</h3>
+            <h3 className="font-om-body font-medium text-[16px] mb-4">{t('footer.heading_company')}</h3>
             <ul className="space-y-3 list-none p-0 m-0">
               {FOOTER_LINKS.company.map((link) => (
                 <li key={link.to}>
                   <Link
                     to={link.to}
-                    className="font-['Inter'] text-[14px] text-[rgba(255,255,255,0.7)] hover:text-white transition-colors no-underline"
+                    className="font-om-body text-[14px] text-[rgba(255,255,255,0.7)] hover:text-white transition-colors no-underline"
                   >
                     {t(link.tKey)}
                   </Link>
@@ -65,13 +65,13 @@ const SiteFooter = () => {
 
           {/* Legal */}
           <div>
-            <h3 className="font-['Inter'] font-medium text-[16px] mb-4">{t('footer.heading_legal')}</h3>
+            <h3 className="font-om-body font-medium text-[16px] mb-4">{t('footer.heading_legal')}</h3>
             <ul className="space-y-3 list-none p-0 m-0">
               {FOOTER_LINKS.legal.map((link) => (
                 <li key={link.to}>
                   <Link
                     to={link.to}
-                    className="font-['Inter'] text-[14px] text-[rgba(255,255,255,0.7)] hover:text-white transition-colors no-underline"
+                    className="font-om-body text-[14px] text-[rgba(255,255,255,0.7)] hover:text-white transition-colors no-underline"
                   >
                     {t(link.tKey)}
                   </Link>
@@ -82,13 +82,13 @@ const SiteFooter = () => {
 
           {/* Support */}
           <div>
-            <h3 className="font-['Inter'] font-medium text-[16px] mb-4">{t('footer.heading_support')}</h3>
+            <h3 className="font-om-body font-medium text-[16px] mb-4">{t('footer.heading_support')}</h3>
             <ul className="space-y-3 list-none p-0 m-0">
               {FOOTER_LINKS.support.map((link) => (
                 <li key={link.to}>
                   <Link
                     to={link.to}
-                    className="font-['Inter'] text-[14px] text-[rgba(255,255,255,0.7)] hover:text-white transition-colors no-underline"
+                    className="font-om-body text-[14px] text-[rgba(255,255,255,0.7)] hover:text-white transition-colors no-underline"
                   >
                     {t(link.tKey)}
                   </Link>
@@ -97,13 +97,13 @@ const SiteFooter = () => {
               <li>
                 <a
                   href="mailto:support@orthodoxmetrics.com"
-                  className="font-['Inter'] text-[14px] text-[rgba(255,255,255,0.7)] hover:text-white transition-colors no-underline"
+                  className="font-om-body text-[14px] text-[rgba(255,255,255,0.7)] hover:text-white transition-colors no-underline"
                 >
                   support@orthodoxmetrics.com
                 </a>
               </li>
               <li>
-                <span className="font-['Inter'] text-[14px] text-[rgba(255,255,255,0.7)]">
+                <span className="font-om-body text-[14px] text-[rgba(255,255,255,0.7)]">
                   {t('footer.hours')}
                 </span>
               </li>
@@ -112,7 +112,7 @@ const SiteFooter = () => {
         </div>
 
         <div className="border-t border-[rgba(255,255,255,0.1)] mt-6 pt-4">
-          <p className="font-['Inter'] text-[14px] text-[rgba(255,255,255,0.5)] text-center">
+          <p className="font-om-body text-[14px] text-[rgba(255,255,255,0.5)] text-center">
             {copyrightText}
           </p>
         </div>

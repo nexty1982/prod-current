@@ -14,6 +14,11 @@
   display: flex;
   flex-direction: column;
   background-color: #fff;
+  font-family: 'Crimson Pro', Georgia, 'Times New Roman', serif;
+}
+
+.om-page-container :where(h1, h2, h3, h4, h5, h6) {
+  font-family: Cinzel, Georgia, 'Times New Roman', serif;
 }
 .dark .om-page-container {
   background-color: #111827;
@@ -76,9 +81,10 @@
 }
 
 .om-hero-badge-text {
-  font-family: 'Inter', sans-serif;
+  font-family: Cinzel, Georgia, serif;
   font-size: 14px;
   color: #d4af37;
+  letter-spacing: 0.08em;
 }
 
 /* ========================================
@@ -222,7 +228,7 @@
    ======================================== */
 
 .om-heading-primary {
-  font-family: 'Georgia', serif;
+  font-family: Cinzel, Georgia, serif;
   font-size: 2.25rem;
   line-height: 1.25;
   color: #2d1b4e;
@@ -237,7 +243,7 @@
 }
 
 .om-heading-secondary {
-  font-family: 'Georgia', serif;
+  font-family: Cinzel, Georgia, serif;
   font-size: 1.875rem;
   color: #2d1b4e;
 }
@@ -251,7 +257,7 @@
 }
 
 .om-heading-tertiary {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Crimson Pro', Georgia, serif;
   font-weight: 500;
   font-size: 1.5rem;
   color: #2d1b4e;
@@ -261,7 +267,7 @@
 }
 
 .om-text-primary {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Crimson Pro', Georgia, serif;
   color: #2d1b4e;
 }
 .dark .om-text-primary {
@@ -269,7 +275,7 @@
 }
 
 .om-text-secondary {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Crimson Pro', Georgia, serif;
   color: #4a5565;
 }
 .dark .om-text-secondary {
@@ -277,7 +283,7 @@
 }
 
 .om-text-tertiary {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Crimson Pro', Georgia, serif;
   color: #6b7280;
 }
 .dark .om-text-tertiary {
@@ -285,7 +291,7 @@
 }
 
 .om-text-body {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Crimson Pro', Georgia, serif;
   font-size: 1.125rem;
   color: #4a5565;
   line-height: 1.625;
@@ -310,7 +316,7 @@
   background-color: #2d1b4e;
   color: #fff;
   border-radius: 0.5rem;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Crimson Pro', Georgia, serif;
   font-weight: 500;
   font-size: 16px;
   transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
@@ -342,7 +348,7 @@
   border-color: rgba(255, 255, 255, 0.2);
   color: #fff;
   border-radius: 0.5rem;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Crimson Pro', Georgia, serif;
   font-weight: 500;
   font-size: 16px;
   transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
@@ -363,7 +369,7 @@
   background-color: #d4af37;
   color: #2d1b4e;
   border-radius: 0.5rem;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Crimson Pro', Georgia, serif;
   font-weight: 500;
   font-size: 16px;
   transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
@@ -387,7 +393,7 @@
   border-color: #2d1b4e;
   color: #2d1b4e;
   border-radius: 0.5rem;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Crimson Pro', Georgia, serif;
   font-weight: 500;
   transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
 }
@@ -461,7 +467,7 @@
   background-color: #fff;
   color: #2d1b4e;
   border-radius: 0.5rem;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Crimson Pro', Georgia, serif;
   font-size: 15px;
 }
 .om-input:focus {
@@ -490,7 +496,7 @@
   background-color: #fff;
   color: #2d1b4e;
   border-radius: 0.5rem;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Crimson Pro', Georgia, serif;
   font-size: 15px;
   resize: none;
 }
@@ -520,7 +526,7 @@
   background-color: #fff;
   color: #2d1b4e;
   border-radius: 0.5rem;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Crimson Pro', Georgia, serif;
   font-size: 15px;
 }
 .om-select:focus {
@@ -612,13 +618,13 @@
 
 .om-stat-number {
   color: #d4af37;
-  font-family: 'Georgia', serif;
+  font-family: Cinzel, Georgia, serif;
   font-size: 3rem;
 }
 
 .om-stat-number-alt {
   color: #2d1b4e;
-  font-family: 'Georgia', serif;
+  font-family: Cinzel, Georgia, serif;
   font-size: 3rem;
 }
 .dark .om-stat-number-alt {
@@ -626,7 +632,7 @@
 }
 
 .om-stat-label {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Crimson Pro', Georgia, serif;
   font-size: 16px;
   color: #4a5565;
 }
@@ -648,7 +654,7 @@
   align-items: center;
   justify-content: center;
   color: #d4af37;
-  font-family: 'Georgia', serif;
+  font-family: Cinzel, Georgia, serif;
   font-size: 1.25rem;
 }
 .dark .om-number-badge-primary {
@@ -666,7 +672,7 @@
   align-items: center;
   justify-content: center;
   color: #2d1b4e;
-  font-family: 'Georgia', serif;
+  font-family: Cinzel, Georgia, serif;
   font-size: 1.25rem;
 }
 
@@ -748,7 +754,7 @@
 
 .om-table-cell-header {
   padding: 1.5rem;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Crimson Pro', Georgia, serif;
   font-weight: 500;
   font-size: 16px;
   color: #2d1b4e;
@@ -759,7 +765,7 @@
 
 .om-table-cell {
   padding: 1.5rem;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Crimson Pro', Georgia, serif;
   font-size: 15px;
   color: #4a5565;
 }
@@ -788,7 +794,7 @@
 
 /* Admin page title */
 .om-page-title {
-  font-family: 'Georgia', serif;
+  font-family: Cinzel, Georgia, serif;
   font-size: 1.5rem;
   line-height: 1.3;
   color: #2d1b4e;
@@ -800,7 +806,7 @@
 
 /* Admin page subtitle */
 .om-page-subtitle {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Crimson Pro', Georgia, serif;
   font-size: 0.875rem;
   color: #6b7280;
   margin-top: 0.25rem;
@@ -811,7 +817,7 @@
 
 /* Admin breadcrumb link */
 .om-breadcrumb-link {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Crimson Pro', Georgia, serif;
   font-size: 0.8125rem;
   color: #6b7280;
   text-decoration: none;
@@ -829,7 +835,7 @@
 
 /* Admin breadcrumb active */
 .om-breadcrumb-active {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Crimson Pro', Georgia, serif;
   font-size: 0.8125rem;
   color: #2d1b4e;
   font-weight: 500;
@@ -878,7 +884,7 @@
 
 /* Admin quick link */
 .om-quick-link {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Crimson Pro', Georgia, serif;
   font-size: 0.8125rem;
   color: #2d1b4e;
   text-decoration: none;
@@ -899,7 +905,7 @@
 
 /* Admin section heading */
 .om-admin-heading {
-  font-family: 'Georgia', serif;
+  font-family: Cinzel, Georgia, serif;
   font-size: 1.75rem;
   line-height: 1.3;
   color: #2d1b4e;
@@ -910,7 +916,7 @@
 
 /* Admin section description */
 .om-admin-description {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Crimson Pro', Georgia, serif;
   font-size: 0.9375rem;
   color: #6b7280;
   line-height: 1.5;
@@ -921,7 +927,7 @@
 
 /* Sidebar section header */
 .om-sidebar-group {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Crimson Pro', Georgia, serif;
   font-weight: 600;
   font-size: 0.6875rem;
   letter-spacing: 0.08em;

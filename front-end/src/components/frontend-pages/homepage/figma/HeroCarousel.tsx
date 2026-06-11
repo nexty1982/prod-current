@@ -1,7 +1,8 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useContext } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { PUBLIC_ROUTES } from "@/config/publicRoutes";
+import { CustomizerContext } from "@/context/CustomizerContext";
 import { ProductEcosystem } from "./ProductEcosystem";
 
 export interface HeroCarouselProps {
@@ -109,8 +110,9 @@ const FLOW_STEPS = [
 ];
 
 export function HeroCarousel({ embedded = false }: HeroCarouselProps) {
+  const { activeMode } = useContext(CustomizerContext);
+  const isDark = activeMode === "dark";
   const [activeSlide, setActiveSlide] = useState(0);
-  const [isDark, setIsDark] = useState(true);
   const [isPaused, setIsPaused] = useState(false);
 
   const advance = useCallback(() => setActiveSlide(s => (s + 1) % SLIDE_FOCUS.length), []);
@@ -173,26 +175,8 @@ export function HeroCarousel({ embedded = false }: HeroCarouselProps) {
         </svg>
       </div>
 
-      {/* Theme toggle — embedded mode skips duplicate brand/nav (HpHeader is above) */}
-      {embedded ? (
-        <div style={{ display: "flex", justifyContent: "flex-end", padding: "12px 24px 0", zIndex: 10, position: "relative" }}>
-          <button
-            type="button"
-            onClick={() => setIsDark(d => !d)}
-            style={{
-              background: isDark ? "rgba(212,175,55,0.1)" : "rgba(45,27,105,0.08)",
-              border: `1px solid rgba(212,175,55,0.3)`,
-              borderRadius: "100px",
-              color: isDark ? G : PD,
-              padding: "6px 14px",
-              cursor: "pointer",
-              fontFamily: "Cinzel, serif", fontSize: "9px", letterSpacing: "1.2px",
-            }}
-          >
-            {isDark ? "☀ LIGHT" : "◑ DARK"}
-          </button>
-        </div>
-      ) : (
+      {/* Standalone chrome (non-embedded demos only; production uses HpHeader theme toggle) */}
+      {!embedded && (
         <div style={{
           display: "flex", alignItems: "center", justifyContent: "space-between",
           padding: "16px 48px",
@@ -214,11 +198,6 @@ export function HeroCarousel({ embedded = false }: HeroCarouselProps) {
             ))}
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-            <button type="button" onClick={() => setIsDark(d => !d)} style={{
-              background: isDark ? "rgba(212,175,55,0.1)" : "rgba(45,27,105,0.08)",
-              border: `1px solid rgba(212,175,55,0.3)`, borderRadius: "100px", color: isDark ? G : PD,
-              padding: "6px 14px", cursor: "pointer", fontFamily: "Cinzel, serif", fontSize: "9px", letterSpacing: "1.2px",
-            }}>{isDark ? "☀ LIGHT" : "◑ DARK"}</button>
             <Link to={PUBLIC_ROUTES.ENROLL} style={{
               background: `linear-gradient(135deg, ${G}, ${GS})`, borderRadius: "5px", padding: "7px 16px",
               fontFamily: "Cinzel, serif", fontSize: "9px", letterSpacing: "1.5px", color: PK, fontWeight: 700, textDecoration: "none",

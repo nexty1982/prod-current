@@ -27,12 +27,12 @@ const Register = () => {
                   <span className="om-hero-badge-text">{t('auth.hero_badge')}</span>
                 </div>
 
-                <h1 className="font-['Georgia'] text-3xl sm:text-4xl md:text-5xl text-white leading-tight mb-4">
+                <h1 className="font-om-display text-3xl sm:text-4xl md:text-5xl text-white leading-tight mb-4">
                   Talk to{' '}
                   <span className="text-[#d4af37]">Orthodox Metrics</span>
                 </h1>
 
-                <p className="font-['Inter'] text-base md:text-lg text-[rgba(255,255,255,0.7)] leading-relaxed mb-8 max-w-lg">
+                <p className="font-om-body text-base md:text-lg text-[rgba(255,255,255,0.7)] leading-relaxed mb-8 max-w-lg">
                   Tell us about your parish. We'll schedule a 30-minute demo and walk you through onboarding — no account creation needed yet.
                 </p>
 
@@ -46,8 +46,8 @@ const Register = () => {
                           <Icon className="text-[#d4af37]" size={20} />
                         </div>
                         <div>
-                          <h3 className="font-['Inter'] font-medium text-[15px] text-white">{t(`auth.feat${idx}_title`)}</h3>
-                          <p className="font-['Inter'] text-[13px] text-[rgba(255,255,255,0.5)]">{t(`auth.feat${idx}_desc`)}</p>
+                          <h3 className="font-om-body font-medium text-[15px] text-white">{t(`auth.feat${idx}_title`)}</h3>
+                          <p className="font-om-body text-[13px] text-[rgba(255,255,255,0.5)]">{t(`auth.feat${idx}_desc`)}</p>
                         </div>
                       </div>
                     );
@@ -61,18 +61,18 @@ const Register = () => {
                   <AuthRegister
                     title="Get Started"
                     subtext={
-                      <p className="font-['Inter'] text-[14px] text-[#4a5565] dark:text-gray-400 mb-3">
+                      <p className="font-om-body text-[14px] text-[#4a5565] dark:text-gray-400 mb-3">
                         Send us a quick inquiry — we'll reach out within one business day to schedule your demo.
                       </p>
                     }
                     subtitle={
                       <div className="flex items-center justify-center gap-2 mt-4">
-                        <span className="font-['Inter'] text-[15px] text-[#4a5565] dark:text-gray-400">
+                        <span className="font-om-body text-[15px] text-[#4a5565] dark:text-gray-400">
                           Already have an Account?
                         </span>
                         <Link
                           to="/auth/login"
-                          className="font-['Inter'] text-[15px] font-medium text-[#2d1b4e] dark:text-[#d4af37] no-underline hover:underline"
+                          className="font-om-body text-[15px] font-medium text-[#2d1b4e] dark:text-[#d4af37] no-underline hover:underline"
                         >
                           Sign In
                         </Link>

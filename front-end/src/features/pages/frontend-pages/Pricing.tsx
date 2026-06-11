@@ -103,7 +103,7 @@ const PagePricing = () => {
       {HIDE_PRICES && (
         <section className="py-6 om-section-base border-b border-[rgba(45,27,78,0.08)] dark:border-white/10">
           <div className="max-w-4xl mx-auto px-6 text-center">
-            <p className="font-['Inter'] text-[15px] text-[#4a5565] dark:text-gray-400 leading-relaxed">
+            <p className="font-om-body text-[15px] text-[#4a5565] dark:text-gray-400 leading-relaxed">
               {t('pricing.quote_only_notice')}
             </p>
           </div>
@@ -128,26 +128,26 @@ const PagePricing = () => {
             {/* Medium Parish — Featured */}
             <div className="bg-gradient-to-br from-[#2d1b4e] to-[#4a2f74] dark:from-[#d4af37] dark:to-[#c29d2f] text-white dark:text-[#2d1b4e] rounded-2xl p-8 relative shadow-xl transform md:scale-105">
               <div className="absolute top-0 right-8 -translate-y-1/2">
-                <span className="bg-[#d4af37] dark:bg-[#2d1b4e] text-[#2d1b4e] dark:text-[#d4af37] px-4 py-1.5 rounded-full font-['Inter'] text-[13px] font-medium whitespace-nowrap">
+                <span className="bg-[#d4af37] dark:bg-[#2d1b4e] text-[#2d1b4e] dark:text-[#d4af37] px-4 py-1.5 rounded-full font-om-body text-[13px] font-medium whitespace-nowrap">
                   {t('pricing.badge_popular')}
                 </span>
               </div>
               <div className="mb-6">
-                <h3 className="font-['Inter'] font-medium text-2xl mb-2">{t('pricing.plan_medium_name')}</h3>
-                <p className="font-['Inter'] text-[15px] text-[rgba(255,255,255,0.8)] dark:text-[rgba(45,27,78,0.8)]">
+                <h3 className="font-om-body font-medium text-2xl mb-2">{t('pricing.plan_medium_name')}</h3>
+                <p className="font-om-body text-[15px] text-[rgba(255,255,255,0.8)] dark:text-[rgba(45,27,78,0.8)]">
                   {t('pricing.plan_medium_desc')}
                 </p>
               </div>
               <div className="mb-6">
                 {HIDE_PRICES ? (
-                  <p className="font-['Georgia'] text-3xl">{t('pricing.btn_request_quote')}</p>
+                  <p className="font-om-display text-3xl">{t('pricing.btn_request_quote')}</p>
                 ) : (
                   <>
                     <div className="flex items-baseline gap-2">
-                      <span className="font-['Georgia'] text-5xl">{t('pricing.plan_medium_price')}</span>
-                      <span className="font-['Inter'] text-[16px] text-[rgba(255,255,255,0.8)] dark:text-[rgba(45,27,78,0.8)]">{t('pricing.per_month')}</span>
+                      <span className="font-om-display text-5xl">{t('pricing.plan_medium_price')}</span>
+                      <span className="font-om-body text-[16px] text-[rgba(255,255,255,0.8)] dark:text-[rgba(45,27,78,0.8)]">{t('pricing.per_month')}</span>
                     </div>
-                    <p className="font-['Inter'] text-[14px] text-[rgba(255,255,255,0.8)] dark:text-[rgba(45,27,78,0.8)] mt-2">
+                    <p className="font-om-body text-[14px] text-[rgba(255,255,255,0.8)] dark:text-[rgba(45,27,78,0.8)] mt-2">
                       {t('pricing.plan_medium_billing')}
                     </p>
                   </>
@@ -157,13 +157,13 @@ const PagePricing = () => {
                 {MEDIUM_FEAT_KEYS.map((i) => (
                   <li key={i} className="flex items-start gap-3">
                     <Check className="text-[#d4af37] dark:text-[#2d1b4e] flex-shrink-0 mt-0.5" size={20} />
-                    <span className="font-['Inter'] text-[15px]">{t(`pricing.plan_medium_feat${i}`)}</span>
+                    <span className="font-om-body text-[15px]">{t(`pricing.plan_medium_feat${i}`)}</span>
                   </li>
                 ))}
               </ul>
               <Link
                 to={PUBLIC_ROUTES.CONTACT}
-                className="block w-full text-center px-6 py-3 bg-[#d4af37] dark:bg-[#2d1b4e] text-[#2d1b4e] dark:text-white rounded-lg font-['Inter'] font-medium hover:bg-[#c29d2f] dark:hover:bg-[#1f1236] transition-colors"
+                className="block w-full text-center px-6 py-3 bg-[#d4af37] dark:bg-[#2d1b4e] text-[#2d1b4e] dark:text-white rounded-lg font-om-body font-medium hover:bg-[#c29d2f] dark:hover:bg-[#1f1236] transition-colors"
               >
                 {HIDE_PRICES ? t('pricing.btn_request_quote') : t('pricing.btn_get_started')}
               </Link>
@@ -183,10 +183,10 @@ const PagePricing = () => {
 
           {/* Enterprise */}
           <div className="bg-[#f9fafb] dark:bg-gray-800 border border-[#e5e7eb] dark:border-gray-700 rounded-2xl p-12 text-center">
-            <EditableText contentKey="pricing.enterprise.title" as="h3" className="font-['Georgia'] text-3xl text-[#2d1b4e] dark:text-white mb-4">
+            <EditableText contentKey="pricing.enterprise.title" as="h3" className="font-om-display text-3xl text-[#2d1b4e] dark:text-white mb-4">
               {t('pricing.enterprise_title')}
             </EditableText>
-            <EditableText contentKey="pricing.enterprise.desc" as="p" className="font-['Inter'] text-lg text-[#4a5565] dark:text-gray-400 mb-6 max-w-2xl mx-auto" multiline>
+            <EditableText contentKey="pricing.enterprise.desc" as="p" className="font-om-body text-lg text-[#4a5565] dark:text-gray-400 mb-6 max-w-2xl mx-auto" multiline>
               {t('pricing.enterprise_desc')}
             </EditableText>
             <Link to={PUBLIC_ROUTES.CONTACT} className="om-btn-primary">{t('pricing.btn_contact_sales')}</Link>
@@ -198,8 +198,8 @@ const PagePricing = () => {
       <section className="py-20 om-section-elevated">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
-            <EditableText contentKey="pricing.compare.title" as="h2" className="font-['Georgia'] text-4xl text-[#2d1b4e] dark:text-white mb-4">{t('pricing.compare_title')}</EditableText>
-            <EditableText contentKey="pricing.compare.subtitle" as="p" className="font-['Inter'] text-lg text-[#4a5565] dark:text-gray-400">{t('pricing.compare_subtitle')}</EditableText>
+            <EditableText contentKey="pricing.compare.title" as="h2" className="font-om-display text-4xl text-[#2d1b4e] dark:text-white mb-4">{t('pricing.compare_title')}</EditableText>
+            <EditableText contentKey="pricing.compare.subtitle" as="p" className="font-om-body text-lg text-[#4a5565] dark:text-gray-400">{t('pricing.compare_subtitle')}</EditableText>
           </div>
           <div className="om-table-container">
             <div className="overflow-x-auto">
@@ -215,7 +215,7 @@ const PagePricing = () => {
                 <tbody>
                   {COMPARISON_ROWS.map((row) => (
                     <tr key={row.idx} className="om-table-row">
-                      <td className="p-6 font-['Inter'] text-[15px] text-[#2d1b4e] dark:text-white">{t(`pricing.compare_row${row.idx}_feature`)}</td>
+                      <td className="p-6 font-om-body text-[15px] text-[#2d1b4e] dark:text-white">{t(`pricing.compare_row${row.idx}_feature`)}</td>
                       <td className="om-table-cell text-center">{row.small}</td>
                       <td className="om-table-cell text-center">{row.medium}</td>
                       <td className="om-table-cell text-center">{row.large}</td>
@@ -232,7 +232,7 @@ const PagePricing = () => {
       <section className="py-20 om-section-base">
         <div className="max-w-3xl mx-auto px-6">
           <div className="text-center mb-16">
-            <EditableText contentKey="pricing.faq.title" as="h2" className="font-['Georgia'] text-4xl text-[#2d1b4e] dark:text-white mb-4">{t('pricing.faq_title')}</EditableText>
+            <EditableText contentKey="pricing.faq.title" as="h2" className="font-om-display text-4xl text-[#2d1b4e] dark:text-white mb-4">{t('pricing.faq_title')}</EditableText>
           </div>
           <div className="space-y-6">
             {[1, 2, 3, 4, 5].map((idx) => (
@@ -240,8 +240,8 @@ const PagePricing = () => {
                 <div className="flex items-start gap-3">
                   <HelpCircle className="text-[#d4af37] flex-shrink-0 mt-1" size={20} />
                   <div>
-                    <h3 className="font-['Inter'] font-medium text-lg text-[#2d1b4e] dark:text-white mb-2">{t(`pricing.faq${idx}_q`)}</h3>
-                    <p className="font-['Inter'] text-[15px] text-[#4a5565] dark:text-gray-400 leading-relaxed">{t(`pricing.faq${idx}_a`)}</p>
+                    <h3 className="font-om-body font-medium text-lg text-[#2d1b4e] dark:text-white mb-2">{t(`pricing.faq${idx}_q`)}</h3>
+                    <p className="font-om-body text-[15px] text-[#4a5565] dark:text-gray-400 leading-relaxed">{t(`pricing.faq${idx}_a`)}</p>
                   </div>
                 </div>
               </div>
@@ -268,19 +268,19 @@ function PricingCard({ name, description, price, perMonth, billingNote, features
   return (
     <div className="om-card p-8 hover:shadow-lg">
       <div className="mb-6">
-        <h3 className="font-['Inter'] font-medium text-2xl text-[#2d1b4e] dark:text-white mb-2">{name}</h3>
-        <p className="font-['Inter'] text-[15px] text-[#4a5565] dark:text-gray-400">{description}</p>
+        <h3 className="font-om-body font-medium text-2xl text-[#2d1b4e] dark:text-white mb-2">{name}</h3>
+        <p className="font-om-body text-[15px] text-[#4a5565] dark:text-gray-400">{description}</p>
       </div>
       <div className="mb-6">
         {HIDE_PRICES ? (
-          <p className="font-['Georgia'] text-3xl text-[#2d1b4e] dark:text-white">{t('pricing.btn_request_quote')}</p>
+          <p className="font-om-display text-3xl text-[#2d1b4e] dark:text-white">{t('pricing.btn_request_quote')}</p>
         ) : (
           <>
             <div className="flex items-baseline gap-2">
-              <span className="font-['Georgia'] text-5xl text-[#2d1b4e] dark:text-white">{price}</span>
-              <span className="font-['Inter'] text-[16px] text-[#4a5565] dark:text-gray-400">{perMonth}</span>
+              <span className="font-om-display text-5xl text-[#2d1b4e] dark:text-white">{price}</span>
+              <span className="font-om-body text-[16px] text-[#4a5565] dark:text-gray-400">{perMonth}</span>
             </div>
-            <p className="font-['Inter'] text-[14px] text-[#4a5565] dark:text-gray-400 mt-2">{billingNote}</p>
+            <p className="font-om-body text-[14px] text-[#4a5565] dark:text-gray-400 mt-2">{billingNote}</p>
           </>
         )}
       </div>
@@ -288,7 +288,7 @@ function PricingCard({ name, description, price, perMonth, billingNote, features
         {features.map((f, i) => (
           <li key={i} className="flex items-start gap-3">
             <Check className="text-[#d4af37] flex-shrink-0 mt-0.5" size={20} />
-            <span className="font-['Inter'] text-[15px] text-[#4a5565] dark:text-gray-400">{f}</span>
+            <span className="font-om-body text-[15px] text-[#4a5565] dark:text-gray-400">{f}</span>
           </li>
         ))}
       </ul>

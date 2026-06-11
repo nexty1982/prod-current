@@ -20,19 +20,19 @@ const CTASection = ({ title, subtitle, children, editKeyPrefix }: CTASectionProp
   <section className="py-20 om-hero-gradient">
     <div className="max-w-4xl mx-auto px-6 text-center">
       {editKeyPrefix ? (
-        <EditableText contentKey={`${editKeyPrefix}.title`} as="h2" className="font-['Georgia'] text-4xl md:text-5xl mb-6">
+        <EditableText contentKey={`${editKeyPrefix}.title`} as="h2" className="font-om-display text-4xl md:text-5xl mb-6">
           {title}
         </EditableText>
       ) : (
-        <h2 className="font-['Georgia'] text-4xl md:text-5xl mb-6">{title}</h2>
+        <h2 className="font-om-display text-4xl md:text-5xl mb-6">{title}</h2>
       )}
       {subtitle && (
         editKeyPrefix ? (
-          <EditableText contentKey={`${editKeyPrefix}.subtitle`} as="p" className="font-['Inter'] text-xl text-[rgba(255,255,255,0.9)] mb-8">
+          <EditableText contentKey={`${editKeyPrefix}.subtitle`} as="p" className="font-om-body text-xl text-[rgba(255,255,255,0.9)] mb-8">
             {subtitle}
           </EditableText>
         ) : (
-          <p className="font-['Inter'] text-xl text-[rgba(255,255,255,0.9)] mb-8">{subtitle}</p>
+          <p className="font-om-body text-xl text-[rgba(255,255,255,0.9)] mb-8">{subtitle}</p>
         )
       )}
       <div className="flex flex-col sm:flex-row gap-4 justify-center">{children}</div>
@@ -295,11 +295,11 @@ export function ParishRecordsAssessment() {
         <div className="text-center mb-8 md:mb-10">
           <h2
             id={`${formId}-heading`}
-            className="font-['Georgia'] text-3xl sm:text-4xl md:text-5xl text-white mb-4 leading-tight"
+            className="font-om-display text-3xl sm:text-4xl md:text-5xl text-white mb-4 leading-tight"
           >
             {PARISH_ASSESSMENT_CONFIG.intro.title}
           </h2>
-          <p className="font-['Inter'] text-base sm:text-lg text-[rgba(255,255,255,0.88)] max-w-2xl mx-auto leading-relaxed">
+          <p className="font-om-body text-base sm:text-lg text-[rgba(255,255,255,0.88)] max-w-2xl mx-auto leading-relaxed">
             {PARISH_ASSESSMENT_CONFIG.intro.subtitle}
           </p>
         </div>
@@ -311,7 +311,7 @@ export function ParishRecordsAssessment() {
         >
           {!isComplete && (
             <div className="mb-8">
-              <div className="flex justify-between items-center mb-2 font-['Inter'] text-sm text-[#6a7282] dark:text-gray-400">
+              <div className="flex justify-between items-center mb-2 font-om-body text-sm text-[#6a7282] dark:text-gray-400">
                 <span>
                   Question {step + 1} of {QUESTIONS.length}
                 </span>
@@ -338,10 +338,10 @@ export function ParishRecordsAssessment() {
             {isComplete && recommendation ? (
               <div className="space-y-6">
                 <div className="text-center sm:text-left">
-                  <h3 className="font-['Georgia'] text-2xl sm:text-3xl text-[#2d1b4e] dark:text-white mb-3">
+                  <h3 className="font-om-display text-2xl sm:text-3xl text-[#2d1b4e] dark:text-white mb-3">
                     {PARISH_ASSESSMENT_CONFIG.completion.title}
                   </h3>
-                  <p className="font-['Inter'] text-[15px] sm:text-base text-[#4a5565] dark:text-gray-400 leading-relaxed">
+                  <p className="font-om-body text-[15px] sm:text-base text-[#4a5565] dark:text-gray-400 leading-relaxed">
                     {PARISH_ASSESSMENT_CONFIG.completion.subtitle}
                   </p>
                 </div>
@@ -349,12 +349,12 @@ export function ParishRecordsAssessment() {
                   className="rounded-xl border border-[rgba(45,27,78,0.12)] dark:border-white/10 bg-[#f9fafb] dark:bg-[#0d1117] p-5 sm:p-6"
                   id={`${formId}-recommendation`}
                 >
-                  <p className="font-['Inter'] font-medium text-[#2d1b4e] dark:text-[#d4af37] mb-4">
+                  <p className="font-om-body font-medium text-[#2d1b4e] dark:text-[#d4af37] mb-4">
                     {recommendation.summaryLine}
                   </p>
                   <ul className="space-y-3 list-none p-0 m-0">
                     {recommendation.bullets.map((line) => (
-                      <li key={line} className="flex gap-3 font-['Inter'] text-[14px] sm:text-[15px] text-[#4a5565] dark:text-gray-400 leading-relaxed">
+                      <li key={line} className="flex gap-3 font-om-body text-[14px] sm:text-[15px] text-[#4a5565] dark:text-gray-400 leading-relaxed">
                         <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#d4af37]" aria-hidden />
                         {line}
                       </li>
@@ -367,19 +367,19 @@ export function ParishRecordsAssessment() {
                     onClick={() => {
                       document.getElementById(`${formId}-recommendation`)?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
                     }}
-                    className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg bg-[#d4af37] hover:bg-[#c29d2f] text-[#2d1b4e] font-['Inter'] font-medium text-[15px] transition-colors border-0 cursor-pointer"
+                    className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg bg-[#d4af37] hover:bg-[#c29d2f] text-[#2d1b4e] font-om-body font-medium text-[15px] transition-colors border-0 cursor-pointer"
                   >
                     {PARISH_ASSESSMENT_CONFIG.completion.viewStepsLabel}
                     <ArrowRight size={18} />
                   </button>
                   <Link
                     to={assessmentContactHref(answers)}
-                    className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg border-2 border-[#2d1b4e] dark:border-[#d4af37] text-[#2d1b4e] dark:text-[#d4af37] hover:bg-[rgba(45,27,78,0.05)] dark:hover:bg-white/5 font-['Inter'] font-medium text-[15px] no-underline transition-colors"
+                    className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg border-2 border-[#2d1b4e] dark:border-[#d4af37] text-[#2d1b4e] dark:text-[#d4af37] hover:bg-[rgba(45,27,78,0.05)] dark:hover:bg-white/5 font-om-body font-medium text-[15px] no-underline transition-colors"
                   >
                     {PARISH_ASSESSMENT_CONFIG.completion.consultLabel}
                   </Link>
                 </div>
-                <p className="font-['Inter'] text-center sm:text-left text-sm text-[#6a7282] dark:text-gray-500 pt-2">
+                <p className="font-om-body text-center sm:text-left text-sm text-[#6a7282] dark:text-gray-500 pt-2">
                   Ready to begin?{' '}
                   <Link to={PUBLIC_ROUTES.ENROLL} className="text-[#2d1b4e] dark:text-[#d4af37] font-medium no-underline hover:underline">
                     Enroll your parish
@@ -389,7 +389,7 @@ export function ParishRecordsAssessment() {
               </div>
             ) : question ? (
               <fieldset className="border-0 p-0 m-0 min-w-0">
-                <legend className="font-['Georgia'] text-xl sm:text-2xl text-[#2d1b4e] dark:text-white mb-6 block w-full">
+                <legend className="font-om-display text-xl sm:text-2xl text-[#2d1b4e] dark:text-white mb-6 block w-full">
                   {question.question}
                 </legend>
                 <div
@@ -406,7 +406,7 @@ export function ParishRecordsAssessment() {
                         role="radio"
                         aria-checked={selected}
                         onClick={() => setAnswers((a) => ({ ...a, [question.id]: opt.value }))}
-                        className={`w-full text-left rounded-xl border-2 px-5 py-4 font-['Inter'] text-[15px] sm:text-[16px] transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d4af37] focus-visible:ring-offset-2 ${
+                        className={`w-full text-left rounded-xl border-2 px-5 py-4 font-om-body text-[15px] sm:text-[16px] transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d4af37] focus-visible:ring-offset-2 ${
                           selected
                             ? 'border-[#d4af37] bg-[rgba(212,175,55,0.14)] text-[#2d1b4e] dark:text-white shadow-sm ring-1 ring-[#d4af37]/25'
                             : 'border-[rgba(45,27,78,0.12)] dark:border-white/12 bg-white dark:bg-[#161b22] text-[#4a5565] dark:text-gray-300 hover:border-[#2d1b4e]/35 hover:bg-[#f9fafb] dark:hover:bg-[#1e2a3a]'
@@ -427,7 +427,7 @@ export function ParishRecordsAssessment() {
                 type="button"
                 onClick={goBack}
                 disabled={step === 0}
-                className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-lg font-['Inter'] text-sm font-medium text-[#4a5565] dark:text-gray-400 hover:bg-[#f3f4f6] dark:hover:bg-white/5 disabled:opacity-40 disabled:pointer-events-none transition-colors"
+                className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-lg font-om-body text-sm font-medium text-[#4a5565] dark:text-gray-400 hover:bg-[#f3f4f6] dark:hover:bg-white/5 disabled:opacity-40 disabled:pointer-events-none transition-colors"
               >
                 <ChevronLeft size={18} />
                 Back
@@ -436,7 +436,7 @@ export function ParishRecordsAssessment() {
                 type="button"
                 onClick={goNext}
                 disabled={!selectedValue}
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-[#d4af37] hover:bg-[#c29d2f] disabled:opacity-50 disabled:pointer-events-none text-[#2d1b4e] font-['Inter'] font-medium text-[15px] transition-colors"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-[#d4af37] hover:bg-[#c29d2f] disabled:opacity-50 disabled:pointer-events-none text-[#2d1b4e] font-om-body font-medium text-[15px] transition-colors"
               >
                 {step === QUESTIONS.length - 1 ? 'See results' : 'Continue'}
                 <ArrowRight size={18} />

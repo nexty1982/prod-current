@@ -83,7 +83,7 @@ function HomepageProofStrip() {
           {PROOF_STRIP_ITEMS.map(({ tKey, icon: Icon }) => (
             <li key={tKey} className="flex items-start gap-3">
               <Icon className="text-[#d4af37] flex-shrink-0 mt-0.5" size={22} aria-hidden />
-              <span className="font-['Inter'] text-[15px] text-[#4a5565] dark:text-gray-400 leading-snug">
+              <span className="font-om-body text-[15px] text-[#4a5565] dark:text-gray-400 leading-snug">
                 {t(tKey)}
               </span>
             </li>
@@ -211,11 +211,11 @@ function SimpleProcessPanel() {
     <>
       <div className="text-center mb-16">
         <div className="inline-flex items-center gap-2 bg-white dark:bg-gray-700 px-4 py-2 rounded-full mb-4 shadow-sm">
-          <EditableText contentKey="steps.badge" as="span" className="font-['Inter'] text-[14px] text-[#2d1b4e] dark:text-white">
+          <EditableText contentKey="steps.badge" as="span" className="font-om-body text-[14px] text-[#2d1b4e] dark:text-white">
             {t('home.steps_badge')}
           </EditableText>
         </div>
-        <RichEditableText contentKey="steps.title" as="h2" className="font-['Georgia'] text-4xl md:text-5xl text-[#2d1b4e] dark:text-white mb-4">
+        <RichEditableText contentKey="steps.title" as="h2" className="font-om-display text-4xl md:text-5xl text-[#2d1b4e] dark:text-white mb-4">
           {t('home.steps_title')}
         </RichEditableText>
       </div>
@@ -236,11 +236,11 @@ function FeaturesPanel() {
     <>
       <div className="text-center mb-16">
         <div className="inline-flex items-center gap-2 bg-[rgba(45,27,78,0.05)] dark:bg-gray-800 px-4 py-2 rounded-full mb-4">
-          <EditableText contentKey="features.badge" as="span" className="font-['Inter'] text-[14px] text-[#2d1b4e] dark:text-white">
+          <EditableText contentKey="features.badge" as="span" className="font-om-body text-[14px] text-[#2d1b4e] dark:text-white">
             {t('home.features_badge')}
           </EditableText>
         </div>
-        <RichEditableText contentKey="features.title" as="h2" className="font-['Georgia'] text-4xl md:text-5xl text-[#2d1b4e] dark:text-white mb-4">
+        <RichEditableText contentKey="features.title" as="h2" className="font-om-display text-4xl md:text-5xl text-[#2d1b4e] dark:text-white mb-4">
           {t('home.features_title')}
         </RichEditableText>
       </div>
@@ -251,10 +251,10 @@ function FeaturesPanel() {
             <div className="w-14 h-14 bg-[#2d1b4e] dark:bg-[#d4af37] rounded-lg flex items-center justify-center mb-4">
               <f.icon className="text-[#d4af37] dark:text-[#2d1b4e]" size={28} />
             </div>
-            <EditableText contentKey={`features.card${i + 1}.title`} as="h3" className="font-['Inter'] font-medium text-xl text-[#2d1b4e] dark:text-white mb-2">
+            <EditableText contentKey={`features.card${i + 1}.title`} as="h3" className="font-om-body font-medium text-xl text-[#2d1b4e] dark:text-white mb-2">
               {t(`home.features_feat${i + 1}_title`)}
             </EditableText>
-            <RichEditableText contentKey={`features.card${i + 1}.desc`} as="p" className="font-['Inter'] text-[15px] text-[#4a5565] dark:text-gray-400 leading-relaxed">
+            <RichEditableText contentKey={`features.card${i + 1}.desc`} as="p" className="font-om-body text-[15px] text-[#4a5565] dark:text-gray-400 leading-relaxed">
               {t(`home.features_feat${i + 1}_desc`)}
             </RichEditableText>
           </div>
@@ -272,14 +272,14 @@ function StepItem({ number, titleKey, descKey, title, description, variant }: { 
           variant === 'gold'
             ? 'bg-[#d4af37] text-[#2d1b4e]'
             : 'bg-[#2d1b4e] dark:bg-[#d4af37] text-[#d4af37] dark:text-[#2d1b4e]'
-        } rounded-full flex items-center justify-center font-['Georgia'] text-xl`}>
+        } rounded-full flex items-center justify-center font-om-display text-xl`}>
           {number}
         </div>
         <div>
-          <EditableText contentKey={titleKey} as="h3" className="font-['Inter'] font-medium text-xl text-[#2d1b4e] dark:text-white mb-2">
+          <EditableText contentKey={titleKey} as="h3" className="font-om-body font-medium text-xl text-[#2d1b4e] dark:text-white mb-2">
             {title}
           </EditableText>
-          <RichEditableText contentKey={descKey} as="p" className="font-['Inter'] text-[16px] text-[#4a5565] dark:text-gray-400 leading-relaxed">
+          <RichEditableText contentKey={descKey} as="p" className="font-om-body text-[16px] text-[#4a5565] dark:text-gray-400 leading-relaxed">
             {description}
           </RichEditableText>
         </div>

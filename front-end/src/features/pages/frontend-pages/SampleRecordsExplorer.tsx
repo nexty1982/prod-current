@@ -153,7 +153,7 @@ function ToolbarDropdown({
         onClick={() => setOpen((p) => !p)}
         className={`
           h-[38px] w-full flex items-center gap-2 px-3 rounded-lg border text-[13px] font-medium
-          font-['Inter'] transition-all cursor-pointer select-none
+          font-om-body transition-all cursor-pointer select-none
           ${borderClass} ${bgClass}
           ${isDark ? 'text-gray-200' : 'text-gray-700'}
           focus:outline-none focus:ring-2 ${accent ? 'focus:ring-[#d4af37]/40' : isDark ? 'focus:ring-gray-500' : 'focus:ring-[#2d1b4e]/30'}
@@ -185,7 +185,7 @@ function ToolbarDropdown({
                 type="button"
                 onClick={() => { onChange(opt.value); setOpen(false); }}
                 className={`
-                  w-full flex items-center gap-2 px-3 py-2 text-[13px] font-['Inter'] text-left transition-colors cursor-pointer
+                  w-full flex items-center gap-2 px-3 py-2 text-[13px] font-om-body text-left transition-colors cursor-pointer
                   ${isSelected
                     ? isDark
                       ? 'bg-[#2d1b4e]/60 text-[#d4af37] font-medium'
@@ -239,7 +239,7 @@ function UILanguageDropdown({
         onClick={() => setOpen((p) => !p)}
         className={`
           h-[38px] w-full flex items-center gap-2 px-3 rounded-lg border text-[13px] font-medium
-          font-['Inter'] transition-all cursor-pointer select-none
+          font-om-body transition-all cursor-pointer select-none
           border-[#d4af37]/40 hover:border-[#d4af37]/70 bg-[#d4af37]/5
           ${isDark ? 'text-gray-200' : 'text-gray-700'}
           focus:outline-none focus:ring-2 focus:ring-[#d4af37]/40
@@ -270,7 +270,7 @@ function UILanguageDropdown({
                 type="button"
                 onClick={() => { onChange(lang.value); setOpen(false); }}
                 className={`
-                  w-full flex items-center gap-2 px-3 py-2 text-[13px] font-['Inter'] text-left transition-colors cursor-pointer
+                  w-full flex items-center gap-2 px-3 py-2 text-[13px] font-om-body text-left transition-colors cursor-pointer
                   ${isSelected
                     ? isDark
                       ? 'bg-[#2d1b4e]/60 text-[#d4af37] font-medium'
@@ -396,7 +396,7 @@ const SampleRecordsExplorer = () => {
           <div className="flex flex-wrap items-center justify-between gap-3">
             <Link
               to={PUBLIC_ROUTES.SAMPLES}
-              className="inline-flex items-center gap-2 text-[13px] font-['Inter'] font-medium om-text-secondary hover:text-[#2d1b4e] dark:hover:text-[#d4af37] transition-colors"
+              className="inline-flex items-center gap-2 text-[13px] font-om-body font-medium om-text-secondary hover:text-[#2d1b4e] dark:hover:text-[#d4af37] transition-colors"
             >
               <ArrowLeft size={15} /> {t('explorer.back_to_samples')}
             </Link>
@@ -409,7 +409,7 @@ const SampleRecordsExplorer = () => {
                     key={tab.key}
                     onClick={() => setView(tab.key)}
                     className={`
-                      flex items-center gap-1.5 px-3 py-[7px] rounded-md text-[13px] font-['Inter'] font-medium transition-all
+                      flex items-center gap-1.5 px-3 py-[7px] rounded-md text-[13px] font-om-body font-medium transition-all
                       ${view === tab.key
                         ? 'bg-[#2d1b4e] text-white shadow-sm'
                         : isDark
@@ -440,7 +440,7 @@ const SampleRecordsExplorer = () => {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className={`
-                  h-[38px] w-full pl-9 pr-3 rounded-lg border text-[13px] font-['Inter']
+                  h-[38px] w-full pl-9 pr-3 rounded-lg border text-[13px] font-om-body
                   transition-all
                   ${isDark
                     ? 'bg-gray-800 border-gray-600 text-gray-200 placeholder:text-gray-500 hover:border-gray-500 focus:ring-gray-500'
@@ -474,7 +474,7 @@ const SampleRecordsExplorer = () => {
             />
 
             {/* Record count */}
-            <span className={`text-[13px] font-['Inter'] ml-auto whitespace-nowrap ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+            <span className={`text-[13px] font-om-body ml-auto whitespace-nowrap ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
               {filtered.length} {t('explorer.records_label')}
             </span>
           </div>
@@ -487,7 +487,7 @@ const SampleRecordsExplorer = () => {
           {filtered.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-24 gap-3">
               <Search size={40} className={isDark ? 'text-gray-600' : 'text-gray-300'} />
-              <p className={`text-[15px] font-['Inter'] ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>{t('explorer.no_records')}</p>
+              <p className={`text-[15px] font-om-body ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>{t('explorer.no_records')}</p>
             </div>
           ) : (
             <>
@@ -625,7 +625,7 @@ function CardsView({
               </span>
               <span className="text-[11px] om-text-tertiary">{r.languageLabel}</span>
             </div>
-            <h3 className="font-['Inter'] font-semibold text-[15px] om-text-primary mb-2 truncate group-hover:text-[#d4af37] transition-colors">
+            <h3 className="font-om-body font-semibold text-[15px] om-text-primary mb-2 truncate group-hover:text-[#d4af37] transition-colors">
               {r.fullName}
             </h3>
             <div className="space-y-1.5 text-[13px]">
@@ -725,7 +725,7 @@ function TimelineView({
               onClick={() => toggle(decade)}
               className="w-full flex items-center gap-4 py-3 px-4 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
             >
-              <span className="font-['Georgia'] text-xl om-text-primary font-bold min-w-[60px]">
+              <span className="font-om-display text-xl om-text-primary font-bold min-w-[60px]">
                 {decade}
               </span>
               <div className="flex gap-2">
@@ -761,7 +761,7 @@ function TimelineView({
                     />
                     <div className="om-card-compact p-4">
                       <div className="flex items-start justify-between gap-3 mb-1">
-                        <span className="font-['Inter'] font-medium text-[14px] om-text-primary">
+                        <span className="font-om-body font-medium text-[14px] om-text-primary">
                           {r.fullName}
                         </span>
                         <span className={typeBadge(r.recordType)}>
@@ -899,7 +899,7 @@ function StatCard({ label, value, accent }: { label: string; value: number; acce
   return (
     <div className={`om-card p-5 ${borderClass}`}>
       <p className="text-[13px] om-text-tertiary mb-1">{label}</p>
-      <p className="font-['Georgia'] text-3xl om-text-primary">{value.toLocaleString()}</p>
+      <p className="font-om-display text-3xl om-text-primary">{value.toLocaleString()}</p>
     </div>
   );
 }

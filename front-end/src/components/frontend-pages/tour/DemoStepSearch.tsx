@@ -77,7 +77,7 @@ const DemoStepSearch = ({ isActive }: Props) => {
       {/* Search bar */}
       <div className="relative mb-3">
         <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6a7282] dark:text-gray-500" />
-        <div className="w-full pl-9 pr-4 py-2.5 bg-[#f9fafb] dark:bg-gray-800 border-2 border-[#2d1b4e] dark:border-[#d4af37] rounded-lg font-['Inter'] text-[14px] text-[#2d1b4e] dark:text-gray-100 min-h-[40px] flex items-center">
+        <div className="w-full pl-9 pr-4 py-2.5 bg-[#f9fafb] dark:bg-gray-800 border-2 border-[#2d1b4e] dark:border-[#d4af37] rounded-lg font-om-body text-[14px] text-[#2d1b4e] dark:text-gray-100 min-h-[40px] flex items-center">
           {typedText}
           {typedText.length < SEARCH_QUERY.length && isActive && (
             <motion.span
@@ -101,7 +101,7 @@ const DemoStepSearch = ({ isActive }: Props) => {
             <button
               key={chip}
               onClick={() => setActiveFilter(i)}
-              className={`px-2.5 py-1 rounded-full text-[11px] font-['Inter'] font-medium transition-all duration-200 ${
+              className={`px-2.5 py-1 rounded-full text-[11px] font-om-body font-medium transition-all duration-200 ${
                 i === activeFilter
                   ? 'bg-[#2d1b4e] dark:bg-[#d4af37] text-white dark:text-[#2d1b4e]'
                   : 'bg-[#f3f4f6] dark:bg-gray-700 text-[#6a7282] dark:text-gray-400 hover:bg-[#e5e7eb] dark:hover:bg-gray-600'
@@ -110,7 +110,7 @@ const DemoStepSearch = ({ isActive }: Props) => {
               {chip}
             </button>
           ))}
-          <span className="ml-auto flex items-center gap-1 text-[11px] font-['Inter'] text-[#6a7282] dark:text-gray-500">
+          <span className="ml-auto flex items-center gap-1 text-[11px] font-om-body text-[#6a7282] dark:text-gray-500">
             <Globe size={11} /> Multilingual
           </span>
         </motion.div>
@@ -121,7 +121,7 @@ const DemoStepSearch = ({ isActive }: Props) => {
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="font-['Inter'] text-[12px] text-[#6a7282] dark:text-gray-500 mb-2"
+          className="font-om-body text-[12px] text-[#6a7282] dark:text-gray-500 mb-2"
         >
           {filteredResults.length} records found in 0.04s
         </motion.p>
@@ -141,7 +141,7 @@ const DemoStepSearch = ({ isActive }: Props) => {
                 className="p-3 bg-white dark:bg-gray-800 rounded-lg border border-[#f3f4f6] dark:border-gray-700 hover:border-[#d4af37] dark:hover:border-[#d4af37] transition-colors cursor-pointer group"
               >
                 <div className="flex items-start justify-between gap-2 mb-1">
-                  <p className="font-['Inter'] text-[13px] font-medium text-[#2d1b4e] dark:text-gray-100 group-hover:text-[#4a2f74] dark:group-hover:text-[#d4af37] transition-colors">
+                  <p className="font-om-body text-[13px] font-medium text-[#2d1b4e] dark:text-gray-100 group-hover:text-[#4a2f74] dark:group-hover:text-[#d4af37] transition-colors">
                     {result.name}
                   </p>
                   <span className={`inline-flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded-full flex-shrink-0 ${TYPE_BADGE[result.type].bg} ${TYPE_BADGE[result.type].text}`}>
@@ -149,12 +149,12 @@ const DemoStepSearch = ({ isActive }: Props) => {
                     {result.typeLabel}
                   </span>
                 </div>
-                <div className="flex items-center gap-2 text-[11px] font-['Inter'] text-[#6a7282] dark:text-gray-500">
+                <div className="flex items-center gap-2 text-[11px] font-om-body text-[#6a7282] dark:text-gray-500">
                   <span>{result.date}</span>
                   <span className="w-1 h-1 bg-[#d1d5db] dark:bg-gray-600 rounded-full" />
                   <span>{result.parish}</span>
                 </div>
-                <p className="text-[11px] font-['Inter'] text-[#9ca3af] dark:text-gray-500 mt-1">{result.detail}</p>
+                <p className="text-[11px] font-om-body text-[#9ca3af] dark:text-gray-500 mt-1">{result.detail}</p>
               </motion.div>
             )
           ))}

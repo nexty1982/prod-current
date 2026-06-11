@@ -285,7 +285,7 @@ export default function WrittenToDigitalShowcase({
                     animate={{ opacity: [1, 0.3, 1] }}
                     transition={{ repeat: Infinity, duration: 1.2 }}
                   />
-                  <span className="text-purple-100 text-sm font-['Inter']">Extracting records&hellip;</span>
+                  <span className="text-purple-100 text-sm font-om-body">Extracting records&hellip;</span>
                 </div>
               </motion.div>
             </motion.div>
@@ -336,7 +336,7 @@ export default function WrittenToDigitalShowcase({
                   animate={{ scale: [1, 1.4, 1] }}
                   transition={{ repeat: Infinity, duration: 0.8 }}
                 />
-                <span className="text-purple-100 text-sm font-['Inter']">Structuring data&hellip;</span>
+                <span className="text-purple-100 text-sm font-om-body">Structuring data&hellip;</span>
               </div>
             </motion.div>
           )}
@@ -374,7 +374,7 @@ export default function WrittenToDigitalShowcase({
 
       {/* Instruction text (full variant only) */}
       {!isCompact && animated && showCards && (
-        <p className="text-center text-purple-300/40 text-xs mt-4 font-['Inter']">
+        <p className="text-center text-purple-300/40 text-xs mt-4 font-om-body">
           Hover or click a record type to see the transformation &middot; Click again to reset
         </p>
       )}

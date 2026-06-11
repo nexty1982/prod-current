@@ -72,7 +72,7 @@ const DemoStepOrganize = ({ isActive }: Props) => {
             <button
               key={r.type}
               onClick={() => setActiveType(i)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-['Inter'] font-medium border transition-all duration-200 ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-om-body font-medium border transition-all duration-200 ${
                 active
                   ? `${colors.bg} ${colors.text} ${colors.border}`
                   : 'bg-[#f9fafb] dark:bg-gray-800 text-[#6a7282] dark:text-gray-400 border-[#f3f4f6] dark:border-gray-700 hover:border-[#d1d5db] dark:hover:border-gray-600'
@@ -98,7 +98,7 @@ const DemoStepOrganize = ({ isActive }: Props) => {
           {/* Card header */}
           <div className="flex items-center gap-2 mb-4">
             <Database size={18} className="text-[#d4af37]" />
-            <span className="font-['Inter'] text-[13px] font-medium text-[rgba(255,255,255,0.8)]">
+            <span className="font-om-body text-[13px] font-medium text-[rgba(255,255,255,0.8)]">
               Extracted Record
             </span>
             <span className={`ml-auto text-[11px] font-medium px-2 py-0.5 rounded-full ${TYPE_COLORS[record.type].bg} ${TYPE_COLORS[record.type].text}`}>
@@ -119,8 +119,8 @@ const DemoStepOrganize = ({ isActive }: Props) => {
                     transition={{ duration: 0.3, ease: 'easeOut' }}
                     className="bg-white/10 backdrop-blur-sm rounded-lg px-3.5 py-2.5 border border-white/10"
                   >
-                    <p className="font-['Inter'] text-[11px] text-[rgba(255,255,255,0.5)] mb-0.5">{field.label}</p>
-                    <p className="font-['Inter'] text-[14px] text-white">{field.value}</p>
+                    <p className="font-om-body text-[11px] text-[rgba(255,255,255,0.5)] mb-0.5">{field.label}</p>
+                    <p className="font-om-body text-[14px] text-white">{field.value}</p>
                   </motion.div>
                 )
               ))}

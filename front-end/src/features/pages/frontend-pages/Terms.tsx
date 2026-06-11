@@ -30,17 +30,17 @@ const Terms = () => {
 
       <section className="py-20 om-section-base">
         <div className="max-w-3xl mx-auto px-6 om-legal-prose">
-          <p className="font-['Inter'] text-[14px] text-[#6b7280] dark:text-gray-500 mb-2">
+          <p className="font-om-body text-[14px] text-[#6b7280] dark:text-gray-500 mb-2">
             <strong>Effective Date:</strong> {EFFECTIVE_DATE}
           </p>
-          <p className="font-['Inter'] text-[14px] text-[#6b7280] dark:text-gray-500 mb-2">
+          <p className="font-om-body text-[14px] text-[#6b7280] dark:text-gray-500 mb-2">
             <strong>Website:</strong> https://orthodoxmetrics.com
           </p>
-          <p className="font-['Inter'] text-[14px] text-[#6b7280] dark:text-gray-500 mb-8">
+          <p className="font-om-body text-[14px] text-[#6b7280] dark:text-gray-500 mb-8">
             <strong>Company:</strong> {COMPANY}
           </p>
 
-          <p className="font-['Inter'] text-[16px] text-[#4a5565] dark:text-gray-400 leading-relaxed mb-10">
+          <p className="font-om-body text-[16px] text-[#4a5565] dark:text-gray-400 leading-relaxed mb-10">
             These Terms of Service govern your use of Orthodox Metrics, including our website,
             software platform, tools, and related services.
           </p>
@@ -241,8 +241,8 @@ const Terms = () => {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="mb-10">
-      <h2 className="font-['Georgia'] text-2xl text-[#2d1b4e] dark:text-white mb-3">{title}</h2>
-      <div className="font-['Inter'] text-[16px] text-[#4a5565] dark:text-gray-400 leading-relaxed space-y-3 [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:space-y-1 [&_ul>li]:marker:text-[#d4af37]">
+      <h2 className="font-om-display text-2xl text-[#2d1b4e] dark:text-white mb-3">{title}</h2>
+      <div className="font-om-body text-[16px] text-[#4a5565] dark:text-gray-400 leading-relaxed space-y-3 [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:space-y-1 [&_ul>li]:marker:text-[#d4af37]">
         {children}
       </div>
     </section>

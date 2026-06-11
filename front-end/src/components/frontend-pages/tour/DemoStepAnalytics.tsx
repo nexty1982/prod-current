@@ -64,12 +64,12 @@ function KPICard({ kpi, index, isActive }: { kpi: MockKPI; index: number; isActi
       transition={{ duration: 0.35, delay: index * 0.1 }}
       className="p-3 bg-white dark:bg-gray-800 rounded-lg border border-[#f3f4f6] dark:border-gray-700 shadow-sm"
     >
-      <p className="font-['Inter'] text-[11px] text-[#6a7282] dark:text-gray-500 mb-1">{kpi.label}</p>
+      <p className="font-om-body text-[11px] text-[#6a7282] dark:text-gray-500 mb-1">{kpi.label}</p>
       <div className="flex items-end gap-2">
-        <span className="font-['Georgia'] text-xl text-[#2d1b4e] dark:text-white leading-none">
+        <span className="font-om-display text-xl text-[#2d1b4e] dark:text-white leading-none">
           {count.toLocaleString()}
         </span>
-        <span className="flex items-center gap-0.5 text-[11px] font-['Inter'] mb-0.5">
+        <span className="flex items-center gap-0.5 text-[11px] font-om-body mb-0.5">
           {TREND_ICONS[kpi.trend]}
           <span className={kpi.trend === 'up' ? 'text-emerald-500' : kpi.trend === 'down' ? 'text-red-400' : 'text-[#6a7282]'}>
             {kpi.trendValue}
@@ -122,14 +122,14 @@ const DemoStepAnalytics = ({ isActive }: Props) => {
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-1.5">
             <BarChart3 size={14} className="text-[#6a7282] dark:text-gray-500" />
-            <span className="font-['Inter'] text-[12px] font-medium text-[#2d1b4e] dark:text-gray-200">Records by Year</span>
+            <span className="font-om-body text-[12px] font-medium text-[#2d1b4e] dark:text-gray-200">Records by Year</span>
           </div>
           <div className="flex gap-1">
             {METRIC_OPTIONS.map(m => (
               <button
                 key={m.key}
                 onClick={() => toggleMetric(m.key)}
-                className={`flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-['Inter'] font-medium transition-all duration-200 ${
+                className={`flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-om-body font-medium transition-all duration-200 ${
                   activeMetrics.has(m.key)
                     ? 'bg-[rgba(45,27,78,0.08)] dark:bg-[rgba(212,175,55,0.15)] text-[#2d1b4e] dark:text-[#d4af37]'
                     : 'text-[#9ca3af] dark:text-gray-600 hover:text-[#6a7282] dark:hover:text-gray-500'
@@ -159,7 +159,7 @@ const DemoStepAnalytics = ({ isActive }: Props) => {
                   )
                 ))}
               </div>
-              <span className="text-[9px] font-['Inter'] text-[#9ca3af] dark:text-gray-600 mt-1">{point.year.slice(2)}</span>
+              <span className="text-[9px] font-om-body text-[#9ca3af] dark:text-gray-600 mt-1">{point.year.slice(2)}</span>
             </div>
           ))}
         </div>

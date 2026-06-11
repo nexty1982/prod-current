@@ -49,8 +49,8 @@ const Tour = () => {
                   <div className="w-16 h-16 bg-[#2d1b4e] dark:bg-[#d4af37] rounded-xl flex items-center justify-center mx-auto mb-4">
                     {f.icon}
                   </div>
-                  <h3 className="font-['Inter'] font-medium text-lg text-[#2d1b4e] dark:text-white mb-2">{t(`tour.extra${idx}_title`)}</h3>
-                  <p className="font-['Inter'] text-[14px] text-[#4a5565] dark:text-gray-400 leading-relaxed">{t(`tour.extra${idx}_desc`)}</p>
+                  <h3 className="font-om-body font-medium text-lg text-[#2d1b4e] dark:text-white mb-2">{t(`tour.extra${idx}_title`)}</h3>
+                  <p className="font-om-body text-[14px] text-[#4a5565] dark:text-gray-400 leading-relaxed">{t(`tour.extra${idx}_desc`)}</p>
                 </div>
               );
             })}

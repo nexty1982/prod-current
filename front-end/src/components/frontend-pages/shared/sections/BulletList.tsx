@@ -15,11 +15,11 @@ const BulletList = ({ items, contentKeys }: BulletListProps) => (
       <li key={contentKeys?.[i] ?? item} className="flex items-start gap-3">
         <div className="om-bullet mt-2.5" />
         {contentKeys?.[i] ? (
-          <EditableText contentKey={contentKeys[i]} as="span" className="font-['Inter'] text-[16px] text-[#4a5565] dark:text-gray-400">
+          <EditableText contentKey={contentKeys[i]} as="span" className="font-om-body text-[16px] text-[#4a5565] dark:text-gray-400">
             {item}
           </EditableText>
         ) : (
-          <span className="font-['Inter'] text-[16px] text-[#4a5565] dark:text-gray-400">{item}</span>
+          <span className="font-om-body text-[16px] text-[#4a5565] dark:text-gray-400">{item}</span>
         )}
       </li>
     ))}
