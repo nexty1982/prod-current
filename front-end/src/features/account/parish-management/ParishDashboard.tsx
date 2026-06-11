@@ -15,6 +15,7 @@ import BrushOutlinedIcon from '@mui/icons-material/BrushOutlined';
 import { useChurch } from '@/context/ChurchContext';
 import { useLanguage } from '@/context/LanguageContext';
 import apiClient from '@/api/utils/axiosInstance';
+import WorkflowGoalStrip from './WorkflowGoalStrip';
 
 const BASE = '/account/parish-management';
 
@@ -134,6 +135,8 @@ const ParishDashboard: React.FC = () => {
           {t('parish.dashboard_desc').replace('{name}', churchName)}
         </Typography>
       </Box>
+
+      <WorkflowGoalStrip churchId={activeChurchId} />
 
       {/* Stats Grid */}
       <Box

@@ -5,6 +5,7 @@ const express = require('express');
 const router = express.Router();
 const { requireAuth, requireRole } = require('../../middleware/auth');
 const onboarding = require('../../services/onboardingService');
+const workflowGoals = require('../../services/workflowGoalsService');
 const {
   sendEnrollmentConfirmationEmail,
   sendEnrollmentInternalNotificationEmail,
@@ -64,8 +65,17 @@ router.get('/:onboarding_request_id', async (req, res) => {
     const request = await onboarding.getByPublicId(id);
     if (!request) return res.status(404).json({ success: false, message: 'Not found' });
     const events = await onboarding.getEvents(id);
-    const progress = onboarding.getProgressSteps(request, events);
-    res.json({ success: true, request, events, progress });
+    const enrollmentWorkflow = await workflowGoals.resolveEnrollmentByRequestId(id);
+    const workflow = enrollmentWorkflow?.workflow || null;
+    const progress = workflow
+      ? workflowGoals.workflowStepsToLegacyProgress(workflow)
+      : onboarding.getProgressSteps(request, events).map((s) => ({
+        key: s.key,
+        label: s.key.replace(/_/g, ' '),
+        done: s.completed,
+        current: s.current,
+      }));
+    res.json({ success: true, request, events, progress, workflow });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
