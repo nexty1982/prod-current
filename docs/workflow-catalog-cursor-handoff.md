@@ -17,7 +17,7 @@ Read these files first (in order):
 3. /var/www/orthodoxmetrics/prod/docs/workflow-catalog-decisions-implementation-plan.md  (PR sequence)
 
 Context: Phase B execution model is shipped (B-PR1–13). Product decisions were recorded 2026-06-13.
-Next recommended work: **B-PR12** cutover (`EXECUTION_FALLBACK_INFERENCE=false` after soak). **UI-PR1 shipped** — Workflow Attention stat card on Executive Overview.
+Next recommended work: **B-PR15** (OCR goal gating + cache hooks). **B-PR12 shipped** — `EXECUTION_FALLBACK_INFERENCE=false`. **C-PR9 shipped** — auto `sync-production-states` on `om-deploy be/be-sync` (promote-only; manual `--full` in OMAI).
 **B-PR14 shipped** — `server/scripts/workflow-smoke-manville.js` (`npm run workflow:smoke:manville`).
 
 Repos: OM = /var/www/orthodoxmetrics/prod, OMAI = /var/www/omai
@@ -104,7 +104,7 @@ These may **not** be on origin yet — **pull and verify**, or commit/push befor
 EXECUTION_MODEL_ENABLED=true
 EXECUTION_WRITE_THROUGH=true
 EXECUTION_READ_PRIMARY=true
-EXECUTION_FALLBACK_INFERENCE=true    ← still on (B-PR12 NOT done)
+EXECUTION_FALLBACK_INFERENCE=false   ← B-PR12 cutover complete (2026-06-12)
 EXECUTION_ANALYTICS_ENABLED=true
 ```
 
@@ -174,7 +174,7 @@ Next to file: **`records.manual.entry`** (#7).
 | ID | Work | Notes |
 |----|------|-------|
 | ~~**B-PR14**~~ | ~~Manville #46 smoke script + run §K checklist~~ | **Done** — `npm run workflow:smoke:manville` (add `--lock-test` for K4 cycle) |
-| **B-PR12** | Cutover: `EXECUTION_FALLBACK_INFERENCE=false` | After soak; compare execution vs resolver goals |
+| ~~**B-PR12**~~ | ~~Cutover: `EXECUTION_FALLBACK_INFERENCE=false`~~ | **Done** — Manville §K K10 green |
 | **B-PR15** | OCR goal gating (feature-flag / upload-attempt only) + cache event hook + cron | G1–G3 |
 | **B-PR16** | Auto `setup_complete` when ops checklist passes | H3 |
 | **B-PR17** | Suppress enrollment goals for CRM-only parishes | H5 |
@@ -265,6 +265,10 @@ EXECUTION_MODEL_ENABLED=true node scripts/workflow-execution-reconcile.js
 # §K smoke (Manville #46) — B-PR14
 npm run workflow:smoke:manville
 npm run workflow:smoke:manville -- --lock-test
+
+# Catalog sync (C-PR9 — also runs automatically on om-deploy be/be-sync)
+npm run workflow:sync:production-states
+npm run workflow:sync:production-states -- --full   # allow downgrades (manual/OMAI)
 ```
 
 **OMAI UI:** Control Panel → Workflows → **Executions** tab  

@@ -143,9 +143,9 @@ async function fetchWorkflowList() {
   return fetchEnrichedWorkflowList();
 }
 
-async function fetchWorkflowDetail(workflowKey) {
-  const pool = getAppPool();
-  const [wfRows] = await pool.query(
+async function fetchWorkflowDetail(workflowKey, pool = null) {
+  const db = pool || getAppPool();
+  const [wfRows] = await db.query(
     `SELECT w.*, sl.level_name AS system_level_name, sl.hierarchy_path AS group_hierarchy_path,
             sl.parent_level_key AS group_parent_key,
             fam.level_name AS app_family_name, fam.level_key AS app_family_key_resolved,
@@ -188,7 +188,7 @@ async function fetchWorkflowDetail(workflowKey) {
     };
   }
 
-  const [steps] = await pool.query(
+  const [steps] = await db.query(
     `SELECT s.*, p.pipeline_key, p.pipeline_name, p.runtime_state_source AS pipeline_runtime_source,
             p.step_definitions AS pipeline_step_definitions
      FROM app_workflow_steps s
@@ -201,7 +201,7 @@ async function fetchWorkflowDetail(workflowKey) {
   const stepIds = steps.map((s) => s.id);
   let components = [];
   if (stepIds.length) {
-    const [compRows] = await pool.query(
+    const [compRows] = await db.query(
       `SELECT * FROM app_workflow_step_components
        WHERE workflow_step_id IN (?)
        ORDER BY workflow_step_id, component_sequence`,

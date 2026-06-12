@@ -9,7 +9,7 @@ const FILING_CHECKLIST = [
   '4. Add STEP_ACTION_ROUTES for parish/admin deep links',
   '5. Extend getRuntimeStatsForCatalog() + deriveWorkflowKpi() for executive KPIs',
   '6. Optional: UI hook (Parish goal strip, CCC panel, or catalog-only)',
-  '7. Run sync-production-states from OMAI Workflow Catalog after deploy',
+  '7. sync-production-states runs automatically on om-deploy be/be-sync (manual button retained in OMAI)',
 ];
 
 const FILED_WORKFLOW_KEYS = [

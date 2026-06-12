@@ -225,7 +225,7 @@
 - [x] Execution goals for church 46 match resolver fallback during soak (`source=execution` when rows exist) — **K7**
 - [x] Workshop validation gates runnable (synthetic request); full approve loop = Phase C — **K8**
 - [x] OMStudio authority manifest API (catalog + filed keys + docs) — **K9** (full refs tab UI = Phase C)
-- [ ] `EXECUTION_FALLBACK_INFERENCE=false` smoke after B-PR12 cutover — **K10** (automated; skipped while fallback on)
+- [x] `EXECUTION_FALLBACK_INFERENCE=false` smoke after B-PR12 cutover — **K10** (automated; passed 2026-06-12)
 
 ---
 

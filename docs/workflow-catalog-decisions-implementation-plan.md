@@ -44,7 +44,7 @@ Nothing else blocks Phase B cutover or Phase C kickoff.
 
 Phase B code is **shipped** (B-PR1–13). Decisions change **cutover behavior and follow-on work**, not core schema.
 
-### 3.1 B-PR12 cutover (immediate)
+### 3.1 B-PR12 cutover — **complete (2026-06-12)**
 
 | Action | Decision driver |
 |--------|-----------------|
@@ -128,7 +128,7 @@ flowchart LR
 | **C-PR6** | Version matrix UI — OMStudio refs tab (C4) | OMAI |
 | **C-PR7** | Catalog detail drawer read-only version mirror (C4) | OMAI |
 | **C-PR8** | OMAI approve/reject → read-only; link to OMStudio (D4 transition) | OMAI |
-| **C-PR9** | Auto `sync-production-states` post catalog deploy (A2, B3) | OM deploy hook |
+| ~~**C-PR9**~~ | ~~Auto `sync-production-states` post catalog deploy~~ | **Shipped** — `om-deploy.sh` + `workflowCatalogSyncService` (promote-only) |
 
 ---
 
