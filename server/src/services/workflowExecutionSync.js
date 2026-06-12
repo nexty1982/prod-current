@@ -115,6 +115,14 @@ async function syncCertificateGoal(pool, churchId, opts = {}) {
   }, opts);
 }
 
+async function syncManualEntry(pool, churchId, opts = {}) {
+  return syncFromReconcile(pool, 'records.manual.entry', {
+    church_id: churchId,
+    subject_type: 'church',
+    subject_id: churchSubjectId(churchId),
+  }, opts);
+}
+
 /** Sync all church-scoped workflows after parish hub / church row changes. */
 async function syncChurchScopedWorkflows(pool, churchId, opts = {}) {
   if (!execution.isWriteThroughEnabled()) return;
@@ -123,6 +131,7 @@ async function syncChurchScopedWorkflows(pool, churchId, opts = {}) {
     syncOcrSetup(pool, churchId, opts),
     syncIdentityAdmin(pool, churchId, opts),
     syncCertificateGoal(pool, churchId, opts),
+    syncManualEntry(pool, churchId, opts),
   ]);
 }
 
@@ -134,5 +143,6 @@ module.exports = {
   syncOcrJob,
   syncIdentityAdmin,
   syncCertificateGoal,
+  syncManualEntry,
   syncChurchScopedWorkflows,
 };

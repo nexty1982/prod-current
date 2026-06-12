@@ -17,6 +17,7 @@ const FILED_WORKFLOW_KEYS = [
   'church.ops.setup',
   'ocr.batch.review',
   'ocr.setup.wizard',
+  'records.manual.entry',
   'records.certificate.generate',
   'identity.user.admin',
 ];

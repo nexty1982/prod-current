@@ -27,7 +27,8 @@
     "test:e2e:debug": "npx playwright test --debug",
     "sync-tasks": "npx ts-node scripts/sync-tasks.ts",
     "workflow:smoke:manville": "node scripts/workflow-smoke-manville.js",
-    "workflow:sync:production-states": "node scripts/sync-workflow-production-states.js"
+    "workflow:sync:production-states": "node scripts/sync-workflow-production-states.js",
+    "workflow:runtime-cache:refresh": "node scripts/workflow-runtime-cache-refresh.js"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.78.0",

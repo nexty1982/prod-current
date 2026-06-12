@@ -85,6 +85,13 @@ const STEP_ACTION_ROUTES = {
     finalize_setup: { route: '/account/parish-management', label: 'Complete setup', audience: 'parish' },
     audit_complete: { route: '/account/parish-management', label: 'Parish dashboard', audience: 'parish' },
   },
+  'records.manual.entry': {
+    select_record_type: { route: '/portal/records', label: 'Choose record type', audience: 'parish' },
+    open_entry_form: { route: '/portal/records/baptism/new', label: 'Add baptism record', audience: 'parish' },
+    validate_fields: { route: '/portal/records/baptism/new', label: 'Complete entry', audience: 'parish' },
+    save_record: { route: '/portal/records', label: 'View records', audience: 'parish' },
+    audit_complete: { route: '/portal/records', label: 'Records hub', audience: 'parish' },
+  },
   'records.certificate.generate': {
     select_record: { route: '/portal/certificates/generate', label: 'Generate certificate', audience: 'parish' },
     choose_template: { route: '/portal/certificates/generate', label: 'Choose template', audience: 'parish' },
@@ -201,7 +208,26 @@ function buildWorkflowContext(workflow, currentStepKey, audience = 'all') {
   };
 }
 
+/** CRM-only parishes: no enrollment_request row — suppress enrollment goals (H5 / B-PR17). */
+async function isCrmOnlyParish(pool, churchId) {
+  const [chRows] = await pool.query(
+    'SELECT crm_lead_id, client_status FROM churches WHERE id = ? LIMIT 1',
+    [churchId]
+  );
+  if (!chRows.length) return false;
+  const ch = chRows[0];
+  const [reqRows] = await pool.query(
+    'SELECT onboarding_request_id FROM onboarding_requests WHERE church_id = ? LIMIT 1',
+    [churchId]
+  );
+  if (reqRows.length) return false;
+  if (ch.crm_lead_id) return true;
+  return ['pre_onboarded', 'directory'].includes(ch.client_status);
+}
+
 async function resolveEnrollmentForChurch(pool, churchId) {
+  if (await isCrmOnlyParish(pool, churchId)) return null;
+
   const [rows] = await pool.query(
     `SELECT * FROM onboarding_requests
      WHERE church_id = ?
@@ -242,23 +268,41 @@ function workflowStepsToLegacyProgress(workflowContext) {
   }));
 }
 
+/** G1 — OCR setup goals only when global OCR is on and parish started setup or attempted upload. */
+async function churchEligibleForOcrSetupGoal(pool, churchId, { setupRows = [], percentComplete = 0 } = {}) {
+  if (!isWorkflowFeatureEnabled('ocr.setup.wizard')) return false;
+
+  const [jobRows] = await pool.query(
+    'SELECT id FROM ocr_jobs WHERE church_id = ? LIMIT 1',
+    [churchId]
+  );
+  if (jobRows.length > 0) return true;
+  return setupRows.length > 0 || percentComplete > 0;
+}
+
 async function resolveOcrSetupGoal(pool, churchId) {
   const churchDb = await getChurchDbPool(churchId);
   if (!churchDb) return null;
 
   let percentComplete = 0;
   let isComplete = false;
+  let setupRows = [];
   try {
     const [rows] = await churchDb.query(
       'SELECT percent_complete, is_complete FROM ocr_setup_state WHERE church_id = ?',
       [churchId]
     );
+    setupRows = rows;
     if (rows.length) {
       percentComplete = Number(rows[0].percent_complete || 0);
       isComplete = Boolean(rows[0].is_complete);
     }
   } catch {
     // ocr_setup_state may not exist yet — treat as not started
+  }
+
+  if (!await churchEligibleForOcrSetupGoal(pool, churchId, { setupRows, percentComplete })) {
+    return null;
   }
 
   const stepKey = resolveOcrSetupStep(percentComplete, isComplete);
@@ -277,6 +321,29 @@ async function resolveOcrSetupGoal(pool, churchId) {
     };
   }
   return { percent_complete: percentComplete, workflow: ctx };
+}
+
+const MANUAL_ENTRY_GOAL_RECORD_CAP = 10;
+
+async function resolveManualEntryGoal(pool, churchId) {
+  const [chRows] = await pool.query(
+    'SELECT setup_complete, is_active, client_status FROM churches WHERE id = ? LIMIT 1',
+    [churchId]
+  );
+  if (!chRows.length || !chRows[0].is_active) return null;
+  if (['directory', 'pre_onboarded', 'decommissioned'].includes(chRows[0].client_status)) return null;
+
+  const churchDb = await getChurchDbPool(churchId);
+  if (!churchDb) return null;
+  const recordCount = await countChurchRecords(churchDb);
+  if (recordCount >= MANUAL_ENTRY_GOAL_RECORD_CAP) return null;
+
+  const workflow = await catalog.fetchWorkflowDetail('records.manual.entry');
+  if (!workflow) return null;
+
+  const stepKey = recordCount === 0 ? 'select_record_type' : 'open_entry_form';
+  const ctx = buildWorkflowContext(workflow, stepKey, 'parish');
+  return { record_count: recordCount, workflow: ctx };
 }
 
 async function resolveCertificateGoal(pool, churchId) {
@@ -433,6 +500,7 @@ const RUNTIME_RESOLVERS = [
     workflow_key: 'church.enrollment',
     priority: 10,
     resolve: async (pool, churchId) => {
+      if (await isCrmOnlyParish(pool, churchId)) return null;
       const item = await resolveEnrollmentForChurch(pool, churchId);
       if (!item || item.request_status === 'active') return null;
       return {
@@ -519,6 +587,26 @@ const RUNTIME_RESOLVERS = [
     },
   },
   {
+    workflow_key: 'records.manual.entry',
+    priority: 28,
+    resolve: async (pool, churchId) => {
+      const item = await resolveManualEntryGoal(pool, churchId);
+      if (!item) return null;
+      return {
+        workflow_key: 'records.manual.entry',
+        priority: 28,
+        title: item.workflow.workflow_name,
+        summary: item.record_count === 0
+          ? 'Add your first sacramental records'
+          : 'Continue manual record entry',
+        action_route: item.workflow.current_step?.action_route,
+        action_label: item.workflow.current_step?.action_label || 'Add record',
+        workflow: item.workflow,
+        meta: { record_count: item.record_count },
+      };
+    },
+  },
+  {
     workflow_key: 'records.certificate.generate',
     priority: 30,
     resolve: async (pool, churchId) => {
@@ -544,6 +632,7 @@ const EXECUTION_GOAL_PRIORITY = {
   'ocr.setup.wizard': 15,
   'ocr.batch.review': 20,
   'identity.user.admin': 25,
+  'records.manual.entry': 28,
   'records.certificate.generate': 30,
 };
 
@@ -601,8 +690,10 @@ async function getGoalsFromExecutions(pool, churchId, { audience = 'parish' } = 
   const execution = require('./workflowExecutionService');
   const rows = await execution.listOpenExecutionsForChurch(pool, churchId);
   const goals = [];
+  const crmOnly = await isCrmOnlyParish(pool, churchId);
 
   for (const row of rows) {
+    if (crmOnly && row.workflow_key === 'church.enrollment') continue;
     if (!isWorkflowFeatureEnabled(row.workflow_key)) continue;
     const workflow = await catalog.fetchWorkflowDetail(row.workflow_key);
     if (!workflow || !row.current_step_key) continue;
@@ -732,6 +823,21 @@ async function getRuntimeStatsForCatalog(pool, workflowKey) {
       by_onboarding_phase: byPhase,
     };
   }
+  if (workflowKey === 'records.manual.entry') {
+    const [activeChurches] = await pool.query(
+      `SELECT COUNT(*) AS cnt FROM churches
+       WHERE is_active = 1 AND client_status NOT IN ('directory', 'pre_onboarded', 'decommissioned')`
+    );
+    const [openExec] = await pool.query(
+      `SELECT COUNT(*) AS cnt FROM church_workflow_executions
+       WHERE workflow_key = 'records.manual.entry' AND status IN ('pending', 'active', 'blocked')`
+    );
+    return {
+      source: 'church_workflow_executions',
+      active_parishes: Number(activeChurches[0]?.cnt || 0),
+      open_manual_entry_goals: Number(openExec[0]?.cnt || 0),
+    };
+  }
   if (workflowKey === 'records.certificate.generate') {
     const [byChurch] = await pool.query(
       `SELECT church_id, COUNT(*) AS count
@@ -821,6 +927,7 @@ function deriveWorkflowKpi(workflowKey, stats) {
       'ocr.setup.wizard': 'Churches need OCR setup',
       'ocr.batch.review': 'Jobs needing review',
       'identity.user.admin': 'Pending user activations',
+      'records.manual.entry': 'Manual entry goals active',
       'records.certificate.generate': 'Certificate goals active',
     };
     return {
@@ -849,6 +956,14 @@ function deriveWorkflowKpi(workflowKey, stats) {
       label: 'Churches need setup',
       value: needsSetup,
       status: needsSetup > 0 ? 'attention' : 'healthy',
+    };
+  }
+  if (workflowKey === 'records.manual.entry') {
+    const open = Number(stats.open_manual_entry_goals || 0);
+    return {
+      label: 'Manual entry goals',
+      value: open,
+      status: open > 0 ? 'attention' : 'healthy',
     };
   }
   if (workflowKey === 'records.certificate.generate') {
@@ -977,6 +1092,9 @@ module.exports = {
   resolveCertificateGoal,
   resolveIdentityAdminGoal,
   resolveChurchOpsSetupGoal,
+  resolveManualEntryGoal,
+  isCrmOnlyParish,
+  churchEligibleForOcrSetupGoal,
   getEnrollmentLegacyProgress,
   getWorkflowRuntimeSummary,
   getGovernancePipelineSummary,

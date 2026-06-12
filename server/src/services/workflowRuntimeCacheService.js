@@ -4,6 +4,10 @@
  */
 const CACHE_KEY_OCR_SETUP = 'ocr.setup.wizard';
 const STALE_MS = 15 * 60 * 1000;
+const REFRESH_DEBOUNCE_MS = 5000;
+
+let ocrRefreshTimer = null;
+let ocrRefreshInFlight = null;
 
 async function readCacheRow(pool, cacheKey) {
   try {
@@ -107,9 +111,27 @@ async function getOcrSetupStats(pool, { forceRefresh = false } = {}) {
   }
 }
 
+/** Debounced refresh after ocr_setup_state writes (G2). */
+function scheduleOcrSetupCacheRefresh(pool) {
+  if (ocrRefreshTimer) clearTimeout(ocrRefreshTimer);
+  ocrRefreshTimer = setTimeout(() => {
+    ocrRefreshTimer = null;
+    if (ocrRefreshInFlight) return;
+    ocrRefreshInFlight = refreshOcrSetupCache(pool)
+      .catch((err) => {
+        console.warn('[workflowRuntimeCache] event refresh failed:', err.message);
+      })
+      .finally(() => {
+        ocrRefreshInFlight = null;
+      });
+  }, REFRESH_DEBOUNCE_MS);
+}
+
 module.exports = {
   CACHE_KEY_OCR_SETUP,
+  STALE_MS,
   refreshOcrSetupCache,
   getOcrSetupStats,
   isStale,
+  scheduleOcrSetupCacheRefresh,
 };

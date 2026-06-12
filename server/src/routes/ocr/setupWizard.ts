@@ -134,8 +134,11 @@ router.put('/setup-state', async (req: any, res: any) => {
 
     try {
       const { getAppPool } = require('../../config/db');
+      const appPool = getAppPool();
       const sync = require('../../services/workflowExecutionSync');
-      await sync.syncOcrSetup(getAppPool(), churchId, { actorType: 'user' });
+      await sync.syncOcrSetup(appPool, churchId, { actorType: 'user' });
+      const runtimeCache = require('../../services/workflowRuntimeCacheService');
+      runtimeCache.scheduleOcrSetupCacheRefresh(appPool);
     } catch (syncErr: any) {
       console.warn('[OCR Setup] execution sync:', syncErr?.message);
     }

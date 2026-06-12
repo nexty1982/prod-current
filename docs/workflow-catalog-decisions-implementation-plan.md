@@ -61,9 +61,9 @@ Phase B code is **shipped** (B-PR1–13). Decisions change **cutover behavior an
 | PR | Work | Decisions |
 |----|------|-----------|
 | ~~**B-PR14**~~ | ~~Manville #46 smoke automation script + checklist doc~~ | **Shipped** — `server/scripts/workflow-smoke-manville.js` |
-| **B-PR15** | OCR goal gating (G1) + cache event hook (G2) + cron refresh (G3) | G1–G3 |
-| **B-PR16** | Auto `setup_complete` when ops checklist passes (H3) | H3 |
-| **B-PR17** | CRM-only enrollment goal suppression (H5) | H5 |
+| ~~**B-PR15**~~ | ~~OCR goal gating + cache hooks~~ | **Shipped** |
+| ~~**B-PR16**~~ | ~~Auto `setup_complete`~~ | **Shipped** |
+| ~~**B-PR17**~~ | ~~CRM-only enrollment suppression~~ | **Shipped** |
 | **B-PR18** | DB feature flag overrides (I4) + expand gated workflows (I3) | I3, I4 |
 | **B-PR19** | Phased legacy retirement: deprecate `getEnrollmentLegacyProgress` (H2) | B5, H2 — **after** B-PR12 |
 | **B-PR20** | Unlock audit event (E6) + `church_users` alignment in church-onboarding | E6, E4 |
@@ -138,7 +138,7 @@ Priority locked by **B2**.
 
 | # | Workflow key | Phase | Depends on |
 |---|--------------|-------|------------|
-| 7 | `records.manual.entry` | E-PR1 | B-PR12, execution reconciler pattern |
+| ~~7~~ | ~~`records.manual.entry`~~ | ~~E-PR1~~ | **Shipped** — reconciler + migration + goals |
 | 8 | `billing.client.lifecycle` | E-PR2 | #7 filed; `client_status` / billing fields |
 | 9 | `crm.lead.nurture` | E-PR3 | H5 CRM goal pattern; ~80 pre-onboarded parishes |
 | 10 | `church.decommission` | E-PR4 | `church-decom.js` routes |
@@ -195,11 +195,11 @@ gantt
 2. **UI-PR1** — Workflow Attention executive stat card (B4)  
 3. **C-PR9** — Auto sync-production-states on catalog deploy (A2, B3)  
 4. **B-PR12** — Cutover: `EXECUTION_FALLBACK_INFERENCE=false` after soak sign-off  
-5. **B-PR15** — OCR goal gating + cache event hook + scheduled refresh (G1–G3)  
-6. **B-PR16** — Auto `setup_complete` when ops checklist passes (H3)  
-7. **B-PR17** — CRM-only enrollment goal suppression (H5)  
-8. **C-PR1 → C-PR6** — Governance loop (tracking PR epic)  
-9. **E-PR1** — File `records.manual.entry` (#7)  
+5. ~~**B-PR15**~~ — OCR goal gating + cache hooks (G1–G3) — **shipped**  
+6. ~~**B-PR16**~~ — Auto `setup_complete` (H3) — **shipped**  
+7. ~~**B-PR17**~~ — CRM-only enrollment suppression (H5) — **shipped**  
+8. ~~**E-PR1**~~ — `records.manual.entry` (#7) — **shipped**  
+9. **C-PR1 → C-PR6** — Governance loop (tracking PR epic)  
 10. **E-PR2 → E-PR4** — Workflows #8–#10  
 11. **B-PR18 → B-PR20** — Feature flags DB, legacy deprecation, identity migration  
 12. **UI-PR2 / UI-PR3** — CRM funnel KPIs (H1)  

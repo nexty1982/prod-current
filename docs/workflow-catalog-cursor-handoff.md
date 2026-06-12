@@ -17,7 +17,7 @@ Read these files first (in order):
 3. /var/www/orthodoxmetrics/prod/docs/workflow-catalog-decisions-implementation-plan.md  (PR sequence)
 
 Context: Phase B execution model is shipped (B-PR1–13). Product decisions were recorded 2026-06-13.
-Next recommended work: **B-PR15** (OCR goal gating + cache hooks). **B-PR12 shipped** — `EXECUTION_FALLBACK_INFERENCE=false`. **C-PR9 shipped** — auto `sync-production-states` on `om-deploy be/be-sync` (promote-only; manual `--full` in OMAI).
+Next recommended work: **E-PR2** (`billing.client.lifecycle` #8) or Phase C governance. **B-PR15–17 + E-PR1 shipped** (2026-06-12).
 **B-PR14 shipped** — `server/scripts/workflow-smoke-manville.js` (`npm run workflow:smoke:manville`).
 
 Repos: OM = /var/www/orthodoxmetrics/prod, OMAI = /var/www/omai
@@ -163,7 +163,7 @@ EXECUTION_ANALYTICS_ENABLED=true
 5. `identity.user.admin`
 6. `records.certificate.generate`
 
-Next to file: **`records.manual.entry`** (#7).
+**Workflow #7 filed:** `records.manual.entry` (E-PR1). Next to file: **`billing.client.lifecycle`** (#8).
 
 ---
 
@@ -175,9 +175,9 @@ Next to file: **`records.manual.entry`** (#7).
 |----|------|-------|
 | ~~**B-PR14**~~ | ~~Manville #46 smoke script + run §K checklist~~ | **Done** — `npm run workflow:smoke:manville` (add `--lock-test` for K4 cycle) |
 | ~~**B-PR12**~~ | ~~Cutover: `EXECUTION_FALLBACK_INFERENCE=false`~~ | **Done** — Manville §K K10 green |
-| **B-PR15** | OCR goal gating (feature-flag / upload-attempt only) + cache event hook + cron | G1–G3 |
-| **B-PR16** | Auto `setup_complete` when ops checklist passes | H3 |
-| **B-PR17** | Suppress enrollment goals for CRM-only parishes | H5 |
+| ~~**B-PR15**~~ | ~~OCR goal gating + cache event hook + cron~~ | **Done** — G1 upload/setup gate; G2 debounced hook; G3 `workflow:runtime-cache:refresh` |
+| ~~**B-PR16**~~ | ~~Auto `setup_complete` when ops checklist passes~~ | **Done** — reconciler at `finalize_setup` |
+| ~~**B-PR17**~~ | ~~Suppress enrollment goals for CRM-only parishes~~ | **Done** — `isCrmOnlyParish` filter |
 | **B-PR18** | DB feature flag overrides (I4) | |
 | **B-PR19** | Phased legacy retirement (`getEnrollmentLegacyProgress`) | After B-PR12 only |
 | **B-PR20** | Unlock audit event + `church_users` alignment | E6, E4 |

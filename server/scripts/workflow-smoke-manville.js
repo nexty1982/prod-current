@@ -140,6 +140,8 @@ const EXPECTED_WORKFLOW_KEYS = [
   'identity.user.admin',
   'ocr.setup.wizard',
   'ocr.batch.review',
+  'records.manual.entry',
+  'records.certificate.generate',
 ];
 
 async function checkK1(pool, churchId, workflowGoals, execution) {
@@ -322,8 +324,16 @@ async function checkK6(pool) {
     "SELECT workflow_key, last_synced_at FROM omstudio_workflow_refs WHERE workflow_key = 'church.ops.setup' LIMIT 1"
   );
 
+  const [manualWf] = await pool.query(
+    "SELECT workflow_key, completion_state FROM app_workflows WHERE workflow_key = 'records.manual.entry' LIMIT 1"
+  );
+  const [manualRef] = await pool.query(
+    "SELECT workflow_key FROM omstudio_workflow_refs WHERE workflow_key = 'records.manual.entry' LIMIT 1"
+  );
+
   if (wf.length && ref.length) {
-    pass('K6', 'church.ops.setup catalog + refs', `catalog=${wf[0].completion_state}, synced=${ref[0].last_synced_at}`);
+    const manualNote = manualWf.length && manualRef.length ? '; records.manual.entry filed' : '';
+    pass('K6', 'church.ops.setup catalog + refs', `catalog=${wf[0].completion_state}, synced=${ref[0].last_synced_at}${manualNote}`);
   } else {
     if (!wf.length) fail('K6', 'church.ops.setup in app_workflows', 'missing');
     if (!ref.length) fail('K6', 'church.ops.setup in omstudio_workflow_refs', 'missing after sync');

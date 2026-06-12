@@ -168,9 +168,9 @@
 
 | ID | Question | Decision |
 |----|----------|----------|
-| G1 | OCR setup goal visibility | **Feature-flag parishes or upload-attempt churches only** |
-| G2 | OCR cache refresh strategy | **Both TTL and event hook** |
-| G3 | Who may refresh OCR cache | **Super_admin + scheduled job** |
+| G1 | OCR setup goal visibility | **Shipped (B-PR15)** — global OCR flag + upload/setup-started only |
+| G2 | OCR cache refresh strategy | **Shipped (B-PR15)** — TTL + `scheduleOcrSetupCacheRefresh` on setup writes |
+| G3 | Who may refresh OCR cache | **Shipped (B-PR15)** — super_admin API + `workflow:runtime-cache:refresh` on deploy |
 | G4 | Canonical portal OCR route | **`/portal/ocr/setup`** — settings may alias later |
 
 ---
@@ -181,9 +181,9 @@
 |----|----------|----------|
 | H1 | CRM funnel KPIs | **Overview and CCC** |
 | H2 | Remove `getEnrollmentLegacyProgress` | **Phased deprecation** (with B5) |
-| H3 | `setup_complete` authority | **Auto when checklist passes**; platform admin override |
+| H3 | `setup_complete` authority | **Shipped (B-PR16)** — reconciler at `finalize_setup` |
 | H4 | Re-enrollment after active | **Never** on same workflow — future separate re-enrollment workflow |
-| H5 | CRM-only parishes (~80) | **No enrollment goals** without `onboarding_requests`; future CRM goal |
+| H5 | CRM-only parishes (~80) | **Shipped (B-PR17)** — `isCrmOnlyParish` suppresses enrollment goals |
 | H6 | `branding_optional` | **Optional for now** — jurisdiction may require later |
 
 ---
@@ -239,10 +239,12 @@
 | Staging package copy on approve | C1 | Controlled path; no live FS overwrite |
 | `app_component_versions` rollback link | C5 | Approve writes version row + history link |
 | Mandatory semver_build on Workshop submit | C6 | API validation |
-| OCR setup goal gating | G1 | Resolver + feature flag / upload attempt |
-| OCR cache event hook | G2 | On `ocr_setup_state` writes |
-| OCR cache scheduled refresh | G3 | Cron alongside TTL |
-| Auto `setup_complete` when ops checklist passes | H3 | Reconciler + execution write-through |
+| ~~OCR setup goal gating~~ | G1 | **Shipped B-PR15** |
+| ~~OCR cache event hook~~ | G2 | **Shipped B-PR15** |
+| ~~OCR cache scheduled refresh~~ | G3 | **Shipped B-PR15** |
+| ~~Auto `setup_complete` when ops checklist passes~~ | H3 | **Shipped B-PR16** |
+| ~~CRM-only enrollment suppression~~ | H5 | **Shipped B-PR17** |
+| ~~`records.manual.entry` workflow~~ | E-PR1 / F4 | **Shipped** — migration + reconciler + goals |
 | CRM funnel KPIs | H1 | Overview + CCC |
 | DB feature flag overrides | I4 | Settings table reads override env |
 | Phased legacy path retirement | B5, H2 | After B-PR12 |

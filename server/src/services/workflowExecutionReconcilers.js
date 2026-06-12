@@ -235,6 +235,27 @@ async function reconcileChurchOps(pool, subject) {
     stepKey = activeStaff < 2 ? 'parish_staff' : 'finalize_setup';
   }
 
+  if (stepKey === 'finalize_setup') {
+    await pool.query(
+      `UPDATE churches SET setup_complete = 1, updated_at = CURRENT_TIMESTAMP
+       WHERE id = ? AND setup_complete = 0`,
+      [churchId]
+    );
+    return buildReconcileResult({
+      status: 'completed',
+      currentStepKey: 'audit_complete',
+      sourceTable: 'churches',
+      sourceRowId: String(churchId),
+      sourceUpdatedAt: new Date(),
+      contextSnapshot: {
+        setup_complete: true,
+        auto_completed: true,
+        client_status: ch.client_status,
+      },
+      eligible: false,
+    });
+  }
+
   return buildReconcileResult({
     status: 'active',
     currentStepKey: stepKey,
@@ -333,6 +354,47 @@ async function reconcileOcrJob(pool, subject) {
   });
 }
 
+async function reconcileManualEntry(pool, subject) {
+  const churchId = subject.church_id;
+  const [chRows] = await pool.query(
+    'SELECT is_active, client_status FROM churches WHERE id = ? LIMIT 1',
+    [churchId]
+  );
+  if (!chRows.length || !chRows[0].is_active) {
+    return buildReconcileResult({ eligible: false, status: 'archived', currentStepKey: null });
+  }
+  if (['directory', 'pre_onboarded', 'decommissioned'].includes(chRows[0].client_status)) {
+    return buildReconcileResult({ eligible: false, status: 'archived', currentStepKey: null });
+  }
+
+  const churchDb = await getChurchDbPool(churchId, pool);
+  if (!churchDb) {
+    return buildReconcileResult({ eligible: false, status: 'pending', currentStepKey: null });
+  }
+
+  const recordCount = await countChurchRecords(churchDb);
+  if (recordCount >= 10) {
+    return buildReconcileResult({
+      status: 'completed',
+      currentStepKey: 'audit_complete',
+      sourceTable: 'church_records',
+      sourceRowId: String(churchId),
+      contextSnapshot: { record_count: recordCount },
+      eligible: false,
+    });
+  }
+
+  const stepKey = recordCount === 0 ? 'select_record_type' : 'open_entry_form';
+  return buildReconcileResult({
+    status: 'active',
+    currentStepKey: stepKey,
+    sourceTable: 'church_records',
+    sourceRowId: String(churchId),
+    contextSnapshot: { record_count: recordCount },
+    eligible: true,
+  });
+}
+
 async function reconcileCertificate(pool, subject) {
   const churchId = subject.church_id;
   const [genRows] = await pool.query(
@@ -401,6 +463,7 @@ const RECONCILER_REGISTRY = {
   'church.ops.setup': reconcileChurchOps,
   'ocr.setup.wizard': reconcileOcrSetup,
   'ocr.batch.review': reconcileOcrJob,
+  'records.manual.entry': reconcileManualEntry,
   'records.certificate.generate': reconcileCertificate,
   'identity.user.admin': reconcileIdentityAdmin,
 };
@@ -470,6 +533,7 @@ module.exports = {
   reconcileChurchOps,
   reconcileOcrSetup,
   reconcileOcrJob,
+  reconcileManualEntry,
   reconcileCertificate,
   reconcileIdentityAdmin,
 };
