@@ -215,6 +215,7 @@ router.post('/:onboarding_request_id/stripe/checkout', async (req, res) => {
     }
     const result = await stripeBilling.createCheckoutSession(req.params.onboarding_request_id, {
       priceId: req.body?.priceId,
+      priceKey: req.body?.priceKey,
       mode: req.body?.mode,
       successUrl: req.body?.successUrl,
       cancelUrl: req.body?.cancelUrl,
@@ -232,6 +233,7 @@ router.post('/:onboarding_request_id/stripe/invoice', async (req, res) => {
     }
     const result = await stripeBilling.createAndSendInvoice(req.params.onboarding_request_id, {
       priceId: req.body?.priceId,
+      priceKey: req.body?.priceKey,
       daysUntilDue: req.body?.daysUntilDue,
     });
     res.json({ success: true, ...result });

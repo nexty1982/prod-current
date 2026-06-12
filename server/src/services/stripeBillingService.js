@@ -4,6 +4,7 @@
 const Stripe = require('stripe');
 const { getAppPool } = require('../config/db');
 const onboarding = require('./onboardingService');
+const stripeCatalog = require('../config/stripeCatalog');
 
 let _stripe = null;
 
@@ -18,10 +19,15 @@ function isConfigured() {
 }
 
 function publicConfig() {
+  const prices = stripeCatalog.getCatalogEntries().filter((p) => p.priceId);
+  const defaultPrice = stripeCatalog.getDefaultEnrollmentPrice();
   return {
     enabled: isConfigured(),
     publishableKey: process.env.STRIPE_PUBLISHABLE_KEY || null,
-    defaultPriceConfigured: !!process.env.STRIPE_DEFAULT_PRICE_ID,
+    defaultPriceConfigured: !!defaultPrice?.priceId,
+    defaultPriceKey: defaultPrice?.key || null,
+    defaultPriceId: defaultPrice?.priceId || null,
+    prices,
   };
 }
 
@@ -33,10 +39,17 @@ function webhookSystemReq() {
   return { session: { user: { id: null, role: 'system' } } };
 }
 
-function resolvePriceId(override) {
-  const priceId = override || process.env.STRIPE_DEFAULT_PRICE_ID;
-  if (!priceId) throw new Error('No Stripe price configured (STRIPE_DEFAULT_PRICE_ID)');
-  return priceId;
+function resolvePriceId(override, priceKey) {
+  const resolved = stripeCatalog.resolveCheckoutPrice({ priceId: override, priceKey });
+  return resolved.priceId;
+}
+
+async function resolveCheckoutMode(priceId, explicitMode) {
+  if (explicitMode) return explicitMode;
+  const stripe = getStripe();
+  if (!stripe) return 'payment';
+  const price = await stripe.prices.retrieve(priceId);
+  return price.type === 'recurring' ? 'subscription' : 'payment';
 }
 
 function extractOnboardingRequestId(obj) {
@@ -141,13 +154,14 @@ async function createCheckoutSession(onboardingRequestId, options = {}) {
   }
 
   const customerId = await ensureStripeCustomer(request);
-  const priceId = resolvePriceId(options.priceId);
+  const priceId = resolvePriceId(options.priceId, options.priceKey);
+  const mode = await resolveCheckoutMode(priceId, options.mode);
   const base = omBaseUrl();
   const onb = encodeURIComponent(request.onboarding_request_id);
 
   const sessionParams = {
     customer: customerId,
-    mode: options.mode || 'payment',
+    mode,
     line_items: [{ price: priceId, quantity: 1 }],
     success_url: options.successUrl || `${base}/enroll?payment=success&onb=${onb}`,
     cancel_url: options.cancelUrl || `${base}/enroll?payment=cancelled&onb=${onb}`,
@@ -194,7 +208,7 @@ async function createAndSendInvoice(onboardingRequestId, options = {}) {
 
   const request = await getRequestOrThrow(onboardingRequestId);
   const customerId = await ensureStripeCustomer(request);
-  const priceId = resolvePriceId(options.priceId);
+  const priceId = resolvePriceId(options.priceId, options.priceKey);
   const daysUntilDue = options.daysUntilDue ?? 30;
 
   await stripe.invoiceItems.create({
