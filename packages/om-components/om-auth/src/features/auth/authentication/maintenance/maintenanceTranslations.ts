@@ -35,7 +35,7 @@ export const maintenanceTranslations: Record<MaintenanceLang, MaintenanceTransla
     deploymentInfo:
       'We are deploying improvements and new features. This typically takes less than two minutes.',
     contactPrefix: 'Questions? Contact us at',
-    contactEmail: 'support@orthodoxmetrics.com',
+    contactEmail: 'info@orthodoxmetrics.com',
     languageHint: 'This page is available in your preferred language',
   },
   el: {
@@ -47,7 +47,7 @@ export const maintenanceTranslations: Record<MaintenanceLang, MaintenanceTransla
     deploymentInfo:
       'Εγκαθιστούμε βελτιώσεις και νέες λειτουργίες. Συνήθως διαρκεί λιγότερο από δύο λεπτά.',
     contactPrefix: 'Ερωτήσεις; Επικοινωνήστε μαζί μας στο',
-    contactEmail: 'support@orthodoxmetrics.com',
+    contactEmail: 'info@orthodoxmetrics.com',
     languageHint: 'Αυτή η σελίδα είναι διαθέσιμη στη γλώσσα που προτιμάτε',
   },
   ru: {
@@ -59,7 +59,7 @@ export const maintenanceTranslations: Record<MaintenanceLang, MaintenanceTransla
     deploymentInfo:
       'Мы внедряем улучшения и новые функции. Обычно это занимает менее двух минут.',
     contactPrefix: 'Вопросы? Свяжитесь с нами:',
-    contactEmail: 'support@orthodoxmetrics.com',
+    contactEmail: 'info@orthodoxmetrics.com',
     languageHint: 'Эта страница доступна на выбранном вами языке',
   },
   ro: {
@@ -71,7 +71,7 @@ export const maintenanceTranslations: Record<MaintenanceLang, MaintenanceTransla
     deploymentInfo:
       'Implementăm îmbunătățiri și funcții noi. De obicei, acest proces durează mai puțin de două minute.',
     contactPrefix: 'Întrebări? Contactați-ne la',
-    contactEmail: 'support@orthodoxmetrics.com',
+    contactEmail: 'info@orthodoxmetrics.com',
     languageHint: 'Această pagină este disponibilă în limba preferată',
   },
   ka: {
@@ -83,7 +83,7 @@ export const maintenanceTranslations: Record<MaintenanceLang, MaintenanceTransla
     deploymentInfo:
       'ჩვენ ვნერგავთ გაუმჯობესებებს და ახალ ფუნქციებს. ეს ჩვეულებრივ გრძელდება ორ წუთზე ნაკლებ ხანს.',
     contactPrefix: 'კითხვები? დაგვიკავშირდით:',
-    contactEmail: 'support@orthodoxmetrics.com',
+    contactEmail: 'info@orthodoxmetrics.com',
     languageHint: 'ეს გვერდი ხელმისაწვდომია თქვენს სასურველ ენაზე',
   },
 };

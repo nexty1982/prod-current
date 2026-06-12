@@ -69,10 +69,10 @@ const SiteFooter = () => {
             <ul className="space-y-3 list-none p-0 m-0">
               <li>
                 <a
-                  href="mailto:support@orthodoxmetrics.com"
+                  href="mailto:info@orthodoxmetrics.com"
                   className="font-['Inter'] text-[14px] text-[rgba(255,255,255,0.7)] hover:text-white transition-colors no-underline"
                 >
-                  support@orthodoxmetrics.com
+                  info@orthodoxmetrics.com
                 </a>
               </li>
               <li>

@@ -463,8 +463,8 @@ export function Onboarding({ onCancel, onComplete, theme, onToggleTheme }: Props
             Step {stepIndex + 1} of {steps.length} · about 5 minutes
           </p>
           <p className="font-['Inter'] text-[12px] text-muted-foreground mb-3">
-            <a href="mailto:support@orthodoxmetrics.com" className="text-[#2d1b4e] dark:text-[#d4af37] no-underline hover:underline">
-              support@orthodoxmetrics.com
+            <a href="mailto:info@orthodoxmetrics.com" className="text-[#2d1b4e] dark:text-[#d4af37] no-underline hover:underline">
+              info@orthodoxmetrics.com
             </a>
           </p>
           <ol className="space-y-1">

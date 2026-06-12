@@ -1404,7 +1404,7 @@ const sendEnrollmentConfirmationEmail = async ({
     const senderName = dbConfig?.sender_name || 'Orthodox Metrics';
     const senderEmail = dbConfig?.sender_email || process.env.SMTP_USER || process.env.EMAIL_USER;
     const contactUrl = 'https://orthodoxmetrics.com/contact';
-    const supportEmail = 'support@orthodoxmetrics.com';
+    const supportEmail = 'info@orthodoxmetrics.com';
 
     const displayName = escapeHtml(firstName || 'there');
     const safeChurch = escapeHtml(churchName || 'your parish');
@@ -1684,7 +1684,7 @@ const sendTemporaryAdminInstructionsEmail = async ({
           </table>
           <p><strong>Important:</strong> You must change your password at first login.</p>
           <p>After signing in, you will review and configure your selected sacramental record table columns before accessing the full portal.</p>
-          <p>Questions? Contact <a href="mailto:support@orthodoxmetrics.com">support@orthodoxmetrics.com</a></p>
+          <p>Questions? Contact <a href="mailto:info@orthodoxmetrics.com">info@orthodoxmetrics.com</a></p>
         </td></tr>
       </table>
     </td></tr>

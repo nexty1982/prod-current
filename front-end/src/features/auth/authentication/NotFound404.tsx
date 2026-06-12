@@ -119,7 +119,7 @@ const NotFound404: React.FC = () => {
             <Typography sx={{ color: subtext, fontSize: '0.75rem' }}>·</Typography>
             <Box
               component="a"
-              href="mailto:support@orthodoxmetrics.com"
+              href="mailto:info@orthodoxmetrics.com"
               sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: linkColor, textDecoration: 'none', fontSize: '0.8125rem', '&:hover': { opacity: 0.75 } }}
             >
               <ArrowForwardIcon sx={{ fontSize: 14 }} />

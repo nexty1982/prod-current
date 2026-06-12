@@ -387,7 +387,7 @@ const ENGLISH_DEFAULTS = {
   'contact.info_title': 'Get in Touch',
   'contact.info_desc': 'Have questions or need assistance? We\'re here to help you get started with Orthodox Metrics.',
   'contact.info1_label': 'Email',
-  'contact.info1_value': 'support@orthodoxmetrics.com',
+  'contact.info1_value': 'info@orthodoxmetrics.com',
   'contact.info2_label': 'Phone',
   'contact.info2_value': 'Available upon request',
   'contact.info3_label': 'Location',

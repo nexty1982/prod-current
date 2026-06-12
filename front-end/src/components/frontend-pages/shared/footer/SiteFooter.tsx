@@ -101,10 +101,10 @@ const SiteFooter = () => {
               ))}
               <li>
                 <a
-                  href="mailto:support@orthodoxmetrics.com"
+                  href="mailto:info@orthodoxmetrics.com"
                   className="font-om-body text-[14px] om-public-text-muted hover:opacity-100 transition-colors no-underline"
                 >
-                  support@orthodoxmetrics.com
+                  info@orthodoxmetrics.com
                 </a>
               </li>
               <li>
