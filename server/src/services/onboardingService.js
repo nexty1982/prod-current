@@ -4,6 +4,7 @@
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const { getAppPool } = require('../config/db');
+const { applyOnboardingPhaseWrite } = require('../utils/churchOnboardingPhase');
 const { generateOnboardingRequestId, isValidOnboardingRequestId } = require('../utils/onboardingId');
 const onboardingCrm = require('./onboardingCrmService');
 const layoutCatalog = require('./ocrLayoutCatalogService');
@@ -586,9 +587,11 @@ async function createTemporaryAdmin(onboardingRequestId, req) {
   }
 
   await pool.query(
-    'UPDATE churches SET onboarding_phase = GREATEST(COALESCE(onboarding_phase, 1), 2), client_status = ? WHERE id = ?',
+    'UPDATE churches SET client_status = ? WHERE id = ?',
     ['enrolling', churchId]
   );
+
+  await applyOnboardingPhaseWrite(pool, churchId, 2, { req, source: 'create-temporary-admin' });
 
   await pool.query(
     'UPDATE onboarding_requests SET provisioning_status = ? WHERE onboarding_request_id = ?',

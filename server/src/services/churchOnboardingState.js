@@ -125,7 +125,63 @@ async function loadOnboardingState(authPool, omaiPool, { churchId, crmLeadId, on
     enrollment = rows[0] || null;
   }
 
-  return resolveOnboardingState({ church, enrollment, crmLead });
+  return {
+    state: resolveOnboardingState({ church, enrollment, crmLead }),
+    church,
+    enrollment,
+    crmLead,
+  };
+}
+
+async function loadEnrollmentDetail(enrollment) {
+  if (!enrollment?.onboarding_request_id) return null;
+  const onboarding = require('./onboardingService');
+  const workflowGoals = require('./workflowGoalsService');
+  const request = await onboarding.getByPublicId(enrollment.onboarding_request_id);
+  if (!request) return null;
+  const events = await onboarding.getEvents(enrollment.onboarding_request_id);
+  const enrollmentWorkflow = await workflowGoals.resolveEnrollmentByRequestId(enrollment.onboarding_request_id);
+  const workflow = enrollmentWorkflow?.workflow || null;
+  const progress = workflow
+    ? workflowGoals.workflowStepsToLegacyProgress(workflow)
+    : onboarding.getProgressSteps(request, events).map((s) => ({
+      key: s.key,
+      label: s.label || s.key.replace(/_/g, ' '),
+      done: s.completed,
+      current: s.current,
+    }));
+  return { request, progress, workflow };
+}
+
+/**
+ * Full profile bundle for Church Command Center drawer (single API call).
+ */
+async function loadOnboardingProfileFull(authPool, omaiPool, apiId, { includeLifecycle = true } = {}) {
+  const raw = String(apiId);
+  const isChurch = raw.startsWith('church_');
+  const numericId = parseInt(isChurch ? raw.replace('church_', '') : raw, 10);
+  const ids = isChurch ? { churchId: numericId } : { crmLeadId: numericId };
+
+  const { state, church, enrollment, crmLead } = await loadOnboardingState(authPool, omaiPool, ids);
+  const enrollmentDetail = await loadEnrollmentDetail(enrollment);
+
+  let lifecycle = null;
+  if (includeLifecycle) {
+    const { buildLifecycleDetail } = require('./churchLifecycleDetailService');
+    const detail = await buildLifecycleDetail(omaiPool, authPool, raw);
+    if (!detail.error) lifecycle = detail;
+  }
+
+  const { deriveOnboardingPhase } = require('../utils/churchOnboardingPhase');
+  const displayPhase = deriveOnboardingPhase(church);
+
+  return {
+    state: { ...state, onboarding_phase: displayPhase },
+    enrollment: enrollmentDetail,
+    lifecycle,
+    church,
+    crm_lead: crmLead,
+  };
 }
 
 function isEnrolledForProvisioning(enrollment) {
@@ -140,6 +196,8 @@ function isEnrolledForProvisioning(enrollment) {
 module.exports = {
   resolveOnboardingState,
   loadOnboardingState,
+  loadOnboardingProfileFull,
+  loadEnrollmentDetail,
   deriveTokenUserStage,
   isEnrolledForProvisioning,
   ENROLLMENT_ACTIVE,

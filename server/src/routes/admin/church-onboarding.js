@@ -7,6 +7,7 @@ const { requireRole } = require('../../middleware/auth');
 const { provisionTenantDb } = require('../../services/tenantProvisioning');
 const { isOperationalChurchId } = require('../../utils/churchVisibility');
 const { assertPhasePromotionAllowed } = require('../../utils/churchPromotionPolicy');
+const { applyOnboardingPhaseWrite, deriveOnboardingPhase } = require('../../utils/churchOnboardingPhase');
 
 const ADMIN_ROLES = ['super_admin', 'admin'];
 
@@ -111,7 +112,7 @@ router.get('/pipeline', requireRole(ADMIN_ROLES), async (req, res) => {
           : (ch.onboarding_phase != null ? 'phase_pipeline' : 'legacy'),
         is_active: ch.is_active,
         setup_complete: ch.setup_complete,
-        onboarding_phase: ch.onboarding_phase,
+        onboarding_phase: deriveOnboardingPhase(ch),
         crm_lead_id: ch.crm_lead_id,
         client_status: ch.client_status,
         billing_status: ch.billing_status,
@@ -422,7 +423,7 @@ router.post('/promote', requireRole(ADMIN_ROLES), async (req, res) => {
       dbCreated = provResult.dbCreated;
     }
 
-    await pool.query('UPDATE churches SET onboarding_phase = ? WHERE id = ?', [to_phase, church.id]);
+    await applyOnboardingPhaseWrite(pool, church.id, to_phase, { req, source: 'promote' });
 
     try {
       const sync = require('../../services/workflowExecutionSync');
@@ -487,7 +488,7 @@ router.post('/batch-promote', requireRole(ADMIN_ROLES), async (req, res) => {
           }
         }
 
-        await pool.query('UPDATE churches SET onboarding_phase = ? WHERE id = ?', [to_phase, church.id]);
+        await applyOnboardingPhaseWrite(pool, church.id, to_phase, { req, source: 'batch-promote' });
         try {
           const sync = require('../../services/workflowExecutionSync');
           await sync.syncChurchOps(pool, church.id, { actorType: 'admin' });
@@ -1004,18 +1005,19 @@ router.post('/:churchId/promote', requireRole(ADMIN_ROLES), async (req, res) => 
     }
 
     // Update onboarding phase
-    await pool.query('UPDATE churches SET onboarding_phase = ? WHERE id = ?', [nextPhase, churchId]);
+    const phaseWrite = await applyOnboardingPhaseWrite(pool, churchId, nextPhase, { req, force, source: 'promote-by-id' });
 
-    console.log(`[Onboarding] Church ${churchId} (${church.name}) promoted: Phase ${currentPhase} (${PHASE_LABELS[currentPhase]}) → Phase ${nextPhase} (${PHASE_LABELS[nextPhase]})`);
+    console.log(`[Onboarding] Church ${churchId} (${church.name}) promoted: Phase ${currentPhase} (${PHASE_LABELS[currentPhase]}) → Phase ${nextPhase} (${PHASE_LABELS[nextPhase]})${phaseWrite.frozen ? ' (phase derived, column frozen)' : ''}`);
 
     res.json({
       success: true,
       church_id: churchId,
       previous_phase: currentPhase,
-      new_phase: nextPhase,
-      label: PHASE_LABELS[nextPhase],
-      message: `${church.name} promoted to ${PHASE_LABELS[nextPhase]}`,
+      new_phase: phaseWrite.phase ?? nextPhase,
+      label: PHASE_LABELS[phaseWrite.phase ?? nextPhase],
+      message: `${church.name} promoted to ${PHASE_LABELS[phaseWrite.phase ?? nextPhase]}`,
       db_created: dbCreated,
+      phase_frozen: Boolean(phaseWrite.frozen),
     });
   } catch (err) {
     console.error('Promote error:', err);
@@ -1049,7 +1051,7 @@ router.post('/:churchId/demote', requireRole(ADMIN_ROLES), async (req, res) => {
     }
 
     const prevPhase = currentPhase - 1;
-    await pool.query('UPDATE churches SET onboarding_phase = ? WHERE id = ?', [prevPhase, churchId]);
+    await applyOnboardingPhaseWrite(pool, churchId, prevPhase, { req, force: req.body?.force === true, source: 'demote' });
 
     console.log(`[Onboarding] Church ${churchId} (${church.name}) demoted: Phase ${currentPhase} → Phase ${prevPhase}`);
 

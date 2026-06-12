@@ -7,7 +7,8 @@ const router = express.Router();
 const { getAppPool, getOmaiPool } = require('../../config/db');
 const { requireAuth, requireRole } = require('../../middleware/auth');
 const { provisionFromCrmLead } = require('../../services/churchProvisionOrchestrator');
-const { loadOnboardingState } = require('../../services/churchOnboardingState');
+const { loadOnboardingState, loadOnboardingProfileFull } = require('../../services/churchOnboardingState');
+const { buildLifecycleDetail } = require('../../services/churchLifecycleDetailService');
 
 const ADMIN_ROLES = ['super_admin', 'admin'];
 
@@ -461,9 +462,14 @@ router.get('/client-summary', requireAuth, requireRole(...ADMIN_ROLES), async (_
 router.get('/unified/:id', requireAuth, requireRole(...ADMIN_ROLES), async (req, res) => {
   try {
     const raw = String(req.params.id);
+    const full = req.query.full === '1' || req.query.full === 'true';
+    if (full) {
+      const profile = await loadOnboardingProfileFull(getAppPool(), getOmaiPool(), raw, { includeLifecycle: true });
+      return res.json({ success: true, ...profile });
+    }
     const isChurch = raw.startsWith('church_');
     const numericId = parseInt(isChurch ? raw.replace('church_', '') : raw, 10);
-    const state = await loadOnboardingState(getAppPool(), getOmaiPool(), isChurch
+    const { state } = await loadOnboardingState(getAppPool(), getOmaiPool(), isChurch
       ? { churchId: numericId }
       : { crmLeadId: numericId });
     res.json({ success: true, state });
@@ -479,117 +485,11 @@ router.get('/unified/:id', requireAuth, requireRole(...ADMIN_ROLES), async (req,
 
 router.get('/:id', requireAuth, requireRole(...ADMIN_ROLES), async (req, res) => {
   try {
-    const omaiPool = getOmaiPool();
-    const authPool = getOmAuthPool();
-    const { id } = req.params;
-
-    // Check if this is a church_## ID (onboarded-only) or a numeric CRM ID
-    const isChurchTableId = String(id).startsWith('church_');
-    const numericId = isChurchTableId ? parseInt(id.replace('church_', '')) : parseInt(id);
-
-    if (isNaN(numericId)) {
-      return res.status(400).json({ error: 'Invalid ID' });
+    const detail = await buildLifecycleDetail(getOmaiPool(), getOmAuthPool(), req.params.id);
+    if (detail.error) {
+      return res.status(detail.status || 404).json({ error: detail.error });
     }
-
-    let crmChurch = null;
-    let onboardedChurch = null;
-    let contacts = [];
-    let activities = [];
-    let followUps = [];
-    let members = [];
-    let tokens = [];
-
-    if (isChurchTableId) {
-      // Direct lookup in churches table
-      const [rows] = await authPool.query('SELECT * FROM churches WHERE id = ?', [numericId]);
-      if (!rows.length) return res.status(404).json({ error: 'Church not found' });
-      onboardedChurch = rows[0];
-    } else {
-      // Lookup in omai_crm_leads (CRM)
-      const [crmRows] = await omaiPool.query(
-        `SELECT uc.*, ps.label AS stage_label, ps.color AS stage_color
-         FROM omai_crm_leads uc
-         LEFT JOIN omai_crm_pipeline_stages ps ON uc.pipeline_stage = ps.stage_key
-         WHERE uc.id = ?`,
-        [numericId]
-      );
-      if (!crmRows.length) return res.status(404).json({ error: 'Church not found' });
-      crmChurch = crmRows[0];
-
-      // CRM data
-      const [c] = await omaiPool.query('SELECT * FROM omai_crm_contacts WHERE church_id = ? ORDER BY is_primary DESC, first_name', [numericId]);
-      contacts = c;
-      const [a] = await omaiPool.query('SELECT * FROM omai_crm_activities WHERE church_id = ? ORDER BY created_at DESC LIMIT 50', [numericId]);
-      activities = a;
-      const [f] = await omaiPool.query('SELECT * FROM omai_crm_followups WHERE church_id = ? ORDER BY due_date ASC', [numericId]);
-      followUps = f;
-
-      // If provisioned, also get onboarded data
-      if (crmChurch.provisioned_church_id) {
-        const [oRows] = await authPool.query('SELECT * FROM churches WHERE id = ?', [crmChurch.provisioned_church_id]);
-        if (oRows.length) onboardedChurch = oRows[0];
-      }
-    }
-
-    // If we have an onboarded church, get tokens and members
-    const churchId = onboardedChurch?.id;
-    if (churchId) {
-      const [m] = await authPool.query(
-        `SELECT id, email, first_name, last_name, full_name, role, is_locked, lockout_reason, created_at
-         FROM users WHERE church_id = ? ORDER BY created_at DESC`,
-        [churchId]
-      );
-      members = m;
-
-      const [t] = await authPool.query(
-        `SELECT crt.id, crt.token, crt.is_active, crt.created_at, u.email AS created_by
-         FROM church_registration_tokens crt
-         LEFT JOIN users u ON crt.created_by = u.id
-         WHERE crt.church_id = ? ORDER BY crt.created_at DESC`,
-        [churchId]
-      );
-      tokens = t;
-    }
-
-    // Derive unified stage
-    let unified_stage, source;
-    if (onboardedChurch) {
-      unified_stage = deriveOnboardingStage({
-        setup_complete: onboardedChurch.setup_complete,
-        active_users: members.filter(m => m.is_locked === 0).length,
-        pending_users: members.filter(m => m.is_locked === 1).length,
-        active_tokens: tokens.filter(t => t.is_active === 1).length,
-      });
-      source = crmChurch ? 'both' : 'onboarded';
-    } else {
-      unified_stage = crmChurch.pipeline_stage;
-      source = 'crm';
-    }
-
-    // Onboarding checklist (if applicable)
-    let checklist = null;
-    if (onboardedChurch) {
-      checklist = {
-        church_created: true,
-        token_issued: tokens.length > 0,
-        members_registered: members.length > 0,
-        members_active: members.filter(m => m.is_locked === 0).length > 0,
-        setup_complete: onboardedChurch.setup_complete === 1,
-      };
-    }
-
-    res.json({
-      source,
-      unified_stage,
-      crm: crmChurch,
-      onboarded: onboardedChurch,
-      contacts,
-      activities,
-      followUps,
-      members,
-      tokens,
-      checklist,
-    });
+    res.json(detail);
   } catch (err) {
     console.error('Church lifecycle detail error:', err);
     res.status(500).json({ error: 'Failed to load church detail' });

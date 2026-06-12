@@ -228,11 +228,15 @@ async function reconcileChurchOps(pool, subject) {
     stepKey = 'verify_provision';
   } else if (!ch.has_baptism_records && !ch.has_marriage_records && !ch.has_funeral_records) {
     stepKey = 'database_mapping';
-  } else if (Number(ch.onboarding_phase || 0) < 4) {
-    stepKey = 'record_settings';
   } else {
-    const { active_users: activeStaff } = await countChurchUsersByLockState(pool, churchId);
-    stepKey = activeStaff < 2 ? 'parish_staff' : 'finalize_setup';
+    const { deriveOnboardingPhase } = require('../utils/churchOnboardingPhase');
+    const displayPhase = deriveOnboardingPhase(ch);
+    if (displayPhase < 4) {
+      stepKey = 'record_settings';
+    } else {
+      const { active_users: activeStaff } = await countChurchUsersByLockState(pool, churchId);
+      stepKey = activeStaff < 2 ? 'parish_staff' : 'finalize_setup';
+    }
   }
 
   if (stepKey === 'finalize_setup') {

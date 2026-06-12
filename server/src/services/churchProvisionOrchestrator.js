@@ -5,6 +5,7 @@
 const crypto = require('crypto');
 const { getAppPool, getOmaiPool } = require('../config/db');
 const { provisionTenantDb } = require('./tenantProvisioning');
+const { applyOnboardingPhaseWrite } = require('../utils/churchOnboardingPhase');
 const { assertCrmProvisionAllowed } = require('../utils/churchPromotionPolicy');
 const { isEnrolledForProvisioning } = require('./churchOnboardingState');
 
@@ -160,10 +161,7 @@ async function provisionFromCrmLead(crmLeadId, req, { source = 'crm', force = fa
     return { success: false, error: provResult.error || 'Tenant provisioning failed', status: 500, church_id: churchId };
   }
 
-  await authPool.query(
-    'UPDATE churches SET onboarding_phase = GREATEST(COALESCE(onboarding_phase, 1), 2) WHERE id = ?',
-    [churchId]
-  );
+  await applyOnboardingPhaseWrite(authPool, churchId, 2, { source: 'provision-orchestrator' });
 
   let registrationToken = null;
   let registrationUrl = null;

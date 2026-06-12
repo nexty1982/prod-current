@@ -66,8 +66,8 @@ Directory staging (`batch-stage`) creates phase-1 CRM rows only — never tenant
 3. **Do not** batch-promote phase 1→2 for directory parishes
 4. **Super-admin override:** `{ "force": true }` on provision or promote when needed
 
-## Follow-up (optional)
+## Follow-up (completed 2026-06-12)
 
-- Enrich CCC drawer with `GET .../unified/:id` instead of 3 parallel fetches
-- Freeze `onboarding_phase` writes after workflow catalog B-PR12 cutover
-- Retire OM `ChurchLifecycleDetailPage` dead paths entirely
+- CCC drawer uses `GET .../unified/:id?full=1` (single call for lifecycle + enrollment + state)
+- OM `ChurchLifecycleDetailPage` redirects to OMAI CCC via `ChurchLifecycleRedirect`
+- `onboarding_phase` writes frozen when `EXECUTION_READ_PRIMARY=true` — use `churchOnboardingPhase.js` for derived display phase
