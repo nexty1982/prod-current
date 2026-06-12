@@ -825,108 +825,20 @@ router.delete('/follow-ups/:id', requireAuth, async (req, res) => {
 
 router.post('/churches/:id/provision', requireAuth, requireAdmin, async (req, res) => {
   try {
-    const pool = getPool();
     const { id } = req.params;
-    const crypto = require('crypto');
-
-    const [churchRows] = await pool.query(
-      `SELECT uc.*, j.calendar_type AS jurisdiction_calendar, j.name AS jurisdiction_name
-       FROM omai_crm_leads uc
-       LEFT JOIN jurisdictions j ON uc.jurisdiction_id = j.id
-       WHERE uc.id = ?`,
-      [id]
-    );
-    if (!churchRows.length) return res.status(404).json({ error: 'Church not found' });
-    const church = churchRows[0];
-
-    if (church.provisioned_church_id) {
-      return res.status(400).json({ error: 'Church already provisioned', provisioned_church_id: church.provisioned_church_id });
+    const force = req.body?.force === true;
+    const { provisionFromCrmLead } = require('../services/churchProvisionOrchestrator');
+    const result = await provisionFromCrmLead(parseInt(id, 10), req, { source: 'crm', force });
+    if (!result.success) {
+      return res.status(result.status || 500).json({ error: result.error, code: result.code });
     }
-
-    // Get primary contact
-    const [contacts] = await pool.query('SELECT * FROM omai_crm_contacts WHERE church_id = ? AND is_primary = 1 LIMIT 1', [id]);
-    const primaryContact = contacts.length > 0 ? contacts[0] : null;
-
-    const contactEmail = primaryContact?.email || null;
-    const calendarType = church.jurisdiction_calendar || null;
-
-    // 1. Insert into churches table (correct column names)
-    const [insertResult] = await pool.query(
-      `INSERT INTO churches (name, email, phone, website, address, city, state_province, postal_code, country,
-                             jurisdiction, jurisdiction_id, calendar_type, is_active)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'United States', ?, ?, ?, TRUE)`,
-      [
-        church.name,
-        contactEmail,
-        church.phone || primaryContact?.phone || null,
-        church.website || null,
-        church.street || null,
-        church.city || null,
-        church.state_code || null,
-        church.zip || null,
-        church.jurisdiction || church.jurisdiction_name || null,
-        church.jurisdiction_id || null,
-        calendarType,
-      ]
-    );
-
-    const newChurchId = insertResult.insertId;
-
-    // 2. Create tenant database via centralized provisioning service
-    let provisionResult = null;
-    try {
-      const { provisionTenantDb } = require('../services/tenantProvisioning');
-      provisionResult = await provisionTenantDb(newChurchId, pool, { source: 'crm', initiatedBy: req.session?.user?.id });
-      if (!provisionResult.success) {
-        console.error('Tenant provisioning failed (non-fatal, church record still created):', provisionResult.error);
-      }
-    } catch (provisionErr) {
-      console.error('Tenant provisioning failed (non-fatal, church record still created):', provisionErr.message);
-    }
-
-    // 3. Generate registration token
-    let registrationToken = null;
-    let registrationUrl = null;
-    try {
-      const token = crypto.randomBytes(32).toString('hex');
-      await pool.query(
-        'INSERT INTO church_registration_tokens (church_id, token, created_by) VALUES (?, ?, ?)',
-        [newChurchId, token, req.session?.user?.id || 0]
-      );
-      registrationToken = token;
-      const encodedName = encodeURIComponent(church.name);
-      registrationUrl = `https://orthodoxmetrics.com/auth/register?token=${token}&church=${encodedName}`;
-    } catch (tokenErr) {
-      console.error('Token generation failed (non-fatal):', tokenErr.message);
-    }
-
-    // 4. Link back to CRM
-    await pool.query(
-      'UPDATE omai_crm_leads SET provisioned_church_id = ?, is_client = 1, pipeline_stage = ? WHERE id = ?',
-      [newChurchId, 'active_parish', id]
-    );
-
-    // 5. Log activity
-    await pool.query(
-      `INSERT INTO omai_crm_activities (church_id, activity_type, subject, metadata, created_by)
-       VALUES (?, 'provision', ?, ?, ?)`,
-      [id, `Church provisioned as OrthodoxMetrics client (ID: ${newChurchId})`,
-       JSON.stringify({
-         provisioned_church_id: newChurchId,
-         database_name: provisionResult?.targetDb || null,
-         calendar_type: calendarType,
-         jurisdiction_id: church.jurisdiction_id || null,
-         registration_token: registrationToken ? '(generated)' : null,
-       }), req.session?.user?.id || null]
-    );
-
     res.status(201).json({
       success: true,
-      provisioned_church_id: newChurchId,
-      database_name: provisionResult?.targetDb || null,
-      calendar_type: calendarType,
-      registration_url: registrationUrl,
-      message: `${church.name} has been provisioned as church #${newChurchId}`,
+      provisioned_church_id: result.provisioned_church_id,
+      database_name: result.database_name,
+      registration_url: result.registration_url,
+      client_status: result.client_status,
+      message: `Church provisioned as #${result.provisioned_church_id}`,
     });
   } catch (err) {
     console.error('CRM provision error:', err);

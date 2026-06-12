@@ -488,9 +488,17 @@ async function ensureParishOnboardRealmAccess(pool, userId, actorUserId) {
 }
 
 async function ensureChurch(pool, row) {
+  const { linkCrmLeadToChurch } = require('./churchProvisionOrchestrator');
+  const { getOmaiPool } = require('../config/db');
+
   if (row.church_id) {
     const [ch] = await pool.query('SELECT id FROM churches WHERE id = ?', [row.church_id]);
-    if (ch.length) return row.church_id;
+    if (ch.length) {
+      if (row.crm_record_id) {
+        await linkCrmLeadToChurch(row.crm_record_id, row.church_id);
+      }
+      return row.church_id;
+    }
   }
 
   const payload = row.submitted_payload_json || {};
@@ -504,15 +512,18 @@ async function ensureChurch(pool, row) {
       'UPDATE onboarding_requests SET church_id = ? WHERE onboarding_request_id = ?',
       [existing[0].id, row.onboarding_request_id]
     );
+    if (row.crm_record_id) {
+      await linkCrmLeadToChurch(row.crm_record_id, existing[0].id);
+    }
     return existing[0].id;
   }
 
   const [ins] = await pool.query(
     `INSERT INTO churches (
       name, church_name, email, phone, address, city, state_province, postal_code, country,
-      jurisdiction, is_active, onboarding_phase, crm_lead_id,
+      jurisdiction, is_active, onboarding_phase, crm_lead_id, client_status,
       has_baptism_records, has_marriage_records, has_funeral_records, setup_complete
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 1, ?, ?, ?, ?, 0)`,
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 1, ?, 'enrolling', ?, ?, ?, 0)`,
     [
       row.parish_name,
       row.parish_name,
@@ -535,6 +546,15 @@ async function ensureChurch(pool, row) {
     'UPDATE onboarding_requests SET church_id = ? WHERE onboarding_request_id = ?',
     [churchId, row.onboarding_request_id]
   );
+  if (row.crm_record_id) {
+    await linkCrmLeadToChurch(row.crm_record_id, churchId);
+    try {
+      await getOmaiPool().query(
+        "UPDATE omai_crm_leads SET pipeline_stage = 'deployment' WHERE id = ?",
+        [row.crm_record_id]
+      );
+    } catch (_) { /* non-fatal */ }
+  }
   return churchId;
 }
 
@@ -564,6 +584,11 @@ async function createTemporaryAdmin(onboardingRequestId, req) {
   if (!provResult?.success) {
     throw new Error(provResult?.error || 'Tenant database provisioning failed');
   }
+
+  await pool.query(
+    'UPDATE churches SET onboarding_phase = GREATEST(COALESCE(onboarding_phase, 1), 2), client_status = ? WHERE id = ?',
+    ['enrolling', churchId]
+  );
 
   await pool.query(
     'UPDATE onboarding_requests SET provisioning_status = ? WHERE onboarding_request_id = ?',

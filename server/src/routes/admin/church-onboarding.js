@@ -106,6 +106,9 @@ router.get('/pipeline', requireRole(ADMIN_ROLES), async (req, res) => {
         db_name: ch.db_name || ch.database_name,
         tenant_provisioned: Boolean(ch.db_name || ch.database_name),
         operational: isOperationalChurchId(ch.id),
+        canonical_system: ch.client_status === 'directory' || ch.crm_lead_id
+          ? 'crm'
+          : (ch.onboarding_phase != null ? 'phase_pipeline' : 'legacy'),
         is_active: ch.is_active,
         setup_complete: ch.setup_complete,
         onboarding_phase: ch.onboarding_phase,
@@ -593,35 +596,16 @@ router.post('/phase1/batch-stage', requireRole(ADMIN_ROLES), async (req, res) =>
 
     const staged = [];
     const errors = [];
+    const { stageDirectoryFromCrmLead } = require('../../services/churchProvisionOrchestrator');
 
     for (const lead of leads) {
       try {
-        // Generate placeholder email (unique constraint on churches.email)
-        const placeholderEmail = `onboarding-${lead.id}@placeholder.orthodoxmetrics.com`;
-
-        const [result] = await pool.query(
-          `INSERT INTO churches (
-            name, church_name, email, phone, address, city, state_province, postal_code, country,
-            website, jurisdiction, jurisdiction_id, latitude, longitude,
-            is_active, onboarding_phase, crm_lead_id,
-            has_baptism_records, has_marriage_records, has_funeral_records, setup_complete
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'US', ?, ?, ?, ?, ?, 0, 1, ?, 0, 0, 0, 0)`,
-          [
-            lead.name, lead.name, placeholderEmail, lead.phone, lead.street, lead.city, lead.state_code,
-            lead.zip, lead.website, lead.jurisdiction, lead.jurisdiction_id,
-            lead.latitude, lead.longitude, lead.id
-          ]
-        );
-
-        const churchId = result.insertId;
-
-        // Link CRM lead back to the new church
-        await pool.query(
-          'UPDATE omai_crm_leads SET provisioned_church_id = ? WHERE id = ?',
-          [churchId, lead.id]
-        );
-
-        staged.push({ church_id: churchId, crm_lead_id: lead.id, name: lead.name });
+        const result = await stageDirectoryFromCrmLead(lead.id, req, { jurisdiction: jur });
+        if (!result.success) {
+          errors.push({ crm_lead_id: lead.id, name: lead.name, error: result.error });
+          continue;
+        }
+        staged.push({ church_id: result.church_id, crm_lead_id: result.crm_lead_id, name: lead.name, client_status: 'directory' });
       } catch (insertErr) {
         errors.push({ crm_lead_id: lead.id, name: lead.name, error: insertErr.message });
       }

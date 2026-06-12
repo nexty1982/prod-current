@@ -301,6 +301,7 @@ const inviteRegisterRouter = require('./routes/invite-register');
 const churchRegisterRouter = require('./routes/church-register');
 const crmPublicRouter = require('./routes/crm-public');
 const churchOnboardingRouter = require('./routes/admin/church-onboarding');
+const churchLifecycleRouter = require('./routes/admin/church-lifecycle');
 const onboardingPipelineRouter = require('./routes/admin/onboarding-pipeline');
 const adminOnboardingRouter = require('./routes/admin/onboarding');
 const workflowGoalsRouter = require('./routes/workflow-goals');
@@ -626,6 +627,8 @@ app.use('/api', churchRegisterRouter); // Admin token management endpoints
 console.log('✅ [Server] Mounted church registration token routes');
 app.use('/api/admin/church-onboarding', churchOnboardingRouter);
 console.log('✅ [Server] Mounted /api/admin/church-onboarding route (Phase 2 onboarding pipeline)');
+app.use('/api/admin/church-lifecycle', churchLifecycleRouter);
+console.log('✅ [Server] Mounted /api/admin/church-lifecycle route (unified CRM + enrollment facade)');
 app.use('/api/admin/onboarding-pipeline', onboardingPipelineRouter);
 console.log('✅ [Server] Mounted /api/admin/onboarding-pipeline route (Layer 3 extended pipeline)');
 app.use('/api/admin/onboarding', adminOnboardingRouter);
