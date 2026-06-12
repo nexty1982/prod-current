@@ -206,6 +206,52 @@ router.post('/:onboarding_request_id/resend-admin-instructions', async (req, res
   }
 });
 
+const stripeBilling = require('../../services/stripeBillingService');
+
+router.post('/:onboarding_request_id/stripe/checkout', async (req, res) => {
+  try {
+    if (!stripeBilling.isConfigured()) {
+      return res.status(503).json({ success: false, message: 'Stripe is not configured on the server' });
+    }
+    const result = await stripeBilling.createCheckoutSession(req.params.onboarding_request_id, {
+      priceId: req.body?.priceId,
+      mode: req.body?.mode,
+      successUrl: req.body?.successUrl,
+      cancelUrl: req.body?.cancelUrl,
+    });
+    res.json({ success: true, ...result });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+});
+
+router.post('/:onboarding_request_id/stripe/invoice', async (req, res) => {
+  try {
+    if (!stripeBilling.isConfigured()) {
+      return res.status(503).json({ success: false, message: 'Stripe is not configured on the server' });
+    }
+    const result = await stripeBilling.createAndSendInvoice(req.params.onboarding_request_id, {
+      priceId: req.body?.priceId,
+      daysUntilDue: req.body?.daysUntilDue,
+    });
+    res.json({ success: true, ...result });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+});
+
+router.post('/:onboarding_request_id/stripe/portal', async (req, res) => {
+  try {
+    if (!stripeBilling.isConfigured()) {
+      return res.status(503).json({ success: false, message: 'Stripe is not configured on the server' });
+    }
+    const result = await stripeBilling.createPortalSession(req.params.onboarding_request_id);
+    res.json({ success: true, ...result });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+});
+
 // Convenience action endpoints
 const ACTION_MAP = {
   'mark-reviewing': { type: 'status', value: 'reviewing' },

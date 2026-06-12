@@ -306,6 +306,7 @@ const onboardingPipelineRouter = require('./routes/admin/onboarding-pipeline');
 const adminOnboardingRouter = require('./routes/admin/onboarding');
 const workflowGoalsRouter = require('./routes/workflow-goals');
 const userOnboardingRouter = require('./routes/onboarding');
+const billingRouter = require('./routes/billing');
 const orthodoxScheduleGuidelinesRouter = require('./routes/admin/orthodox-schedule-guidelines');
 const changeSetsRouter = require('./routes/admin/change-sets');
 // Import new modular admin route files (extracted from monolithic admin.js)
@@ -475,6 +476,10 @@ logAuthConfiguration();
 app.use(morgan('dev'));
 
 // 2. Body parsing middleware (before session)
+// Stripe webhook requires raw body — mount before express.json()
+const stripeBillingWebhook = require('./routes/billing').webhookHandler;
+app.post('/api/billing/webhook', express.raw({ type: 'application/json' }), stripeBillingWebhook);
+
 // Note: express.json() and express.urlencoded() automatically skip multipart/form-data
 // So they won't interfere with multer file uploads
 app.use(express.json({ limit: '50mb' }));
@@ -969,6 +974,8 @@ app.use('/api/upload', profileUploadRouter);
 const enrollRouter = require('./routes/enroll');
 app.use('/api/enroll', enrollRouter);
 app.use('/api/enrollment', enrollRouter);
+app.use('/api/billing', billingRouter);
+console.log('✅ [Server] Mounted /api/billing route (Stripe config + webhook at /api/billing/webhook)');
 
 // Contact form (public - no auth required)
 app.post('/api/contact', async (req: any, res: any) => {
