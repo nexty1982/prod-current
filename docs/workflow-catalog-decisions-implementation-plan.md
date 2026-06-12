@@ -153,7 +153,7 @@ Each filing PR includes: catalog seed SQL · step components · reconciler · wr
 
 | Item | PR | Repo | Decision |
 |------|-----|------|----------|
-| Workflow Attention stat card | UI-PR1 | OMAI | B4 |
+| ~~Workflow Attention stat card~~ | ~~UI-PR1~~ | OMAI | **Shipped** — Executive Overview metrics row (B4) |
 | CRM funnel KPIs on Overview | UI-PR2 | OMAI | H1 |
 | CRM funnel KPIs on CCC | UI-PR3 | OMAI | H1 |
 | Certificate jurisdiction warning goal | OM-PR1 | OM | F3 |
