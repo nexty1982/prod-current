@@ -17,7 +17,7 @@ Read these files first (in order):
 3. /var/www/orthodoxmetrics/prod/docs/workflow-catalog-decisions-implementation-plan.md  (PR sequence)
 
 Context: Phase B execution model is shipped (B-PR1–13). Product decisions were recorded 2026-06-13.
-Next recommended work: **UI-PR1** (Workflow Attention card), then **B-PR12** cutover (`EXECUTION_FALLBACK_INFERENCE=false` after soak).
+Next recommended work: **B-PR12** cutover (`EXECUTION_FALLBACK_INFERENCE=false` after soak). **UI-PR1 shipped** — Workflow Attention stat card on Executive Overview.
 **B-PR14 shipped** — `server/scripts/workflow-smoke-manville.js` (`npm run workflow:smoke:manville`).
 
 Repos: OM = /var/www/orthodoxmetrics/prod, OMAI = /var/www/omai
@@ -186,7 +186,7 @@ Next to file: **`records.manual.entry`** (#7).
 
 | ID | Work |
 |----|------|
-| **UI-PR1** | Compact “Workflow Attention” stat card on Executive Overview (B4) |
+| ~~**UI-PR1**~~ | ~~Compact “Workflow Attention” stat card on Executive Overview (B4)~~ | **Done** — scrolls to Workflow Operations section |
 | **UI-PR2/3** | CRM funnel KPIs on Overview + CCC (H1) |
 
 ### Phase C — governance (tracking PR epic)
