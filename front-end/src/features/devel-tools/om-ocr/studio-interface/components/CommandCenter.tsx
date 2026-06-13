@@ -123,8 +123,8 @@ export function CommandCenter({
   mode = 'devel',
   isSuperAdmin = false,
 }: CommandCenterProps) {
-  const actions = useMemo(() => buildActions(stats, isPortal), [stats, isPortal]);
   const isPortal = mode === 'portal';
+  const actions = useMemo(() => buildActions(stats, isPortal), [stats, isPortal]);
 
   const pipelineSteps = [
     { label: 'Uploaded', count: stats.uploaded, color: 'bg-blue-500' },
