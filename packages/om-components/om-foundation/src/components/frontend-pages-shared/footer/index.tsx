@@ -60,9 +60,9 @@ const Footer = () => {
             <Box mb={2}>
               <Box
                 component="img"
-                src={isDark ? '/images/logos/dark-logo.png' : '/images/logos/light-logo.png'}
+                src={isDark ? '/images/logos/om-mark-logo-dark.png' : '/images/logos/om-mark-logo.png'}
                 alt="Orthodox Metrics"
-                sx={{ height: 36, width: 'auto', maxWidth: 260, objectFit: 'contain' }}
+                sx={{ height: 44, width: 'auto', maxWidth: 220, objectFit: 'contain' }}
               />
             </Box>
             <Typography variant="body2" sx={{ color: textSecondary, lineHeight: 1.7, mb: 2, fontSize: '0.85rem' }}>

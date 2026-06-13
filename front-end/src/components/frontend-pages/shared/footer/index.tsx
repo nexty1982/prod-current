@@ -61,9 +61,10 @@ const Footer = () => {
           <Box sx={{ flex: { md: '0 0 280px' }, maxWidth: { md: 280 } }}>
             <Box mb={2}>
               <BrandLogo
+                variant="mark"
                 href={PUBLIC_ROUTES.HOME}
                 colorScheme={isDark ? 'dark' : 'light'}
-                className="h-9 w-auto max-w-[min(100%,260px)] object-contain object-left"
+                className="h-11 w-auto max-w-[min(100%,220px)] object-contain object-left"
               />
             </Box>
             <Typography variant="body2" sx={{ color: textSecondary, lineHeight: 1.7, mb: 2, fontSize: '0.85rem' }}>

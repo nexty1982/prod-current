@@ -22,9 +22,10 @@ const SiteFooter = () => {
           {/* Brand */}
           <div className="col-span-2 lg:col-span-1">
             <BrandLogo
+              variant="mark"
               href={PUBLIC_ROUTES.HOME}
               colorScheme={activeMode === 'dark' ? 'dark' : 'light'}
-              className="h-9 w-auto max-w-[min(100%,260px)] object-contain object-left mb-4"
+              className="h-11 w-auto max-w-[min(100%,220px)] object-contain object-left mb-4"
             />
           </div>
 
