@@ -12,74 +12,73 @@ export function useEnrollmentCopy() {
 }
 
 export function buildEnrollmentCopy(t: TFn) {
-  const stepWord = t('enroll.common.step');
-  const stepLabel = (n: number) => `${stepWord} ${n}`;
+  const stepLabel = (n: number) => t('enroll.wizard.step_label').replace('{n}', String(n));
 
   const wizardSteps = [
-    { key: 'find-parish' as const, label: t('enroll.step.find_parish'), n: 1 },
-    { key: 'contact' as const, label: t('enroll.step.contact'), n: 2 },
-    { key: 'parish' as const, label: t('enroll.step.parish'), n: 3 },
-    { key: 'location' as const, label: t('enroll.step.location'), n: 4 },
-    { key: 'modules' as const, label: t('enroll.step.modules'), n: 5 },
+    { key: 'find-parish' as const, label: t('enroll.steps.find_parish'), n: 1 },
+    { key: 'contact' as const, label: t('enroll.steps.contact'), n: 2 },
+    { key: 'parish' as const, label: t('enroll.steps.parish'), n: 3 },
+    { key: 'location' as const, label: t('enroll.steps.location'), n: 4 },
+    { key: 'modules' as const, label: t('enroll.steps.modules'), n: 5 },
   ];
 
   const importMethods = [
     {
       value: 'om_full_service' as const,
-      label: t('enroll.import.om_full_service.label'),
-      description: t('enroll.import.om_full_service.desc'),
+      label: t('enroll.modules.import.om_full_service.label'),
+      description: t('enroll.modules.import.om_full_service.description'),
     },
     {
       value: 'self_service' as const,
-      label: t('enroll.import.self_service.label'),
-      description: t('enroll.import.self_service.desc'),
+      label: t('enroll.modules.import.self_service.label'),
+      description: t('enroll.modules.import.self_service.description'),
     },
   ];
 
   const startTimelines = [
-    { value: 'asap' as const, label: t('enroll.timeline.asap') },
-    { value: 'few_weeks' as const, label: t('enroll.timeline.few_weeks') },
-    { value: 'month_plus' as const, label: t('enroll.timeline.month_plus') },
+    { value: 'asap' as const, label: t('enroll.modules.timeline.asap') },
+    { value: 'few_weeks' as const, label: t('enroll.modules.timeline.few_weeks') },
+    { value: 'month_plus' as const, label: t('enroll.modules.timeline.month_plus') },
   ];
 
   const moduleSubStages = [
-    { n: 1, label: t('enroll.modules.sub.record_types') },
-    { n: 2, label: t('enroll.modules.sub.import_method') },
-    { n: 3, label: t('enroll.modules.sub.start_timeline') },
+    { n: 1, label: t('enroll.modules.stage.record_types') },
+    { n: 2, label: t('enroll.modules.stage.import_method') },
+    { n: 3, label: t('enroll.modules.stage.start_timeline') },
   ];
 
   const moduleCards = [
     {
       key: 'baptism',
-      title: t('enroll.module.baptism.title'),
-      desc: t('enroll.module.baptism.desc'),
+      title: t('enroll.landing.sacrament.baptism.label'),
+      desc: t('enroll.landing.sacrament.baptism.desc'),
       recommended: true,
     },
     {
       key: 'marriage',
-      title: t('enroll.module.marriage.title'),
-      desc: t('enroll.module.marriage.desc'),
+      title: t('enroll.landing.sacrament.marriage.label'),
+      desc: t('enroll.landing.sacrament.marriage.desc'),
       recommended: true,
     },
     {
       key: 'funeral',
-      title: t('enroll.module.funeral.title'),
-      desc: t('enroll.module.funeral.desc'),
+      title: t('enroll.landing.sacrament.funeral.label'),
+      desc: t('enroll.landing.sacrament.funeral.desc'),
       recommended: false,
     },
     {
       key: 'custom',
-      title: t('enroll.module.custom.title'),
-      desc: t('enroll.module.custom.desc'),
+      title: t('enroll.module_type.custom'),
+      desc: t('enroll.modules.select_prompt'),
       recommended: false,
     },
   ];
 
   const moduleLabels: Record<string, string> = {
-    baptism: t('enroll.module.baptism.short'),
-    marriage: t('enroll.module.marriage.short'),
-    funeral: t('enroll.module.funeral.short'),
-    custom: t('enroll.module.custom.short'),
+    baptism: t('enroll.module_type.baptism'),
+    marriage: t('enroll.module_type.marriage'),
+    funeral: t('enroll.module_type.funeral'),
+    custom: t('enroll.module_type.custom'),
   };
 
   const jurisdictions = JURISDICTION_SLUGS.map((slug) => ({
@@ -99,10 +98,10 @@ export function buildEnrollmentCopy(t: TFn) {
   ];
 
   const confirmNextSteps = [
-    { title: t('enroll.confirm.next1.title'), description: t('enroll.confirm.next1.desc') },
-    { title: t('enroll.confirm.next2.title'), description: t('enroll.confirm.next2.desc') },
-    { title: t('enroll.confirm.next3.title'), description: t('enroll.confirm.next3.desc') },
-    { title: t('enroll.confirm.next4.title'), description: t('enroll.confirm.next4.desc') },
+    { title: t('enroll.confirm.next_step1.title'), description: t('enroll.confirm.next_step1.description') },
+    { title: t('enroll.confirm.next_step2.title'), description: t('enroll.confirm.next_step2.description') },
+    { title: t('enroll.confirm.next_step3.title'), description: t('enroll.confirm.next_step3.description') },
+    { title: t('enroll.confirm.next_step4.title'), description: t('enroll.confirm.next_step4.description') },
   ];
 
   return {
@@ -123,161 +122,159 @@ export function buildEnrollmentCopy(t: TFn) {
     formatStartTimeline: (value: string) =>
       startTimelines.find((o) => o.value === value)?.label ?? value,
     wizardProgress: (current: number, total: number) =>
-      t('enroll.wizard.progress').replace('{current}', String(current)).replace('{total}', String(total)),
-    moduleStageProgress: (current: number, total: number, label: string) =>
-      t('enroll.modules.stage_progress')
+      t('enroll.wizard.sidebar_progress')
         .replace('{current}', String(current))
         .replace('{total}', String(total))
-        .replace('{label}', label),
+        .replace(/ · about 5 minutes$/, ''),
     confirmReceivedBody: (firstName: string, churchName: string) =>
-      t('enroll.confirm.received_body')
+      t('enroll.confirm.received_message')
         .replace('{firstName}', firstName ? `, ${firstName}` : '')
         .replace('{churchName}', churchName),
     landing: {
       badge: t('enroll.landing.badge'),
-      headlinePrefix: t('enroll.landing.headline_prefix'),
-      headlineAccent: t('enroll.landing.headline_accent'),
-      body: t('enroll.landing.body'),
+      headlinePrefix: t('enroll.landing.hero_title'),
+      headlineAccent: t('enroll.landing.hero_highlight'),
+      body: t('enroll.landing.subtitle'),
       ctaStart: t('enroll.landing.cta_start'),
       ctaContact: t('enroll.landing.cta_contact'),
       trustReviewed: t('enroll.landing.trust_reviewed'),
       trustEncrypted: t('enroll.landing.trust_encrypted'),
-      onboardingTitle: t('enroll.landing.onboarding_title'),
+      onboardingTitle: t('enroll.landing.how_it_works'),
       landingSteps: [
-        { n: 1, title: t('enroll.landing.flow1.title'), desc: t('enroll.landing.flow1.desc') },
-        { n: 2, title: t('enroll.landing.flow2.title'), desc: t('enroll.landing.flow2.desc') },
-        { n: 3, title: t('enroll.landing.flow3.title'), desc: t('enroll.landing.flow3.desc') },
-        { n: 4, title: t('enroll.landing.flow4.title'), desc: t('enroll.landing.flow4.desc') },
+        { n: 1, title: t('enroll.landing.step1_title'), desc: t('enroll.landing.step1_desc') },
+        { n: 2, title: t('enroll.landing.step2_title'), desc: t('enroll.landing.step2_desc') },
+        { n: 3, title: t('enroll.landing.step3_title'), desc: t('enroll.landing.step3_desc') },
+        { n: 4, title: t('enroll.landing.step4_title'), desc: t('enroll.landing.step4_desc') },
       ],
-      carouselLabel: t('enroll.landing.carousel_label'),
-      carouselSlidesLabel: t('enroll.landing.carousel_slides_label'),
-      carouselShowing: (label: string) => t('enroll.landing.carousel_showing').replace('{label}', label),
+      carouselLabel: t('enroll.landing.carousel.region_label'),
+      carouselSlidesLabel: t('enroll.landing.carousel.tablist_label'),
+      carouselShowing: (label: string) => t('enroll.landing.carousel.now_showing').replace('{label}', label),
     },
     complete: {
-      title: t('enroll.complete.title'),
-      body: t('enroll.complete.body'),
-      backHome: t('enroll.complete.back_home'),
-      contact: t('enroll.complete.contact'),
+      title: t('enroll.app_complete.title'),
+      body: t('enroll.app_complete.subtitle'),
+      backHome: t('enroll.app_complete.back_home'),
+      contact: t('enroll.app_complete.contact_us'),
     },
     nav: {
-      cancel: t('enroll.nav.cancel'),
-      back: t('enroll.nav.back'),
-      continue: t('enroll.nav.continue'),
-      next: t('enroll.nav.next'),
-      skip: t('enroll.nav.skip'),
-      submit: t('enroll.nav.submit'),
-      submitting: t('enroll.nav.submitting'),
+      cancel: t('enroll.wizard.cancel'),
+      back: t('enroll.wizard.back'),
+      continue: t('enroll.wizard.continue'),
+      next: t('enroll.wizard.next'),
+      skip: t('enroll.wizard.skip_for_now'),
+      submit: t('enroll.wizard.submit'),
+      submitting: t('enroll.wizard.submitting'),
     },
     wizard: {
-      title: t('enroll.wizard.title'),
-      duration: t('enroll.wizard.duration'),
+      title: t('enroll.wizard.sidebar_title'),
+      duration: t('enroll.wizard.duration_hint'),
       progressAria: t('enroll.wizard.progress_aria'),
-      completeRequired: t('enroll.wizard.complete_required'),
+      completeRequired: t('enroll.wizard.required_fields_notice'),
     },
     findParish: {
-      title: t('enroll.find_parish.title'),
-      description: t('enroll.find_parish.description'),
-      statePlaceholder: t('enroll.find_parish.state_placeholder'),
-      mapLabel: t('enroll.find_parish.map_label'),
-      mapHint: t('enroll.find_parish.map_hint'),
-      loadingMap: t('enroll.find_parish.loading_map'),
-      mapUnavailable: t('enroll.find_parish.map_unavailable'),
-      parishName: t('enroll.find_parish.parish_name'),
-      parishHint: t('enroll.find_parish.parish_hint'),
-      parishPlaceholder: t('enroll.find_parish.parish_placeholder'),
-      searching: t('enroll.find_parish.searching'),
-      noResults: t('enroll.find_parish.no_results'),
-      selected: t('enroll.find_parish.selected'),
-      notListed: t('enroll.find_parish.not_listed'),
-      cancelSearch: t('enroll.find_parish.cancel_search'),
-      manualLabel: t('enroll.find_parish.manual_label'),
-      manualHint: t('enroll.find_parish.manual_hint'),
-      manualPlaceholder: t('enroll.find_parish.manual_placeholder'),
-      crmTip: t('enroll.find_parish.crm_tip'),
+      title: t('enroll.section.find_parish.title'),
+      description: t('enroll.section.find_parish.description'),
+      statePlaceholder: t('enroll.find_parish.placeholder.select_state'),
+      mapLabel: t('enroll.find_parish.map.title'),
+      mapHint: t('enroll.find_parish.map.help'),
+      loadingMap: t('enroll.find_parish.map.loading'),
+      mapUnavailable: t('enroll.find_parish.map.unavailable'),
+      parishName: t('enroll.find_parish.field.parish_name'),
+      parishHint: t('enroll.find_parish.hint.parish_name'),
+      parishPlaceholder: t('enroll.find_parish.placeholder.parish_name'),
+      searching: t('enroll.find_parish.map.loading'),
+      noResults: t('enroll.find_parish.search.no_results'),
+      selected: t('enroll.find_parish.selected.change'),
+      notListed: t('enroll.find_parish.toggle.not_listed'),
+      cancelSearch: t('enroll.find_parish.toggle.search_list'),
+      manualLabel: t('enroll.find_parish.field.manual_name'),
+      manualHint: t('enroll.find_parish.hint.manual_name'),
+      manualPlaceholder: t('enroll.find_parish.placeholder.manual_name'),
+      crmTip: `${t('enroll.find_parish.crm_tip')} ${t('enroll.find_parish.crm_tip_action')}`,
     },
     contact: {
-      title: t('enroll.contact.title'),
-      description: t('enroll.contact.description'),
-      firstName: t('enroll.contact.first_name'),
-      lastName: t('enroll.contact.last_name'),
-      email: t('enroll.contact.email'),
-      emailHint: t('enroll.contact.email_hint'),
+      title: t('enroll.section.contact.title'),
+      description: t('enroll.section.contact.description'),
+      firstName: t('enroll.contact.field.first_name'),
+      lastName: t('enroll.contact.field.last_name'),
+      email: t('enroll.contact.field.email'),
+      emailHint: t('enroll.contact.hint.email'),
     },
     parishInfo: {
-      title: t('enroll.parish_info.title'),
-      description: t('enroll.parish_info.description'),
-      churchName: t('enroll.parish_info.church_name'),
-      jurisdiction: t('enroll.parish_info.jurisdiction'),
-      jurisdictionHint: t('enroll.parish_info.jurisdiction_hint'),
-      jurisdictionPlaceholder: t('enroll.parish_info.jurisdiction_placeholder'),
-      phone: t('enroll.parish_info.phone'),
-      website: t('enroll.parish_info.website'),
-      size: t('enroll.parish_info.size'),
-      sizePlaceholder: t('enroll.parish_info.size_placeholder'),
-      referral: t('enroll.parish_info.referral'),
-      optional: t('enroll.common.optional'),
+      title: t('enroll.section.parish.title'),
+      description: t('enroll.section.parish.description'),
+      churchName: t('enroll.parish.field.church_name'),
+      jurisdiction: t('enroll.parish.field.jurisdiction'),
+      jurisdictionHint: t('enroll.parish.hint.jurisdiction'),
+      jurisdictionPlaceholder: t('enroll.parish.placeholder.select_jurisdiction'),
+      phone: t('enroll.parish.field.phone'),
+      website: t('enroll.parish.field.website'),
+      size: t('enroll.parish.field.size'),
+      sizePlaceholder: t('enroll.parish.placeholder.select_size'),
+      referral: t('enroll.parish.field.referral'),
+      optional: t('enroll.optional'),
     },
     location: {
-      title: t('enroll.location.title'),
-      description: t('enroll.location.description'),
-      street: t('enroll.location.street'),
-      city: t('enroll.location.city'),
-      state: t('enroll.location.state'),
-      zip: t('enroll.location.zip'),
-      zipSuggested: t('enroll.location.zip_suggested'),
-      country: t('enroll.location.country'),
-      timezone: t('enroll.location.timezone'),
-      timezonePlaceholder: t('enroll.location.timezone_placeholder'),
+      title: t('enroll.section.location.title'),
+      description: t('enroll.section.location.description'),
+      street: t('enroll.location.field.street'),
+      city: t('enroll.location.field.city'),
+      state: t('enroll.location.field.state'),
+      zip: t('enroll.location.field.postal'),
+      zipSuggested: t('enroll.location.hint.postal_suggested'),
+      country: t('enroll.location.field.country'),
+      timezone: t('enroll.location.field.timezone'),
+      timezonePlaceholder: t('enroll.location.placeholder.select_timezone'),
     },
     modules: {
-      title: t('enroll.modules.title'),
-      description: t('enroll.modules.description'),
+      title: t('enroll.section.modules.title'),
+      description: t('enroll.section.modules.description'),
       selectPrompt: t('enroll.modules.select_prompt'),
       recommended: t('enroll.modules.recommended'),
       selected: t('enroll.modules.selected'),
       tapToSelect: t('enroll.modules.tap_to_select'),
-      selectedCount: t('enroll.modules.selected_count'),
-      selectedModules: t('enroll.modules.selected_modules'),
-      importLabel: t('enroll.modules.import_label'),
-      importQuestion: t('enroll.modules.import_question'),
-      importAria: t('enroll.modules.import_aria'),
-      timelineQuestion: t('enroll.modules.timeline_question'),
-      timelineAria: t('enroll.modules.timeline_aria'),
+      selectedCount: t('enroll.modules.summary.selected_modules'),
+      selectedModules: t('enroll.modules.summary.selected_modules'),
+      importLabel: t('enroll.modules.import.legend'),
+      importQuestion: t('enroll.modules.import.legend'),
+      importAria: t('enroll.modules.import.aria'),
+      timelineQuestion: t('enroll.modules.timeline.legend'),
+      timelineAria: t('enroll.modules.timeline.aria'),
       submitTip: t('enroll.modules.submit_tip'),
     },
     confirm: {
-      brand: t('enroll.confirm.brand'),
-      receivedTitle: t('enroll.confirm.received_title'),
-      reference: t('enroll.confirm.reference'),
+      brand: t('common.brand_name'),
+      receivedTitle: t('enroll.confirm.title'),
+      reference: t('enroll.confirm.reference_label'),
       copyReference: t('enroll.confirm.copy_reference'),
       copied: t('enroll.confirm.copied'),
-      whatNext: t('enroll.confirm.what_next'),
+      whatNext: t('enroll.confirm.what_happens_next'),
       submissionTitle: t('enroll.confirm.submission_title'),
-      detailChurch: t('enroll.confirm.detail_church'),
-      detailEmail: t('enroll.confirm.detail_email'),
-      detailModules: t('enroll.confirm.detail_modules'),
-      detailImport: t('enroll.confirm.detail_import'),
-      detailTimeline: t('enroll.confirm.detail_timeline'),
+      detailChurch: t('enroll.confirm.submission.church'),
+      detailEmail: t('enroll.confirm.submission.contact_email'),
+      detailModules: t('enroll.confirm.submission.modules'),
+      detailImport: t('enroll.confirm.submission.import'),
+      detailTimeline: t('enroll.confirm.submission.getting_started'),
       none: t('enroll.confirm.none'),
-      helpTitle: t('enroll.confirm.help_title'),
-      helpBody: t('enroll.confirm.help_body'),
+      helpTitle: t('enroll.confirm.need_help_title'),
+      helpBody: t('enroll.confirm.need_help_body'),
       returnHome: t('enroll.confirm.return_home'),
       contactUs: t('enroll.confirm.contact_us'),
-      showDetails: t('enroll.confirm.show_details'),
+      showDetails: t('enroll.confirm.view_details'),
       hideDetails: t('enroll.confirm.hide_details'),
       footer: t('enroll.confirm.footer').replace('{year}', String(new Date().getFullYear())),
     },
     errors: {
-      submitFailed: t('enroll.errors.submit_failed'),
-      network: t('enroll.errors.network'),
-      firstName: t('enroll.errors.first_name'),
-      lastName: t('enroll.errors.last_name'),
-      emailRequired: t('enroll.errors.email_required'),
-      emailInvalid: t('enroll.errors.email_invalid'),
-      churchName: t('enroll.errors.church_name'),
-      modules: t('enroll.errors.modules'),
-      importMethod: t('enroll.errors.import_method'),
-      startTimeline: t('enroll.errors.start_timeline'),
+      submitFailed: t('enroll.validation.submit_failed'),
+      network: t('enroll.validation.network_error'),
+      firstName: t('enroll.validation.first_name_required'),
+      lastName: t('enroll.validation.last_name_required'),
+      emailRequired: t('enroll.validation.email_required'),
+      emailInvalid: t('enroll.validation.email_invalid'),
+      churchName: t('enroll.validation.church_name_required'),
+      modules: t('enroll.validation.modules_required'),
+      importMethod: t('enroll.validation.import_method_required'),
+      startTimeline: t('enroll.validation.start_timeline_required'),
     },
   };
 }
@@ -285,16 +282,16 @@ export function buildEnrollmentCopy(t: TFn) {
 export function validateContactFields(p: Record<string, unknown>, t: TFn): Record<string, string> {
   const e: Record<string, string> = {};
   const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!String(p.firstName ?? '').trim()) e.firstName = t('enroll.errors.first_name');
-  if (!String(p.lastName ?? '').trim()) e.lastName = t('enroll.errors.last_name');
-  if (!String(p.email ?? '').trim()) e.email = t('enroll.errors.email_required');
-  else if (!EMAIL_RE.test(String(p.email).trim())) e.email = t('enroll.errors.email_invalid');
+  if (!String(p.firstName ?? '').trim()) e.firstName = t('enroll.validation.first_name_required');
+  if (!String(p.lastName ?? '').trim()) e.lastName = t('enroll.validation.last_name_required');
+  if (!String(p.email ?? '').trim()) e.email = t('enroll.validation.email_required');
+  else if (!EMAIL_RE.test(String(p.email).trim())) e.email = t('enroll.validation.email_invalid');
   return e;
 }
 
 export function validateParishFields(p: Record<string, unknown>, t: TFn): Record<string, string> {
   const e: Record<string, string> = {};
-  if (!String(p.churchName ?? '').trim()) e.churchName = t('enroll.errors.church_name');
+  if (!String(p.churchName ?? '').trim()) e.churchName = t('enroll.validation.church_name_required');
   return e;
 }
 
@@ -305,8 +302,8 @@ export function validateModulesFields(
   t: TFn,
 ): Record<string, string> {
   const e: Record<string, string> = {};
-  if (!Object.values(modules).some(Boolean)) e.modules = t('enroll.errors.modules');
-  if (!importMethod) e.importMethod = t('enroll.errors.import_method');
-  if (!startTimeline) e.startTimeline = t('enroll.errors.start_timeline');
+  if (!Object.values(modules).some(Boolean)) e.modules = t('enroll.validation.modules_required');
+  if (!importMethod) e.importMethod = t('enroll.validation.import_method_required');
+  if (!startTimeline) e.startTimeline = t('enroll.validation.start_timeline_required');
   return e;
 }

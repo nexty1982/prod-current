@@ -319,6 +319,7 @@ const ENGLISH_DEFAULTS = {
   'enroll.wizard.progress_aria': 'Enrollment progress',
   'enroll.wizard.sidebar_title': 'Onboarding Wizard',
   'enroll.wizard.sidebar_progress': 'Step {current} of {total} · about 5 minutes',
+  'enroll.wizard.duration_hint': 'about 5 minutes',
   'enroll.wizard.step_label': 'Step {n}',
   'enroll.wizard.required_fields_notice': 'Please complete the required fields highlighted above before continuing.',
   'enroll.steps.find_parish': 'Find Your Parish',
