@@ -48,6 +48,7 @@ function scanPublicPageKeys() {
     'features/auth/authentication/authForms',
     'features/auth/authentication/auth1',
     'features/auth/authentication/auth2',
+    'features/account',
     'components/frontend-pages/shared/header',
     'components/frontend-pages/shared/footer',
     'components/frontend-pages/shared/c2a',
