@@ -9,7 +9,7 @@ import Stack from '@mui/material/Stack';
 import { IconMoon, IconSun } from '@tabler/icons-react';
 import { useContext } from 'react';
 import { BrandLogo } from '@/layouts/full/shared/logo/Logo';
-import { PUBLIC_ROUTES } from '@/config/publicRoutes';
+import { PUBLIC_MAIN_NAV_LINKS, PUBLIC_ROUTES } from '@/config/publicRoutes';
 import { Link } from 'react-router-dom';
 
 const portalMobileLinks = [
@@ -106,12 +106,17 @@ const MobileSidebar = ({ isPortal = false }: MobileSidebarProps) => {
             </>
           ) : (
             <>
-              <Button color="inherit" component={Link} to={PUBLIC_ROUTES.HOME} sx={mobileNavButtonSx}>
-                {t('nav.home')}
-              </Button>
-              <Button color="inherit" component={Link} to={PUBLIC_ROUTES.PRICING} sx={mobileNavButtonSx}>
-                {t('nav.pricing')}
-              </Button>
+              {PUBLIC_MAIN_NAV_LINKS.map((link) => (
+                <Button
+                  color="inherit"
+                  key={link.to}
+                  component={Link}
+                  to={link.to}
+                  sx={mobileNavButtonSx}
+                >
+                  {t(link.tKey)}
+                </Button>
+              ))}
               {PUBLIC_MOBILE_NAV_GROUPS.map((group) => (
                 <Box key={group.labelKey}>
                   <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', display: 'block', mb: 0.5, mt: 1 }}>
@@ -132,6 +137,23 @@ const MobileSidebar = ({ isPortal = false }: MobileSidebarProps) => {
                   </Stack>
                 </Box>
               ))}
+              <Button
+                color="primary"
+                variant="contained"
+                component={Link}
+                to={PUBLIC_ROUTES.ENROLL}
+                sx={{
+                  mt: 1,
+                  background: 'linear-gradient(135deg, #D4AF37 0%, #E6C96A 100%)',
+                  color: '#14093A',
+                  fontWeight: 700,
+                  letterSpacing: '0.06em',
+                  fontSize: '12px',
+                  '&:hover': { background: 'linear-gradient(135deg, #c9a030 0%, #d4af37 100%)' },
+                }}
+              >
+                {t('footer.enroll_parish')}
+              </Button>
               <Button color="primary" variant="outlined" component={Link} to="/auth/login">
                 {t('common.church_login')}
               </Button>

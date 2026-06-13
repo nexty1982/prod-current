@@ -1,4 +1,8 @@
-import { isPublicNavActive, PUBLIC_NAV_LINKS, PUBLIC_ROUTES } from '@/config/publicRoutes';
+import {
+  isPublicNavActive,
+  PUBLIC_MAIN_NAV_LINKS,
+  PUBLIC_ROUTES,
+} from '@/config/publicRoutes';
 import { useAuth } from '@/context/AuthContext';
 import { CustomizerContext } from '@/context/CustomizerContext';
 import { useLanguage } from '@/context/LanguageContext';
@@ -13,14 +17,18 @@ import { BrandLogo } from '@/layouts/full/shared/logo/Logo';
 import MobileSidebar from './MobileSidebar';
 import PortalNavigations from './PortalNavigations';
 
-const LANG_OPTIONS: { code: string; flag: string; label: string }[] = [
-  { code: 'en', flag: '🇺🇸', label: 'English' },
-  { code: 'el', flag: '🇬🇷', label: 'Ελληνικά' },
-  { code: 'ru', flag: '🇷🇺', label: 'Русский' },
-  { code: 'ro', flag: '🇷🇴', label: 'Română' },
-  { code: 'ka', flag: '🇬🇪', label: 'ქართული' },
-  { code: 'zh', flag: '🇹🇼', label: '繁體中文' },
+const LANG_OPTIONS: { code: string; flag: string; label: string; region: string }[] = [
+  { code: 'en', flag: '🇺🇸', label: 'English', region: 'US' },
+  { code: 'el', flag: '🇬🇷', label: 'Ελληνικά', region: 'GR' },
+  { code: 'ru', flag: '🇷🇺', label: 'Русский', region: 'RU' },
+  { code: 'ro', flag: '🇷🇴', label: 'Română', region: 'RO' },
+  { code: 'ka', flag: '🇬🇪', label: 'ქართული', region: 'GE' },
+  { code: 'zh', flag: '🇹🇼', label: '繁體中文', region: 'TW' },
 ];
+
+function UtilityDivider() {
+  return <span className="om-public-header__utility-sep" aria-hidden>|</span>;
+}
 
 const HpHeader = () => {
   const { authenticated, user } = useAuth();
@@ -30,6 +38,7 @@ const HpHeader = () => {
   const mdUp = useMediaQuery((theme: any) => theme.breakpoints.up('md'));
   const location = useLocation();
   const isHomeHero = location.pathname === '/';
+  const isDarkHero = isHomeHero && activeMode === 'dark';
 
   const isChurchStaff = authenticated && user && !['super_admin', 'admin'].includes(user.role);
   const isAccountHub = location.pathname.startsWith('/account');
@@ -41,7 +50,6 @@ const HpHeader = () => {
 
   const currentLang = LANG_OPTIONS.find((l) => l.code === lang) || LANG_OPTIONS[0];
 
-  // Close dropdown on outside click
   React.useEffect(() => {
     if (!langOpen) return;
     const handler = (e: MouseEvent) => {
@@ -53,143 +61,146 @@ const HpHeader = () => {
     return () => document.removeEventListener('mousedown', handler);
   }, [langOpen]);
 
+  const navLinkClass = (isActive: boolean) => {
+    const base = 'om-public-header__nav-link';
+    if (isDarkHero) {
+      return `${base}${isActive ? ' om-public-header__nav-link--active font-semibold' : ''}`;
+    }
+    return `${base}${isActive ? ' text-[var(--om-text-primary)] font-semibold' : ' om-text-secondary hover:text-[var(--om-text-primary)]'}`;
+  };
+
+  const utilityBar = (
+    <div className="om-public-header__utility">
+      <div className="max-w-7xl mx-auto px-6 om-public-header__utility-inner">
+        <div ref={langRef} className="relative">
+          <button
+            type="button"
+            onClick={() => setLangOpen(!langOpen)}
+            aria-label={t('common.language')}
+            className="om-public-header__utility-btn"
+          >
+            <IconWorld size={14} stroke={1.75} />
+            <span>{currentLang.region}</span>
+          </button>
+          {langOpen && (
+            <div className="absolute right-0 top-full mt-1 w-44 om-public-panel rounded-lg shadow-lg py-1 z-[60]">
+              {LANG_OPTIONS.map((opt) => (
+                <button
+                  key={opt.code}
+                  type="button"
+                  onClick={() => {
+                    setLang(opt.code);
+                    setLangOpen(false);
+                  }}
+                  className={`w-full text-left px-3 py-2 flex items-center gap-2.5 font-om-body om-text-small transition-colors cursor-pointer border-0 ${
+                    opt.code === lang
+                      ? 'bg-[var(--om-input-bg)] text-[var(--om-gold)] font-semibold'
+                      : 'bg-transparent om-text-secondary hover:bg-[var(--om-input-bg)]'
+                  }`}
+                >
+                  <span className="text-[16px]">{opt.flag}</span>
+                  <span>{opt.label}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <UtilityDivider />
+
+        <button
+          type="button"
+          onClick={toggleMode}
+          aria-label={activeMode === 'light' ? t('common.dark_mode') : t('common.light_mode')}
+          className="om-public-header__utility-btn"
+        >
+          {activeMode === 'light' ? <IconMoon size={14} stroke={1.75} /> : <IconSun size={14} stroke={1.75} />}
+        </button>
+
+        {!showPortalNav && (
+          <>
+            <UtilityDivider />
+            {authenticated ? (
+              <div className="flex items-center pl-1">
+                <Profile />
+              </div>
+            ) : (
+              <a href={PUBLIC_ROUTES.LOGIN} className="om-public-header__utility-btn">
+                {t('common.sign_in')}
+              </a>
+            )}
+          </>
+        )}
+
+        {showPortalNav && authenticated && (
+          <>
+            <UtilityDivider />
+            <div className="flex items-center pl-1">
+              <Profile />
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+
   return (
     <nav className={`om-public-header sticky top-0 z-50${isHomeHero ? ' om-public-header--hero' : ''}`}>
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo */}
+      {utilityBar}
+
+      <div className="om-public-header__main">
+        <div className="max-w-7xl mx-auto px-6 om-public-header__main-inner">
           <BrandLogo
             variant="header-svg"
             href={PUBLIC_ROUTES.HOME}
             colorScheme={activeMode === 'dark' ? 'dark' : 'light'}
-            className="h-10 w-auto max-h-10 max-w-[min(100%,300px)] object-contain object-left"
+            className="h-11 w-auto max-h-11 max-w-[min(100%,300px)] object-contain object-left shrink-0"
           />
 
-          {/* Desktop Navigation */}
           {mdUp ? (
             showPortalNav ? (
-              <div className="flex items-center">
+              <div className="flex flex-1 items-center justify-center">
                 <Stack spacing={1} direction="row" alignItems="center">
                   <PortalNavigations />
                 </Stack>
               </div>
             ) : (
-              <div className="flex items-center gap-8">
-                {PUBLIC_NAV_LINKS.map((link) => {
+              <nav className="om-public-header__nav" aria-label="Primary">
+                {PUBLIC_MAIN_NAV_LINKS.map((link) => {
                   const isActive = isPublicNavActive(location.pathname, link.to);
                   return (
-                    <NavLink
-                      key={link.to}
-                      to={link.to}
-                      className={`font-om-display om-text-small tracking-wide transition-colors no-underline ${
-                        isActive
-                          ? isHomeHero && activeMode === 'dark'
-                            ? 'text-[#d4af37] font-semibold'
-                            : 'text-[var(--om-text-primary)] font-semibold'
-                          : isHomeHero && activeMode === 'dark'
-                            ? 'text-white/70 hover:text-[#d4af37]'
-                            : 'om-text-secondary hover:text-[var(--om-text-primary)]'
-                      }`}
-                    >
+                    <NavLink key={link.to} to={link.to} className={navLinkClass(isActive)}>
                       {t(link.tKey)}
                     </NavLink>
                   );
                 })}
-              </div>
+              </nav>
             )
-          ) : null}
+          ) : (
+            <div className="flex-1" />
+          )}
 
-          {/* CTA Button & Theme Toggle & Language */}
-          <div className="flex items-center gap-3">
-            {/* Language Switcher */}
-            <div ref={langRef} className="relative">
-              <button
-                onClick={() => setLangOpen(!langOpen)}
-                aria-label={t('common.language')}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 text-[var(--om-text-primary)] rounded-lg hover:bg-[var(--om-input-bg)] transition-colors cursor-pointer border-0 bg-transparent font-om-body om-text-small"
-              >
-                <IconWorld size={18} />
-                <span className="hidden sm:inline">{currentLang.flag}</span>
-              </button>
+          <div className="flex items-center gap-2 shrink-0">
+            {mdUp && !showPortalNav && !authenticated && (
+              <Link to={PUBLIC_ROUTES.ENROLL} className="om-public-header__enroll">
+                {t('footer.enroll_parish')}
+              </Link>
+            )}
 
-              {langOpen && (
-                <div className="absolute right-0 top-full mt-1 w-44 om-public-panel rounded-lg shadow-lg py-1 z-[60]">
-                  {LANG_OPTIONS.map((opt) => (
-                    <button
-                      key={opt.code}
-                      onClick={() => {
-                        setLang(opt.code);
-                        setLangOpen(false);
-                      }}
-                      className={`w-full text-left px-3 py-2 flex items-center gap-2.5 font-om-body om-text-small transition-colors cursor-pointer border-0 ${
-                        opt.code === lang
-                          ? 'bg-[var(--om-input-bg)] text-[var(--om-gold)] font-semibold'
-                          : 'bg-transparent om-text-secondary hover:bg-[var(--om-input-bg)]'
-                      }`}
-                    >
-                      <span className="text-[16px]">{opt.flag}</span>
-                      <span>{opt.label}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Dark/Light mode toggle */}
-            <button
-              onClick={toggleMode}
-              aria-label={activeMode === 'light' ? t('common.dark_mode') : t('common.light_mode')}
-              className="p-2 text-[#2d1b4e] dark:text-white rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer border-0 bg-transparent"
-            >
-              {activeMode === 'light' ? <IconMoon size={20} /> : <IconSun size={20} />}
-            </button>
-
-            {/* Mobile hamburger */}
             {!mdUp && (
               <button
+                type="button"
                 onClick={() => setOpen(true)}
                 aria-label="menu"
-                className="p-2 text-[#2d1b4e] dark:text-white cursor-pointer border-0 bg-transparent"
+                className="p-2 text-[var(--om-text-primary)] cursor-pointer border-0 bg-transparent rounded-lg hover:bg-[var(--om-input-bg)]"
               >
                 <IconMenu2 size={24} />
               </button>
-            )}
-
-            {/* Auth CTA — desktop only */}
-            {mdUp && !showPortalNav && (
-              authenticated ? (
-                <Profile />
-              ) : (
-                <>
-                  <a
-                    href="/auth/login"
-                    className={`font-om-display text-[13px] tracking-wide transition-colors no-underline ${
-                      isHomeHero && activeMode === 'dark'
-                        ? 'text-[#d4af37] hover:text-[#e6c96a] border border-[#d4af37]/50 rounded-md px-4 py-2'
-                        : 'text-[#2d1b4e] dark:text-white hover:text-[#1f1236] dark:hover:text-[#d4af37]'
-                    }`}
-                  >
-                    {t('common.sign_in')}
-                  </a>
-                  <Link
-                    to={PUBLIC_ROUTES.ENROLL}
-                    className="font-om-display text-[11px] font-bold tracking-wider no-underline rounded-md px-4 py-2 transition-opacity hover:opacity-90"
-                    style={{
-                      background: 'linear-gradient(135deg, #D4AF37 0%, #E6C96A 100%)',
-                      color: '#14093A',
-                      boxShadow: '0 4px 16px rgba(212,175,55,0.35)',
-                    }}
-                  >
-                    {t('footer.enroll_parish')}
-                  </Link>
-                </>
-              )
             )}
           </div>
         </div>
       </div>
 
-      {/* Mobile drawer */}
       <Drawer
         anchor="left"
         open={open}

@@ -44,13 +44,18 @@ export function isPublicNavActive(pathname: string, to: string): boolean {
   return pathname === to;
 }
 
-/** Navigation links shown in the public header and mobile sidebar. */
-export const PUBLIC_NAV_LINKS = [
+/** Primary links in the public header main bar (Contact lives in footer / mobile groups). */
+export const PUBLIC_MAIN_NAV_LINKS = [
   { tKey: 'nav.home', to: PUBLIC_ROUTES.HOME },
   { tKey: 'nav.tour', to: PUBLIC_ROUTES.TOUR },
   { tKey: 'nav.samples', to: PUBLIC_ROUTES.SAMPLES },
   { tKey: 'nav.about', to: PUBLIC_ROUTES.ABOUT },
   { tKey: 'nav.pricing', to: PUBLIC_ROUTES.PRICING },
+] as const;
+
+/** Navigation links shown in the public header and mobile sidebar. */
+export const PUBLIC_NAV_LINKS = [
+  ...PUBLIC_MAIN_NAV_LINKS,
   { tKey: 'nav.contact', to: PUBLIC_ROUTES.CONTACT },
 ] as const;
 
