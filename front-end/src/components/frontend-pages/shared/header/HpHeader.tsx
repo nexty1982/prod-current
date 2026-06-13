@@ -8,7 +8,7 @@ import Stack from '@mui/material/Stack';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { IconMenu2, IconMoon, IconSun, IconWorld } from '@tabler/icons-react';
 import React, { useContext, useRef, useState } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { Link, NavLink, useLocation } from 'react-router-dom';
 import { BrandLogo } from '@/layouts/full/shared/logo/Logo';
 import MobileSidebar from './MobileSidebar';
 import PortalNavigations from './PortalNavigations';
@@ -29,6 +29,7 @@ const HpHeader = () => {
   const toggleMode = () => setActiveMode(activeMode === 'light' ? 'dark' : 'light');
   const mdUp = useMediaQuery((theme: any) => theme.breakpoints.up('md'));
   const location = useLocation();
+  const isHomeHero = location.pathname === '/';
 
   const isChurchStaff = authenticated && user && !['super_admin', 'admin'].includes(user.role);
   const isAccountHub = location.pathname.startsWith('/account');
@@ -53,7 +54,7 @@ const HpHeader = () => {
   }, [langOpen]);
 
   return (
-    <nav className="om-public-header sticky top-0 z-50">
+    <nav className={`om-public-header sticky top-0 z-50${isHomeHero ? ' om-public-header--hero' : ''}`}>
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
@@ -82,8 +83,12 @@ const HpHeader = () => {
                       to={link.to}
                       className={`font-om-display om-text-small tracking-wide transition-colors no-underline ${
                         isActive
-                          ? 'text-[var(--om-text-primary)] font-semibold'
-                          : 'om-text-secondary hover:text-[var(--om-text-primary)]'
+                          ? isHomeHero && activeMode === 'dark'
+                            ? 'text-[#d4af37] font-semibold'
+                            : 'text-[var(--om-text-primary)] font-semibold'
+                          : isHomeHero && activeMode === 'dark'
+                            ? 'text-white/70 hover:text-[#d4af37]'
+                            : 'om-text-secondary hover:text-[var(--om-text-primary)]'
                       }`}
                     >
                       {t(link.tKey)}
@@ -158,10 +163,25 @@ const HpHeader = () => {
                 <>
                   <a
                     href="/auth/login"
-                    className="font-om-display text-[13px] tracking-wide text-[#2d1b4e] dark:text-white hover:text-[#1f1236] dark:hover:text-[#d4af37] transition-colors no-underline"
+                    className={`font-om-display text-[13px] tracking-wide transition-colors no-underline ${
+                      isHomeHero && activeMode === 'dark'
+                        ? 'text-[#d4af37] hover:text-[#e6c96a] border border-[#d4af37]/50 rounded-md px-4 py-2'
+                        : 'text-[#2d1b4e] dark:text-white hover:text-[#1f1236] dark:hover:text-[#d4af37]'
+                    }`}
                   >
                     {t('common.sign_in')}
                   </a>
+                  <Link
+                    to={PUBLIC_ROUTES.ENROLL}
+                    className="font-om-display text-[11px] font-bold tracking-wider no-underline rounded-md px-4 py-2 transition-opacity hover:opacity-90"
+                    style={{
+                      background: 'linear-gradient(135deg, #D4AF37 0%, #E6C96A 100%)',
+                      color: '#14093A',
+                      boxShadow: '0 4px 16px rgba(212,175,55,0.35)',
+                    }}
+                  >
+                    {t('footer.enroll_parish')}
+                  </Link>
                 </>
               )
             )}

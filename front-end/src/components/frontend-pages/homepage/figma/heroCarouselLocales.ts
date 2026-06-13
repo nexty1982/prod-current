@@ -87,16 +87,16 @@ export const EN: Locale = {
 
   navPlatform: "Platform", navParishes: "Parishes", navSecurity: "Security", navAbout: "About",
 
-  welcomeEyebrow: "WELCOME TO ORTHODOX METRICS",
+  welcomeEyebrow: "A NEW STANDARD FOR PARISH RECORDS",
   mainHeadline: ["The Complete Parish", "Records Platform"],
   goldSubheadline: "for Orthodox Churches",
   bodyText: "Digitize, preserve, search, manage, and generate official documents from baptism, marriage, and funeral records through one secure Orthodox parish platform.",
-  primaryCta: "ENROLL YOUR PARISH",
+  primaryCta: "CREATE YOUR PARISH",
   secondaryCta: "EXPLORE THE PLATFORM",
   bullets: [
-    "Baptism • Marriage • Funeral Records",
-    "Secure Parish Record Preservation",
-    "Built for Orthodox Churches",
+    "Track Members & Parish Records",
+    "Secure & Cloud-Based",
+    "Public & Private Records",
   ],
 
   slides: [
@@ -109,7 +109,7 @@ export const EN: Locale = {
 
   panelParish: "PARISH OPERATIONS", panelCerts: "CERTIFICATES & REPORTS",
   panelRecords: "RECORD MANAGEMENT", panelOcr: "OCR STUDIO",
-  panelBook: "HISTORIC RECORDS", ecosystemLabel: "PLATFORM ECOSYSTEM",
+  panelBook: "HISTORIC RECORDS", ecosystemLabel: "PARISH RECORDS",
 
   bookPageTitle: "BOOK OF BAPTISMS", bookChurchName: "ST. GEORGE ORTHODOX CHURCH",
   bookCols: ["No.", "Full Name", "Sacrament", "Date"], bookSacrament: "Baptism",

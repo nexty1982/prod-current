@@ -83,10 +83,11 @@ export function HeroCarousel({ embedded = false }: HeroCarouselProps) {
   const locale = getHeroCarouselLocale(lang);
   const { activeMode } = useContext(CustomizerContext);
   const isDark = activeMode === "dark";
-  const [activeSlide, setActiveSlide] = useState(0);
+  /** Figma default: records management panel (slide index 2) */
+  const [activeSlide, setActiveSlide] = useState(2);
   const [isPaused, setIsPaused] = useState(false);
 
-  useEffect(() => { setActiveSlide(0); }, [locale.code]);
+  useEffect(() => { setActiveSlide(2); }, [locale.code]);
 
   const advance = useCallback(
     () => setActiveSlide(s => (s + 1) % locale.slides.length),
@@ -99,10 +100,12 @@ export function HeroCarousel({ embedded = false }: HeroCarouselProps) {
     return () => clearInterval(id);
   }, [advance, isPaused]);
 
-  const bg = "var(--om-bg)";
+  const bg = isDark
+    ? "linear-gradient(145deg, #070412 0%, #0e0624 28%, #14093a 52%, #1a1050 78%, #120a2a 100%)"
+    : "linear-gradient(145deg, #faf6ee 0%, #f7f3e8 45%, #fffdf8 100%)";
 
-  const textPrimary  = isDark ? IV : PK;
-  const textMuted    = isDark ? "rgba(246,241,232,0.5)" : "rgba(14,6,37,0.5)";
+  const textPrimary  = isDark ? "#FFFFFF" : PK;
+  const textMuted    = isDark ? "rgba(255,255,255,0.62)" : "rgba(14,6,37,0.55)";
   const df = locale.displayFont;
   const bf = locale.bodyFont;
   const ls = (scale: number) => `${locale.letterSpacingScale * scale}px`;
@@ -202,6 +205,8 @@ export function HeroCarousel({ embedded = false }: HeroCarouselProps) {
               fontSize: "clamp(1.8rem, 3vw, 2.9rem)",
               fontWeight: 700, lineHeight: 1.15, margin: 0,
               color: textPrimary,
+              textTransform: "uppercase",
+              letterSpacing: ls(1.5),
             }}>
               {locale.mainHeadline.map((line, i) => (
                 <span key={i}>{i > 0 && <br />}{line}</span>
@@ -212,7 +217,8 @@ export function HeroCarousel({ embedded = false }: HeroCarouselProps) {
               fontSize: "clamp(1.1rem, 1.8vw, 1.7rem)",
               fontWeight: 400, lineHeight: 1.4, margin: "8px 0 0",
               color: G,
-              letterSpacing: ls(1),
+              letterSpacing: ls(2),
+              textTransform: "uppercase",
             }}>
               {locale.goldSubheadline}
             </h2>
@@ -307,8 +313,12 @@ export function HeroCarousel({ embedded = false }: HeroCarouselProps) {
             paddingTop: "4px",
           }}>
             {locale.bullets.map((text, i) => (
-              <div key={i} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <span style={{ fontSize: "7px", color: G, opacity: 0.7 }}>✦</span>
+              <div key={i} style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <span style={{
+                  width: "6px", height: "6px", borderRadius: "1px",
+                  background: G, opacity: 0.85, flexShrink: 0,
+                  transform: "rotate(45deg)",
+                }} />
                 <span style={{
                   fontFamily: bf, fontSize: "11px",
                   color: textMuted, letterSpacing: "0.2px",
@@ -367,8 +377,9 @@ export function HeroCarousel({ embedded = false }: HeroCarouselProps) {
           <div
             className="om-figma-ecosystem-frame overflow-hidden rounded-xl"
             style={{
+              border: `1px solid rgba(212,175,55,${isDark ? 0.42 : 0.35})`,
               boxShadow: isDark
-                ? "0 32px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(212,175,55,0.1)"
+                ? "0 32px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(212,175,55,0.12), inset 0 1px 0 rgba(212,175,55,0.08)"
                 : "0 32px 80px rgba(45,27,105,0.18), 0 0 0 1px rgba(212,175,55,0.2)",
             }}
             onMouseEnter={() => setIsPaused(true)}
