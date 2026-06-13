@@ -5,7 +5,7 @@
 
 import { recordTableConfigApiService, RecordTableConfig, FieldDefinition, TableConfig } from './RecordTableConfigApiService';
 import { agGridConfigApiService, AgGridConfig, ColumnDefinition, GridOptions } from './AgGridConfigApiService';
-import { apiJson } from '@/sandbox/field-mapper/api/client';
+import { apiJson } from '../client';
 
 export interface UnifiedRecordConfig {
   tableConfig: RecordTableConfig;

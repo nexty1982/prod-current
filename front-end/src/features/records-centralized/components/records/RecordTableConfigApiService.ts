@@ -3,7 +3,7 @@
  * Handles all API calls related to record table configurations
  */
 
-import { apiJson } from '@/sandbox/field-mapper/api/client';
+import { apiJson } from '../client';
 
 export interface RecordTableConfig {
   id: number;

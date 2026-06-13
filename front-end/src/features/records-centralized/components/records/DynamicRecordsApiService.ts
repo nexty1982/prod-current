@@ -5,7 +5,7 @@
  */
 
 import { apiClient } from '@/api/utils/axiosInstance';
-import { apiJson, FieldMapperApiError } from '@/sandbox/field-mapper/api/client';
+import { apiJson, FieldMapperApiError } from '../client';
 
 // Types
 export interface DynamicRecordApiResponse<T> {
