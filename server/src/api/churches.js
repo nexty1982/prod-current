@@ -241,6 +241,7 @@ router.get('/church-settings', requireAuth, async (req, res) => {
         c.calendar_type, c.tax_id, c.website, c.description_multilang, c.is_active,
         c.database_name, c.setup_complete, c.has_baptism_records, c.has_marriage_records,
         c.has_funeral_records, c.jurisdiction, c.jurisdiction_id, c.short_name,
+        c.crm_lead_id,
         c.logo_path, c.logo_dark_path, c.favicon_path,
         c.primary_color, c.secondary_color,
         c.created_at, c.updated_at,
@@ -260,7 +261,36 @@ router.get('/church-settings', requireAuth, async (req, res) => {
     // Look up CRM match to provide jurisdiction suggestions
     let crm_match = null;
     try {
-      // First try direct link via provisioned_church_id
+      // Direct OMAI CRM lead link (enrollment / provisioned parishes)
+      if (church.crm_lead_id) {
+        const [leadRows] = await getAppPool().query(`
+          SELECT cl.id, cl.name AS lead_name, cl.pipeline_stage, cl.jurisdiction AS lead_jurisdiction,
+                 cl.provisioned_church_id, cl.jurisdiction_id AS lead_jurisdiction_id,
+                 j.name AS jurisdiction_name, j.abbreviation AS jurisdiction_abbr,
+                 j.calendar_type AS jurisdiction_calendar_type
+          FROM omai_crm_leads cl
+          LEFT JOIN jurisdictions j ON cl.jurisdiction_id = j.id
+          WHERE cl.id = ?
+          LIMIT 1
+        `, [church.crm_lead_id]);
+        if (leadRows.length > 0) {
+          const lead = leadRows[0];
+          crm_match = {
+            id: lead.id,
+            crm_lead_id: lead.id,
+            source: 'omai_crm_leads',
+            lead_name: lead.lead_name,
+            pipeline_stage: lead.pipeline_stage,
+            jurisdiction: lead.lead_jurisdiction || lead.jurisdiction_name,
+            jurisdiction_id: lead.lead_jurisdiction_id || lead.jurisdiction_id,
+            jurisdiction_name: lead.jurisdiction_name,
+            jurisdiction_abbr: lead.jurisdiction_abbr,
+            jurisdiction_calendar_type: lead.jurisdiction_calendar_type,
+          };
+        }
+      }
+
+      // us_churches directory match (fallback / supplement)
       let [crmRows] = await getAppPool().query(`
         SELECT uc.id, uc.jurisdiction, uc.jurisdiction_id,
                j.name AS jurisdiction_name, j.abbreviation AS jurisdiction_abbr,
@@ -299,7 +329,17 @@ router.get('/church-settings', requireAuth, async (req, res) => {
             match.jurisdiction_calendar_type = jRows[0].calendar_type;
           }
         }
-        crm_match = match;
+        crm_match = {
+          ...(crm_match || {}),
+          us_churches_id: match.id,
+          jurisdiction: crm_match?.jurisdiction || match.jurisdiction,
+          jurisdiction_id: crm_match?.jurisdiction_id || match.jurisdiction_id,
+          jurisdiction_name: crm_match?.jurisdiction_name || match.jurisdiction_name,
+          jurisdiction_abbr: crm_match?.jurisdiction_abbr || match.jurisdiction_abbr,
+          jurisdiction_calendar_type: crm_match?.jurisdiction_calendar_type || match.jurisdiction_calendar_type,
+          id: crm_match?.id || match.id,
+          source: crm_match?.source || 'us_churches',
+        };
       }
     } catch (_) { /* CRM lookup is best-effort */ }
 

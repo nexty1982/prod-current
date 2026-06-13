@@ -24,6 +24,7 @@ import SendIcon from '@mui/icons-material/Send';
 import ShieldIcon from '@mui/icons-material/Shield';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import {
+    Alert,
     Box,
     Button,
     Card,
@@ -55,6 +56,23 @@ interface SecurityStatus {
   verification_sent_at: string | null;
   active_sessions: number;
   two_factor_enabled: boolean;
+  auth_provider?: 'keycloak' | 'active_directory' | 'local';
+  password_managed_externally?: boolean;
+  identity_realm?: string | null;
+}
+
+function authProviderLabel(
+  provider: SecurityStatus['auth_provider'],
+  t: (key: string) => string,
+): string {
+  switch (provider) {
+    case 'active_directory':
+      return t('account.auth_provider_active_directory');
+    case 'keycloak':
+      return t('account.auth_provider_keycloak');
+    default:
+      return t('account.auth_provider_local');
+  }
 }
 
 // useSnackbar hook — uses SNACKBAR_DURATION_LONG for security actions
@@ -203,13 +221,14 @@ const AccountPasswordPage: React.FC = () => {
 
   const canSubmit = useMemo(
     () =>
+      !security?.password_managed_externally &&
       form.currentPassword.length > 0 &&
       form.newPassword.length >= 8 &&
       form.confirmPassword.length > 0 &&
       form.newPassword === form.confirmPassword &&
       form.newPassword !== form.currentPassword &&
       !saving,
-    [form, saving],
+    [form, saving, security?.password_managed_externally],
   );
 
   // ── Handlers ──
@@ -389,6 +408,18 @@ const AccountPasswordPage: React.FC = () => {
               />
               <StatusItem
                 icon={<ShieldIcon sx={{ fontSize: 20 }} />}
+                label={t('account.sign_in_method')}
+                value={authProviderLabel(security.auth_provider, t)}
+                chipColor={
+                  security.auth_provider === 'active_directory'
+                    ? 'info'
+                    : security.auth_provider === 'keycloak'
+                      ? 'success'
+                      : 'default'
+                }
+              />
+              <StatusItem
+                icon={<ShieldIcon sx={{ fontSize: 20 }} />}
                 label={t('account.twofactor_auth')}
                 value={security.two_factor_enabled ? t('account.enabled') : t('account.not_available')}
                 chipColor={security.two_factor_enabled ? 'success' : 'default'}
@@ -482,77 +513,92 @@ const AccountPasswordPage: React.FC = () => {
               {t('account.change_password')}
             </Typography>
           </Box>
-          <Typography variant="body2" color="text.secondary" mb={0.5}>
-            {t('account.choose_strong_password')}
-          </Typography>
-          <Typography variant="caption" color="text.disabled" mb={3} component="div">
-            {t('account.password_signout_warning')}
-          </Typography>
-          <Divider sx={{ mb: 3 }} />
+          {security?.password_managed_externally ? (
+            <>
+              <Typography variant="body2" color="text.secondary" mb={2}>
+                {t('account.ad_password_managed_desc')}
+              </Typography>
+              <Alert severity="info" sx={{ mb: 0 }}>
+                {t('account.ad_password_change_instructions')}
+              </Alert>
+            </>
+          ) : (
+            <>
+              <Typography variant="body2" color="text.secondary" mb={0.5}>
+                {t('account.choose_strong_password')}
+              </Typography>
+              <Typography variant="caption" color="text.disabled" mb={3} component="div">
+                {security?.auth_provider === 'keycloak'
+                  ? t('account.password_keycloak_sync_note')
+                  : t('account.password_signout_warning')}
+              </Typography>
+              <Divider sx={{ mb: 3 }} />
 
-          <Stack spacing={2.5} sx={{ maxWidth: 480 }}>
-            {pwField(t('account.label_current_password'), 'current', 'currentPassword')}
-            {pwField(t('account.label_new_password'), 'new', 'newPassword', t('account.minimum_8_characters'))}
+              <Stack spacing={2.5} sx={{ maxWidth: 480 }}>
+                {pwField(t('account.label_current_password'), 'current', 'currentPassword')}
+                {pwField(t('account.label_new_password'), 'new', 'newPassword', t('account.minimum_8_characters'))}
 
-            {/* Strength indicator */}
-            {form.newPassword.length > 0 && (
-              <Box>
-                <Box display="flex" alignItems="center" justifyContent="space-between" mb={0.5}>
-                  <Typography variant="caption" color="text.secondary">
-                    {t('account.password_strength')}
-                  </Typography>
-                  <Typography variant="caption" color={`${strength.color}.main`} fontWeight={600}>
-                    {t(strength.labelKey)}
-                  </Typography>
-                </Box>
-                <LinearProgress
-                  variant="determinate"
-                  value={(strength.score / 4) * 100}
-                  color={strength.color}
-                  sx={{ height: 6, borderRadius: 3 }}
-                />
-                <Stack spacing={0.25} mt={1}>
-                  {strength.checks.map((c) => (
-                    <Typography
-                      key={c.label}
-                      variant="caption"
-                      color={c.met ? 'success.main' : 'text.disabled'}
-                      sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}
-                    >
-                      {c.met ? <CheckCircleOutlineIcon sx={{ fontSize: 14 }} /> : <InfoOutlinedIcon sx={{ fontSize: 14 }} />}
-                      {t(c.labelKey)}
-                    </Typography>
-                  ))}
-                </Stack>
-              </Box>
-            )}
+                {/* Strength indicator */}
+                {form.newPassword.length > 0 && (
+                  <Box>
+                    <Box display="flex" alignItems="center" justifyContent="space-between" mb={0.5}>
+                      <Typography variant="caption" color="text.secondary">
+                        {t('account.password_strength')}
+                      </Typography>
+                      <Typography variant="caption" color={`${strength.color}.main`} fontWeight={600}>
+                        {t(strength.labelKey)}
+                      </Typography>
+                    </Box>
+                    <LinearProgress
+                      variant="determinate"
+                      value={(strength.score / 4) * 100}
+                      color={strength.color}
+                      sx={{ height: 6, borderRadius: 3 }}
+                    />
+                    <Stack spacing={0.25} mt={1}>
+                      {strength.checks.map((c) => (
+                        <Typography
+                          key={c.labelKey}
+                          variant="caption"
+                          color={c.met ? 'success.main' : 'text.disabled'}
+                          sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}
+                        >
+                          {c.met ? <CheckCircleOutlineIcon sx={{ fontSize: 14 }} /> : <InfoOutlinedIcon sx={{ fontSize: 14 }} />}
+                          {t(c.labelKey)}
+                        </Typography>
+                      ))}
+                    </Stack>
+                  </Box>
+                )}
 
-            {pwField(t('account.label_confirm_new_password'), 'confirm', 'confirmPassword')}
+                {pwField(t('account.label_confirm_new_password'), 'confirm', 'confirmPassword')}
 
-            <Button
-              variant="contained"
-              onClick={handleSubmit}
-              disabled={!canSubmit}
-              sx={{
-                '&&': {
-                  bgcolor: `${accent} !important`,
-                  color: `${onAccent} !important`,
-                },
-                alignSelf: 'flex-start',
-                borderRadius: '4px',
-                px: 3,
-                py: 0.875,
-                fontSize: '0.8125rem',
-                fontWeight: 600,
-                letterSpacing: '0.01em',
-                '&:hover': {
-                  bgcolor: `${accentHover} !important`,
-                },
-              }}
-            >
-              {saving ? <CircularProgress size={20} color="inherit" /> : t('account.change_password')}
-            </Button>
-          </Stack>
+                <Button
+                  variant="contained"
+                  onClick={handleSubmit}
+                  disabled={!canSubmit}
+                  sx={{
+                    '&&': {
+                      bgcolor: `${accent} !important`,
+                      color: `${onAccent} !important`,
+                    },
+                    alignSelf: 'flex-start',
+                    borderRadius: '4px',
+                    px: 3,
+                    py: 0.875,
+                    fontSize: '0.8125rem',
+                    fontWeight: 600,
+                    letterSpacing: '0.01em',
+                    '&:hover': {
+                      bgcolor: `${accentHover} !important`,
+                    },
+                  }}
+                >
+                  {saving ? <CircularProgress size={20} color="inherit" /> : t('account.change_password')}
+                </Button>
+              </Stack>
+            </>
+          )}
         </CardContent>
       </Card>
 

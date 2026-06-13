@@ -20,7 +20,7 @@ import { useChurch } from '@/context/ChurchContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { RoleAvatar, getRoleLabel } from '@/utils/roleAvatars';
 import { getChurchDisplayName } from './accountConstants';
-import { churchApi, profileApi } from './accountApi';
+import { churchApi, CrmMatch, profileApi } from './accountApi';
 
 interface ProfileData {
   display_name: string;
@@ -39,15 +39,17 @@ const AccountProfilePage: React.FC = () => {
   const navigate = useNavigate();
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [churchName, setChurchName] = useState('');
+  const [crmMatch, setCrmMatch] = useState<CrmMatch | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const [data, settings] = await Promise.all([
+        const [data, churchResult] = await Promise.all([
           profileApi.getProfile(),
-          churchApi.getSettings<Record<string, unknown>>().catch(() => null),
+          churchApi.getSettingsWithCrm().catch(() => ({ settings: null, crm_match: null })),
         ]);
+        const settings = churchResult.settings;
         if (data.success && data.profile) {
           const p = data.profile;
           setProfile({
@@ -66,6 +68,9 @@ const AccountProfilePage: React.FC = () => {
         const fromContext =
           churchMetadata?.church_name_display || churchMetadata?.church_name || '';
         setChurchName(fromProfile || fromSettings || fromContext || '');
+        if (churchResult.crm_match) {
+          setCrmMatch(churchResult.crm_match);
+        }
       } catch (err) {
         console.error('Failed to load profile:', err);
       } finally {
@@ -92,6 +97,19 @@ const AccountProfilePage: React.FC = () => {
     { label: t('account.label_role'), value: getRoleLabel(user?.role) },
     { label: t('account.label_church'), value: churchName || '—' },
   ];
+
+  const crmJurisdiction =
+    crmMatch?.jurisdiction_name ||
+    crmMatch?.jurisdiction ||
+    crmMatch?.jurisdiction_abbr ||
+    null;
+
+  if (crmJurisdiction) {
+    infoRows.push({ label: t('account.label_crm_jurisdiction'), value: crmJurisdiction });
+  }
+  if (crmMatch?.lead_name) {
+    infoRows.push({ label: t('account.label_crm_record'), value: crmMatch.lead_name });
+  }
 
   return (
     <Card variant="outlined">

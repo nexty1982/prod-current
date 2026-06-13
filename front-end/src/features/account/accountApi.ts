@@ -81,6 +81,9 @@ export interface SecurityStatus {
   verification_sent_at: string | null;
   active_sessions: number;
   two_factor_enabled: boolean;
+  auth_provider?: 'keycloak' | 'active_directory' | 'local';
+  password_managed_externally?: boolean;
+  identity_realm?: string | null;
 }
 
 /** PUT /api/user/profile/password response */
@@ -122,6 +125,11 @@ export interface RevokeOthersResponse {
 /** CRM match data returned alongside church settings. */
 export interface CrmMatch {
   id: number;
+  crm_lead_id?: number | null;
+  us_churches_id?: number | null;
+  source?: 'omai_crm_leads' | 'us_churches' | string;
+  lead_name?: string | null;
+  pipeline_stage?: string | null;
   jurisdiction: string | null;
   jurisdiction_id: number | null;
   jurisdiction_name: string | null;

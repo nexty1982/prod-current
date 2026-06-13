@@ -42,7 +42,7 @@ import { useLanguage } from '@/context/LanguageContext';
 import { getRoleLabel } from '@/utils/roleAvatars';
 import { canEditBasicChurchInfo, canEditChurchSettings } from './accountPermissions';
 import { LANGUAGE_LABEL_KEYS, ROLE_DESCRIPTION_KEYS, getChurchDisplayName } from './accountConstants';
-import { churchApi } from './accountApi';
+import { churchApi, CrmMatch } from './accountApi';
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -63,6 +63,7 @@ interface ChurchSettings {
   calendar_type: string | null;
   website: string | null;
   jurisdiction: string | null;
+  jurisdiction_id?: number | null;
   short_name: string | null;
   has_baptism_records: number | boolean;
   has_marriage_records: number | boolean;
@@ -93,6 +94,7 @@ const AccountParishInfoPage: React.FC = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const [church, setChurch] = useState<ChurchSettings | null>(null);
+  const [crmMatch, setCrmMatch] = useState<CrmMatch | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -105,9 +107,13 @@ const AccountParishInfoPage: React.FC = () => {
     }
     const load = async () => {
       try {
-        const settings = await churchApi.getSettings<ChurchSettings>();
+        const result = await churchApi.getSettingsWithCrm();
+        const settings = result.settings;
         if (settings) {
-          setChurch(settings);
+          setChurch(settings as ChurchSettings);
+        }
+        if (result.crm_match) {
+          setCrmMatch(result.crm_match);
         }
       } catch {
         setError(t('account.unable_to_load_church'));
@@ -268,11 +274,82 @@ const AccountParishInfoPage: React.FC = () => {
                     variant="outlined"
                   />
                 )}
+                {crmMatch && (
+                  <Chip
+                    label={t('account.crm_linked')}
+                    size="small"
+                    color="success"
+                    variant="outlined"
+                  />
+                )}
               </Box>
             </Box>
           </Box>
         </CardContent>
       </Card>
+
+      {/* ── CRM linkage ── */}
+      {crmMatch && (
+        <Card variant="outlined" sx={{ mb: 2 }}>
+          <CardContent sx={{ p: 3 }}>
+            <Box display="flex" alignItems="center" gap={1} mb={0.5}>
+              <InfoOutlinedIcon color="primary" />
+              <Typography variant="h5" fontWeight={600}>
+                {t('account.crm_connection')}
+              </Typography>
+            </Box>
+            <Typography variant="body2" color="text.secondary" mb={2}>
+              {t('account.crm_connection_desc')}
+            </Typography>
+            <Divider sx={{ mb: 2 }} />
+            <Box
+              display="grid"
+              gridTemplateColumns={{ xs: '1fr', sm: '1fr 1fr' }}
+              gap={2}
+            >
+              {crmMatch.lead_name && (
+                <DetailRow
+                  icon={<ChurchIcon sx={{ fontSize: 18 }} />}
+                  label={t('account.label_crm_record')}
+                  value={crmMatch.lead_name}
+                />
+              )}
+              {(crmMatch.jurisdiction_name || crmMatch.jurisdiction) && (
+                <DetailRow
+                  icon={<PublicIcon sx={{ fontSize: 18 }} />}
+                  label={t('account.label_crm_jurisdiction')}
+                  value={crmMatch.jurisdiction_name || crmMatch.jurisdiction || '—'}
+                />
+              )}
+              {crmMatch.pipeline_stage && (
+                <DetailRow
+                  icon={<CalendarMonthIcon sx={{ fontSize: 18 }} />}
+                  label={t('account.label_crm_stage')}
+                  value={crmMatch.pipeline_stage}
+                />
+              )}
+              {crmMatch.jurisdiction_calendar_type && (
+                <DetailRow
+                  icon={<CalendarMonthIcon sx={{ fontSize: 18 }} />}
+                  label={t('account.label_calendar')}
+                  value={crmMatch.jurisdiction_calendar_type}
+                />
+              )}
+            </Box>
+            {canEditDetails && crmMatch.jurisdiction_id && !church.jurisdiction_id && (
+              <Button
+                size="small"
+                variant="outlined"
+                startIcon={<EditIcon sx={{ fontSize: 16 }} />}
+                onClick={() => navigate('/account/church-details')}
+                sx={{ mt: 2, textTransform: 'none' }}
+              >
+                {t('account.apply_crm_jurisdiction')}
+              </Button>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* ── Role & Access ── */}
       <Card variant="outlined" sx={{ mb: 2 }}>

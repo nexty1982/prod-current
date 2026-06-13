@@ -6,6 +6,13 @@ const { promisePool } = require('../config/db-compat');
 const { requireAuth } = require('../middleware/auth');
 const { sendVerificationEmail } = require('../utils/emailService');
 
+const KEYCLOAK_BOOTSTRAP_PATH =
+  process.env.KEYCLOAK_BOOTSTRAP_SCRIPT || '/var/www/omai/_runtime/server/scripts/keycloak-bootstrap.js';
+
+function loadKeycloakModule() {
+  return require(KEYCLOAK_BOOTSTRAP_PATH);
+}
+
 /** Verify password against Keycloak orthodoxmetrics realm (OIDC users). */
 async function verifyKeycloakPassword(email, password) {
     try {
@@ -46,12 +53,54 @@ async function verifyKeycloakPassword(email, password) {
 
 async function syncKeycloakPassword(email, password) {
     try {
-        const { syncKeycloakPasswordForEmail } = require('/var/www/omai/_runtime/server/scripts/keycloak-bootstrap.js');
-        await syncKeycloakPasswordForEmail(email, password);
-        return true;
+        const { syncKeycloakPasswordForEmail } = loadKeycloakModule();
+        const results = await syncKeycloakPasswordForEmail(email, password);
+        const orthodox = (results || []).find((r) => r.realm === 'orthodoxmetrics');
+        if (orthodox?.skipped && orthodox.reason === 'federated') {
+            return { ok: false, federated: true, results };
+        }
+        const anySet = (results || []).some((r) => r.passwordSet);
+        const anySkippedFederated = (results || []).some((r) => r.skipped && r.reason === 'federated');
+        if (anySkippedFederated && !anySet) {
+            return { ok: false, federated: true, results };
+        }
+        return { ok: anySet || (results || []).length === 0, federated: false, results };
     } catch (err) {
         console.warn('[profile] Keycloak password sync failed:', err.message);
-        return false;
+        return { ok: false, federated: false, error: err.message, results: [] };
+    }
+}
+
+async function syncKeycloakProfile(user) {
+    if (!user?.email) return;
+    try {
+        const kc = loadKeycloakModule();
+        const realms = kc.PARISH_ONBOARD_KC_REALMS || ['orthodoxmetrics'];
+        await kc.provisionOmUserInKeycloak({
+            email: user.email,
+            first_name: user.first_name,
+            last_name: user.last_name,
+            role: user.role,
+            enabled: true,
+            realms,
+        });
+    } catch (err) {
+        console.warn('[profile] Keycloak profile sync failed:', err.message);
+    }
+}
+
+async function resolveIdentityAuth(email) {
+    try {
+        const kc = loadKeycloakModule();
+        return await kc.getIdentityAuthStatus(email);
+    } catch (err) {
+        console.warn('[profile] identity auth lookup failed:', err.message);
+        return {
+            auth_provider: 'local',
+            password_managed_externally: false,
+            identity_realm: null,
+            keycloak_user_id: null,
+        };
     }
 }
 
@@ -209,6 +258,14 @@ router.put('/', requireAuth, async (req, res) => {
             );
         }
 
+        const [updatedUsers] = await getAppPool().query(
+            'SELECT email, first_name, last_name, role FROM orthodoxmetrics_db.users WHERE id = ? LIMIT 1',
+            [userId]
+        );
+        if (updatedUsers.length) {
+            await syncKeycloakProfile(updatedUsers[0]);
+        }
+
         console.log(`📸 User profile updated for user ${userId}`);
 
         res.json({
@@ -309,6 +366,18 @@ router.put('/password', requireAuth, async (req, res) => {
         }
 
         const userEmail = users[0].email;
+        const identity = userEmail ? await resolveIdentityAuth(userEmail) : {
+            auth_provider: 'local',
+            password_managed_externally: false,
+        };
+
+        if (identity.password_managed_externally) {
+            return res.status(403).json({
+                success: false,
+                message: 'Your password is managed by your organization (Active Directory). Change it through your IT department or Windows account settings, then sign in again.',
+                auth_provider: identity.auth_provider,
+            });
+        }
 
         // Verify current password (DB hash and/or Keycloak — parish login uses Keycloak)
         const bcrypt = require('bcrypt');
@@ -373,7 +442,16 @@ router.put('/password', requireAuth, async (req, res) => {
         ).catch((err) => console.error('Failed to log password_changed activity:', err.message));
 
         if (userEmail) {
-            await syncKeycloakPassword(userEmail, newPassword);
+            const kcSync = await syncKeycloakPassword(userEmail, newPassword);
+            if (identity.auth_provider === 'keycloak' && !kcSync.ok) {
+                return res.status(502).json({
+                    success: false,
+                    message: kcSync.federated
+                        ? 'Your account uses Active Directory federation. Password changes must be done through your organization.'
+                        : 'Password saved locally but Keycloak sync failed. Please try again or contact support.',
+                    auth_provider: identity.auth_provider,
+                });
+            }
         }
 
         console.log(`🔐 Password changed for user ${userId}, revoked ${sessionsRevoked} other session(s)`);
@@ -420,6 +498,12 @@ router.get('/security-status', requireAuth, async (req, res) => {
             [userId]
         );
 
+        const identity = user.email ? await resolveIdentityAuth(user.email) : {
+            auth_provider: 'local',
+            password_managed_externally: false,
+            identity_realm: null,
+        };
+
         res.json({
             success: true,
             security: {
@@ -431,6 +515,9 @@ router.get('/security-status', requireAuth, async (req, res) => {
                 verification_sent_at: verifyRows.length > 0 ? verifyRows[0].created_at : null,
                 active_sessions: sessionRows[0].active_sessions,
                 two_factor_enabled: false, // No 2FA infrastructure exists yet
+                auth_provider: identity.auth_provider,
+                password_managed_externally: !!identity.password_managed_externally,
+                identity_realm: identity.identity_realm || null,
             },
         });
     } catch (error) {
