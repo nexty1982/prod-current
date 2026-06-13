@@ -2,8 +2,15 @@ const { getAppPool } = require('../config/db-compat');
 // Site Testing Utility using Puppeteer
 // Performs automated testing on deployed church sites
 
-const puppeteer = require('puppeteer');
 const logger = require('./logger');
+
+function loadPuppeteer() {
+  try {
+    return require('puppeteer');
+  } catch (err) {
+    throw new Error('puppeteer is not installed — site testing is unavailable');
+  }
+}
 
 // Test configuration
 const TEST_CONFIG = {
@@ -45,7 +52,7 @@ async function testDeployedSite({ siteUrl, language }) {
     logger.info(`Starting automated testing for ${siteUrl} in ${language}`);
     
     // Launch browser
-    browser = await puppeteer.launch({
+    browser = await loadPuppeteer().launch({
       headless: TEST_CONFIG.headless,
       args: [
         '--no-sandbox',
