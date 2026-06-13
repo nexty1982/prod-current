@@ -1,4 +1,3 @@
-import SiteFooter from '@/components/frontend-pages/shared/footer/SiteFooter';
 import { useEffect, useState } from "react";
 import {
   ArrowRight,
@@ -9,17 +8,14 @@ import {
   ShieldCheck,
   UploadCloud
 } from "lucide-react";
-import { Logo } from "../Logo";
-import { ThemeToggle } from "../ThemeToggle";
+import { Link } from "react-router-dom";
+import { PUBLIC_ROUTES } from "@/config/publicRoutes";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Card, CardContent } from "../ui/card";
 
 type Props = {
   onStart: () => void;
-  onAdmin: () => void;
-  theme: "light" | "dark";
-  onToggleTheme: () => void;
 };
 
 /** Figma: baptism-small-footer 1 (node 65:24) — sacrament illustrations */
@@ -128,24 +124,12 @@ function SacramentIllustrationRotator({
   );
 }
 
-export function Landing({ onStart, onAdmin, theme, onToggleTheme }: Props) {
+export function Landing({ onStart }: Props) {
   const [activeSacrament, setActiveSacrament] = useState(0);
 
   return (
     <div className="flex-1 w-full bg-background text-foreground flex flex-col">
-      <header className="border-b border-border bg-card/60 backdrop-blur sticky top-0 z-10">
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <a href="/" className="flex items-center no-underline">
-            <Logo colorScheme={theme} size="md" />
-          </a>
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" onClick={() => { window.location.href = '/auth/login'; }}>Sign In</Button>
-            <ThemeToggle theme={theme} onToggle={onToggleTheme} />
-          </div>
-        </div>
-      </header>
-
-      <section className="relative overflow-hidden">
+      <section className="relative overflow-hidden om-section-base">
         <div
           className="absolute inset-0 opacity-[0.06] dark:opacity-[0.08] pointer-events-none"
           style={{
@@ -160,11 +144,11 @@ export function Landing({ onStart, onAdmin, theme, onToggleTheme }: Props) {
                 For Orthodox Parishes
               </Badge>
             </div>
-            <h1 className="font-['Georgia'] text-4xl lg:text-5xl leading-[1.1]" style={{ fontWeight: 400 }}>
+            <h1 className="font-om-display text-4xl lg:text-5xl leading-[1.1] text-[var(--om-text-primary)]">
               Digitize and manage your{" "}
-              <span className="text-[#2d1b4e] dark:text-[#d4af37]">Orthodox church records.</span>
+              <span className="text-[var(--om-gold)]">Orthodox church records.</span>
             </h1>
-            <p className="text-lg text-muted-foreground max-w-xl">
+            <p className="font-om-body text-lg text-muted-foreground max-w-xl">
               Orthodox Metrics helps parishes safely organize baptism, marriage, and funeral
               records — preserving the work of generations in a calm, secure workspace built for
               the Church.
@@ -173,12 +157,12 @@ export function Landing({ onStart, onAdmin, theme, onToggleTheme }: Props) {
               <Button
                 size="lg"
                 onClick={onStart}
-                className="bg-[#d4af37] hover:bg-[#c29d2f] text-[#2d1b4e] font-medium px-8 py-4 rounded-lg text-[16px]"
+                className="bg-[var(--om-gold)] hover:bg-[var(--om-gold-hover)] text-[var(--om-text-primary)] font-medium px-8 py-4 rounded-lg text-[16px]"
               >
                 Start Church Setup <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
-              <Button size="lg" variant="outline" onClick={() => { window.location.href = '/contact'; }} className="px-8 py-4 rounded-lg text-[16px]">
-                Contact Orthodox Metrics
+              <Button size="lg" variant="outline" asChild className="px-8 py-4 rounded-lg text-[16px]">
+                <Link to={PUBLIC_ROUTES.CONTACT}>Contact Orthodox Metrics</Link>
               </Button>
             </div>
             <div className="flex flex-wrap gap-x-8 gap-y-3 text-sm text-muted-foreground pt-2">
@@ -245,10 +229,10 @@ export function Landing({ onStart, onAdmin, theme, onToggleTheme }: Props) {
                   i === activeSacrament ? "opacity-100" : "opacity-40"
                 }`}
               >
-                <h3 className="font-['Georgia'] text-xl text-[#2d1b4e] dark:text-[#d4af37] mb-1">
+                <h3 className="font-om-display text-xl text-[var(--om-text-primary)] mb-1">
                   {label}
                 </h3>
-                <p className="font-['Inter'] text-[15px] text-muted-foreground leading-relaxed">
+                <p className="font-om-body text-[15px] text-muted-foreground leading-relaxed">
                   {key === "baptism" &&
                     "Digitize baptism registers with sponsors, clergy, dates, and full search across your parish history."}
                   {key === "marriage" &&
@@ -261,8 +245,6 @@ export function Landing({ onStart, onAdmin, theme, onToggleTheme }: Props) {
           </div>
         </div>
       </section>
-
-      <SiteFooter />
     </div>
   );
 }

@@ -909,11 +909,9 @@ const Router = [
           { path: '/security', element: <Security /> },
           { path: '/platform-tour', element: <Navigate to="/tour" replace /> },
           { path: '/sample-records', element: <Navigate to="/samples" replace /> },
+          { path: '/enroll', element: <Enrollment /> },
         ],
       },
-      // Enrollment wizard brings its own header/footer chrome — keep it
-      // outside PublicLayout so HpHeader/SiteFooter don't double up.
-      { path: '/enroll', element: <Enrollment /> },
       { path: '/greek_baptism_table_demo.html', element: <GreekRecordsViewer /> },
       { path: '/russian_wedding_table_demo.html', element: <HTMLViewer htmlFile="/russian_wedding_table_demo.html" /> },
       { path: '/romanian_funeral_table_demo.html', element: <HTMLViewer htmlFile="/romanian_funeral_table_demo.html" /> },

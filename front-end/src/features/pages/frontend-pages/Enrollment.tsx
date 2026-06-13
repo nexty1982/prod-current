@@ -4,9 +4,8 @@ import OmChurchOnboarding from '@/components/om-church-onboarding/v1/App';
 /**
  * Public homepage CTA "Enroll Now" lands here.
  *
- * Renders the om-church-onboarding component (sourced from om-workshop)
- * inside a scoped wrapper so its CSS variables and dark-mode toggle do
- * not leak into the rest of the Orthodox Metrics public site.
+ * Renders inside PublicLayout (HpHeader + SiteFooter). The onboarding wizard
+ * uses scoped theme tokens aligned with the site design system.
  */
 const Enrollment = () => {
   return (

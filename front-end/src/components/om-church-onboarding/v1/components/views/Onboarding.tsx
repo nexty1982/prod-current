@@ -19,13 +19,11 @@ import {
     X
 } from "lucide-react";
 import { motion } from "framer-motion";
-import SiteFooter from '@/components/frontend-pages/shared/footer/SiteFooter';
-import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useContext, useEffect, useRef, useState } from "react";
+import { CustomizerContext } from "@/context/CustomizerContext";
 import type { ParishGeoJSON } from "@/features/devel-tools/us-church-map/ParishDetailMap";
 import { apiClient } from "@/api/utils/axiosInstance";
 import { inferLocationFields, reconcileInferredLocation } from "../../lib/inferLocationFields";
-import { Logo } from "../Logo";
-import { ThemeToggle } from "../ThemeToggle";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Card, CardContent } from "../ui/card";
@@ -91,8 +89,6 @@ function formatStartTimeline(value: StartTimeline): string {
 type Props = {
   onCancel: () => void;
   onComplete: () => void;
-  theme: "light" | "dark";
-  onToggleTheme: () => void;
 };
 
 type CrmChurch = {
@@ -159,7 +155,7 @@ function getModulesStepErrors(
   return e;
 }
 
-export function Onboarding({ onCancel, onComplete, theme, onToggleTheme }: Props) {
+export function Onboarding({ onCancel, onComplete }: Props) {
   const [step, setStep] = useState<StepKey>("find-parish");
 
   // Frame 1: parish location
@@ -392,22 +388,14 @@ export function Onboarding({ onCancel, onComplete, theme, onToggleTheme }: Props
         : "border border-border";
 
   return (
-    <div className="flex-1 w-full bg-background text-foreground flex flex-col">
-      <header className="border-b border-border bg-card shrink-0">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <a href="/" className="flex items-center no-underline">
-            <Logo colorScheme={theme} size="md" />
-          </a>
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" onClick={onCancel}>
-              <X className="h-4 w-4 mr-2" /> Cancel
-            </Button>
-            <ThemeToggle theme={theme} onToggle={onToggleTheme} />
-          </div>
-        </div>
-      </header>
+    <div className="flex-1 w-full bg-background text-foreground flex flex-col om-section-base">
+      <div className="max-w-7xl mx-auto px-6 pt-4 w-full flex justify-end shrink-0">
+        <Button variant="ghost" onClick={onCancel} className="font-om-body">
+          <X className="h-4 w-4 mr-2" /> Cancel
+        </Button>
+      </div>
 
-      <div className="flex-1 max-w-7xl mx-auto px-6 py-6 lg:py-10 w-full">
+      <div className="flex-1 max-w-7xl mx-auto px-6 py-4 lg:py-8 w-full">
         {step === "confirm" ? (
           <ConfirmStep
             profile={profile}
@@ -497,7 +485,7 @@ export function Onboarding({ onCancel, onComplete, theme, onToggleTheme }: Props
 
         <div className="space-y-6 min-w-0">
           {step === "find-parish" && (
-            <FindParishStep parish={parish} setParish={setParish} theme={theme} />
+            <FindParishStep parish={parish} setParish={setParish} />
           )}
           {step === "contact" && (
             <ContactStep profile={profile} setProfile={setProfile} errors={contactErrors} showErrors={triedNext} />
@@ -585,7 +573,6 @@ export function Onboarding({ onCancel, onComplete, theme, onToggleTheme }: Props
         </>
         )}
       </div>
-      <SiteFooter />
     </div>
   );
 }
@@ -653,7 +640,6 @@ function Field({
 function FindParishStep({
   parish,
   setParish,
-  theme,
 }: {
   parish: {
     state: string;
@@ -665,8 +651,9 @@ function FindParishStep({
     manualName: string;
   };
   setParish: React.Dispatch<React.SetStateAction<any>>;
-  theme: "light" | "dark";
 }) {
+  const { activeMode } = useContext(CustomizerContext);
+  const theme: "light" | "dark" = activeMode === "dark" ? "dark" : "light";
   const { state, query, results, selected, searching, notListed, manualName } = parish;
   const update = (patch: Partial<typeof parish>) => setParish((p: any) => ({ ...p, ...patch }));
   const [geoData, setGeoData] = useState<ParishGeoJSON | null>(null);

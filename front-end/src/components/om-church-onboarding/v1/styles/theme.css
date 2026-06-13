@@ -1,96 +1,69 @@
 /*
- * om-church-onboarding theme — scoped under .om-cornerstone-scope so it
- * does not bleed into the rest of the Orthodox Metrics site. The component
- * mounts inside this scope on /frontend-pages/enroll and toggles dark mode
- * by adding `dark` to its own wrapper (not to <html>).
+ * om-church-onboarding theme — scoped under .om-cornerstone-scope.
+ * Maps to site design tokens (--om-*) so /enroll matches PublicLayout light/dark.
+ * Dark mode follows html.dark from CustomizerContext (HpHeader toggle).
  */
 
 .om-cornerstone-scope {
-  --font-size: 15px;
+  --font-size: var(--om-text-body);
   --brand-purple: #2d1b4e;
   --brand-purple-deep: #2d1b4e;
-  --brand-gold: #d4af37;
-  --brand-gold-soft: #e8cc6e;
-  --background: #ffffff;
-  --foreground: #1f2937;
-  --card: #ffffff;
-  --card-foreground: #1f2937;
-  --popover: #ffffff;
-  --popover-foreground: #1f2937;
+  --brand-gold: var(--om-gold);
+  --brand-gold-soft: var(--om-gold-hover);
+  --background: var(--om-bg);
+  --foreground: var(--om-text-primary);
+  --card: var(--om-surface-elevated);
+  --card-foreground: var(--om-text-primary);
+  --popover: var(--om-surface-elevated);
+  --popover-foreground: var(--om-text-primary);
   --primary: #2d1b4e;
   --primary-foreground: #ffffff;
-  --secondary: #f3f4f6;
-  --secondary-foreground: #2d1b4e;
-  --muted: #f9fafb;
-  --muted-foreground: #4a5565;
+  --secondary: var(--om-surface);
+  --secondary-foreground: var(--om-text-primary);
+  --muted: var(--om-surface);
+  --muted-foreground: var(--om-text-secondary);
   --accent: rgba(212, 175, 55, 0.12);
   --accent-foreground: #2d1b4e;
   --destructive: #b3261e;
   --destructive-foreground: #ffffff;
-  --border: rgba(45, 27, 78, 0.10);
+  --border: var(--om-border);
   --input: transparent;
-  --input-background: #ffffff;
+  --input-background: var(--om-surface-elevated);
   --switch-background: #cbced4;
   --font-weight-medium: 500;
   --font-weight-normal: 400;
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --radius: 0.5rem;
+  --ring: rgba(212, 175, 55, 0.35);
+  --radius: var(--om-radius-button);
   --sidebar: #2d1b4e;
   --sidebar-foreground: #ede7f5;
-  --sidebar-primary: #d4af37;
+  --sidebar-primary: var(--om-gold);
   --sidebar-primary-foreground: #2d1b4e;
   --sidebar-accent: #3a2461;
   --sidebar-accent-foreground: #ffffff;
   --sidebar-border: rgba(255, 255, 255, 0.08);
-  --sidebar-ring: #d4af37;
+  --sidebar-ring: var(--om-gold);
 
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--om-font-body);
   font-size: var(--font-size);
   background: var(--background);
   color: var(--foreground);
 }
 
-.om-cornerstone-scope.dark {
-  /* Deep navy/charcoal base — ecclesiastical, not purple-saturated */
-  --background: #0d1117;
-  --foreground: #e8e6e1;
-  --card: #161b22;
-  --card-foreground: #e8e6e1;
-  --popover: #1c2230;
-  --popover-foreground: #e8e6e1;
-  /* Gold as primary action — clear hierarchy */
-  --primary: #d4af37;
-  --primary-foreground: #0d1117;
-  /* Navy surface for secondary elements */
-  --secondary: #1e2a3a;
-  --secondary-foreground: #c8c4bc;
-  --muted: #161b22;
-  --muted-foreground: #8b8680;
-  /* Gold-tinted accent, not purple tinted */
+html.dark .om-cornerstone-scope {
+  --primary: var(--om-gold);
+  --primary-foreground: #120a2a;
+  --secondary: var(--om-surface);
+  --secondary-foreground: var(--om-text-secondary);
+  --muted: var(--om-surface);
+  --muted-foreground: var(--om-text-secondary);
   --accent: rgba(212, 175, 55, 0.10);
-  --accent-foreground: #d4af37;
+  --accent-foreground: var(--om-gold);
   --destructive: #d44a40;
-  --destructive-foreground: #ffffff;
-  /* Subtle warm-neutral border — not gold-dominant */
-  --border: rgba(255, 255, 255, 0.08);
-  --input: rgba(255, 255, 255, 0.05);
-  --input-background: #1e2a3a;
+  --input-background: var(--om-input-bg);
   --ring: rgba(212, 175, 55, 0.5);
   --sidebar: #090d14;
-  --sidebar-foreground: #e8e6e1;
-  --sidebar-primary: #d4af37;
-  --sidebar-primary-foreground: #0d1117;
-  --sidebar-accent: #1e2a3a;
-  --sidebar-accent-foreground: #d4af37;
-  --sidebar-border: rgba(255, 255, 255, 0.06);
-  --sidebar-ring: #d4af37;
-  /* Purple reserved as a selective accent only */
-  --brand-purple: #2d1b4e;
+  --sidebar-accent: var(--om-surface-elevated);
+  --sidebar-accent-foreground: var(--om-gold);
 }
 
 @theme inline {
@@ -130,7 +103,7 @@
   color: var(--popover-foreground);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--om-shadow-card);
   z-index: 50;
 }
 
@@ -139,19 +112,38 @@
   color: var(--accent-foreground);
 }
 
-.om-cornerstone-scope h1 { font-family: 'Georgia', serif; font-size: 2rem; font-weight: 400; line-height: 1.2; color: var(--brand-purple); }
-.om-cornerstone-scope h2 { font-family: 'Georgia', serif; font-size: 1.375rem; font-weight: 400; line-height: 1.3; color: var(--brand-purple); }
+.om-cornerstone-scope h1,
+.om-cornerstone-scope h2 {
+  font-family: var(--om-font-heading);
+  font-weight: 600;
+  line-height: var(--om-leading-heading);
+  color: var(--foreground);
+}
+
+.om-cornerstone-scope h1 { font-size: var(--om-text-h3); }
+.om-cornerstone-scope h2 { font-size: var(--om-text-h4); }
 .om-cornerstone-scope h3 { font-size: 1.125rem; font-weight: var(--font-weight-medium); line-height: 1.4; }
 .om-cornerstone-scope h4 { font-size: 1rem; font-weight: var(--font-weight-medium); line-height: 1.4; }
 .om-cornerstone-scope label { font-weight: var(--font-weight-medium); font-size: 0.875rem; line-height: 1.5; color: var(--foreground); }
 .om-cornerstone-scope button { font-weight: var(--font-weight-medium); line-height: 1.5; }
 .om-cornerstone-scope input { font-weight: var(--font-weight-normal); line-height: 1.5; font-size: 0.9375rem; }
-/* Dark mode: headings shift to warm off-white; purple is an accent not a base */
-.om-cornerstone-scope.dark h1,
-.om-cornerstone-scope.dark h2 { color: var(--foreground); }
-/* Dark inputs — visible border on navy surface */
-.om-cornerstone-scope.dark [data-slot="input"] { border-color: rgba(255, 255, 255, 0.12); }
-.om-cornerstone-scope.dark [data-slot="input"]:focus-visible { border-color: #d4af37; box-shadow: 0 0 0 3px rgba(212,175,55,0.15); }
-/* Dark select dropdown */
-.om-cornerstone-scope.dark [data-slot="select-content"] { background-color: #1c2230; border-color: rgba(255,255,255,0.10); box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
-.om-cornerstone-scope.dark [data-slot="select-item"]:focus { background-color: rgba(212,175,55,0.12); color: #d4af37; }
+
+html.dark .om-cornerstone-scope [data-slot="input"] {
+  border-color: var(--om-border);
+}
+
+html.dark .om-cornerstone-scope [data-slot="input"]:focus-visible {
+  border-color: var(--om-gold);
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.15);
+}
+
+html.dark .om-cornerstone-scope [data-slot="select-content"] {
+  background-color: var(--om-surface-elevated);
+  border-color: var(--om-border);
+  box-shadow: var(--om-shadow-elevated);
+}
+
+html.dark .om-cornerstone-scope [data-slot="select-item"]:focus {
+  background-color: rgba(212, 175, 55, 0.12);
+  color: var(--om-gold);
+}
