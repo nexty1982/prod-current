@@ -1,36 +1,34 @@
 import React from 'react';
-import { Outlet, useLocation } from 'react-router-dom';
-import './ocr-studio-shell.css';
-import { OcrStudioPathProvider, useOcrStudioPaths } from './OcrStudioPathContext';
+import { Outlet } from 'react-router-dom';
+import { Box } from '@mui/material';
+import OcrChurchSelector from '../components/OcrChurchSelector';
+import OcrStudioNav from '../components/OcrStudioNav';
+import { OcrStudioPathProvider } from './OcrStudioPathContext';
 import type { OcrStudioBase } from './ocrStudioPaths';
-import { ocrStudioScreenFromPath } from './ocrStudioPaths';
-import OcrStudioSidebar from './OcrStudioSidebar';
-import OcrStudioTopBar from './OcrStudioTopBar';
+import { OcrStudioShellProvider } from './OcrStudioShellContext';
 
+/**
+ * Native OM OCR Studio shell — uses the app theme and shared OcrStudioNav,
+ * not the standalone Figma sidebar/topbar frame.
+ */
 export function OcrStudioLayout({ mode = 'devel' }: { mode?: OcrStudioBase }) {
   return (
     <OcrStudioPathProvider mode={mode}>
-      <OcrStudioLayoutInner />
-    </OcrStudioPathProvider>
-  );
-}
-
-function OcrStudioLayoutInner() {
-  const { pathname } = useLocation();
-  const { basePath } = useOcrStudioPaths();
-  const screen = ocrStudioScreenFromPath(pathname, basePath);
-  const fullBleed = screen === 'review-detail' || screen === 'layout-templates';
-
-  return (
-    <div className="ocr-studio-shell flex h-[calc(100vh-64px)] min-h-[640px] w-full overflow-hidden -mx-4 -my-3 md:-mx-6">
-      <OcrStudioSidebar />
-      <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
-        <OcrStudioTopBar />
-        <main className={`flex-1 overflow-auto p-5 ${fullBleed ? 'overflow-hidden' : ''}`}>
+      <OcrStudioShellProvider>
+        <Box
+          sx={{
+            width: '100%',
+            maxWidth: '100%',
+            py: { xs: 1.5, sm: 2 },
+            px: { xs: 1.5, sm: 2, md: 3 },
+          }}
+        >
+          <OcrStudioNav />
+          <OcrChurchSelector />
           <Outlet />
-        </main>
-      </div>
-    </div>
+        </Box>
+      </OcrStudioShellProvider>
+    </OcrStudioPathProvider>
   );
 }
 

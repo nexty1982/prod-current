@@ -14,6 +14,7 @@ import { useAuth } from '@/context/AuthContext';
 import OcrChurchSelector from '@/features/devel-tools/om-ocr/components/OcrChurchSelector';
 import OcrSetupGate from '@/features/devel-tools/om-ocr/components/OcrSetupGate';
 import OcrStudioNav from '@/features/devel-tools/om-ocr/components/OcrStudioNav';
+import { useInOcrStudioShell } from '@/features/devel-tools/om-ocr/studio-interface/OcrStudioShellContext';
 import { useOcrChurchSelector } from '@/features/devel-tools/om-ocr/hooks/useOcrChurchSelector';
 import { formatOcrStudioChurchLabel, ocrStudioPathWithChurch } from '@/features/devel-tools/om-ocr/utils/ocrStudioChurch';
 
@@ -284,7 +285,8 @@ const jobDisplayName = (job: OcrJob) => (job.original_filename || job.filename |
 const UploadRecordsPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const isOcrStudioUpload = location.pathname.includes('/devel/ocr-studio');
+  const isOcrStudioUpload = location.pathname.includes('/devel/ocr-studio') || location.pathname.startsWith('/portal/ocr/upload');
+  const inShell = useInOcrStudioShell();
   const isPortalUpload = location.pathname.startsWith('/portal');
   const { selectedChurchId: studioChurchId, searchParams: studioSearchParams } = useOcrChurchSelector();
   const theme = useTheme();
@@ -294,7 +296,15 @@ const UploadRecordsPage: React.FC = () => {
   const isStaff = isSuperAdmin() || ['admin', 'manager', 'church_admin', 'priest', 'deacon', 'editor'].includes(user?.role || '');
 
   // Tab
-  const [activeTab, setActiveTab] = useState(0);
+  const [activeTab, setActiveTab] = useState(() => {
+    const tab = new URLSearchParams(location.search).get('tab');
+    return tab === 'uploads' ? 1 : 0;
+  });
+
+  useEffect(() => {
+    const tab = new URLSearchParams(location.search).get('tab');
+    if (tab === 'uploads') setActiveTab(1);
+  }, [location.search]);
 
   // Church selection (admin only)
   const [churches, setChurches] = useState<Church[]>([]);
@@ -663,14 +673,18 @@ const UploadRecordsPage: React.FC = () => {
     <OcrSetupGate churchId={effectiveChurchId}>
     <Box
       sx={{
-        py: 3,
-        px: { xs: 1.5, md: 3 },
-        ...(isOcrStudioUpload
-          ? { maxWidth: '100%', width: '100%' }
-          : { maxWidth: 1100, mx: 'auto' }),
+        ...(inShell
+          ? { pt: 0, pb: 2, px: 0, maxWidth: '100%', width: '100%' }
+          : {
+              py: 3,
+              px: { xs: 1.5, md: 3 },
+              ...(isOcrStudioUpload
+                ? { maxWidth: '100%', width: '100%' }
+                : { maxWidth: 1100, mx: 'auto' }),
+            }),
       }}
     >
-      {isOcrStudioUpload && <OcrStudioNav />}
+      {isOcrStudioUpload && !inShell && <OcrStudioNav />}
       {/* Page header */}
       <Box sx={{ mb: 3 }}>
         <Typography variant="h5" fontWeight={700}>
@@ -714,7 +728,7 @@ const UploadRecordsPage: React.FC = () => {
             gap={2}
             sx={{ minHeight: 56 }}
           >
-            <OcrChurchSelector variant="inline" />
+            {!inShell && <OcrChurchSelector variant="inline" />}
             {effectiveChurchId && (
               <Tabs
                 value={activeTab}

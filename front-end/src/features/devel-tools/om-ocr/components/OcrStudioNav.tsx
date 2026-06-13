@@ -13,11 +13,13 @@ import {
   CloudUpload as UploadIcon,
   ViewColumn as ViewColumnIcon,
   TableRows as TableRowsIcon,
+  Settings as SettingsIcon,
 } from '@mui/icons-material';
 import { alpha, Box, Button, Stack, useTheme } from '@mui/material';
 import { useAuth } from '@/context/AuthContext';
 import React, { useCallback, useMemo } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { useOptionalOcrStudioPaths } from '../studio-interface/OcrStudioPathContext';
 import { ocrStudioPathWithChurch } from '../utils/ocrStudioChurch';
 
 interface NavItem {
@@ -28,28 +30,40 @@ interface NavItem {
   superAdminOnly?: boolean;
 }
 
-const NAV_ITEMS: NavItem[] = [
-  { label: 'Hub',              path: '/devel/ocr-studio',                 icon: <HomeIcon fontSize="small" /> },
-  { label: 'Upload',           path: '/devel/ocr-studio/upload',          icon: <UploadIcon fontSize="small" /> },
-  { label: 'Job History',      path: '/devel/ocr-studio/jobs',            icon: <HistoryIcon fontSize="small" />, superAdminOnly: true },
-  { label: 'Record Headers',   path: '/devel/ocr-studio/record-fields',   icon: <TableRowsIcon fontSize="small" /> },
-  { label: 'Table Extractor',  path: '/devel/ocr-studio/table-extractor', icon: <AssessmentIcon fontSize="small" />, superAdminOnly: true },
-  { label: 'Layout Templates', path: '/devel/ocr-studio/layout-templates', icon: <ViewColumnIcon fontSize="small" />, superAdminOnly: true },
-];
-
 const OcrStudioNav: React.FC = () => {
   const theme = useTheme();
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const { isSuperAdmin } = useAuth();
   const [searchParams] = useSearchParams();
+  const pathsCtx = useOptionalOcrStudioPaths();
+
+  const navItems = useMemo((): NavItem[] => {
+    const base = pathsCtx?.basePath ?? '/devel/ocr-studio';
+    const isPortal = pathsCtx?.mode === 'portal';
+    if (isPortal) {
+      return [
+        { label: 'Hub', path: base, icon: <HomeIcon fontSize="small" /> },
+        { label: 'Upload', path: `${base}/upload`, icon: <UploadIcon fontSize="small" /> },
+        { label: 'Review', path: `${base}/review`, icon: <AssessmentIcon fontSize="small" /> },
+        { label: 'Settings', path: `${base}/settings`, icon: <SettingsIcon fontSize="small" /> },
+      ];
+    }
+    return [
+      { label: 'Hub', path: base, icon: <HomeIcon fontSize="small" /> },
+      { label: 'Upload', path: `${base}/upload`, icon: <UploadIcon fontSize="small" /> },
+      { label: 'Job History', path: `${base}/jobs`, icon: <HistoryIcon fontSize="small" />, superAdminOnly: true },
+      { label: 'Record Headers', path: `${base}/record-fields`, icon: <TableRowsIcon fontSize="small" /> },
+      { label: 'Table Extractor', path: `${base}/table-extractor`, icon: <AssessmentIcon fontSize="small" />, superAdminOnly: true },
+      { label: 'Layout Templates', path: `${base}/layout-templates`, icon: <ViewColumnIcon fontSize="small" />, superAdminOnly: true },
+    ];
+  }, [pathsCtx]);
 
   const visibleItems = useMemo(
-    () => NAV_ITEMS.filter((item) => !item.superAdminOnly || isSuperAdmin()),
-    [isSuperAdmin],
+    () => navItems.filter((item) => !item.superAdminOnly || isSuperAdmin()),
+    [navItems, isSuperAdmin],
   );
 
-  // Navigate to sibling page, preserving the ?church= param
   const handleNavigate = useCallback(
     (targetPath: string) => {
       navigate(ocrStudioPathWithChurch(targetPath, searchParams));
@@ -57,10 +71,18 @@ const OcrStudioNav: React.FC = () => {
     [navigate, searchParams],
   );
 
+  const isActivePath = useCallback((itemPath: string) => {
+    if (pathname === itemPath) return true;
+    if (itemPath !== (pathsCtx?.basePath ?? '/devel/ocr-studio') && pathname.startsWith(`${itemPath}/`)) {
+      return true;
+    }
+    return false;
+  }, [pathname, pathsCtx?.basePath]);
+
   return (
     <Box
       sx={{
-        px: { xs: 1, sm: 2 },
+        px: { xs: 0, sm: 0.5 },
         py: 0.75,
         mb: 1.5,
         borderBottom: '1px solid',
@@ -70,7 +92,7 @@ const OcrStudioNav: React.FC = () => {
     >
       <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap alignItems="center">
         {visibleItems.map((item) => {
-          const isActive = pathname === item.path;
+          const isActive = isActivePath(item.path);
           return (
             <Button
               key={item.path}

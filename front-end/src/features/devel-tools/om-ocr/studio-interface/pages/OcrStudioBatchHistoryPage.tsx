@@ -1,31 +1,15 @@
-import React, { useCallback } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { BatchHistory } from '../components/BatchHistory';
-import { useOcrStudioChurch } from '../hooks/useOcrStudioChurch';
-import { useOcrStudioJobData } from '../hooks/useOcrStudioJobData';
-import { useOcrStudioBatches } from '../hooks/useOcrStudioBatches';
-import { apiClient } from '@/shared/lib/axiosInstance';
+import React from 'react';
+import { Navigate, useSearchParams } from 'react-router-dom';
+import { useOcrStudioPaths } from '../OcrStudioPathContext';
+import { ocrStudioPathWithChurch } from '../../utils/ocrStudioChurch';
 
+/** Batch history lives on the Upload page "My Uploads" tab. */
 export default function OcrStudioBatchHistoryPage() {
-  const { churchId } = useOcrStudioChurch();
-  const { jobs, loading, refresh } = useOcrStudioJobData(churchId);
-  const batches = useOcrStudioBatches(jobs);
-
-  const onRetryBatch = useCallback(async (jobIds: number[]) => {
-    if (!churchId) return;
-    await Promise.all(
-      jobIds.map((id) => apiClient.post(`/api/church/${churchId}/ocr/jobs/${id}/retry`).catch(() => null)),
-    );
-    await refresh();
-  }, [churchId, refresh]);
-
-  return (
-    <BatchHistory
-      batches={batches}
-      churchId={churchId}
-      loading={loading}
-      onRefresh={refresh}
-      onRetryBatch={onRetryBatch}
-    />
-  );
+  const [searchParams] = useSearchParams();
+  const { toScreen } = useOcrStudioPaths();
+  const path = ocrStudioPathWithChurch(toScreen('upload-intake'), searchParams);
+  const [base, qs = ''] = path.split('?');
+  const merged = new URLSearchParams(qs);
+  merged.set('tab', 'uploads');
+  return <Navigate to={`${base}?${merged.toString()}`} replace />;
 }

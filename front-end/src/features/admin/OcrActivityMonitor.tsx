@@ -80,6 +80,7 @@ import {
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import OcrChurchSelector from '../devel-tools/om-ocr/components/OcrChurchSelector';
 import OcrStudioNav from '../devel-tools/om-ocr/components/OcrStudioNav';
+import { useInOcrStudioShell } from '../devel-tools/om-ocr/studio-interface/OcrStudioShellContext';
 import { useOcrChurchSelector } from '../devel-tools/om-ocr/hooks/useOcrChurchSelector';
 
 // ── Types ──────────────────────────────────────────────────────────────────
@@ -150,6 +151,7 @@ const isReprocessable = (s: string) => ['failed','error','queued','pending'].inc
 
 const OcrActivityMonitor: React.FC = () => {
   const theme = useTheme();
+  const inShell = useInOcrStudioShell();
   const { selectedChurchId } = useOcrChurchSelector();
 
   const pageSize = 50;
@@ -476,7 +478,7 @@ const OcrActivityMonitor: React.FC = () => {
 
   return (
     <PageContainer title="OCR Operations Console" description="Super Admin OCR job monitoring and operations">
-      <OcrStudioNav />
+      {!inShell && <OcrStudioNav />}
       <Box sx={{ p: { xs: 1, sm: 2 } }}>
 
         {/* ═══ SUMMARY BAR ════════════════════════════════════════════════════ */}

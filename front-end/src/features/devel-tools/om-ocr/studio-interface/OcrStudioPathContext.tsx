@@ -38,3 +38,7 @@ export function useOcrStudioPaths(): Ctx {
   if (!ctx) throw new Error('useOcrStudioPaths must be used within OcrStudioPathProvider');
   return ctx;
 }
+
+export function useOptionalOcrStudioPaths(): Ctx | null {
+  return useContext(OcrStudioPathContext);
+}
