@@ -1,0 +1,29 @@
+@import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+.ocr-studio-shell {
+  --font-display: 'Cormorant Garamond', 'Crimson Pro', Georgia, serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --font-size: 14px;
+  --background: #f4f1ea;
+  --foreground: #1a2744;
+  --border: rgba(26, 39, 68, 0.12);
+  --om-navy: #1a2744;
+  --om-navy-light: #243459;
+  --om-parchment: #f4f1ea;
+  --om-gold: #c9a84c;
+  font-family: var(--font-body);
+  color: var(--foreground);
+  background: var(--om-parchment);
+}
+
+.ocr-studio-shell *,
+.ocr-studio-shell *::before,
+.ocr-studio-shell *::after {
+  box-sizing: border-box;
+}
+
+/* Legacy MUI tools embedded in the Figma shell */
+.ocr-studio-functional-embed .MuiBox-root {
+  max-width: 100%;
+}

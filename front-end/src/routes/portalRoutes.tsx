@@ -6,6 +6,7 @@ import { lazy } from 'react';
 import Loadable from '../layouts/full/shared/loadable/Loadable';
 import { ROLE_ALL_CHURCH, ROLE_STAFF } from './rolePresets';
 import { protectedRoute, redirectRoute } from './routeConfigHelpers';
+import ProtectedRoute from '../components/auth/ProtectedRoute';
 
 /* ── Lazy imports ── */
 const ChurchPortalLayout = Loadable(lazy(() => import('../layouts/portal/ChurchPortalLayout')));
@@ -22,11 +23,21 @@ const UploadRecordsPage = Loadable(lazy(() => import('../features/records-centra
 const OMChartsPage = Loadable(lazy(() => import('../features/church/apps/om-charts/OMChartsPage')));
 const CertificateGeneratorPage = Loadable(lazy(() => import('../features/certificates/CertificateGeneratorPage')));
 const OrthodoxScheduleGuidelinesPage = Loadable(lazy(() => import('../features/admin/control-panel/OrthodoxScheduleGuidelinesPage')));
-const OCRStudioPage = Loadable(lazy(() => import('../features/ocr/pages/OCRStudioPage')));
-const OcrReviewPage = Loadable(lazy(() => import('../features/devel-tools/om-ocr/pages/OcrReviewPage')));
 const OcrSetupWizardPage = Loadable(lazy(() => import('../features/devel-tools/om-ocr/pages/OcrSetupWizardPage')));
 const UserGuide = Loadable(lazy(() => import('../features/help/UserGuide')));
 const SiteMapPage = Loadable(lazy(() => import('../features/admin/SiteMapPage')));
+const OcrStudioLayout = Loadable(lazy(() => import('../features/devel-tools/om-ocr/studio-interface/OcrStudioLayout')));
+const OcrStudioCommandCenterPage = Loadable(lazy(() => import('../features/devel-tools/om-ocr/studio-interface/pages/OcrStudioCommandCenterPage')));
+const OcrStudioUploadPage = Loadable(lazy(() => import('../features/devel-tools/om-ocr/studio-interface/pages/OcrStudioUploadPage')));
+const OcrStudioReviewQueuePage = Loadable(lazy(() => import('../features/devel-tools/om-ocr/studio-interface/pages/OcrStudioReviewQueuePage')));
+const OcrStudioReviewDetailPage = Loadable(lazy(() => import('../features/devel-tools/om-ocr/studio-interface/pages/OcrStudioReviewDetailPage')));
+const OcrStudioSettingsPage = Loadable(lazy(() => import('../features/devel-tools/om-ocr/studio-interface/pages/OcrStudioSettingsPage')));
+
+const portalOcrShell = (
+  <ProtectedRoute requiredRole={ROLE_STAFF}>
+    <OcrStudioLayout mode="portal" />
+  </ProtectedRoute>
+);
 
 /**
  * Top-level portal route object with ChurchPortalLayout.
@@ -60,12 +71,20 @@ export const portalRoute = {
     redirectRoute('profile', '/account/profile'),
     // User Guide
     protectedRoute('guide', <UserGuide />),
-    // OCR Studio (portal version)
-    protectedRoute('ocr', <OCRStudioPage />, ROLE_STAFF),
+    // OCR Studio (portal — Figma shell)
+    {
+      path: 'ocr',
+      element: portalOcrShell,
+      children: [
+        { index: true, element: <OcrStudioCommandCenterPage /> },
+        { path: 'upload', element: <OcrStudioUploadPage /> },
+        { path: 'review', element: <OcrStudioReviewQueuePage /> },
+        { path: 'review/:churchId', element: <OcrStudioReviewDetailPage /> },
+        { path: 'review/:churchId/:jobId', element: <OcrStudioReviewDetailPage /> },
+        { path: 'settings', element: <OcrStudioSettingsPage /> },
+      ],
+    },
     protectedRoute('ocr/setup', <OcrSetupWizardPage />, ROLE_STAFF),
-    // Agent review & seed (portal)
-    protectedRoute('ocr/review/:churchId', <OcrReviewPage />, ROLE_STAFF),
-    protectedRoute('ocr/review/:churchId/:jobId', <OcrReviewPage />, ROLE_STAFF),
     redirectRoute('ocr/jobs', '/portal/ocr'),
     // Sacramental Restrictions (portal version)
     protectedRoute('sacramental-restrictions', <OrthodoxScheduleGuidelinesPage />, ROLE_ALL_CHURCH),

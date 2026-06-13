@@ -120,7 +120,7 @@ const EXTRACTION_MODES: Array<{ value: ExtractionMode; label: string; desc: stri
   { value: 'auto', label: 'Auto', desc: 'Try anchors first, fall back to table' },
 ];
 
-const LayoutTemplateEditorPage: React.FC = () => {
+const LayoutTemplateEditorPage: React.FC<{ embeddedInStudioShell?: boolean }> = ({ embeddedInStudioShell = false }) => {
   const theme = useTheme();
   const [searchParams] = useSearchParams();
   const { user } = useAuth();
@@ -554,8 +554,8 @@ const LayoutTemplateEditorPage: React.FC = () => {
 
   return (
     <PageContainer title="Layout Template Editor" description="Visual editor for OCR layout templates">
-      <OcrStudioNav />
-      <Box sx={{ p: { xs: 1, sm: 2 } }}>
+      {!embeddedInStudioShell && <OcrStudioNav />}
+      <Box sx={{ p: embeddedInStudioShell ? 0 : { xs: 1, sm: 2 } }}>
         {/* Header */}
         <Stack direction="row" alignItems="center" justifyContent="space-between" flexWrap="wrap" gap={1} sx={{ mb: 2 }}>
           <Stack direction="row" alignItems="center" spacing={1}>

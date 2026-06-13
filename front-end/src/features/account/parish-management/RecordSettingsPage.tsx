@@ -68,7 +68,7 @@ function reorderRows(rows: ChurchRecordFieldRow[], from: number, dir: -1 | 1): C
   return next.map((r, idx) => ({ ...r, sortOrder: idx }));
 }
 
-const RecordSettingsPage: React.FC = () => {
+const RecordSettingsPage: React.FC<{ embeddedInStudioShell?: boolean }> = ({ embeddedInStudioShell = false }) => {
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
   const { activeChurchId, churchMetadata, setActiveChurchId } = useChurch();
@@ -205,7 +205,7 @@ const RecordSettingsPage: React.FC = () => {
   if (!churchId) {
     return (
       <Box>
-        {isOcrStudio && <OcrStudioNav />}
+        {isOcrStudio && !embeddedInStudioShell && <OcrStudioNav />}
         <Alert severity="info" sx={{ mb: 2 }}>Select a church to configure record table headers.</Alert>
         {isSuperAdmin() && churches.length > 0 && (
           <FormControl size="small" sx={{ minWidth: 300 }}>
@@ -233,7 +233,7 @@ const RecordSettingsPage: React.FC = () => {
 
   return (
     <Box>
-      {isOcrStudio && <OcrStudioNav />}
+      {isOcrStudio && !embeddedInStudioShell && <OcrStudioNav />}
 
       <Box sx={{ mb: 3 }}>
         <Typography sx={{ fontFamily: "'Inter'", fontSize: '1.25rem', fontWeight: 600, color: isDark ? '#f3f4f6' : '#111827', mb: 0.5 }}>

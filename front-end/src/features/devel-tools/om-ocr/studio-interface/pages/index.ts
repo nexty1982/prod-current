@@ -1,0 +1,9 @@
+export { default as OcrStudioCommandCenterPage } from './OcrStudioCommandCenterPage';
+export { default as OcrStudioUploadPage } from './OcrStudioUploadPage';
+export { default as OcrStudioBatchHistoryPage } from './OcrStudioBatchHistoryPage';
+export { default as OcrStudioJobOperationsPage } from './OcrStudioJobOperationsPage';
+export { default as OcrStudioReviewQueuePage } from './OcrStudioReviewQueuePage';
+export { default as OcrStudioRecordHeadersPage } from './OcrStudioRecordHeadersPage';
+export { default as OcrStudioTableExtractorPage } from './OcrStudioTableExtractorPage';
+export { default as OcrStudioLayoutTemplatesPage } from './OcrStudioLayoutTemplatesPage';
+export { default as OcrStudioSettingsPage } from './OcrStudioSettingsPage';

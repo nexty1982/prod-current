@@ -147,7 +147,7 @@ const fmtDate = (iso: string | null) => {
 
 // ── Component ────────────────────────────────────────────────────────────────
 
-const OcrTableExtractorPage: React.FC = () => {
+const OcrTableExtractorPage: React.FC<{ embeddedInStudioShell?: boolean }> = ({ embeddedInStudioShell = false }) => {
   const theme = useTheme();
   const { selectedChurchId, setSearchParams } = useOcrChurchSelector();
 
@@ -329,8 +329,8 @@ const OcrTableExtractorPage: React.FC = () => {
 
   return (
     <PageContainer title="OCR Table Extractor" description="Layout-first table extraction from OCR jobs">
-      <OcrStudioNav />
-      <Box sx={{ p: { xs: 1, sm: 2 } }}>
+      {!embeddedInStudioShell && <OcrStudioNav />}
+      <Box sx={{ p: embeddedInStudioShell ? 0 : { xs: 1, sm: 2 } }}>
 
         {/* Header */}
         <Stack direction="row" alignItems="center" justifyContent="space-between" flexWrap="wrap" gap={1} sx={{ mb: 2 }}>

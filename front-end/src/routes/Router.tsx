@@ -81,11 +81,7 @@ const OMAIUltimateLogger = Loadable(lazy(() => import('../features/devel-tools/o
 const SiteMapPage = Loadable(lazy(() => import('../features/admin/SiteMapPage')));
 const OmaiBridge = Loadable(lazy(() => import('../features/admin/OmaiBridge')));
 
-// OCR
-const OCRStudioPage = Loadable(lazy(() => import('../features/ocr/pages/OCRStudioPage')));
 const UploadRecordsPage = Loadable(lazy(() => import('../features/records-centralized/apps/upload-records/UploadRecordsPage')));
-
-// Big Book System
 const OMLearn = Loadable(lazy(() => import('../features/omlearn/OMLearn')));
 const BigBookDynamicRoute = Loadable(lazy(() => import('../features/admin/BigBookDynamicRoute')));
 

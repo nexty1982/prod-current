@@ -1,48 +1,85 @@
 /**
- * Developer tool routes — all /devel/*, /devel-tools/*, /tools/* paths
- * extracted from Router.tsx. Each route is a FullLayout child.
+ * OCR Studio routes — Figma interface shell replacing legacy per-page MUI chrome.
  */
 import { lazy } from 'react';
 import Loadable from '../layouts/full/shared/loadable/Loadable';
-import {
-    ROLE_STAFF,
-    ROLE_SUPER
-} from './rolePresets';
-import {
-    featureRoute,
-    guardedFeatureRoute,
-    guardedRoute,
-    redirectRoute,
-} from './routeConfigHelpers';
+import { ROLE_STAFF, ROLE_SUPER } from './rolePresets';
+import { guardedRoute, redirectRoute } from './routeConfigHelpers';
+import ProtectedRoute from '../components/auth/ProtectedRoute';
+import AdminErrorBoundary from '../components/ErrorBoundary/AdminErrorBoundary';
+import EnvironmentAwarePage from '../components/routing/EnvironmentAwarePage';
 
-/* ── Lazy imports ── */
-const OCRSettingsPage = Loadable(lazy(() => import('../features/devel-tools/om-ocr/pages/OCRSettingsPage')));
-const PMRecordSettingsPage = Loadable(lazy(() => import('../features/account/parish-management/RecordSettingsPage')));
-const OcrSetupWizardPage = Loadable(lazy(() => import('../features/devel-tools/om-ocr/pages/OcrSetupWizardPage')));
-const OcrReviewPage = Loadable(lazy(() => import('../features/devel-tools/om-ocr/pages/OcrReviewPage')));
-const OcrTableExtractorPage = Loadable(lazy(() => import('../features/devel-tools/om-ocr/pages/OcrTableExtractorPage')));
-const LayoutTemplateEditorPage = Loadable(lazy(() => import('../features/devel-tools/om-ocr/pages/LayoutTemplateEditorPage')));
-const OcrActivityMonitor = Loadable(lazy(() => import('../features/admin/OcrActivityMonitor')));
-const OCRStudioPage = Loadable(lazy(() => import('../features/ocr/pages/OCRStudioPage')));
-const UploadRecordsPage = Loadable(lazy(() => import('../features/records-centralized/apps/upload-records/UploadRecordsPage')));
+const OcrStudioLayout = Loadable(
+  lazy(() => import('../features/devel-tools/om-ocr/studio-interface/OcrStudioLayout')),
+);
+const OcrStudioCommandCenterPage = Loadable(
+  lazy(() => import('../features/devel-tools/om-ocr/studio-interface/pages/OcrStudioCommandCenterPage')),
+);
+const OcrStudioUploadPage = Loadable(
+  lazy(() => import('../features/devel-tools/om-ocr/studio-interface/pages/OcrStudioUploadPage')),
+);
+const OcrStudioBatchHistoryPage = Loadable(
+  lazy(() => import('../features/devel-tools/om-ocr/studio-interface/pages/OcrStudioBatchHistoryPage')),
+);
+const OcrStudioJobOperationsPage = Loadable(
+  lazy(() => import('../features/devel-tools/om-ocr/studio-interface/pages/OcrStudioJobOperationsPage')),
+);
+const OcrStudioReviewQueuePage = Loadable(
+  lazy(() => import('../features/devel-tools/om-ocr/studio-interface/pages/OcrStudioReviewQueuePage')),
+);
+const OcrStudioReviewDetailPage = Loadable(
+  lazy(() => import('../features/devel-tools/om-ocr/studio-interface/pages/OcrStudioReviewDetailPage')),
+);
+const OcrStudioRecordHeadersPage = Loadable(
+  lazy(() => import('../features/devel-tools/om-ocr/studio-interface/pages/OcrStudioRecordHeadersPage')),
+);
+const OcrStudioTableExtractorPage = Loadable(
+  lazy(() => import('../features/devel-tools/om-ocr/studio-interface/pages/OcrStudioTableExtractorPage')),
+);
+const OcrStudioLayoutTemplatesPage = Loadable(
+  lazy(() => import('../features/devel-tools/om-ocr/studio-interface/pages/OcrStudioLayoutTemplatesPage')),
+);
+const OcrStudioSettingsPage = Loadable(
+  lazy(() => import('../features/devel-tools/om-ocr/studio-interface/pages/OcrStudioSettingsPage')),
+);
+const OcrSetupWizardPage = Loadable(
+  lazy(() => import('../features/devel-tools/om-ocr/pages/OcrSetupWizardPage')),
+);
+
+const ocrStudioShell = (
+  <ProtectedRoute requiredRole={ROLE_STAFF}>
+    <AdminErrorBoundary>
+      <EnvironmentAwarePage featureId="ocr-studio" priority={4} featureName="OCR Studio">
+        <OcrStudioLayout mode="devel" />
+      </EnvironmentAwarePage>
+    </AdminErrorBoundary>
+  </ProtectedRoute>
+);
+
+export const ocrStudioRoutes = {
+  path: '/devel/ocr-studio',
+  element: ocrStudioShell,
+  children: [
+    { index: true, element: <OcrStudioCommandCenterPage /> },
+    { path: 'upload', element: <OcrStudioUploadPage /> },
+    { path: 'batch-history', element: <OcrStudioBatchHistoryPage /> },
+    { path: 'jobs', element: <ProtectedRoute requiredRole={ROLE_SUPER}><OcrStudioJobOperationsPage /></ProtectedRoute> },
+    { path: 'review', element: <OcrStudioReviewQueuePage /> },
+    { path: 'review/:churchId', element: <OcrStudioReviewDetailPage /> },
+    { path: 'review/:churchId/:jobId', element: <OcrStudioReviewDetailPage /> },
+    { path: 'record-fields', element: <OcrStudioRecordHeadersPage /> },
+    { path: 'table-extractor', element: <ProtectedRoute requiredRole={ROLE_SUPER}><OcrStudioTableExtractorPage /></ProtectedRoute> },
+    { path: 'layout-templates', element: <ProtectedRoute requiredRole={ROLE_SUPER}><OcrStudioLayoutTemplatesPage /></ProtectedRoute> },
+    { path: 'settings', element: <OcrStudioSettingsPage /> },
+  ],
+};
 
 /**
- * All /devel/*, /devel-tools/*, /tools/* route definitions.
- * These are children of the FullLayout route.
+ * All /devel/* developer tool routes (OCR Studio + setup wizard + legacy redirects).
  */
 export const develRoutes = [
-  // OCR Studio routes
-  guardedFeatureRoute('/devel/ocr-studio', <OCRStudioPage />, ROLE_STAFF, { featureId: 'ocr-studio', priority: 4, featureName: 'OCR Studio' }),
+  ocrStudioRoutes,
   guardedRoute('/devel/ocr-setup-wizard', <OcrSetupWizardPage />, ROLE_STAFF),
-  guardedFeatureRoute('/devel/ocr-studio/upload', <UploadRecordsPage />, ROLE_STAFF, { featureId: 'enhanced-ocr-uploader', priority: 2, featureName: 'OCR Upload' }),
-  guardedRoute('/devel/ocr-studio/review/:churchId/:jobId', <OcrReviewPage />, ROLE_STAFF),
-  guardedRoute('/devel/ocr-studio/review/:churchId', <OcrReviewPage />, ROLE_STAFF),
-  guardedRoute('/devel/ocr-studio/jobs', <OcrActivityMonitor />, ROLE_SUPER),
-  guardedRoute('/devel/ocr-studio/table-extractor', <OcrTableExtractorPage />, ROLE_SUPER),
-  guardedRoute('/devel/ocr-studio/layout-templates', <LayoutTemplateEditorPage />, ROLE_SUPER),
-  guardedRoute('/devel/ocr-studio/record-fields', <PMRecordSettingsPage />, ROLE_STAFF),
-  guardedRoute('/devel/ocr-studio/settings', <OCRSettingsPage />, ROLE_STAFF),
-  // Legacy OCR routes → canonical OCR Studio paths
   redirectRoute('/devel/enhanced-ocr-uploader', '/devel/ocr-studio/upload'),
   redirectRoute('/devel/om-ocr-studio', '/devel/ocr-studio'),
   redirectRoute('/devel/ocr-activity-monitor', '/devel/ocr-studio/jobs'),
