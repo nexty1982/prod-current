@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Search, Eye, Play, Download, RotateCcw, X, FileImage, AlertTriangle, CheckCircle, Table2 } from "lucide-react";
+import { Search, Eye, Play, Download, RotateCcw, X, FileImage, AlertTriangle, CheckCircle, Table2 } from '@/ui/icons';
 import { PageHeader } from "./PageHeader";
 import { MetricCard } from "./MetricCard";
 import { StatusBadge, RecordTypeBadge, ConfidenceBadge } from "./StatusBadge";

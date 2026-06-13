@@ -27,6 +27,7 @@ export {
     ArrowRight, ArrowUpDown, Award, BarChart3, Bell, BookOpen, Bookmark,
     // Buildings
     Building2,
+    Briefcase,
 
     // Domain-specific
     Calendar,
@@ -38,33 +39,35 @@ export {
     ChevronRight,
     // Navigation
     ChevronUp, ChevronsUpDown, Church, Circle, ClipboardList, Clock, Code, Coffee, Columns, Columns3, Copy, Cross,
-    Crown, Database,
+    Crown, Cpu, Database,
     // Data / Files
-    Download, Droplet, Droplets, Edit, ExternalLink, Eye,
+    Download, Droplet, Droplets, Edit, Edit2, ExternalLink, Eye,
     EyeOff, FileBarChart,
     FileCheck,
     FileCode,
+    FileImage,
     FileSearch, FileText, FileX, Filter, Fish,
     Flame, Folder,
-    FolderOpen, GitBranch,
-    GitCompare, Globe, Grid, HardDrive, Heart, HelpCircle, History, Home, Info, Layers, LayoutGrid, LayoutList, Link2, List, ListChecks, Loader2,
+    FolderOpen, Flag, GitBranch,
+    GitCompare, Globe, Grid, GripVertical, HardDrive, Heart, HelpCircle, History, Home, Info, Layers, LayoutDashboard, LayoutGrid, LayoutList, LayoutTemplate, Link2, List, ListChecks, Loader2,
     // Security — DANGEROUS NAMES (collide with browser globals)
     Lock,
     // Communication
-    Mail, MapPin, Maximize2, Milk, Minimize2, MoreHorizontal,
+    Mail, MapPin, Maximize2, Milk, Minimize2, Minus, MoreHorizontal,
     // Utility
-    MoreVertical, Package, Palette, Pencil, Phone, Play,
+    MoreVertical, Package, Palette, PanelLeft, Pencil, Phone, Play,
     // Action
-    Plus, RefreshCw, RotateCcw, Rows, Save, ScanLine, Scroll,
-    ScrollText,
+    Plus, RefreshCw, RotateCcw, RotateCw, Rows, Save, ScanLine, Scroll,
+    ScrollText, Send,
     // UI / Layout
     Search, Settings, Share2, Shield,
     // Records Management
     ShieldCheck, ShieldOff, Shuffle, SortAsc,
     SortDesc, Star, Table, Table2,
-    TableProperties, Trash2, TrendingUp, Unlock, Upload, User, User2,
+    TableProperties, Terminal, Trash2, TrendingUp, Toggle, ToggleLeft, Unlock, Upload, User, User2,
     // Users / People
-    Users, Wrench, X, XCircle, Zap
+    Users, Wrench, X, XCircle, Zap, ZoomIn, ZoomOut,
+    AlignLeft, CornerDownLeft,
 } from 'lucide-react';
 
 // ── Type re-exports ─────────────────────────────────────────────────────────
@@ -74,6 +77,15 @@ export type { LucideIcon } from 'lucide-react';
 // Use these when you want extra safety or clarity.
 
 export {
-    History as HistoryIcon, Lock as LockIcon, Table as TableIcon, Unlock as UnlockIcon
+    History as HistoryIcon, Lock as LockIcon, Table as TableIcon, Unlock as UnlockIcon,
+    Check as CheckIcon,
+    ChevronDown as ChevronDownIcon,
+    ChevronRight as ChevronRightIcon,
+    Circle as CircleIcon,
+    Search as SearchIcon,
+    X as XIcon,
+    GripVertical as GripVerticalIcon,
+    Minus as MinusIcon,
+    PanelLeft as PanelLeftIcon,
 } from 'lucide-react';
 

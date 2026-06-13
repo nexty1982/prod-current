@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import {
   Activity, Upload, Eye, Briefcase, AlignLeft, Table2, LayoutTemplate,
   AlertTriangle, CheckCircle, Clock, ChevronRight, TrendingUp, RefreshCw, Loader2,
-} from 'lucide-react';
+} from '@/ui/icons';
 import { MetricCard } from './MetricCard';
 import { PageHeader } from './PageHeader';
 import { StatusBadge, ConfidenceBadge } from './StatusBadge';

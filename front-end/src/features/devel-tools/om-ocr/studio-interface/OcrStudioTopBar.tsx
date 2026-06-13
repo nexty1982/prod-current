@@ -1,5 +1,5 @@
 import React from 'react';
-import { Bell, ChevronDown, RefreshCw, Building2, Layers } from 'lucide-react';
+import { Bell, ChevronDown, RefreshCw, Building2, Layers } from '@/ui/icons';
 import { useAuth } from '@/context/AuthContext';
 import { useOcrChurchSelector } from '../hooks/useOcrChurchSelector';
 import OcrChurchSelector from '../components/OcrChurchSelector';

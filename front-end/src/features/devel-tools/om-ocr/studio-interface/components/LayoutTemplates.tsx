@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import {
   Plus, Save, Play, ZoomIn, ZoomOut, RotateCw, Maximize2,
   Upload, Layers, CheckCircle, Clock, AlertTriangle, Trash2, Edit2, Toggle, ToggleLeft
-} from "lucide-react";
+} from '@/ui/icons';
 import { PageHeader } from "./PageHeader";
 
 const templates = [

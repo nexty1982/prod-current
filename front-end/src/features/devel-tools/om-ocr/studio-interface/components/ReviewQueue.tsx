@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Search, FileImage, Loader2, RefreshCw } from 'lucide-react';
+import { Search, FileImage, Loader2, RefreshCw } from '@/ui/icons';
 import { PageHeader } from './PageHeader';
 import { MetricCard } from './MetricCard';
 import { StatusBadge, RecordTypeBadge, ConfidenceBadge } from './StatusBadge';

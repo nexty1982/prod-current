@@ -4,7 +4,7 @@ import {
   LayoutDashboard, Upload, Eye, Briefcase, AlignLeft,
   Table2, LayoutTemplate, Settings, ChevronDown, ChevronRight,
   Cpu, Cross, User, Activity, History,
-} from 'lucide-react';
+} from '@/ui/icons';
 import { useAuth } from '@/context/AuthContext';
 import { useOcrStudioPaths } from './OcrStudioPathContext';
 import { ocrStudioScreenFromPath, type OcrStudioScreen } from './ocrStudioPaths';

@@ -1,5 +1,5 @@
 import React from "react";
-import { Bell, ChevronDown, RefreshCw, Building2, Layers } from "lucide-react";
+import { Bell, ChevronDown, RefreshCw, Building2, Layers } from '@/ui/icons';
 
 export function TopBar() {
   return (

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { GripVertical, Trash2, Plus, Save, RotateCcw, Eye, Info } from "lucide-react";
+import { GripVertical, Trash2, Plus, Save, RotateCcw, Eye, Info } from '@/ui/icons';
 import { PageHeader } from "./PageHeader";
 
 type RecordTab = "baptism" | "marriage" | "funeral";

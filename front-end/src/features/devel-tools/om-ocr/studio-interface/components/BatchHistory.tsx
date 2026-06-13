@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Search, RefreshCw, Eye, RotateCcw, Loader2 } from 'lucide-react';
+import { Search, RefreshCw, Eye, RotateCcw, Loader2 } from '@/ui/icons';
 import { PageHeader } from './PageHeader';
 import { StatusBadge, RecordTypeBadge, ConfidenceBadge } from './StatusBadge';
 import type { OcrStudioBatch } from '../hooks/useOcrStudioBatches';

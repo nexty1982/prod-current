@@ -4,7 +4,7 @@ import {
   Table2, LayoutTemplate, Settings, FileText, BarChart3,
   Shield, ChevronDown, ChevronRight, Cpu, Cross, User,
   Activity
-} from "lucide-react";
+} from '@/ui/icons';
 
 type Screen =
   | "command-center" | "upload-intake" | "batch-history"

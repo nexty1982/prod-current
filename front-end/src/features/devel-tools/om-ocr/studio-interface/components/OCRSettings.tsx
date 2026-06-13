@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Save, Info, CheckCircle } from "lucide-react";
+import { Save, Info, CheckCircle } from '@/ui/icons';
 import { PageHeader } from "./PageHeader";
 
 type SettingsTab = "documents" | "api" | "rules" | "clergy" | "locations" | "retention";

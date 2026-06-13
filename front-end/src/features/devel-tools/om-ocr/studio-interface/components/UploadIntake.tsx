@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Upload, FileImage, CheckCircle, X, AlertTriangle, ChevronRight, Play, Trash2, Loader2,
-} from 'lucide-react';
+} from '@/ui/icons';
 import { PageHeader } from './PageHeader';
 import { StatusBadge } from './StatusBadge';
 import type { UploadQueueItem, UploadRecordType } from '../hooks/useOcrUploadQueue';
