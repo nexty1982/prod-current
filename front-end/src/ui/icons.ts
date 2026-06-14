@@ -53,14 +53,14 @@ export {
     // Security — DANGEROUS NAMES (collide with browser globals)
     Lock,
     // Communication
-    Mail, MapPin, Maximize2, Milk, Minimize2, Minus, MoreHorizontal,
+    Mail, MapPin, Maximize2, Milk, Minimize2, Minus, Moon, MoreHorizontal,
     // Utility
     MoreVertical, Package, Palette, PanelLeft, Pencil, Phone, Play,
     // Action
     Plus, RefreshCw, RotateCcw, RotateCw, Rows, Save, ScanLine, Scroll,
-    ScrollText, Send,
+    ScrollText, Send, LogOut,
     // UI / Layout
-    Search, Settings, Share2, Shield,
+    Search, Settings, Share2, Shield, Sun,
     // Records Management
     ShieldCheck, ShieldOff, Shuffle, SortAsc,
     SortDesc, Star, Table, Table2,

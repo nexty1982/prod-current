@@ -16,6 +16,11 @@ import {
 } from '@mui/material';
 import CheckIcon from '@mui/icons-material/Check';
 import SaveOutlinedIcon from '@mui/icons-material/SaveOutlined';
+import {
+  DEFAULT_PORTAL_LAYOUT_THEME,
+  PORTAL_THEME_META,
+} from '@/features/portal/themes/registry';
+import type { PortalLayoutThemeId } from '@/features/portal/themes/types';
 import { useParishSettingsWithLocal } from './useParishSettings';
 
 interface LiturgicalTheme {
@@ -28,12 +33,16 @@ interface LiturgicalTheme {
 interface ThemeSettings {
   selectedTheme: string;
   globalTheme: boolean;
+  portalLayoutTheme: PortalLayoutThemeId;
 }
 
 const DEFAULTS: ThemeSettings = {
   selectedTheme: 'traditional',
   globalTheme: false,
+  portalLayoutTheme: DEFAULT_PORTAL_LAYOUT_THEME,
 };
+
+const portalLayoutThemes = Object.values(PORTAL_THEME_META);
 
 const themes: LiturgicalTheme[] = [
   {
@@ -92,7 +101,7 @@ const ThemeStudioPage: React.FC = () => {
             Theme Studio
           </Typography>
           <Typography sx={{ fontFamily: "'Inter'", fontSize: '0.8125rem', color: isDark ? '#9ca3af' : '#6b7280' }}>
-            Choose from liturgical themes or create custom color palettes
+            Choose portal layout themes and liturgical color palettes
           </Typography>
         </Box>
         <Button
@@ -149,7 +158,73 @@ const ThemeStudioPage: React.FC = () => {
             <Switch checked={settings.globalTheme} onChange={(e) => setField('globalTheme', e.target.checked)} />
           </Paper>
 
-          {/* Theme Cards */}
+          {/* Portal layout themes */}
+          <Typography sx={{ fontFamily: "'Inter'", fontSize: '0.875rem', fontWeight: 600, color: isDark ? '#f3f4f6' : '#111827', mb: 1.5 }}>
+            Portal Layout Theme
+          </Typography>
+          <Typography sx={{ fontFamily: "'Inter'", fontSize: '0.75rem', color: isDark ? '#9ca3af' : '#6b7280', mb: 2 }}>
+            Each layout uses a matched set of React components — structure and navigation differ, not just colors.
+          </Typography>
+          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' }, gap: 2, mb: 4 }}>
+            {portalLayoutThemes.map((layoutTheme) => {
+              const isSelected = settings.portalLayoutTheme === layoutTheme.id;
+              const isDisabled = !layoutTheme.available;
+              return (
+                <Paper
+                  key={layoutTheme.id}
+                  variant="outlined"
+                  role="button"
+                  tabIndex={isDisabled ? -1 : 0}
+                  aria-disabled={isDisabled}
+                  aria-label={`Select ${layoutTheme.label} layout${isSelected ? ' (selected)' : ''}`}
+                  onClick={() => {
+                    if (!isDisabled) setField('portalLayoutTheme', layoutTheme.id);
+                  }}
+                  onKeyDown={(e: React.KeyboardEvent) => {
+                    if (isDisabled) return;
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      setField('portalLayoutTheme', layoutTheme.id);
+                    }
+                  }}
+                  sx={{
+                    p: 2.5,
+                    borderRadius: 2,
+                    cursor: isDisabled ? 'not-allowed' : 'pointer',
+                    opacity: isDisabled ? 0.55 : 1,
+                    borderWidth: isSelected ? 2 : 1,
+                    borderColor: isSelected
+                      ? isDark ? '#3b82f6' : '#2563eb'
+                      : isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.08)',
+                  }}
+                >
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+                    <Typography sx={{ fontFamily: "'Inter'", fontSize: '0.9375rem', fontWeight: 600, color: isDark ? '#f3f4f6' : '#111827' }}>
+                      {layoutTheme.label}
+                    </Typography>
+                    {isSelected && (
+                      <Typography sx={{ fontFamily: "'Inter'", fontSize: '0.625rem', fontWeight: 600, color: isDark ? '#93c5fd' : '#2563eb' }}>
+                        Active
+                      </Typography>
+                    )}
+                    {isDisabled && (
+                      <Typography sx={{ fontFamily: "'Inter'", fontSize: '0.625rem', fontWeight: 600, color: isDark ? '#6b7280' : '#9ca3af' }}>
+                        Coming soon
+                      </Typography>
+                    )}
+                  </Box>
+                  <Typography sx={{ fontFamily: "'Inter'", fontSize: '0.75rem', color: isDark ? '#9ca3af' : '#6b7280' }}>
+                    {layoutTheme.description}
+                  </Typography>
+                </Paper>
+              );
+            })}
+          </Box>
+
+          {/* Liturgical color themes */}
+          <Typography sx={{ fontFamily: "'Inter'", fontSize: '0.875rem', fontWeight: 600, color: isDark ? '#f3f4f6' : '#111827', mb: 1.5 }}>
+            Liturgical Color Palette
+          </Typography>
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2, mb: 3 }}>
             {themes.map((t) => {
               const isSelected = settings.selectedTheme === t.id;
