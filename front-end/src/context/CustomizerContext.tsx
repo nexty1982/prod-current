@@ -2,6 +2,9 @@
 import { createContext, useState, ReactNode, useEffect } from 'react';
 import config from './config'
 import React from "react";
+import { resolvePortalLayoutTheme } from '@/features/portal/themes/registry';
+import { slotToThemeId, themeIdToSlot } from '@/features/portal/themes/portalLayoutSlots';
+import type { PortalLayoutThemeId } from '@/features/portal/themes/types';
 
 // Define the shape of the context state
 interface CustomizerContextState {
@@ -27,6 +30,8 @@ interface CustomizerContextState {
     setIsMobileSidebar: (isMobileSidebar: boolean) => void;
     headerBackground: number;
     setHeaderBackground: (bg: number) => void;
+    portalLayoutTheme: PortalLayoutThemeId;
+    setPortalLayoutTheme: (themeId: PortalLayoutThemeId) => void;
 }
 
 // Create the context with an initial value
@@ -114,8 +119,15 @@ export const CustomizerContextProvider: React.FC<CustomizerContextProps> = ({ ch
     const [isLanguage, setIsLanguage] = useState<string>(config.isLanguage);
     const [isSidebarHover, setIsSidebarHover] = useState<boolean>(false);
     const [isMobileSidebar, setIsMobileSidebar] = useState<boolean>(false);
-    const [headerBackground, setHeaderBackgroundState] = useState<number>(() => 
-        getStoredValue('headerBackground', 1)
+    const initialPortalLayoutTheme = (() => {
+        const storedTheme = getStoredValue('portalLayoutTheme', null);
+        if (storedTheme) return resolvePortalLayoutTheme(storedTheme);
+        return slotToThemeId(getStoredValue('headerBackground', 1));
+    })();
+
+    const [portalLayoutTheme, setPortalLayoutThemeState] = useState<PortalLayoutThemeId>(initialPortalLayoutTheme);
+    const [headerBackground, setHeaderBackgroundState] = useState<number>(() =>
+        themeIdToSlot(initialPortalLayoutTheme),
     );
 
     // Enhanced setter functions that also save to localStorage
@@ -159,9 +171,17 @@ export const CustomizerContextProvider: React.FC<CustomizerContextProps> = ({ ch
         setStoredValue('isCollapse', collapse);
     };
 
+    const setPortalLayoutTheme = (themeId: PortalLayoutThemeId) => {
+        const resolved = resolvePortalLayoutTheme(themeId);
+        const slot = themeIdToSlot(resolved);
+        setPortalLayoutThemeState(resolved);
+        setHeaderBackgroundState(slot);
+        setStoredValue('portalLayoutTheme', resolved);
+        setStoredValue('headerBackground', slot);
+    };
+
     const setHeaderBackground = (bg: number) => {
-        setHeaderBackgroundState(bg);
-        setStoredValue('headerBackground', bg);
+        setPortalLayoutTheme(slotToThemeId(bg));
     };
 
     // Set attributes immediately
@@ -247,7 +267,9 @@ export const CustomizerContextProvider: React.FC<CustomizerContextProps> = ({ ch
                 isMobileSidebar,
                 setIsMobileSidebar,
                 headerBackground,
-                setHeaderBackground
+                setHeaderBackground,
+                portalLayoutTheme,
+                setPortalLayoutTheme,
             }}
         >
             {children}

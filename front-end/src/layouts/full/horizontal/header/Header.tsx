@@ -29,16 +29,15 @@ const Header = () => {
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
 
   // drawer
-  const { isLayout, setIsMobileSidebar, isMobileSidebar, activeMode, setActiveMode, headerBackground } = React.useContext(CustomizerContext);
+  const { isLayout, setIsMobileSidebar, isMobileSidebar, activeMode, setActiveMode } = React.useContext(CustomizerContext);
   const TopbarHeight = config.topbarHeight;
 
   const AppBarStyled = styled(AppBar)(({ theme }) => ({
-    background: headerBackground 
-      ? `url(/images/bgtiled${headerBackground}.png) repeat`
-      : theme.palette.background.paper,
-    backgroundSize: 'auto',
+    background: theme.palette.mode === 'dark'
+      ? 'rgba(15, 17, 23, 0.95)'
+      : 'rgba(255, 255, 255, 0.92)',
+    backdropFilter: 'blur(12px)',
     justifyContent: 'center',
-    backdropFilter: 'blur(4px)',
 
     [theme.breakpoints.up('lg')]: {
       minHeight: TopbarHeight,

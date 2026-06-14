@@ -18,6 +18,9 @@ import { useDraggableFab } from '@/hooks/useDraggableFab';
 // @ts-ignore
 import Scrollbar from '@/components/custom-scroll/Scrollbar';
 import { CustomizerContext } from '@/context/CustomizerContext';
+import { useChurch } from '@/context/ChurchContext';
+import apiClient from '@/api/utils/axiosInstance';
+import { PORTAL_LAYOUT_SLOTS } from '@/features/portal/themes/portalLayoutSlots';
 import { BorderOuter } from '@mui/icons-material';
 import AspectRatioTwoToneIcon from '@mui/icons-material/AspectRatioTwoTone';
 import CallToActionTwoToneIcon from '@mui/icons-material/CallToActionTwoTone';
@@ -67,9 +70,27 @@ const Customizer: FC = () => {
     isBorderRadius,
     setIsBorderRadius,
     setActiveTheme,
+    portalLayoutTheme,
+    setPortalLayoutTheme,
     headerBackground,
-    setHeaderBackground
   } = useContext(CustomizerContext);
+
+  const { activeChurchId } = useChurch();
+
+  const handleLayoutThemeSelect = async (slot: number) => {
+    const entry = PORTAL_LAYOUT_SLOTS.find((s) => s.slot === slot);
+    if (!entry) return;
+    setPortalLayoutTheme(entry.id);
+    if (activeChurchId) {
+      try {
+        await apiClient.patch(`/api/parish-settings/${activeChurchId}/theme`, {
+          portalLayoutTheme: entry.id,
+        });
+      } catch (err) {
+        console.warn('[Customizer] Failed to persist layout theme:', err);
+      }
+    }
+  };
 
   const { dragProps, positionSx, wrapClick } = useDraggableFab({
     fabId: 'settings',
@@ -398,73 +419,70 @@ const Customizer: FC = () => {
             />
             <Box pt={4} />
             {/* ------------------------------------------- */}
-            {/* ------------ Header Background ------------- */}
-            {/* ------------------------------------------- */}
+            {/* ------------ Layout Theme ------------- */}
             <Typography variant="h6" gutterBottom>
-              Header Background
+              Layout Theme
+            </Typography>
+            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
+              Parish portal dashboard layout — 6 distinct structures
             </Typography>
             <Grid2 container spacing={2} my={2}>
-              {[1, 2, 3, 4, 5, 6].map((num) => (
-                <Grid2 key={`header-bg-${num}`} size={4}>
-                  <StyledBox 
-                    onClick={() => setHeaderBackground(num)}
-                    sx={{
-                      position: 'relative',
-                      minHeight: '60px',
-                      backgroundColor: 'rgba(0,0,0,0.2)', // Fallback background
-                      backgroundImage: `url(/images/bgtiled${num}.png)`,
-                      backgroundSize: 'cover',
-                      backgroundPosition: 'center',
-                      backgroundRepeat: 'repeat',
-                      '&::before': {
-                        content: '""',
-                        position: 'absolute',
-                        inset: 0,
-                        backgroundColor: 'rgba(0,0,0,0.1)',
-                        zIndex: 0,
-                      }
-                    }}
-                  >
-                    {headerBackground === num && (
-                      <Box
-                        sx={{
-                          position: 'absolute',
-                          top: 4,
-                          right: 4,
-                          backgroundColor: 'primary.main',
-                          borderRadius: '50%',
-                          width: 24,
-                          height: 24,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          zIndex: 2,
-                        }}
-                      >
-                        <IconCheck width={16} color="white" />
-                      </Box>
-                    )}
-                    <Typography 
-                      variant="caption" 
-                      sx={{ 
-                        position: 'absolute',
-                        bottom: 4,
-                        left: '50%',
-                        transform: 'translateX(-50%)',
-                        backgroundColor: 'rgba(0,0,0,0.7)',
-                        color: 'white',
-                        px: 1,
-                        py: 0.5,
-                        borderRadius: 1,
-                        zIndex: 2,
-                        fontWeight: 'bold',
+              {PORTAL_LAYOUT_SLOTS.map((entry) => {
+                const isSelected = portalLayoutTheme === entry.id || headerBackground === entry.slot;
+                return (
+                  <Grid2 key={`layout-theme-${entry.slot}`} size={4}>
+                    <StyledBox
+                      onClick={() => { void handleLayoutThemeSelect(entry.slot); }}
+                      sx={{
+                        position: 'relative',
+                        minHeight: '72px',
+                        background: entry.previewGradient,
+                        overflow: 'hidden',
                       }}
                     >
-                      {num}
-                    </Typography>
-                  </StyledBox>
-                </Grid2>
-              ))}
+                      {isSelected && (
+                        <Box
+                          sx={{
+                            position: 'absolute',
+                            top: 4,
+                            right: 4,
+                            backgroundColor: 'primary.main',
+                            borderRadius: '50%',
+                            width: 24,
+                            height: 24,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            zIndex: 2,
+                          }}
+                        >
+                          <IconCheck width={16} color="white" />
+                        </Box>
+                      )}
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          position: 'absolute',
+                          bottom: 4,
+                          left: '50%',
+                          transform: 'translateX(-50%)',
+                          backgroundColor: 'rgba(0,0,0,0.65)',
+                          color: 'white',
+                          px: 1,
+                          py: 0.5,
+                          borderRadius: 1,
+                          zIndex: 2,
+                          fontWeight: 'bold',
+                          whiteSpace: 'nowrap',
+                          fontSize: '0.65rem',
+                        }}
+                      >
+                        {entry.shortLabel}
+                      </Typography>
+                    </StyledBox>
+                  </Grid2>
+                );
+              })}
             </Grid2>
           </Box>
         </Scrollbar>
