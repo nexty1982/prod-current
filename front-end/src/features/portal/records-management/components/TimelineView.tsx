@@ -1,3 +1,4 @@
+import type { PortalRecordsThemeStyle } from '@/features/portal/themes/records/portalRecordsTheme';
 import { Calendar, Cross, Droplet, Heart, MapPin, User2 } from "@/ui/icons";
 import { Skeleton } from "@mui/material";
 import { useMemo } from "react";
@@ -67,10 +68,11 @@ interface Props {
   loading?: boolean;
   sortField?: string;
   sortDir?: "asc" | "desc";
+  recordsTheme: PortalRecordsThemeStyle;
   onOpen: (r: AnyRecord) => void;
 }
 
-export function TimelineView({ records, recordType, highlight, density, loading, sortField, sortDir, onOpen }: Props) {
+export function TimelineView({ records, recordType, highlight, density, loading, sortField, sortDir, recordsTheme, onOpen }: Props) {
   const config = SACRAMENT_CONFIG[recordType];
   const SacramentIcon = config.Icon;
   const sortOptions = SORT_OPTIONS[recordType];
@@ -138,9 +140,15 @@ export function TimelineView({ records, recordType, highlight, density, loading,
       });
   }, [sortedRecords, sortDir, isDateSort, activeOpt]);
 
+  const layout = recordsTheme.timeline.layout;
+  const accent = 'var(--rm-accent)';
+  const shellClass = layout === 'glass'
+    ? 'portal-glass-card border border-[var(--rm-border)]'
+    : 'border border-[var(--rm-border)] bg-[var(--rm-card)]';
+
   if (loading) {
     return (
-      <div className="bg-[var(--rm-card)] border border-[var(--rm-border)] rounded-xl p-6 space-y-6">
+      <div className={`${shellClass} ${recordsTheme.recordsClass} space-y-6 rounded-xl p-6`} style={{ borderRadius: recordsTheme.table.radius, fontFamily: recordsTheme.table.fontFamily }}>
         {[1, 2, 3].map((i) => (
           <div key={i}>
             <Skeleton variant="text" width={160} height={28} sx={{ mb: 1 }} />
@@ -154,7 +162,7 @@ export function TimelineView({ records, recordType, highlight, density, loading,
 
   if (records.length === 0) {
     return (
-      <div className="bg-[var(--rm-card)] border border-[var(--rm-border)] rounded-xl p-6">
+      <div className={`${shellClass} ${recordsTheme.recordsClass} rounded-xl p-6`} style={{ borderRadius: recordsTheme.table.radius, fontFamily: recordsTheme.table.fontFamily }}>
         <div className="py-12 text-center">
           <Calendar className="w-12 h-12 mx-auto mb-3 opacity-30 text-[var(--rm-muted-fg)]" />
           <div className="text-base font-medium text-[var(--rm-fg)] mb-1">
@@ -171,46 +179,51 @@ export function TimelineView({ records, recordType, highlight, density, loading,
   }
 
   return (
-    <div className="bg-[var(--rm-card)] border border-[var(--rm-border)] rounded-xl p-6">
-      {/* Record count */}
-      <div className="flex items-center mb-4">
+    <div
+      className={`${shellClass} ${recordsTheme.recordsClass} rm-timeline-${layout} rounded-xl p-6`}
+      style={{ borderRadius: recordsTheme.table.radius, fontFamily: recordsTheme.table.fontFamily }}
+    >
+      <div className="mb-4 flex items-center">
         <div className="text-sm text-[var(--rm-muted-fg)]">
-          {records.length} record{records.length !== 1 ? "s" : ""} · grouped by month
+          {records.length} record{records.length !== 1 ? 's' : ''} · grouped by {isDateSort ? 'month' : 'name'}
         </div>
       </div>
 
-      {/* Timeline */}
       <div className="relative">
-        {/* Vertical timeline line */}
-        <div
-          className="absolute top-0 bottom-0 w-0.5 rounded-full left-[17px] sm:left-[21px]"
-          style={{ backgroundColor: `${config.color}20` }}
-        />
+        {layout !== 'editorial' && layout !== 'minimal' && (
+          <div
+            className={`absolute bottom-0 top-0 w-0.5 rounded-full left-[17px] sm:left-[21px] ${layout === 'neon' ? 'rm-timeline-neon-line' : ''}`}
+            style={{ backgroundColor: layout === 'neon' ? accent : `${config.color}20` }}
+          />
+        )}
 
         <div className="space-y-8">
           {groups.map((group) => (
             <div key={group.sortKey}>
-              {/* Month/Year group header */}
-              <div className="flex items-center gap-3 mb-3">
-                <div
-                  className="w-[36px] h-[36px] sm:w-[42px] sm:h-[42px] rounded-full flex items-center justify-center shrink-0 z-[1] bg-[var(--rm-card)]"
-                  style={{ border: `2px solid ${config.color}40` }}
+              <div className={`mb-3 flex items-center gap-3 ${layout === 'editorial' ? 'border-b border-[var(--rm-border)] pb-2' : ''}`}>
+                {layout !== 'editorial' && layout !== 'minimal' && (
+                  <div
+                    className={`z-[1] flex size-9 shrink-0 items-center justify-center rounded-full bg-[var(--rm-card)] sm:size-[42px] ${layout === 'ornate' ? 'border-2 border-[var(--rm-accent)]' : ''}`}
+                    style={{ border: layout === 'ornate' ? undefined : `2px solid ${config.color}40` }}
+                  >
+                    <Calendar className="size-4" style={{ color: layout === 'neon' ? accent : config.color }} />
+                  </div>
+                )}
+                <span
+                  className={`tracking-wide ${layout === 'editorial' ? 'text-lg font-semibold text-[var(--rm-fg)]' : 'text-sm font-bold'}`}
+                  style={{ color: layout === 'editorial' ? undefined : (layout === 'neon' ? accent : config.color) }}
                 >
-                  <Calendar className="w-4 h-4" style={{ color: config.color }} />
-                </div>
-                <span className="text-sm font-bold tracking-wide" style={{ color: config.color }}>
                   {group.label}
                 </span>
                 <span
-                  className="inline-flex items-center justify-center px-2 py-0.5 rounded-full text-[11px] font-semibold"
-                  style={{ backgroundColor: `${config.color}15`, color: config.color }}
+                  className="inline-flex items-center justify-center rounded-full px-2 py-0.5 text-[11px] font-semibold"
+                  style={{ backgroundColor: `${config.color}15`, color: layout === 'neon' ? accent : config.color }}
                 >
                   {group.records.length}
                 </span>
               </div>
 
-              {/* Records in this group */}
-              <div className="space-y-1.5 pl-[44px] sm:pl-[56px]">
+              <div className={`space-y-1.5 ${layout === 'editorial' ? '' : 'pl-[44px] sm:pl-[56px]'}`}>
                 {group.records.map((r) => {
                   const name = recordPrimaryName(r);
                   const date = recordPrimaryDate(r);
@@ -221,11 +234,14 @@ export function TimelineView({ records, recordType, highlight, density, loading,
                   return (
                     <button
                       key={r.id}
+                      type="button"
                       onClick={() => onOpen(r)}
-                      className="w-full text-left flex items-center gap-3 px-3 py-2.5 rounded-lg border transition-all cursor-pointer"
+                      className={`flex w-full cursor-pointer items-center gap-3 rounded-lg border px-3 py-2.5 text-left transition-all ${
+                        layout === 'minimal' ? 'bg-[var(--rm-muted)]/50' : ''
+                      }`}
                       style={{
-                        borderColor: isHi ? config.color : "var(--rm-border)",
-                        backgroundColor: isHi ? `${config.color}08` : "transparent",
+                        borderColor: isHi ? config.color : 'var(--rm-border)',
+                        backgroundColor: isHi ? `${config.color}08` : 'transparent',
                       }}
                       onMouseEnter={(e) => {
                         e.currentTarget.style.borderColor = `${config.color}50`;

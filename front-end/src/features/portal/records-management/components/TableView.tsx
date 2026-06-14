@@ -1,30 +1,14 @@
-import { CustomizerContext } from "@/context/CustomizerContext";
 import { agGridIconMap } from "@/ui/agGridIcons";
 import { Download, Eye, FileText, History, LayoutList, MoreHorizontal, Pencil, Users } from "@/ui/icons";
 import { Menu, MenuItem } from "@mui/material";
 import type { ColDef, GridReadyEvent, ICellRendererParams } from "ag-grid-community";
 import { themeQuartz } from "ag-grid-community";
 import { AgGridReact } from "ag-grid-react";
-import React, { createElement, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import React, { createElement, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { PortalRecordsThemeStyle } from "@/features/portal/themes/records/portalRecordsTheme";
+import { useRecordsThemeColors } from "../useRecordsThemeColors";
 import type { AnyRecord, Density, GridLayoutPreset, RecordType } from "../types";
 import { StatusBadge } from "./StatusBadge";
-
-const THEME_COLORS: Record<string, { main: string; dark: string }> = {
-  WHITE_THEME: { main: "#11307a", dark: "#0a1e52" },
-  GREEN_THEME: { main: "#2E7D32", dark: "#1B5E20" },
-  PURPLE_THEME: { main: "#6B2D75", dark: "#4a1f52" },
-  RED_THEME: { main: "#B22234", dark: "#7a1824" },
-  BLUE_THEME: { main: "#00838F", dark: "#005662" },
-  GOLD_THEME: { main: "#C9A227", dark: "#9a7b1b" },
-  LENT_THEME: { main: "#1a1a1a", dark: "#000000" },
-};
-
-const GRID_PRESETS: { id: GridLayoutPreset; label: string; Icon: typeof LayoutList }[] = [
-  { id: "full", label: "Full details", Icon: LayoutList },
-  { id: "summary", label: "Summary", Icon: LayoutList },
-  { id: "clergy", label: "Clergy & dates", Icon: Users },
-  { id: "compact", label: "Compact", Icon: LayoutList },
-];
 
 interface Props {
   records: AnyRecord[];
@@ -34,12 +18,20 @@ interface Props {
   density: Density;
   standard: boolean;
   visibleCols: Record<string, boolean>;
+  recordsTheme: PortalRecordsThemeStyle;
   onOpen: (r: AnyRecord) => void;
   onEdit: (r: AnyRecord) => void;
   onAudit: (r: AnyRecord) => void;
   onExport: () => void;
   onCertificate?: (r: AnyRecord) => void;
 }
+
+const GRID_PRESETS: { id: GridLayoutPreset; label: string; Icon: typeof LayoutList }[] = [
+  { id: "full", label: "Full details", Icon: LayoutList },
+  { id: "summary", label: "Summary", Icon: LayoutList },
+  { id: "clergy", label: "Clergy & dates", Icon: Users },
+  { id: "compact", label: "Compact", Icon: LayoutList },
+];
 
 type ColDefSpec = { field: string; headerName: string; valueGetter?: (r: any) => string; rawField?: string };
 
@@ -146,8 +138,8 @@ function presetStorageKey(recordType: RecordType) {
   return `rm-ag-preset-${recordType}`;
 }
 
-export function TableView({ records, recordType, fieldConfig, highlight, density, standard, visibleCols, onOpen, onEdit, onAudit, onExport, onCertificate }: Props) {
-  const { activeTheme } = useContext(CustomizerContext);
+export function TableView({ records, recordType, fieldConfig, highlight, density, standard, visibleCols, recordsTheme, onOpen, onEdit, onAudit, onExport, onCertificate }: Props) {
+  const surface = useRecordsThemeColors(recordsTheme, recordsTheme.recordsClass);
   const gridRef = useRef<AgGridReact<AnyRecord>>(null);
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
   const [menuRecord, setMenuRecord] = useState<AnyRecord | null>(null);
@@ -183,42 +175,45 @@ export function TableView({ records, recordType, fieldConfig, highlight, density
   }, []);
 
   const rowHeight = density === "compact" ? 36 : density === "comfortable" ? 48 : 42;
-  const headerHeight = 44;
-  const floatingFiltersHeight = 36;
+  const headerHeight = 40;
+  const floatingFiltersHeight = 34;
 
-  const themeColor = THEME_COLORS[activeTheme] || THEME_COLORS.WHITE_THEME;
+  const filledHeader = recordsTheme.table.headerMode === 'filled';
+  const headerBg = filledHeader ? surface.accentDark : surface.headerBg;
+  const headerFg = filledHeader ? '#ffffff' : surface.accentDark;
+  const accent = surface.accent;
 
   const gridTheme = useMemo(() => themeQuartz.withParams(isDark ? {
-    headerBackgroundColor: themeColor.main,
-    headerTextColor: "#ffffff",
+    headerBackgroundColor: headerBg,
+    headerTextColor: headerFg,
     headerFontWeight: 600,
-    foregroundColor: "#e8e9ed",
-    backgroundColor: "#0f1117",
-    oddRowBackgroundColor: "#1a1d27",
-    rowHoverColor: `${themeColor.main}40`,
-    selectedRowBackgroundColor: `${themeColor.main}28`,
-    borderColor: "#2d3140",
+    foregroundColor: surface.foreground,
+    backgroundColor: surface.surfaceAlt,
+    oddRowBackgroundColor: surface.surface,
+    rowHoverColor: `${accent}30`,
+    selectedRowBackgroundColor: `${accent}22`,
+    borderColor: surface.border,
     fontSize: 13,
-    headerFontSize: 13,
-    cellHorizontalPaddingScale: 1.15,
-    rowBorder: { color: "#2d3140", style: "solid", width: 1 },
-    wrapperBorder: true,
+    headerFontSize: 12,
+    cellHorizontalPaddingScale: 1.1,
+    rowBorder: { color: surface.border, style: "solid", width: 1 },
+    wrapperBorder: false,
   } : {
-    headerBackgroundColor: themeColor.main,
-    headerTextColor: "#ffffff",
+    headerBackgroundColor: headerBg,
+    headerTextColor: headerFg,
     headerFontWeight: 600,
-    foregroundColor: "#1a1a2e",
-    backgroundColor: "#ffffff",
-    oddRowBackgroundColor: "#f8f9fa",
-    rowHoverColor: `${themeColor.main}12`,
-    selectedRowBackgroundColor: `${themeColor.main}20`,
-    borderColor: "#e5e7eb",
+    foregroundColor: surface.foreground,
+    backgroundColor: surface.surface,
+    oddRowBackgroundColor: surface.surfaceAlt,
+    rowHoverColor: `${accent}14`,
+    selectedRowBackgroundColor: `${accent}18`,
+    borderColor: surface.border,
     fontSize: 13,
-    headerFontSize: 13,
-    cellHorizontalPaddingScale: 1.15,
-    rowBorder: { color: "#e5e7eb", style: "solid", width: 1 },
-    wrapperBorder: true,
-  }), [isDark, themeColor]);
+    headerFontSize: 12,
+    cellHorizontalPaddingScale: 1.1,
+    rowBorder: { color: surface.border, style: "solid", width: 1 },
+    wrapperBorder: false,
+  }), [isDark, surface, headerBg, headerFg, accent]);
 
   const statusRenderer = useCallback((params: ICellRendererParams) => {
     if (!params.data) return null;
@@ -357,10 +352,15 @@ export function TableView({ records, recordType, fieldConfig, highlight, density
     }
   }, [gridPreset, columnDefs]);
 
-  const gridHeight = density === "comfortable" ? 580 : density === "compact" ? 480 : 540;
+  const gridHeight = density === "comfortable" ? "min(70vh, 640px)" : density === "compact" ? "min(60vh, 520px)" : "min(65vh, 580px)";
+
+  const radiusClass = standard ? "rounded-none" : "rounded-xl";
 
   return (
-    <div className={`rm-ag-grid ${isDark ? "bg-[#0f1117] border-[#2d3140]" : "bg-white border-[#e5e7eb]"} border ${standard ? "rounded-none" : "rounded-xl"} overflow-hidden shadow-sm`}>
+    <div
+      className={`rm-ag-grid rm-ag-theme-${recordsTheme.id} border border-[var(--rm-border)] bg-[var(--rm-card)] ${radiusClass} overflow-hidden shadow-sm w-full min-w-0`}
+      style={{ borderRadius: standard ? 0 : recordsTheme.table.radius, fontFamily: recordsTheme.table.fontFamily }}
+    >
       <div className="flex flex-wrap items-center justify-between gap-2 px-3 py-2.5 border-b border-[var(--rm-border)] bg-[var(--rm-muted)]/60">
         <div className="flex flex-wrap items-center gap-1.5">
           <span className="text-xs font-medium uppercase tracking-wide text-[var(--rm-muted-fg)] mr-1">Grid layout</span>
@@ -385,7 +385,7 @@ export function TableView({ records, recordType, fieldConfig, highlight, density
         </p>
       </div>
 
-      <div style={{ height: gridHeight, width: "100%" }} className="rm-ag-grid-host">
+      <div style={{ height: gridHeight, width: "100%", minWidth: 0 }} className="rm-ag-grid-host">
         <AgGridReact<AnyRecord>
           ref={gridRef}
           theme={gridTheme}

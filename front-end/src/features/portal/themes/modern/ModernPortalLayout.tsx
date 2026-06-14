@@ -51,7 +51,7 @@ function getPageLabel(pathname: string): string {
   return 'Portal';
 }
 
-const PortalHeader: React.FC = () => {
+const PortalHeader: React.FC<{ maxWidth: string }> = ({ maxWidth }) => {
   const { user, logout } = useAuth();
   const { churchMetadata } = useChurch();
   const { lang } = useLanguage();
@@ -90,7 +90,7 @@ const PortalHeader: React.FC = () => {
     <header className="sticky top-0 z-50 border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80">
       <div
         className="mx-auto flex h-16 max-w-[var(--portal-max-width)] items-center justify-between px-4 sm:px-6"
-        style={{ maxWidth: 'var(--portal-max-width)' }}
+        style={{ maxWidth }}
       >
         <NavLink to="/portal" className="flex shrink-0 items-center gap-3 no-underline">
           {logoUrl ? (
@@ -193,7 +193,7 @@ const PortalHeader: React.FC = () => {
   );
 };
 
-const PortalFooter: React.FC = () => {
+const PortalFooter: React.FC<{ maxWidth: string }> = ({ maxWidth }) => {
   const { churchMetadata } = useChurch();
   const location = useLocation();
 
@@ -204,7 +204,7 @@ const PortalFooter: React.FC = () => {
     <footer className="mt-auto border-t border-border bg-card">
       <div
         className="mx-auto flex max-w-[var(--portal-max-width)] flex-wrap items-center justify-between gap-3 px-4 py-4 sm:px-6"
-        style={{ maxWidth: 'var(--portal-max-width)' }}
+        style={{ maxWidth }}
       >
         <span className="text-sm text-muted-foreground">
           {churchName} · {pageLabel}
@@ -238,16 +238,25 @@ const ModernPortalLayout: React.FC = () => {
     return <Navigate to="/auth/login" state={{ from: location }} replace />;
   }
 
-  const maxWidth = isLayout === 'boxed' ? '72rem' : 'var(--portal-max-width)';
+  const isRecordsRoute = location.pathname.startsWith('/portal/records');
+  const portalMax = 'min(100%, 96rem)';
+  const maxWidth = isRecordsRoute
+    ? '100%'
+    : isLayout === 'boxed'
+      ? '72rem'
+      : portalMax;
+
+  const mainPadding = isRecordsRoute ? 'px-3 py-5 sm:px-5 lg:px-6' : 'px-4 py-6 sm:px-6 lg:px-8';
 
   return (
     <div
       className={`${bundle.scopeClass} flex min-h-screen flex-col bg-background text-foreground`}
       data-theme-mode={activeMode}
+      style={{ ['--portal-max-width' as string]: portalMax }}
     >
-      <PortalHeader />
+      <PortalHeader maxWidth={maxWidth} />
       <main
-        className="mx-auto w-full flex-1 px-4 py-6 sm:px-6 lg:px-8"
+        className={`mx-auto w-full min-w-0 flex-1 ${mainPadding}`}
         style={{
           maxWidth,
           minHeight: 'calc(100vh - 8rem)',
@@ -255,7 +264,7 @@ const ModernPortalLayout: React.FC = () => {
       >
         <Outlet />
       </main>
-      <PortalFooter />
+      <PortalFooter maxWidth={maxWidth} />
       <ScrollToTop />
       <Customizer />
     </div>

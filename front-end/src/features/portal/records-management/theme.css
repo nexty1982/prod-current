@@ -172,3 +172,40 @@ html.dark .rm-scope select,
 .rm-scope .rm-ag-grid .ag-row-hover {
   cursor: pointer;
 }
+
+/* Records route — full-width data surfaces */
+.rm-scope.rm-records-modern,
+.rm-scope.rm-records-art-deco,
+.rm-scope.rm-records-neo-gothic,
+.rm-scope.rm-records-paper,
+.rm-scope.rm-records-bento,
+.rm-scope.rm-records-glass {
+  width: 100%;
+  min-width: 0;
+}
+
+.rm-scope.rm-records-art-deco .rm-ag-theme-art-deco .ag-header {
+  font-family: Georgia, 'Times New Roman', serif;
+}
+
+.rm-scope.rm-records-paper .rm-ag-theme-paper .ag-header,
+.rm-scope.rm-records-paper .rm-cards-list {
+  font-family: Georgia, 'Times New Roman', serif;
+}
+
+.rm-scope.rm-records-neo-gothic .rm-timeline-neon-line {
+  box-shadow: 0 0 12px var(--rm-accent);
+}
+
+.rm-scope.rm-records-glass .portal-glass-card {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.rm-scope .rm-ag-grid-host {
+  min-width: 0;
+}
+
+.rm-scope .rm-ag-grid .ag-root-wrapper {
+  min-width: 0;
+}

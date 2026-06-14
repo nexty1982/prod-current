@@ -2,6 +2,8 @@ import { metricsAPI } from "@/api/metrics.api";
 import { apiClient } from "@/api/utils/axiosInstance";
 import { useChurch } from "@/context/ChurchContext";
 import { useParishSettings } from "@/features/account/parish-management/useParishSettings";
+import { usePortalTheme } from "@/features/portal/themes/PortalThemeContext";
+import { getPortalRecordsTheme } from "@/features/portal/themes/records/portalRecordsTheme";
 import { Alert, Box, CircularProgress, Snackbar } from "@mui/material";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -115,6 +117,8 @@ function mapFuneralRecords(rows: any[], churchName: string): AnyRecord[] {
 
 const RecordsManagement: React.FC = () => {
   const { churchMetadata, activeChurchId } = useChurch();
+  const { layoutTheme } = usePortalTheme();
+  const recordsTheme = getPortalRecordsTheme(layoutTheme);
   const churchName = churchMetadata?.church_name_display || churchMetadata?.church_name || "St. Peter & Paul";
   const churchId = activeChurchId || churchMetadata?.church_id || 46;
 
@@ -290,7 +294,7 @@ const RecordsManagement: React.FC = () => {
   const cols = fieldConfig.length > 0 ? fieldConfig.map((f) => f.displayName) : COL_KEYS_BY_TYPE[recordType];
 
   return (
-    <div className="rm-scope">
+    <div className={`rm-scope ${recordsTheme.recordsClass} w-full min-w-0`}>
       <main className="space-y-5">
         <div>
           <div className="text-[15px] text-[var(--rm-fg)] font-medium tracking-tight">Records Management</div>
@@ -342,6 +346,7 @@ const RecordsManagement: React.FC = () => {
                 density={density}
                 standard={standardTable}
                 visibleCols={visibleCols}
+                recordsTheme={recordsTheme}
                 onOpen={openRecord}
                 onEdit={openEdit}
                 onCertificate={(r) => { window.open(`/portal/certificates/generate?recordType=${recordType}&recordId=${r.id}&churchId=${churchId}`, '_blank'); }}
@@ -349,8 +354,8 @@ const RecordsManagement: React.FC = () => {
                 onExport={() => setMoreAction("export")}
               />
             )}
-            {view === "cards" && <CardsView records={filtered} highlight={search} density={density} onOpen={openRecord} />}
-            {view === "timeline" && <TimelineView records={filtered} recordType={recordType} highlight={search} density={density} loading={loading} sortField={sortField} sortDir={sortDir} onOpen={openRecord} />}
+            {view === "cards" && <CardsView records={filtered} highlight={search} density={density} recordsTheme={recordsTheme} onOpen={openRecord} />}
+            {view === "timeline" && <TimelineView records={filtered} recordType={recordType} highlight={search} density={density} loading={loading} sortField={sortField} sortDir={sortDir} recordsTheme={recordsTheme} onOpen={openRecord} />}
             {view === "analytics" && <AnalyticsView records={filtered} recordType={recordType} totalRecords={totalRecords} onOpen={openRecord} />}
           </div>
         )}
