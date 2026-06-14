@@ -41,7 +41,7 @@ export function GlassHubLayout({ hub }: PortalHubLayoutProps) {
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
         <div className="portal-glass-card rounded-2xl lg:col-span-7">
-          <div className="border-b border-white/10 px-5 py-4">
+          <div className="border-b border-border/50 px-5 py-4">
             <h2 className="text-sm font-semibold text-foreground">{hub.t('portal.recent_activity')}</h2>
           </div>
           <div className="space-y-4 px-5 py-4">

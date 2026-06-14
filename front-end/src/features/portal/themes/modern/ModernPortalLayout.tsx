@@ -221,7 +221,7 @@ const PortalFooter: React.FC = () => {
 
 const ModernPortalLayout: React.FC = () => {
   const { authenticated, loading } = useAuth();
-  const { isLayout } = useContext(CustomizerContext);
+  const { isLayout, activeMode } = useContext(CustomizerContext);
   const { bundle } = usePortalTheme();
   const location = useLocation();
 
@@ -240,7 +240,10 @@ const ModernPortalLayout: React.FC = () => {
   const maxWidth = isLayout === 'boxed' ? '72rem' : 'var(--portal-max-width)';
 
   return (
-    <div className={`${bundle.scopeClass} flex min-h-screen flex-col`}>
+    <div
+      className={`${bundle.scopeClass} flex min-h-screen flex-col bg-background text-foreground`}
+      data-theme-mode={activeMode}
+    >
       <PortalHeader />
       <main
         className="mx-auto w-full flex-1 px-4 py-6 sm:px-6 lg:px-8"

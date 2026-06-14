@@ -2,7 +2,7 @@ import type { PortalHubLayoutProps } from '../portalHubTypes';
 import { getRecordTypes, HubActivityFeed, HubFilterPills, HubHeaderBar, HubOnboarding, HubSearchInput } from '../HubShared';
 import { Droplets, Heart, Cross } from '@/ui/icons';
 
-const ORNAMENT = 'portal-artdeco-ornament';
+const ORNAMENT = 'portal-art-deco-ornament';
 
 /** #2 Art Deco — circular gauges, gold frame, right activity column */
 export function ArtDecoHubLayout({ hub }: PortalHubLayoutProps) {
@@ -31,13 +31,13 @@ export function ArtDecoHubLayout({ hub }: PortalHubLayoutProps) {
             key={cfg.key}
             type="button"
             onClick={() => hub.onRecordsType(cfg.key)}
-            className="portal-artdeco-gauge flex flex-col items-center rounded-2xl border-2 border-[var(--portal-gold)] bg-card/80 px-4 py-6 text-center shadow-md transition-transform hover:scale-[1.02]"
+            className="flex flex-col items-center rounded-2xl border-2 border-[var(--portal-gold)] bg-card/80 px-4 py-6 text-center shadow-md transition-transform hover:scale-[1.02]"
           >
             <div className="mb-3 flex size-20 items-center justify-center rounded-full border-2 border-[var(--portal-gold)] bg-[var(--portal-gold-soft)]">
               <Icon size={28} className="text-[var(--portal-gold-dark)]" />
             </div>
-            <p className="portal-artdeco-serif text-xs uppercase tracking-[0.2em] text-muted-foreground">{cfg.label}</p>
-            <p className="portal-artdeco-serif mt-1 text-3xl font-semibold text-foreground">
+            <p className="portal-art-deco-serif text-xs uppercase tracking-[0.2em] text-muted-foreground">{cfg.label}</p>
+            <p className="portal-art-deco-serif mt-1 text-3xl font-semibold text-foreground">
               {hub.recordsLoading ? '—' : cfg.count.toLocaleString()}
             </p>
           </button>
@@ -46,7 +46,7 @@ export function ArtDecoHubLayout({ hub }: PortalHubLayoutProps) {
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
         <div className="lg:col-span-4">
-          <h3 className="portal-artdeco-serif mb-3 text-sm font-semibold uppercase tracking-wider text-[var(--portal-gold-dark)]">
+          <h3 className="portal-art-deco-serif mb-3 text-sm font-semibold uppercase tracking-wider text-[var(--portal-gold-dark)]">
             {hub.t('portal.tools')}
           </h3>
           <div className="grid grid-cols-2 gap-3">
@@ -69,7 +69,7 @@ export function ArtDecoHubLayout({ hub }: PortalHubLayoutProps) {
 
         <div className="rounded-2xl border-2 border-[var(--portal-gold)] bg-card/90 shadow-lg lg:col-span-8">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--portal-gold)]/40 px-5 py-4">
-            <h3 className="portal-artdeco-serif text-sm font-semibold text-foreground">{hub.t('portal.recent_activity')}</h3>
+            <h3 className="portal-art-deco-serif text-sm font-semibold text-foreground">{hub.t('portal.recent_activity')}</h3>
             <HubFilterPills hub={hub} />
           </div>
           <div className="space-y-4 px-5 py-4">

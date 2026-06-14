@@ -1,6 +1,6 @@
 /*
  * Parish portal — six layout theme scopes.
- * Each scope defines design tokens + theme-specific surface styles.
+ * Light tokens are the default; html.dark swaps each scope to its dark palette.
  */
 
 /* ── Shared token bridge for shadcn-style utilities ── */
@@ -14,6 +14,7 @@
   background: var(--background);
   color: var(--foreground);
   -webkit-font-smoothing: antialiased;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .portal-modern .rm-scope,
@@ -62,9 +63,13 @@ html.dark .portal-modern {
   --background: #0b0f17;
   --foreground: #e8e9ed;
   --card: #151a24;
+  --card-foreground: #e8e9ed;
   --popover: #151a24;
+  --popover-foreground: #e8e9ed;
   --primary: #3b82f6;
+  --primary-foreground: #ffffff;
   --secondary: #1a2030;
+  --secondary-foreground: #cbd5e1;
   --muted: #1a2030;
   --muted-foreground: #94a3b8;
   --accent: rgba(59, 130, 246, 0.15);
@@ -75,13 +80,37 @@ html.dark .portal-modern {
 
 /* ═══ 2. Art Deco Elegance ═══ */
 .portal-art-deco {
-  --background: linear-gradient(160deg, #1a2744 0%, #2d3a5c 40%, #1a2744 100%);
+  --background: #f4f0e6;
+  --foreground: #1a2744;
+  --card: #fffdf8;
+  --card-foreground: #1a2744;
+  --popover: #fffdf8;
+  --popover-foreground: #1a2744;
+  --primary: #c9a227;
+  --primary-foreground: #1a1208;
+  --secondary: #ece6d6;
+  --secondary-foreground: #1a2744;
+  --muted: #e8e2d4;
+  --muted-foreground: #5c5344;
+  --accent: rgba(201, 162, 39, 0.14);
+  --accent-foreground: #1a2744;
+  --border: rgba(201, 162, 39, 0.35);
+  --input: rgba(26, 39, 68, 0.12);
+  --ring: rgba(201, 162, 39, 0.45);
+  --portal-gold: #c9a227;
+  --portal-gold-dark: #8a6914;
+  --portal-gold-soft: rgba(201, 162, 39, 0.12);
+  --radius: 0.75rem;
+}
+
+html.dark .portal-art-deco {
+  --background: #1a2744;
   --foreground: #f5eed6;
-  --card: rgba(26, 39, 68, 0.85);
+  --card: rgba(26, 39, 68, 0.92);
   --card-foreground: #f5eed6;
   --popover: #1a2744;
   --popover-foreground: #f5eed6;
-  --primary: #c9a227;
+  --primary: #d4af37;
   --primary-foreground: #1a1208;
   --secondary: rgba(201, 162, 39, 0.12);
   --secondary-foreground: #f5eed6;
@@ -91,11 +120,8 @@ html.dark .portal-modern {
   --accent-foreground: #f5eed6;
   --border: rgba(201, 162, 39, 0.45);
   --input: rgba(201, 162, 39, 0.25);
-  --ring: rgba(201, 162, 39, 0.5);
-  --portal-gold: #c9a227;
-  --portal-gold-dark: #a67c00;
+  --portal-gold-dark: #e8c547;
   --portal-gold-soft: rgba(201, 162, 39, 0.15);
-  --radius: 0.75rem;
   background: linear-gradient(160deg, #1a2744 0%, #2d3a5c 40%, #1a2744 100%);
 }
 
@@ -103,6 +129,10 @@ html.dark .portal-modern {
   border: 2px solid var(--portal-gold);
   border-radius: 1rem;
   padding: 1.25rem;
+  background: var(--card);
+}
+
+html.dark .portal-art-deco-ornament {
   background: rgba(26, 39, 68, 0.5);
 }
 
@@ -110,8 +140,29 @@ html.dark .portal-modern {
   font-family: Georgia, 'Times New Roman', serif;
 }
 
-/* ═══ 3. Neo-Gothic Dark ═══ */
+/* ═══ 3. Neo-Gothic ═══ */
 .portal-neo-gothic {
+  --background: #f3f0fa;
+  --foreground: #1e1b2e;
+  --card: #ffffff;
+  --card-foreground: #1e1b2e;
+  --popover: #ffffff;
+  --popover-foreground: #1e1b2e;
+  --primary: #6366f1;
+  --primary-foreground: #ffffff;
+  --secondary: #ede9fe;
+  --secondary-foreground: #4338ca;
+  --muted: #ede9fe;
+  --muted-foreground: #64748b;
+  --accent: rgba(99, 102, 241, 0.12);
+  --accent-foreground: #4338ca;
+  --border: rgba(99, 102, 241, 0.22);
+  --input: rgba(99, 102, 241, 0.15);
+  --ring: rgba(236, 72, 153, 0.35);
+  --radius: 0.5rem;
+}
+
+html.dark .portal-neo-gothic {
   --background: #07070d;
   --foreground: #e8e9ed;
   --card: rgba(20, 20, 32, 0.9);
@@ -128,14 +179,16 @@ html.dark .portal-modern {
   --accent-foreground: #c4b5fd;
   --border: rgba(129, 140, 248, 0.25);
   --input: rgba(129, 140, 248, 0.2);
-  --ring: rgba(236, 72, 153, 0.4);
-  --radius: 0.5rem;
 }
 
 .portal-neo-frame {
-  border: 1px solid rgba(129, 140, 248, 0.2);
+  border: 1px solid var(--border);
   border-radius: 0.75rem;
   padding: 1rem;
+  background: var(--card);
+}
+
+html.dark .portal-neo-frame {
   background: radial-gradient(ellipse at top, rgba(76, 29, 149, 0.15), transparent 60%);
 }
 
@@ -161,9 +214,32 @@ html.dark .portal-modern {
   --radius: 0.25rem;
 }
 
+html.dark .portal-paper {
+  --background: #1c1916;
+  --foreground: #f0ebe3;
+  --card: #262220;
+  --card-foreground: #f0ebe3;
+  --popover: #262220;
+  --popover-foreground: #f0ebe3;
+  --primary: #e8e0d0;
+  --primary-foreground: #1a1a1a;
+  --secondary: #2e2a26;
+  --secondary-foreground: #d4cfc4;
+  --muted: #2e2a26;
+  --muted-foreground: #a39e94;
+  --accent: #3a3530;
+  --accent-foreground: #f0ebe3;
+  --border: #3d3832;
+  --input: #3d3832;
+}
+
 .portal-paper-texture {
-  background-color: #f7f3eb;
+  background-color: var(--background);
   background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+}
+
+html.dark .portal-paper-texture {
+  background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
 }
 
 .portal-paper-serif {
@@ -192,8 +268,48 @@ html.dark .portal-modern {
   --radius: 1rem;
 }
 
+html.dark .portal-bento {
+  --background: #0f172a;
+  --foreground: #e2e8f0;
+  --card: #1e293b;
+  --card-foreground: #e2e8f0;
+  --popover: #1e293b;
+  --popover-foreground: #e2e8f0;
+  --primary: #38bdf8;
+  --primary-foreground: #0f172a;
+  --secondary: #1e3a4a;
+  --secondary-foreground: #99f6e4;
+  --muted: #1e3a4a;
+  --muted-foreground: #94a3b8;
+  --accent: rgba(14, 165, 233, 0.15);
+  --accent-foreground: #7dd3fc;
+  --border: #334155;
+  --input: #334155;
+}
+
 /* ═══ 6. Futuristic Glass ═══ */
 .portal-glass {
+  --background: #e8eaf6;
+  --foreground: #1e1b4b;
+  --card: rgba(255, 255, 255, 0.72);
+  --card-foreground: #1e1b4b;
+  --popover: rgba(255, 255, 255, 0.95);
+  --popover-foreground: #1e1b4b;
+  --primary: #6366f1;
+  --primary-foreground: #ffffff;
+  --secondary: rgba(99, 102, 241, 0.08);
+  --secondary-foreground: #4338ca;
+  --muted: rgba(99, 102, 241, 0.08);
+  --muted-foreground: #64748b;
+  --accent: rgba(99, 102, 241, 0.14);
+  --accent-foreground: #4338ca;
+  --border: rgba(99, 102, 241, 0.2);
+  --input: rgba(99, 102, 241, 0.12);
+  --ring: rgba(99, 102, 241, 0.35);
+  --radius: 1rem;
+}
+
+html.dark .portal-glass {
   --background: #0f0c29;
   --foreground: #e8e9ed;
   --card: rgba(255, 255, 255, 0.08);
@@ -210,21 +326,23 @@ html.dark .portal-modern {
   --accent-foreground: #c7d2fe;
   --border: rgba(255, 255, 255, 0.15);
   --input: rgba(255, 255, 255, 0.12);
-  --ring: rgba(129, 140, 248, 0.45);
-  --radius: 1rem;
   background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
 }
 
 .portal-glass-card {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--card);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid var(--border);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+}
+
+html.dark .portal-glass-card {
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
 }
 
 .portal-glass-orbit {
-  border: 1px dashed rgba(255, 255, 255, 0.12);
+  border: 1px dashed var(--border);
   border-radius: 50%;
 }
 

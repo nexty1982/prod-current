@@ -7,7 +7,6 @@ import {
   resolvePortalLayoutTheme,
 } from './registry';
 import type { PortalLayoutThemeId, PortalThemeContextValue } from './types';
-import './portal-themes.css';
 
 interface ThemeSettings {
   portalLayoutTheme?: PortalLayoutThemeId | 'heritage' | 'cathedral';

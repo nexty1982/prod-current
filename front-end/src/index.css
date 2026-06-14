@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./features/portal/themes/portal-themes.css";
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wght@400;500;600;700&display=swap');
 
 /* Enable class-based dark mode (Tailwind v4) */
